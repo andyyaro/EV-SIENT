@@ -26,13 +26,25 @@ After running the script, the folder will contain:
 ## What each file means
 
 site_results.csv:
-This is the main output table. It shows each site's readiness score, expected charging sessions per day, recommended starter ports, future ports, estimated utilization, install cost, and AHJ review flag.
+This is the main output table. It shows each site's readiness score, expected charging sessions per day, recommended starter ports, future ports, estimated utilization, install cost, AHJ review flag, and review reason.
 
 readiness_score_chart.png:
 This chart compares candidate sites by overall readiness.
 
 utilization_vs_ports_chart.png:
 This chart shows how utilization changes as you add more ports for one site.
+
+## New in the current version
+
+The model now includes a review_reason column.
+
+Instead of only saying ahj_review_flag = 1, the model explains why a site may need extra review.
+
+Example:
+
+ADA-accessible layout unresolved; Emergency disconnect not clearly visible; Stormwater or firefighting runoff concern
+
+This matters because the model should not replace Fire Marshal, AHJ, ADA, utility, or stormwater review. It should help identify which issues need to be checked before moving forward.
 
 ## What to edit next
 
