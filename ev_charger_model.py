@@ -8,7 +8,8 @@ What this script does:
 4. Recommends starter EV charging ports now, 2035, and 2050
 5. Flags sites needing AHJ / Fire Marshal / accessibility / stormwater review
 6. Explains the review reason in plain language
-7. Exports site_results.csv and two charts
+7. Exports site_results.csv and charts
+8. Creates one utilization-vs-ports chart for every site
 
 Run in PyCharm:
 - Put this file and sites.csv in the same folder.
@@ -40,6 +41,24 @@ def yesno_to_num(value):
         return float(value)
     value = str(value).strip().lower()
     return 1.0 if value in {"1", "y", "yes", "true", "t"} else 0.0
+
+
+def safe_filename(name):
+    """Turn a site name into a simple safe filename."""
+    cleaned = []
+
+    for character in str(name):
+        if character.isalnum():
+            cleaned.append(character.lower())
+        elif character in {" ", "-", "_"}:
+            cleaned.append("_")
+
+    filename = "".join(cleaned).strip("_")
+
+    while "__" in filename:
+        filename = filename.replace("__", "_")
+
+    return filename or "site"
 
 
 def erlang_c(lambda_hr, mu_hr, ports):
@@ -287,6 +306,7 @@ def enrich_and_score(sites):
         output_rows.append([
             expected_sessions_day,
             b["avg_session_hr"],
+            b["target_util"],
             rec_now,
             rec_2035,
             rec_2050,
@@ -297,6 +317,7 @@ def enrich_and_score(sites):
     df[[
         "expected_sessions_day",
         "avg_session_hr",
+        "target_utilization",
         "recommended_ports_now",
         "recommended_ports_2035",
         "recommended_ports_2050",
@@ -315,7 +336,7 @@ def enrich_and_score(sites):
         (df["ada_layout_possible"] == 0)
     ).astype(int)
 
-    # New plain-English review explanation.
+    # Plain-English review explanation.
     df["review_reason"] = df.apply(build_review_reason, axis=1)
 
     return df
@@ -333,35 +354,44 @@ def make_readiness_chart(results):
     plt.show()
 
 
-def make_utilization_chart(results):
-    first_site = results.iloc[0]
+def make_utilization_charts(results, max_ports=10):
+    """Create one utilization-vs-ports chart for every site."""
+    saved_files = []
 
-    expected_sessions_day = float(first_site["expected_sessions_day"])
-    avg_session_hr = float(first_site["avg_session_hr"])
-    hours_open = float(first_site["hours_open"])
-    site_name = str(first_site["site_name"])
+    for _, site in results.iterrows():
+        expected_sessions_day = float(site["expected_sessions_day"])
+        avg_session_hr = float(site["avg_session_hr"])
+        hours_open = float(site["hours_open"])
+        target_utilization = float(site["target_utilization"])
+        site_name = str(site["site_name"])
 
-    ports_list = []
-    utilization_list = []
+        ports_list = []
+        utilization_list = []
 
-    for ports in range(1, 11):
-        arrivals_per_hour = expected_sessions_day / max(hours_open, 1)
-        service_rate_per_hour = 1 / max(avg_session_hr, 0.1)
-        _, _, utilization = erlang_c(arrivals_per_hour, service_rate_per_hour, ports)
+        for ports in range(1, max_ports + 1):
+            arrivals_per_hour = expected_sessions_day / max(hours_open, 1)
+            service_rate_per_hour = 1 / max(avg_session_hr, 0.1)
+            _, _, utilization = erlang_c(arrivals_per_hour, service_rate_per_hour, ports)
 
-        ports_list.append(ports)
-        utilization_list.append(utilization)
+            ports_list.append(ports)
+            utilization_list.append(utilization)
 
-    plt.figure(figsize=(7, 4))
-    plt.plot(ports_list, utilization_list, marker="o")
-    plt.axhline(0.70, linestyle="--", label="70% target")
-    plt.xlabel("Ports installed")
-    plt.ylabel("Estimated utilization")
-    plt.title(f"Utilization vs Ports: {site_name}")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig("utilization_vs_ports_chart.png", dpi=200)
-    plt.show()
+        filename = f"utilization_vs_ports_{safe_filename(site_name)}.png"
+
+        plt.figure(figsize=(7, 4))
+        plt.plot(ports_list, utilization_list, marker="o")
+        plt.axhline(target_utilization, linestyle="--", label=f"{target_utilization:.0%} target")
+        plt.xlabel("Ports installed")
+        plt.ylabel("Estimated utilization")
+        plt.title(f"Utilization vs Ports: {site_name}")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(filename, dpi=200)
+        plt.close()
+
+        saved_files.append(filename)
+
+    return saved_files
 
 
 def main():
@@ -399,10 +429,12 @@ def main():
     make_readiness_chart(results)
     print("Saved: readiness_score_chart.png")
 
-    make_utilization_chart(results)
-    print("Saved: utilization_vs_ports_chart.png")
+    utilization_chart_files = make_utilization_charts(results)
+    print("Saved utilization charts:")
+    for filename in utilization_chart_files:
+        print(f"- {filename}")
 
-    print("\nDone. Open site_results.csv and the two PNG charts in this folder.")
+    print("\nDone. Open site_results.csv and the PNG charts in this folder.")
 
 
 if __name__ == "__main__":
