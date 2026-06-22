@@ -7,7 +7,8 @@ What this script does:
 3. Estimates charging sessions per day
 4. Recommends starter EV charging ports now, 2035, and 2050
 5. Flags sites needing AHJ / Fire Marshal / accessibility / stormwater review
-6. Exports site_results.csv and two charts
+6. Explains the review reason in plain language
+7. Exports site_results.csv and two charts
 
 Run in PyCharm:
 - Put this file and sites.csv in the same folder.
@@ -43,7 +44,8 @@ def yesno_to_num(value):
 
 def erlang_c(lambda_hr, mu_hr, ports):
     """
-    Queueing approximation.
+    Simple queueing approximation.
+
     lambda_hr = charging arrivals per hour
     mu_hr = service rate per port per hour
     ports = number of charging ports
@@ -60,7 +62,6 @@ def erlang_c(lambda_hr, mu_hr, ports):
         return 1.0, np.inf, utilization
 
     traffic_load = lambda_hr / mu_hr
-
     sum_terms = sum((traffic_load ** n) / math.factorial(n) for n in range(ports))
     last_term = ((traffic_load ** ports) / math.factorial(ports)) * (1 / (1 - utilization))
     p0 = 1.0 / (sum_terms + last_term)
@@ -84,7 +85,7 @@ def choose_ports(expected_sessions_day, avg_session_hr, hours_open,
     fallback = None
 
     for ports in range(1, max_ports + 1):
-        probability_wait, wait_hours, utilization = erlang_c(
+        _, wait_hours, utilization = erlang_c(
             arrivals_per_hour,
             service_rate_per_hour,
             ports
@@ -98,6 +99,39 @@ def choose_ports(expected_sessions_day, avg_session_hr, hours_open,
         fallback = (ports, utilization, wait_minutes)
 
     return fallback
+
+
+def build_review_reason(row):
+    """
+    Build a plain-English explanation for why a site needs extra review.
+
+    This does not replace Fire Marshal, AHJ, ADA, utility, or stormwater review.
+    It only tells us which issues the model noticed.
+    """
+    reasons = []
+
+    if row["ada_layout_possible"] == 0:
+        reasons.append("ADA-accessible layout unresolved")
+
+    if row["fire_access_ok"] == 0:
+        reasons.append("Fire apparatus access concern")
+
+    if row["garage_enclosed"] == 1:
+        reasons.append("Enclosed garage or limited ventilation/access")
+
+    if row["emergency_disconnect_visible"] == 0:
+        reasons.append("Emergency disconnect not clearly visible")
+
+    if row["stormwater_risk"] == 1:
+        reasons.append("Stormwater or firefighting runoff concern")
+
+    if row["battery_storage_flag"] == 1:
+        reasons.append("Battery storage present or proposed")
+
+    if len(reasons) == 0:
+        return "No obvious model-level review trigger"
+
+    return "; ".join(reasons)
 
 
 def enrich_and_score(sites):
@@ -135,7 +169,6 @@ def enrich_and_score(sites):
 
     df["existing_ports_total"] = df["existing_l2_ports_1mi"] + df["existing_dcfc_ports_3mi"]
 
-    # Normalize selected fields to 0-1 scale
     normalize_cols = [
         "nearby_households_1mi", "nearby_jobs_1mi", "aadt_nearest",
         "amenities_count_0_5mi", "avg_dwell_min", "existing_ports_total",
@@ -177,7 +210,7 @@ def enrich_and_score(sites):
     ).clip(lower=0)
 
     # Final readiness score:
-    # This is a weighted average of demand, feasibility, safety, and equity.
+    # weighted average of demand, feasibility, safety, and equity.
     df["readiness_score"] = (
         0.45 * df["demand_subscore"] +
         0.30 * df["feasibility_subscore"] +
@@ -236,9 +269,9 @@ def enrich_and_score(sites):
             target_utilization=b["target_util"]
         )
 
-        # Future growth scenarios:
-        # 2035 assumes 60% more charging demand.
-        # 2050 assumes 140% more charging demand.
+        # Future growth assumptions:
+        # 2035 = 60% more charging demand.
+        # 2050 = 140% more charging demand.
         rec_2035, _, _ = choose_ports(
             expected_sessions_day * 1.6,
             b["avg_session_hr"],
@@ -281,6 +314,9 @@ def enrich_and_score(sites):
         (df["stormwater_risk"] == 1) |
         (df["ada_layout_possible"] == 0)
     ).astype(int)
+
+    # New plain-English review explanation.
+    df["review_reason"] = df.apply(build_review_reason, axis=1)
 
     return df
 
@@ -347,7 +383,8 @@ def main():
         "estimated_utilization",
         "mean_wait_min",
         "install_cost_est_usd",
-        "ahj_review_flag"
+        "ahj_review_flag",
+        "review_reason"
     ]
 
     final_results = results[display_cols].sort_values("readiness_score", ascending=False)
