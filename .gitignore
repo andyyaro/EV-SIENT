@@ -1,0 +1,23 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# PyCharm / JetBrains project settings
+.idea/
+
+# macOS system files
+.DS_Store
+
+# Generated model outputs
+site_results.csv
+readiness_score_chart.png
+utilization_vs_ports_chart.png
+utilization_vs_ports_*.png
+
+# Temporary files
+*.tmp
+*.log
