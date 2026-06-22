@@ -8,20 +8,20 @@ The goal is to keep the EV charging site-readiness model transparent and defensi
 
 | Level | Meaning | Use in model |
 |---|---|---|
-| Official | Comes from a government, DOE/NLR, Census, VDOT, or local government source | Best source for model inputs |
+| Official | Comes from a government, DOE/NREL, Census, VDOT, or local government source | Best source for model inputs |
 | Stakeholder evidence | Comes from interviews or project notes | Useful for known site constraints and calibration |
 | Manual estimate | Estimated from maps, site review, assumptions, or early planning judgment | Acceptable for prototype, but should be labeled |
 | Unknown | Not available yet | Keep blank or use conservative placeholder |
 
 ## Priority official sources
 
-### 1. DOE / AFDC / NLR Alternative Fuel Stations
+### 1. DOE / AFDC / NREL Alternative Fuel Stations
 
 Use for existing EV charger supply near each candidate site.
 
 Official pages:
 - https://afdc.energy.gov/stations
-- https://developer.nlr.gov/docs/transportation/alt-fuel-stations-v1/
+- https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/
 
 Model fields supported:
 - `existing_l2_ports_1mi`
@@ -162,8 +162,8 @@ How to handle them in the prototype:
 | `amenities_count_0_5mi` | OpenStreetMap / manual map count | Public/open data or manual estimate | Not government official unless using local GIS |
 | `ev_registrations_local` | State/local registration source if available | Official if found | Optional for later |
 | `ev_share_local` | State/local registration source or regional assumption | Official or manual estimate | Use same assumption for v1 if needed |
-| `existing_l2_ports_1mi` | AFDC / NLR Alternative Fuel Stations | Official | Count public L2 ports within 1 mile |
-| `existing_dcfc_ports_3mi` | AFDC / NLR Alternative Fuel Stations | Official | Count public DC fast ports within 3 miles |
+| `existing_l2_ports_1mi` | AFDC / NREL Alternative Fuel Stations | Official | Count public L2 ports within 1 mile |
+| `existing_dcfc_ports_3mi` | AFDC / NREL Alternative Fuel Stations | Official | Count public DC fast ports within 3 miles |
 | `equity_gap_index` | ACS-derived index | Official-derived / project-created | Project-created score using official ACS variables |
 | `elec_service_voltage` | Facility/utility data | Manual estimate | Often unknown publicly |
 | `elec_service_rating_amp` | Facility/utility data | Manual estimate | Often unknown publicly |
