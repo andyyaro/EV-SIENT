@@ -27,10 +27,19 @@ data/outputs/workflow_success.json
 
 ```text
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/profile_rank_stability_chart.png
 data/outputs/charts/profile_score_heatmap.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 ```
+
+Recommended profile visual:
+
+```text
+data/outputs/charts/profile_rank_stability_chart.png
+```
+
+The heatmap is kept as a supporting view, but the rank-stability chart is easier to explain in a presentation.
 
 ## Optional OSM amenities outputs
 
@@ -60,4 +69,4 @@ python src/build_deliverable_package.py && \
 git status --short
 ```
 
-`src/run_all.py` runs the validator, model, polished readiness chart, sensitivity analysis, scoring profile analysis, profile score heatmap, readiness map, generated summaries, output checks, and baseline comparison.
+`src/run_all.py` runs the validator, model, polished readiness chart, sensitivity analysis, scoring profile analysis, profile rank-stability chart, supporting profile heatmap, readiness map, generated summaries, output checks, and baseline comparison.
