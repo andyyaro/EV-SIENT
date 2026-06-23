@@ -47,14 +47,32 @@ real_sites_v1.csv        Current real candidate site dataset
 sites.csv                Older starter/demo dataset
 site_results.csv         Model output after running the script
 README.txt               Repo overview and run instructions
-DATA_SOURCES.md          Data source and field plan
 PROJECT_STATUS.md        Current project status and next steps
+DATA_SOURCES.md          Data source and field plan
+METHODOLOGY.md           Scoring and port recommendation method
+DATA_DICTIONARY.md       Definitions for input and output columns
+RESULTS_INTERPRETATION.md
+                         Plain-English guide to reading current results
 data/README.md           Data folder explanation
 data/source_dataset_log.csv
                          Dataset source log
 data/dataset_metadata.csv
                          Dataset freshness and metadata notes
 data/source_extracts/    Small model-ready source extracts
+```
+
+## Documentation guide
+
+Use these files depending on what you need:
+
+```text
+README.txt               Start here. Basic overview and run instructions.
+PROJECT_STATUS.md        What has been completed and what still needs work.
+DATA_SOURCES.md          Where each dataset or model field comes from.
+METHODOLOGY.md           How the model calculates scores and recommends ports.
+DATA_DICTIONARY.md       What each CSV column means.
+RESULTS_INTERPRETATION.md
+                         Simple explanation of the current ranking and review flags.
 ```
 
 ## What the script does
