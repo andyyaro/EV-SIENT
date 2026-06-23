@@ -25,9 +25,9 @@ docs/                  Documentation and reporting
 Run from the repository root:
 
 ```bash
-git pull --rebase origin main
-python src/run_all.py
-python src/build_deliverable_package.py
+git pull --rebase origin main && \
+python src/run_all.py && \
+python src/build_deliverable_package.py && \
 git status --short
 ```
 
@@ -60,7 +60,8 @@ Latest confirmed user rerun: 2026-06-23.
 Data-quality result: ERROR 0, WARNING 0, REVIEW 20, INFO 6
 Output check: PASSED
 Baseline comparison: COMPLETED
-Deliverable package: PASSED with 0 missing files
+Workflow success marker: OK
+Deliverable package: 19 files copied, 0 missing files
 ```
 
 The configurable output checker passed after moving V1 assumptions into:
@@ -94,7 +95,8 @@ Dynamic model run summary added.
 Dynamic generated results interpretation added.
 Baseline snapshot and baseline comparison added.
 Configurable output-check rules added.
-Deliverable package builder added.
+Workflow success marker added to prevent stale packaging after failed runs.
+Deliverable package builder added and expanded.
 Findings brief, full findings report, and presentation outline added.
 Stakeholder data request pack added.
 Repository reorganized into cleaner folders.
@@ -106,8 +108,8 @@ Repository reorganized into cleaner folders.
 FFX002 is the strongest current candidate.
 FFX002 ranks #1 in the base model, stays stable across sensitivity scenarios, and ranks #1 across all five scoring profiles.
 FFX001 is the second strongest current candidate and remains a Tier 1 alternative.
-PWC004 is a promising Tier 2 library candidate only under the future/reopened planning assumption because of the renovation/closure caveat.
-PWC002 remains important but high-review because of garage, fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical-review concerns.
+PWC002 moved ahead of PWC004 after the corrected trenching normalization, but remains high-review because of garage, fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical-review concerns.
+PWC004 remains a promising Tier 2 library candidate only under the future/reopened planning assumption because of the renovation/closure caveat.
 PWC001 remains a lower-priority monitored candidate under the current V1 dataset.
 PWC003 should not be treated as a general-public priority unless public access or use-case assumptions change.
 ```
@@ -115,12 +117,12 @@ PWC003 should not be treated as a general-public priority unless public access o
 ## Latest confirmed ranking
 
 ```text
-1. FFX002 — City of Fairfax Regional Library — 59.9 — Tier 1
-2. FFX001 — Fairfax City Hall or municipal building — 53.1 — Tier 1
-3. PWC004 — Chinn Park Regional Library — 48.0 — Tier 2
-4. PWC002 — Neabsco-Potomac Commuter Garage — 44.3 — High-review candidate
-5. PWC001 — PWC McCoart Government Center — 42.1 — Tier 3
-6. PWC003 — Prince William County Public Safety Training Center — 18.6 — Low public-priority / special-use
+1. FFX002 — City of Fairfax Regional Library — 65.3 — Tier 1
+2. FFX001 — Fairfax City Hall or municipal building — 57.3 — Tier 1
+3. PWC002 — Neabsco-Potomac Commuter Garage — 56.0 — High-review candidate
+4. PWC004 — Chinn Park Regional Library — 52.7 — Tier 2
+5. PWC001 — PWC McCoart Government Center — 43.2 — Tier 3
+6. PWC003 — Prince William County Public Safety Training Center — 29.5 — Low public-priority / special-use
 ```
 
 ## Current generated outputs
@@ -139,6 +141,7 @@ data/outputs/model_run_summary.md
 data/outputs/results_interpretation.md
 data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
+data/outputs/workflow_success.json
 data/outputs/charts/readiness_score_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
@@ -190,8 +193,8 @@ data/baselines/v1_baseline/baseline_manifest.json
 ## Next good improvements
 
 ```text
-1. Add a scoring-profile ranking chart or stability visual using matplotlib.
-2. Improve stakeholder data request workflow for unresolved electrical, parking, operating-hours, and access fields.
+1. Decide whether to create a new corrected baseline snapshot after the trenching-normalization fix.
+2. Add a scoring-profile ranking chart or stability visual using matplotlib.
 3. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
 4. Improve facility hours and parking for sites other than FFX002.
 5. Prepare final presentation slides from docs/PRESENTATION_OUTLINE.md and the deliverable package.
