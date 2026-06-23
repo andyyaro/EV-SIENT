@@ -41,8 +41,13 @@ PACKAGE_GROUPS = {
         "docs/RESULTS_INTERPRETATION.md",
         "docs/READINESS_MAP_GUIDE.md",
         "docs/STAKEHOLDER_DATA_REQUEST.md",
+        "docs/STAKEHOLDER_CONTACT_PLAN.md",
         "docs/DATA_DICTIONARY.md",
         "docs/DATA_SOURCES.md",
+    ],
+    "stakeholder_inputs": [
+        "data/source_extracts/stakeholder_data_request_fields.csv",
+        "data/source_extracts/stakeholder_response_tracker.csv",
     ],
 }
 
@@ -167,6 +172,8 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
         "8. `run_outputs/profile_comparison.md`",
         "9. `reports/PRESENTATION_OUTLINE.md`",
         "10. `reports/STAKEHOLDER_DATA_REQUEST.md`",
+        "11. `reports/STAKEHOLDER_CONTACT_PLAN.md`",
+        "12. `stakeholder_inputs/stakeholder_response_tracker.csv`",
         "",
         "## Included files",
         "",
