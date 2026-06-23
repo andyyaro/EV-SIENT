@@ -36,6 +36,7 @@ REQUIRED_OUTPUT_FILES = [
     "data/outputs/model_run_summary.md",
     "data/outputs/results_interpretation.md",
     "data/outputs/charts/readiness_score_chart.png",
+    "data/outputs/charts/profile_spider_chart.png",
     "data/outputs/charts/site_readiness_map.png",
 ]
 
