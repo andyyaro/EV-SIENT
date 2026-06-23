@@ -34,6 +34,8 @@ data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
+data/outputs/amenities_osm_summary_0_5mi.csv
+data/outputs/amenities_osm_pois_0_5mi.csv
 data/outputs/charts/readiness_score_chart.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 ```
@@ -65,6 +67,8 @@ acs_equity_index_1mi.csv
 official_facility_hours_parking_v1.csv
 amenity_official_source_inventory_v1.csv
 amenities_0_5mi_v2_official_supported.csv
+amenities_0_5mi_v3_osm_run_summary.csv
+amenities_0_5mi_v4_osm_reviewed.csv
 electrical_feasibility_v1.csv
 local_ev_adoption_v1.csv
 sensitivity_scenarios_v1.csv
