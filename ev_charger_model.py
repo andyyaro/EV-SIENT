@@ -142,7 +142,7 @@ def build_review_reason(row):
         reasons.append("Enclosed garage or limited ventilation/access")
 
     if row["emergency_disconnect_visible"] == 0:
-        reasons.append("Emergency disconnect not clearly visible")
+        reasons.append("Emergency disconnect visibility not confirmed")
 
     if row["stormwater_risk"] == 1:
         reasons.append("Stormwater or firefighting runoff concern")
