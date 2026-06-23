@@ -36,12 +36,13 @@ git status --short
 ```text
 1. src/validate_site_data.py
 2. src/ev_charger_model.py
-3. src/run_sensitivity_analysis.py
-4. src/run_profile_analysis.py
-5. src/plot_site_map.py
-6. src/generate_run_summary.py
-7. src/generate_results_interpretation.py
-8. src/check_outputs.py
+3. src/plot_readiness_score_chart.py
+4. src/run_sensitivity_analysis.py
+5. src/run_profile_analysis.py
+6. src/plot_site_map.py
+7. src/generate_run_summary.py
+8. src/generate_results_interpretation.py
+9. src/check_outputs.py
 ```
 
 The package builder creates a shareable local folder at:
@@ -94,7 +95,8 @@ Recommendation tier layer added.
 Right-sizing logic added for recommended ports now, 2035, and 2050.
 Sensitivity analysis added and strengthened.
 Scoring profile analysis added.
-Readiness map added with dynamic top-candidate note.
+Readiness score chart polished with score and tier annotations.
+Readiness map label offsets and planning notes improved.
 Dynamic model run summary added.
 Dynamic generated results interpretation added.
 Baseline snapshot and baseline comparison added.
