@@ -1,12 +1,14 @@
 # Data Folder
 
-This folder stores input datasets, source extracts, raw-export notes, and generated local outputs.
+This folder stores input datasets, configuration files, source extracts, baseline snapshots, raw-export notes, and generated local outputs.
 
 ## Structure
 
 ```text
 data/inputs/           Main model input CSVs
+data/config/           Small model configuration and output-check rule files
 data/source_extracts/  Small model-ready extracts used to populate input fields
+data/baselines/        Curated committed benchmark snapshots for regression comparison
 data/raw_exports/      Notes about raw exports that are too large or unnecessary to commit
 data/outputs/          Generated local outputs ignored by Git
 ```
@@ -18,6 +20,27 @@ data/inputs/real_sites_v1.csv   Current real candidate-site dataset
 data/inputs/sites_demo.csv      Small starter/demo dataset
 ```
 
+## Config files
+
+```text
+data/config/scoring_profiles.csv
+data/config/output_check_rules_v1.json
+```
+
+`scoring_profiles.csv` defines the alternative scoring-priority profiles used by `src/run_profile_analysis.py`.
+
+`output_check_rules_v1.json` defines the current V1 sanity-check expectations used by `src/check_outputs.py`, including expected site IDs, expected top site, profile names, profile count, expected sites per profile, data-quality error rule, sensitivity stability rule, and profile score range.
+
+## Baseline snapshots
+
+Committed benchmark outputs live in:
+
+```text
+data/baselines/v1_baseline/
+```
+
+The combined output-check step compares the current local run against this baseline and writes the comparison reports under `data/outputs/`.
+
 ## Generated outputs
 
 Generated outputs are written to:
@@ -25,6 +48,7 @@ Generated outputs are written to:
 ```text
 data/outputs/
 data/outputs/charts/
+data/outputs/deliverable_package/
 ```
 
 Typical generated files:
@@ -34,12 +58,19 @@ data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
+data/outputs/profile_results.csv
+data/outputs/profile_rank_summary.csv
+data/outputs/profile_comparison.md
 data/outputs/model_run_summary.md
+data/outputs/results_interpretation.md
+data/outputs/baseline_comparison.csv
+data/outputs/baseline_comparison.md
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 data/outputs/charts/readiness_score_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
+data/outputs/deliverable_package/
 ```
 
 These are local run artifacts. They are ignored by Git so local script runs do not clutter the repository.
