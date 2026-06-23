@@ -21,11 +21,11 @@ data/outputs/sensitivity_summary.csv Sensitivity summary output, generated local
 | `site_type` | Model behavior type such as `library`, `office`, `garage`, `public_safety`. | Project classification. |
 | `address`, `city`, `state`, `zip`, `lat`, `lon` | Location fields. | Official GIS/facility sources where available. |
 | `public_access` | Whether the site is a normal public charging candidate. | `1` public, `0` limited/non-public. |
-| `employees_day`, `visitors_day`, `parking_spaces`, `hours_open`, `avg_dwell_min` | Demand and use assumptions. | V1 planning assumptions; should be improved. |
+| `employees_day`, `visitors_day`, `parking_spaces`, `hours_open`, `avg_dwell_min` | Demand and use assumptions. | V1 planning assumptions except FFX002 parking/hours. |
 | `nearby_households_1mi` | Estimated households within 1 mile. | Official-derived from ACS/TIGER. |
 | `nearby_jobs_1mi` | Estimated jobs within 1 mile. | Official-derived from LODES/TIGER. |
 | `aadt_nearest` | Nearest traffic exposure. | Official-derived from VDOT. |
-| `amenities_count_0_5mi` | Nearby public-use amenity category count. | Manual V1 estimate. |
+| `amenities_count_0_5mi` | Nearby public-use amenity category count. | Reviewed OpenStreetMap/Overpass six-category count. |
 | `ev_registrations_local`, `ev_share_local` | Local EV adoption signal. | V1 planning proxy. |
 | `existing_l2_ports_1mi`, `existing_dcfc_ports_3mi` | Existing nearby public charging supply. | Official-derived from AFDC/NREL. |
 | `equity_gap_index` | Equity signal used in scoring. | Official-derived ACS/TIGER model extract. |
