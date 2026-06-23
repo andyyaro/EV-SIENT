@@ -84,12 +84,40 @@ PWC003 — Low public-priority / special-use
 ## Slide 9 — Sensitivity analysis
 
 ```text
-The model tested five scenarios.
+The model tested five uncertainty scenarios.
 The ranking stayed stable across all five.
 Every site had rank_range = 0.
 ```
 
-## Slide 10 — Remaining data gaps
+## Slide 10 — Scoring profile analysis
+
+```text
+The model also tested five planning-priority profiles:
+- base
+- demand priority
+- equity priority
+- feasibility priority
+- safety priority
+
+FFX002 ranked #1 in every profile.
+```
+
+Speaker note:
+
+```text
+This matters because different stakeholders may value different things. A site that stays strong across multiple priority profiles is more defensible than a site that only ranks well under one weighting setup.
+```
+
+## Slide 11 — Strongest finding
+
+```text
+FFX002 is the strongest current candidate because it is:
+1. ranked #1 in the base model,
+2. stable across all sensitivity scenarios, and
+3. ranked #1 across all scoring-priority profiles.
+```
+
+## Slide 12 — Remaining data gaps
 
 ```text
 elec_service_rating_amp
@@ -102,7 +130,7 @@ parking_spaces for sites except FFX002
 local EV adoption counts
 ```
 
-## Slide 11 — Current source-quality note
+## Slide 13 — Current source-quality note
 
 ```text
 FFX002 parking and hours are now supported by an official facility page.
@@ -112,10 +140,11 @@ Amenities now use reviewed OSM/Overpass six-category POI counts.
 The site map is a planning visual only, not a parcel boundary or engineering map.
 ```
 
-## Slide 12 — Final conclusion
+## Slide 14 — Final conclusion
 
 ```text
-FFX002 and FFX001 are stable top candidates.
+FFX002 is the most stable top candidate.
+FFX001 is the second strongest current candidate.
 PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
 PWC002 should remain in discussion but needs garage/fire/electrical review.
 PWC003 should not be treated as a general-public site unless its access or use case changes.
