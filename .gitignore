@@ -22,6 +22,7 @@ utilization_vs_ports_chart.png
 utilization_vs_ports_*.png
 data/outputs/*.csv
 data/outputs/*.md
+data/outputs/*.json
 data/outputs/charts/*.png
 data/outputs/deliverable_package/
 
