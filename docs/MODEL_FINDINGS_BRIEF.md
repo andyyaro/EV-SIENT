@@ -26,12 +26,12 @@ FFX002 — City of Fairfax Regional Library
 ## Latest ranked results
 
 ```text
-1. FFX002 — City of Fairfax Regional Library — 59.9
-2. FFX001 — Fairfax City Hall or municipal building — 53.1
-3. PWC004 — Chinn Park Regional Library — 48.0
-4. PWC002 — Neabsco-Potomac Commuter Garage — 44.3
-5. PWC001 — PWC McCoart Government Center — 42.1
-6. PWC003 — Prince William County Public Safety Training Center — 18.6
+1. FFX002 — City of Fairfax Regional Library — 65.3
+2. FFX001 — Fairfax City Hall or municipal building — 57.3
+3. PWC002 — Neabsco-Potomac Commuter Garage — 56.0
+4. PWC004 — Chinn Park Regional Library — 52.7
+5. PWC001 — PWC McCoart Government Center — 43.2
+6. PWC003 — Prince William County Public Safety Training Center — 29.5
 ```
 
 ## Recommendation tiers
@@ -39,8 +39,8 @@ FFX002 — City of Fairfax Regional Library
 ```text
 FFX002 — Tier 1 — advance to site screening
 FFX001 — Tier 1 — advance to site screening
-PWC004 — Tier 2 — promising candidate, refine data
 PWC002 — High-review candidate
+PWC004 — Tier 2 — promising candidate, refine data
 PWC001 — Tier 3 — lower priority / monitor
 PWC003 — Low public-priority / special-use
 ```
@@ -65,9 +65,9 @@ FFX002 is the strongest current candidate. It ranks first and combines public ac
 
 FFX001 is the second strongest current candidate. It has strong civic/public-use value, reviewed OSM amenity support, and remains the second-ranked site.
 
-PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions, but the current official library page lists Chinn Park Library as closed for renovation.
+PWC002 now ranks third after the corrected trenching normalization, but it remains high-review because garage installations can involve additional fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical complexity.
 
-PWC002 has meaningful commuter, public-access, and equity value, but it remains high-review because garage installations can involve additional fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical complexity.
+PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions, but the current official library page lists Chinn Park Library as closed for renovation.
 
 PWC001 remains lower priority than the top candidates, but reviewed OSM amenities improved its demand support.
 
@@ -98,4 +98,4 @@ local EV adoption counts
 
 ## Planning conclusion
 
-FFX002 is the strongest current candidate because it is top-ranked in the base model, stable across sensitivity scenarios, and stable across all scoring-priority profiles. FFX001 remains the second strongest candidate. PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions, but its current closure status remains a caveat. PWC002 should remain in the discussion because of its commuter and equity role, but it needs deeper garage/fire/electrical review before advancement. PWC003 should not be treated as a general-public charging site unless its access or use case changes.
+FFX002 is the strongest current candidate because it is top-ranked in the base model, stable across sensitivity scenarios, and stable across all scoring-priority profiles. FFX001 remains the second strongest candidate. PWC002 is now the third-ranked site, but it needs deeper garage/fire/electrical review before advancement. PWC004 remains the strongest current Prince William County public-library candidate under future/reopened planning assumptions, but its current closure status remains a caveat. PWC003 should not be treated as a general-public charging site unless its access or use case changes.
