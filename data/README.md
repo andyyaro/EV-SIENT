@@ -63,6 +63,8 @@ Examples:
 acs_equity_inputs_1mi.csv
 acs_equity_index_1mi.csv
 official_facility_hours_parking_v1.csv
+amenity_official_source_inventory_v1.csv
+amenities_0_5mi_v2_official_supported.csv
 electrical_feasibility_v1.csv
 local_ev_adoption_v1.csv
 sensitivity_scenarios_v1.csv
