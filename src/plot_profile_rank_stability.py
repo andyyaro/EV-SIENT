@@ -45,6 +45,8 @@ PROFILE_AXIS_LABELS = {
     "safety_priority": "Safety",
 }
 
+TOP_SITE_ID = "FFX002"
+
 
 def ensure_parent_dir(path: str | Path) -> None:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -97,6 +99,25 @@ def build_rank_matrix(data: pd.DataFrame, profiles: list[str], sites: list[str])
     return matrix.loc[sites, profiles]
 
 
+def add_top_site_annotation(ax, x_values: list[int], rank_matrix: pd.DataFrame) -> None:
+    if TOP_SITE_ID not in rank_matrix.index:
+        return
+
+    top_ranks = rank_matrix.loc[TOP_SITE_ID].astype(float).tolist()
+    if all(rank == 1 for rank in top_ranks):
+        ax.annotate(
+            "Stable #1 across all profiles",
+            xy=(x_values[2], 1),
+            xytext=(x_values[2], 1.38),
+            ha="center",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+            arrowprops={"arrowstyle": "->", "lw": 0.8},
+            bbox={"boxstyle": "round,pad=0.25", "fc": "white", "alpha": 0.90, "lw": 0.5},
+        )
+
+
 def plot_rank_stability(data: pd.DataFrame, output_path: Path) -> None:
     ensure_parent_dir(output_path)
 
@@ -112,9 +133,10 @@ def plot_rank_stability(data: pd.DataFrame, output_path: Path) -> None:
 
     for site_id in sites:
         y_values = rank_matrix.loc[site_id].astype(float).tolist()
-        line_width = 3.0 if site_id == "FFX002" else 1.6
-        alpha = 0.95 if site_id == "FFX002" else 0.72
-        marker_size = 8 if site_id == "FFX002" else 5
+        line_width = 3.6 if site_id == TOP_SITE_ID else 1.5
+        alpha = 1.00 if site_id == TOP_SITE_ID else 0.68
+        marker_size = 8 if site_id == TOP_SITE_ID else 5
+        z_order = 5 if site_id == TOP_SITE_ID else 2
         ax.plot(
             x_values,
             y_values,
@@ -123,6 +145,7 @@ def plot_rank_stability(data: pd.DataFrame, output_path: Path) -> None:
             markersize=marker_size,
             alpha=alpha,
             label=site_id,
+            zorder=z_order,
         )
 
         ax.text(
@@ -130,9 +153,11 @@ def plot_rank_stability(data: pd.DataFrame, output_path: Path) -> None:
             y_values[-1],
             site_id,
             va="center",
-            fontsize=9 if site_id == "FFX002" else 8,
-            fontweight="bold" if site_id == "FFX002" else "normal",
+            fontsize=9 if site_id == TOP_SITE_ID else 8,
+            fontweight="bold" if site_id == TOP_SITE_ID else "normal",
         )
+
+    add_top_site_annotation(ax, x_values, rank_matrix)
 
     ax.set_xticks(x_values)
     ax.set_xticklabels(labels)
@@ -140,7 +165,7 @@ def plot_rank_stability(data: pd.DataFrame, output_path: Path) -> None:
     ax.set_ylim(max_rank + 0.45, 0.55)
     ax.set_ylabel("Rank within profile (#1 is best)")
     ax.set_xlabel("Scoring profile")
-    ax.set_title("Profile Rank Stability — Candidate Rank Across Scoring Priorities")
+    ax.set_title("Candidate Rank Stability Across Scoring Profiles")
     ax.grid(axis="y", alpha=0.25)
     ax.set_xlim(-0.2, len(profiles) - 0.2)
 
