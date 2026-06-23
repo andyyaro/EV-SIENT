@@ -135,6 +135,19 @@ Decision: `src/check_outputs.py` is the single final output-check command. It ru
 
 Reason: this keeps the project reproducible without cloud credentials, external links, storage cost, or extra authentication complexity.
 
+## Decision 22 — Add scoring profile analysis
+
+The project now includes configurable scoring profiles for testing different planning priorities.
+
+```text
+data/config/scoring_profiles.csv
+src/run_profile_analysis.py
+```
+
+Decision: the main V1 ranking remains the primary ranking. Profile analysis is a planning-sensitivity layer that shows how rankings change when demand, equity, feasibility, or safety is weighted more heavily.
+
+Reason: different stakeholders may care about different priorities, so the model should show whether recommendations are stable across reasonable policy perspectives.
+
 ## Current expected recommendation interpretation
 
 ```text
