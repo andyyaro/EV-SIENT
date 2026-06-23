@@ -11,17 +11,18 @@ This folder is for human-readable project documentation, reporting, and presenta
 4. PRESENTATION_OUTLINE.md
 5. RESULTS_INTERPRETATION.md
 6. READINESS_MAP_GUIDE.md
-7. STAKEHOLDER_DATA_REQUEST.md
-8. STAKEHOLDER_CONTACT_PLAN.md
-9. METHODOLOGY.md
-10. DATA_DICTIONARY.md
-11. DATA_SOURCES.md
-12. RECOMMENDATION_TIERS.md
-13. SENSITIVITY_ANALYSIS.md
-14. SENSITIVITY_RESULTS_INTERPRETATION.md
-15. OSM_AMENITIES_WORKFLOW.md
-16. OSM_AMENITIES_REVIEW_NOTE.md
-17. PROJECT_DECISIONS_LOG.md
+7. ADDING_NEW_SITES_GUIDE.md
+8. STAKEHOLDER_DATA_REQUEST.md
+9. STAKEHOLDER_CONTACT_PLAN.md
+10. METHODOLOGY.md
+11. DATA_DICTIONARY.md
+12. DATA_SOURCES.md
+13. RECOMMENDATION_TIERS.md
+14. SENSITIVITY_ANALYSIS.md
+15. SENSITIVITY_RESULTS_INTERPRETATION.md
+16. OSM_AMENITIES_WORKFLOW.md
+17. OSM_AMENITIES_REVIEW_NOTE.md
+18. PROJECT_DECISIONS_LOG.md
 ```
 
 ## Latest generated outputs
@@ -42,6 +43,13 @@ Recommended profile-analysis visual:
 
 ```text
 data/outputs/charts/profile_rank_stability_chart.png
+```
+
+## Expansion files
+
+```text
+docs/ADDING_NEW_SITES_GUIDE.md
+data/inputs/new_sites_template.csv
 ```
 
 ## Stakeholder follow-up files
