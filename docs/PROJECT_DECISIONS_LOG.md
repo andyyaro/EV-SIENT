@@ -119,6 +119,20 @@ Decision: do not mix manual and OSM values in the active model field. Manual V1 
 
 Source quality: open POI/GIS support, not official local government confirmation.
 
+## Decision 21 — Use committed baseline snapshots for run comparison
+
+The project now uses a small committed baseline snapshot instead of external storage for run comparison.
+
+```text
+data/baselines/v1_baseline/
+src/create_baseline_snapshot.py
+src/compare_to_baseline.py
+```
+
+Decision: normal generated outputs remain ignored under `data/outputs/`, while selected benchmark snapshots under `data/baselines/` can be committed after review.
+
+Reason: this keeps the project reproducible without cloud credentials, external links, storage cost, or extra authentication complexity.
+
 ## Current expected recommendation interpretation
 
 ```text
