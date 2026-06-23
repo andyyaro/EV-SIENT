@@ -45,11 +45,15 @@ PACKAGE_GROUPS = {
         "data/outputs/data_quality_report.csv",
     ],
     "reports": [
+        "docs/PROJECT_STATUS.md",
         "docs/MODEL_FINDINGS_BRIEF.md",
         "docs/MODEL_FINDINGS_REPORT.md",
         "docs/PRESENTATION_OUTLINE.md",
         "docs/RESULTS_INTERPRETATION.md",
         "docs/READINESS_MAP_GUIDE.md",
+        "docs/STAKEHOLDER_DATA_REQUEST.md",
+        "docs/DATA_DICTIONARY.md",
+        "docs/DATA_SOURCES.md",
     ],
 }
 
@@ -96,16 +100,18 @@ def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> s
     lines.append("")
     lines.append("## Recommended review order")
     lines.append("")
-    lines.append("1. `reports/MODEL_FINDINGS_BRIEF.md`")
-    lines.append("2. `charts/site_readiness_map.png`")
-    lines.append("3. `run_outputs/results_interpretation.md`")
-    lines.append("4. `run_outputs/model_run_summary.md`")
-    lines.append("5. `run_outputs/profile_comparison.md`")
-    lines.append("6. `reports/PRESENTATION_OUTLINE.md`")
+    lines.append("1. `reports/PROJECT_STATUS.md`")
+    lines.append("2. `reports/MODEL_FINDINGS_BRIEF.md`")
+    lines.append("3. `charts/site_readiness_map.png`")
+    lines.append("4. `run_outputs/results_interpretation.md`")
+    lines.append("5. `run_outputs/model_run_summary.md`")
+    lines.append("6. `run_outputs/profile_comparison.md`")
+    lines.append("7. `reports/PRESENTATION_OUTLINE.md`")
+    lines.append("8. `reports/STAKEHOLDER_DATA_REQUEST.md`")
     lines.append("")
     lines.append("## Dynamic vs static files")
     lines.append("")
-    lines.append("Files under `run_outputs/` are generated from the latest local model run. Files under `reports/` are static project documents that explain the project story and methodology.")
+    lines.append("Files under `run_outputs/` are generated from the latest local model run. Files under `reports/` are static project documents that explain the project story, methodology, current status, and next data needs.")
     lines.append("")
     lines.append("## Included files")
     lines.append("")
