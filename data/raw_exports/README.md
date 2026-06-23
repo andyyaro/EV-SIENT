@@ -13,6 +13,9 @@ alt_fuel_stations (Jun 23 2026).csv
 Traffic_Volume_ADT.csv
 VDOT_Bidirectional_Traffic_Volume_2025.zip
 VDOT_Bidirectional_Traffic_Volume_2025.geojson.zip
+ACSDT5Y2024.B11001-2026-06-23T052522.csv
+tl_2024_51_bg.zip
+va_wac_S000_JT00_2023.csv.gz
 ```
 
 ## How each raw export was used
@@ -116,6 +119,34 @@ Source: VDOT Bidirectional Traffic Volume 2025 GeoJSON export
 
 This was uploaded as an alternative geometry export. The shapefile ZIP was used for processing because it was smaller and easier to handle.
 
+### ACSDT5Y2024.B11001-2026-06-23T052522.csv
+
+Source: U.S. Census Bureau ACS 2024 5-Year B11001 Household Type table
+
+Used to calculate:
+
+```text
+nearby_households_1mi
+```
+
+### tl_2024_51_bg.zip
+
+Source: U.S. Census Bureau TIGER Line 2024 Virginia Block Groups
+
+Used as the geometry layer for area-weighted 1-mile household and job estimates.
+
+### va_wac_S000_JT00_2023.csv.gz
+
+Source: U.S. Census Bureau LODES 2023 Virginia Workplace Area Characteristics
+
+Used to calculate:
+
+```text
+nearby_jobs_1mi
+```
+
+The file gives workplace jobs at census block level. For the current prototype, jobs were aggregated to block groups and then estimated within each 1-mile site buffer by area weighting.
+
 ## Stored extracts
 
 The small extracts used by the model are stored in:
@@ -124,4 +155,6 @@ The small extracts used by the model are stored in:
 data/source_extracts/site_coordinate_sources.csv
 data/source_extracts/afdc_ev_supply_counts.csv
 data/source_extracts/vdot_nearest_traffic_segments.csv
+data/source_extracts/acs_households_1mi.csv
+data/source_extracts/lodes_jobs_1mi.csv
 ```
