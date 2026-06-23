@@ -27,12 +27,20 @@ DEFAULT_PROFILE_RESULTS = "data/outputs/profile_results.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/site_readiness_map.png"
 
 LABEL_OFFSETS = {
-    "FFX001": (-54, -6),
-    "FFX002": (10, 12),
-    "PWC001": (10, 8),
-    "PWC002": (8, 8),
+    "FFX001": (-70, -14),
+    "FFX002": (12, 14),
+    "PWC001": (12, 12),
+    "PWC002": (-78, 14),
     "PWC003": (8, 8),
-    "PWC004": (8, 8),
+    "PWC004": (12, 4),
+}
+
+TIER_SHORT_LABELS = {
+    "Tier 1 — advance to site screening": "Tier 1",
+    "Tier 2 — promising candidate, refine data": "Tier 2",
+    "High-review candidate": "High-review",
+    "Tier 3 — lower priority / monitor": "Tier 3",
+    "Low public-priority / special-use": "Special-use",
 }
 
 
@@ -44,6 +52,10 @@ def read_csv_if_exists(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path)
+
+
+def compact_tier(value: str) -> str:
+    return TIER_SHORT_LABELS.get(str(value), str(value))
 
 
 def load_map_data(input_path: Path, results_path: Path) -> pd.DataFrame:
@@ -172,6 +184,16 @@ def label_offset(site_id: str) -> tuple[int, int]:
     return LABEL_OFFSETS.get(str(site_id), (8, 8))
 
 
+def planning_note(data: pd.DataFrame) -> str:
+    site_ids = set(data["site_id"].astype(str)) if "site_id" in data.columns else set()
+    notes = []
+    if "PWC002" in site_ids:
+        notes.append("PWC002 = high-review garage candidate")
+    if "PWC004" in site_ids:
+        notes.append("PWC004 = future/reopened planning assumption")
+    return "; ".join(notes)
+
+
 def plot_site_map(
     data: pd.DataFrame,
     output_path: Path,
@@ -183,7 +205,7 @@ def plot_site_map(
     sensitivity = sensitivity if sensitivity is not None else pd.DataFrame()
     profile_results = profile_results if profile_results is not None else pd.DataFrame()
 
-    plt.figure(figsize=(11, 8.2))
+    fig, ax = plt.subplots(figsize=(11.2, 8.4))
 
     if "readiness_score" in data.columns:
         scores = pd.to_numeric(data["readiness_score"], errors="coerce")
@@ -191,7 +213,7 @@ def plot_site_map(
         scores = pd.Series([0] * len(data), index=data.index)
 
     sizes = [marker_size(score) for score in scores]
-    scatter = plt.scatter(
+    scatter = ax.scatter(
         data["lon"],
         data["lat"],
         s=sizes,
@@ -207,7 +229,7 @@ def plot_site_map(
         top_row = data[data["site_id"].astype(str) == top_site]
         if not top_row.empty:
             star_size = 260 if stable_top_candidate_found(data, sensitivity, profile_results) else 220
-            plt.scatter(
+            ax.scatter(
                 top_row["lon"],
                 top_row["lat"],
                 s=star_size,
@@ -220,34 +242,38 @@ def plot_site_map(
 
     for _, row in data.iterrows():
         offset = label_offset(row.get("site_id", ""))
-        plt.annotate(
+        ax.annotate(
             site_label(row),
             xy=(row["lon"], row["lat"]),
             xytext=offset,
             textcoords="offset points",
             fontsize=8,
             arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
-            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.78, "lw": 0.3},
+            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.80, "lw": 0.3},
             zorder=5,
         )
 
-    plt.colorbar(scatter, label="Readiness score")
-    plt.xlabel("Longitude")
-    plt.ylabel("Latitude")
-    plt.suptitle("Candidate EV Charging Sites — Readiness Map", fontsize=14)
-    plt.title(map_interpretation_note(data, sensitivity, profile_results), fontsize=9)
-    plt.grid(True, alpha=0.25)
+    cbar = fig.colorbar(scatter, ax=ax, label="Readiness score")
+    cbar.ax.tick_params(labelsize=8)
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    fig.suptitle("Candidate EV Charging Sites — Readiness Map", fontsize=14)
+    ax.set_title(map_interpretation_note(data, sensitivity, profile_results), fontsize=9, pad=8)
+    ax.grid(True, alpha=0.25)
 
-    lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.14, 0.01)
-    lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.14, 0.01)
-    plt.xlim(data["lon"].min() - lon_padding, data["lon"].max() + lon_padding)
-    plt.ylim(data["lat"].min() - lat_padding, data["lat"].max() + lat_padding)
+    lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.16, 0.01)
+    lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.16, 0.01)
+    ax.set_xlim(data["lon"].min() - lon_padding, data["lon"].max() + lon_padding)
+    ax.set_ylim(data["lat"].min() - lat_padding, data["lat"].max() + lat_padding)
 
+    note = planning_note(data)
+    if note:
+        fig.text(0.5, 0.055, f"Planning notes: {note}.", ha="center", fontsize=8)
     footer = "Planning visual only — longitude/latitude scatter, no basemap, parcel boundary, engineering layout, or permitting decision."
-    plt.figtext(0.5, 0.01, footer, ha="center", fontsize=8)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig(output_path, dpi=200)
-    plt.close()
+    fig.text(0.5, 0.018, footer, ha="center", fontsize=8)
+    fig.tight_layout(rect=[0, 0.08, 1, 0.95])
+    fig.savefig(output_path, dpi=200)
+    plt.close(fig)
 
 
 def parse_args() -> argparse.Namespace:
@@ -282,6 +308,7 @@ def main() -> None:
     print(f"Profile results file: {profile_results_path if profile_results_path.exists() else 'not found'}")
     print(f"Saved map: {output_path}")
     print(f"Map note: {interpretation}")
+    print(f"Planning note: {planning_note(data)}")
     print()
     print("Sites plotted:")
     display_cols = [col for col in ["site_id", "site_name", "model_rank", "readiness_score", "recommendation_tier"] if col in data.columns]
