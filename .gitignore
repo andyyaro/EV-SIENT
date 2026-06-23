@@ -23,6 +23,7 @@ utilization_vs_ports_*.png
 data/outputs/*.csv
 data/outputs/*.md
 data/outputs/charts/*.png
+data/outputs/deliverable_package/
 
 # Local-only run archives
 data/run_history/
