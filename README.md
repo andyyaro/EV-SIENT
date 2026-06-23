@@ -62,15 +62,17 @@ matplotlib
 Run the full local workflow from the repository root:
 
 ```bash
-git pull --rebase origin main
-python src/run_all.py
-python src/build_deliverable_package.py
+git pull --rebase origin main && \
+python src/run_all.py && \
+python src/build_deliverable_package.py && \
 git status --short
 ```
 
 `src/run_all.py` runs the validator, readiness/right-sizing model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, generated results interpretation, and one combined output-check step.
 
 The output-check step also generates a baseline comparison report against the committed V1 baseline.
+
+The package builder checks for `data/outputs/workflow_success.json`, which is written only after the full workflow passes. This prevents a package from being built from stale outputs after a failed or partial run.
 
 You can also run the steps manually:
 
@@ -112,6 +114,7 @@ data/outputs/model_run_summary.md
 data/outputs/results_interpretation.md
 data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
+data/outputs/workflow_success.json
 data/outputs/charts/readiness_score_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
@@ -296,7 +299,8 @@ python src/build_deliverable_package.py
 10. Exports CSV outputs, charts, and Markdown summaries.
 11. Generates an adaptive results interpretation from the latest outputs.
 12. Runs one combined output check that validates current outputs and compares them against the committed V1 baseline snapshot.
-13. Can build a local deliverable package for sharing or presentation.
+13. Writes a workflow success marker after the full pipeline passes.
+14. Can build a local deliverable package for sharing or presentation.
 
 ## Current candidate sites
 
@@ -314,8 +318,8 @@ FFX002 — City of Fairfax Regional Library
 ```text
 FFX002 — Tier 1 / stable top candidate
 FFX001 — Tier 1 / stable second candidate
-PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC002 — High-review candidate because of garage context
+PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC001 — Tier 3 / lower priority under current assumptions
 PWC003 — Low public-priority / special-use because public access is limited
 ```
