@@ -22,6 +22,8 @@ import pandas as pd
 DEFAULT_RESULTS = "data/outputs/site_results.csv"
 DEFAULT_QUALITY = "data/outputs/data_quality_report.csv"
 DEFAULT_SENSITIVITY = "data/outputs/sensitivity_summary.csv"
+DEFAULT_PROFILE_RESULTS = "data/outputs/profile_results.csv"
+DEFAULT_PROFILE_SUMMARY = "data/outputs/profile_rank_summary.csv"
 DEFAULT_OUTPUT = "data/outputs/model_run_summary.md"
 
 CHART_OUTPUTS = [
@@ -102,10 +104,60 @@ def sensitivity_summary_text(sensitivity: pd.DataFrame) -> str:
     return "Sensitivity output exists, but `rank_range` was not found."
 
 
-def build_summary(results: pd.DataFrame, quality: pd.DataFrame, sensitivity: pd.DataFrame) -> str:
+def profile_summary_text(profile_results: pd.DataFrame) -> str:
+    if profile_results.empty:
+        return "_No scoring profile analysis found._"
+
+    required = {"profile_name", "profile_rank", "site_id", "site_name", "profile_readiness_score"}
+    if not required.issubset(profile_results.columns):
+        return "Profile output exists, but required profile columns were not found."
+
+    top_by_profile = (
+        profile_results.sort_values(["profile_name", "profile_rank"])
+        .groupby("profile_name", as_index=False)
+        .first()
+    )
+    top_sites = top_by_profile["site_id"].astype(str).unique().tolist()
+
+    if len(top_sites) == 1:
+        top_site = top_sites[0]
+        profiles_tested = len(top_by_profile)
+        return f"`{top_site}` stayed ranked #1 across all `{profiles_tested}` scoring profiles. This means the top recommendation is stable when demand, equity, feasibility, or safety is weighted more heavily."
+
+    return f"Top-ranked sites changed across scoring profiles: `{top_sites}`. Review `data/outputs/profile_comparison.md` for details."
+
+
+def profile_top_table(profile_results: pd.DataFrame) -> str:
+    if profile_results.empty:
+        return "_No scoring profile analysis found._"
+
+    required = {"profile_name", "profile_rank", "site_id", "site_name", "profile_readiness_score"}
+    if not required.issubset(profile_results.columns):
+        return "_Profile output exists, but required profile columns were not found._"
+
+    top_by_profile = (
+        profile_results.sort_values(["profile_name", "profile_rank"])
+        .groupby("profile_name", as_index=False)
+        .first()
+        .sort_values("profile_name")
+    )
+    return markdown_table(
+        top_by_profile,
+        ["profile_name", "site_id", "site_name", "profile_readiness_score"],
+    )
+
+
+def build_summary(
+    results: pd.DataFrame,
+    quality: pd.DataFrame,
+    sensitivity: pd.DataFrame,
+    profile_results: pd.DataFrame,
+    profile_summary: pd.DataFrame,
+) -> str:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
     quality_text, review_items = quality_summary(quality)
     sensitivity_text = sensitivity_summary_text(sensitivity)
+    profile_text = profile_summary_text(profile_results)
 
     if results.empty:
         top_line = "_No model results found._"
@@ -123,6 +175,7 @@ def build_summary(results: pd.DataFrame, quality: pd.DataFrame, sensitivity: pd.
     )
 
     review_table = remaining_review_summary(review_items)
+    profile_table = profile_top_table(profile_results)
     chart_lines = "\n".join([f"- `{path}`" for path in CHART_OUTPUTS])
 
     summary = f"""# Model Run Summary
@@ -134,6 +187,8 @@ Generated: {generated_at}
 {top_line}
 
 {sensitivity_text}
+
+{profile_text}
 
 This is a planning-support output only. It does not replace utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, or stakeholder approval.
 
@@ -152,6 +207,14 @@ This is a planning-support output only. It does not replace utility review, engi
 ## Sensitivity summary
 
 {sensitivity_text}
+
+## Scoring profile summary
+
+{profile_text}
+
+{profile_table}
+
+See `data/outputs/profile_comparison.md` for the full scoring-profile report.
 
 ## Generated visual outputs
 
@@ -180,6 +243,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--results", default=DEFAULT_RESULTS, help="Model results CSV.")
     parser.add_argument("--quality", default=DEFAULT_QUALITY, help="Data-quality report CSV.")
     parser.add_argument("--sensitivity", default=DEFAULT_SENSITIVITY, help="Sensitivity summary CSV.")
+    parser.add_argument("--profile-results", default=DEFAULT_PROFILE_RESULTS, help="Scoring profile results CSV.")
+    parser.add_argument("--profile-summary", default=DEFAULT_PROFILE_SUMMARY, help="Scoring profile summary CSV.")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Output Markdown summary path.")
     return parser.parse_args()
 
@@ -189,13 +254,17 @@ def main() -> None:
     results_path = Path(args.results)
     quality_path = Path(args.quality)
     sensitivity_path = Path(args.sensitivity)
+    profile_results_path = Path(args.profile_results)
+    profile_summary_path = Path(args.profile_summary)
     output_path = Path(args.output)
 
     results = read_csv_if_exists(results_path)
     quality = read_csv_if_exists(quality_path)
     sensitivity = read_csv_if_exists(sensitivity_path)
+    profile_results = read_csv_if_exists(profile_results_path)
+    profile_summary = read_csv_if_exists(profile_summary_path)
 
-    summary = build_summary(results, quality, sensitivity)
+    summary = build_summary(results, quality, sensitivity, profile_results, profile_summary)
     ensure_parent_dir(output_path)
     output_path.write_text(summary, encoding="utf-8")
 
@@ -204,6 +273,7 @@ def main() -> None:
     print(f"Results file: {results_path if results_path.exists() else 'not found'}")
     print(f"Quality file: {quality_path if quality_path.exists() else 'not found'}")
     print(f"Sensitivity file: {sensitivity_path if sensitivity_path.exists() else 'not found'}")
+    print(f"Profile results file: {profile_results_path if profile_results_path.exists() else 'not found'}")
     print(f"Saved summary: {output_path}")
 
 
