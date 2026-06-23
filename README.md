@@ -8,6 +8,7 @@ The model evaluates sites using demand, feasibility, safety/AHJ review, equity, 
 
 ```text
 src/                  Python scripts
+src/run_all.py
 src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
@@ -34,7 +35,15 @@ pip install pandas numpy matplotlib
 
 ## Main workflow
 
-Run these from the repository root:
+Run the full local workflow from the repository root:
+
+```bash
+python src/run_all.py
+```
+
+This runs the validator, model, sensitivity analysis, and readiness map in order.
+
+You can also run the steps manually:
 
 ```bash
 python src/validate_site_data.py
