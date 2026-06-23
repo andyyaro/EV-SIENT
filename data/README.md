@@ -34,13 +34,17 @@ data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
+data/outputs/model_run_summary.md
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 ```
 
-These are ignored by Git so local script runs do not clutter the repository.
+These are local run artifacts. They are ignored by Git so local script runs do not clutter the repository.
+
+Do not commit files from `data/outputs/` by default. If the project needs to publish a specific output, copy or export that file intentionally as a separate deliverable.
 
 ## Source documentation files
 
