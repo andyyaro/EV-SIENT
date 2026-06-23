@@ -19,6 +19,7 @@ The package folder is generated locally and ignored by Git.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 from datetime import datetime
@@ -34,6 +35,7 @@ PACKAGE_GROUPS = {
         "data/outputs/charts/readiness_score_chart.png",
     ],
     "run_outputs": [
+        "data/outputs/workflow_success.json",
         "data/outputs/model_run_summary.md",
         "data/outputs/results_interpretation.md",
         "data/outputs/profile_comparison.md",
@@ -93,7 +95,7 @@ def validate_success_marker() -> None:
     newer_outputs = [
         path.relative_to(PROJECT_ROOT)
         for path in generated_sources()
-        if path.exists() and path.stat().st_mtime > marker_mtime
+        if path.exists() and path != marker_path and path.stat().st_mtime > marker_mtime
     ]
     if newer_outputs:
         joined = ", ".join(str(path) for path in newer_outputs)
@@ -104,24 +106,55 @@ def validate_success_marker() -> None:
         )
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file_obj:
+        for chunk in iter(lambda: file_obj.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def iso_mtime(path: Path) -> str:
+    return datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec="seconds")
+
+
 def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[str, str]:
     source = PROJECT_ROOT / source_relative
     destination_dir = package_dir / group_name
     destination_dir.mkdir(parents=True, exist_ok=True)
     destination = destination_dir / source.name
+    copied_at = datetime.now().isoformat(timespec="seconds")
 
     if not source.exists():
         return {
             "source": source_relative,
             "destination": str(destination.relative_to(PROJECT_ROOT)),
             "status": "missing",
+            "copied_at": copied_at,
         }
 
-    shutil.copy2(source, destination)
+    source_sha256 = sha256_file(source)
+    source_modified_at = iso_mtime(source)
+
+    # Intentionally do not use shutil.copy2 here.
+    # copy2 preserves old source timestamps, which makes Finder look like the
+    # package was not refreshed. copyfile writes a fresh destination file while
+    # the manifest records the original source timestamp and content hash.
+    shutil.copyfile(source, destination)
+
+    destination_sha256 = sha256_file(destination)
+    destination_modified_at = iso_mtime(destination)
+    if source_sha256 != destination_sha256:
+        raise SystemExit(f"Copied file hash mismatch: {source_relative}")
+
     return {
         "source": source_relative,
         "destination": str(destination.relative_to(PROJECT_ROOT)),
         "status": "copied",
+        "source_modified_at": source_modified_at,
+        "destination_modified_at": destination_modified_at,
+        "copied_at": copied_at,
+        "sha256": source_sha256,
     }
 
 
@@ -136,6 +169,10 @@ def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> s
     lines.append(f"Generated: {generated_at}")
     lines.append("")
     lines.append("This folder collects the main files needed to review or present the current model run.")
+    lines.append("")
+    lines.append("## Freshness check")
+    lines.append("")
+    lines.append("The package builder deletes and recreates this package by default. Copied files receive a fresh package-build modified time. The package manifest records each source file's original modified time and SHA-256 hash so the copied content can be verified.")
     lines.append("")
     lines.append("## Recommended review order")
     lines.append("")
