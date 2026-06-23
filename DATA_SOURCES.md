@@ -2,13 +2,14 @@
 
 This file tracks where each input in the EV charging site-readiness model should come from.
 
-The goal is to keep the model transparent and defensible. Some fields can come from official datasets, while other fields require manual review, stakeholder input, or site assumptions.
+The goal is to keep the model transparent and defensible. Some fields come from official datasets, while other fields require manual review, stakeholder input, or site assumptions.
 
 ## Source quality levels
 
 | Level | Meaning | Use in model |
 |---|---|---|
 | Official | Comes from a government, DOE/NREL, Census, VDOT, or local government source | Best source for model inputs |
+| Official-derived | Calculated from official data, such as a buffer estimate | Good for planning, but the method should be documented |
 | Stakeholder evidence | Comes from interviews or project notes | Useful for known site constraints and calibration |
 | Manual estimate | Estimated from maps, site review, assumptions, or early planning judgment | Acceptable for prototype, but should be labeled |
 | Unknown | Not available yet | Keep blank or use conservative placeholder |
@@ -26,13 +27,13 @@ The older `sites.csv` file is still available as a starter/demo dataset, but the
 ```text
 PWC001 — PWC McCoart Government Center
 PWC002 — Neabsco-Potomac Commuter Garage
-PWC003 — Prince William public health facility staging row
+PWC003 — Prince William County Public Safety Training Center
 PWC004 — Chinn Park Regional Library
 FFX001 — Fairfax City Hall or municipal building
 FFX002 — City of Fairfax Regional Library
 ```
 
-`PWC003` is intentionally still a staging row because a specific official facility has not been confirmed yet.
+`PWC003` now represents the Prince William County Public Safety Training Center. It is marked as limited/not general public access in the working CSV because the facility is primarily a public safety training location.
 
 ## Official data already added
 
@@ -63,6 +64,7 @@ Used for official address and coordinates for:
 ```text
 PWC001 — 1 County Complex Ct, Woodbridge, VA 22192
 PWC002 — 14801 Dining Way, Woodbridge, VA 22191
+PWC003 — 13101 Public Safety Dr, Nokesville, VA 20181
 PWC004 — 13065 Chinn Park Dr, Woodbridge, VA 22192
 ```
 
@@ -81,13 +83,6 @@ lon
 
 Used for official nearby public active EV charging supply.
 
-Official pages:
-
-```text
-https://afdc.energy.gov/stations
-https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/
-```
-
 Model fields supported:
 
 ```text
@@ -100,6 +95,7 @@ Current AFDC-derived values:
 ```text
 PWC001: existing_l2_ports_1mi = 10, existing_dcfc_ports_3mi = 0
 PWC002: existing_l2_ports_1mi = 62, existing_dcfc_ports_3mi = 60
+PWC003: existing_l2_ports_1mi = 0, existing_dcfc_ports_3mi = 0
 PWC004: existing_l2_ports_1mi = 0, existing_dcfc_ports_3mi = 27
 FFX001: existing_l2_ports_1mi = 28, existing_dcfc_ports_3mi = 39
 FFX002: existing_l2_ports_1mi = 14, existing_dcfc_ports_3mi = 23
@@ -120,6 +116,7 @@ Current VDOT-derived nearest AADT values:
 ```text
 PWC001: aadt_nearest = 51000
 PWC002: aadt_nearest = 8300
+PWC003: aadt_nearest = 490
 PWC004: aadt_nearest = 45000
 FFX001: aadt_nearest = 9700
 FFX002: aadt_nearest = 12000
@@ -149,6 +146,7 @@ Current ACS-derived values:
 ```text
 PWC001: nearby_households_1mi = 3576
 PWC002: nearby_households_1mi = 5263
+PWC003: nearby_households_1mi = 58
 PWC004: nearby_households_1mi = 5022
 FFX001: nearby_households_1mi = 4231
 FFX002: nearby_households_1mi = 4964
@@ -178,6 +176,7 @@ Current LODES-derived values:
 ```text
 PWC001: nearby_jobs_1mi = 5195
 PWC002: nearby_jobs_1mi = 9890
+PWC003: nearby_jobs_1mi = 33
 PWC004: nearby_jobs_1mi = 3140
 FFX001: nearby_jobs_1mi = 18057
 FFX002: nearby_jobs_1mi = 15718
@@ -195,9 +194,9 @@ The source extract is stored at data/source_extracts/lodes_jobs_1mi.csv.
 
 ## Priority official sources still needed
 
-### 1. Local government facility pages and GIS
+### Local government facility pages and GIS
 
-Use for candidate site names, addresses, hours, parking, and facility details when published.
+Use for candidate site names, addresses, hours, parking, public-access details, and facility details when published.
 
 Possible sources:
 
@@ -207,22 +206,6 @@ Fairfax City official facility pages
 library system pages
 public works / public safety / government center pages
 local GIS open data
-```
-
-Model fields supported:
-
-```text
-site_name
-site_type
-address
-city
-state
-zip
-lat
-lon
-public_access
-hours_open
-parking_spaces if published
 ```
 
 ## Fields that likely need manual or stakeholder inputs
@@ -266,13 +249,13 @@ Do not present these fields as official engineering determinations unless verifi
 | `zip` | Local government / GIS source | Official |  |
 | `lat` | Official local GIS address point when available | Official if GIS | Fairfax and PWC coordinates added for confirmed rows |
 | `lon` | Official local GIS address point when available | Official if GIS | Fairfax and PWC coordinates added for confirmed rows |
-| `public_access` | Facility page / site knowledge | Official or manual estimate | 1 if public can access site |
+| `public_access` | Facility page / site knowledge | Official or manual estimate | 1 if public can access site; 0 if access is limited |
 | `employees_day` | Facility estimate / stakeholder input | Manual estimate | Hard to get officially |
 | `visitors_day` | Facility estimate / stakeholder input | Manual estimate | Hard to get officially |
 | `fleet_vehicles` | Stakeholder input / fleet plan | Stakeholder evidence or manual estimate | Use 0 if not a fleet site |
 | `parking_spaces` | Site page, GIS, stakeholder evidence, or manual count | Official, stakeholder, or manual estimate | PWC002 parking still needs confirmation |
 | `hours_open` | Facility page | Official or manual estimate | Current values are planning assumptions unless otherwise noted |
-| `avg_dwell_min` | Site-type assumption | Manual estimate | Based on library, garage, office, clinic, etc. |
+| `avg_dwell_min` | Site-type assumption | Manual estimate | Based on library, garage, office, clinic, public safety, etc. |
 | `nearby_households_1mi` | Census ACS | Official-derived | Added with ACS B11001 and TIGER block group geometry |
 | `nearby_jobs_1mi` | Census LEHD LODES | Official-derived | Added with LODES WAC and TIGER block group geometry |
 | `aadt_nearest` | VDOT / Virginia Roads | Official | Added for confirmed rows using nearest traffic segment |
@@ -311,7 +294,7 @@ Unknown safety/electrical values should not be presented as verified.
 Best next data work:
 
 ```text
-1. Confirm or replace the PWC003 staging health facility row.
+1. Improve site-specific public_access handling and public_safety behavior in the model.
 2. Improve site-specific parking, hours, visitor, employee, and electrical assumptions.
 3. Fill missing dataset freshness metadata for older source files.
 4. Begin equity-gap scoring from ACS variables.
