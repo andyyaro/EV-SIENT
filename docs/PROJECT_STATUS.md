@@ -70,6 +70,10 @@ The configurable output checker passed after moving V1 assumptions into:
 data/config/output_check_rules_v1.json
 ```
 
+## Baseline decision
+
+The committed V1 baseline will stay as-is for now. The corrected current run should be compared against the existing baseline instead of replacing it.
+
 ## Completed so far
 
 ```text
@@ -193,10 +197,9 @@ data/baselines/v1_baseline/baseline_manifest.json
 ## Next good improvements
 
 ```text
-1. Decide whether to create a new corrected baseline snapshot after the trenching-normalization fix.
-2. Add a scoring-profile ranking chart or stability visual using matplotlib.
-3. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
-4. Improve facility hours and parking for sites other than FFX002.
-5. Prepare final presentation slides from docs/PRESENTATION_OUTLINE.md and the deliverable package.
-6. Add more candidate sites if the project scope expands.
+1. Add a scoring-profile ranking chart or stability visual using matplotlib.
+2. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
+3. Improve facility hours and parking for sites other than FFX002.
+4. Prepare final presentation slides from docs/PRESENTATION_OUTLINE.md and the deliverable package.
+5. Add more candidate sites if the project scope expands.
 ```
