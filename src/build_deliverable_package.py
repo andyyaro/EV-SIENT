@@ -33,7 +33,7 @@ PACKAGE_GROUPS = {
     "charts": [
         "data/outputs/charts/site_readiness_map.png",
         "data/outputs/charts/readiness_score_chart.png",
-        "data/outputs/charts/profile_spider_chart.png",
+        "data/outputs/charts/profile_score_heatmap.png",
     ],
     "run_outputs": [
         "data/outputs/workflow_success.json",
@@ -181,7 +181,7 @@ def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> s
     lines.append("2. `reports/MODEL_FINDINGS_BRIEF.md`")
     lines.append("3. `charts/site_readiness_map.png`")
     lines.append("4. `charts/readiness_score_chart.png`")
-    lines.append("5. `charts/profile_spider_chart.png`")
+    lines.append("5. `charts/profile_score_heatmap.png`")
     lines.append("6. `run_outputs/results_interpretation.md`")
     lines.append("7. `run_outputs/model_run_summary.md`")
     lines.append("8. `run_outputs/profile_comparison.md`")
