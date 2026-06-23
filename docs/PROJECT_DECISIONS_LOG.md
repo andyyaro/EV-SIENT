@@ -101,7 +101,9 @@ data/source_extracts/official_facility_hours_parking_v1.csv
 
 Decision: update FFX002 `parking_spaces` from 160 to 199 and `hours_open` from 8.00 to 9.29 using the official Fairfax County Public Library branch page.
 
-Decision: document that the official Prince William Public Libraries locations page currently lists Chinn Park Library as closed for renovation. This was not applied to the PWC004 score yet because the project must decide whether to model current closure or future reopened site conditions.
+Decision: document that the official Prince William Public Libraries locations page currently lists Chinn Park Library as closed for renovation.
+
+Scope decision: keep PWC004 in the model as a future/reopened planning candidate, not as a current operating-site recommendation. The closure remains documented as an important caveat.
 
 Source quality: official facility webpage for FFX002 fields and official current-status webpage for PWC004.
 
