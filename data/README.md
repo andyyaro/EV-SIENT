@@ -6,10 +6,10 @@ This folder stores input datasets, configuration files, source extracts, baselin
 
 ```text
 data/inputs/           Main model input CSVs
-data/config/           Small model configuration and output-check rule files
-data/source_extracts/  Small model-ready extracts used to populate input fields
-data/baselines/        Curated committed benchmark snapshots for regression comparison
-data/raw_exports/      Notes about raw exports that are too large or unnecessary to commit
+data/config/           Model configuration and output-check rules
+data/source_extracts/  Small model-ready extracts
+data/baselines/        Committed benchmark snapshots
+data/raw_exports/      Notes about raw exports not committed to the repo
 data/outputs/          Generated local outputs ignored by Git
 ```
 
@@ -29,7 +29,7 @@ data/config/output_check_rules_v1.json
 
 `scoring_profiles.csv` defines the alternative scoring-priority profiles used by `src/run_profile_analysis.py`.
 
-`output_check_rules_v1.json` defines the current V1 sanity-check expectations used by `src/check_outputs.py`, including expected site IDs, expected top site, profile names, profile count, expected sites per profile, data-quality error rule, sensitivity stability rule, and profile score range.
+`output_check_rules_v1.json` defines V1 output-check expectations used by `src/check_outputs.py`.
 
 ## Baseline snapshots
 
@@ -38,8 +38,6 @@ Committed benchmark outputs live in:
 ```text
 data/baselines/v1_baseline/
 ```
-
-The combined output-check step compares the current local run against this baseline and writes the comparison reports under `data/outputs/`.
 
 ## Generated outputs
 
@@ -69,16 +67,28 @@ data/outputs/workflow_success.json
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/profile_rank_stability_chart.png
+data/outputs/charts/profile_score_heatmap.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/deliverable_package/
 ```
 
-`workflow_success.json` is created only after `src/run_all.py` passes. The deliverable package builder uses it to avoid packaging stale outputs after a failed or partial run.
+Recommended profile-analysis visual:
 
-These are local run artifacts. They are ignored by Git so local script runs do not clutter the repository.
+```text
+data/outputs/charts/profile_rank_stability_chart.png
+```
 
-Do not commit files from `data/outputs/` by default. If the project needs to publish a specific output, copy or export that file intentionally as a separate deliverable.
+Supporting profile-analysis visual:
+
+```text
+data/outputs/charts/profile_score_heatmap.png
+```
+
+`workflow_success.json` is created only after `src/run_all.py` passes. The deliverable package builder checks it before packaging generated outputs.
+
+Files under `data/outputs/` are local generated artifacts and are ignored by Git.
 
 ## Source documentation files
 
@@ -86,8 +96,6 @@ Do not commit files from `data/outputs/` by default. If the project needs to pub
 data/source_dataset_log.csv
 data/dataset_metadata.csv
 ```
-
-These files track source quality, freshness, raw exports used, and fields supported.
 
 ## Source extracts
 
@@ -115,12 +123,8 @@ stakeholder_data_request_fields.csv
 
 ## Raw exports
 
-The repo does not store every full raw export because some official data files are large. Raw-export notes live in:
+Raw-export notes live in:
 
 ```text
 data/raw_exports/README.md
 ```
-
-## Important note
-
-This data folder supports transparency and reproducibility. The model is still a planning prototype and does not replace AHJ, Fire Marshal, ADA, utility, stormwater, engineering, permitting, procurement, or stakeholder review.
