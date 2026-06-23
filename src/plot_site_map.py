@@ -205,16 +205,15 @@ def plot_site_map(
     if top_site:
         top_row = data[data["site_id"].astype(str) == top_site]
         if not top_row.empty:
-            top_label = "Stable top candidate" if stable_top_candidate_found(data, sensitivity, profile_results) else "Top candidate"
+            star_size = 560 if stable_top_candidate_found(data, sensitivity, profile_results) else 430
             plt.scatter(
                 top_row["lon"],
                 top_row["lat"],
-                s=900,
+                s=star_size,
                 marker="*",
                 alpha=0.9,
                 edgecolors="black",
                 linewidths=1.0,
-                label=top_label,
             )
 
     for _, row in data.iterrows():
@@ -235,8 +234,6 @@ def plot_site_map(
     plt.suptitle("Candidate EV Charging Sites — Readiness Map", fontsize=14)
     plt.title(map_interpretation_note(data, sensitivity, profile_results), fontsize=9)
     plt.grid(True, alpha=0.25)
-    if top_site:
-        plt.legend(loc="lower left", fontsize=8)
 
     lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.14, 0.01)
     lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.14, 0.01)
