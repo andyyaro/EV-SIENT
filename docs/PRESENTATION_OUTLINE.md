@@ -70,6 +70,8 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ## Slide 7 — Ranked results
 
 ```text
+Show data/outputs/charts/readiness_score_chart.png
+
 1. FFX002 — 65.3
 2. FFX001 — 57.3
 3. PWC002 — 56.0
@@ -97,23 +99,25 @@ The ranking stayed stable across all five.
 Every site had rank_range = 0.
 ```
 
-## Slide 10 — Scoring profile analysis
+## Slide 10 — Scoring profile rank stability
 
 ```text
-The model also tested five planning-priority profiles:
+Show data/outputs/charts/profile_rank_stability_chart.png
+
+The model tested five planning-priority profiles:
 - base
 - demand priority
 - equity priority
 - feasibility priority
 - safety priority
 
-FFX002 ranked #1 in every profile.
+FFX002 stayed ranked #1 in every profile.
 ```
 
 Speaker note:
 
 ```text
-This matters because different stakeholders may value different things. A site that stays strong across multiple priority profiles is more defensible than a site that only ranks well under one weighting setup.
+This chart is easier to explain than the heatmap because it only shows rank movement. The FFX002 line stays flat at #1, which means the top recommendation is stable even when different planning priorities are emphasized.
 ```
 
 ## Slide 11 — Strongest finding
