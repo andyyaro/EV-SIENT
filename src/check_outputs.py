@@ -25,6 +25,7 @@ REQUIRED_FILES = [
     "data/outputs/results_interpretation.md",
     "data/outputs/charts/readiness_score_chart.png",
     "data/outputs/charts/profile_rank_stability_chart.png",
+    "data/outputs/charts/profile_score_heatmap.png",
     "data/outputs/charts/site_readiness_map.png",
 ]
 
