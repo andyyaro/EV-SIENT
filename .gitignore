@@ -21,6 +21,7 @@ readiness_score_chart.png
 utilization_vs_ports_chart.png
 utilization_vs_ports_*.png
 data/outputs/*.csv
+data/outputs/*.md
 data/outputs/charts/*.png
 
 # Temporary files
