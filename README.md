@@ -120,6 +120,7 @@ docs/RECOMMENDATION_TIERS.md                Recommendation tier logic
 docs/SENSITIVITY_ANALYSIS.md                Sensitivity scenario setup
 docs/SENSITIVITY_RESULTS_INTERPRETATION.md  Sensitivity result interpretation
 docs/MODEL_FINDINGS_BRIEF.md                Concise report-style findings brief
+docs/MODEL_FINDINGS_REPORT.md               Fuller report-style write-up
 docs/PRESENTATION_OUTLINE.md                Slide-style presentation outline
 docs/PROJECT_STATUS.md                      Project status and next steps
 docs/PROJECT_DECISIONS_LOG.md               Central project decision log
