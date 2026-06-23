@@ -27,9 +27,9 @@ FFX002 — City of Fairfax Regional Library
 
 ## Data sources used
 
-The model combines official, official-derived, planning-estimate, manual-estimate, and proxy data.
+The model combines official, official-derived, open POI/GIS support, planning-estimate, and proxy data.
 
-Official or official-derived inputs include:
+Key stronger inputs include:
 
 ```text
 City of Fairfax GIS address data
@@ -41,20 +41,18 @@ TIGER 2024 Virginia block group geometry
 LODES 2023 employment data
 Official facility hours/parking data for FFX002
 Official current renovation-status documentation for PWC004
+Reviewed OSM / Overpass POI categories for amenities
 ```
 
-Planning, proxy, or manual-estimate inputs include:
+Inputs still needing stronger confirmation include:
 
 ```text
 visitor and employee assumptions
 remaining parking-space assumptions
 remaining operating-hour assumptions
-amenity category counts
 electrical distance/trenching/service-upgrade estimates
 local EV adoption proxy values
 ```
-
-The model labels weaker inputs clearly so they can be improved later.
 
 ## Scoring method
 
@@ -75,16 +73,48 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 
 Then the model applies a public-access discount if a site is limited-access or not a normal general-public charging location.
 
+## Amenities source update
+
+The active amenities field is now based on a reviewed OpenStreetMap / Overpass POI extract:
+
+```text
+data/source_extracts/amenities_0_5mi_v4_osm_reviewed.csv
+```
+
+Reviewed applied amenities values:
+
+```text
+PWC001 — 5
+PWC002 — 6
+PWC003 — 0
+PWC004 — 5
+FFX001 — 6
+FFX002 — 6
+```
+
+The method uses six categories within 0.5 miles:
+
+```text
+civic_public
+entertainment_culture
+food
+recreation
+retail
+transit
+```
+
+This is reproducible open POI/GIS support, not official local government confirmation. PWC003 remains 0 because its only OSM category was facility-related civic/public context and the site is limited or not general public.
+
 ## Final ranked results
 
-Latest V1 ranking after the local EV adoption proxy, ACS equity update, electrical feasibility estimates, official FFX002 facility hours/parking update, sensitivity analysis, and recommendation tier layer:
+Latest ranking after the reviewed OSM amenities update:
 
 ```text
 1. FFX002 — City of Fairfax Regional Library — readiness 59.9
 2. FFX001 — Fairfax City Hall or municipal building — readiness 53.1
-3. PWC004 — Chinn Park Regional Library — readiness 46.5
-4. PWC002 — Neabsco-Potomac Commuter Garage — readiness 43.2
-5. PWC001 — PWC McCoart Government Center — readiness 40.1
+3. PWC004 — Chinn Park Regional Library — readiness 48.0
+4. PWC002 — Neabsco-Potomac Commuter Garage — readiness 44.3
+5. PWC001 — PWC McCoart Government Center — readiness 42.1
 6. PWC003 — Prince William County Public Safety Training Center — readiness 18.6
 ```
 
@@ -99,99 +129,27 @@ PWC001 — Tier 3 — lower priority / monitor
 PWC003 — Low public-priority / special-use
 ```
 
-## Source-quality update from official facility pages
-
-FFX002 now has stronger facility support:
-
-```text
-parking_spaces = 199 official spaces
-hours_open = 9.29 weekly-average daily public open hours
-```
-
-PWC004 has an important official status note:
-
-```text
-The official Prince William Public Libraries locations page currently lists Chinn Park Library as closed for renovation.
-```
-
-The model keeps PWC004 as a future/reopened planning candidate for now, but this should be treated as a project scope decision.
-
 ## Site-by-site interpretation
 
 ### FFX002 — City of Fairfax Regional Library
 
-FFX002 is the strongest current candidate. It ranks first in the base model and remains first under all tested sensitivity scenarios.
-
-Planning interpretation:
-
-```text
-Tier 1 — advance to site screening
-```
-
-Why it performs well:
-
-```text
-public library use
-public accessibility
-strong surrounding demand context
-strong equity context
-official parking and operating-hours support
-lower planning-level electrical distance/cost burden than several other sites
-stable first-place ranking under sensitivity testing
-```
-
-Important next confirmations:
-
-```text
-confirm electrical service rating
-confirm spare capacity or upgrade need
-confirm emergency disconnect location/visibility
-confirm visitor/employee counts and average dwell time
-confirm likely charger placement
-```
+FFX002 is the strongest current candidate. It combines public library use, public accessibility, nearby jobs/households, strong equity context, official parking/hour support, reviewed OSM amenity support, and lower planning-level electrical distance/cost burden than several other sites.
 
 ### FFX001 — Fairfax City Hall or municipal building
 
-FFX001 is the second strongest current candidate and remains second across all tested scenarios.
-
-Important next confirmations:
-
-```text
-confirm electrical service rating
-confirm spare capacity or upgrade need
-confirm emergency disconnect location/visibility
-confirm visitor/employee counts and operating hours
-confirm parking count and likely charger placement
-```
+FFX001 is the second strongest current candidate. It has strong civic/public-use value and reviewed OSM amenity support.
 
 ### PWC004 — Chinn Park Regional Library
 
-PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
-
-Important caveat:
-
-```text
-The official library locations page currently lists Chinn Park Library as closed for renovation.
-```
-
-The project should decide whether PWC004 should be modeled using current closure status or future reopened site conditions.
+PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions. Its readiness increased after the reviewed OSM amenities update. The current official library page still lists Chinn Park Library as closed for renovation, so that remains a caveat.
 
 ### PWC002 — Neabsco-Potomac Commuter Garage
 
-PWC002 remains important because it has a commuter-garage role and strong equity context. However, it is treated as high-review because garage installations can involve additional complexity.
-
-Why it needs more review:
-
-```text
-garage/enclosed context
-higher planning service-upgrade cost
-fire/AHJ/access/ventilation/conduit-routing questions
-emergency disconnect visibility not confirmed
-```
+PWC002 has commuter, public-access, equity, and strong mixed-use amenity value, but it remains high-review because garage installations can involve additional fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical complexity.
 
 ### PWC001 — PWC McCoart Government Center
 
-PWC001 is a public civic site but ranks below the stronger current candidates under V1 assumptions.
+PWC001 remains below the stronger current candidates, but the reviewed OSM amenities update improved its demand support.
 
 ### PWC003 — Prince William County Public Safety Training Center
 
@@ -202,26 +160,6 @@ First decision needed:
 ```text
 confirm whether the site should be public, fleet-only, or removed from the public-charging candidate list
 ```
-
-## Sensitivity analysis result
-
-The model tested five uncertainty scenarios:
-
-```text
-very_low_demand_high_cost
-low_demand_high_cost
-base_case
-high_demand_base_cost
-very_high_demand_low_cost
-```
-
-The ranking stayed stable across all five scenarios.
-
-```text
-Every site had rank_range = 0.
-```
-
-This means the current ranking is stable under the tested V1 assumptions. It does not mean the ranking is final or guaranteed.
 
 ## Port-planning result
 
@@ -250,7 +188,6 @@ employees_day
 visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
-amenities_count_0_5mi
 local EV adoption counts
 ```
 
@@ -294,8 +231,7 @@ Recommended near-term focus:
 ```text
 1. Treat FFX002 and FFX001 as stable top candidates.
 2. Treat PWC004 as the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
-3. Decide how to handle PWC004's current renovation closure in the project scope.
-4. Keep PWC002 in the discussion, but route it through garage/fire/electrical review.
-5. Keep PWC003 as special-use or fleet-only unless public access is confirmed.
-6. Improve electrical capacity, visitor, parking, hours, and emergency-disconnect data before any implementation recommendation.
+3. Keep PWC002 in the discussion, but route it through garage/fire/electrical review.
+4. Keep PWC003 as special-use or fleet-only unless public access is confirmed.
+5. Improve electrical capacity, visitor, parking, hours, and emergency-disconnect data before any implementation recommendation.
 ```
