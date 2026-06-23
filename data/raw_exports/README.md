@@ -1,10 +1,10 @@
 # Raw Exports
 
-This folder explains the raw exports used so far.
+This folder explains the raw exports and project-created extracts used so far.
 
 The full raw exports are not all committed here because some are large and only a few rows or derived counts are needed for the current prototype.
 
-## Raw exports used during current data build
+## Raw official exports used during current data build
 
 ```text
 Addresses.csv
@@ -22,9 +22,21 @@ ACS_2024_5Y_B25003_blockgroups_equity.csv
 ACS_2024_5Y_B25024_blockgroups_equity.csv
 ```
 
-## ACS equity build
+## Project-created small extracts
 
-The equity build uses official U.S. Census Bureau ACS 2024 5-Year Detailed Tables at block-group geography plus TIGER 2024 Virginia block group geometry.
+These are not raw official exports. They are small model-ready extracts or planning assumption files used for transparency:
+
+```text
+data/source_extracts/demand_assumptions_v1.csv
+data/source_extracts/amenities_0_5mi.csv
+data/source_extracts/electrical_feasibility_v1.csv
+data/source_extracts/local_ev_adoption_v1.csv
+data/source_extracts/sensitivity_scenarios_v1.csv
+```
+
+## ACS equity extract
+
+The equity extract uses official U.S. Census Bureau ACS 2024 5-Year Detailed Tables at block-group geography plus TIGER 2024 Virginia block group geometry.
 
 Official source table inventory:
 
@@ -87,6 +99,7 @@ Used to verify:
 ```text
 PWC001 — PWC McCoart Government Center
 PWC002 — Neabsco-Potomac Commuter Garage
+PWC003 — Prince William County Public Safety Training Center
 PWC004 — Chinn Park Regional Library
 ```
 
@@ -245,4 +258,9 @@ data/source_extracts/lodes_jobs_1mi.csv
 data/source_extracts/acs_equity_official_tables.csv
 data/source_extracts/acs_equity_inputs_1mi.csv
 data/source_extracts/acs_equity_index_1mi.csv
+data/source_extracts/demand_assumptions_v1.csv
+data/source_extracts/amenities_0_5mi.csv
+data/source_extracts/electrical_feasibility_v1.csv
+data/source_extracts/local_ev_adoption_v1.csv
+data/source_extracts/sensitivity_scenarios_v1.csv
 ```
