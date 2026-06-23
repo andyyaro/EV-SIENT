@@ -23,11 +23,23 @@ sensitivity_summary.csv
 
 ## Scenarios
 
-The current script tests three scenarios.
+The current script tests five scenarios.
 
-### 1. low_demand_high_cost
+### 1. very_low_demand_high_cost
 
-Purpose: pessimistic case.
+Purpose: strong downside test.
+
+```text
+employees_day = 50% of base
+visitors_day = 50% of base
+ev_share_local = 60% of base
+service_upgrade_cost_usd = 160% of base
+trenching_ft = 140% of base
+```
+
+### 2. low_demand_high_cost
+
+Purpose: moderate downside test.
 
 ```text
 employees_day = 75% of base
@@ -37,7 +49,7 @@ service_upgrade_cost_usd = 125% of base
 trenching_ft = 115% of base
 ```
 
-### 2. base_case
+### 3. base_case
 
 Purpose: current V1 dataset.
 
@@ -45,9 +57,9 @@ Purpose: current V1 dataset.
 all values = current real_sites_v1.csv values
 ```
 
-### 3. high_demand_base_cost
+### 4. high_demand_base_cost
 
-Purpose: stronger demand case.
+Purpose: moderate upside demand test.
 
 ```text
 employees_day = 125% of base
@@ -55,6 +67,18 @@ visitors_day = 125% of base
 ev_share_local = 125% of base
 service_upgrade_cost_usd = base
 trenching_ft = base
+```
+
+### 5. very_high_demand_low_cost
+
+Purpose: strong upside test.
+
+```text
+employees_day = 175% of base
+visitors_day = 175% of base
+ev_share_local = 160% of base
+service_upgrade_cost_usd = 80% of base
+trenching_ft = 85% of base
 ```
 
 ## How to read sensitivity_summary.csv
