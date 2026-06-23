@@ -95,6 +95,7 @@ nearby households = count of households
 nearby jobs = count of jobs
 traffic = AADT vehicles per day
 amenities = count of nearby public-use amenity categories
+parking = count of parking spaces
 existing charging ports = count of ports
 installation cost = dollars
 ```
@@ -112,11 +113,12 @@ The demand subscore estimates how strongly a site looks like a public charging o
 Current demand components:
 
 ```text
-0.30 * local EV share
-0.20 * nearby jobs within 1 mile
-0.20 * nearby households within 1 mile
+0.25 * local EV share
+0.18 * nearby jobs within 1 mile
+0.18 * nearby households within 1 mile
 0.10 * nearest AADT traffic
 0.10 * nearby amenities
+0.09 * parking spaces
 0.10 * average dwell time
 -0.20 * existing nearby charger supply
 ```
@@ -129,11 +131,12 @@ More nearby jobs help.
 More nearby households help.
 More traffic helps.
 More amenities help.
+More parking helps slightly because it suggests a larger site capacity.
 Longer dwell time helps.
 More existing chargers nearby reduce new need.
 ```
 
-Current limitation: amenities are no longer all zero, but the current `amenities_count_0_5mi` values are manual V1 planning category estimates. They should later be replaced with a stronger GIS/POI method.
+Current limitation: amenities and parking are no longer all zero, but the current `amenities_count_0_5mi` and `parking_spaces` values are manual V1 planning estimates. They should later be replaced with stronger GIS/POI, facility, stakeholder, or documented manual-count data.
 
 ## Public access adjustment
 
@@ -252,6 +255,8 @@ amenities factor
 existing charger supply factor
 ```
 
+Parking currently affects the demand subscore, not the expected-sessions calculation. This avoids double-counting parking where visitor estimates are already based partly on parking assumptions.
+
 A fallback minimum of 0.3 sessions per day is used so every site can still be evaluated by the queueing logic.
 
 ## Site-type behavior assumptions
@@ -343,8 +348,8 @@ Public charging priority sites:
 ```text
 City of Fairfax Regional Library
 Chinn Park Regional Library
-PWC McCoart Government Center
 Fairfax City Hall or municipal building
+PWC McCoart Government Center
 ```
 
 Special or high-review sites:
@@ -385,7 +390,7 @@ Recommended next improvements:
 
 ```text
 1. Re-run the model after each data update and compare results.
-2. Improve visitor, employee, parking, and hours assumptions.
+2. Improve visitor, employee, parking, and hours assumptions with stronger evidence.
 3. Replace manual amenity estimates with a stronger GIS/POI method.
 4. Improve equity scoring using ACS variables.
 5. Improve electrical, trenching, and service upgrade assumptions.
