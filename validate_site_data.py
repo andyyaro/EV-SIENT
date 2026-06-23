@@ -158,12 +158,13 @@ SAFETY_REVIEW_RULES = {
     },
 }
 
+# These fields are still V1 assumptions for most sites. equity_gap_index is no longer
+# listed here because it is now populated from the ACS official-derived extract.
 ASSUMPTION_FIELDS = [
     "employees_day",
     "visitors_day",
     "hours_open",
     "avg_dwell_min",
-    "equity_gap_index",
 ]
 
 SEVERITY_ORDER = ["ERROR", "WARNING", "REVIEW", "INFO"]
@@ -427,6 +428,61 @@ def validate_assumption_notes(df: pd.DataFrame, issues: list[dict[str, str]]) ->
             )
 
 
+def validate_equity_source(df: pd.DataFrame, issues: list[dict[str, str]]) -> None:
+    """Check that equity values are in range and have a documented source note."""
+    if "equity_gap_index" not in df.columns:
+        return
+
+    for _, row in df.iterrows():
+        site_id, site_name = site_label(row)
+        value = row.get("equity_gap_index")
+        if pd.isna(value):
+            continue
+        if value < 0 or value > 1:
+            add_issue(
+                issues,
+                "ERROR",
+                site_id,
+                site_name,
+                "equity_gap_index",
+                "Equity index should be between 0 and 1",
+                value,
+                "Review the equity extract and keep the normalized index in the 0 to 1 range.",
+            )
+
+    if "notes" not in df.columns:
+        add_issue(
+            issues,
+            "REVIEW",
+            "GLOBAL",
+            "Dataset",
+            "equity_gap_index",
+            "Equity values need source documentation",
+            "notes column missing",
+            "Document whether equity values are placeholders or official-derived ACS estimates.",
+        )
+        return
+
+    notes = df["notes"].fillna("").astype(str).str.lower()
+    documented_mask = notes.str.contains("equity_gap_index") & notes.str.contains(
+        "acs|official-derived|acs_equity_index", regex=True
+    )
+    missing_source_mask = ~documented_mask
+
+    for _, row in df[missing_source_mask].iterrows():
+        site_id, site_name = site_label(row)
+        add_issue(
+            issues,
+            "REVIEW",
+            site_id,
+            site_name,
+            "equity_gap_index",
+            "Equity source not clearly documented in notes",
+            row.get("equity_gap_index", ""),
+            "Add a note explaining whether equity_gap_index is from acs_equity_index_1mi.csv or still a placeholder.",
+        )
+
+
 def validate_dataset_level_patterns(df: pd.DataFrame, issues: list[dict[str, str]]) -> None:
     if "ev_share_local" in df.columns:
         unique_ev_shares = sorted(df["ev_share_local"].dropna().unique().tolist())
@@ -494,6 +550,7 @@ def build_report(input_path: Path) -> pd.DataFrame:
     validate_placeholder_values(numeric_df, issues)
     validate_safety_review_flags(numeric_df, issues)
     validate_assumption_notes(df, issues)
+    validate_equity_source(numeric_df.join(df[["notes"]]) if "notes" in df.columns else numeric_df, issues)
     validate_dataset_level_patterns(numeric_df, issues)
 
     if not issues:
