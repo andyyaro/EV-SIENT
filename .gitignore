@@ -24,6 +24,9 @@ data/outputs/*.csv
 data/outputs/*.md
 data/outputs/charts/*.png
 
+# Local-only run archives
+data/run_history/
+
 # Temporary files
 *.tmp
 *.log
