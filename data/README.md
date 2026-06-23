@@ -18,7 +18,10 @@ data/outputs/          Generated local outputs ignored by Git
 ```text
 data/inputs/real_sites_v1.csv   Current real candidate-site dataset
 data/inputs/sites_demo.csv      Small starter/demo dataset
+data/inputs/new_sites_template.csv   Template for future candidate-site rows
 ```
+
+Use `docs/ADDING_NEW_SITES_GUIDE.md` before copying new rows into `real_sites_v1.csv`.
 
 ## Config files
 
