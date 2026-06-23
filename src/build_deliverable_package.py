@@ -26,6 +26,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PACKAGE_DIR = "data/outputs/deliverable_package"
+SUCCESS_MARKER = "data/outputs/workflow_success.json"
 
 PACKAGE_GROUPS = {
     "charts": [
@@ -57,12 +58,50 @@ PACKAGE_GROUPS = {
     ],
 }
 
+GENERATED_GROUPS = {"charts", "run_outputs", "data_tables"}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a local deliverable package.")
     parser.add_argument("--output-dir", default=DEFAULT_PACKAGE_DIR, help="Package output folder.")
     parser.add_argument("--no-clean", action="store_true", help="Do not delete the existing package folder first.")
+    parser.add_argument(
+        "--skip-success-check",
+        action="store_true",
+        help="Allow package creation without checking that the full workflow completed successfully.",
+    )
     return parser.parse_args()
+
+
+def generated_sources() -> list[Path]:
+    paths: list[Path] = []
+    for group_name, files in PACKAGE_GROUPS.items():
+        if group_name in GENERATED_GROUPS:
+            paths.extend(PROJECT_ROOT / relative_path for relative_path in files)
+    return paths
+
+
+def validate_success_marker() -> None:
+    marker_path = PROJECT_ROOT / SUCCESS_MARKER
+    if not marker_path.exists():
+        raise SystemExit(
+            f"Missing workflow success marker: {SUCCESS_MARKER}. "
+            "Run `python src/run_all.py` successfully before building the deliverable package."
+        )
+
+    marker_mtime = marker_path.stat().st_mtime
+    newer_outputs = [
+        path.relative_to(PROJECT_ROOT)
+        for path in generated_sources()
+        if path.exists() and path.stat().st_mtime > marker_mtime
+    ]
+    if newer_outputs:
+        joined = ", ".join(str(path) for path in newer_outputs)
+        raise SystemExit(
+            "Some generated outputs are newer than the latest successful workflow marker. "
+            "This can happen after a failed or partial run. Re-run `python src/run_all.py` successfully first. "
+            f"Newer outputs: {joined}"
+        )
 
 
 def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[str, str]:
@@ -138,6 +177,9 @@ def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> s
 def main() -> None:
     args = parse_args()
     package_dir = PROJECT_ROOT / args.output_dir
+
+    if not args.skip_success_check:
+        validate_success_marker()
 
     if package_dir.exists() and not args.no_clean:
         shutil.rmtree(package_dir)
