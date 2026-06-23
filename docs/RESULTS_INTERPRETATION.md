@@ -26,7 +26,7 @@ PWC003 — Low public-priority / special-use
 
 ## Main interpretation
 
-FFX002 is the strongest current candidate. It remains first and combines public library use, nearby jobs/households, equity value, official parking/hour support, reviewed OSM amenity support, and lower planning install burden.
+FFX002 is the strongest current candidate. It remains first and combines public library use, nearby jobs/households, equity value, official parking/hour support, reviewed OSM amenity support, lower planning install burden, and cross-profile stability.
 
 FFX001 is the second strongest current candidate because of its civic/public-use role, reviewed OSM amenity support, and stable ranking.
 
@@ -37,6 +37,25 @@ PWC002 has commuter and equity value, but it remains high-review because garage 
 PWC001 remains lower priority than the top candidates, but reviewed OSM amenities improved its demand support.
 
 PWC003 is low public-priority because it is limited or non-public access and has weak surrounding public-demand indicators.
+
+## Sensitivity and profile interpretation
+
+The current top result is supported by two stability checks.
+
+```text
+Sensitivity analysis:
+- rankings stayed stable across all five uncertainty scenarios
+- every site had rank_range = 0
+
+Scoring profile analysis:
+- FFX002 ranked #1 under the base profile
+- FFX002 ranked #1 under the demand-priority profile
+- FFX002 ranked #1 under the equity-priority profile
+- FFX002 ranked #1 under the feasibility-priority profile
+- FFX002 ranked #1 under the safety-priority profile
+```
+
+Plain-English meaning: FFX002 is not just winning under one scoring setup. It remains the top site when the model emphasizes different planning priorities.
 
 ## What the result does not mean
 
