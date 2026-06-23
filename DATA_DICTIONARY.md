@@ -40,7 +40,7 @@ Official or official-derived fields should still be checked before a real projec
 | `nearby_households_1mi` | number | Estimated households within 1 mile of the site. | Official-derived from ACS 2024 5-Year B11001 and TIGER 2024 block group geometry. |
 | `nearby_jobs_1mi` | number | Estimated jobs within 1 mile of the site. | Official-derived from LODES 2023 Virginia WAC and TIGER 2024 block group geometry. |
 | `aadt_nearest` | number | Annual Average Daily Traffic from the nearest VDOT traffic segment. | Official-derived from VDOT Bidirectional Traffic Volume 2025. |
-| `amenities_count_0_5mi` | number | Count of nearby amenities within 0.5 miles. | Placeholder for V1. Needs future data. |
+| `amenities_count_0_5mi` | number | Manual V1 count of nearby public-use amenity categories within roughly 0.5 miles. It is a category count, not an exact business count. | Manual V1 planning estimate from `data/source_extracts/amenities_0_5mi.csv`. Replace later with GIS/POI data. |
 | `ev_registrations_local` | number | Local EV registration count, if available. | Placeholder. |
 | `ev_share_local` | number | Estimated local EV share. Example: `0.07` means 7 percent. | Planning assumption for V1. |
 | `existing_l2_ports_1mi` | number | Public active Level 2 charging ports within 1 mile. | Official-derived from AFDC / NREL Alternative Fuel Stations export. |
@@ -137,5 +137,7 @@ stormwater_risk
 battery_storage_flag
 battery_storage_kwh
 ```
+
+`amenities_count_0_5mi` is now populated with manual V1 category estimates, but it should still be improved later with GIS/POI data.
 
 Any real site decision should be checked with the appropriate AHJ, Fire Marshal, ADA/accessibility reviewers, utility, stormwater staff, engineers, and permitting offices.
