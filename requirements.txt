@@ -1,3 +1,7 @@
-pandas
-numpy
-matplotlib
+# Core project dependencies
+# Keep this prototype beginner-friendly and PyCharm-friendly.
+# No GeoPandas, QGIS, or GIS-specific runtime dependency is required.
+
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
