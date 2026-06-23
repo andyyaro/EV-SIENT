@@ -36,6 +36,8 @@ Official / official-derived:
 - ACS 2024 5-Year household/equity data
 - TIGER 2024 block group geometry
 - LODES 2023 jobs data
+- Official facility hours/parking for FFX002
+- Official current renovation status for PWC004
 
 Planning estimates / proxies:
 - Demand assumptions v1
@@ -53,7 +55,7 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ## Slide 6 — Ranked results
 
 ```text
-1. FFX002 — 59.8
+1. FFX002 — 59.9
 2. FFX001 — 53.1
 3. PWC004 — 46.5
 4. PWC002 — 43.2
@@ -94,11 +96,19 @@ amenities_count_0_5mi
 local EV adoption counts
 ```
 
-## Slide 10 — Final conclusion
+## Slide 10 — Current source-quality note
+
+```text
+FFX002 parking and hours are now supported by an official facility page.
+PWC004's official library page currently lists Chinn Park Library as closed for renovation.
+The project should decide whether PWC004 is modeled as current closed status or future reopened site conditions.
+```
+
+## Slide 11 — Final conclusion
 
 ```text
 FFX002 and FFX001 are stable top candidates.
-PWC004 is the strongest current Prince William County public-library candidate.
+PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
 PWC002 should remain in discussion but needs garage/fire/electrical review.
 PWC003 should not be treated as a general-public site unless its access or use case changes.
 ```
