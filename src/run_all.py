@@ -1,8 +1,8 @@
 """Run the full EV charger model workflow in one command.
 
-This script is a beginner-friendly pipeline runner. It calls the main project
-scripts in the correct order so the validator, model outputs, sensitivity
-analysis, map/chart outputs, and Markdown run summary stay synchronized.
+This script calls the main project scripts in the correct order so the validator,
+model outputs, sensitivity analysis, map/chart outputs, Markdown run summary,
+and output checks stay synchronized.
 
 Run from the repository root:
 
@@ -18,26 +18,12 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 STEPS = [
-    {
-        "name": "Validate input data",
-        "command": [sys.executable, "src/validate_site_data.py"],
-    },
-    {
-        "name": "Run readiness and right-sizing model",
-        "command": [sys.executable, "src/ev_charger_model.py"],
-    },
-    {
-        "name": "Run sensitivity analysis",
-        "command": [sys.executable, "src/run_sensitivity_analysis.py"],
-    },
-    {
-        "name": "Create readiness map",
-        "command": [sys.executable, "src/plot_site_map.py"],
-    },
-    {
-        "name": "Generate Markdown run summary",
-        "command": [sys.executable, "src/generate_run_summary.py"],
-    },
+    {"name": "Validate input data", "command": [sys.executable, "src/validate_site_data.py"]},
+    {"name": "Run readiness and right-sizing model", "command": [sys.executable, "src/ev_charger_model.py"]},
+    {"name": "Run sensitivity analysis", "command": [sys.executable, "src/run_sensitivity_analysis.py"]},
+    {"name": "Create readiness map", "command": [sys.executable, "src/plot_site_map.py"]},
+    {"name": "Generate Markdown run summary", "command": [sys.executable, "src/generate_run_summary.py"]},
+    {"name": "Check generated outputs", "command": [sys.executable, "src/check_outputs.py"]},
 ]
 
 EXPECTED_OUTPUTS = [
