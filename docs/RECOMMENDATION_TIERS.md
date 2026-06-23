@@ -39,8 +39,8 @@ The site is lower priority than stronger alternatives in the current model. Moni
 ```text
 FFX002 — Tier 1 / stable top candidate
 FFX001 — Tier 1 / stable second candidate
-PWC004 — Tier 2 / strongest current PWC public-library candidate
 PWC002 — High-review candidate because of garage context
+PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC001 — Tier 3 / lower priority under current assumptions
 PWC003 — Low public-priority / special-use because public access is limited
 ```
