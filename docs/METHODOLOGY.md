@@ -60,6 +60,35 @@ ev_share_signal = min(ev_share_local / 0.10, 1.0)
 
 The fixed benchmark avoids exaggerating small EV-share differences in a six-site dataset.
 
+## Amenities method
+
+The active `amenities_count_0_5mi` field now uses a reviewed OpenStreetMap / Overpass POI method instead of the original manual V1 count.
+
+The reviewed source extract is:
+
+```text
+data/source_extracts/amenities_0_5mi_v4_osm_reviewed.csv
+```
+
+The OSM workflow counts whether each site has POIs in six planning categories within 0.5 miles:
+
+```text
+civic_public
+entertainment_culture
+food
+recreation
+retail
+transit
+```
+
+The method is consistent across all six sites. It is reproducible open POI/GIS support, but it is not official local government confirmation.
+
+Special review rule:
+
+```text
+PWC003 remains 0 for amenities_count_0_5mi because its only OSM category was facility-related civic/public context and the site is limited or not general public.
+```
+
 ## Feasibility subscore
 
 Current feasibility components:
