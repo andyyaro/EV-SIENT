@@ -18,6 +18,39 @@ tl_2024_51_bg.zip
 va_wac_S000_JT00_2023.csv.gz
 ```
 
+## Official raw exports identified for next equity build
+
+The next equity build should use official U.S. Census Bureau ACS 2024 5-Year Detailed Tables at block-group geography plus TIGER 2024 Virginia block group geometry.
+
+Official source table inventory:
+
+```text
+data/source_extracts/acs_equity_official_tables.csv
+```
+
+Raw ACS exports to download next:
+
+```text
+ACS 2024 5-Year Detailed Table B19013 — median household income
+ACS 2024 5-Year Detailed Table B08201 — household vehicles available
+ACS 2024 5-Year Detailed Table B25003 — tenure / renter occupied
+ACS 2024 5-Year Detailed Table B25024 — units in structure / multifamily housing
+```
+
+Geometry already identified:
+
+```text
+tl_2024_51_bg.zip — TIGER Line 2024 Virginia Block Groups
+```
+
+The final project-ready equity extract should be:
+
+```text
+data/source_extracts/acs_equity_inputs_1mi.csv
+```
+
+That extract should only be filled after the official ACS table exports are downloaded and processed, following the same official-derived pattern used for households and jobs.
+
 ## How each raw export was used
 
 ### Addresses.csv
@@ -157,4 +190,5 @@ data/source_extracts/afdc_ev_supply_counts.csv
 data/source_extracts/vdot_nearest_traffic_segments.csv
 data/source_extracts/acs_households_1mi.csv
 data/source_extracts/lodes_jobs_1mi.csv
+data/source_extracts/acs_equity_official_tables.csv
 ```
