@@ -1,5 +1,7 @@
 # EV Charger Site-Readiness and Right-Sizing Prototype
 
+![Model Pipeline Check](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/model-check.yml/badge.svg)
+
 This repository contains a Python planning-support prototype for comparing public EV charging candidate sites in Fairfax City and Prince William County.
 
 The model evaluates sites using demand, feasibility, safety/AHJ review, equity, and right-sizing signals. It does **not** replace utility review, engineering design, Fire Marshal/AHJ review, ADA/accessibility review, stormwater review, permitting, procurement, or stakeholder approval.
