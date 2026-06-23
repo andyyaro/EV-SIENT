@@ -25,13 +25,22 @@ data/raw_exports/      Notes about large raw exports not committed to the repo
 data/outputs/          Generated local outputs; ignored by Git
 
 docs/                  Project documentation and reporting files
+requirements.txt       Python package list for reproducible local runs
 README.md              Start here
 ```
 
 ## Install requirements
 
 ```bash
-pip install pandas numpy matplotlib
+pip install -r requirements.txt
+```
+
+The project currently uses:
+
+```text
+pandas
+numpy
+matplotlib
 ```
 
 ## Main workflow
