@@ -52,6 +52,13 @@ Official or official-derived sources already used:
 - LODES 2023 Virginia Workplace Area Characteristics
 ```
 
+Manual planning-estimate extracts already used:
+
+```text
+- Demand assumptions v1
+- Amenities 0.5-mile V1 category count
+```
+
 Small model-ready extracts are stored under:
 
 ```text
@@ -87,6 +94,7 @@ Several input fields use different units. For example:
 nearby households = count of households
 nearby jobs = count of jobs
 traffic = AADT vehicles per day
+amenities = count of nearby public-use amenity categories
 existing charging ports = count of ports
 installation cost = dollars
 ```
@@ -125,7 +133,7 @@ Longer dwell time helps.
 More existing chargers nearby reduce new need.
 ```
 
-Current limitation: amenities are still mostly zero/placeholders, so they do not yet meaningfully affect the current rankings.
+Current limitation: amenities are no longer all zero, but the current `amenities_count_0_5mi` values are manual V1 planning category estimates. They should later be replaced with a stronger GIS/POI method.
 
 ## Public access adjustment
 
@@ -376,9 +384,9 @@ battery storage assumptions
 Recommended next improvements:
 
 ```text
-1. Build a data dictionary for every CSV column.
+1. Re-run the model after each data update and compare results.
 2. Improve visitor, employee, parking, and hours assumptions.
-3. Add amenities near each site.
+3. Replace manual amenity estimates with a stronger GIS/POI method.
 4. Improve equity scoring using ACS variables.
 5. Improve electrical, trenching, and service upgrade assumptions.
 6. Add clearer special-use handling for fleet or public safety facilities.
