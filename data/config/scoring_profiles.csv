@@ -1,0 +1,6 @@
+profile_name,profile_label,description,demand_weight,feasibility_weight,safety_weight,equity_weight
+base,Base,current V1 weighting used by the main model,0.45,0.30,0.15,0.10
+demand_priority,Demand priority,puts more weight on likely charger use and surrounding activity,0.60,0.20,0.10,0.10
+equity_priority,Equity priority,puts more weight on equity and access gap considerations,0.35,0.25,0.15,0.25
+feasibility_priority,Feasibility priority,puts more weight on lower-cost and easier-to-build sites,0.35,0.45,0.10,0.10
+safety_priority,Safety priority,puts more weight on safety and AHJ review factors,0.35,0.25,0.30,0.10
