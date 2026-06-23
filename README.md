@@ -12,6 +12,7 @@ src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
 src/build_osm_amenities.py
+src/plot_site_map.py
 
 data/inputs/           Main input datasets
 data/inputs/real_sites_v1.csv
@@ -39,6 +40,7 @@ Run these from the repository root:
 python src/validate_site_data.py
 python src/ev_charger_model.py
 python src/run_sensitivity_analysis.py
+python src/plot_site_map.py
 ```
 
 Optional amenities POI workflow:
@@ -61,6 +63,7 @@ data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
@@ -86,6 +89,12 @@ Run the OSM amenities workflow with a longer pause between API requests:
 
 ```bash
 python src/build_osm_amenities.py --pause 5
+```
+
+Create the readiness map after running the model:
+
+```bash
+python src/plot_site_map.py
 ```
 
 ## What the model does
@@ -155,7 +164,6 @@ employees_day
 visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
-amenities_count_0_5mi
 local EV adoption counts
 ```
 
