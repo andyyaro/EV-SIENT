@@ -1,0 +1,7 @@
+site_id,site_name,best_rank,worst_rank,average_rank,min_readiness_score,max_readiness_score,average_readiness_score,rank_range,readiness_score_range
+FFX002,City of Fairfax Regional Library,1,1,1.0,58.8,61.4,59.94,0,2.6000000000000014
+FFX001,Fairfax City Hall or municipal building,2,2,2.0,52.2,54.5,53.239999999999995,0,2.299999999999997
+PWC004,Chinn Park Regional Library,3,3,3.0,45.8,47.6,46.6,0,1.8000000000000043
+PWC002,Neabsco-Potomac Commuter Garage,4,4,4.0,42.4,44.4,43.3,0,2.0
+PWC001,PWC McCoart Government Center,5,5,5.0,39.6,41.1,40.260000000000005,0,1.5
+PWC003,Prince William County Public Safety Training Center,6,6,6.0,18.6,18.8,18.660000000000004,0,0.1999999999999993
