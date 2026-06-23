@@ -34,6 +34,7 @@ PACKAGE_GROUPS = {
     ],
     "run_outputs": [
         "data/outputs/model_run_summary.md",
+        "data/outputs/results_interpretation.md",
         "data/outputs/profile_comparison.md",
         "data/outputs/baseline_comparison.md",
     ],
@@ -97,9 +98,14 @@ def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> s
     lines.append("")
     lines.append("1. `reports/MODEL_FINDINGS_BRIEF.md`")
     lines.append("2. `charts/site_readiness_map.png`")
-    lines.append("3. `run_outputs/model_run_summary.md`")
-    lines.append("4. `run_outputs/profile_comparison.md`")
-    lines.append("5. `reports/PRESENTATION_OUTLINE.md`")
+    lines.append("3. `run_outputs/results_interpretation.md`")
+    lines.append("4. `run_outputs/model_run_summary.md`")
+    lines.append("5. `run_outputs/profile_comparison.md`")
+    lines.append("6. `reports/PRESENTATION_OUTLINE.md`")
+    lines.append("")
+    lines.append("## Dynamic vs static files")
+    lines.append("")
+    lines.append("Files under `run_outputs/` are generated from the latest local model run. Files under `reports/` are static project documents that explain the project story and methodology.")
     lines.append("")
     lines.append("## Included files")
     lines.append("")
