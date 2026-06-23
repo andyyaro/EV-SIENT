@@ -24,6 +24,7 @@ SUCCESS_MARKER = "data/outputs/workflow_success.json"
 STEPS = [
     {"name": "Validate input data", "command": [sys.executable, "src/validate_site_data.py"]},
     {"name": "Run readiness and right-sizing model", "command": [sys.executable, "src/ev_charger_model.py"]},
+    {"name": "Create polished readiness score chart", "command": [sys.executable, "src/plot_readiness_score_chart.py"]},
     {"name": "Run sensitivity analysis", "command": [sys.executable, "src/run_sensitivity_analysis.py"]},
     {"name": "Run scoring profile analysis", "command": [sys.executable, "src/run_profile_analysis.py"]},
     {"name": "Create readiness map", "command": [sys.executable, "src/plot_site_map.py"]},
