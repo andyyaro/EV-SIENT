@@ -1,60 +1,102 @@
-# EV Charger Site-Readiness and Right-Sizing Starter Project
+# EV Charger Site-Readiness and Right-Sizing Prototype
 
-This folder contains the first working prototype for the EV charging model.
+This repository contains a working Python prototype for a public EV charging planning model.
 
-## What to run first
+The model does not only ask how many EV chargers a site can fit. It asks whether a site is actually ready for chargers from a demand, electrical, cost, accessibility, and fire-response perspective.
 
-1. Open PyCharm.
-2. Open this folder as a project.
-3. Open the PyCharm Terminal.
-4. Run:
+## Current default workflow
 
-pip install pandas numpy matplotlib
+The script now uses the real candidate-site dataset by default:
 
-5. Run:
-
+```bash
 python ev_charger_model.py
+```
 
-## What files you will get
+Default input:
 
-After running the script, the folder will contain:
+```text
+real_sites_v1.csv
+```
 
-- site_results.csv
-- readiness_score_chart.png
-- utilization_vs_ports_chart.png
+Default output:
 
-## What each file means
+```text
+site_results.csv
+```
 
-site_results.csv:
-This is the main output table. It shows each site's readiness score, expected charging sessions per day, recommended starter ports, future ports, estimated utilization, install cost, AHJ review flag, and review reason.
+The script uses Python's built-in `argparse` module so the input and output files can be changed from the terminal without editing the code.
 
-readiness_score_chart.png:
-This chart compares candidate sites by overall readiness.
+Optional examples:
 
-utilization_vs_ports_chart.png:
-This chart shows how utilization changes as you add more ports for one site.
+```bash
+python ev_charger_model.py --input sites.csv
+python ev_charger_model.py --input real_sites_v1.csv --output real_site_results.csv
+```
 
-## New in the current version
+## Install requirements
 
-The model now includes a review_reason column.
+```bash
+pip install pandas numpy matplotlib
+```
 
-Instead of only saying ahj_review_flag = 1, the model explains why a site may need extra review.
+## Main files
 
-Example:
+```text
+ev_charger_model.py   Main model script
+real_sites_v1.csv     Current real/staging candidate site dataset
+sites.csv             Older starter/demo dataset
+site_results.csv      Model output after running the script
+DATA_SOURCES.md       Data source and field plan
+PROJECT_STATUS.md     Current project status and next steps
+```
 
-ADA-accessible layout unresolved; Emergency disconnect not clearly visible; Stormwater or firefighting runoff concern
+## What the script does
 
-This matters because the model should not replace Fire Marshal, AHJ, ADA, utility, or stormwater review. It should help identify which issues need to be checked before moving forward.
+1. Reads a candidate-site CSV file.
+2. Cleans numeric and yes/no fields.
+3. Scores each site for demand, feasibility, safety, and equity.
+4. Estimates charging sessions per day.
+5. Recommends EV charging ports for now, 2035, and 2050.
+6. Flags sites that may need AHJ, Fire Marshal, ADA, utility, stormwater, or safety review.
+7. Adds a plain-English `review_reason` column.
+8. Exports results and charts.
 
-## What to edit next
+## Outputs
 
-Edit sites.csv to replace the demo sites with real Fairfax City / Prince William County sites.
+After running the script, the folder should contain:
 
-Start with simple candidate sites:
-- a library
-- a civic building
-- a commuter garage
-- a clinic or public facility
-- a fleet lot
+```text
+site_results.csv
+readiness_score_chart.png
+utilization_vs_ports_<site_name>.png
+```
 
-You do NOT need Kaggle for the first run. Kaggle is useful later for practice notebooks or extra EV datasets. Your first working model should start with sites.csv.
+`site_results.csv` is the main output table. It includes readiness score, demand score, feasibility score, safety score, expected daily charging sessions, recommended port counts, utilization, wait time, install cost estimate, AHJ review flag, and review reason.
+
+`readiness_score_chart.png` compares candidate sites by readiness score.
+
+Each `utilization_vs_ports_<site_name>.png` chart shows how estimated utilization changes as more ports are installed for that site.
+
+## Current real dataset status
+
+`real_sites_v1.csv` currently includes Fairfax City and Prince William County candidate sites.
+
+Official data already added:
+
+```text
+- Fairfax City GIS coordinates for Fairfax City Hall and City of Fairfax Regional Library
+- Prince William County GIS coordinates for McCoart Government Center, Neabsco-Potomac Commuter Garage, and Chinn Park Regional Library
+- AFDC public active EV station counts for nearby Level 2 and DC fast charging supply
+```
+
+Still placeholder or unresolved:
+
+```text
+- PWC003 is still a staging public health facility row because a specific official facility has not been confirmed yet.
+- Demand fields such as employees, visitors, households, jobs, traffic, and amenities still need official or defensible data.
+- Electrical capacity, trenching distance, service upgrade cost, ADA layout, fire access, emergency disconnect, stormwater, and battery storage fields still need stakeholder, site-review, or manual assumptions.
+```
+
+## Important limitation
+
+This model is a prototype planning tool. It does not replace AHJ, Fire Marshal, ADA, utility, stormwater, engineering, or permitting review. It helps rank candidate sites and flag issues that deserve deeper review.
