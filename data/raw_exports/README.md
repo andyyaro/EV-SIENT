@@ -16,11 +16,15 @@ VDOT_Bidirectional_Traffic_Volume_2025.geojson.zip
 ACSDT5Y2024.B11001-2026-06-23T052522.csv
 tl_2024_51_bg.zip
 va_wac_S000_JT00_2023.csv.gz
+ACS_2024_5Y_B19013_blockgroups_equity.csv
+ACS_2024_5Y_B25044_blockgroups_equity.csv
+ACS_2024_5Y_B25003_blockgroups_equity.csv
+ACS_2024_5Y_B25024_blockgroups_equity.csv
 ```
 
-## Official raw exports identified for next equity build
+## ACS equity build
 
-The next equity build should use official U.S. Census Bureau ACS 2024 5-Year Detailed Tables at block-group geography plus TIGER 2024 Virginia block group geometry.
+The equity build uses official U.S. Census Bureau ACS 2024 5-Year Detailed Tables at block-group geography plus TIGER 2024 Virginia block group geometry.
 
 Official source table inventory:
 
@@ -28,28 +32,29 @@ Official source table inventory:
 data/source_extracts/acs_equity_official_tables.csv
 ```
 
-Raw ACS exports to download next:
+Raw ACS exports used:
 
 ```text
 ACS 2024 5-Year Detailed Table B19013 — median household income
-ACS 2024 5-Year Detailed Table B08201 — household vehicles available
+ACS 2024 5-Year Detailed Table B25044 — tenure by vehicles available
 ACS 2024 5-Year Detailed Table B25003 — tenure / renter occupied
 ACS 2024 5-Year Detailed Table B25024 — units in structure / multifamily housing
 ```
 
-Geometry already identified:
+Geometry used:
 
 ```text
 tl_2024_51_bg.zip — TIGER Line 2024 Virginia Block Groups
 ```
 
-The final project-ready equity extract should be:
+Project-ready equity extracts:
 
 ```text
 data/source_extracts/acs_equity_inputs_1mi.csv
+data/source_extracts/acs_equity_index_1mi.csv
 ```
 
-That extract should only be filled after the official ACS table exports are downloaded and processed, following the same official-derived pattern used for households and jobs.
+Note: B08201 was tested first for no-vehicle households, but its downloaded block-group fields were blank. The current equity extract uses B25044 instead because it gives total occupied housing units plus owner/renter no-vehicle household counts.
 
 ## How each raw export was used
 
@@ -166,7 +171,7 @@ nearby_households_1mi
 
 Source: U.S. Census Bureau TIGER Line 2024 Virginia Block Groups
 
-Used as the geometry layer for area-weighted 1-mile household and job estimates.
+Used as the geometry layer for area-weighted 1-mile household, job, and equity estimates.
 
 ### va_wac_S000_JT00_2023.csv.gz
 
@@ -180,6 +185,53 @@ nearby_jobs_1mi
 
 The file gives workplace jobs at census block level. For the current prototype, jobs were aggregated to block groups and then estimated within each 1-mile site buffer by area weighting.
 
+### ACS_2024_5Y_B19013_blockgroups_equity.csv
+
+Source: U.S. Census Bureau ACS 2024 5-Year B19013 Median Household Income table
+
+Used to calculate:
+
+```text
+median_household_income
+lower_income_component
+```
+
+### ACS_2024_5Y_B25044_blockgroups_equity.csv
+
+Source: U.S. Census Bureau ACS 2024 5-Year B25044 Tenure by Vehicles Available table
+
+Used to calculate:
+
+```text
+total_households
+no_vehicle_households
+no_vehicle_household_share
+```
+
+### ACS_2024_5Y_B25003_blockgroups_equity.csv
+
+Source: U.S. Census Bureau ACS 2024 5-Year B25003 Tenure table
+
+Used to calculate:
+
+```text
+occupied_housing_units
+renter_occupied_households
+renter_household_share
+```
+
+### ACS_2024_5Y_B25024_blockgroups_equity.csv
+
+Source: U.S. Census Bureau ACS 2024 5-Year B25024 Units in Structure table
+
+Used to calculate:
+
+```text
+total_housing_units
+multifamily_units
+multifamily_unit_share
+```
+
 ## Stored extracts
 
 The small extracts used by the model are stored in:
@@ -191,4 +243,6 @@ data/source_extracts/vdot_nearest_traffic_segments.csv
 data/source_extracts/acs_households_1mi.csv
 data/source_extracts/lodes_jobs_1mi.csv
 data/source_extracts/acs_equity_official_tables.csv
+data/source_extracts/acs_equity_inputs_1mi.csv
+data/source_extracts/acs_equity_index_1mi.csv
 ```
