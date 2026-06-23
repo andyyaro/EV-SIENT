@@ -199,13 +199,14 @@ def plot_site_map(
         alpha=0.75,
         edgecolors="black",
         linewidths=0.8,
+        zorder=2,
     )
 
     top_site = top_site_id_from_results(data)
     if top_site:
         top_row = data[data["site_id"].astype(str) == top_site]
         if not top_row.empty:
-            star_size = 560 if stable_top_candidate_found(data, sensitivity, profile_results) else 430
+            star_size = 260 if stable_top_candidate_found(data, sensitivity, profile_results) else 220
             plt.scatter(
                 top_row["lon"],
                 top_row["lat"],
@@ -213,7 +214,8 @@ def plot_site_map(
                 marker="*",
                 alpha=0.9,
                 edgecolors="black",
-                linewidths=1.0,
+                linewidths=0.9,
+                zorder=4,
             )
 
     for _, row in data.iterrows():
@@ -226,6 +228,7 @@ def plot_site_map(
             fontsize=8,
             arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
             bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.78, "lw": 0.3},
+            zorder=5,
         )
 
     plt.colorbar(scatter, label="Readiness score")
