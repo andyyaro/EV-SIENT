@@ -34,6 +34,22 @@ python src/build_osm_amenities.py
 
 The script uses only Python standard library tools plus pandas. No GeoPandas, OSMnx, or QGIS is required.
 
+## Safer command after timeout/rate-limit errors
+
+Public Overpass servers can return temporary 504 timeout or 429 rate-limit errors. The script now retries failed sites, waits longer by default, and marks failed sites clearly instead of treating them as true zero-amenity sites.
+
+Recommended command after an incomplete run:
+
+```bash
+python src/build_osm_amenities.py --pause 15 --retries 4 --retry-wait 30
+```
+
+You can also fetch one failed site at a time:
+
+```bash
+python src/build_osm_amenities.py --site-id PWC002 --pause 15 --retries 4 --retry-wait 30
+```
+
 ## Default outputs
 
 ```text
@@ -69,6 +85,7 @@ data/source_extracts/osm_amenity_query_tags_v1.csv
 After running the script, check:
 
 ```text
+fetch_status
 osm_poi_total_0_5mi
 osm_category_count_0_5mi
 osm_categories_found
@@ -79,6 +96,8 @@ Compare those values to the current model field:
 ```text
 current_model_amenities_count_0_5mi
 ```
+
+If `fetch_status` is `failed`, do not treat blank or missing POI counts as zero amenities.
 
 ## How to decide whether to update the model
 
@@ -123,8 +142,8 @@ The current radius is:
 
 If the script fails with a timeout or API error, wait and run it again later. Public Overpass servers can be busy.
 
-You can increase the pause between requests:
+Use the safer retry command:
 
 ```bash
-python src/build_osm_amenities.py --pause 5
+python src/build_osm_amenities.py --pause 15 --retries 4 --retry-wait 30
 ```
