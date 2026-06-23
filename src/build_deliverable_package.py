@@ -1,20 +1,4 @@
-"""Build a clean shareable deliverable package.
-
-This script collects the most useful generated outputs and reporting documents
-into one local folder that can be shared with mentors, reviewers, or
-stakeholders.
-
-Run from the repository root after the full model pipeline:
-
-    python src/run_all.py
-    python src/build_deliverable_package.py
-
-Default output folder:
-
-    data/outputs/deliverable_package/
-
-The package folder is generated locally and ignored by Git.
-"""
+"""Build a clean shareable deliverable package."""
 
 from __future__ import annotations
 
@@ -33,6 +17,7 @@ PACKAGE_GROUPS = {
     "charts": [
         "data/outputs/charts/site_readiness_map.png",
         "data/outputs/charts/readiness_score_chart.png",
+        "data/outputs/charts/profile_rank_stability_chart.png",
         "data/outputs/charts/profile_score_heatmap.png",
     ],
     "run_outputs": [
@@ -102,7 +87,7 @@ def validate_success_marker() -> None:
         joined = ", ".join(str(path) for path in newer_outputs)
         raise SystemExit(
             "Some generated outputs are newer than the latest successful workflow marker. "
-            "This can happen after a failed or partial run. Re-run `python src/run_all.py` successfully first. "
+            "Re-run `python src/run_all.py` successfully first. "
             f"Newer outputs: {joined}"
         )
 
@@ -136,15 +121,10 @@ def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[
 
     source_sha256 = sha256_file(source)
     source_modified_at = iso_mtime(source)
-
-    # Intentionally do not use shutil.copy2 here.
-    # copy2 preserves old source timestamps, which makes Finder look like the
-    # package was not refreshed. copyfile writes a fresh destination file while
-    # the manifest records the original source timestamp and content hash.
     shutil.copyfile(source, destination)
-
     destination_sha256 = sha256_file(destination)
     destination_modified_at = iso_mtime(destination)
+
     if source_sha256 != destination_sha256:
         raise SystemExit(f"Copied file hash mismatch: {source_relative}")
 
@@ -159,58 +139,57 @@ def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[
     }
 
 
-def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> str:
+def build_package_readme(manifest: list[dict[str, str]]) -> str:
     copied = [item for item in manifest if item["status"] == "copied"]
     missing = [item for item in manifest if item["status"] == "missing"]
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    lines: list[str] = []
-    lines.append("# EV Charging Site-Readiness Deliverable Package")
-    lines.append("")
-    lines.append(f"Generated: {generated_at}")
-    lines.append("")
-    lines.append("This folder collects the main files needed to review or present the current model run.")
-    lines.append("")
-    lines.append("## Freshness check")
-    lines.append("")
-    lines.append("The package builder deletes and recreates this package by default. Copied files receive a fresh package-build modified time. The package manifest records each source file's original modified time and SHA-256 hash so the copied content can be verified.")
-    lines.append("")
-    lines.append("## Recommended review order")
-    lines.append("")
-    lines.append("1. `reports/PROJECT_STATUS.md`")
-    lines.append("2. `reports/MODEL_FINDINGS_BRIEF.md`")
-    lines.append("3. `charts/site_readiness_map.png`")
-    lines.append("4. `charts/readiness_score_chart.png`")
-    lines.append("5. `charts/profile_score_heatmap.png`")
-    lines.append("6. `run_outputs/results_interpretation.md`")
-    lines.append("7. `run_outputs/model_run_summary.md`")
-    lines.append("8. `run_outputs/profile_comparison.md`")
-    lines.append("9. `reports/PRESENTATION_OUTLINE.md`")
-    lines.append("10. `reports/STAKEHOLDER_DATA_REQUEST.md`")
-    lines.append("")
-    lines.append("## Dynamic vs static files")
-    lines.append("")
-    lines.append("Files under `run_outputs/` are generated from the latest local model run. Files under `reports/` are static project documents that explain the project story, methodology, current status, and next data needs.")
-    lines.append("")
-    lines.append("## Included files")
-    lines.append("")
+    lines: list[str] = [
+        "# EV Charging Site-Readiness Deliverable Package",
+        "",
+        f"Generated: {generated_at}",
+        "",
+        "This folder collects the main files needed to review or present the current model run.",
+        "",
+        "## Freshness check",
+        "",
+        "The package builder recreates this package by default. Copied files receive a fresh package-build modified time. The manifest records each source file's original modified time and SHA-256 hash.",
+        "",
+        "## Recommended review order",
+        "",
+        "1. `reports/PROJECT_STATUS.md`",
+        "2. `reports/MODEL_FINDINGS_BRIEF.md`",
+        "3. `charts/site_readiness_map.png`",
+        "4. `charts/readiness_score_chart.png`",
+        "5. `charts/profile_rank_stability_chart.png`",
+        "6. `run_outputs/results_interpretation.md`",
+        "7. `run_outputs/model_run_summary.md`",
+        "8. `run_outputs/profile_comparison.md`",
+        "9. `reports/PRESENTATION_OUTLINE.md`",
+        "10. `reports/STAKEHOLDER_DATA_REQUEST.md`",
+        "",
+        "## Included files",
+        "",
+    ]
+
     for item in copied:
         lines.append(f"- `{item['destination']}`")
     lines.append("")
 
     if missing:
-        lines.append("## Missing files")
-        lines.append("")
-        lines.append("These files were expected but not found. Run `python src/run_all.py` and rebuild the package.")
-        lines.append("")
+        lines.extend(["## Missing files", ""])
         for item in missing:
             lines.append(f"- `{item['source']}`")
         lines.append("")
 
-    lines.append("## Important limitation")
-    lines.append("")
-    lines.append("This package is for planning communication only. It does not replace utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, or stakeholder approval.")
-    lines.append("")
+    lines.extend(
+        [
+            "## Limitation",
+            "",
+            "This package is for planning communication only. It does not replace required technical, permitting, procurement, or stakeholder review.",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -231,7 +210,7 @@ def main() -> None:
             manifest.append(copy_file(source_relative, package_dir, group_name))
 
     readme_path = package_dir / "README.md"
-    readme_path.write_text(build_package_readme(package_dir, manifest), encoding="utf-8")
+    readme_path.write_text(build_package_readme(manifest), encoding="utf-8")
 
     manifest_path = package_dir / "package_manifest.json"
     manifest_payload = {
