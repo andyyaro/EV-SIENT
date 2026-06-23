@@ -92,11 +92,11 @@ The profile analysis is a planning-sensitivity layer. It does not replace the ma
 Latest result:
 
 ```text
-base — FFX002 ranked #1
-demand_priority — FFX002 ranked #1
-equity_priority — FFX002 ranked #1
-feasibility_priority — FFX002 ranked #1
-safety_priority — FFX002 ranked #1
+base — FFX002 ranked #1 with score 65.3
+demand_priority — FFX002 ranked #1 with score 63.3
+equity_priority — FFX002 ranked #1 with score 68.7
+feasibility_priority — FFX002 ranked #1 with score 64.1
+safety_priority — FFX002 ranked #1 with score 70.1
 ```
 
 Interpretation: FFX002 remains the strongest current candidate even when demand, equity, feasibility, or safety/AHJ considerations are weighted more heavily. This makes the top recommendation stronger than a single-scenario ranking.
@@ -135,15 +135,15 @@ This is reproducible open POI/GIS support, not official local government confirm
 
 ## Final ranked results
 
-Latest ranking after the reviewed OSM amenities update:
+Latest ranking after the corrected trenching-normalization fix:
 
 ```text
-1. FFX002 — City of Fairfax Regional Library — readiness 59.9
-2. FFX001 — Fairfax City Hall or municipal building — readiness 53.1
-3. PWC004 — Chinn Park Regional Library — readiness 48.0
-4. PWC002 — Neabsco-Potomac Commuter Garage — readiness 44.3
-5. PWC001 — PWC McCoart Government Center — readiness 42.1
-6. PWC003 — Prince William County Public Safety Training Center — readiness 18.6
+1. FFX002 — City of Fairfax Regional Library — readiness 65.3
+2. FFX001 — Fairfax City Hall or municipal building — readiness 57.3
+3. PWC002 — Neabsco-Potomac Commuter Garage — readiness 56.0
+4. PWC004 — Chinn Park Regional Library — readiness 52.7
+5. PWC001 — PWC McCoart Government Center — readiness 43.2
+6. PWC003 — Prince William County Public Safety Training Center — readiness 29.5
 ```
 
 ## Recommendation tiers
@@ -151,8 +151,8 @@ Latest ranking after the reviewed OSM amenities update:
 ```text
 FFX002 — Tier 1 — advance to site screening
 FFX001 — Tier 1 — advance to site screening
-PWC004 — Tier 2 — promising candidate, refine data
 PWC002 — High-review candidate
+PWC004 — Tier 2 — promising candidate, refine data
 PWC001 — Tier 3 — lower priority / monitor
 PWC003 — Low public-priority / special-use
 ```
@@ -167,13 +167,13 @@ FFX002 is the strongest current candidate. It combines public library use, publi
 
 FFX001 is the second strongest current candidate. It has strong civic/public-use value and reviewed OSM amenity support.
 
-### PWC004 — Chinn Park Regional Library
-
-PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions. Its readiness increased after the reviewed OSM amenities update. The current official library page still lists Chinn Park Library as closed for renovation, so that remains a caveat.
-
 ### PWC002 — Neabsco-Potomac Commuter Garage
 
-PWC002 has commuter, public-access, equity, and strong mixed-use amenity value, but it remains high-review because garage installations can involve additional fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical complexity.
+PWC002 is now the third-ranked site after the corrected trenching normalization. It has commuter, public-access, equity, and strong mixed-use amenity value, but it remains high-review because garage installations can involve additional fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical complexity.
+
+### PWC004 — Chinn Park Regional Library
+
+PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions. Its current official library page still lists Chinn Park Library as closed for renovation, so that remains a caveat.
 
 ### PWC001 — PWC McCoart Government Center
 
@@ -194,11 +194,11 @@ confirm whether the site should be public, fleet-only, or removed from the publi
 Current V1 recommendations:
 
 ```text
-FFX002 — 1 port now, 2 by 2035, 2 by 2050
-FFX001 — 1 port now, 2 by 2035, 2 by 2050
-PWC004 — 1 port now, 1 by 2035, 2 by 2050
-PWC002 — 2 ports now, 2 by 2035, 2 by 2050
-PWC001 — 2 ports now, 2 by 2035, 2 by 2050
+FFX002 — 2 ports now, 2 by 2035, 2 by 2050
+FFX001 — 2 ports now, 2 by 2035, 3 by 2050
+PWC002 — 2 ports now, 3 by 2035, 3 by 2050
+PWC004 — 2 ports now, 2 by 2035, 2 by 2050
+PWC001 — 2 ports now, 2 by 2035, 3 by 2050
 PWC003 — 2 ports now, 2 by 2035, 2 by 2050
 ```
 
@@ -271,8 +271,8 @@ Recommended near-term focus:
 ```text
 1. Treat FFX002 as the most stable top candidate because it ranks first in the base model, stays stable in sensitivity analysis, and remains first across all scoring profiles.
 2. Treat FFX001 as the second strongest current candidate.
-3. Treat PWC004 as the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
-4. Keep PWC002 in the discussion, but route it through garage/fire/electrical review.
+3. Keep PWC002 in the discussion, but route it through garage/fire/electrical review before advancement.
+4. Treat PWC004 as the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
 5. Keep PWC003 as special-use or fleet-only unless public access is confirmed.
 6. Improve electrical capacity, visitor, parking, hours, and emergency-disconnect data before any implementation recommendation.
 ```
