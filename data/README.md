@@ -119,7 +119,16 @@ electrical_feasibility_v1.csv
 local_ev_adoption_v1.csv
 sensitivity_scenarios_v1.csv
 stakeholder_data_request_fields.csv
+stakeholder_response_tracker.csv
 ```
+
+## Stakeholder follow-up tracker
+
+```text
+data/source_extracts/stakeholder_response_tracker.csv
+```
+
+Use this tracker to record outreach status, response summaries, source dates, confidence levels, and whether a model update is needed.
 
 ## Raw exports
 
