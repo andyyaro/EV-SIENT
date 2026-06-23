@@ -18,6 +18,7 @@ src/generate_run_summary.py
 src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
+src/run_profile_analysis.py
 src/build_osm_amenities.py
 src/plot_site_map.py
 
@@ -25,6 +26,8 @@ data/inputs/           Main input datasets
 data/inputs/real_sites_v1.csv
 data/inputs/sites_demo.csv
 
+data/config/           Small model configuration files
+data/config/scoring_profiles.csv
 data/baselines/        Curated committed benchmark snapshots
 data/source_extracts/  Small model-ready source extracts
 data/raw_exports/      Notes about large raw exports not committed to the repo
@@ -58,7 +61,7 @@ Run the full local workflow from the repository root:
 python src/run_all.py
 ```
 
-This runs the validator, model, sensitivity analysis, readiness map, Markdown run summary, and one combined output-check step.
+This runs the validator, model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, and one combined output-check step.
 
 You can also run the steps manually:
 
@@ -66,6 +69,7 @@ You can also run the steps manually:
 python src/validate_site_data.py
 python src/ev_charger_model.py
 python src/run_sensitivity_analysis.py
+python src/run_profile_analysis.py
 python src/plot_site_map.py
 python src/generate_run_summary.py
 python src/check_outputs.py
@@ -90,6 +94,9 @@ data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
+data/outputs/profile_results.csv
+data/outputs/profile_rank_summary.csv
+data/outputs/profile_comparison.md
 data/outputs/model_run_summary.md
 data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
@@ -98,6 +105,36 @@ data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
+```
+
+## Scoring profile analysis
+
+`src/run_profile_analysis.py` tests how rankings change when different planning priorities are emphasized.
+
+The profile definitions live in:
+
+```text
+data/config/scoring_profiles.csv
+```
+
+Current profiles include:
+
+```text
+base
+demand_priority
+equity_priority
+feasibility_priority
+safety_priority
+```
+
+This does not replace the main model ranking. It is a planning-sensitivity layer that shows whether the same sites stay strong when demand, equity, feasibility, or safety is weighted more heavily.
+
+Generated profile outputs:
+
+```text
+data/outputs/profile_results.csv
+data/outputs/profile_rank_summary.csv
+data/outputs/profile_comparison.md
 ```
 
 ## Combined output check
@@ -111,7 +148,7 @@ It does two things:
 2. Generates a baseline comparison report against data/baselines/v1_baseline/.
 ```
 
-The sanity check confirms that generated files exist, the six current candidate site IDs appear, model ranks are valid, readiness scores are in range, port counts are non-negative, sensitivity ranks are stable, and the data-quality report has no ERROR items.
+The sanity check confirms that generated files exist, the six current candidate site IDs appear, model ranks are valid, readiness scores are in range, port counts are non-negative, sensitivity ranks are stable, profile-analysis outputs exist, and the data-quality report has no ERROR items.
 
 The baseline comparison writes local reports to:
 
@@ -153,6 +190,12 @@ Run the validator on the demo dataset:
 python src/validate_site_data.py --input data/inputs/sites_demo.csv --output data/outputs/demo_data_quality_report.csv
 ```
 
+Run the profile analysis after generating site results:
+
+```bash
+python src/run_profile_analysis.py
+```
+
 Run the OSM amenities workflow with a longer pause between API requests:
 
 ```bash
@@ -187,8 +230,9 @@ python src/check_outputs.py
 6. Recommends starter ports for now, 2035, and 2050.
 7. Adds plain-English recommendation tiers and next data needs.
 8. Runs sensitivity scenarios to test whether rankings stay stable under uncertainty.
-9. Exports CSV outputs, charts, and a Markdown run summary.
-10. Runs one combined output check that validates current outputs and compares them against the committed V1 baseline snapshot.
+9. Tests alternative scoring profiles for different planning priorities.
+10. Exports CSV outputs, charts, and Markdown summaries.
+11. Runs one combined output check that validates current outputs and compares them against the committed V1 baseline snapshot.
 
 ## Current candidate sites
 
