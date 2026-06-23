@@ -73,7 +73,9 @@ The repo now uses a cleaner layout:
 ```text
 src/                  Python scripts
 data/inputs/           Main input datasets
+data/config/           Model config and output-check rules
 data/source_extracts/  Small model-ready extracts
+data/baselines/        Committed benchmark snapshots
 data/outputs/          Generated outputs ignored by Git
 docs/                  Documentation and reporting
 ```
@@ -173,6 +175,19 @@ data/outputs/results_interpretation.md
 Decision: static docs remain useful for the project story, but the generated interpretation should be used when sharing the latest model run because it adapts to ranking, tier, sensitivity, profile, and review-trigger changes.
 
 Reason: this reduces the risk that the deliverable package contains stale result sentences after future data or model updates.
+
+## Decision 25 — Move V1 output-check rules into config
+
+The project now stores output-check expectations in a config file instead of hard-coding all V1 assumptions directly inside the checker.
+
+```text
+data/config/output_check_rules_v1.json
+src/check_outputs.py
+```
+
+Decision: the current V1 sanity-check rules include expected site IDs, expected top site, zero data-quality errors, zero sensitivity rank movement, expected profile names, expected profile count, expected sites per profile, and allowed profile score range.
+
+Reason: this makes the checker easier to maintain if the project adds sites, changes the official top-site expectation, changes scoring profiles, or creates a future V2 benchmark.
 
 ## Current expected recommendation interpretation
 
