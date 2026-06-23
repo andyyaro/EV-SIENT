@@ -14,7 +14,14 @@ Public EV charging decisions need more than a map of empty parking spaces.
 Good sites should balance demand, electrical feasibility, public access, safety, ADA/accessibility, equity, and charger right-sizing.
 ```
 
-## Slide 3 — Candidate sites
+## Slide 3 — Candidate sites map
+
+```text
+Show data/outputs/charts/site_readiness_map.png
+Use the map to show where the six candidate sites are located and how their readiness scores compare spatially.
+```
+
+## Slide 4 — Candidate sites
 
 ```text
 PWC001 — PWC McCoart Government Center
@@ -25,7 +32,7 @@ FFX001 — Fairfax City Hall or municipal building
 FFX002 — City of Fairfax Regional Library
 ```
 
-## Slide 4 — Data sources
+## Slide 5 — Data sources
 
 ```text
 Official / official-derived / open GIS:
@@ -46,13 +53,13 @@ Planning estimates / proxies:
 - Local EV adoption proxy
 ```
 
-## Slide 5 — Model scoring structure
+## Slide 6 — Model scoring structure
 
 ```text
 readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ```
 
-## Slide 6 — Ranked results
+## Slide 7 — Ranked results
 
 ```text
 1. FFX002 — 59.9
@@ -63,7 +70,7 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 6. PWC003 — 18.6
 ```
 
-## Slide 7 — Recommendation tiers
+## Slide 8 — Recommendation tiers
 
 ```text
 FFX002 — Tier 1 — advance to site screening
@@ -74,7 +81,7 @@ PWC001 — Tier 3 — lower priority / monitor
 PWC003 — Low public-priority / special-use
 ```
 
-## Slide 8 — Sensitivity analysis
+## Slide 9 — Sensitivity analysis
 
 ```text
 The model tested five scenarios.
@@ -82,7 +89,7 @@ The ranking stayed stable across all five.
 Every site had rank_range = 0.
 ```
 
-## Slide 9 — Remaining data gaps
+## Slide 10 — Remaining data gaps
 
 ```text
 elec_service_rating_amp
@@ -95,16 +102,17 @@ parking_spaces for sites except FFX002
 local EV adoption counts
 ```
 
-## Slide 10 — Current source-quality note
+## Slide 11 — Current source-quality note
 
 ```text
 FFX002 parking and hours are now supported by an official facility page.
 PWC004's official library page currently lists Chinn Park Library as closed for renovation.
 PWC004 remains modeled under the future/reopened planning assumption.
 Amenities now use reviewed OSM/Overpass six-category POI counts.
+The site map is a planning visual only, not a parcel boundary or engineering map.
 ```
 
-## Slide 11 — Final conclusion
+## Slide 12 — Final conclusion
 
 ```text
 FFX002 and FFX001 are stable top candidates.
