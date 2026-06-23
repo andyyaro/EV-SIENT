@@ -2,8 +2,8 @@
 EV Charger Site-Readiness and Right-Sizing Starter Model
 
 This script reads candidate public EV charging sites, scores them for demand,
-feasibility, safety, and equity, recommends starter port counts, and exports
-CSV/chart outputs.
+feasibility, safety, and equity, recommends starter port counts, adds planning
+recommendation tiers, and exports CSV/chart outputs.
 
 It is a transparent planning-support prototype. It does not replace utility,
 engineering, ADA, Fire Marshal, AHJ, stormwater, or permitting review.
@@ -122,6 +122,76 @@ def build_review_reason(row: pd.Series) -> str:
     return "; ".join(reasons) if reasons else "No obvious model-level review trigger"
 
 
+def build_recommendation_tier(row: pd.Series) -> str:
+    """Convert scores and review flags into a plain-English planning tier."""
+    if row["public_access"] == 0:
+        return "Low public-priority / special-use"
+    if row["garage_enclosed"] == 1:
+        return "High-review candidate"
+    if row["model_rank"] <= 2 and row["readiness_score"] >= 50:
+        return "Tier 1 — advance to site screening"
+    if row["readiness_score"] >= 45:
+        return "Tier 2 — promising candidate, refine data"
+    return "Tier 3 — lower priority / monitor"
+
+
+def build_planning_recommendation(row: pd.Series) -> str:
+    tier = row["recommendation_tier"]
+    if tier.startswith("Tier 1"):
+        return "Advance to site screening and stakeholder confirmation before design or procurement."
+    if tier.startswith("Tier 2"):
+        return "Keep as a promising candidate and improve demand, parking, operating-hours, and electrical assumptions."
+    if tier.startswith("High-review"):
+        return "Keep in the planning discussion, but require garage, fire/AHJ, access, and electrical review before advancement."
+    if tier.startswith("Low public"):
+        return "Do not advance as a general-public charging site until the public-access or fleet-only use case is confirmed."
+    return "Monitor as a lower-priority candidate and revisit after stronger data is available."
+
+
+def build_priority_reason(row: pd.Series) -> str:
+    if row["public_access"] == 0:
+        return "Limited or non-public access and low surrounding public-charging demand keep this site low priority."
+    if row["garage_enclosed"] == 1:
+        return "Commuter/garage role and equity value are useful, but enclosed-garage review lowers implementation confidence."
+    if row["model_rank"] <= 2:
+        return "Stable top-ranked public candidate with stronger readiness than the rest of the current candidate set."
+    if row["readiness_score"] >= 45:
+        return "Public candidate with moderate readiness, but additional data is needed before advancing."
+    return "Current score is lower than stronger alternatives, mainly because demand/equity/feasibility signals are weaker in this V1 dataset."
+
+
+def build_data_needed_next(row: pd.Series) -> str:
+    needs = []
+
+    if row["elec_service_rating_amp"] == 0:
+        needs.append("confirm electrical service rating")
+    if row["spare_capacity_kw"] == 0:
+        needs.append("confirm spare capacity or upgrade need")
+    if row["emergency_disconnect_visible"] == 0:
+        needs.append("confirm emergency disconnect location/visibility")
+
+    needs.append("confirm visitor/employee counts and operating hours")
+    needs.append("confirm parking count and likely charger placement")
+
+    if row["garage_enclosed"] == 1:
+        needs.append("complete garage fire/AHJ/access review")
+    if row["public_access"] == 0:
+        needs.append("confirm whether site is public, fleet-only, or should be removed")
+
+    return "; ".join(needs)
+
+
+def apply_recommendations(results: pd.DataFrame) -> pd.DataFrame:
+    """Add rank and plain-English planning recommendation columns."""
+    ranked = results.sort_values("readiness_score", ascending=False).reset_index(drop=True)
+    ranked["model_rank"] = range(1, len(ranked) + 1)
+    ranked["recommendation_tier"] = ranked.apply(build_recommendation_tier, axis=1)
+    ranked["planning_recommendation"] = ranked.apply(build_planning_recommendation, axis=1)
+    ranked["priority_reason"] = ranked.apply(build_priority_reason, axis=1)
+    ranked["data_needed_next"] = ranked.apply(build_data_needed_next, axis=1)
+    return ranked
+
+
 def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
     df = sites.copy()
 
@@ -157,6 +227,7 @@ def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
         "trenching_ft",
         "trench_cost_per_ft",
         "service_upgrade_cost_usd",
+        "elec_service_rating_amp",
     ]
     for col in numeric_fields:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
@@ -264,13 +335,20 @@ def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
         output_rows.append(row)
 
     results = pd.DataFrame(output_rows)
+    results = apply_recommendations(results)
+
     output_cols = [
+        "model_rank",
         "site_id",
         "site_name",
         "site_type",
         "public_access",
         "access_adjustment",
         "readiness_score",
+        "recommendation_tier",
+        "planning_recommendation",
+        "priority_reason",
+        "data_needed_next",
         "demand_subscore",
         "feasibility_subscore",
         "safety_subscore",
@@ -284,7 +362,7 @@ def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
         "ahj_review_flag",
         "review_reason",
     ]
-    return results[output_cols].sort_values("readiness_score", ascending=False)
+    return results[output_cols]
 
 
 def plot_readiness(results: pd.DataFrame, output_file: str = "readiness_score_chart.png") -> None:
