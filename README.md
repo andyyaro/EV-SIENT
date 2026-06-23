@@ -28,8 +28,10 @@ data/inputs/           Main input datasets
 data/inputs/real_sites_v1.csv
 data/inputs/sites_demo.csv
 
-data/config/           Small model configuration files
+data/config/           Small model configuration and output-check rule files
 data/config/scoring_profiles.csv
+data/config/output_check_rules_v1.json
+
 data/baselines/        Curated committed benchmark snapshots
 data/source_extracts/  Small model-ready source extracts
 data/raw_exports/      Notes about large raw exports not committed to the repo
@@ -60,10 +62,15 @@ matplotlib
 Run the full local workflow from the repository root:
 
 ```bash
+git pull --rebase origin main
 python src/run_all.py
+python src/build_deliverable_package.py
+git status --short
 ```
 
-This runs the validator, model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, generated results interpretation, and one combined output-check step.
+`src/run_all.py` runs the validator, readiness/right-sizing model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, generated results interpretation, and one combined output-check step.
+
+The output-check step also generates a baseline comparison report against the committed V1 baseline.
 
 You can also run the steps manually:
 
@@ -76,6 +83,7 @@ python src/plot_site_map.py
 python src/generate_run_summary.py
 python src/generate_results_interpretation.py
 python src/check_outputs.py
+python src/build_deliverable_package.py
 ```
 
 Optional amenities POI workflow:
@@ -109,6 +117,7 @@ data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
+data/outputs/deliverable_package/
 ```
 
 ## Scoring profile analysis
@@ -164,7 +173,13 @@ It does two things:
 2. Generates a baseline comparison report against data/baselines/v1_baseline/.
 ```
 
-The sanity check confirms that generated files exist, the six current candidate site IDs appear, model ranks are valid, readiness scores are in range, port counts are non-negative, sensitivity ranks are stable, profile-analysis outputs exist, the generated interpretation exists, and the data-quality report has no ERROR items.
+The V1 sanity-check expectations live in:
+
+```text
+data/config/output_check_rules_v1.json
+```
+
+The sanity check currently verifies that required outputs exist, the expected six candidate site IDs appear, model ranks are valid, readiness scores and profile scores are in range, port counts are non-negative, sensitivity rankings remain stable, profile outputs have the expected profiles and row counts, the generated interpretation exists, and the data-quality report has no ERROR items.
 
 The baseline comparison writes local reports to:
 
@@ -201,7 +216,7 @@ Default package folder:
 data/outputs/deliverable_package/
 ```
 
-The package includes charts, dynamic run outputs, key CSV tables, and reporting documents. It is ignored by Git because it is generated locally.
+The package includes charts, dynamic run outputs, key CSV tables, reporting documents, a package README, and a package manifest. It is ignored by Git because it is generated locally.
 
 ## Generated outputs stay local
 
