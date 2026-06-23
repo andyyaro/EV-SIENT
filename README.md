@@ -9,6 +9,7 @@ The model evaluates sites using demand, feasibility, safety/AHJ review, equity, 
 ```text
 src/                  Python scripts
 src/run_all.py
+src/generate_run_summary.py
 src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
@@ -41,7 +42,7 @@ Run the full local workflow from the repository root:
 python src/run_all.py
 ```
 
-This runs the validator, model, sensitivity analysis, and readiness map in order.
+This runs the validator, model, sensitivity analysis, readiness map, and Markdown run summary in order.
 
 You can also run the steps manually:
 
@@ -50,6 +51,7 @@ python src/validate_site_data.py
 python src/ev_charger_model.py
 python src/run_sensitivity_analysis.py
 python src/plot_site_map.py
+python src/generate_run_summary.py
 ```
 
 Optional amenities POI workflow:
@@ -71,6 +73,7 @@ data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
+data/outputs/model_run_summary.md
 data/outputs/charts/readiness_score_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
@@ -106,6 +109,12 @@ Create the readiness map after running the model:
 python src/plot_site_map.py
 ```
 
+Create the Markdown run summary after running the model:
+
+```bash
+python src/generate_run_summary.py
+```
+
 ## What the model does
 
 1. Reads a candidate-site CSV.
@@ -116,7 +125,7 @@ python src/plot_site_map.py
 6. Recommends starter ports for now, 2035, and 2050.
 7. Adds plain-English recommendation tiers and next data needs.
 8. Runs sensitivity scenarios to test whether rankings stay stable under uncertainty.
-9. Exports CSV outputs and charts.
+9. Exports CSV outputs, charts, and a Markdown run summary.
 
 ## Current candidate sites
 
