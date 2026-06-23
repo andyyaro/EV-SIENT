@@ -31,3 +31,6 @@ jobs:
 
       - name: Run full model workflow
         run: python src/run_all.py
+
+      - name: Build deliverable package
+        run: python src/build_deliverable_package.py
