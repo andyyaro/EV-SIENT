@@ -78,6 +78,19 @@ data/outputs/          Generated outputs ignored by Git
 docs/                  Documentation and reporting
 ```
 
+## Decision 18 — Add stakeholder data request pack
+
+The repo now includes a stakeholder data request guide and structured request-field extract.
+
+```text
+docs/STAKEHOLDER_DATA_REQUEST.md
+data/source_extracts/stakeholder_data_request_fields.csv
+```
+
+Reason: the strongest next improvement is replacing V1 assumptions and placeholders with confirmed site, facility, utility, parking, ADA/accessibility, Fire Marshal/AHJ, GIS, or planning data.
+
+Source quality: planning data request. These files are not observed site data; they are a checklist for future data collection.
+
 ## Current expected recommendation interpretation
 
 ```text
