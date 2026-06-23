@@ -39,6 +39,8 @@ DATA_DICTIONARY.md
 SENSITIVITY_ANALYSIS.md
 SENSITIVITY_RESULTS_INTERPRETATION.md
 RECOMMENDATION_TIERS.md
+MODEL_FINDINGS_BRIEF.md
+PRESENTATION_OUTLINE.md
 data/source_dataset_log.csv
 data/dataset_metadata.csv
 data/raw_exports/README.md
@@ -450,6 +452,23 @@ Source quality: Model logic / planning interpretation.
 
 Replacement target: revise tiers after stakeholder feedback, confirmed electrical data, official demand/parking data, or updated project priorities.
 
+## Decision 21 — Findings brief and presentation outline added
+
+Decision: The project now includes a concise model findings brief and a slide-style presentation outline.
+
+New documentation files:
+
+```text
+MODEL_FINDINGS_BRIEF.md
+PRESENTATION_OUTLINE.md
+```
+
+Reason: The prototype needs a human-readable reporting layer that explains the model purpose, data sources, scoring method, ranked results, recommendation tiers, sensitivity result, remaining data gaps, stakeholder questions, and planning conclusion.
+
+Source quality: Reporting / communication layer.
+
+Replacement target: update these files whenever the ranking, recommendations, assumptions, or stakeholder-facing conclusions change.
+
 ## Current unresolved items
 
 The main unresolved fields are:
@@ -500,4 +519,4 @@ PWC003 — Low public-priority / special-use because public access is limited
 
 ## Maintenance rule
 
-Whenever the project changes a source, assumption, formula, or output interpretation, update this file along with the affected source extract, metadata, methodology, and status documents.
+Whenever the project changes a source, assumption, formula, output interpretation, or stakeholder-facing conclusion, update this file along with the affected source extract, metadata, methodology, status, findings, and presentation documents.
