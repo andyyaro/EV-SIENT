@@ -119,17 +119,19 @@ Decision: do not mix manual and OSM values in the active model field. Manual V1 
 
 Source quality: open POI/GIS support, not official local government confirmation.
 
-## Decision 21 — Use committed baseline snapshots for run comparison
+## Decision 21 — Use committed baseline snapshots and one combined output check
 
 The project now uses a small committed baseline snapshot instead of external storage for run comparison.
 
 ```text
 data/baselines/v1_baseline/
+src/check_outputs.py
 src/create_baseline_snapshot.py
-src/compare_to_baseline.py
 ```
 
 Decision: normal generated outputs remain ignored under `data/outputs/`, while selected benchmark snapshots under `data/baselines/` can be committed after review.
+
+Decision: `src/check_outputs.py` is the single final output-check command. It runs sanity checks and then generates the baseline comparison report.
 
 Reason: this keeps the project reproducible without cloud credentials, external links, storage cost, or extra authentication complexity.
 
