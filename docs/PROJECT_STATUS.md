@@ -28,7 +28,8 @@ Planning electrical feasibility estimates added.
 Local EV adoption proxy added.
 Sensitivity analysis added and strengthened.
 Recommendation tier layer added.
-Findings brief and presentation outline added.
+Findings brief, full findings report, and presentation outline added.
+Stakeholder data request pack added.
 Repository reorganized into cleaner folders.
 ```
 
@@ -55,6 +56,15 @@ amenities_count_0_5mi
 local EV adoption counts
 ```
 
+## Current stakeholder request files
+
+```text
+docs/STAKEHOLDER_DATA_REQUEST.md
+data/source_extracts/stakeholder_data_request_fields.csv
+```
+
+Use these files to ask facility, utility, public works, parking, ADA/accessibility, Fire Marshal/AHJ, GIS, and planning contacts for the data needed to replace assumptions and placeholders.
+
 ## Current run commands
 
 ```bash
@@ -66,9 +76,10 @@ python src/run_sensitivity_analysis.py
 ## Next good improvements
 
 ```text
-1. Confirm electrical/service capacity with facility or utility contacts.
-2. Replace visitor/employee/parking assumptions with stronger site data.
-3. Add or improve map/visual outputs.
-4. Prepare slides from docs/PRESENTATION_OUTLINE.md.
-5. Add more candidate sites if the project scope expands.
+1. Use the stakeholder request pack to contact facility/public works/utility contacts.
+2. Replace visitor/employee/parking/electrical assumptions with stronger site data when responses arrive.
+3. Re-run the validator, model, and sensitivity analysis after each major data update.
+4. Add or improve map/visual outputs.
+5. Prepare slides from docs/PRESENTATION_OUTLINE.md.
+6. Add more candidate sites if the project scope expands.
 ```
