@@ -1,16 +1,17 @@
 # Methodology
 
-This document explains how the EV Charger Site-Readiness and Right-Sizing Prototype scores candidate sites and recommends starter charging ports.
+This document explains how the EV Charger Site-Readiness and Right-Sizing Prototype scores candidate sites, recommends starter charging ports, and translates outputs into planning recommendation tiers.
 
 The goal is transparency. The model should be easy to inspect, adjust, and explain to a planner, mentor, reviewer, or stakeholder.
 
 ## What the model is trying to answer
 
-The model asks two related but different questions:
+The model asks three related but different questions:
 
 ```text
 1. Should this site be prioritized for public EV charging?
 2. If yes, how many starter charging ports should be considered?
+3. What planning action should happen next?
 ```
 
 These are not the same question. A site can rank highly as a strategic public charging location but still only need a small starter installation. A site can also need extra review even if its demand looks strong.
@@ -229,3 +230,41 @@ Emergency disconnect visibility matters.
 Stormwater and firefighting runoff concerns matter.
 Battery storage adds review complexity.
 ```
+
+## Recommendation tier layer
+
+After scoring and port right-sizing, the model now adds a planning recommendation layer.
+
+The normal `site_results.csv` output includes:
+
+```text
+model_rank
+recommendation_tier
+planning_recommendation
+priority_reason
+data_needed_next
+```
+
+The recommendation layer is intentionally separate from the readiness score. A site can have public value but still require high review before it should advance.
+
+Current tier categories:
+
+```text
+Tier 1 — advance to site screening
+Tier 2 — promising candidate, refine data
+High-review candidate
+Low public-priority / special-use
+Tier 3 — lower priority / monitor
+```
+
+Plain-English interpretation:
+
+```text
+Tier 1 = strong current candidate; advance to site screening and stakeholder confirmation.
+Tier 2 = promising candidate; improve assumptions before advancement.
+High-review = keep in discussion, but review garage/fire/AHJ/access/electrical issues first.
+Low public-priority = do not advance as public charging until access/use case is confirmed.
+Tier 3 = monitor or revisit after stronger data is available.
+```
+
+The recommendation layer does not replace utility, engineering, ADA, Fire Marshal, AHJ, stormwater, permitting, or procurement review.
