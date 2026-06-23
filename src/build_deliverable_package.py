@@ -33,6 +33,7 @@ PACKAGE_GROUPS = {
     "charts": [
         "data/outputs/charts/site_readiness_map.png",
         "data/outputs/charts/readiness_score_chart.png",
+        "data/outputs/charts/profile_spider_chart.png",
     ],
     "run_outputs": [
         "data/outputs/workflow_success.json",
@@ -179,11 +180,13 @@ def build_package_readme(package_dir: Path, manifest: list[dict[str, str]]) -> s
     lines.append("1. `reports/PROJECT_STATUS.md`")
     lines.append("2. `reports/MODEL_FINDINGS_BRIEF.md`")
     lines.append("3. `charts/site_readiness_map.png`")
-    lines.append("4. `run_outputs/results_interpretation.md`")
-    lines.append("5. `run_outputs/model_run_summary.md`")
-    lines.append("6. `run_outputs/profile_comparison.md`")
-    lines.append("7. `reports/PRESENTATION_OUTLINE.md`")
-    lines.append("8. `reports/STAKEHOLDER_DATA_REQUEST.md`")
+    lines.append("4. `charts/readiness_score_chart.png`")
+    lines.append("5. `charts/profile_spider_chart.png`")
+    lines.append("6. `run_outputs/results_interpretation.md`")
+    lines.append("7. `run_outputs/model_run_summary.md`")
+    lines.append("8. `run_outputs/profile_comparison.md`")
+    lines.append("9. `reports/PRESENTATION_OUTLINE.md`")
+    lines.append("10. `reports/STAKEHOLDER_DATA_REQUEST.md`")
     lines.append("")
     lines.append("## Dynamic vs static files")
     lines.append("")
