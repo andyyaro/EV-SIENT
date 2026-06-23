@@ -20,9 +20,12 @@ Placeholder = unresolved value intentionally left for future confirmation
 ```text
 ev_charger_model.py
 validate_site_data.py
+run_sensitivity_analysis.py
 real_sites_v1.csv
 site_results.csv
 data_quality_report.csv
+sensitivity_results.csv
+sensitivity_summary.csv
 ```
 
 ## Current source/documentation files
@@ -32,6 +35,7 @@ METHODOLOGY.md
 PROJECT_STATUS.md
 RESULTS_INTERPRETATION.md
 DATA_DICTIONARY.md
+SENSITIVITY_ANALYSIS.md
 data/source_dataset_log.csv
 data/dataset_metadata.csv
 data/raw_exports/README.md
@@ -377,6 +381,37 @@ Method: The model chooses the smallest number of ports that keeps utilization an
 Source quality: model logic decision.
 
 Replacement target: recalibrate with observed charger use, session data, or stakeholder planning targets.
+
+## Decision 19 — Sensitivity analysis added
+
+Decision: The project now includes a simple scenario sensitivity analysis script.
+
+Script:
+
+```text
+run_sensitivity_analysis.py
+```
+
+Outputs:
+
+```text
+sensitivity_results.csv
+sensitivity_summary.csv
+```
+
+Scenarios:
+
+```text
+low_demand_high_cost
+base_case
+high_demand_base_cost
+```
+
+Reason: The model still contains manual assumptions, planning estimates, and proxy values. Sensitivity analysis helps show whether rankings are stable when uncertain inputs move up or down.
+
+Source quality: model uncertainty workflow.
+
+Replacement target: later upgrade to a richer scenario design or Monte Carlo simulation if needed.
 
 ## Current unresolved items
 
