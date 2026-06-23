@@ -24,6 +24,8 @@ VDOT Bidirectional Traffic Volume 2025
 ACS 2024 5-Year household and equity indicators
 TIGER 2024 Virginia block group geometry
 LODES 2023 workplace/job data
+Fairfax County Public Library official branch page for FFX002 hours/parking
+Prince William Public Libraries official locations page for PWC004 current renovation status
 ```
 
 ## Main planning estimates and proxies
@@ -49,9 +51,11 @@ Important examples:
 ```text
 acs_equity_inputs_1mi.csv
 acs_equity_index_1mi.csv
+official_facility_hours_parking_v1.csv
 electrical_feasibility_v1.csv
 local_ev_adoption_v1.csv
 sensitivity_scenarios_v1.csv
+stakeholder_data_request_fields.csv
 ```
 
 ## Raw export policy
@@ -72,8 +76,8 @@ spare_capacity_kw
 emergency_disconnect_visible
 employees_day
 visitors_day
-hours_open
-parking_spaces
+hours_open for sites except FFX002
+parking_spaces for sites except FFX002
 amenities_count_0_5mi
 local EV adoption counts
 ```
