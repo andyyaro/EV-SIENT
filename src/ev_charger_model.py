@@ -254,6 +254,7 @@ def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
         "existing_ports_total",
         "spare_capacity_kw",
         "distance_to_service_ft",
+        "trenching_ft",
         "install_cost_est_usd",
         "equity_gap_index",
     ]
