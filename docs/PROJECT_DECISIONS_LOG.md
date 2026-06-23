@@ -189,13 +189,30 @@ Decision: the current V1 sanity-check rules include expected site IDs, expected 
 
 Reason: this makes the checker easier to maintain if the project adds sites, changes the official top-site expectation, changes scoring profiles, or creates a future V2 benchmark.
 
+## Decision 26 — Correct trenching normalization and guard against stale packages
+
+The feasibility score uses `trenching_ft_n`, so `trenching_ft` must be part of the normalized input list in `src/ev_charger_model.py`.
+
+```text
+src/ev_charger_model.py
+src/run_all.py
+src/build_deliverable_package.py
+data/outputs/workflow_success.json
+```
+
+Decision: restore `trenching_ft` normalization and treat the corrected run as the current model output. After the correction, PWC002 moves ahead of PWC004, but PWC002 remains a high-review garage candidate.
+
+Decision: `src/run_all.py` writes `data/outputs/workflow_success.json` only after the full workflow passes. `src/build_deliverable_package.py` checks that marker before building the shareable package.
+
+Reason: this prevents packaging stale local outputs after a failed or partial pipeline run.
+
 ## Current expected recommendation interpretation
 
 ```text
 FFX002 — Tier 1 / stable top candidate
 FFX001 — Tier 1 / stable second candidate
-PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC002 — High-review candidate because of garage context
+PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC001 — Tier 3 / lower priority under current assumptions
 PWC003 — Low public-priority / special-use because public access is limited
 ```
