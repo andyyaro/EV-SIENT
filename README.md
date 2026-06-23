@@ -11,6 +11,7 @@ The model evaluates sites using demand, feasibility, safety/AHJ review, equity, 
 ```text
 src/                  Python scripts
 src/run_all.py
+src/check_outputs.py
 src/generate_run_summary.py
 src/ev_charger_model.py
 src/validate_site_data.py
@@ -53,7 +54,7 @@ Run the full local workflow from the repository root:
 python src/run_all.py
 ```
 
-This runs the validator, model, sensitivity analysis, readiness map, and Markdown run summary in order.
+This runs the validator, model, sensitivity analysis, readiness map, Markdown run summary, and output checks in order.
 
 You can also run the steps manually:
 
@@ -63,6 +64,7 @@ python src/ev_charger_model.py
 python src/run_sensitivity_analysis.py
 python src/plot_site_map.py
 python src/generate_run_summary.py
+python src/check_outputs.py
 ```
 
 Optional amenities POI workflow:
@@ -91,6 +93,12 @@ data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 ```
+
+## Output checks
+
+`src/check_outputs.py` confirms that the generated files exist and that the current V1 output structure is consistent.
+
+It checks the six current candidate site IDs, model ranks, readiness-score range, recommended port counts, sensitivity rank stability, and that the data-quality report has no ERROR items.
 
 ## Generated outputs stay local
 
@@ -132,6 +140,12 @@ Create the Markdown run summary after running the model:
 python src/generate_run_summary.py
 ```
 
+Run the output checks after generating outputs:
+
+```bash
+python src/check_outputs.py
+```
+
 ## What the model does
 
 1. Reads a candidate-site CSV.
@@ -143,6 +157,7 @@ python src/generate_run_summary.py
 7. Adds plain-English recommendation tiers and next data needs.
 8. Runs sensitivity scenarios to test whether rankings stay stable under uncertainty.
 9. Exports CSV outputs, charts, and a Markdown run summary.
+10. Checks generated outputs for basic consistency.
 
 ## Current candidate sites
 
