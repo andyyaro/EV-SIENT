@@ -11,7 +11,6 @@ src/                  Python scripts
 src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
-src/build_equity_index.py
 
 data/inputs/           Main input datasets
 data/inputs/real_sites_v1.csv
@@ -72,12 +71,6 @@ Run the validator on the demo dataset:
 
 ```bash
 python src/validate_site_data.py --input data/inputs/sites_demo.csv --output data/outputs/demo_data_quality_report.csv
-```
-
-Rebuild the ACS equity index extract:
-
-```bash
-python src/build_equity_index.py
 ```
 
 ## What the model does
