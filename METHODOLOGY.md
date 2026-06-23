@@ -52,11 +52,12 @@ Official or official-derived sources already used:
 - LODES 2023 Virginia Workplace Area Characteristics
 ```
 
-Manual planning-estimate extracts already used:
+Manual or template planning extracts already used:
 
 ```text
 - Demand assumptions v1
 - Amenities 0.5-mile V1 category count
+- ACS equity inputs 1-mile template
 ```
 
 Small model-ready extracts are stored under:
@@ -223,13 +224,53 @@ This subscore is a planning flag only. It does not replace Fire Marshal, AHJ, AD
 
 The final score includes an equity contribution worth 10 percent of the readiness score.
 
-Current field:
+Current model field:
 
 ```text
 equity_gap_index
 ```
 
-Current limitation: `equity_gap_index` is still a project-created placeholder. It should later be improved using ACS variables such as income, vehicle access, renter share, or other defensible equity indicators.
+The current `equity_gap_index` values in `real_sites_v1.csv` are still V1 placeholders. They should not be presented as final official equity findings.
+
+The repository now has an ACS-ready equity workflow:
+
+```text
+build_equity_index.py
+data/source_extracts/acs_equity_inputs_1mi.csv
+```
+
+The planned equity input extract uses 1-mile buffer estimates for:
+
+```text
+median_household_income
+no_vehicle_households
+total_households
+renter_occupied_households
+occupied_housing_units
+multifamily_units
+total_housing_units
+```
+
+The planned V1 equity formula is:
+
+```text
+equity_gap_index =
+0.35 * lower_income_component +
+0.30 * no_vehicle_component +
+0.20 * renter_component +
+0.15 * multifamily_component
+```
+
+Where:
+
+```text
+lower_income_component = higher score for lower median household income
+no_vehicle_component = higher score for higher no-vehicle household share
+renter_component = higher score for higher renter household share
+multifamily_component = higher score for higher multifamily housing share
+```
+
+The current `acs_equity_inputs_1mi.csv` file is a template only. Its numeric values are intentionally blank until official-derived ACS values are extracted and area-weighted to each site's 1-mile buffer. The model should not copy new equity values into `real_sites_v1.csv` until that source extract is populated and reviewed.
 
 ## Expected sessions per day
 
@@ -391,13 +432,14 @@ battery storage assumptions
 Recommended next improvements:
 
 ```text
-1. Re-run the model after each data update and compare results.
-2. Improve visitor, employee, parking, and hours assumptions with stronger evidence.
-3. Revisit the parking weight once official or strongly verified parking counts are available.
-4. Replace manual amenity estimates with a stronger GIS/POI method.
-5. Improve equity scoring using ACS variables.
-6. Improve electrical, trenching, and service upgrade assumptions.
-7. Add clearer special-use handling for fleet or public safety facilities.
+1. Populate the ACS equity input extract with official-derived income, vehicle-access, renter, and multifamily values.
+2. Run build_equity_index.py and review the output before copying equity_gap_index into real_sites_v1.csv.
+3. Re-run the model after each data update and compare results.
+4. Improve visitor, employee, parking, and hours assumptions with stronger evidence.
+5. Revisit the parking weight once official or strongly verified parking counts are available.
+6. Replace manual amenity estimates with a stronger GIS/POI method.
+7. Improve electrical, trenching, and service upgrade assumptions.
+8. Add clearer special-use handling for fleet or public safety facilities.
 ```
 
 ## Important limitation
