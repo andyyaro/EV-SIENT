@@ -157,9 +157,9 @@ FFX002 — City of Fairfax Regional Library
 
 `PWC003` is no longer a staging row. It now represents the Prince William County Public Safety Training Center at 13101 Public Safety Dr, Nokesville, VA 20181. It is marked as limited/not general public access, so the model keeps it in the dataset but discounts it as a public charging priority.
 
-## Official and official-derived data added
+## Official, official-derived, and planning-estimate data added
 
-The current V1 dataset includes the following official or official-derived inputs:
+The current V1 dataset includes the following official, official-derived, or clearly labeled planning-estimate inputs:
 
 ```text
 - Fairfax City GIS coordinates for Fairfax City Hall and City of Fairfax Regional Library
@@ -169,6 +169,7 @@ The current V1 dataset includes the following official or official-derived input
 - ACS 2024 5-Year B11001 household estimates within 1 mile
 - TIGER Line 2024 Virginia block group geometry for area-weighted estimates
 - LODES 2023 Virginia Workplace Area Characteristics job estimates within 1 mile
+- Manual V1 amenity category counts within roughly 0.5 miles
 ```
 
 The small extracts used by the model are stored in:
@@ -180,9 +181,12 @@ data/source_extracts/vdot_nearest_traffic_segments.csv
 data/source_extracts/acs_households_1mi.csv
 data/source_extracts/lodes_jobs_1mi.csv
 data/source_extracts/demand_assumptions_v1.csv
+data/source_extracts/amenities_0_5mi.csv
 ```
 
 The repository does not commit every full raw export because several raw files are large. Instead, the repo stores small source extracts and documentation so the model remains readable and reproducible.
+
+The current amenities values are manual V1 planning estimates, not final official GIS counts. They should later be replaced with a stronger GIS/POI method.
 
 ## Current V1 interpretation
 
@@ -228,6 +232,8 @@ stormwater_risk
 battery_storage_flag
 battery_storage_kwh
 ```
+
+`amenities_count_0_5mi` is no longer all zero, but it remains a manual V1 estimate until a stronger GIS/POI method is added.
 
 ## Important limitation
 
