@@ -1,0 +1,15 @@
+{
+  "baseline_label": "v1_baseline",
+  "created_utc": "2026-06-23T19:49:00Z",
+  "purpose": "Curated benchmark snapshot for comparing future model runs.",
+  "source_directory": "data/outputs",
+  "files": [
+    "site_results.csv",
+    "sensitivity_summary.csv",
+    "data_quality_report.csv"
+  ],
+  "site_count": 6,
+  "top_site_id": "FFX002",
+  "data_quality_error_count": 0,
+  "notes": "Initial committed V1 baseline snapshot from the current passing model pipeline."
+}
