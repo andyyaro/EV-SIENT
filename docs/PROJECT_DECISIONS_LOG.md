@@ -36,7 +36,7 @@ Demand, parking, amenities, electrical distance/cost, and local EV adoption valu
 
 ## Decision 9 — Keep parking weight low until verified
 
-Parking is included in demand scoring but kept at a low weight because current parking values are V1 assumptions.
+Parking is included in demand scoring but kept at a low weight because several current parking values are still V1 assumptions.
 
 ## Decision 10 — Use benchmark scaling for local EV share
 
@@ -91,12 +91,26 @@ Reason: the strongest next improvement is replacing V1 assumptions and placehold
 
 Source quality: planning data request. These files are not observed site data; they are a checklist for future data collection.
 
+## Decision 19 — Apply official FFX002 hours and parking; document PWC004 closure status
+
+The repo now includes:
+
+```text
+data/source_extracts/official_facility_hours_parking_v1.csv
+```
+
+Decision: update FFX002 `parking_spaces` from 160 to 199 and `hours_open` from 8.00 to 9.29 using the official Fairfax County Public Library branch page.
+
+Decision: document that the official Prince William Public Libraries locations page currently lists Chinn Park Library as closed for renovation. This was not applied to the PWC004 score yet because the project must decide whether to model current closure or future reopened site conditions.
+
+Source quality: official facility webpage for FFX002 fields and official current-status webpage for PWC004.
+
 ## Current expected recommendation interpretation
 
 ```text
 FFX002 — Tier 1 / stable top candidate
 FFX001 — Tier 1 / stable second candidate
-PWC004 — Tier 2 / strongest current PWC public-library candidate
+PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC002 — High-review candidate because of garage context
 PWC001 — Tier 3 / lower priority under current assumptions
 PWC003 — Low public-priority / special-use because public access is limited
@@ -110,8 +124,8 @@ spare_capacity_kw
 emergency_disconnect_visible
 employees_day
 visitors_day
-hours_open
-parking_spaces
+hours_open for sites except FFX002
+parking_spaces for sites except FFX002
 amenities_count_0_5mi
 local EV adoption counts
 ```
