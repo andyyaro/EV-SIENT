@@ -15,6 +15,7 @@ src/check_outputs.py
 src/compare_to_baseline.py
 src/create_baseline_snapshot.py
 src/generate_run_summary.py
+src/generate_results_interpretation.py
 src/build_deliverable_package.py
 src/ev_charger_model.py
 src/validate_site_data.py
@@ -62,7 +63,7 @@ Run the full local workflow from the repository root:
 python src/run_all.py
 ```
 
-This runs the validator, model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, and one combined output-check step.
+This runs the validator, model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, generated results interpretation, and one combined output-check step.
 
 You can also run the steps manually:
 
@@ -73,6 +74,7 @@ python src/run_sensitivity_analysis.py
 python src/run_profile_analysis.py
 python src/plot_site_map.py
 python src/generate_run_summary.py
+python src/generate_results_interpretation.py
 python src/check_outputs.py
 ```
 
@@ -99,6 +101,7 @@ data/outputs/profile_results.csv
 data/outputs/profile_rank_summary.csv
 data/outputs/profile_comparison.md
 data/outputs/model_run_summary.md
+data/outputs/results_interpretation.md
 data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
 data/outputs/charts/readiness_score_chart.png
@@ -138,6 +141,18 @@ data/outputs/profile_rank_summary.csv
 data/outputs/profile_comparison.md
 ```
 
+## Generated interpretation
+
+`src/generate_results_interpretation.py` creates a dynamic plain-English interpretation from the latest local outputs.
+
+Generated output:
+
+```text
+data/outputs/results_interpretation.md
+```
+
+This generated file adapts when rankings, recommendation tiers, sensitivity results, profile results, or review triggers change. It should be preferred over static docs when sharing the latest run result.
+
 ## Combined output check
 
 `src/check_outputs.py` is the single final output-check command.
@@ -149,7 +164,7 @@ It does two things:
 2. Generates a baseline comparison report against data/baselines/v1_baseline/.
 ```
 
-The sanity check confirms that generated files exist, the six current candidate site IDs appear, model ranks are valid, readiness scores are in range, port counts are non-negative, sensitivity ranks are stable, profile-analysis outputs exist, and the data-quality report has no ERROR items.
+The sanity check confirms that generated files exist, the six current candidate site IDs appear, model ranks are valid, readiness scores are in range, port counts are non-negative, sensitivity ranks are stable, profile-analysis outputs exist, the generated interpretation exists, and the data-quality report has no ERROR items.
 
 The baseline comparison writes local reports to:
 
@@ -186,7 +201,7 @@ Default package folder:
 data/outputs/deliverable_package/
 ```
 
-The package includes charts, run summaries, key CSV tables, and reporting documents. It is ignored by Git because it is generated locally.
+The package includes charts, dynamic run outputs, key CSV tables, and reporting documents. It is ignored by Git because it is generated locally.
 
 ## Generated outputs stay local
 
@@ -214,6 +229,12 @@ Run the profile analysis after generating site results:
 
 ```bash
 python src/run_profile_analysis.py
+```
+
+Generate the dynamic results interpretation after generating outputs:
+
+```bash
+python src/generate_results_interpretation.py
 ```
 
 Run the OSM amenities workflow with a longer pause between API requests:
@@ -258,8 +279,9 @@ python src/build_deliverable_package.py
 8. Runs sensitivity scenarios to test whether rankings stay stable under uncertainty.
 9. Tests alternative scoring profiles for different planning priorities.
 10. Exports CSV outputs, charts, and Markdown summaries.
-11. Runs one combined output check that validates current outputs and compares them against the committed V1 baseline snapshot.
-12. Can build a local deliverable package for sharing or presentation.
+11. Generates an adaptive results interpretation from the latest outputs.
+12. Runs one combined output check that validates current outputs and compares them against the committed V1 baseline snapshot.
+13. Can build a local deliverable package for sharing or presentation.
 
 ## Current candidate sites
 
@@ -291,7 +313,7 @@ Use these docs depending on what you need:
 docs/METHODOLOGY.md                         How scoring and port recommendations work
 docs/DATA_DICTIONARY.md                     Input/output column definitions
 docs/DATA_SOURCES.md                        Source plan and source quality notes
-docs/RESULTS_INTERPRETATION.md              Plain-English result guide
+docs/RESULTS_INTERPRETATION.md              Static plain-English result guide
 docs/READINESS_MAP_GUIDE.md                 How to interpret the generated readiness map
 docs/OSM_AMENITIES_WORKFLOW.md              How to download and review OSM amenity POIs
 docs/RECOMMENDATION_TIERS.md                Recommendation tier logic
@@ -303,6 +325,12 @@ docs/PRESENTATION_OUTLINE.md                Slide-style presentation outline
 docs/STAKEHOLDER_DATA_REQUEST.md            Stakeholder questions for replacing assumptions
 docs/PROJECT_STATUS.md                      Project status and next steps
 docs/PROJECT_DECISIONS_LOG.md               Central project decision log
+```
+
+Latest generated interpretation:
+
+```text
+data/outputs/results_interpretation.md
 ```
 
 ## Important limitations
