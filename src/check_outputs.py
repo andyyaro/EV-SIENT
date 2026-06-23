@@ -1,8 +1,8 @@
-"""Run sanity checks on generated model outputs.
+"""Check generated model outputs and compare them to the V1 baseline.
 
-This script checks that the pipeline did more than run without crashing. It
-verifies that key generated outputs exist and that the main model outputs are
-within expected planning ranges for the current V1 dataset.
+This script is the single output-check step for the project. It first runs
+sanity checks on the current generated outputs. If those checks pass, it then
+creates a baseline comparison report against the committed V1 benchmark snapshot.
 
 Run from the repository root after `python src/run_all.py`, or let run_all.py
 call it automatically.
@@ -10,6 +10,8 @@ call it automatically.
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -180,21 +182,35 @@ def run_checks() -> list[str]:
     return issues
 
 
+def run_baseline_comparison() -> None:
+    completed = subprocess.run(
+        [sys.executable, "src/compare_to_baseline.py"],
+        cwd=PROJECT_ROOT,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise SystemExit("Baseline comparison failed.")
+
+
 def main() -> None:
     issues = run_checks()
 
-    print("MODEL OUTPUT SANITY CHECK")
-    print("-------------------------")
+    print("MODEL OUTPUT CHECK")
+    print("------------------")
 
     if issues:
-        print("Result: FAILED")
+        print("Sanity check: FAILED")
         print()
         for issue in issues:
             print(f"- {issue}")
         raise SystemExit(1)
 
+    print("Sanity check: PASSED")
+    print()
+    run_baseline_comparison()
+    print()
     print("Result: PASSED")
-    print("All expected output files exist and the current V1 output checks passed.")
+    print("Current outputs are valid, and the baseline comparison report was generated.")
 
 
 if __name__ == "__main__":
