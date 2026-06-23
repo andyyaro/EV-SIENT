@@ -13,11 +13,16 @@ The first baseline is:
 v1_baseline/
 ```
 
-Use it to compare a current model run against the official V1 benchmark:
+The main workflow uses this baseline automatically through the combined output-check step:
 
 ```bash
 python src/run_all.py
-python src/compare_to_baseline.py
+```
+
+You can also run the combined output check manually after generating outputs:
+
+```bash
+python src/check_outputs.py
 ```
 
 To create a future baseline intentionally:
