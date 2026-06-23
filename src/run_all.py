@@ -2,7 +2,7 @@
 
 This script calls the main project scripts in the correct order so the validator,
 model outputs, sensitivity analysis, map/chart outputs, Markdown run summary,
-and output checks stay synchronized.
+output checks, and baseline comparison stay synchronized.
 
 Run from the repository root:
 
@@ -24,6 +24,7 @@ STEPS = [
     {"name": "Create readiness map", "command": [sys.executable, "src/plot_site_map.py"]},
     {"name": "Generate Markdown run summary", "command": [sys.executable, "src/generate_run_summary.py"]},
     {"name": "Check generated outputs", "command": [sys.executable, "src/check_outputs.py"]},
+    {"name": "Compare outputs to V1 baseline", "command": [sys.executable, "src/compare_to_baseline.py"]},
 ]
 
 EXPECTED_OUTPUTS = [
@@ -34,6 +35,8 @@ EXPECTED_OUTPUTS = [
     "data/outputs/charts/readiness_score_chart.png",
     "data/outputs/charts/site_readiness_map.png",
     "data/outputs/model_run_summary.md",
+    "data/outputs/baseline_comparison.csv",
+    "data/outputs/baseline_comparison.md",
 ]
 
 
