@@ -21,6 +21,8 @@ src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
 src/run_profile_analysis.py
+src/plot_readiness_score_chart.py
+src/plot_profile_spider_chart.py
 src/build_osm_amenities.py
 src/plot_site_map.py
 
@@ -68,7 +70,7 @@ python src/build_deliverable_package.py && \
 git status --short
 ```
 
-`src/run_all.py` runs the validator, readiness/right-sizing model, sensitivity analysis, scoring profile analysis, readiness map, Markdown run summary, generated results interpretation, and one combined output-check step.
+`src/run_all.py` runs the validator, readiness/right-sizing model, polished readiness chart, sensitivity analysis, scoring profile analysis, profile spider chart, readiness map, Markdown run summary, generated results interpretation, and one combined output-check step.
 
 The output-check step also generates a baseline comparison report against the committed V1 baseline.
 
@@ -79,8 +81,10 @@ You can also run the steps manually:
 ```bash
 python src/validate_site_data.py
 python src/ev_charger_model.py
+python src/plot_readiness_score_chart.py
 python src/run_sensitivity_analysis.py
 python src/run_profile_analysis.py
+python src/plot_profile_spider_chart.py
 python src/plot_site_map.py
 python src/generate_run_summary.py
 python src/generate_results_interpretation.py
@@ -116,6 +120,7 @@ data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
 data/outputs/workflow_success.json
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/profile_spider_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/amenities_osm_summary_0_5mi.csv
@@ -151,7 +156,10 @@ Generated profile outputs:
 data/outputs/profile_results.csv
 data/outputs/profile_rank_summary.csv
 data/outputs/profile_comparison.md
+data/outputs/charts/profile_spider_chart.png
 ```
+
+The spider chart shows each candidate site's profile readiness score across the five scoring-priority views. It emphasizes FFX002 because it ranks #1 across all profiles.
 
 ## Generated interpretation
 
@@ -182,7 +190,7 @@ The V1 sanity-check expectations live in:
 data/config/output_check_rules_v1.json
 ```
 
-The sanity check currently verifies that required outputs exist, the expected six candidate site IDs appear, model ranks are valid, readiness scores and profile scores are in range, port counts are non-negative, sensitivity rankings remain stable, profile outputs have the expected profiles and row counts, the generated interpretation exists, and the data-quality report has no ERROR items.
+The sanity check currently verifies that required outputs exist, the expected six candidate site IDs appear, model ranks are valid, readiness scores and profile scores are in range, port counts are non-negative, sensitivity rankings remain stable, profile outputs and the profile spider chart exist, the generated interpretation exists, and the data-quality report has no ERROR items.
 
 The baseline comparison writes local reports to:
 
@@ -247,6 +255,12 @@ Run the profile analysis after generating site results:
 
 ```bash
 python src/run_profile_analysis.py
+```
+
+Create the profile spider chart after generating profile results:
+
+```bash
+python src/plot_profile_spider_chart.py
 ```
 
 Generate the dynamic results interpretation after generating outputs:
