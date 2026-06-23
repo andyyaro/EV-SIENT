@@ -1,15 +1,26 @@
 # Data Dictionary
 
-This file defines the main inputs and outputs used by the EV Charger Site-Readiness and Right-Sizing Prototype.
+This file defines the main inputs, configs, and outputs used by the EV Charger Site-Readiness and Right-Sizing Prototype.
 
 ## Main files
 
 ```text
-data/inputs/real_sites_v1.csv       Main candidate-site input dataset
-data/inputs/sites_demo.csv          Small starter/demo dataset
-data/outputs/site_results.csv       Main model output, generated locally
-data/outputs/data_quality_report.csv Validation checklist output, generated locally
-data/outputs/sensitivity_summary.csv Sensitivity summary output, generated locally
+data/inputs/real_sites_v1.csv              Main candidate-site input dataset
+data/inputs/sites_demo.csv                 Small starter/demo dataset
+data/config/scoring_profiles.csv           Alternative scoring-priority profiles
+data/config/output_check_rules_v1.json     V1 output-check expectations
+data/outputs/site_results.csv              Main model output, generated locally
+data/outputs/data_quality_report.csv       Validation checklist output, generated locally
+data/outputs/sensitivity_results.csv       Detailed sensitivity output, generated locally
+data/outputs/sensitivity_summary.csv       Sensitivity summary output, generated locally
+data/outputs/profile_results.csv           Detailed scoring-profile output, generated locally
+data/outputs/profile_rank_summary.csv      Scoring-profile rank stability summary, generated locally
+data/outputs/profile_comparison.md         Scoring-profile plain-English report, generated locally
+data/outputs/model_run_summary.md          Dynamic run summary, generated locally
+data/outputs/results_interpretation.md     Dynamic results interpretation, generated locally
+data/outputs/baseline_comparison.csv       Baseline comparison table, generated locally
+data/outputs/baseline_comparison.md        Baseline comparison report, generated locally
+data/outputs/deliverable_package/          Local shareable output package, generated locally
 ```
 
 ## Important input columns
@@ -34,7 +45,9 @@ data/outputs/sensitivity_summary.csv Sensitivity summary output, generated local
 | `ada_layout_possible`, `fire_access_ok`, `garage_enclosed`, `emergency_disconnect_visible`, `stormwater_risk`, `battery_storage_flag` | Review and safety flags. | Planning/site-review assumptions. |
 | `notes` | Source and uncertainty explanation. | Required for transparency. |
 
-## Important output columns
+## Important main output columns
+
+These columns appear in `data/outputs/site_results.csv`.
 
 | Column | Meaning |
 |---|---|
@@ -56,6 +69,38 @@ data/outputs/sensitivity_summary.csv Sensitivity summary output, generated local
 | `install_cost_est_usd` | Planning install cost estimate. |
 | `ahj_review_flag` | `1` if model-level review trigger exists. |
 | `review_reason` | Plain-English review trigger explanation. |
+
+## Important scoring-profile output columns
+
+These columns appear in `data/outputs/profile_results.csv`.
+
+| Column | Meaning |
+|---|---|
+| `profile_name` | Scoring profile identifier from `data/config/scoring_profiles.csv`. |
+| `profile_label` | Human-readable profile label. |
+| `profile_description` | Short description of the profile priority. |
+| `demand_weight`, `feasibility_weight`, `safety_weight`, `equity_weight` | Weighting used for that profile. |
+| `profile_rank` | Rank under the scoring profile. |
+| `profile_readiness_score` | Readiness score under the scoring profile. |
+| `base_model_rank` | Rank from the main V1 model. |
+| `base_readiness_score` | Readiness score from the main V1 model. |
+| `rank_change_vs_base` | Difference between profile rank and base model rank. |
+| `profile_recommendation_tier` | Tier assigned under the scoring profile. |
+
+## Important output-check rule fields
+
+These fields appear in `data/config/output_check_rules_v1.json`.
+
+| Field | Meaning |
+|---|---|
+| `expected_site_ids` | Candidate site IDs expected in current V1 outputs. |
+| `expected_top_site_id` | Site expected to rank first in the current V1 output. |
+| `require_zero_data_quality_errors` | Whether `data_quality_report.csv` must contain zero ERROR items. |
+| `require_zero_sensitivity_rank_range` | Whether every site must have `rank_range = 0` in sensitivity summary. |
+| `expected_profile_names` | Scoring profiles expected in `profile_results.csv`. |
+| `expected_profile_count` | Number of scoring profiles expected. |
+| `expected_sites_per_profile` | Number of candidate sites expected in each profile. |
+| `profile_readiness_score_min`, `profile_readiness_score_max` | Allowed score range for profile readiness scores. |
 
 ## Recommendation interpretation
 
