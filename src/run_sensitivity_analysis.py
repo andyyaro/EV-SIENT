@@ -1,0 +1,155 @@
+"""Run scenario sensitivity analysis for the EV charger site-readiness model.
+
+The script checks whether site rankings stay stable when uncertain V1 inputs change.
+It does not replace confirmed facility, utility, or stakeholder data.
+"""
+
+import argparse
+from pathlib import Path
+
+import pandas as pd
+
+from ev_charger_model import enrich_and_score
+
+DEFAULT_INPUT = "data/inputs/real_sites_v1.csv"
+DEFAULT_RESULTS_OUTPUT = "data/outputs/sensitivity_results.csv"
+DEFAULT_SUMMARY_OUTPUT = "data/outputs/sensitivity_summary.csv"
+
+SCENARIOS = {
+    "very_low_demand_high_cost": {
+        "description": "Much lower demand and EV adoption; much higher planning install cost.",
+        "employees_day_multiplier": 0.50,
+        "visitors_day_multiplier": 0.50,
+        "ev_share_local_multiplier": 0.60,
+        "service_upgrade_cost_multiplier": 1.60,
+        "trenching_ft_multiplier": 1.40,
+    },
+    "low_demand_high_cost": {
+        "description": "Lower demand and EV adoption; higher planning install cost.",
+        "employees_day_multiplier": 0.75,
+        "visitors_day_multiplier": 0.75,
+        "ev_share_local_multiplier": 0.80,
+        "service_upgrade_cost_multiplier": 1.25,
+        "trenching_ft_multiplier": 1.15,
+    },
+    "base_case": {
+        "description": "Current V1 dataset values.",
+        "employees_day_multiplier": 1.00,
+        "visitors_day_multiplier": 1.00,
+        "ev_share_local_multiplier": 1.00,
+        "service_upgrade_cost_multiplier": 1.00,
+        "trenching_ft_multiplier": 1.00,
+    },
+    "high_demand_base_cost": {
+        "description": "Higher demand and EV adoption; same planning install cost.",
+        "employees_day_multiplier": 1.25,
+        "visitors_day_multiplier": 1.25,
+        "ev_share_local_multiplier": 1.25,
+        "service_upgrade_cost_multiplier": 1.00,
+        "trenching_ft_multiplier": 1.00,
+    },
+    "very_high_demand_low_cost": {
+        "description": "Much higher demand and EV adoption; lower planning install cost.",
+        "employees_day_multiplier": 1.75,
+        "visitors_day_multiplier": 1.75,
+        "ev_share_local_multiplier": 1.60,
+        "service_upgrade_cost_multiplier": 0.80,
+        "trenching_ft_multiplier": 0.85,
+    },
+}
+
+
+def apply_scenario(df, settings):
+    """Return a scenario-adjusted copy of the site input data."""
+    scenario_df = df.copy()
+
+    adjustable_fields = [
+        ("employees_day", "employees_day_multiplier"),
+        ("visitors_day", "visitors_day_multiplier"),
+        ("ev_share_local", "ev_share_local_multiplier"),
+        ("service_upgrade_cost_usd", "service_upgrade_cost_multiplier"),
+        ("trenching_ft", "trenching_ft_multiplier"),
+    ]
+
+    for column, multiplier_name in adjustable_fields:
+        if column not in scenario_df.columns:
+            continue
+        scenario_df[column] = pd.to_numeric(scenario_df[column], errors="coerce").fillna(0)
+        scenario_df[column] = scenario_df[column] * settings[multiplier_name]
+
+    if "ev_share_local" in scenario_df.columns:
+        scenario_df["ev_share_local"] = scenario_df["ev_share_local"].clip(lower=0, upper=0.20)
+
+    return scenario_df
+
+
+def run_scenarios(input_path):
+    sites = pd.read_csv(input_path)
+    all_results = []
+
+    for scenario_name, settings in SCENARIOS.items():
+        scenario_sites = apply_scenario(sites, settings)
+        results = enrich_and_score(scenario_sites).copy()
+        results.insert(0, "scenario", scenario_name)
+        results.insert(1, "scenario_description", settings["description"])
+        results["rank"] = range(1, len(results) + 1)
+        all_results.append(results)
+
+    sensitivity_results = pd.concat(all_results, ignore_index=True)
+
+    summary = (
+        sensitivity_results
+        .groupby(["site_id", "site_name"], as_index=False)
+        .agg(
+            best_rank=("rank", "min"),
+            worst_rank=("rank", "max"),
+            average_rank=("rank", "mean"),
+            min_readiness_score=("readiness_score", "min"),
+            max_readiness_score=("readiness_score", "max"),
+            average_readiness_score=("readiness_score", "mean"),
+        )
+        .sort_values(["average_rank", "average_readiness_score"], ascending=[True, False])
+    )
+
+    summary["rank_range"] = summary["worst_rank"] - summary["best_rank"]
+    summary["readiness_score_range"] = summary["max_readiness_score"] - summary["min_readiness_score"]
+
+    return sensitivity_results, summary
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run EV charger model sensitivity scenarios.")
+    parser.add_argument("--input", default=DEFAULT_INPUT, help="Input candidate-site CSV.")
+    parser.add_argument("--results-output", default=DEFAULT_RESULTS_OUTPUT, help="Detailed scenario results CSV.")
+    parser.add_argument("--summary-output", default=DEFAULT_SUMMARY_OUTPUT, help="Summary CSV by site.")
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    input_path = Path(args.input)
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_path}")
+
+    sensitivity_results, summary = run_scenarios(input_path)
+    results_output = Path(args.results_output)
+    summary_output = Path(args.summary_output)
+    results_output.parent.mkdir(parents=True, exist_ok=True)
+    summary_output.parent.mkdir(parents=True, exist_ok=True)
+    sensitivity_results.to_csv(results_output, index=False)
+    summary.to_csv(summary_output, index=False)
+
+    print("EV CHARGER SENSITIVITY ANALYSIS")
+    print("-------------------------------")
+    print(f"Input file: {input_path}")
+    print(f"Detailed output: {results_output}")
+    print(f"Summary output: {summary_output}")
+    print()
+    print("Scenario summary by site:")
+    print(summary.to_string(index=False))
+    print()
+    print("Done. Use data/outputs/sensitivity_summary.csv to see whether rankings are stable.")
+
+
+if __name__ == "__main__":
+    main()
