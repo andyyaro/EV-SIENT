@@ -138,6 +138,8 @@ More existing chargers nearby reduce new need.
 
 Current limitation: amenities and parking are no longer all zero, but the current `amenities_count_0_5mi` and `parking_spaces` values are manual V1 planning estimates. They should later be replaced with stronger GIS/POI, facility, stakeholder, or documented manual-count data.
 
+Important weighting note: the current 0.09 parking weight is intentionally low because `parking_spaces` is not official data yet. Once parking counts become official or strongly verified, this weight should be revisited and may need to be increased or recalibrated against the other demand indicators.
+
 ## Public access adjustment
 
 The model now includes a public-access adjustment.
@@ -391,10 +393,11 @@ Recommended next improvements:
 ```text
 1. Re-run the model after each data update and compare results.
 2. Improve visitor, employee, parking, and hours assumptions with stronger evidence.
-3. Replace manual amenity estimates with a stronger GIS/POI method.
-4. Improve equity scoring using ACS variables.
-5. Improve electrical, trenching, and service upgrade assumptions.
-6. Add clearer special-use handling for fleet or public safety facilities.
+3. Revisit the parking weight once official or strongly verified parking counts are available.
+4. Replace manual amenity estimates with a stronger GIS/POI method.
+5. Improve equity scoring using ACS variables.
+6. Improve electrical, trenching, and service upgrade assumptions.
+7. Add clearer special-use handling for fleet or public safety facilities.
 ```
 
 ## Important limitation
