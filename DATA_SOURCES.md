@@ -35,7 +35,7 @@ FFX002 — City of Fairfax Regional Library
 
 `PWC003` now represents the Prince William County Public Safety Training Center. It is marked as limited/not general public access in the working CSV because the facility is primarily a public safety training location.
 
-## Official data already added
+## Data already added
 
 ### 1. Fairfax City GeoHub Addresses
 
@@ -56,6 +56,8 @@ zip
 lat
 lon
 ```
+
+Source quality: `Official`
 
 ### 2. Prince William County GIS Premise Addresses
 
@@ -79,9 +81,11 @@ lat
 lon
 ```
 
+Source quality: `Official`
+
 ### 3. DOE / AFDC / NREL Alternative Fuel Stations
 
-Used for official nearby public active EV charging supply.
+Used for nearby public active EV charging supply.
 
 Model fields supported:
 
@@ -99,6 +103,17 @@ PWC003: existing_l2_ports_1mi = 0, existing_dcfc_ports_3mi = 0
 PWC004: existing_l2_ports_1mi = 0, existing_dcfc_ports_3mi = 27
 FFX001: existing_l2_ports_1mi = 28, existing_dcfc_ports_3mi = 39
 FFX002: existing_l2_ports_1mi = 14, existing_dcfc_ports_3mi = 23
+```
+
+Source quality: `Official`
+
+Notes:
+
+```text
+Filtered to public active electric stations.
+Level 2 ports counted within 1 mile.
+DC fast ports counted within 3 miles.
+The source extract is stored at data/source_extracts/afdc_ev_supply_counts.csv.
 ```
 
 ### 4. VDOT Bidirectional Traffic Volume 2025
@@ -121,6 +136,8 @@ PWC004: aadt_nearest = 45000
 FFX001: aadt_nearest = 9700
 FFX002: aadt_nearest = 12000
 ```
+
+Source quality: `Official`
 
 Notes:
 
@@ -152,6 +169,8 @@ FFX001: nearby_households_1mi = 4231
 FFX002: nearby_households_1mi = 4964
 ```
 
+Source quality: `Official-derived`
+
 Notes:
 
 ```text
@@ -182,6 +201,8 @@ FFX001: nearby_jobs_1mi = 18057
 FFX002: nearby_jobs_1mi = 15718
 ```
 
+Source quality: `Official-derived`
+
 Notes:
 
 ```text
@@ -190,6 +211,39 @@ The source file is va_wac_S000_JT00_2023.csv.gz.
 Workplace block jobs were aggregated to block groups for the current prototype.
 Values are then area-weighted estimates for a 1-mile site buffer.
 The source extract is stored at data/source_extracts/lodes_jobs_1mi.csv.
+```
+
+### 7. Amenities 0.5-mile V1 category count
+
+Used for a planning-level nearby amenity signal.
+
+Model field supported:
+
+```text
+amenities_count_0_5mi
+```
+
+Current values:
+
+```text
+PWC001: amenities_count_0_5mi = 3
+PWC002: amenities_count_0_5mi = 6
+PWC003: amenities_count_0_5mi = 0
+PWC004: amenities_count_0_5mi = 4
+FFX001: amenities_count_0_5mi = 8
+FFX002: amenities_count_0_5mi = 8
+```
+
+Source quality: `Manual estimate`
+
+Notes:
+
+```text
+These are manual V1 planning estimates, not official GIS counts.
+The values count nearby public-use amenity categories, not every individual business.
+Categories include civic services, libraries, parks/recreation, retail/services, restaurants/cafes, grocery/food retail, entertainment, transit, public gathering space, and courthouse/government activity.
+The source extract is stored at data/source_extracts/amenities_0_5mi.csv.
+This field should later be replaced with a stronger GIS/POI method such as OpenStreetMap, local GIS, or a documented manual map count with screenshots.
 ```
 
 ## Priority official sources still needed
@@ -259,7 +313,7 @@ Do not present these fields as official engineering determinations unless verifi
 | `nearby_households_1mi` | Census ACS | Official-derived | Added with ACS B11001 and TIGER block group geometry |
 | `nearby_jobs_1mi` | Census LEHD LODES | Official-derived | Added with LODES WAC and TIGER block group geometry |
 | `aadt_nearest` | VDOT / Virginia Roads | Official | Added for confirmed rows using nearest traffic segment |
-| `amenities_count_0_5mi` | OpenStreetMap / manual map count | Public/open data or manual estimate | Not government official unless using local GIS |
+| `amenities_count_0_5mi` | Manual V1 category count; later GIS/POI | Manual estimate | Added from `data/source_extracts/amenities_0_5mi.csv`; replace later with stronger POI data |
 | `ev_registrations_local` | State/local registration source if available | Official if found | Optional for later |
 | `ev_share_local` | State/local registration source or regional assumption | Official or manual estimate | Use same assumption for v1 if needed |
 | `existing_l2_ports_1mi` | AFDC / NREL Alternative Fuel Stations | Official | Count public active L2 ports within 1 mile |
@@ -294,9 +348,10 @@ Unknown safety/electrical values should not be presented as verified.
 Best next data work:
 
 ```text
-1. Improve site-specific public_access handling and public_safety behavior in the model.
+1. Re-run the validator and model after each CSV update.
 2. Improve site-specific parking, hours, visitor, employee, and electrical assumptions.
-3. Fill missing dataset freshness metadata for older source files.
-4. Begin equity-gap scoring from ACS variables.
-5. Improve feasibility assumptions for electrical capacity, trenching, and service upgrade cost.
+3. Replace manual amenities with a stronger GIS/POI method.
+4. Fill missing dataset freshness metadata for older source files.
+5. Begin equity-gap scoring from ACS variables.
+6. Improve feasibility assumptions for electrical capacity, trenching, and service upgrade cost.
 ```
