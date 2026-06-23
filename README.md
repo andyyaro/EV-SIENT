@@ -33,6 +33,35 @@ python ev_charger_model.py --input sites.csv
 python ev_charger_model.py --input real_sites_v1.csv --output real_site_results.csv
 ```
 
+## Data quality checklist
+
+Before trusting a new or edited candidate-site CSV, run:
+
+```bash
+python validate_site_data.py
+```
+
+Default input:
+
+```text
+real_sites_v1.csv
+```
+
+Default output:
+
+```text
+data_quality_report.csv
+```
+
+Optional examples:
+
+```bash
+python validate_site_data.py --input sites.csv
+python validate_site_data.py --input real_sites_v1.csv --output data_quality_report.csv
+```
+
+The validation script does not approve a site or change the model ranking. It acts like a checklist that flags missing columns, invalid values, placeholder zeros, limited-access sites, garage/enclosed-space concerns, emergency disconnect uncertainty, and other fields needing stakeholder or site review.
+
 ## Install requirements
 
 ```bash
@@ -43,9 +72,11 @@ pip install pandas numpy matplotlib
 
 ```text
 ev_charger_model.py      Main model script
+validate_site_data.py    Data quality/checklist script
 real_sites_v1.csv        Current real candidate site dataset
 sites.csv                Older starter/demo dataset
 site_results.csv         Model output after running the script
+data_quality_report.csv  Validation output after running the checklist
 README.md                Repo overview and run instructions
 PROJECT_STATUS.md        Current project status and next steps
 DATA_SOURCES.md          Data source and field plan
@@ -75,7 +106,7 @@ RESULTS_INTERPRETATION.md
                          Simple explanation of the current ranking and review flags.
 ```
 
-## What the script does
+## What the model script does
 
 1. Reads a candidate-site CSV file.
 2. Cleans numeric and yes/no fields.
@@ -89,7 +120,7 @@ RESULTS_INTERPRETATION.md
 
 ## Outputs
 
-After running the script, the folder should contain:
+After running the model script, the folder should contain:
 
 ```text
 site_results.csv
@@ -102,6 +133,14 @@ utilization_vs_ports_<site_name>.png
 `readiness_score_chart.png` compares candidate sites by readiness score.
 
 Each `utilization_vs_ports_<site_name>.png` chart shows how estimated utilization changes as more ports are installed for that site.
+
+After running the validation script, the folder should contain:
+
+```text
+data_quality_report.csv
+```
+
+`data_quality_report.csv` lists site-level and dataset-level issues with severity, field name, current value, and a recommended next step.
 
 ## Current real dataset status
 
