@@ -21,6 +21,15 @@ DEFAULT_INPUT = "data/inputs/real_sites_v1.csv"
 DEFAULT_RESULTS = "data/outputs/site_results.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/site_readiness_map.png"
 
+LABEL_OFFSETS = {
+    "FFX001": (-54, -6),
+    "FFX002": (10, 12),
+    "PWC001": (10, 8),
+    "PWC002": (8, 8),
+    "PWC003": (8, 8),
+    "PWC004": (8, 8),
+}
+
 
 def ensure_parent_dir(path: str | Path) -> None:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -67,9 +76,17 @@ def site_label(row: pd.Series) -> str:
     """Create a compact map label."""
     site_id = str(row.get("site_id", ""))
     score = row.get("readiness_score", "")
+    rank = row.get("model_rank", "")
+
     if pd.isna(score) or score == "":
         return site_id
-    return f"{site_id}\n{float(score):.1f}"
+
+    try:
+        rank_text = f"#{int(rank)} " if pd.notna(rank) and str(rank) != "" else ""
+    except (TypeError, ValueError):
+        rank_text = ""
+
+    return f"{rank_text}{site_id}\n{float(score):.1f}"
 
 
 def marker_size(score) -> float:
@@ -80,11 +97,16 @@ def marker_size(score) -> float:
         return 180
 
 
+def label_offset(site_id: str) -> tuple[int, int]:
+    """Return a hand-tuned label offset so nearby labels do not overlap."""
+    return LABEL_OFFSETS.get(str(site_id), (8, 8))
+
+
 def plot_site_map(data: pd.DataFrame, output_path: Path) -> None:
     """Create and save the site map."""
     ensure_parent_dir(output_path)
 
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(11, 7.5))
 
     if "readiness_score" in data.columns:
         scores = pd.to_numeric(data["readiness_score"], errors="coerce")
@@ -103,13 +125,15 @@ def plot_site_map(data: pd.DataFrame, output_path: Path) -> None:
     )
 
     for _, row in data.iterrows():
+        offset = label_offset(row.get("site_id", ""))
         plt.annotate(
             site_label(row),
             xy=(row["lon"], row["lat"]),
-            xytext=(6, 6),
+            xytext=offset,
             textcoords="offset points",
             fontsize=8,
-            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.75, "lw": 0.3},
+            arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
+            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.78, "lw": 0.3},
         )
 
     plt.colorbar(scatter, label="Readiness score")
@@ -118,8 +142,8 @@ def plot_site_map(data: pd.DataFrame, output_path: Path) -> None:
     plt.title("Candidate EV Charging Sites — Readiness Map")
     plt.grid(True, alpha=0.25)
 
-    lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.12, 0.01)
-    lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.12, 0.01)
+    lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.14, 0.01)
+    lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.14, 0.01)
     plt.xlim(data["lon"].min() - lon_padding, data["lon"].max() + lon_padding)
     plt.ylim(data["lat"].min() - lat_padding, data["lat"].max() + lat_padding)
 
