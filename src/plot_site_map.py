@@ -136,6 +136,12 @@ def map_interpretation_note(
     return "Candidate locations shown with readiness-score markers."
 
 
+def stable_top_candidate_found(data: pd.DataFrame, sensitivity: pd.DataFrame, profile_results: pd.DataFrame) -> bool:
+    top_site = top_site_id_from_results(data)
+    profile_site, profile_count = profile_top_site(profile_results)
+    return bool(top_site and sensitivity_is_stable(sensitivity) and profile_site == top_site and profile_count > 0)
+
+
 def site_label(row: pd.Series) -> str:
     """Create a compact map label."""
     site_id = str(row.get("site_id", ""))
@@ -199,6 +205,7 @@ def plot_site_map(
     if top_site:
         top_row = data[data["site_id"].astype(str) == top_site]
         if not top_row.empty:
+            top_label = "Stable top candidate" if stable_top_candidate_found(data, sensitivity, profile_results) else "Top candidate"
             plt.scatter(
                 top_row["lon"],
                 top_row["lat"],
@@ -207,7 +214,7 @@ def plot_site_map(
                 alpha=0.9,
                 edgecolors="black",
                 linewidths=1.0,
-                label="Stable top candidate",
+                label=top_label,
             )
 
     for _, row in data.iterrows():
