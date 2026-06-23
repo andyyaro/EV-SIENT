@@ -2,7 +2,7 @@
 EV Charger Site-Readiness and Right-Sizing Starter Model
 
 What this script does:
-1. Reads sites.csv
+1. Reads an input site CSV file, defaulting to real_sites_v1.csv
 2. Scores each site for demand, feasibility, safety, and equity
 3. Estimates charging sessions per day
 4. Recommends starter EV charging ports now, 2035, and 2050
@@ -12,13 +12,16 @@ What this script does:
 8. Creates one utilization-vs-ports chart for every site
 
 Run in PyCharm:
-- Put this file and sites.csv in the same folder.
+- Put this file and real_sites_v1.csv in the same folder.
 - Install packages:
     pip install pandas numpy matplotlib
 - Run:
     python ev_charger_model.py
+- Optional:
+    python ev_charger_model.py --input sites.csv --output site_results_starter.csv
 """
 
+import argparse
 import math
 import numpy as np
 import pandas as pd
@@ -395,7 +398,25 @@ def make_utilization_charts(results, max_ports=10):
 
 
 def main():
-    sites = pd.read_csv("sites.csv")
+    parser = argparse.ArgumentParser(
+        description="Run the EV charger site-readiness and right-sizing model."
+    )
+
+    parser.add_argument(
+        "--input",
+        default="real_sites_v1.csv",
+        help="Input CSV file. Default: real_sites_v1.csv"
+    )
+
+    parser.add_argument(
+        "--output",
+        default="site_results.csv",
+        help="Output results CSV file. Default: site_results.csv"
+    )
+
+    args = parser.parse_args()
+
+    sites = pd.read_csv(args.input)
     results = enrich_and_score(sites)
 
     display_cols = [
@@ -421,10 +442,11 @@ def main():
 
     print("\nEV CHARGER SITE-READINESS RESULTS")
     print("----------------------------------")
+    print(f"Input file: {args.input}")
     print(final_results.to_string(index=False))
 
-    final_results.to_csv("site_results.csv", index=False)
-    print("\nSaved: site_results.csv")
+    final_results.to_csv(args.output, index=False)
+    print(f"\nSaved: {args.output}")
 
     make_readiness_chart(results)
     print("Saved: readiness_score_chart.png")
@@ -434,7 +456,7 @@ def main():
     for filename in utilization_chart_files:
         print(f"- {filename}")
 
-    print("\nDone. Open site_results.csv and the PNG charts in this folder.")
+    print("\nDone. Open the output CSV and PNG charts in this folder.")
 
 
 if __name__ == "__main__":
