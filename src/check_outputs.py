@@ -4,22 +4,26 @@ This script is the single output-check step for the project. It first runs
 sanity checks on the current generated outputs. If those checks pass, it then
 creates a baseline comparison report against the committed V1 benchmark snapshot.
 
+The V1 expectations that are likely to change over time live in
+data/config/output_check_rules_v1.json instead of being hard-coded in this
+script.
+
 Run from the repository root after `python src/run_all.py`, or let run_all.py
 call it automatically.
 """
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-
-EXPECTED_SITE_IDS = {"PWC001", "PWC002", "PWC003", "PWC004", "FFX001", "FFX002"}
-EXPECTED_TOP_SITE_ID = "FFX002"
+CHECK_RULES_FILE = "data/config/output_check_rules_v1.json"
 
 REQUIRED_OUTPUT_FILES = [
     "data/outputs/data_quality_report.csv",
@@ -46,6 +50,14 @@ REQUIRED_SITE_RESULTS_COLUMNS = [
     "recommended_ports_2050",
 ]
 
+REQUIRED_PROFILE_RESULTS_COLUMNS = [
+    "profile_name",
+    "profile_rank",
+    "site_id",
+    "site_name",
+    "profile_readiness_score",
+]
+
 
 def output_path(relative_path: str) -> Path:
     return PROJECT_ROOT / relative_path
@@ -53,6 +65,41 @@ def output_path(relative_path: str) -> Path:
 
 def add_issue(issues: list[str], message: str) -> None:
     issues.append(message)
+
+
+def load_check_rules(issues: list[str]) -> dict[str, Any]:
+    path = output_path(CHECK_RULES_FILE)
+    if not path.exists():
+        add_issue(issues, f"Missing output-check rules config: {CHECK_RULES_FILE}")
+        return {}
+
+    try:
+        rules = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        add_issue(issues, f"Could not parse {CHECK_RULES_FILE}: {exc}")
+        return {}
+
+    if not isinstance(rules, dict):
+        add_issue(issues, f"{CHECK_RULES_FILE} must contain a JSON object")
+        return {}
+
+    return rules
+
+
+def get_expected_site_ids(rules: dict[str, Any], issues: list[str]) -> set[str]:
+    site_ids = rules.get("expected_site_ids", [])
+    if not isinstance(site_ids, list) or not site_ids:
+        add_issue(issues, f"{CHECK_RULES_FILE} must define a non-empty expected_site_ids list")
+        return set()
+    return {str(site_id) for site_id in site_ids}
+
+
+def get_expected_profile_names(rules: dict[str, Any], issues: list[str]) -> set[str]:
+    profile_names = rules.get("expected_profile_names", [])
+    if not isinstance(profile_names, list) or not profile_names:
+        add_issue(issues, f"{CHECK_RULES_FILE} must define a non-empty expected_profile_names list")
+        return set()
+    return {str(profile_name) for profile_name in profile_names}
 
 
 def require_file_exists(relative_path: str, issues: list[str]) -> None:
@@ -101,7 +148,7 @@ def check_required_files(issues: list[str]) -> None:
         require_file_exists(relative_path, issues)
 
 
-def check_site_results(issues: list[str]) -> None:
+def check_site_results(issues: list[str], rules: dict[str, Any]) -> None:
     path = output_path("data/outputs/site_results.csv")
     if not path.exists():
         return
@@ -111,11 +158,13 @@ def check_site_results(issues: list[str]) -> None:
     if not set(REQUIRED_SITE_RESULTS_COLUMNS).issubset(results.columns):
         return
 
+    expected_site_ids = get_expected_site_ids(rules, issues)
     actual_site_ids = set(results["site_id"].astype(str))
-    if actual_site_ids != EXPECTED_SITE_IDS:
+    if expected_site_ids and actual_site_ids != expected_site_ids:
         add_issue(
             issues,
-            f"site_results.csv site IDs do not match expected V1 sites. Expected {sorted(EXPECTED_SITE_IDS)}, got {sorted(actual_site_ids)}",
+            f"site_results.csv site IDs do not match expected V1 sites. "
+            f"Expected {sorted(expected_site_ids)}, got {sorted(actual_site_ids)}",
         )
 
     if results["site_id"].duplicated().any():
@@ -134,17 +183,20 @@ def check_site_results(issues: list[str]) -> None:
     for column in ["recommended_ports_now", "recommended_ports_2035", "recommended_ports_2050"]:
         check_numeric_range(results, column, 0, 100, "site_results.csv", issues)
 
-    if not ranks.isna().any():
+    expected_top_site_id = str(rules.get("expected_top_site_id", ""))
+    if not expected_top_site_id:
+        add_issue(issues, f"{CHECK_RULES_FILE} must define expected_top_site_id")
+    elif not ranks.isna().any():
         top_row = results.loc[ranks.idxmin()]
         top_site_id = str(top_row.get("site_id", ""))
-        if top_site_id != EXPECTED_TOP_SITE_ID:
+        if top_site_id != expected_top_site_id:
             add_issue(
                 issues,
-                f"Expected current V1 top-ranked site to be {EXPECTED_TOP_SITE_ID}, but got {top_site_id}",
+                f"Expected current V1 top-ranked site to be {expected_top_site_id}, but got {top_site_id}",
             )
 
 
-def check_data_quality_report(issues: list[str]) -> None:
+def check_data_quality_report(issues: list[str], rules: dict[str, Any]) -> None:
     path = output_path("data/outputs/data_quality_report.csv")
     if not path.exists():
         return
@@ -154,12 +206,13 @@ def check_data_quality_report(issues: list[str]) -> None:
     if "severity" not in report.columns:
         return
 
-    error_count = int((report["severity"] == "ERROR").sum())
-    if error_count != 0:
-        add_issue(issues, f"data_quality_report.csv has {error_count} ERROR item(s)")
+    if bool(rules.get("require_zero_data_quality_errors", True)):
+        error_count = int((report["severity"] == "ERROR").sum())
+        if error_count != 0:
+            add_issue(issues, f"data_quality_report.csv has {error_count} ERROR item(s)")
 
 
-def check_sensitivity_summary(issues: list[str]) -> None:
+def check_sensitivity_summary(issues: list[str], rules: dict[str, Any]) -> None:
     path = output_path("data/outputs/sensitivity_summary.csv")
     if not path.exists():
         return
@@ -172,17 +225,105 @@ def check_sensitivity_summary(issues: list[str]) -> None:
     rank_range = pd.to_numeric(summary["rank_range"], errors="coerce")
     if rank_range.isna().any():
         add_issue(issues, "sensitivity_summary.csv rank_range contains blank or non-numeric values")
-    elif (rank_range != 0).any():
+    elif bool(rules.get("require_zero_sensitivity_rank_range", True)) and (rank_range != 0).any():
         moving_sites = summary.loc[rank_range != 0, "site_id"].astype(str).tolist()
         add_issue(issues, f"Expected V1 sensitivity rank_range to be 0 for every site; changed sites: {moving_sites}")
 
 
+def check_profile_results(issues: list[str], rules: dict[str, Any]) -> None:
+    path = output_path("data/outputs/profile_results.csv")
+    if not path.exists():
+        return
+
+    profiles = pd.read_csv(path)
+    require_columns(profiles, REQUIRED_PROFILE_RESULTS_COLUMNS, "profile_results.csv", issues)
+    if not set(REQUIRED_PROFILE_RESULTS_COLUMNS).issubset(profiles.columns):
+        return
+
+    expected_site_ids = get_expected_site_ids(rules, issues)
+    expected_profile_names = get_expected_profile_names(rules, issues)
+
+    actual_profile_names = set(profiles["profile_name"].astype(str))
+    if expected_profile_names and actual_profile_names != expected_profile_names:
+        add_issue(
+            issues,
+            f"profile_results.csv profile names do not match expected V1 profiles. "
+            f"Expected {sorted(expected_profile_names)}, got {sorted(actual_profile_names)}",
+        )
+
+    actual_site_ids = set(profiles["site_id"].astype(str))
+    if expected_site_ids and actual_site_ids != expected_site_ids:
+        add_issue(
+            issues,
+            f"profile_results.csv site IDs do not match expected V1 sites. "
+            f"Expected {sorted(expected_site_ids)}, got {sorted(actual_site_ids)}",
+        )
+
+    duplicate_pairs = profiles[profiles[["profile_name", "site_id"]].duplicated()]
+    if not duplicate_pairs.empty:
+        duplicates = duplicate_pairs[["profile_name", "site_id"]].astype(str).to_dict("records")
+        add_issue(issues, f"profile_results.csv has duplicate (profile_name, site_id) rows: {duplicates}")
+
+    expected_profile_count = int(rules.get("expected_profile_count", len(expected_profile_names)))
+    actual_profile_count = profiles["profile_name"].nunique()
+    if expected_profile_count and actual_profile_count != expected_profile_count:
+        add_issue(
+            issues,
+            f"profile_results.csv should contain {expected_profile_count} profiles, but contains {actual_profile_count}",
+        )
+
+    expected_sites_per_profile = int(rules.get("expected_sites_per_profile", len(expected_site_ids)))
+    if expected_profile_count and expected_sites_per_profile:
+        expected_rows = expected_profile_count * expected_sites_per_profile
+        if len(profiles) != expected_rows:
+            add_issue(issues, f"profile_results.csv should contain {expected_rows} rows, but contains {len(profiles)}")
+
+    score_min = float(rules.get("profile_readiness_score_min", 0))
+    score_max = float(rules.get("profile_readiness_score_max", 100))
+    check_numeric_range(
+        profiles,
+        "profile_readiness_score",
+        score_min,
+        score_max,
+        "profile_results.csv",
+        issues,
+    )
+
+    for profile_name, group in profiles.groupby("profile_name", sort=False):
+        label = f"profile_results.csv profile {profile_name}"
+
+        if expected_sites_per_profile and len(group) != expected_sites_per_profile:
+            add_issue(issues, f"{label} should contain {expected_sites_per_profile} sites, but contains {len(group)}")
+
+        if expected_site_ids and set(group["site_id"].astype(str)) != expected_site_ids:
+            add_issue(issues, f"{label} does not contain the expected site set")
+
+        ranks = pd.to_numeric(group["profile_rank"], errors="coerce")
+        if ranks.isna().any():
+            add_issue(issues, f"{label} profile_rank contains blank or non-numeric values")
+            continue
+
+        if ranks.duplicated().any():
+            add_issue(issues, f"{label} has duplicate profile_rank values")
+            continue
+
+        expected_ranks = list(range(1, len(group) + 1))
+        actual_ranks = sorted(ranks.astype(int).tolist())
+        if actual_ranks != expected_ranks:
+            add_issue(issues, f"{label} profile_rank values should be consecutive starting at 1")
+
+
 def run_checks() -> list[str]:
     issues: list[str] = []
+    rules = load_check_rules(issues)
+
     check_required_files(issues)
-    check_site_results(issues)
-    check_data_quality_report(issues)
-    check_sensitivity_summary(issues)
+    if rules:
+        check_site_results(issues, rules)
+        check_data_quality_report(issues, rules)
+        check_sensitivity_summary(issues, rules)
+        check_profile_results(issues, rules)
+
     return issues
 
 
