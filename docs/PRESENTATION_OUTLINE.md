@@ -28,7 +28,7 @@ FFX002 — City of Fairfax Regional Library
 ## Slide 4 — Data sources
 
 ```text
-Official / official-derived:
+Official / official-derived / open GIS:
 - City of Fairfax GIS addresses
 - Prince William County GIS premise addresses
 - AFDC / NREL public active EV charger data
@@ -38,10 +38,10 @@ Official / official-derived:
 - LODES 2023 jobs data
 - Official facility hours/parking for FFX002
 - Official current renovation status for PWC004
+- Reviewed OSM / Overpass POI categories for amenities
 
 Planning estimates / proxies:
 - Demand assumptions v1
-- Amenities 0.5-mile category count
 - Electrical feasibility planning estimates
 - Local EV adoption proxy
 ```
@@ -57,9 +57,9 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ```text
 1. FFX002 — 59.9
 2. FFX001 — 53.1
-3. PWC004 — 46.5
-4. PWC002 — 43.2
-5. PWC001 — 40.1
+3. PWC004 — 48.0
+4. PWC002 — 44.3
+5. PWC001 — 42.1
 6. PWC003 — 18.6
 ```
 
@@ -90,9 +90,8 @@ spare_capacity_kw
 emergency_disconnect_visible
 employees_day
 visitors_day
-hours_open
-parking_spaces
-amenities_count_0_5mi
+hours_open for sites except FFX002
+parking_spaces for sites except FFX002
 local EV adoption counts
 ```
 
@@ -101,7 +100,8 @@ local EV adoption counts
 ```text
 FFX002 parking and hours are now supported by an official facility page.
 PWC004's official library page currently lists Chinn Park Library as closed for renovation.
-The project should decide whether PWC004 is modeled as current closed status or future reopened site conditions.
+PWC004 remains modeled under the future/reopened planning assumption.
+Amenities now use reviewed OSM/Overpass six-category POI counts.
 ```
 
 ## Slide 11 — Final conclusion
