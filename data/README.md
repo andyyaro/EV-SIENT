@@ -24,6 +24,7 @@ source_dataset_log.csv
 dataset_metadata.csv
 source_extracts/site_coordinate_sources.csv
 source_extracts/afdc_ev_supply_counts.csv
+source_extracts/vdot_nearest_traffic_segments.csv
 raw_exports/README.md
 ```
 
