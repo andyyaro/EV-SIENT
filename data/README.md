@@ -26,6 +26,7 @@ source_extracts/site_coordinate_sources.csv
 source_extracts/afdc_ev_supply_counts.csv
 source_extracts/vdot_nearest_traffic_segments.csv
 source_extracts/acs_households_1mi.csv
+source_extracts/lodes_jobs_1mi.csv
 source_extracts/demand_assumptions_v1.csv
 raw_exports/README.md
 ```
