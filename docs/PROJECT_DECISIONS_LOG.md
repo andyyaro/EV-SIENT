@@ -28,7 +28,7 @@ Nearby households and jobs are official-derived from ACS/TIGER and LODES/TIGER m
 
 ## Decision 7 — Use ACS-derived equity index
 
-`equity_gap_index` uses ACS 2024 5-Year indicators and TIGER geometry.
+`equity_gap_index` uses ACS 2024 5-Year indicators and TIGER geometry. The main model reads the precomputed value from the input CSV; the current repo does not ask users to run a separate custom equity-builder script.
 
 ## Decision 8 — Use planning estimates where confirmed data is unavailable
 
@@ -64,7 +64,7 @@ The model now outputs planning tiers, recommendations, priority reasons, and nex
 
 ## Decision 16 — Add reporting layer
 
-The repo includes a model findings brief and presentation outline for stakeholder communication.
+The repo includes a model findings brief, a full model findings report, and a presentation outline for stakeholder communication.
 
 ## Decision 17 — Reorganize repository structure
 
