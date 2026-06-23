@@ -1,8 +1,8 @@
 """Run the full EV charger model workflow in one command.
 
 This script calls the main project scripts in the correct order so the validator,
-model outputs, sensitivity analysis, map/chart outputs, Markdown run summary,
-and combined output checks stay synchronized.
+model outputs, sensitivity analysis, profile analysis, map/chart outputs,
+Markdown run summary, and combined output checks stay synchronized.
 
 Run from the repository root:
 
@@ -21,6 +21,7 @@ STEPS = [
     {"name": "Validate input data", "command": [sys.executable, "src/validate_site_data.py"]},
     {"name": "Run readiness and right-sizing model", "command": [sys.executable, "src/ev_charger_model.py"]},
     {"name": "Run sensitivity analysis", "command": [sys.executable, "src/run_sensitivity_analysis.py"]},
+    {"name": "Run scoring profile analysis", "command": [sys.executable, "src/run_profile_analysis.py"]},
     {"name": "Create readiness map", "command": [sys.executable, "src/plot_site_map.py"]},
     {"name": "Generate Markdown run summary", "command": [sys.executable, "src/generate_run_summary.py"]},
     {"name": "Check outputs and compare to V1 baseline", "command": [sys.executable, "src/check_outputs.py"]},
@@ -31,6 +32,9 @@ EXPECTED_OUTPUTS = [
     "data/outputs/site_results.csv",
     "data/outputs/sensitivity_results.csv",
     "data/outputs/sensitivity_summary.csv",
+    "data/outputs/profile_results.csv",
+    "data/outputs/profile_rank_summary.csv",
+    "data/outputs/profile_comparison.md",
     "data/outputs/charts/readiness_score_chart.png",
     "data/outputs/charts/site_readiness_map.png",
     "data/outputs/model_run_summary.md",
