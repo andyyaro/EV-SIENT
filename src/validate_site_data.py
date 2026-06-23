@@ -49,7 +49,6 @@ BINARY_COLUMNS = [
 ]
 
 PLACEHOLDER_ZERO_FIELDS = {
-    "amenities_count_0_5mi": "Add or confirm nearby amenities within 0.5 miles.",
     "ev_registrations_local": "Replace zero with a local EV registration count or document why unavailable.",
     "parking_spaces": "Confirm parking-space count from site records, GIS, or stakeholder input.",
     "elec_service_rating_amp": "Replace placeholder with service rating if available from facility/utility review.",
@@ -85,6 +84,20 @@ def clean_value(value: Any) -> str:
         return ""
     text = str(value)
     return text if len(text) <= 160 else text[:157] + "..."
+
+
+def normalized_note(row: pd.Series) -> str:
+    return str(row.get("notes", "") or "").lower()
+
+
+def note_documents_field(row: pd.Series, field: str) -> bool:
+    """Return True when notes show that a field has stronger source support."""
+    note = normalized_note(row)
+    if field == "hours_open":
+        return "hours_open" in note and any(word in note for word in ["official", "supports", "supported"])
+    if field == "amenities_count_0_5mi":
+        return "amenities_count" in note and any(word in note for word in ["osm", "overpass", "reviewed"])
+    return False
 
 
 def add_issue(issues: list[dict[str, str]], severity: str, site_id: str, site_name: str,
@@ -206,6 +219,8 @@ def validate_assumption_notes(df: pd.DataFrame, issues: list[dict[str, str]]) ->
             continue
         field_mask = assumption_mask & notes.str.contains(column.lower(), regex=False)
         for _, row in df[field_mask].iterrows():
+            if note_documents_field(row, column):
+                continue
             site_id, site_name = site_label(row)
             add_issue(issues, "REVIEW", site_id, site_name, column, "Field appears to be assumption-based",
                       row.get(column, ""), "Replace with official data, stakeholder estimate, or a clearly documented assumption.")
@@ -229,8 +244,8 @@ def validate_equity_source(df: pd.DataFrame, issues: list[dict[str, str]]) -> No
         return
 
     notes = df["notes"].fillna("").astype(str).str.lower()
-    documented = notes.str.contains("equity_gap_index", regex=False) & notes.str.contains(
-        "acs|official-derived|acs_equity_index", regex=True
+    documented = notes.str.contains("equity", regex=False) & notes.str.contains(
+        "source extract|source extracts|acs|official-derived|acs_equity_index", regex=True
     )
     for _, row in df[~documented].iterrows():
         site_id, site_name = site_label(row)
