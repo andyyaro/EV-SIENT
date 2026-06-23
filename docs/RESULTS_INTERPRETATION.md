@@ -7,9 +7,9 @@ This file explains the current model result in plain English.
 ```text
 1. FFX002 — City of Fairfax Regional Library — 59.9
 2. FFX001 — Fairfax City Hall or municipal building — 53.1
-3. PWC004 — Chinn Park Regional Library — 46.5
-4. PWC002 — Neabsco-Potomac Commuter Garage — 43.2
-5. PWC001 — PWC McCoart Government Center — 40.1
+3. PWC004 — Chinn Park Regional Library — 48.0
+4. PWC002 — Neabsco-Potomac Commuter Garage — 44.3
+5. PWC001 — PWC McCoart Government Center — 42.1
 6. PWC003 — Prince William County Public Safety Training Center — 18.6
 ```
 
@@ -26,15 +26,15 @@ PWC003 — Low public-priority / special-use
 
 ## Main interpretation
 
-FFX002 is the strongest current candidate. It remains first under sensitivity analysis and combines public library use, nearby jobs/households, equity value, official parking/hour support, and lower planning install burden.
+FFX002 is the strongest current candidate. It remains first and combines public library use, nearby jobs/households, equity value, official parking/hour support, reviewed OSM amenity support, and lower planning install burden.
 
-FFX001 is the second strongest current candidate because of its civic/public-use role and stable ranking.
+FFX001 is the second strongest current candidate because of its civic/public-use role, reviewed OSM amenity support, and stable ranking.
 
-PWC004 is the strongest current Prince William County public-library candidate, but the current official library page lists Chinn Park Library as closed for renovation. The project should decide whether to model current closure or future reopened site conditions.
+PWC004 is the strongest current Prince William County public-library candidate under the future/reopened planning assumption, but the current official library page lists Chinn Park Library as closed for renovation.
 
 PWC002 has commuter and equity value, but it remains high-review because garage installations can create additional fire/AHJ, ventilation, access, conduit-routing, and electrical questions.
 
-PWC001 is lower priority under the current assumptions.
+PWC001 remains lower priority than the top candidates, but reviewed OSM amenities improved its demand support.
 
 PWC003 is low public-priority because it is limited or non-public access and has weak surrounding public-demand indicators.
 
