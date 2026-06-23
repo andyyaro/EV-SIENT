@@ -39,10 +39,11 @@ git status --short
 3. src/plot_readiness_score_chart.py
 4. src/run_sensitivity_analysis.py
 5. src/run_profile_analysis.py
-6. src/plot_site_map.py
-7. src/generate_run_summary.py
-8. src/generate_results_interpretation.py
-9. src/check_outputs.py
+6. src/plot_profile_spider_chart.py
+7. src/plot_site_map.py
+8. src/generate_run_summary.py
+9. src/generate_results_interpretation.py
+10. src/check_outputs.py
 ```
 
 The package builder creates a shareable local folder at:
@@ -96,6 +97,7 @@ Right-sizing logic added for recommended ports now, 2035, and 2050.
 Sensitivity analysis added and strengthened.
 Scoring profile analysis added.
 Readiness score chart polished with score and tier annotations.
+Profile spider chart added to compare readiness across scoring-priority profiles.
 Readiness map label offsets and planning notes improved.
 Dynamic model run summary added.
 Dynamic generated results interpretation added.
@@ -149,6 +151,7 @@ data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
 data/outputs/workflow_success.json
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/profile_spider_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/deliverable_package/
@@ -199,7 +202,7 @@ data/baselines/v1_baseline/baseline_manifest.json
 ## Next good improvements
 
 ```text
-1. Add a scoring-profile ranking chart or stability visual using matplotlib.
+1. Inspect the new profile spider chart for readability.
 2. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
 3. Improve facility hours and parking for sites other than FFX002.
 4. Prepare final presentation slides from docs/PRESENTATION_OUTLINE.md and the deliverable package.
