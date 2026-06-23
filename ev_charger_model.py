@@ -4,12 +4,13 @@ EV Charger Site-Readiness and Right-Sizing Starter Model
 What this script does:
 1. Reads an input site CSV file, defaulting to real_sites_v1.csv
 2. Scores each site for demand, feasibility, safety, and equity
-3. Estimates charging sessions per day
-4. Recommends starter EV charging ports now, 2035, and 2050
-5. Flags sites needing AHJ / Fire Marshal / accessibility / stormwater review
-6. Explains the review reason in plain language
-7. Exports site_results.csv and charts
-8. Creates one utilization-vs-ports chart for every site
+3. Adjusts public-charging readiness for sites with limited public access
+4. Estimates charging sessions per day
+5. Recommends starter EV charging ports now, 2035, and 2050
+6. Flags sites needing AHJ / Fire Marshal / accessibility / stormwater review
+7. Explains the review reason in plain language
+8. Exports site_results.csv and charts
+9. Creates one utilization-vs-ports chart for every site
 
 Run in PyCharm:
 - Put this file and real_sites_v1.csv in the same folder.
@@ -132,6 +133,9 @@ def build_review_reason(row):
     """
     reasons = []
 
+    if row["public_access"] == 0:
+        reasons.append("Limited or non-public access")
+
     if row["ada_layout_possible"] == 0:
         reasons.append("ADA-accessible layout unresolved")
 
@@ -160,6 +164,7 @@ def enrich_and_score(sites):
     df = sites.copy()
 
     yes_no_fields = [
+        "public_access",
         "ada_layout_possible",
         "fire_access_ok",
         "garage_enclosed",
@@ -183,6 +188,13 @@ def enrich_and_score(sites):
     for col in numeric_fields:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
+    # Public access adjustment:
+    # public_access = 1 means normal public charging candidate.
+    # public_access = 0 means limited/private/special-use site.
+    # Limited-access sites stay in the model, but are discounted as public charging priorities.
+    df["access_adjustment"] = np.where(df["public_access"] >= 1, 1.00, 0.35)
+    df["readiness_access_adjustment"] = np.where(df["public_access"] >= 1, 1.00, 0.65)
+
     # Estimated installation cost:
     # trenching cost + electrical service upgrade cost
     df["install_cost_est_usd"] = (
@@ -201,9 +213,10 @@ def enrich_and_score(sites):
     for col in normalize_cols:
         df[col + "_n"] = minmax(df[col])
 
-    # Demand subscore: higher means more likely demand.
+    # Demand subscore: higher means more likely public charging demand.
     # Existing nearby chargers reduce demand because the area may already be served.
-    df["demand_subscore"] = 100 * (
+    # Limited-access sites are discounted because they are not normal public charging locations.
+    raw_demand_subscore = 100 * (
         0.30 * minmax(df["ev_share_local"]) +
         0.20 * df["nearby_jobs_1mi_n"] +
         0.20 * df["nearby_households_1mi_n"] +
@@ -212,6 +225,8 @@ def enrich_and_score(sites):
         0.10 * df["avg_dwell_min_n"] -
         0.20 * df["existing_ports_total_n"]
     ).clip(lower=0)
+
+    df["demand_subscore"] = (raw_demand_subscore * df["access_adjustment"]).clip(lower=0)
 
     # Feasibility subscore: higher means easier to build.
     # High spare capacity helps. High installation cost and long service distance hurt.
@@ -233,11 +248,16 @@ def enrich_and_score(sites):
 
     # Final readiness score:
     # weighted average of demand, feasibility, safety, and equity.
-    df["readiness_score"] = (
+    # Limited-access sites are further discounted as public charging priorities.
+    df["base_readiness_score"] = (
         0.45 * df["demand_subscore"] +
         0.30 * df["feasibility_subscore"] +
         0.15 * df["safety_subscore"] +
         0.10 * (100 * df["equity_gap_index_n"])
+    )
+
+    df["readiness_score"] = (
+        df["base_readiness_score"] * df["readiness_access_adjustment"]
     ).round(1)
 
     # Site-type assumptions for early prototype.
@@ -251,6 +271,8 @@ def enrich_and_score(sites):
                    "need_factor": 0.50, "avg_session_hr": 2.0, "target_util": 0.65},
         "garage": {"visitor_capture": 0.05, "employee_capture": 0.03,
                    "need_factor": 0.60, "avg_session_hr": 4.0, "target_util": 0.60},
+        "public_safety": {"visitor_capture": 0.02, "employee_capture": 0.03,
+                          "need_factor": 0.35, "avg_session_hr": 3.0, "target_util": 0.70},
         "fleet": {"visitor_capture": 0.00, "employee_capture": 0.00,
                   "need_factor": 0.00, "avg_session_hr": 3.0, "target_util": 0.70},
     }
@@ -272,7 +294,9 @@ def enrich_and_score(sites):
 
         # Equity and amenities can increase public value/demand.
         # Existing ports reduce new need because the area may already be served.
+        # Limited-access sites generate fewer public charging sessions.
         public_sessions *= (
+            row["access_adjustment"] *
             (1 + 0.30 * row["equity_gap_index"]) *
             (1 + 0.10 * row["amenities_count_0_5mi_n"]) *
             (1 - 0.20 * row["existing_ports_total_n"])
@@ -297,13 +321,15 @@ def enrich_and_score(sites):
         rec_2035, _, _ = choose_ports(
             expected_sessions_day * 1.6,
             b["avg_session_hr"],
-            max(row["hours_open"], 1)
+            max(row["hours_open"], 1),
+            target_utilization=b["target_util"]
         )
 
         rec_2050, _, _ = choose_ports(
             expected_sessions_day * 2.4,
             b["avg_session_hr"],
-            max(row["hours_open"], 1)
+            max(row["hours_open"], 1),
+            target_utilization=b["target_util"]
         )
 
         output_rows.append([
@@ -423,6 +449,8 @@ def main():
         "site_id",
         "site_name",
         "site_type",
+        "public_access",
+        "access_adjustment",
         "readiness_score",
         "demand_subscore",
         "feasibility_subscore",
