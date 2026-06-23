@@ -12,11 +12,14 @@ Run from the repository root:
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SUCCESS_MARKER = "data/outputs/workflow_success.json"
 
 STEPS = [
     {"name": "Validate input data", "command": [sys.executable, "src/validate_site_data.py"]},
@@ -43,6 +46,7 @@ EXPECTED_OUTPUTS = [
     "data/outputs/results_interpretation.md",
     "data/outputs/baseline_comparison.csv",
     "data/outputs/baseline_comparison.md",
+    SUCCESS_MARKER,
 ]
 
 
@@ -61,6 +65,17 @@ def run_step(step: dict[str, object]) -> None:
     completed = subprocess.run(command, cwd=PROJECT_ROOT, check=False)
     if completed.returncode != 0:
         raise SystemExit(f"Pipeline stopped because this step failed: {name}")
+
+
+def write_success_marker() -> None:
+    marker_path = PROJECT_ROOT / SUCCESS_MARKER
+    marker_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "completed_at": datetime.now().isoformat(timespec="seconds"),
+        "status": "passed",
+        "steps": [step["name"] for step in STEPS],
+    }
+    marker_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 def print_output_summary() -> None:
@@ -86,6 +101,7 @@ def main() -> None:
     for step in STEPS:
         run_step(step)
 
+    write_success_marker()
     print_output_summary()
 
 
