@@ -11,6 +11,7 @@ src/                  Python scripts
 src/ev_charger_model.py
 src/validate_site_data.py
 src/run_sensitivity_analysis.py
+src/build_osm_amenities.py
 
 data/inputs/           Main input datasets
 data/inputs/real_sites_v1.csv
@@ -40,6 +41,12 @@ python src/ev_charger_model.py
 python src/run_sensitivity_analysis.py
 ```
 
+Optional amenities POI workflow:
+
+```bash
+python src/build_osm_amenities.py
+```
+
 Default input:
 
 ```text
@@ -55,6 +62,8 @@ data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
 data/outputs/charts/readiness_score_chart.png
 data/outputs/charts/utilization_vs_ports_<site>.png
+data/outputs/amenities_osm_summary_0_5mi.csv
+data/outputs/amenities_osm_pois_0_5mi.csv
 ```
 
 The generated output files are ignored by Git so they do not clutter `git status`.
@@ -71,6 +80,12 @@ Run the validator on the demo dataset:
 
 ```bash
 python src/validate_site_data.py --input data/inputs/sites_demo.csv --output data/outputs/demo_data_quality_report.csv
+```
+
+Run the OSM amenities workflow with a longer pause between API requests:
+
+```bash
+python src/build_osm_amenities.py --pause 5
 ```
 
 ## What the model does
@@ -101,7 +116,7 @@ FFX002 — City of Fairfax Regional Library
 ```text
 FFX002 — Tier 1 / stable top candidate
 FFX001 — Tier 1 / stable second candidate
-PWC004 — Tier 2 / strongest current PWC public-library candidate
+PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
 PWC002 — High-review candidate because of garage context
 PWC001 — Tier 3 / lower priority under current assumptions
 PWC003 — Low public-priority / special-use because public access is limited
@@ -116,6 +131,7 @@ docs/METHODOLOGY.md                         How scoring and port recommendations
 docs/DATA_DICTIONARY.md                     Input/output column definitions
 docs/DATA_SOURCES.md                        Source plan and source quality notes
 docs/RESULTS_INTERPRETATION.md              Plain-English result guide
+docs/OSM_AMENITIES_WORKFLOW.md              How to download and review OSM amenity POIs
 docs/RECOMMENDATION_TIERS.md                Recommendation tier logic
 docs/SENSITIVITY_ANALYSIS.md                Sensitivity scenario setup
 docs/SENSITIVITY_RESULTS_INTERPRETATION.md  Sensitivity result interpretation
@@ -137,8 +153,8 @@ spare_capacity_kw
 emergency_disconnect_visible
 employees_day
 visitors_day
-hours_open
-parking_spaces
+hours_open for sites except FFX002
+parking_spaces for sites except FFX002
 amenities_count_0_5mi
 local EV adoption counts
 ```
