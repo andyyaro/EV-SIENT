@@ -59,6 +59,7 @@ It looks at things like:
 nearby jobs
 nearby households
 traffic
+nearby amenities
 local EV share
 dwell time
 existing chargers nearby
@@ -71,7 +72,7 @@ Simple analogy:
 demand_subscore is like asking, "Will enough people probably use this?"
 ```
 
-A library or government building can score well because people visit, stay for a while, and may have a reason to plug in.
+A library, city hall, or government building can score well because people visit, stay for a while, and may have a reason to plug in.
 
 A remote or limited-access site can score low because fewer public users can reach it.
 
@@ -128,8 +129,7 @@ Simple analogy:
 recommended_ports_now is like deciding how many checkout lanes to open at a store.
 ```
 
-Too few ports can create waiting.
-Too many ports can sit unused.
+Too few ports can create waiting. Too many ports can sit unused.
 
 The model tries to balance use and wait time.
 
@@ -156,9 +156,22 @@ recommended_ports_now = how many ports should we start with?
 
 These are related, but they are not the same.
 
-## Current V1 ranking interpretation
+## Latest V1 ranking after amenities update
 
-Based on the latest run, the model separates sites into two broad groups.
+The latest run used manual V1 amenity category counts in `amenities_count_0_5mi`.
+
+Latest ranking:
+
+```text
+1. FFX002 — City of Fairfax Regional Library: readiness_score = 60.6
+2. PWC004 — Chinn Park Regional Library: readiness_score = 55.9
+3. FFX001 — Fairfax City Hall or municipal building: readiness_score = 55.7
+4. PWC001 — PWC McCoart Government Center: readiness_score = 53.2
+5. PWC002 — Neabsco-Potomac Commuter Garage: readiness_score = 42.0
+6. PWC003 — Prince William County Public Safety Training Center: readiness_score = 25.4
+```
+
+The amenity update mainly helped Fairfax City Hall and the City of Fairfax Regional Library because Old Town Fairfax has more nearby public-use destinations. It also helped Neabsco because the garage is near mixed-use activity, but the garage still remains high-review because enclosed/garage charging has extra safety and emergency-response considerations.
 
 ## Public charging priority sites
 
@@ -167,8 +180,8 @@ These sites currently look like the strongest public charging candidates:
 ```text
 1. City of Fairfax Regional Library
 2. Chinn Park Regional Library
-3. PWC McCoart Government Center
-4. Fairfax City Hall or municipal building
+3. Fairfax City Hall or municipal building
+4. PWC McCoart Government Center
 ```
 
 These sites rise because they combine some mix of:
@@ -179,6 +192,7 @@ nearby households
 nearby jobs
 reasonable traffic exposure
 public-facing site types
+nearby amenities
 long enough dwell time
 ```
 
@@ -213,7 +227,7 @@ They may be useful, but you do not treat them like the front lobby.
 Current interpretation:
 
 ```text
-Strong public charging candidate.
+Strongest current public charging candidate.
 ```
 
 Why it ranks high:
@@ -221,13 +235,17 @@ Why it ranks high:
 ```text
 It is a public-facing library.
 It has strong nearby jobs and households.
+It has strong nearby amenity context in Old Town Fairfax.
 Library visits usually create enough dwell time for Level 2 charging.
 ```
 
-Simple analogy:
+Current result:
 
 ```text
-This is like placing chargers near a place where people already stop and spend time.
+readiness_score = 60.6
+demand_subscore = 42.5
+recommended_ports_now = 2
+recommended_ports_2050 = 3
 ```
 
 Main caution:
@@ -252,18 +270,55 @@ Why it ranks high:
 It is a public library.
 It has strong nearby household context.
 It has high nearby traffic exposure.
+It has library/recreation amenity context.
 It has enough dwell time for Level 2 charging.
 ```
 
-Simple analogy:
+Current result:
 
 ```text
-This is another good "people already spend time here" location.
+readiness_score = 55.9
+demand_subscore = 31.9
+recommended_ports_now = 2
+recommended_ports_2050 = 2
 ```
 
 Main caution:
 
 ```text
+Emergency disconnect visibility is not confirmed.
+```
+
+## FFX001 — Fairfax City Hall or municipal building
+
+Current interpretation:
+
+```text
+Strong public government/civic site.
+```
+
+Why it ranks well:
+
+```text
+It is public-facing.
+It has very strong nearby job density.
+It has strong nearby amenity context in Old Town Fairfax.
+It supports civic/municipal use.
+```
+
+Current result:
+
+```text
+readiness_score = 55.7
+demand_subscore = 38.9
+recommended_ports_now = 2
+recommended_ports_2050 = 2
+```
+
+Main caution:
+
+```text
+Existing nearby charging supply is already significant.
 Emergency disconnect visibility is not confirmed.
 ```
 
@@ -281,47 +336,23 @@ Why it ranks well:
 It is a major civic/government destination.
 It has strong nearby traffic exposure.
 It likely has employees and visitors during the day.
+It now has some nearby amenity support, but less than the Old Town Fairfax sites.
 ```
 
-Simple analogy:
+Current result:
 
 ```text
-This is like placing chargers at a county service hub where people come for official business.
+readiness_score = 53.2
+demand_subscore = 33.4
+recommended_ports_now = 2
+recommended_ports_2035 = 3
+recommended_ports_2050 = 3
 ```
 
 Main caution:
 
 ```text
 Employee and visitor counts are still planning assumptions.
-Emergency disconnect visibility is not confirmed.
-```
-
-## FFX001 — Fairfax City Hall or municipal building
-
-Current interpretation:
-
-```text
-Moderate-to-strong public government site.
-```
-
-Why it ranks well:
-
-```text
-It is public-facing.
-It has very strong nearby job density.
-It supports civic/municipal use.
-```
-
-Simple analogy:
-
-```text
-This is like adding chargers near a downtown office/civic cluster.
-```
-
-Main caution:
-
-```text
-Existing nearby charging supply is already significant.
 Emergency disconnect visibility is not confirmed.
 ```
 
@@ -342,11 +373,20 @@ The nearest VDOT segment is a ramp, so traffic interpretation may need review.
 Garage EV charging can involve ventilation, fire access, and emergency-response questions.
 ```
 
-Simple analogy:
+What the amenities update changed:
 
 ```text
-This is like adding equipment inside a parking structure instead of an open parking lot.
-It may work, but you need more safety checks first.
+The garage now gets credit for nearby mixed-use amenities around Stonebridge.
+That helps demand, but it does not remove the garage/fire-response review burden.
+```
+
+Current result:
+
+```text
+readiness_score = 42.0
+demand_subscore = 30.0
+recommended_ports_now = 2
+recommended_ports_2050 = 3
 ```
 
 Main caution:
@@ -371,14 +411,17 @@ It is limited-access.
 It is more rural.
 Nearby households and jobs are low.
 Nearest AADT is low.
+No general-public amenity categories are counted in V1.
 The model applies a public-access discount.
 ```
 
-Simple analogy:
+Current result:
 
 ```text
-This is like putting a vending machine in an employee-only training building.
-It may help staff or fleet users, but it is not the same as putting one in a public library lobby.
+readiness_score = 25.4
+demand_subscore = 2.1
+recommended_ports_now = 2
+recommended_ports_2050 = 2
 ```
 
 Better interpretation:
@@ -398,7 +441,7 @@ Emergency disconnect visibility is not confirmed.
 
 ## How to explain the current ranking in one paragraph
 
-The current model suggests that public-facing libraries and government centers are stronger near-term public EV charging candidates because they combine public access, nearby households or jobs, and enough dwell time for Level 2 charging. The Neabsco-Potomac Commuter Garage remains important but needs extra review because garages raise added fire-access, ventilation, and emergency-response questions, and the surrounding area already has significant charging supply. The Prince William County Public Safety Training Center is now a real site, but because it is limited-access and has low nearby households, jobs, and traffic, the model treats it as a special-use or fleet-support candidate rather than a public charging priority.
+After the amenities update, the model still suggests that public-facing libraries and government/civic sites are the strongest near-term public EV charging candidates. The City of Fairfax Regional Library remains first, while Fairfax City Hall moves slightly above McCoart because the Old Town Fairfax area has stronger nearby amenity context. Chinn Park Library remains strong because of its library/recreation setting and high nearby traffic. Neabsco-Potomac Commuter Garage gains demand credit from nearby mixed-use amenities, but it remains high-review because garage charging raises ventilation, fire-access, and emergency-response questions. The Prince William County Public Safety Training Center remains a real site but is better interpreted as a special-use or fleet-support candidate because it is limited-access and has low nearby public demand indicators.
 
 ## How to read AHJ review flags
 
@@ -463,7 +506,7 @@ The results will become more reliable after improving:
 visitor and employee counts
 parking spaces
 hours open
-amenities nearby
+amenities nearby with GIS/POI data
 equity scoring
 electrical capacity
 trenching and service upgrade assumptions
