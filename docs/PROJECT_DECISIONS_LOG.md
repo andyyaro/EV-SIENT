@@ -148,6 +148,19 @@ Decision: the main V1 ranking remains the primary ranking. Profile analysis is a
 
 Reason: different stakeholders may care about different priorities, so the model should show whether recommendations are stable across reasonable policy perspectives.
 
+## Decision 23 — Add local deliverable package builder
+
+The project now includes a script that gathers key generated outputs and reporting documents into one local shareable folder.
+
+```text
+src/build_deliverable_package.py
+data/outputs/deliverable_package/
+```
+
+Decision: the deliverable package is generated locally and ignored by Git.
+
+Reason: the project needs an easy way to share maps, summaries, CSV tables, and reporting files without committing generated output artifacts to the repository.
+
 ## Current expected recommendation interpretation
 
 ```text
