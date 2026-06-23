@@ -41,18 +41,18 @@ Official or official-derived fields should still be checked before a real projec
 | `nearby_jobs_1mi` | number | Estimated jobs within 1 mile of the site. | Official-derived from LODES 2023 Virginia WAC and TIGER 2024 block group geometry. |
 | `aadt_nearest` | number | Annual Average Daily Traffic from the nearest VDOT traffic segment. | Official-derived from VDOT Bidirectional Traffic Volume 2025. |
 | `amenities_count_0_5mi` | number | Manual V1 count of nearby public-use amenity categories within roughly 0.5 miles. It is a category count, not an exact business count. | Manual V1 planning estimate from `data/source_extracts/amenities_0_5mi.csv`. Replace later with GIS/POI data. |
-| `ev_registrations_local` | number | Local EV registration count, if available. | Placeholder. |
-| `ev_share_local` | number | Estimated local EV share. Example: `0.07` means 7 percent. | Planning assumption for V1. |
+| `ev_registrations_local` | number | Local EV registration count, if available. | V1 local EV adoption proxy. Replace with official locality data when available. |
+| `ev_share_local` | number | Estimated local EV share. Example: `0.018` means 1.8 percent. | V1 local EV adoption proxy. |
 | `existing_l2_ports_1mi` | number | Public active Level 2 charging ports within 1 mile. | Official-derived from AFDC / NREL Alternative Fuel Stations export. |
 | `existing_dcfc_ports_3mi` | number | Public active DC fast charging ports within 3 miles. | Official-derived from AFDC / NREL Alternative Fuel Stations export. |
-| `equity_gap_index` | number | Project-created equity gap score. Higher means the model treats the site as having more equity value. | Placeholder/project-created. Needs ACS-based improvement. |
+| `equity_gap_index` | number | Equity gap score. Higher means the model treats the site as having more equity value. | Official-derived from ACS 2024 5-Year equity indicators and TIGER 2024 geometry. |
 | `elec_service_voltage` | number | Electrical service voltage at or near the site. | Placeholder unless facility/utility data is available. |
 | `elec_service_rating_amp` | number | Electrical service rating in amps. | Placeholder unless facility/utility data is available. |
 | `spare_capacity_kw` | number | Estimated spare electrical capacity in kilowatts. Higher values improve feasibility. | Placeholder/manual assumption. Needs utility or facility data. |
-| `distance_to_service_ft` | number | Estimated distance from charger location to electrical service, in feet. Lower values improve feasibility. | Placeholder/manual assumption. |
-| `trenching_ft` | number | Estimated trenching length in feet. Used in install cost estimate. | Placeholder/manual assumption. |
+| `distance_to_service_ft` | number | Estimated distance from charger location to electrical service, in feet. Lower values improve feasibility. | Planning-level V1 estimate. |
+| `trenching_ft` | number | Estimated trenching length in feet. Used in install cost estimate. | Planning-level V1 estimate. |
 | `trench_cost_per_ft` | number | Estimated trenching cost per foot. | Cost assumption. |
-| `service_upgrade_cost_usd` | number | Estimated service upgrade cost in U.S. dollars. | Placeholder/manual assumption. |
+| `service_upgrade_cost_usd` | number | Estimated service upgrade cost in U.S. dollars. | Planning-level V1 estimate. |
 | `ada_layout_possible` | yes/no number | Whether ADA-accessible layout appears possible. `1` means likely possible. `0` means unresolved or problematic. | Planning/site-review assumption. |
 | `fire_access_ok` | yes/no number | Whether fire apparatus access appears acceptable at model level. `1` means no obvious issue. `0` means concern. | Planning/site-review assumption. |
 | `garage_enclosed` | yes/no number | Whether the site is an enclosed garage or has garage-like limitations. `1` means garage/enclosed. | Site type/facility assumption. |
@@ -68,12 +68,17 @@ Official or official-derived fields should still be checked before a real projec
 
 | Column | Type | Meaning |
 |---|---:|---|
+| `model_rank` | number | Rank assigned after sorting by readiness score. `1` is the highest-readiness site in the current candidate set. |
 | `site_id` | text | Site ID copied from the input dataset. |
 | `site_name` | text | Site name copied from the input dataset. |
 | `site_type` | text | Site type copied from the input dataset. |
 | `public_access` | number | Cleaned public-access value used by the model. `1` means public access; `0` means limited/non-public. |
 | `access_adjustment` | number | Public-access multiplier used to discount limited-access sites as public charging priorities. Current values: `1.00` for public sites and `0.35` for limited-access sites. |
 | `readiness_score` | number | Final weighted site-readiness score after public-access adjustment. Higher means stronger public charging priority. |
+| `recommendation_tier` | text | Plain-English planning tier such as Tier 1, Tier 2, high-review, low public-priority, or Tier 3. |
+| `planning_recommendation` | text | Suggested next planning action for the site. |
+| `priority_reason` | text | Short explanation of why the site received its planning recommendation. |
+| `data_needed_next` | text | The most important fields or confirmations needed before the site can move closer to implementation. |
 | `demand_subscore` | number | Demand score after public-access adjustment. Higher means stronger demand indicators. |
 | `feasibility_subscore` | number | Feasibility score. Higher means easier to build based on current assumptions. |
 | `safety_subscore` | number | Safety/site-review score. Higher means fewer model-level concerns. |
@@ -114,6 +119,20 @@ Higher safety_subscore = fewer model-level review concerns.
 
 A site can have a good readiness score and still require review. For example, a public library may be a strong demand location but still have `Emergency disconnect visibility not confirmed` because that design detail has not been verified.
 
+## Recommendation interpretation
+
+Use recommendation tiers as next-step planning guidance.
+
+```text
+Tier 1 — advance to site screening = strong current candidate.
+Tier 2 — promising candidate, refine data = promising but needs stronger support.
+High-review candidate = has value, but review complexity must be resolved first.
+Low public-priority / special-use = not ready as a general-public charging candidate.
+Tier 3 — lower priority / monitor = lower current priority than stronger alternatives.
+```
+
+These tiers are not final implementation approvals.
+
 ## Important limitations
 
 The current model still has placeholder or early-assumption fields. The most important ones to improve are:
@@ -125,17 +144,9 @@ parking_spaces
 hours_open
 amenities_count_0_5mi
 ev_share_local
-equity_gap_index
+elec_service_rating_amp
 spare_capacity_kw
-distance_to_service_ft
-trenching_ft
-service_upgrade_cost_usd
-ada_layout_possible
-fire_access_ok
 emergency_disconnect_visible
-stormwater_risk
-battery_storage_flag
-battery_storage_kwh
 ```
 
 `amenities_count_0_5mi` is now populated with manual V1 category estimates, but it should still be improved later with GIS/POI data.
