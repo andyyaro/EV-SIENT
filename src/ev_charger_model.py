@@ -157,8 +157,10 @@ def build_priority_reason(row: pd.Series) -> str:
         return "Limited or non-public access and low surrounding public-charging demand keep this site low priority."
     if row["garage_enclosed"] == 1:
         return "Commuter/garage role and equity value are useful, but enclosed-garage review lowers implementation confidence."
-    if row["model_rank"] <= 2:
+    if row["model_rank"] == 1:
         return "Stable top-ranked public candidate with stronger readiness than the rest of the current candidate set."
+    if row["model_rank"] == 2:
+        return "Second strongest public candidate under the current model; strong, but not the top-ranked site."
     if row["readiness_score"] >= 45:
         return "Public candidate with moderate readiness, but additional data is needed before advancing."
     return "Current score is lower than stronger alternatives, mainly because demand/equity/feasibility signals are weaker in this V1 dataset."
@@ -258,90 +260,157 @@ def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
     for col in normalize_cols:
         df[col + "_n"] = minmax(df[col])
 
-    ev_share_signal = bounded_signal(df["ev_share_local"], EV_SHARE_HIGH_BENCHMARK)
+    df["ev_share_local_n"] = bounded_signal(df["ev_share_local"], EV_SHARE_HIGH_BENCHMARK)
 
-    raw_demand_subscore = 100 * (
-        0.25 * ev_share_signal
+    df["demand_subscore"] = 100 * (
+        0.18 * df["nearby_households_1mi_n"]
         + 0.18 * df["nearby_jobs_1mi_n"]
-        + 0.18 * df["nearby_households_1mi_n"]
-        + 0.10 * df["aadt_nearest_n"]
-        + 0.10 * df["amenities_count_0_5mi_n"]
-        + 0.09 * df["parking_spaces_n"]
-        + 0.10 * df["avg_dwell_min_n"]
-        - 0.20 * df["existing_ports_total_n"]
-    ).clip(lower=0)
-    df["demand_subscore"] = (raw_demand_subscore * df["access_adjustment"]).clip(lower=0)
+        + 0.13 * df["aadt_nearest_n"]
+        + 0.11 * df["amenities_count_0_5mi_n"]
+        + 0.10 * df["parking_spaces_n"]
+        + 0.08 * df["hours_open"].clip(lower=0, upper=24) / 24
+        + 0.07 * df["avg_dwell_min_n"]
+        + 0.08 * df["ev_share_local_n"]
+        + 0.07 * (1 - df["existing_ports_total_n"])
+    )
+    df["demand_subscore"] = df["demand_subscore"] * df["readiness_access_adjustment"]
 
     df["feasibility_subscore"] = 100 * (
         0.35 * df["spare_capacity_kw_n"]
+        + 0.25 * (1 - df["distance_to_service_ft_n"])
         + 0.25 * (1 - df["install_cost_est_usd_n"])
-        + 0.20 * (1 - df["distance_to_service_ft_n"])
-        + 0.20 * df["ada_layout_possible"]
-    ).clip(lower=0)
+        + 0.15 * (1 - df["trenching_ft_n"])
+    )
 
     df["safety_subscore"] = 100 * (
-        0.35 * df["fire_access_ok"]
-        + 0.20 * (1 - df["garage_enclosed"])
-        + 0.20 * df["emergency_disconnect_visible"]
-        + 0.15 * (1 - df["stormwater_risk"])
-        + 0.10 * (1 - df["battery_storage_flag"])
-    ).clip(lower=0)
+        0.35 * df["ada_layout_possible"]
+        + 0.35 * df["fire_access_ok"]
+        + 0.15 * (1 - df["garage_enclosed"])
+        + 0.10 * df["emergency_disconnect_visible"]
+        + 0.05 * (1 - df["stormwater_risk"])
+    )
 
-    df["base_readiness_score"] = (
+    df["equity_subscore"] = 100 * df["equity_gap_index_n"]
+
+    df["readiness_score"] = (
         0.45 * df["demand_subscore"]
         + 0.30 * df["feasibility_subscore"]
         + 0.15 * df["safety_subscore"]
-        + 0.10 * (100 * df["equity_gap_index_n"])
+        + 0.10 * df["equity_subscore"]
+    ).round(1)
+
+    df["expected_sessions_day"] = (
+        0.0015 * df["visitors_day"]
+        + 0.0006 * df["employees_day"]
+        + 0.00002 * df["nearby_jobs_1mi"]
+        + 0.00003 * df["nearby_households_1mi"] * (1 + df["ev_share_local"])
     )
-    df["readiness_score"] = (df["base_readiness_score"] * df["readiness_access_adjustment"]).round(1)
+    df["expected_sessions_day"] = df["expected_sessions_day"].clip(lower=0.3)
 
-    behavior = {
-        "library": {"visitor_capture": 0.07, "employee_capture": 0.04, "need_factor": 0.55, "avg_session_hr": 1.5, "target_util": 0.65},
-        "office": {"visitor_capture": 0.05, "employee_capture": 0.05, "need_factor": 0.50, "avg_session_hr": 2.0, "target_util": 0.65},
-        "clinic": {"visitor_capture": 0.06, "employee_capture": 0.04, "need_factor": 0.50, "avg_session_hr": 2.0, "target_util": 0.65},
-        "garage": {"visitor_capture": 0.05, "employee_capture": 0.03, "need_factor": 0.60, "avg_session_hr": 4.0, "target_util": 0.60},
-        "public_safety": {"visitor_capture": 0.02, "employee_capture": 0.03, "need_factor": 0.35, "avg_session_hr": 3.0, "target_util": 0.70},
-        "fleet": {"visitor_capture": 0.00, "employee_capture": 0.00, "need_factor": 0.00, "avg_session_hr": 3.0, "target_util": 0.70},
-    }
-
-    output_rows = []
+    port_rows = []
     for _, row in df.iterrows():
-        site_type = str(row["site_type"]).lower()
-        b = behavior.get(site_type, {"visitor_capture": 0.06, "employee_capture": 0.04, "need_factor": 0.50, "avg_session_hr": 2.0, "target_util": 0.65})
-
-        public_sessions = (
-            row["visitors_day"] * row["ev_share_local"] * b["visitor_capture"] * b["need_factor"]
-            + row["employees_day"] * row["ev_share_local"] * b["employee_capture"] * b["need_factor"]
+        avg_session_hr = row["avg_dwell_min"] / 60 if row["avg_dwell_min"] > 0 else 2
+        ports_now, util_now, wait_now = choose_ports(row["expected_sessions_day"], avg_session_hr, row["hours_open"])
+        ports_2035, _, _ = choose_ports(row["expected_sessions_day"] * 1.8, avg_session_hr, row["hours_open"])
+        ports_2050, _, _ = choose_ports(row["expected_sessions_day"] * 3.0, avg_session_hr, row["hours_open"])
+        port_rows.append(
+            {
+                "recommended_ports_now": int(ports_now),
+                "recommended_ports_2035": int(ports_2035),
+                "recommended_ports_2050": int(ports_2050),
+                "estimated_utilization": util_now,
+                "mean_wait_min": wait_now,
+            }
         )
-        public_sessions *= (
-            row["access_adjustment"]
-            * (1 + 0.30 * row["equity_gap_index"])
-            * (1 + 0.10 * row["amenities_count_0_5mi_n"])
-            * (1 - 0.20 * row["existing_ports_total_n"])
-        )
 
-        fleet_sessions = max(0, row["fleet_vehicles"] * 0.5)
-        expected_sessions_day = max(0.3, public_sessions + fleet_sessions)
+    port_df = pd.DataFrame(port_rows)
+    df = pd.concat([df, port_df], axis=1)
+    df["ahj_review_flag"] = df.apply(lambda row: 1 if build_review_reason(row) != "No obvious model-level review trigger" else 0, axis=1)
+    df["review_reason"] = df.apply(build_review_reason, axis=1)
 
-        ports_now, utilization, wait_min = choose_ports(expected_sessions_day, b["avg_session_hr"], row["hours_open"], target_utilization=b["target_util"])
-        ports_2035, _, _ = choose_ports(expected_sessions_day * 1.6, b["avg_session_hr"], row["hours_open"], target_utilization=b["target_util"])
-        ports_2050, _, _ = choose_ports(expected_sessions_day * 2.4, b["avg_session_hr"], row["hours_open"], target_utilization=b["target_util"])
+    return apply_recommendations(df)
 
-        row = row.copy()
-        row["expected_sessions_day"] = expected_sessions_day
-        row["recommended_ports_now"] = ports_now
-        row["recommended_ports_2035"] = ports_2035
-        row["recommended_ports_2050"] = ports_2050
-        row["estimated_utilization"] = utilization
-        row["mean_wait_min"] = wait_min
-        row["review_reason"] = build_review_reason(row)
-        row["ahj_review_flag"] = 0 if row["review_reason"] == "No obvious model-level review trigger" else 1
-        output_rows.append(row)
 
-    results = pd.DataFrame(output_rows)
-    results = apply_recommendations(results)
+def plot_readiness_chart(results: pd.DataFrame, path: Path) -> None:
+    ensure_parent_dir(path)
+    ordered = results.sort_values("readiness_score", ascending=True)
+    labels = ordered["site_id"] + "\n" + ordered["site_name"]
 
-    output_cols = [
+    plt.figure(figsize=(10, 6))
+    plt.barh(labels, ordered["readiness_score"])
+    plt.xlabel("Readiness score")
+    plt.title("EV Charger Site Readiness Scores")
+    plt.tight_layout()
+    plt.savefig(path, dpi=200)
+    plt.close()
+
+
+def plot_utilization_curves(results: pd.DataFrame, chart_dir: Path) -> list[Path]:
+    chart_dir.mkdir(parents=True, exist_ok=True)
+    saved_paths = []
+
+    for _, row in results.iterrows():
+        avg_session_hr = row["avg_dwell_min"] / 60 if row["avg_dwell_min"] > 0 else 2
+        hours_open = row["hours_open"]
+        arrivals_per_hour = row["expected_sessions_day"] / max(hours_open, 1)
+        service_rate_per_hour = 1 / max(avg_session_hr, 0.1)
+        ports = list(range(1, 11))
+        waits = []
+        utils = []
+
+        for port_count in ports:
+            _, wait_hours, utilization = erlang_c(arrivals_per_hour, service_rate_per_hour, port_count)
+            wait_minutes = wait_hours * 60 if np.isfinite(wait_hours) else np.nan
+            waits.append(wait_minutes)
+            utils.append(utilization)
+
+        fig, ax1 = plt.subplots(figsize=(8, 5))
+        ax1.plot(ports, utils, marker="o", label="Utilization")
+        ax1.set_xlabel("Number of charging ports")
+        ax1.set_ylabel("Utilization")
+        ax1.set_ylim(0, max(1.0, max([value for value in utils if np.isfinite(value)] + [1.0])))
+
+        ax2 = ax1.twinx()
+        ax2.plot(ports, waits, marker="s", linestyle="--", label="Mean wait minutes")
+        ax2.set_ylabel("Mean wait time (minutes)")
+
+        plt.title(f"Utilization vs Ports: {row['site_id']} — {row['site_name']}")
+        fig.tight_layout()
+        output = chart_dir / f"utilization_vs_ports_{safe_filename(row['site_name'])}.png"
+        plt.savefig(output, dpi=200)
+        plt.close()
+        saved_paths.append(output)
+
+    return saved_paths
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the EV charger site-readiness model.")
+    parser.add_argument("--input", default=DEFAULT_INPUT, help="Path to input CSV file.")
+    parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Path to output CSV file.")
+    parser.add_argument("--chart", default=DEFAULT_READINESS_CHART, help="Path to readiness chart PNG.")
+    parser.add_argument("--utilization-chart-dir", default=DEFAULT_UTILIZATION_CHART_DIR, help="Folder for utilization charts.")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    input_path = Path(args.input)
+    output_path = Path(args.output)
+    chart_path = Path(args.chart)
+    utilization_chart_dir = Path(args.utilization_chart_dir)
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_path}")
+
+    sites = pd.read_csv(input_path)
+    results = enrich_and_score(sites)
+    ensure_parent_dir(output_path)
+    results.to_csv(output_path, index=False)
+    plot_readiness_chart(results, chart_path)
+    utilization_charts = plot_utilization_curves(results, utilization_chart_dir)
+
+    display_columns = [
         "model_rank",
         "site_id",
         "site_name",
@@ -366,81 +435,17 @@ def enrich_and_score(sites: pd.DataFrame) -> pd.DataFrame:
         "ahj_review_flag",
         "review_reason",
     ]
-    return results[output_cols]
-
-
-def plot_readiness(results: pd.DataFrame, output_file: str = DEFAULT_READINESS_CHART) -> None:
-    ensure_parent_dir(output_file)
-    plt.figure(figsize=(10, 6))
-    plt.barh(results["site_name"], results["readiness_score"])
-    plt.xlabel("Readiness Score")
-    plt.ylabel("Site")
-    plt.title("EV Charger Site Readiness Scores")
-    plt.gca().invert_yaxis()
-    plt.tight_layout()
-    plt.savefig(output_file, dpi=200)
-    plt.close()
-
-
-def plot_utilization_curves(results: pd.DataFrame, output_dir: str = DEFAULT_UTILIZATION_CHART_DIR) -> list[str]:
-    chart_files = []
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-
-    for _, row in results.iterrows():
-        ports = list(range(1, 9))
-        avg_session_hr = 1.5 if row["site_type"] == "library" else 4.0 if row["site_type"] == "garage" else 3.0 if row["site_type"] == "public_safety" else 2.0
-        hours_open = 24 if row["site_type"] == "garage" else 8
-        utilizations = []
-        for port_count in ports:
-            _, _, utilization = erlang_c(row["expected_sessions_day"] / max(hours_open, 1), 1 / avg_session_hr, port_count)
-            utilizations.append(utilization)
-
-        output_file = Path(output_dir) / f"utilization_vs_ports_{safe_filename(row['site_name'])}.png"
-        plt.figure(figsize=(8, 5))
-        plt.plot(ports, utilizations, marker="o")
-        plt.xlabel("Number of Charging Ports")
-        plt.ylabel("Estimated Utilization")
-        plt.title(f"Utilization vs Ports — {row['site_name']}")
-        plt.ylim(0, max(0.8, max(utilizations) * 1.2 if utilizations else 0.8))
-        plt.tight_layout()
-        plt.savefig(output_file, dpi=200)
-        plt.close()
-        chart_files.append(str(output_file))
-    return chart_files
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run EV charger site-readiness model.")
-    parser.add_argument("--input", default=DEFAULT_INPUT, help="Input candidate-site CSV.")
-    parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Output results CSV.")
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-    input_path = Path(args.input)
-    output_path = Path(args.output)
-
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_path}")
-
-    sites = pd.read_csv(input_path)
-    results = enrich_and_score(sites)
-    ensure_parent_dir(output_path)
-    results.to_csv(output_path, index=False)
-    plot_readiness(results)
-    chart_files = plot_utilization_curves(results)
 
     print("EV CHARGER SITE-READINESS RESULTS")
     print("----------------------------------")
     print(f"Input file: {input_path}")
-    print(results.to_string(index=False))
+    print(results[display_columns].to_string(index=False))
     print()
     print(f"Saved: {output_path}")
-    print(f"Saved: {DEFAULT_READINESS_CHART}")
+    print(f"Saved: {chart_path}")
     print("Saved utilization charts:")
-    for chart_file in chart_files:
-        print(f"- {chart_file}")
+    for path in utilization_charts:
+        print(f"- {path}")
     print()
     print("Done. Open data/outputs/ for CSV outputs and data/outputs/charts/ for charts.")
 
