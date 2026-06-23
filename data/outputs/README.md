@@ -4,7 +4,7 @@ This folder is for files created when the scripts run locally.
 
 Generated outputs are ignored by Git so local runs do not clutter `git status`.
 
-## Main generated CSV and Markdown outputs
+## Main generated CSV, Markdown, and metadata outputs
 
 ```text
 data/outputs/data_quality_report.csv
@@ -18,7 +18,10 @@ data/outputs/model_run_summary.md
 data/outputs/results_interpretation.md
 data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
+data/outputs/workflow_success.json
 ```
+
+`workflow_success.json` is written only after `src/run_all.py` completes successfully. The deliverable package builder uses it to avoid packaging stale outputs after a failed or partial run.
 
 ## Generated chart outputs
 
@@ -50,9 +53,9 @@ It includes selected charts, run outputs, data tables, reports, a package README
 From the repository root:
 
 ```bash
-git pull --rebase origin main
-python src/run_all.py
-python src/build_deliverable_package.py
+git pull --rebase origin main && \
+python src/run_all.py && \
+python src/build_deliverable_package.py && \
 git status --short
 ```
 
