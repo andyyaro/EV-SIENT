@@ -2,7 +2,7 @@
 
 This file keeps the major project decisions in one place so assumptions, source quality, model changes, and replacement targets are not lost as the prototype evolves.
 
-The project is a planning-support prototype for public EV charging site readiness and right-sizing in Fairfax City and Prince William County. It does not replace engineering, utility, ADA, Fire Marshal, AHJ, stormwater, or permitting review.
+The project is a planning-support prototype for public EV charging site readiness and right-sizing in Fairfax City and Prince William County. It does not replace engineering, utility, ADA, Fire Marshal, AHJ, stormwater, permitting, procurement, or utility review.
 
 ## Source quality labels
 
@@ -13,6 +13,7 @@ Manual estimate = manual V1 estimate that should be improved later
 Planning estimate = project-created estimate used to reduce placeholder zeros
 Planning proxy = temporary proxy when official local data is not accessible
 Placeholder = unresolved value intentionally left for future confirmation
+Model logic = scoring, ranking, tiering, or scenario method created by the project
 ```
 
 ## Current model files
@@ -36,6 +37,8 @@ PROJECT_STATUS.md
 RESULTS_INTERPRETATION.md
 DATA_DICTIONARY.md
 SENSITIVITY_ANALYSIS.md
+SENSITIVITY_RESULTS_INTERPRETATION.md
+RECOMMENDATION_TIERS.md
 data/source_dataset_log.csv
 data/dataset_metadata.csv
 data/raw_exports/README.md
@@ -76,7 +79,7 @@ data/source_dataset_log.csv
 data/dataset_metadata.csv
 ```
 
-Source quality: documentation / repo management decision.
+Source quality: repo management decision.
 
 Replacement target: keep documenting raw exports used and store only useful small extracts.
 
@@ -223,7 +226,7 @@ Affected model area:
 demand_subscore
 ```
 
-Source quality: model weighting decision.
+Source quality: Model logic.
 
 Replacement target: revisit the parking weight once parking counts are official or strongly verified.
 
@@ -345,7 +348,7 @@ Affected model area:
 demand_subscore
 ```
 
-Source quality: model normalization decision.
+Source quality: Model logic.
 
 Replacement target: recalibrate the benchmark if stronger regional/local EV adoption data becomes available.
 
@@ -368,7 +371,7 @@ Affected site:
 PWC003 — Prince William County Public Safety Training Center
 ```
 
-Source quality: model logic decision.
+Source quality: Model logic.
 
 Replacement target: confirm whether the site should be public charging, fleet/support charging, or excluded from the public-charging candidate list.
 
@@ -378,13 +381,13 @@ Decision: Recommended ports are based on expected sessions, dwell time, hours op
 
 Method: The model chooses the smallest number of ports that keeps utilization and mean wait below targets.
 
-Source quality: model logic decision.
+Source quality: Model logic.
 
 Replacement target: recalibrate with observed charger use, session data, or stakeholder planning targets.
 
-## Decision 19 — Sensitivity analysis added
+## Decision 19 — Sensitivity analysis added and strengthened
 
-Decision: The project now includes a simple scenario sensitivity analysis script.
+Decision: The project includes a simple scenario sensitivity analysis script.
 
 Script:
 
@@ -402,16 +405,50 @@ sensitivity_summary.csv
 Scenarios:
 
 ```text
+very_low_demand_high_cost
 low_demand_high_cost
 base_case
 high_demand_base_cost
+very_high_demand_low_cost
 ```
 
 Reason: The model still contains manual assumptions, planning estimates, and proxy values. Sensitivity analysis helps show whether rankings are stable when uncertain inputs move up or down.
 
-Source quality: model uncertainty workflow.
+Latest interpretation: The current ranking stayed stable across the five tested scenarios, with every site having rank_range = 0.
+
+Source quality: Model uncertainty workflow.
 
 Replacement target: later upgrade to a richer scenario design or Monte Carlo simulation if needed.
+
+## Decision 20 — Recommendation tier layer added
+
+Decision: The main model output now includes plain-English planning recommendation columns.
+
+New output columns:
+
+```text
+model_rank
+recommendation_tier
+planning_recommendation
+priority_reason
+data_needed_next
+```
+
+Reason: Readiness scores alone are not enough for planning. The model should explain whether a site should advance, stay in discussion with high review, be refined with better data, or remain low public priority.
+
+Current tier categories:
+
+```text
+Tier 1 — advance to site screening
+Tier 2 — promising candidate, refine data
+High-review candidate
+Low public-priority / special-use
+Tier 3 — lower priority / monitor
+```
+
+Source quality: Model logic / planning interpretation.
+
+Replacement target: revise tiers after stakeholder feedback, confirmed electrical data, official demand/parking data, or updated project priorities.
 
 ## Current unresolved items
 
@@ -448,6 +485,17 @@ The most important next confirmations are:
 4. PWC002 — Neabsco-Potomac Commuter Garage: 43.2
 5. PWC001 — PWC McCoart Government Center: 40.1
 6. PWC003 — Prince William County Public Safety Training Center: 18.6
+```
+
+## Current expected recommendation interpretation
+
+```text
+FFX002 — Tier 1 / stable top candidate
+FFX001 — Tier 1 / stable second candidate
+PWC004 — Tier 2 / strongest current PWC public-library candidate
+PWC002 — High-review candidate because of garage context
+PWC001 — Tier 3 / lower priority under current assumptions
+PWC003 — Low public-priority / special-use because public access is limited
 ```
 
 ## Maintenance rule
