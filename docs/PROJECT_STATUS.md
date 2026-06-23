@@ -24,6 +24,8 @@ VDOT AADT traffic signal added.
 ACS households and equity index added.
 LODES jobs signal added.
 Demand assumptions added and documented.
+Official FFX002 facility hours and parking added.
+Official PWC004 current renovation status documented.
 Planning electrical feasibility estimates added.
 Local EV adoption proxy added.
 Sensitivity analysis added and strengthened.
@@ -37,7 +39,8 @@ Repository reorganized into cleaner folders.
 
 ```text
 FFX002 and FFX001 are stable top candidates.
-PWC004 is the strongest current PWC public-library candidate.
+PWC004 is the strongest current PWC public-library candidate under future/reopened planning assumptions.
+PWC004's current official renovation closure needs a project scope decision.
 PWC002 remains important but high-review because of garage context.
 PWC003 is low public-priority unless its access/use case changes.
 ```
@@ -50,8 +53,8 @@ spare_capacity_kw
 emergency_disconnect_visible
 employees_day
 visitors_day
-hours_open
-parking_spaces
+hours_open for sites except FFX002
+parking_spaces for sites except FFX002
 amenities_count_0_5mi
 local EV adoption counts
 ```
@@ -76,10 +79,11 @@ python src/run_sensitivity_analysis.py
 ## Next good improvements
 
 ```text
-1. Use the stakeholder request pack to contact facility/public works/utility contacts.
-2. Replace visitor/employee/parking/electrical assumptions with stronger site data when responses arrive.
-3. Re-run the validator, model, and sensitivity analysis after each major data update.
-4. Add or improve map/visual outputs.
-5. Prepare slides from docs/PRESENTATION_OUTLINE.md.
-6. Add more candidate sites if the project scope expands.
+1. Decide whether PWC004 should be modeled as current closed status or future reopened site conditions.
+2. Continue public-data upgrades for facility hours, parking, public access, and amenities.
+3. Replace visitor/employee/parking/electrical assumptions with stronger site data when responses arrive.
+4. Re-run the validator, model, and sensitivity analysis after each major data update.
+5. Add or improve map/visual outputs.
+6. Prepare slides from docs/PRESENTATION_OUTLINE.md.
+7. Add more candidate sites if the project scope expands.
 ```
