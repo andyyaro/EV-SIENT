@@ -58,7 +58,7 @@ Run the full local workflow from the repository root:
 python src/run_all.py
 ```
 
-This runs the validator, model, sensitivity analysis, readiness map, Markdown run summary, output checks, and baseline comparison in order.
+This runs the validator, model, sensitivity analysis, readiness map, Markdown run summary, and one combined output-check step.
 
 You can also run the steps manually:
 
@@ -69,7 +69,6 @@ python src/run_sensitivity_analysis.py
 python src/plot_site_map.py
 python src/generate_run_summary.py
 python src/check_outputs.py
-python src/compare_to_baseline.py
 ```
 
 Optional amenities POI workflow:
@@ -101,17 +100,20 @@ data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 ```
 
-## Output checks
+## Combined output check
 
-`src/check_outputs.py` confirms that the generated files exist and that the current V1 output structure is consistent.
+`src/check_outputs.py` is the single final output-check command.
 
-It checks the six current candidate site IDs, model ranks, readiness-score range, recommended port counts, sensitivity rank stability, and that the data-quality report has no ERROR items.
+It does two things:
 
-## Baseline comparison
+```text
+1. Sanity-checks current generated outputs.
+2. Generates a baseline comparison report against data/baselines/v1_baseline/.
+```
 
-`data/baselines/v1_baseline/` stores the first committed benchmark snapshot.
+The sanity check confirms that generated files exist, the six current candidate site IDs appear, model ranks are valid, readiness scores are in range, port counts are non-negative, sensitivity ranks are stable, and the data-quality report has no ERROR items.
 
-`src/compare_to_baseline.py` compares the current local outputs against that committed baseline and writes local reports to:
+The baseline comparison writes local reports to:
 
 ```text
 data/outputs/baseline_comparison.csv
@@ -169,16 +171,10 @@ Create the Markdown run summary after running the model:
 python src/generate_run_summary.py
 ```
 
-Run the output checks after generating outputs:
+Run the combined output check after generating outputs:
 
 ```bash
 python src/check_outputs.py
-```
-
-Compare current outputs to the V1 baseline:
-
-```bash
-python src/compare_to_baseline.py
 ```
 
 ## What the model does
@@ -192,8 +188,7 @@ python src/compare_to_baseline.py
 7. Adds plain-English recommendation tiers and next data needs.
 8. Runs sensitivity scenarios to test whether rankings stay stable under uncertainty.
 9. Exports CSV outputs, charts, and a Markdown run summary.
-10. Checks generated outputs for basic consistency.
-11. Compares current outputs against the committed V1 baseline snapshot.
+10. Runs one combined output check that validates current outputs and compares them against the committed V1 baseline snapshot.
 
 ## Current candidate sites
 
