@@ -205,9 +205,9 @@ def enrich_and_score(sites):
 
     normalize_cols = [
         "nearby_households_1mi", "nearby_jobs_1mi", "aadt_nearest",
-        "amenities_count_0_5mi", "avg_dwell_min", "existing_ports_total",
-        "spare_capacity_kw", "distance_to_service_ft", "install_cost_est_usd",
-        "equity_gap_index"
+        "amenities_count_0_5mi", "parking_spaces", "avg_dwell_min",
+        "existing_ports_total", "spare_capacity_kw", "distance_to_service_ft",
+        "install_cost_est_usd", "equity_gap_index"
     ]
 
     for col in normalize_cols:
@@ -216,12 +216,14 @@ def enrich_and_score(sites):
     # Demand subscore: higher means more likely public charging demand.
     # Existing nearby chargers reduce demand because the area may already be served.
     # Limited-access sites are discounted because they are not normal public charging locations.
+    # Parking has a small weight because it is currently a manual V1 estimate.
     raw_demand_subscore = 100 * (
-        0.30 * minmax(df["ev_share_local"]) +
-        0.20 * df["nearby_jobs_1mi_n"] +
-        0.20 * df["nearby_households_1mi_n"] +
+        0.25 * minmax(df["ev_share_local"]) +
+        0.18 * df["nearby_jobs_1mi_n"] +
+        0.18 * df["nearby_households_1mi_n"] +
         0.10 * df["aadt_nearest_n"] +
         0.10 * df["amenities_count_0_5mi_n"] +
+        0.09 * df["parking_spaces_n"] +
         0.10 * df["avg_dwell_min_n"] -
         0.20 * df["existing_ports_total_n"]
     ).clip(lower=0)
