@@ -60,7 +60,7 @@ Latest confirmed user rerun: 2026-06-23.
 Data-quality result: ERROR 0, WARNING 0, REVIEW 20, INFO 6
 Output check: PASSED
 Baseline comparison: COMPLETED
-Deliverable package: 15 files copied, 0 missing
+Deliverable package: PASSED with 0 missing files
 ```
 
 The configurable output checker passed after moving V1 assumptions into:
