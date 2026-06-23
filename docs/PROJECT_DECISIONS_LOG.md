@@ -32,7 +32,7 @@ Nearby households and jobs are official-derived from ACS/TIGER and LODES/TIGER m
 
 ## Decision 8 — Use planning estimates where confirmed data is unavailable
 
-Demand, parking, amenities, electrical distance/cost, and local EV adoption values are clearly labeled when they are assumptions, planning estimates, or proxies.
+Demand, parking, electrical distance/cost, and local EV adoption values are clearly labeled when they are assumptions, planning estimates, or proxies.
 
 ## Decision 9 — Keep parking weight low until verified
 
@@ -107,6 +107,18 @@ Scope decision: keep PWC004 in the model as a future/reopened planning candidate
 
 Source quality: official facility webpage for FFX002 fields and official current-status webpage for PWC004.
 
+## Decision 20 — Use reviewed OSM amenities counts
+
+The project now uses reviewed OpenStreetMap / Overpass amenity counts for `amenities_count_0_5mi`.
+
+```text
+data/source_extracts/amenities_0_5mi_v4_osm_reviewed.csv
+```
+
+Decision: do not mix manual and OSM values in the active model field. Manual V1 amenity values are retained only for comparison and history.
+
+Source quality: open POI/GIS support, not official local government confirmation.
+
 ## Current expected recommendation interpretation
 
 ```text
@@ -128,7 +140,6 @@ employees_day
 visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
-amenities_count_0_5mi
 local EV adoption counts
 ```
 
