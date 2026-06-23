@@ -161,6 +161,19 @@ Decision: the deliverable package is generated locally and ignored by Git.
 
 Reason: the project needs an easy way to share maps, summaries, CSV tables, and reporting files without committing generated output artifacts to the repository.
 
+## Decision 24 — Add generated results interpretation
+
+The project now includes a generated plain-English interpretation built from the latest local outputs.
+
+```text
+src/generate_results_interpretation.py
+data/outputs/results_interpretation.md
+```
+
+Decision: static docs remain useful for the project story, but the generated interpretation should be used when sharing the latest model run because it adapts to ranking, tier, sensitivity, profile, and review-trigger changes.
+
+Reason: this reduces the risk that the deliverable package contains stale result sentences after future data or model updates.
+
 ## Current expected recommendation interpretation
 
 ```text
