@@ -27,7 +27,7 @@ data/outputs/workflow_success.json
 
 ```text
 data/outputs/charts/readiness_score_chart.png
-data/outputs/charts/profile_spider_chart.png
+data/outputs/charts/profile_score_heatmap.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 ```
@@ -60,4 +60,4 @@ python src/build_deliverable_package.py && \
 git status --short
 ```
 
-`src/run_all.py` runs the validator, model, polished readiness chart, sensitivity analysis, scoring profile analysis, profile spider chart, readiness map, generated summaries, output checks, and baseline comparison.
+`src/run_all.py` runs the validator, model, polished readiness chart, sensitivity analysis, scoring profile analysis, profile score heatmap, readiness map, generated summaries, output checks, and baseline comparison.
