@@ -4,14 +4,69 @@
 
 Phase 2 prototype development for the Public EV Charging Site-Readiness and Right-Sizing Model.
 
+The project is now a working planning-support prototype. It validates candidate-site data, runs the readiness and right-sizing model, tests sensitivity scenarios, compares alternative scoring profiles, generates charts and a readiness map, creates dynamic Markdown summaries, checks outputs against V1 expectations, compares the run to a committed baseline, and builds a local deliverable package.
+
+This project is still a planning-support model only. It does not replace utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, construction approval, or stakeholder approval.
+
 ## Current repo structure
 
 ```text
 src/                  Python scripts
 data/inputs/           Input datasets
-data/source_extracts/  Small source extracts
+data/config/           Config files for scoring profiles and output-check rules
+data/source_extracts/  Small source extracts and source notes
+data/baselines/        Committed V1 baseline outputs for regression comparison
 data/outputs/          Generated outputs ignored by Git
 docs/                  Documentation and reporting
+```
+
+## Current full workflow
+
+Run from the repository root:
+
+```bash
+git pull --rebase origin main
+python src/run_all.py
+python src/build_deliverable_package.py
+git status --short
+```
+
+`src/run_all.py` currently runs:
+
+```text
+1. src/validate_site_data.py
+2. src/ev_charger_model.py
+3. src/run_sensitivity_analysis.py
+4. src/run_profile_analysis.py
+5. src/plot_site_map.py
+6. src/generate_run_summary.py
+7. src/generate_results_interpretation.py
+8. src/check_outputs.py
+```
+
+The package builder creates a shareable local folder at:
+
+```text
+data/outputs/deliverable_package/
+```
+
+Generated outputs are local and ignored by Git.
+
+## Latest confirmed successful run
+
+Latest confirmed user rerun: 2026-06-23.
+
+```text
+Data-quality result: ERROR 0, WARNING 0, REVIEW 20, INFO 6
+Output check: PASSED
+Baseline comparison: COMPLETED
+Deliverable package: 15 files copied, 0 missing
+```
+
+The configurable output checker passed after moving V1 assumptions into:
+
+```text
+data/config/output_check_rules_v1.json
 ```
 
 ## Completed so far
@@ -30,8 +85,16 @@ PWC004 future/reopened planning assumption confirmed.
 Reviewed OSM/Overpass amenities count added and applied.
 Planning electrical feasibility estimates added.
 Local EV adoption proxy added.
-Sensitivity analysis added and strengthened.
 Recommendation tier layer added.
+Right-sizing logic added for recommended ports now, 2035, and 2050.
+Sensitivity analysis added and strengthened.
+Scoring profile analysis added.
+Readiness map added with dynamic top-candidate note.
+Dynamic model run summary added.
+Dynamic generated results interpretation added.
+Baseline snapshot and baseline comparison added.
+Configurable output-check rules added.
+Deliverable package builder added.
 Findings brief, full findings report, and presentation outline added.
 Stakeholder data request pack added.
 Repository reorganized into cleaner folders.
@@ -40,12 +103,49 @@ Repository reorganized into cleaner folders.
 ## Current strongest findings
 
 ```text
-FFX002 and FFX001 are stable top candidates.
-PWC004 is the strongest current PWC public-library candidate under future/reopened planning assumptions.
-PWC002 remains important but high-review because of garage context.
-PWC001 improved from the reviewed OSM amenities update but remains below stronger candidates.
-PWC003 is low public-priority unless its access or use case changes.
+FFX002 is the strongest current candidate.
+FFX002 ranks #1 in the base model, stays stable across sensitivity scenarios, and ranks #1 across all five scoring profiles.
+FFX001 is the second strongest current candidate and remains a Tier 1 alternative.
+PWC004 is a promising Tier 2 library candidate only under the future/reopened planning assumption because of the renovation/closure caveat.
+PWC002 remains important but high-review because of garage, fire/AHJ, access, ventilation, conduit-routing, emergency-disconnect, and electrical-review concerns.
+PWC001 remains a lower-priority monitored candidate under the current V1 dataset.
+PWC003 should not be treated as a general-public priority unless public access or use-case assumptions change.
 ```
+
+## Latest confirmed ranking
+
+```text
+1. FFX002 — City of Fairfax Regional Library — 59.9 — Tier 1
+2. FFX001 — Fairfax City Hall or municipal building — 53.1 — Tier 1
+3. PWC004 — Chinn Park Regional Library — 48.0 — Tier 2
+4. PWC002 — Neabsco-Potomac Commuter Garage — 44.3 — High-review candidate
+5. PWC001 — PWC McCoart Government Center — 42.1 — Tier 3
+6. PWC003 — Prince William County Public Safety Training Center — 18.6 — Low public-priority / special-use
+```
+
+## Current generated outputs
+
+Expected local outputs include:
+
+```text
+data/outputs/data_quality_report.csv
+data/outputs/site_results.csv
+data/outputs/sensitivity_results.csv
+data/outputs/sensitivity_summary.csv
+data/outputs/profile_results.csv
+data/outputs/profile_rank_summary.csv
+data/outputs/profile_comparison.md
+data/outputs/model_run_summary.md
+data/outputs/results_interpretation.md
+data/outputs/baseline_comparison.csv
+data/outputs/baseline_comparison.md
+data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/site_readiness_map.png
+data/outputs/charts/utilization_vs_ports_<site>.png
+data/outputs/deliverable_package/
+```
+
+Use `data/outputs/results_interpretation.md` for the latest generated plain-English interpretation of the current run.
 
 ## Remaining data improvements
 
@@ -58,6 +158,9 @@ visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
 local EV adoption counts
+PWC004 reopening or usable-planning timeline
+PWC002 garage/fire/AHJ/access/ventilation/conduit review
+PWC003 public, fleet-only, special-use, or removal decision
 ```
 
 ## Current stakeholder request files
@@ -69,27 +172,28 @@ data/source_extracts/stakeholder_data_request_fields.csv
 
 Use these files to ask facility, utility, public works, parking, ADA/accessibility, Fire Marshal/AHJ, GIS, and planning contacts for the data needed to replace assumptions and placeholders.
 
-## Current run commands
+## Current config and quality-control files
 
-```bash
-python src/validate_site_data.py
-python src/ev_charger_model.py
-python src/run_sensitivity_analysis.py
+```text
+data/config/scoring_profiles.csv
+data/config/output_check_rules_v1.json
+data/baselines/v1_baseline/site_results.csv
+data/baselines/v1_baseline/sensitivity_summary.csv
+data/baselines/v1_baseline/data_quality_report.csv
+data/baselines/v1_baseline/baseline_manifest.json
 ```
 
-Optional OSM amenities workflow:
+`data/config/scoring_profiles.csv` controls the alternative scoring-priority profiles.
 
-```bash
-python src/build_osm_amenities.py --pause 15 --retries 4 --retry-wait 30
-```
+`data/config/output_check_rules_v1.json` controls V1 sanity-check expectations, including expected site IDs, expected top site, sensitivity stability rule, data-quality error rule, expected profile names, expected profile count, expected sites per profile, and profile score range.
 
 ## Next good improvements
 
 ```text
-1. Re-run the validator, model, and sensitivity analysis after the reviewed amenities update.
-2. Replace visitor, employee, parking, and electrical assumptions with stronger site data when available.
-3. Improve facility hours and parking for sites other than FFX002.
-4. Add or improve map and visual outputs.
-5. Prepare slides from docs/PRESENTATION_OUTLINE.md.
+1. Add a scoring-profile ranking chart or stability visual using matplotlib.
+2. Improve stakeholder data request workflow for unresolved electrical, parking, operating-hours, and access fields.
+3. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
+4. Improve facility hours and parking for sites other than FFX002.
+5. Prepare final presentation slides from docs/PRESENTATION_OUTLINE.md and the deliverable package.
 6. Add more candidate sites if the project scope expands.
 ```
