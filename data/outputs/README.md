@@ -1,29 +1,59 @@
 # Generated Outputs
 
-This folder is for files created when the scripts run.
+This folder is for files created when the scripts run locally.
 
-Generated CSV outputs:
+Generated outputs are ignored by Git so local runs do not clutter `git status`.
+
+## Main generated CSV and Markdown outputs
 
 ```text
-data/outputs/site_results.csv
 data/outputs/data_quality_report.csv
+data/outputs/site_results.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
+data/outputs/profile_results.csv
+data/outputs/profile_rank_summary.csv
+data/outputs/profile_comparison.md
+data/outputs/model_run_summary.md
+data/outputs/results_interpretation.md
+data/outputs/baseline_comparison.csv
+data/outputs/baseline_comparison.md
 ```
 
-Generated chart outputs:
+## Generated chart outputs
 
 ```text
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 ```
 
-These generated outputs are ignored by Git so local runs do not clutter `git status`.
+## Optional OSM amenities outputs
 
-To regenerate them from the repository root:
+```text
+data/outputs/amenities_osm_summary_0_5mi.csv
+data/outputs/amenities_osm_pois_0_5mi.csv
+```
+
+## Deliverable package
+
+The package builder creates a local shareable folder:
+
+```text
+data/outputs/deliverable_package/
+```
+
+It includes selected charts, run outputs, data tables, reports, a package README, and a package manifest.
+
+## Regenerate outputs
+
+From the repository root:
 
 ```bash
-python src/validate_site_data.py
-python src/ev_charger_model.py
-python src/run_sensitivity_analysis.py
+git pull --rebase origin main
+python src/run_all.py
+python src/build_deliverable_package.py
+git status --short
 ```
+
+`src/run_all.py` runs the validator, model, sensitivity analysis, scoring profile analysis, readiness map, generated summaries, output checks, and baseline comparison.
