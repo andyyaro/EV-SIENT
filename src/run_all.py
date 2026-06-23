@@ -2,7 +2,8 @@
 
 This script calls the main project scripts in the correct order so the validator,
 model outputs, sensitivity analysis, profile analysis, map/chart outputs,
-Markdown run summary, and combined output checks stay synchronized.
+Markdown summaries, generated interpretation, and combined output checks stay
+synchronized.
 
 Run from the repository root:
 
@@ -24,6 +25,7 @@ STEPS = [
     {"name": "Run scoring profile analysis", "command": [sys.executable, "src/run_profile_analysis.py"]},
     {"name": "Create readiness map", "command": [sys.executable, "src/plot_site_map.py"]},
     {"name": "Generate Markdown run summary", "command": [sys.executable, "src/generate_run_summary.py"]},
+    {"name": "Generate results interpretation", "command": [sys.executable, "src/generate_results_interpretation.py"]},
     {"name": "Check outputs and compare to V1 baseline", "command": [sys.executable, "src/check_outputs.py"]},
 ]
 
@@ -38,6 +40,7 @@ EXPECTED_OUTPUTS = [
     "data/outputs/charts/readiness_score_chart.png",
     "data/outputs/charts/site_readiness_map.png",
     "data/outputs/model_run_summary.md",
+    "data/outputs/results_interpretation.md",
     "data/outputs/baseline_comparison.csv",
     "data/outputs/baseline_comparison.md",
 ]
