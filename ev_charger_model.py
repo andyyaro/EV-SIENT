@@ -216,7 +216,9 @@ def enrich_and_score(sites):
     # Demand subscore: higher means more likely public charging demand.
     # Existing nearby chargers reduce demand because the area may already be served.
     # Limited-access sites are discounted because they are not normal public charging locations.
-    # Parking has a small weight because it is currently a manual V1 estimate.
+    # Parking has a small weight because it is currently manual V1 data, not official data.
+    # Once parking counts become official or strongly verified, this weight should be revisited
+    # and may need to be increased or recalibrated against the other demand indicators.
     raw_demand_subscore = 100 * (
         0.25 * minmax(df["ev_share_local"]) +
         0.18 * df["nearby_jobs_1mi_n"] +
