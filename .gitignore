@@ -14,11 +14,14 @@ __pycache__/
 
 # Generated model outputs
 site_results.csv
+data_quality_report.csv
+sensitivity_results.csv
+sensitivity_summary.csv
 readiness_score_chart.png
 utilization_vs_ports_chart.png
 utilization_vs_ports_*.png
-sensitivity_results.csv
-sensitivity_summary.csv
+data/outputs/*.csv
+data/outputs/charts/*.png
 
 # Temporary files
 *.tmp
