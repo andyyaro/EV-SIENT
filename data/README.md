@@ -28,6 +28,7 @@ source_extracts/vdot_nearest_traffic_segments.csv
 source_extracts/acs_households_1mi.csv
 source_extracts/lodes_jobs_1mi.csv
 source_extracts/demand_assumptions_v1.csv
+source_extracts/amenities_0_5mi.csv
 raw_exports/README.md
 ```
 
@@ -47,6 +48,7 @@ VDOT Bidirectional Traffic Volume 2025
 ACS 2024 5-Year B11001 Household Type
 TIGER Line 2024 Virginia Block Groups
 LODES 2023 Virginia Workplace Area Characteristics
+Amenities 0.5-mile V1 category count
 ```
 
 ## Current use in the model
@@ -65,9 +67,12 @@ nearby_jobs_1mi
 existing_l2_ports_1mi
 existing_dcfc_ports_3mi
 aadt_nearest
+amenities_count_0_5mi
 notes
 ```
 
 ## Important note
 
 This data folder is for transparency and reproducibility. The model is still a planning prototype and does not replace AHJ, Fire Marshal, ADA, utility, stormwater, engineering, or permitting review.
+
+The current amenities extract is a manual V1 planning estimate. It should later be replaced with a stronger GIS/POI method, but it is useful now because it prevents the demand score from treating every site as if it had zero nearby dwell-time amenities.
