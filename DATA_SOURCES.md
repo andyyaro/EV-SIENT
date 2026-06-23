@@ -105,23 +105,9 @@ FFX001: existing_l2_ports_1mi = 28, existing_dcfc_ports_3mi = 39
 FFX002: existing_l2_ports_1mi = 14, existing_dcfc_ports_3mi = 23
 ```
 
-Notes:
-
-```text
-Level 2 ports are counted within 1 mile.
-DC fast ports are counted within 3 miles.
-Only public active EV stations should be counted for the current prototype.
-```
-
 ### 4. VDOT Bidirectional Traffic Volume 2025
 
 Used for official traffic exposure near each confirmed candidate site.
-
-Source:
-
-```text
-Virginia Roads — VDOT Bidirectional Traffic Volume 2025
-```
 
 Model field supported:
 
@@ -148,49 +134,68 @@ The source extract is stored at data/source_extracts/vdot_nearest_traffic_segmen
 PWC002's nearest segment is a ramp near the garage; nearby I-95 segments have much higher ADT, so this may deserve later review.
 ```
 
-## Priority official sources still needed
+### 5. U.S. Census ACS 2024 5-Year Household Type and TIGER Block Groups
 
-### 1. U.S. Census ACS 5-Year
+Used for household context around each confirmed candidate site.
 
-Use for demographic and equity context.
-
-Official page:
-
-```text
-https://www.census.gov/data/developers/data-sets/acs-5year.html
-```
-
-Model fields supported:
+Model field supported:
 
 ```text
 nearby_households_1mi
-population context
-renter share
-median income
-vehicle access
-possible future equity-gap variables
-equity_gap_index
 ```
 
-### 2. U.S. Census LEHD LODES
-
-Use for workplace/job density around candidate sites.
-
-Official page:
+Current ACS-derived values:
 
 ```text
-https://lehd.ces.census.gov/data/
+PWC001: nearby_households_1mi = 3576
+PWC002: nearby_households_1mi = 5263
+PWC004: nearby_households_1mi = 5022
+FFX001: nearby_households_1mi = 4231
+FFX002: nearby_households_1mi = 4964
 ```
 
-Model fields supported:
+Notes:
+
+```text
+Values use ACS 2024 5-Year B11001 total households.
+Block group geometry comes from TIGER Line 2024 Virginia block groups.
+Values are area-weighted estimates for a 1-mile site buffer.
+The source extract is stored at data/source_extracts/acs_households_1mi.csv.
+```
+
+### 6. U.S. Census LEHD LODES 2023 Workplace Area Characteristics
+
+Used for workplace/job density around each confirmed candidate site.
+
+Model field supported:
 
 ```text
 nearby_jobs_1mi
-employment density near the site
-workplace activity around public buildings, garages, and community facilities
 ```
 
-### 3. Local government facility pages and GIS
+Current LODES-derived values:
+
+```text
+PWC001: nearby_jobs_1mi = 5195
+PWC002: nearby_jobs_1mi = 9890
+PWC004: nearby_jobs_1mi = 3140
+FFX001: nearby_jobs_1mi = 18057
+FFX002: nearby_jobs_1mi = 15718
+```
+
+Notes:
+
+```text
+Values use LODES 2023 Virginia Workplace Area Characteristics, all jobs.
+The source file is va_wac_S000_JT00_2023.csv.gz.
+Workplace block jobs were aggregated to block groups for the current prototype.
+Values are then area-weighted estimates for a 1-mile site buffer.
+The source extract is stored at data/source_extracts/lodes_jobs_1mi.csv.
+```
+
+## Priority official sources still needed
+
+### 1. Local government facility pages and GIS
 
 Use for candidate site names, addresses, hours, parking, and facility details when published.
 
@@ -268,8 +273,8 @@ Do not present these fields as official engineering determinations unless verifi
 | `parking_spaces` | Site page, GIS, stakeholder evidence, or manual count | Official, stakeholder, or manual estimate | PWC002 parking still needs confirmation |
 | `hours_open` | Facility page | Official or manual estimate | Current values are planning assumptions unless otherwise noted |
 | `avg_dwell_min` | Site-type assumption | Manual estimate | Based on library, garage, office, clinic, etc. |
-| `nearby_households_1mi` | Census ACS | Official | Later automate by tract/block-group approximation |
-| `nearby_jobs_1mi` | Census LEHD LODES | Official | Later automate by block aggregation |
+| `nearby_households_1mi` | Census ACS | Official-derived | Added with ACS B11001 and TIGER block group geometry |
+| `nearby_jobs_1mi` | Census LEHD LODES | Official-derived | Added with LODES WAC and TIGER block group geometry |
 | `aadt_nearest` | VDOT / Virginia Roads | Official | Added for confirmed rows using nearest traffic segment |
 | `amenities_count_0_5mi` | OpenStreetMap / manual map count | Public/open data or manual estimate | Not government official unless using local GIS |
 | `ev_registrations_local` | State/local registration source if available | Official if found | Optional for later |
@@ -306,9 +311,9 @@ Unknown safety/electrical values should not be presented as verified.
 Best next data work:
 
 ```text
-1. Add ACS household/equity context.
-2. Add LEHD jobs/workplace context.
-3. Confirm or replace the PWC003 staging health facility row.
-4. Improve site-specific parking, hours, visitor, employee, and electrical assumptions.
-5. Fill missing dataset freshness metadata for older source files.
+1. Confirm or replace the PWC003 staging health facility row.
+2. Improve site-specific parking, hours, visitor, employee, and electrical assumptions.
+3. Fill missing dataset freshness metadata for older source files.
+4. Begin equity-gap scoring from ACS variables.
+5. Improve feasibility assumptions for electrical capacity, trenching, and service upgrade cost.
 ```
