@@ -33,7 +33,17 @@ data/outputs/model_run_summary.md
 data/outputs/profile_comparison.md
 data/outputs/baseline_comparison.md
 data/outputs/charts/site_readiness_map.png
+data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/profile_rank_stability_chart.png
 ```
+
+Recommended profile-analysis visual:
+
+```text
+data/outputs/charts/profile_rank_stability_chart.png
+```
+
+The heatmap remains available as a supporting view, but the rank-stability chart is easier to explain in a presentation.
 
 Generated outputs are local files ignored by Git.
 
