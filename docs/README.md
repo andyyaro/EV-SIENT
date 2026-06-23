@@ -12,20 +12,21 @@ This folder is for human-readable project documentation, reporting, and presenta
 5. RESULTS_INTERPRETATION.md
 6. READINESS_MAP_GUIDE.md
 7. STAKEHOLDER_DATA_REQUEST.md
-8. METHODOLOGY.md
-9. DATA_DICTIONARY.md
-10. DATA_SOURCES.md
-11. RECOMMENDATION_TIERS.md
-12. SENSITIVITY_ANALYSIS.md
-13. SENSITIVITY_RESULTS_INTERPRETATION.md
-14. OSM_AMENITIES_WORKFLOW.md
-15. OSM_AMENITIES_REVIEW_NOTE.md
-16. PROJECT_DECISIONS_LOG.md
+8. STAKEHOLDER_CONTACT_PLAN.md
+9. METHODOLOGY.md
+10. DATA_DICTIONARY.md
+11. DATA_SOURCES.md
+12. RECOMMENDATION_TIERS.md
+13. SENSITIVITY_ANALYSIS.md
+14. SENSITIVITY_RESULTS_INTERPRETATION.md
+15. OSM_AMENITIES_WORKFLOW.md
+16. OSM_AMENITIES_REVIEW_NOTE.md
+17. PROJECT_DECISIONS_LOG.md
 ```
 
 ## Latest generated outputs
 
-The static docs explain the project story and methodology. For the latest model-run result, use the generated files under `data/outputs/`:
+For the latest model-run result, use:
 
 ```text
 data/outputs/results_interpretation.md
@@ -43,9 +44,14 @@ Recommended profile-analysis visual:
 data/outputs/charts/profile_rank_stability_chart.png
 ```
 
-The heatmap remains available as a supporting view, but the rank-stability chart is easier to explain in a presentation.
+## Stakeholder follow-up files
 
-Generated outputs are local files ignored by Git.
+```text
+docs/STAKEHOLDER_DATA_REQUEST.md
+docs/STAKEHOLDER_CONTACT_PLAN.md
+data/source_extracts/stakeholder_data_request_fields.csv
+data/source_extracts/stakeholder_response_tracker.csv
+```
 
 ## Main code
 
