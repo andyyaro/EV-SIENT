@@ -73,6 +73,34 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 
 Then the model applies a public-access discount if a site is limited-access or not a normal general-public charging location.
 
+## Scoring profile analysis
+
+The project now includes scoring profiles that test whether the ranking changes when a stakeholder gives more weight to one planning priority.
+
+The current profiles are:
+
+```text
+base
+demand_priority
+equity_priority
+feasibility_priority
+safety_priority
+```
+
+The profile analysis is a planning-sensitivity layer. It does not replace the main V1 ranking.
+
+Latest result:
+
+```text
+base — FFX002 ranked #1
+demand_priority — FFX002 ranked #1
+equity_priority — FFX002 ranked #1
+feasibility_priority — FFX002 ranked #1
+safety_priority — FFX002 ranked #1
+```
+
+Interpretation: FFX002 remains the strongest current candidate even when demand, equity, feasibility, or safety/AHJ considerations are weighted more heavily. This makes the top recommendation stronger than a single-scenario ranking.
+
 ## Amenities source update
 
 The active amenities field is now based on a reviewed OpenStreetMap / Overpass POI extract:
@@ -133,7 +161,7 @@ PWC003 — Low public-priority / special-use
 
 ### FFX002 — City of Fairfax Regional Library
 
-FFX002 is the strongest current candidate. It combines public library use, public accessibility, nearby jobs/households, strong equity context, official parking/hour support, reviewed OSM amenity support, and lower planning-level electrical distance/cost burden than several other sites.
+FFX002 is the strongest current candidate. It combines public library use, public accessibility, nearby jobs/households, strong equity context, official parking/hour support, reviewed OSM amenity support, lower planning-level electrical distance/cost burden than several other sites, and stable rank across all tested scoring profiles.
 
 ### FFX001 — Fairfax City Hall or municipal building
 
@@ -175,6 +203,18 @@ PWC003 — 2 ports now, 2 by 2035, 2 by 2050
 ```
 
 Important caution: port recommendations are starter planning estimates. They should be recalibrated with better observed use, confirmed site hours, confirmed parking behavior, and stakeholder input.
+
+## Cross-checks supporting the result
+
+The current top recommendation is supported by three checks:
+
+```text
+1. Base model ranking: FFX002 ranked #1.
+2. Sensitivity analysis: all six sites had rank_range = 0.
+3. Scoring profile analysis: FFX002 ranked #1 across all five scoring profiles.
+```
+
+This does not mean FFX002 is ready to build. It means it is the strongest current site to advance into stakeholder and site-screening review.
 
 ## Remaining data gaps
 
@@ -229,9 +269,10 @@ The current prototype is strong enough to support a preliminary planning convers
 Recommended near-term focus:
 
 ```text
-1. Treat FFX002 and FFX001 as stable top candidates.
-2. Treat PWC004 as the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
-3. Keep PWC002 in the discussion, but route it through garage/fire/electrical review.
-4. Keep PWC003 as special-use or fleet-only unless public access is confirmed.
-5. Improve electrical capacity, visitor, parking, hours, and emergency-disconnect data before any implementation recommendation.
+1. Treat FFX002 as the most stable top candidate because it ranks first in the base model, stays stable in sensitivity analysis, and remains first across all scoring profiles.
+2. Treat FFX001 as the second strongest current candidate.
+3. Treat PWC004 as the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
+4. Keep PWC002 in the discussion, but route it through garage/fire/electrical review.
+5. Keep PWC003 as special-use or fleet-only unless public access is confirmed.
+6. Improve electrical capacity, visitor, parking, hours, and emergency-disconnect data before any implementation recommendation.
 ```
