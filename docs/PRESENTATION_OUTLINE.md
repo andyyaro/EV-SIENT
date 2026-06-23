@@ -70,12 +70,12 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ## Slide 7 — Ranked results
 
 ```text
-1. FFX002 — 59.9
-2. FFX001 — 53.1
-3. PWC004 — 48.0
-4. PWC002 — 44.3
-5. PWC001 — 42.1
-6. PWC003 — 18.6
+1. FFX002 — 65.3
+2. FFX001 — 57.3
+3. PWC002 — 56.0
+4. PWC004 — 52.7
+5. PWC001 — 43.2
+6. PWC003 — 29.5
 ```
 
 ## Slide 8 — Recommendation tiers
@@ -83,8 +83,8 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ```text
 FFX002 — Tier 1 — advance to site screening
 FFX001 — Tier 1 — advance to site screening
-PWC004 — Tier 2 — promising candidate, refine data
 PWC002 — High-review candidate
+PWC004 — Tier 2 — promising candidate, refine data
 PWC001 — Tier 3 — lower priority / monitor
 PWC003 — Low public-priority / special-use
 ```
@@ -144,6 +144,7 @@ local EV adoption counts
 FFX002 parking and hours are now supported by an official facility page.
 PWC004's official library page currently lists Chinn Park Library as closed for renovation.
 PWC004 remains modeled under the future/reopened planning assumption.
+PWC002 ranks third in the corrected model, but remains a high-review garage candidate.
 Amenities now use reviewed OSM/Overpass six-category POI counts.
 The site map is a planning visual only, not a parcel boundary or engineering map.
 ```
@@ -153,7 +154,7 @@ The site map is a planning visual only, not a parcel boundary or engineering map
 ```text
 FFX002 is the most stable top candidate.
 FFX001 is the second strongest current candidate.
+PWC002 should remain in discussion but needs garage/fire/electrical review before advancement.
 PWC004 is the strongest current Prince William County public-library candidate under future/reopened planning assumptions.
-PWC002 should remain in discussion but needs garage/fire/electrical review.
 PWC003 should not be treated as a general-public site unless its access or use case changes.
 ```
