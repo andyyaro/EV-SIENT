@@ -2,7 +2,7 @@
 
 This script is a beginner-friendly pipeline runner. It calls the main project
 scripts in the correct order so the validator, model outputs, sensitivity
-analysis, and map/chart outputs stay synchronized.
+analysis, map/chart outputs, and Markdown run summary stay synchronized.
 
 Run from the repository root:
 
@@ -34,6 +34,10 @@ STEPS = [
         "name": "Create readiness map",
         "command": [sys.executable, "src/plot_site_map.py"],
     },
+    {
+        "name": "Generate Markdown run summary",
+        "command": [sys.executable, "src/generate_run_summary.py"],
+    },
 ]
 
 EXPECTED_OUTPUTS = [
@@ -43,6 +47,7 @@ EXPECTED_OUTPUTS = [
     "data/outputs/sensitivity_summary.csv",
     "data/outputs/charts/readiness_score_chart.png",
     "data/outputs/charts/site_readiness_map.png",
+    "data/outputs/model_run_summary.md",
 ]
 
 
