@@ -15,8 +15,6 @@ The goal is to keep the model transparent and defensible. Some fields can come f
 
 ## Current working dataset
 
-The current real/staging dataset is:
-
 ```text
 real_sites_v1.csv
 ```
@@ -58,8 +56,6 @@ lat
 lon
 ```
 
-Current notes in `real_sites_v1.csv` label these as verified from City of Fairfax GeoHub Addresses authoritative feature service.
-
 ### 2. Prince William County GIS Premise Addresses
 
 Used for official address and coordinates for:
@@ -80,8 +76,6 @@ zip
 lat
 lon
 ```
-
-Current notes in `real_sites_v1.csv` label these as verified from Prince William County GIS Premise Addresses countywide address point layer.
 
 ### 3. DOE / AFDC / NREL Alternative Fuel Stations
 
@@ -119,6 +113,41 @@ DC fast ports are counted within 3 miles.
 Only public active EV stations should be counted for the current prototype.
 ```
 
+### 4. VDOT Bidirectional Traffic Volume 2025
+
+Used for official traffic exposure near each confirmed candidate site.
+
+Source:
+
+```text
+Virginia Roads — VDOT Bidirectional Traffic Volume 2025
+```
+
+Model field supported:
+
+```text
+aadt_nearest
+```
+
+Current VDOT-derived nearest AADT values:
+
+```text
+PWC001: aadt_nearest = 51000
+PWC002: aadt_nearest = 8300
+PWC004: aadt_nearest = 45000
+FFX001: aadt_nearest = 9700
+FFX002: aadt_nearest = 12000
+```
+
+Notes:
+
+```text
+AADT means Annual Average Daily Traffic.
+Values were assigned using the nearest traffic-volume geometry to each site coordinate.
+The source extract is stored at data/source_extracts/vdot_nearest_traffic_segments.csv.
+PWC002's nearest segment is a ramp near the garage; nearby I-95 segments have much higher ADT, so this may deserve later review.
+```
+
 ## Priority official sources still needed
 
 ### 1. U.S. Census ACS 5-Year
@@ -143,13 +172,6 @@ possible future equity-gap variables
 equity_gap_index
 ```
 
-Notes:
-
-```text
-ACS 5-year estimates are available down to census tracts and block groups.
-For the prototype, ACS should support household and equity context.
-```
-
 ### 2. U.S. Census LEHD LODES
 
 Use for workplace/job density around candidate sites.
@@ -168,37 +190,7 @@ employment density near the site
 workplace activity around public buildings, garages, and community facilities
 ```
 
-Notes:
-
-```text
-LODES files are state-based.
-The useful file type for this model is Workplace Area Characteristics.
-```
-
-### 3. VDOT / Virginia Roads Traffic Volume
-
-Use for traffic exposure near candidate sites.
-
-Official page:
-
-```text
-https://www.virginiaroads.org/datasets/VDOT::traffic-volume/about
-```
-
-Model fields supported:
-
-```text
-aadt_nearest
-```
-
-Notes:
-
-```text
-AADT means Annual Average Daily Traffic.
-Traffic volume near a site can be a demand proxy.
-```
-
-### 4. Local government facility pages and GIS
+### 3. Local government facility pages and GIS
 
 Use for candidate site names, addresses, hours, parking, and facility details when published.
 
@@ -225,13 +217,7 @@ lat
 lon
 public_access
 hours_open
-parking_spaces, if published
-```
-
-Notes:
-
-```text
-If parking or hours are not published, mark them as manual estimates in the notes field.
+parking_spaces if published
 ```
 
 ## Fields that likely need manual or stakeholder inputs
@@ -280,11 +266,11 @@ Do not present these fields as official engineering determinations unless verifi
 | `visitors_day` | Facility estimate / stakeholder input | Manual estimate | Hard to get officially |
 | `fleet_vehicles` | Stakeholder input / fleet plan | Stakeholder evidence or manual estimate | Use 0 if not a fleet site |
 | `parking_spaces` | Site page, GIS, stakeholder evidence, or manual count | Official, stakeholder, or manual estimate | PWC002 parking still needs confirmation |
-| `hours_open` | Facility page | Official | If unknown, estimate and mark notes |
+| `hours_open` | Facility page | Official or manual estimate | Current values are planning assumptions unless otherwise noted |
 | `avg_dwell_min` | Site-type assumption | Manual estimate | Based on library, garage, office, clinic, etc. |
 | `nearby_households_1mi` | Census ACS | Official | Later automate by tract/block-group approximation |
 | `nearby_jobs_1mi` | Census LEHD LODES | Official | Later automate by block aggregation |
-| `aadt_nearest` | VDOT / Virginia Roads | Official | Nearest traffic segment |
+| `aadt_nearest` | VDOT / Virginia Roads | Official | Added for confirmed rows using nearest traffic segment |
 | `amenities_count_0_5mi` | OpenStreetMap / manual map count | Public/open data or manual estimate | Not government official unless using local GIS |
 | `ev_registrations_local` | State/local registration source if available | Official if found | Optional for later |
 | `ev_share_local` | State/local registration source or regional assumption | Official or manual estimate | Use same assumption for v1 if needed |
@@ -322,7 +308,7 @@ Best next data work:
 ```text
 1. Add ACS household/equity context.
 2. Add LEHD jobs/workplace context.
-3. Add VDOT AADT context.
-4. Confirm or replace the PWC003 staging health facility row.
-5. Improve site-specific parking, hours, visitor, employee, and electrical assumptions.
+3. Confirm or replace the PWC003 staging health facility row.
+4. Improve site-specific parking, hours, visitor, employee, and electrical assumptions.
+5. Fill missing dataset freshness metadata for older source files.
 ```
