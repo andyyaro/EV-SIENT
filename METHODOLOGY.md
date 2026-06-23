@@ -38,7 +38,7 @@ The older `sites.csv` remains in the repository as a starter/demo dataset.
 
 ## Data sources used in V1
 
-The current V1 model combines official, official-derived, and assumption-based fields.
+The current V1 model combines official, official-derived, planning-estimate, and proxy fields.
 
 Official or official-derived sources already used:
 
@@ -50,14 +50,16 @@ Official or official-derived sources already used:
 - ACS 2024 5-Year B11001 Household Type
 - TIGER Line 2024 Virginia Block Groups
 - LODES 2023 Virginia Workplace Area Characteristics
+- ACS 2024 5-Year equity indicators and TIGER geometry
 ```
 
-Manual or template planning extracts already used:
+Manual, planning-estimate, or proxy extracts already used:
 
 ```text
 - Demand assumptions v1
 - Amenities 0.5-mile V1 category count
-- ACS equity inputs 1-mile template
+- Electrical feasibility V1 planning estimates
+- Local EV adoption V1 proxy
 ```
 
 Small model-ready extracts are stored under:
@@ -107,6 +109,8 @@ That means the lowest value among the candidate sites becomes 0 and the highest 
 
 This is useful for a small prototype, but it also means scores are relative to the current candidate list. Adding more sites later can change normalized values and rankings.
 
+Important exception: `ev_share_local` is not min-max normalized. The model now scales it against a fixed 10 percent high-adoption benchmark. This prevents small local EV-share differences from becoming exaggerated when the candidate list only has a few sites.
+
 ## Demand subscore
 
 The demand subscore estimates how strongly a site looks like a public charging opportunity.
@@ -114,7 +118,7 @@ The demand subscore estimates how strongly a site looks like a public charging o
 Current demand components:
 
 ```text
-0.25 * local EV share
+0.25 * local EV share signal
 0.18 * nearby jobs within 1 mile
 0.18 * nearby households within 1 mile
 0.10 * nearest AADT traffic
@@ -123,6 +127,14 @@ Current demand components:
 0.10 * average dwell time
 -0.20 * existing nearby charger supply
 ```
+
+The local EV-share signal is calculated as:
+
+```text
+ev_share_signal = min(ev_share_local / 0.10, 1.0)
+```
+
+This means 10 percent local EV share or higher receives the maximum EV-share demand signal. A 2 percent local EV share receives a 0.20 signal.
 
 In plain English:
 
@@ -137,13 +149,13 @@ Longer dwell time helps.
 More existing chargers nearby reduce new need.
 ```
 
-Current limitation: amenities and parking are no longer all zero, but the current `amenities_count_0_5mi` and `parking_spaces` values are manual V1 planning estimates. They should later be replaced with stronger GIS/POI, facility, stakeholder, or documented manual-count data.
+Current limitation: amenities, parking, and local EV adoption are not all official local values yet. `amenities_count_0_5mi`, `parking_spaces`, and the current local EV adoption values should later be replaced with stronger GIS/POI, facility, DMV/locality, stakeholder, or documented manual-count data.
 
 Important weighting note: the current 0.09 parking weight is intentionally low because `parking_spaces` is not official data yet. Once parking counts become official or strongly verified, this weight should be revisited and may need to be increased or recalibrated against the other demand indicators.
 
 ## Public access adjustment
 
-The model now includes a public-access adjustment.
+The model includes a public-access adjustment.
 
 ```text
 public_access = 1 means normal public charging candidate.
@@ -192,7 +204,7 @@ Shorter service distance helps.
 ADA layout feasibility helps.
 ```
 
-Current limitation: many electrical and cost fields are still placeholders or assumptions. This subscore should be improved with stakeholder input, utility review, or site review.
+Current limitation: distance, trenching, and service-upgrade cost are planning-level V1 estimates. Electrical service rating, spare capacity, and emergency disconnect visibility still need stakeholder input, utility review, or site review.
 
 ## Safety subscore
 
@@ -217,233 +229,3 @@ Emergency disconnect visibility matters.
 Stormwater and firefighting runoff concerns matter.
 Battery storage adds review complexity.
 ```
-
-This subscore is a planning flag only. It does not replace Fire Marshal, AHJ, ADA, utility, stormwater, engineering, or permitting review.
-
-## Equity contribution
-
-The final score includes an equity contribution worth 10 percent of the readiness score.
-
-Current model field:
-
-```text
-equity_gap_index
-```
-
-The current `equity_gap_index` values in `real_sites_v1.csv` are still V1 placeholders. They should not be presented as final official equity findings.
-
-The repository now has an ACS-ready equity workflow:
-
-```text
-build_equity_index.py
-data/source_extracts/acs_equity_inputs_1mi.csv
-```
-
-The planned equity input extract uses 1-mile buffer estimates for:
-
-```text
-median_household_income
-no_vehicle_households
-total_households
-renter_occupied_households
-occupied_housing_units
-multifamily_units
-total_housing_units
-```
-
-The planned V1 equity formula is:
-
-```text
-equity_gap_index =
-0.35 * lower_income_component +
-0.30 * no_vehicle_component +
-0.20 * renter_component +
-0.15 * multifamily_component
-```
-
-Where:
-
-```text
-lower_income_component = higher score for lower median household income
-no_vehicle_component = higher score for higher no-vehicle household share
-renter_component = higher score for higher renter household share
-multifamily_component = higher score for higher multifamily housing share
-```
-
-The current `acs_equity_inputs_1mi.csv` file is a template only. Its numeric values are intentionally blank until official-derived ACS values are extracted and area-weighted to each site's 1-mile buffer. The model should not copy new equity values into `real_sites_v1.csv` until that source extract is populated and reviewed.
-
-## Expected sessions per day
-
-The model estimates expected charging sessions per day separately from readiness score.
-
-This means:
-
-```text
-readiness_score = site priority
-expected_sessions_day = estimated use level
-recommended_ports_now = starter port count
-```
-
-Expected sessions are currently based on:
-
-```text
-visitors_day
-employees_day
-fleet_vehicles
-ev_share_local
-site_type behavior assumptions
-public access adjustment
-equity factor
-amenities factor
-existing charger supply factor
-```
-
-Parking currently affects the demand subscore, not the expected-sessions calculation. This avoids double-counting parking where visitor estimates are already based partly on parking assumptions.
-
-A fallback minimum of 0.3 sessions per day is used so every site can still be evaluated by the queueing logic.
-
-## Site-type behavior assumptions
-
-Different site types have different charging behavior assumptions.
-
-Current site types include:
-
-```text
-library
-office
-clinic
-garage
-public_safety
-fleet
-```
-
-Examples:
-
-```text
-Libraries have shorter average charging sessions than garages.
-Garages have longer dwell time.
-Public safety sites are treated as special-use and lower public-capture sites.
-Fleet sites are modeled separately from public visitors.
-```
-
-These are adjustable prototype assumptions, not permanent facts.
-
-## Port recommendation logic
-
-The model recommends ports using a simple queueing/utilization check.
-
-It tests one port, then two ports, then three ports, and so on until the site meets both conditions:
-
-```text
-estimated utilization <= target utilization
-mean wait time <= 10 minutes
-```
-
-The model recommends:
-
-```text
-recommended_ports_now
-recommended_ports_2035
-recommended_ports_2050
-```
-
-Future years use simple growth assumptions:
-
-```text
-2035 demand = current expected sessions * 1.6
-2050 demand = current expected sessions * 2.4
-```
-
-These future values are planning scenarios, not forecasts.
-
-## AHJ review flag
-
-The model creates an `ahj_review_flag` when a site has review concerns.
-
-Current triggers include:
-
-```text
-garage_enclosed = 1
-battery_storage_flag = 1
-fire_access_ok = 0
-emergency_disconnect_visible = 0
-stormwater_risk = 1
-ada_layout_possible = 0
-```
-
-The model also creates a plain-English `review_reason` explaining what triggered the review flag.
-
-Examples:
-
-```text
-Emergency disconnect visibility not confirmed
-Enclosed garage or limited ventilation/access
-Limited or non-public access
-Stormwater or firefighting runoff concern
-```
-
-## Current interpretation of V1 results
-
-The current V1 model generally separates sites into two groups.
-
-Public charging priority sites:
-
-```text
-City of Fairfax Regional Library
-Chinn Park Regional Library
-Fairfax City Hall or municipal building
-PWC McCoart Government Center
-```
-
-Special or high-review sites:
-
-```text
-Neabsco-Potomac Commuter Garage
-Prince William County Public Safety Training Center
-```
-
-The garage has a higher review burden because it is an enclosed/garage setting and already has significant nearby charging supply. The Public Safety Training Center is a real facility, but it is limited-access and rural, so it is better interpreted as a special-use or fleet-support candidate rather than a normal public charging priority.
-
-## Current limitations
-
-The current model is useful for a transparent V1 prototype, but several fields still need improvement:
-
-```text
-employees_day
-visitors_day
-fleet_vehicles
-parking_spaces
-hours_open
-amenities_count_0_5mi
-ev_registrations_local
-ev_share_local
-equity_gap_index
-electrical capacity assumptions
-trenching and service upgrade assumptions
-ADA layout assumptions
-fire access assumptions
-emergency disconnect assumptions
-stormwater assumptions
-battery storage assumptions
-```
-
-## What should be improved next
-
-Recommended next improvements:
-
-```text
-1. Populate the ACS equity input extract with official-derived income, vehicle-access, renter, and multifamily values.
-2. Run build_equity_index.py and review the output before copying equity_gap_index into real_sites_v1.csv.
-3. Re-run the model after each data update and compare results.
-4. Improve visitor, employee, parking, and hours assumptions with stronger evidence.
-5. Revisit the parking weight once official or strongly verified parking counts are available.
-6. Replace manual amenity estimates with a stronger GIS/POI method.
-7. Improve electrical, trenching, and service upgrade assumptions.
-8. Add clearer special-use handling for fleet or public safety facilities.
-```
-
-## Important limitation
-
-This is a planning-support prototype. It does not approve, design, permit, or certify EV charging installations.
-
-Any real project would still need review from the appropriate AHJ, Fire Marshal, ADA/accessibility reviewers, utility, stormwater staff, engineers, and permitting offices.
