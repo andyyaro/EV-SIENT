@@ -20,6 +20,7 @@ data/outputs/model_run_summary.md          Dynamic run summary, generated locall
 data/outputs/results_interpretation.md     Dynamic results interpretation, generated locally
 data/outputs/baseline_comparison.csv       Baseline comparison table, generated locally
 data/outputs/baseline_comparison.md        Baseline comparison report, generated locally
+data/outputs/workflow_success.json         Successful full-workflow marker, generated locally
 data/outputs/deliverable_package/          Local shareable output package, generated locally
 ```
 
@@ -86,6 +87,10 @@ These columns appear in `data/outputs/profile_results.csv`.
 | `base_readiness_score` | Readiness score from the main V1 model. |
 | `rank_change_vs_base` | Difference between profile rank and base model rank. |
 | `profile_recommendation_tier` | Tier assigned under the scoring profile. |
+
+## Workflow success marker
+
+`data/outputs/workflow_success.json` is written only after `src/run_all.py` completes successfully. The deliverable package builder checks this file before packaging generated outputs, so a failed or partial run does not accidentally produce a stale shareable package.
 
 ## Important output-check rule fields
 
