@@ -19,6 +19,14 @@ Good sites should balance demand, electrical feasibility, public access, safety,
 ```text
 Show data/outputs/charts/site_readiness_map.png
 Use the map to show where the six candidate sites are located and how their readiness scores compare spatially.
+The star marker highlights the top candidate.
+The subtitle should show that FFX002 is #1 in the base model, stable in sensitivity analysis, and #1 across all scoring profiles.
+```
+
+Speaker note:
+
+```text
+This map is a presentation visual, not a parcel map or engineering layout. It helps connect the ranking result to geography while reminding viewers that site-screening and technical review still come later.
 ```
 
 ## Slide 4 — Candidate sites
