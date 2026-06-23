@@ -65,6 +65,7 @@ data/outputs/model_run_summary.md
 data/outputs/results_interpretation.md
 data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
+data/outputs/workflow_success.json
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 data/outputs/charts/readiness_score_chart.png
@@ -72,6 +73,8 @@ data/outputs/charts/site_readiness_map.png
 data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/deliverable_package/
 ```
+
+`workflow_success.json` is created only after `src/run_all.py` passes. The deliverable package builder uses it to avoid packaging stale outputs after a failed or partial run.
 
 These are local run artifacts. They are ignored by Git so local script runs do not clutter the repository.
 
