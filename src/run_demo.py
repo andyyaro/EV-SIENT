@@ -30,6 +30,17 @@ DEFAULT_COUNT = 50
 DEFAULT_SEED = 42
 DEFAULT_TOP_N = 15
 
+SCALABLE_REVIEW_ORDER = [
+    "readiness_top_{top_n}.png",
+    "readiness_map_top_{top_n}_labeled.png",
+    "profile_heatmap_top_{top_n}.png",
+    "profile_rank_stability_top_{top_n}.png",
+    "readiness_score_distribution.png",
+    "recommendation_tier_counts.png",
+    "data_confidence_full_compact.png",
+    "readiness_full_compact.png",
+]
+
 
 def repo_path(path: str | Path) -> Path:
     return PROJECT_ROOT / path
@@ -41,11 +52,47 @@ def run_command(command: list[str]) -> None:
     subprocess.run(command, cwd=PROJECT_ROOT, check=True)
 
 
+def tier_funnel_sentence(results: pd.DataFrame) -> str:
+    if results.empty or "recommendation_tier" not in results.columns:
+        return "No tier interpretation available."
+    short_names = {
+        "Tier 1 — advance to site screening": "Tier 1",
+        "Tier 2 — promising candidate, refine data": "Tier 2",
+        "High-review candidate": "High-review",
+        "Tier 3 — lower priority / monitor": "Tier 3",
+        "Low public-priority / special-use": "Special-use",
+    }
+    tiers = results["recommendation_tier"].map(lambda value: short_names.get(str(value), str(value)))
+    counts = tiers.value_counts()
+    top_tier = counts.idxmax()
+    top_count = int(counts.max())
+    total = len(results)
+    tier1_count = int(counts.get("Tier 1", 0))
+    high_review_count = int(counts.get("High-review", 0))
+    return (
+        f"Most sites fall into {top_tier} ({top_count} of {total}), while {tier1_count} sites are Tier 1 "
+        f"and {high_review_count} sites need high review. This suggests the demo run creates a broad review pool "
+        "rather than over-selecting top candidates."
+    )
+
+
+def scalable_review_paths(scalable_dir: Path, top_n: int) -> list[Path]:
+    paths: list[Path] = []
+    for template in SCALABLE_REVIEW_ORDER:
+        candidate = scalable_dir / template.format(top_n=top_n)
+        if candidate.exists():
+            paths.append(candidate.relative_to(PROJECT_ROOT))
+    return paths
+
+
 def write_demo_summary(
     results_path: Path,
     summary_path: Path,
     quality_report_path: Path,
     action_matrix_path: Path,
+    profile_results_path: Path,
+    profile_summary_path: Path,
+    profile_report_path: Path,
     scalable_dir: Path,
     count: int,
     seed: int,
@@ -70,11 +117,18 @@ def write_demo_summary(
         f"- Top-N chart size: {actual_top_n}",
         f"- Full compact chart included: {'yes' if include_full_compact else 'no'}",
         "",
+        "## Quick interpretation",
+        "",
+        tier_funnel_sentence(ranked),
+        "",
         "## Main files",
         "",
         f"- Results CSV: `{results_path.relative_to(PROJECT_ROOT)}`",
         f"- Data quality report: `{quality_report_path.relative_to(PROJECT_ROOT)}`",
         f"- Action matrix: `{action_matrix_path.relative_to(PROJECT_ROOT)}`",
+        f"- Profile results CSV: `{profile_results_path.relative_to(PROJECT_ROOT)}`",
+        f"- Profile summary CSV: `{profile_summary_path.relative_to(PROJECT_ROOT)}`",
+        f"- Profile comparison report: `{profile_report_path.relative_to(PROJECT_ROOT)}`",
         f"- Scalable chart folder: `{scalable_dir.relative_to(PROJECT_ROOT)}`",
         "",
         "## Top 10 demo sites",
@@ -90,36 +144,15 @@ def write_demo_summary(
             f"{float(row['data_confidence_score']):.1f} | {row['recommendation_tier']} | {action} |"
         )
 
-    lines.extend([
-        "",
-        "## Tier counts",
-        "",
-        "| Tier | Count |",
-        "|---|---:|",
-    ])
-
+    lines.extend(["", "## Tier counts", "", "| Tier | Count |", "|---|---:|"])
     for tier, count_value in ranked["recommendation_tier"].value_counts().items():
         lines.append(f"| {tier} | {int(count_value)} |")
 
-    lines.extend([
-        "",
-        "## Data confidence counts",
-        "",
-        "| Confidence level | Count |",
-        "|---|---:|",
-    ])
-
+    lines.extend(["", "## Data confidence counts", "", "| Confidence level | Count |", "|---|---:|"])
     for confidence, count_value in ranked["data_confidence_level"].value_counts().items():
         lines.append(f"| {confidence} | {int(count_value)} |")
 
-    review_paths = [
-        scalable_dir.relative_to(PROJECT_ROOT) / f"readiness_top_{actual_top_n}.png",
-        scalable_dir.relative_to(PROJECT_ROOT) / "readiness_score_distribution.png",
-        scalable_dir.relative_to(PROJECT_ROOT) / "recommendation_tier_counts.png",
-    ]
-    if include_full_compact:
-        review_paths.append(scalable_dir.relative_to(PROJECT_ROOT) / "readiness_full_compact.png")
-
+    review_paths = scalable_review_paths(scalable_dir, actual_top_n)
     lines.extend(["", "## Recommended visual review order", ""])
     for number, path in enumerate(review_paths, start=1):
         lines.append(f"{number}. `{path}`")
@@ -165,6 +198,9 @@ def main() -> None:
     quality_report_path = output_dir / f"demo_data_quality_report_{args.count}.csv"
     results_path = output_dir / f"demo_site_results_{args.count}.csv"
     action_matrix_path = output_dir / f"demo_action_matrix_{args.count}.md"
+    profile_results_path = output_dir / f"demo_profile_results_{args.count}.csv"
+    profile_summary_path = output_dir / f"demo_profile_rank_summary_{args.count}.csv"
+    profile_report_path = output_dir / f"demo_profile_comparison_{args.count}.md"
     basic_chart_path = charts_dir / f"basic_readiness_score_chart_{args.count}.png"
     summary_path = output_dir / f"demo_run_summary_{args.count}.md"
 
@@ -175,26 +211,8 @@ def main() -> None:
 
     py = sys.executable
 
-    run_command([
-        py,
-        "src/generate_demo_sites.py",
-        "--count",
-        str(args.count),
-        "--seed",
-        str(args.seed),
-        "--output",
-        str(input_path.relative_to(PROJECT_ROOT)),
-    ])
-
-    run_command([
-        py,
-        "src/validate_site_data.py",
-        "--input",
-        str(input_path.relative_to(PROJECT_ROOT)),
-        "--output",
-        str(quality_report_path.relative_to(PROJECT_ROOT)),
-    ])
-
+    run_command([py, "src/generate_demo_sites.py", "--count", str(args.count), "--seed", str(args.seed), "--output", str(input_path.relative_to(PROJECT_ROOT))])
+    run_command([py, "src/validate_site_data.py", "--input", str(input_path.relative_to(PROJECT_ROOT)), "--output", str(quality_report_path.relative_to(PROJECT_ROOT))])
     run_command([
         py,
         "src/ev_charger_model.py",
@@ -207,14 +225,20 @@ def main() -> None:
         "--utilization-chart-dir",
         str(utilization_dir.relative_to(PROJECT_ROOT)),
     ])
-
+    run_command([py, "src/add_action_matrix.py", "--results", str(results_path.relative_to(PROJECT_ROOT)), "--report", str(action_matrix_path.relative_to(PROJECT_ROOT))])
     run_command([
         py,
-        "src/add_action_matrix.py",
-        "--results",
+        "src/run_profile_analysis.py",
+        "--site-results",
         str(results_path.relative_to(PROJECT_ROOT)),
-        "--report",
-        str(action_matrix_path.relative_to(PROJECT_ROOT)),
+        "--input-sites",
+        str(input_path.relative_to(PROJECT_ROOT)),
+        "--output",
+        str(profile_results_path.relative_to(PROJECT_ROOT)),
+        "--summary-output",
+        str(profile_summary_path.relative_to(PROJECT_ROOT)),
+        "--report-output",
+        str(profile_report_path.relative_to(PROJECT_ROOT)),
     ])
 
     scalable_command = [
@@ -222,6 +246,10 @@ def main() -> None:
         "src/plot_scalable_readiness_charts.py",
         "--results",
         str(results_path.relative_to(PROJECT_ROOT)),
+        "--input-sites",
+        str(input_path.relative_to(PROJECT_ROOT)),
+        "--profile-results",
+        str(profile_results_path.relative_to(PROJECT_ROOT)),
         "--output-dir",
         str(scalable_dir.relative_to(PROJECT_ROOT)),
         "--top-n",
@@ -237,6 +265,9 @@ def main() -> None:
         summary_path=summary_path,
         quality_report_path=quality_report_path,
         action_matrix_path=action_matrix_path,
+        profile_results_path=profile_results_path,
+        profile_summary_path=profile_summary_path,
+        profile_report_path=profile_report_path,
         scalable_dir=scalable_dir,
         count=args.count,
         seed=args.seed,
@@ -251,6 +282,8 @@ def main() -> None:
     print(f"Demo results: {results_path.relative_to(PROJECT_ROOT)}")
     print(f"Demo summary: {summary_path.relative_to(PROJECT_ROOT)}")
     print(f"Main scalable chart: {(scalable_dir / f'readiness_top_{min(args.top_n, args.count)}.png').relative_to(PROJECT_ROOT)}")
+    print(f"Scalable map: {(scalable_dir / f'readiness_map_top_{min(args.top_n, args.count)}_labeled.png').relative_to(PROJECT_ROOT)}")
+    print(f"Profile heatmap: {(scalable_dir / f'profile_heatmap_top_{min(args.top_n, args.count)}.png').relative_to(PROJECT_ROOT)}")
     print()
     print("These are local demo outputs. They are intentionally separate from the official V1 deliverable package.")
 
