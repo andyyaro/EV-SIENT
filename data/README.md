@@ -6,7 +6,7 @@ This folder stores input datasets, configuration files, source extracts, baselin
 
 ```text
 data/inputs/           Main model input CSVs
-data/config/           Model configuration and output-check rules
+data/config/           Model configuration, output manifest, and output-check rules
 data/source_extracts/  Small model-ready extracts
 data/baselines/        Committed benchmark snapshots
 data/raw_exports/      Notes about raw exports not committed to the repo
@@ -16,8 +16,8 @@ data/outputs/          Generated local outputs ignored by Git
 ## Main input files
 
 ```text
-data/inputs/real_sites_v1.csv   Current real candidate-site dataset
-data/inputs/sites_demo.csv      Small starter/demo dataset
+data/inputs/real_sites_v1.csv        Current real candidate-site dataset
+data/inputs/sites_demo.csv           Small starter/demo dataset
 data/inputs/new_sites_template.csv   Template for future candidate-site rows
 ```
 
@@ -26,9 +26,12 @@ Use `docs/SITE_SCREENING_CHECKLIST.md` and `docs/ADDING_NEW_SITES_GUIDE.md` befo
 ## Config files
 
 ```text
+data/config/output_manifest_v1.json
 data/config/scoring_profiles.csv
 data/config/output_check_rules_v1.json
 ```
+
+`output_manifest_v1.json` is the single source of truth for expected generated outputs, output-check required files, and deliverable package contents.
 
 `scoring_profiles.csv` defines the alternative scoring-priority profiles used by `src/run_profile_analysis.py`.
 
@@ -57,6 +60,7 @@ Typical generated files:
 ```text
 data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
+data/outputs/action_matrix.md
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
 data/outputs/profile_results.csv
@@ -70,6 +74,7 @@ data/outputs/workflow_success.json
 data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
 data/outputs/charts/profile_rank_stability_chart.png
 data/outputs/charts/profile_score_heatmap.png
 data/outputs/charts/site_readiness_map.png
