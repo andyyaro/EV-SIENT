@@ -443,7 +443,7 @@ def plot_utilization_curves(results: pd.DataFrame, chart_dir: Path) -> list[Path
 
         plt.title(f"Utilization vs Ports: {row['site_id']} — {row['site_name']}")
         fig.tight_layout()
-        output = chart_dir / f"utilization_vs_ports_{safe_filename(row['site_name'])}.png"
+        output = chart_dir / f"utilization_vs_ports_{safe_filename(row['site_id'])}_{safe_filename(row['site_name'])}.png"
         plt.savefig(output, dpi=200)
         plt.close()
         saved_paths.append(output)
