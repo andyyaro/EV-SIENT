@@ -16,6 +16,7 @@ data/config/output_check_rules_v1.json     V1 output-check expectations
 
 ```text
 data/outputs/site_results.csv
+data/outputs/action_matrix.md
 data/outputs/data_quality_report.csv
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
@@ -87,6 +88,11 @@ The heatmap remains available when exact score and rank values are helpful.
 | `data_confidence_score` | Separate 0-100 score showing how complete/confirmed the current input data is. |
 | `data_confidence_level` | Plain-English level for the confidence score: High, Medium, or Low. |
 | `data_confidence_reason` | Short explanation of what raised or lowered the confidence score. |
+| `readiness_band` | Simple readiness category used by the action matrix. |
+| `confidence_band` | Simple confidence category used by the action matrix. |
+| `readiness_confidence_cell` | Combined readiness/confidence action-matrix cell. |
+| `action_label` | Short next-action label for the site. |
+| `action_detail` | Longer explanation of the next action. |
 | `recommendation_tier` | Plain-English planning tier. |
 | `planning_recommendation` | Suggested next planning action. |
 | `priority_reason` | Short reason for the recommendation. |
@@ -102,15 +108,17 @@ The heatmap remains available when exact score and rank values are helpful.
 | `mean_wait_min` | Estimated mean wait time in minutes. |
 | `install_cost_est_usd` | Planning install cost estimate. |
 
-## Data confidence interpretation
+## Data confidence and action-matrix interpretation
 
 ```text
 readiness_score = how promising the site looks
 
 data_confidence_score = how complete/confirmed the current inputs are
+
+action_label = what to do next
 ```
 
-The confidence score does not change the ranking. It helps explain how carefully each result should be interpreted.
+The confidence score does not change the ranking. The action matrix turns readiness and confidence into a simple next step.
 
 ## Important `profile_results.csv` columns
 
