@@ -115,7 +115,8 @@ def top_candidate_text(results: pd.DataFrame) -> str:
     return (
         f"The current top candidate is `{top.get('site_id', '')}` — {top.get('site_name', '')} "
         f"with readiness score `{top.get('readiness_score', '')}`, data confidence "
-        f"`{top.get('data_confidence_level', 'not available')}`, and tier `{top.get('recommendation_tier', '')}`."
+        f"`{top.get('data_confidence_level', 'not available')}`, tier `{top.get('recommendation_tier', '')}`, "
+        f"and action `{top.get('action_label', 'not available')}`."
     )
 
 
@@ -180,6 +181,15 @@ def confidence_text(results: pd.DataFrame) -> str:
     )
 
 
+def action_text(results: pd.DataFrame) -> str:
+    if results.empty or "action_label" not in results.columns:
+        return "No action-matrix output was found."
+
+    counts = results["action_label"].value_counts().to_dict()
+    parts = [f"{label} `{count}`" for label, count in counts.items()]
+    return "Action-matrix labels: " + ", ".join(parts) + "."
+
+
 def rank_position_text(rank: int, tier: str) -> str:
     if rank == 1:
         return "This is the strongest current candidate in the model run."
@@ -197,7 +207,6 @@ def rank_position_text(rank: int, tier: str) -> str:
 def smarter_reason(row: pd.Series) -> str:
     site_id = as_text(row.get("site_id", ""))
     rank = as_int(row.get("model_rank", 0))
-    tier = as_text(row.get("recommendation_tier", ""))
     original_reason = as_text(row.get("priority_reason", ""))
 
     if rank == 1:
@@ -211,7 +220,7 @@ def smarter_reason(row: pd.Series) -> str:
     if site_id == "PWC003":
         return "Limited or non-public access and low surrounding public-charging demand keep this site low priority for general-public charging."
 
-    return original_reason or rank_position_text(rank, tier)
+    return original_reason or rank_position_text(rank, as_text(row.get("recommendation_tier", "")))
 
 
 def smarter_planning_recommendation(row: pd.Series) -> str:
@@ -246,6 +255,9 @@ def site_interpretation(row: pd.Series) -> str:
     confidence_score = row.get("data_confidence_score", "")
     confidence_level = as_text(row.get("data_confidence_level", ""))
     confidence_reason = as_text(row.get("data_confidence_reason", ""))
+    readiness_confidence_cell = as_text(row.get("readiness_confidence_cell", ""))
+    action_label = as_text(row.get("action_label", ""))
+    action_detail = as_text(row.get("action_detail", ""))
     tier = as_text(row.get("recommendation_tier", ""))
     review_reason = as_text(row.get("review_reason", ""))
     data_needed = as_text(row.get("data_needed_next", ""))
@@ -255,6 +267,12 @@ def site_interpretation(row: pd.Series) -> str:
     lines.append(f"Rank `{rank}` with readiness score `{score}`. Current tier: `{tier}`.")
     if confidence_level:
         lines.append(f"Data confidence: `{confidence_level}` with score `{confidence_score}`.")
+    if readiness_confidence_cell:
+        lines.append(f"Action-matrix cell: `{readiness_confidence_cell}`.")
+    if action_label:
+        lines.append(f"Next action: `{action_label}`.")
+    if action_detail:
+        lines.append(f"Action detail: {action_detail}")
     lines.append("")
     lines.append(f"Rank meaning: {rank_position_text(as_int(rank), tier)}")
     lines.append("")
@@ -306,6 +324,8 @@ def build_interpretation(
     lines.append("")
     lines.append(confidence_text(ranked))
     lines.append("")
+    lines.append(action_text(ranked))
+    lines.append("")
 
     lines.append("## Ranked results")
     lines.append("")
@@ -319,6 +339,7 @@ def build_interpretation(
                 "readiness_score",
                 "data_confidence_score",
                 "data_confidence_level",
+                "action_label",
                 "recommendation_tier",
                 "recommended_ports_now",
                 "recommended_ports_2035",
@@ -326,6 +347,18 @@ def build_interpretation(
             ],
         )
     )
+    lines.append("")
+
+    lines.append("## Readiness-confidence action matrix")
+    lines.append("")
+    lines.append(
+        markdown_table(
+            ranked,
+            ["model_rank", "site_id", "readiness_confidence_cell", "action_label", "action_detail"],
+        )
+    )
+    lines.append("")
+    lines.append("See `data/outputs/action_matrix.md` for the dedicated action-matrix report.")
     lines.append("")
 
     lines.append("## Site-by-site interpretation")
@@ -343,7 +376,7 @@ def build_interpretation(
     lines.append("")
     lines.append("A high rank does not mean a site is ready to build. It means the site is a stronger candidate for stakeholder review, site screening, and data confirmation.")
     lines.append("")
-    lines.append("Readiness score and data confidence should be read together: readiness says how promising the site looks, while data confidence says how much the current inputs can be trusted.")
+    lines.append("Readiness score, data confidence, and action label should be read together: readiness says how promising the site looks, confidence says how complete the inputs are, and the action label says what to do next.")
     lines.append("")
 
     lines.append("## What this result does not replace")
@@ -367,10 +400,7 @@ def main() -> None:
     profile_results = read_csv_if_exists(profile_results_path)
 
     ensure_parent_dir(output_path)
-    output_path.write_text(
-        build_interpretation(results, quality, sensitivity, profile_results),
-        encoding="utf-8",
-    )
+    output_path.write_text(build_interpretation(results, quality, sensitivity, profile_results), encoding="utf-8")
 
     print("GENERATED RESULTS INTERPRETATION")
     print("--------------------------------")
