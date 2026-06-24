@@ -80,18 +80,19 @@ data/outputs/          Generated outputs ignored by Git
 docs/                  Documentation and reporting
 ```
 
-## Decision 18 — Add stakeholder data request pack
+## Decision 18 — Add stakeholder outreach plan
 
-The repo now includes a stakeholder data request guide and structured request-field extract.
+The repo now includes one consolidated stakeholder outreach guide and structured request-field extract.
 
 ```text
-docs/STAKEHOLDER_DATA_REQUEST.md
+docs/STAKEHOLDER_OUTREACH_PLAN.md
 data/source_extracts/stakeholder_data_request_fields.csv
+data/source_extracts/stakeholder_response_tracker.csv
 ```
 
 Reason: the strongest next improvement is replacing V1 assumptions and placeholders with confirmed site, facility, utility, parking, ADA/accessibility, Fire Marshal/AHJ, GIS, or planning data.
 
-Source quality: planning data request. These files are not observed site data; they are a checklist for future data collection.
+Source quality: planning data request. These files are not observed site data; they are a checklist and tracker for future data collection.
 
 ## Decision 19 — Apply official FFX002 hours and parking; document PWC004 closure status
 
@@ -267,6 +268,29 @@ Missing files: 0
 
 Reason: the project may add more candidate sites later. The template and the real input file must stay aligned so new rows do not silently break the model, change column meanings, or allow placeholder/example rows into the active dataset.
 
+## Decision 29 — Merge overlapping documentation
+
+The project now consolidates overlapping documentation instead of keeping multiple near-duplicate docs.
+
+Merged docs:
+
+```text
+docs/OSM_AMENITIES.md
+  replaces docs/OSM_AMENITIES_WORKFLOW.md and docs/OSM_AMENITIES_REVIEW_NOTE.md
+
+docs/SENSITIVITY_ANALYSIS.md
+  now includes both sensitivity method and latest interpretation
+
+docs/STAKEHOLDER_OUTREACH_PLAN.md
+  replaces docs/STAKEHOLDER_DATA_REQUEST.md and docs/STAKEHOLDER_CONTACT_PLAN.md
+```
+
+Decision: keep `DATA_CONFIDENCE_SCORE.md` and `RECOMMENDATION_TIERS.md` separate because they explain different interpretation layers.
+
+Decision: keep `MODEL_FINDINGS_BRIEF.md` and `MODEL_FINDINGS_REPORT.md` separate because one is a quick summary and the other is the fuller report.
+
+Reason: this reduces documentation clutter while preserving the docs that have distinct reviewer purposes.
+
 ## Current expected recommendation interpretation
 
 ```text
@@ -289,6 +313,9 @@ visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
 local EV adoption counts
+PWC004 reopening or usable-planning timeline
+PWC002 garage-specific review
+PWC003 public, fleet-only, special-use, or removal decision
 ```
 
 ## Maintenance rule
