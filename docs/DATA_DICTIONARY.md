@@ -8,6 +8,7 @@ This file defines the main inputs, config files, and generated outputs used by t
 data/inputs/real_sites_v1.csv              Main candidate-site input dataset
 data/inputs/sites_demo.csv                 Small starter/demo dataset
 data/inputs/new_sites_template.csv         Template for future candidate-site rows
+data/config/output_manifest_v1.json        Expected outputs, checker files, and package contents
 data/config/scoring_profiles.csv           Alternative scoring-priority profiles
 data/config/output_check_rules_v1.json     V1 output-check expectations
 ```
@@ -120,6 +121,17 @@ action_label = what to do next
 
 The confidence score does not change the ranking. The action matrix turns readiness and confidence into a simple next step.
 
+Current expected action interpretation:
+
+```text
+FFX002 — Verify key data, then advance
+FFX001 — Promising, but fix data first
+PWC002 — Technical review before advancement
+PWC004 — Promising with timeline caveat
+PWC001 — Monitor or deprioritize
+PWC003 — Special-use decision needed
+```
+
 ## Important `profile_results.csv` columns
 
 | Column | Meaning |
@@ -138,6 +150,10 @@ The confidence score does not change the ranking. The action matrix turns readin
 ## Workflow success marker
 
 `data/outputs/workflow_success.json` is written only after `src/run_all.py` completes successfully. The deliverable package builder checks this file before packaging generated outputs.
+
+## Output manifest
+
+`data/config/output_manifest_v1.json` is the shared source for expected generated outputs, output-check required files, package groups, generated package groups, and package review order.
 
 ## Output-check rule fields
 
