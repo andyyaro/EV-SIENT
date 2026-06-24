@@ -64,7 +64,9 @@
       "data/outputs/site_results.csv",
       "data/outputs/sensitivity_summary.csv",
       "data/outputs/profile_rank_summary.csv",
-      "data/outputs/data_quality_report.csv",
+      "data/outputs/data_quality_report.csv"
+    ],
+    "metadata_tables": [
       "data/dataset_metadata.csv",
       "data/source_dataset_log.csv"
     ],
@@ -113,8 +115,8 @@
     "reports/MODEL_FINDINGS_BRIEF.md",
     "reports/DATA_DICTIONARY.md",
     "reports/DATA_SOURCES.md",
-    "data_tables/dataset_metadata.csv",
-    "data_tables/source_dataset_log.csv",
+    "metadata_tables/dataset_metadata.csv",
+    "metadata_tables/source_dataset_log.csv",
     "config/output_manifest_v1.json",
     "reports/STAKEHOLDER_OUTREACH_PLAN.md",
     "stakeholder_inputs/stakeholder_response_tracker.csv"
