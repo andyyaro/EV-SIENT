@@ -11,8 +11,10 @@ Before cloning the repository, make sure these tools are installed:
 ```text
 Git
 GitHub CLI, also called gh
-Python 3
+Python 3.10 or newer
 ```
+
+Python 3.11 is the tested version used by the GitHub Actions workflow. Python 3.10+ is recommended because the scripts use modern Python type syntax.
 
 Check whether they are already installed:
 
@@ -203,7 +205,7 @@ Missing files: 0
 Done. The deliverable package is ready to review or share.
 ```
 
-For the V1 review-ready checkpoint, the package should copy 40 files.
+For the V1 review-ready checkpoint, the package should copy 40 files on the latest `main` version. Older frozen tags may copy fewer files depending on the package manifest at that tag.
 
 ## 10. Check local Git status
 
@@ -276,13 +278,24 @@ The package should include:
 - [charts/site_readiness_map.png](data/outputs/deliverable_package/charts/site_readiness_map.png)
 - [stakeholder_inputs/stakeholder_contact_targets.csv](data/outputs/deliverable_package/stakeholder_inputs/stakeholder_contact_targets.csv)
 
-## 15. What not to edit manually
+## 15. Optional: run demo mode
+
+Demo mode stress-tests the workflow with synthetic larger candidate pools.
+
+```bash
+python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
+```
+
+Demo outputs are local-only and ignored by Git under [data/demo/](data/demo/).
+
+## 16. What not to edit manually
 
 Do not manually edit generated outputs:
 
 - [data/outputs/](data/outputs/)
 - [data/outputs/charts/](data/outputs/charts/)
 - [data/outputs/deliverable_package/](data/outputs/deliverable_package/)
+- [data/demo/](data/demo/)
 
 Regenerate them with:
 
