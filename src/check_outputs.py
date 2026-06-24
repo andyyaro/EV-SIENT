@@ -16,6 +16,7 @@ RULES_FILE = "data/config/output_check_rules_v1.json"
 REQUIRED_FILES = [
     "data/outputs/data_quality_report.csv",
     "data/outputs/site_results.csv",
+    "data/outputs/action_matrix.md",
     "data/outputs/sensitivity_results.csv",
     "data/outputs/sensitivity_summary.csv",
     "data/outputs/profile_results.csv",
@@ -38,6 +39,11 @@ SITE_COLUMNS = [
     "data_confidence_score",
     "data_confidence_level",
     "data_confidence_reason",
+    "readiness_band",
+    "confidence_band",
+    "readiness_confidence_cell",
+    "action_label",
+    "action_detail",
     "recommendation_tier",
     "recommended_ports_now",
     "recommended_ports_2035",
@@ -156,10 +162,11 @@ def check_site_results(issues: list[str], rules: dict[str, Any]) -> None:
     if invalid_levels:
         add(issues, f"site_results.csv has invalid data_confidence_level values: {invalid_levels}")
 
-    blank_reasons = df["data_confidence_reason"].astype(str).str.strip().eq("")
-    if blank_reasons.any():
-        sites = df.loc[blank_reasons, "site_id"].astype(str).tolist()
-        add(issues, f"site_results.csv has blank data_confidence_reason values for: {sites}")
+    for column in ["data_confidence_reason", "action_label", "action_detail"]:
+        blank_values = df[column].astype(str).str.strip().eq("")
+        if blank_values.any():
+            sites = df.loc[blank_values, "site_id"].astype(str).tolist()
+            add(issues, f"site_results.csv has blank {column} values for: {sites}")
 
     for column in ["recommended_ports_now", "recommended_ports_2035", "recommended_ports_2050"]:
         require_range(df, column, 0, 100, "site_results.csv", issues)
