@@ -1,0 +1,120 @@
+{
+  "version": "v1",
+  "description": "Single source of truth for generated outputs, required output checks, and deliverable package contents.",
+  "success_marker": "data/outputs/workflow_success.json",
+  "expected_outputs": [
+    "data/outputs/data_quality_report.csv",
+    "data/outputs/site_results.csv",
+    "data/outputs/action_matrix.md",
+    "data/outputs/sensitivity_results.csv",
+    "data/outputs/sensitivity_summary.csv",
+    "data/outputs/profile_results.csv",
+    "data/outputs/profile_rank_summary.csv",
+    "data/outputs/profile_comparison.md",
+    "data/outputs/charts/readiness_score_chart.png",
+    "data/outputs/charts/data_confidence_chart.png",
+    "data/outputs/charts/profile_score_heatmap.png",
+    "data/outputs/charts/profile_rank_stability_chart.png",
+    "data/outputs/charts/site_readiness_map.png",
+    "data/outputs/model_run_summary.md",
+    "data/outputs/results_interpretation.md",
+    "data/outputs/baseline_comparison.csv",
+    "data/outputs/baseline_comparison.md",
+    "data/outputs/workflow_success.json"
+  ],
+  "check_required_outputs": [
+    "data/outputs/data_quality_report.csv",
+    "data/outputs/site_results.csv",
+    "data/outputs/action_matrix.md",
+    "data/outputs/sensitivity_results.csv",
+    "data/outputs/sensitivity_summary.csv",
+    "data/outputs/profile_results.csv",
+    "data/outputs/profile_rank_summary.csv",
+    "data/outputs/profile_comparison.md",
+    "data/outputs/model_run_summary.md",
+    "data/outputs/results_interpretation.md",
+    "data/outputs/charts/readiness_score_chart.png",
+    "data/outputs/charts/data_confidence_chart.png",
+    "data/outputs/charts/profile_rank_stability_chart.png",
+    "data/outputs/charts/profile_score_heatmap.png",
+    "data/outputs/charts/site_readiness_map.png"
+  ],
+  "generated_package_groups": [
+    "charts",
+    "run_outputs",
+    "data_tables"
+  ],
+  "package_groups": {
+    "charts": [
+      "data/outputs/charts/site_readiness_map.png",
+      "data/outputs/charts/readiness_score_chart.png",
+      "data/outputs/charts/data_confidence_chart.png",
+      "data/outputs/charts/profile_rank_stability_chart.png",
+      "data/outputs/charts/profile_score_heatmap.png"
+    ],
+    "run_outputs": [
+      "data/outputs/workflow_success.json",
+      "data/outputs/model_run_summary.md",
+      "data/outputs/results_interpretation.md",
+      "data/outputs/action_matrix.md",
+      "data/outputs/profile_comparison.md",
+      "data/outputs/baseline_comparison.md"
+    ],
+    "data_tables": [
+      "data/outputs/site_results.csv",
+      "data/outputs/sensitivity_summary.csv",
+      "data/outputs/profile_rank_summary.csv",
+      "data/outputs/data_quality_report.csv"
+    ],
+    "reports": [
+      "START_HERE.md",
+      "REPRODUCIBILITY_CHECKLIST.md",
+      "docs/REPO_MAP.md",
+      "docs/PROJECT_STATUS.md",
+      "docs/MODEL_FINDINGS_BRIEF.md",
+      "docs/MODEL_FINDINGS_REPORT.md",
+      "docs/PRESENTATION_OUTLINE.md",
+      "docs/RESULTS_INTERPRETATION.md",
+      "docs/READINESS_MAP_GUIDE.md",
+      "docs/DATA_CONFIDENCE_SCORE.md",
+      "docs/SITE_SCREENING_CHECKLIST.md",
+      "docs/ADDING_NEW_SITES_GUIDE.md",
+      "docs/STAKEHOLDER_DATA_REQUEST.md",
+      "docs/STAKEHOLDER_CONTACT_PLAN.md",
+      "docs/DATA_DICTIONARY.md",
+      "docs/DATA_SOURCES.md"
+    ],
+    "config": [
+      "data/config/output_manifest_v1.json",
+      "data/config/output_check_rules_v1.json",
+      "data/config/scoring_profiles.csv"
+    ],
+    "expansion_inputs": [
+      "data/inputs/new_sites_template.csv",
+      "data/source_extracts/site_screening_checklist.csv"
+    ],
+    "stakeholder_inputs": [
+      "data/source_extracts/stakeholder_data_request_fields.csv",
+      "data/source_extracts/stakeholder_response_tracker.csv"
+    ]
+  },
+  "package_review_order": [
+    "reports/START_HERE.md",
+    "reports/REPRODUCIBILITY_CHECKLIST.md",
+    "reports/REPO_MAP.md",
+    "run_outputs/model_run_summary.md",
+    "run_outputs/results_interpretation.md",
+    "run_outputs/action_matrix.md",
+    "charts/site_readiness_map.png",
+    "charts/readiness_score_chart.png",
+    "charts/data_confidence_chart.png",
+    "charts/profile_rank_stability_chart.png",
+    "reports/MODEL_FINDINGS_BRIEF.md",
+    "reports/DATA_DICTIONARY.md",
+    "reports/DATA_SOURCES.md",
+    "config/output_manifest_v1.json",
+    "reports/STAKEHOLDER_DATA_REQUEST.md",
+    "reports/STAKEHOLDER_CONTACT_PLAN.md",
+    "stakeholder_inputs/stakeholder_response_tracker.csv"
+  ]
+}
