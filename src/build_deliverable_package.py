@@ -64,6 +64,11 @@ def iso_mtime(path: Path) -> str:
     return datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec="seconds")
 
 
+def package_link(path: str) -> str:
+    """Return a clickable Markdown link for a path inside the package README."""
+    return f"[{path}]({path})"
+
+
 def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[str, str]:
     source = PROJECT_ROOT / source_relative
     destination_dir = package_dir / group_name
@@ -75,6 +80,7 @@ def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[
         return {
             "source": source_relative,
             "destination": str(destination.relative_to(PROJECT_ROOT)),
+            "package_path": str((Path(group_name) / source.name).as_posix()),
             "status": "missing",
             "copied_at": copied_at,
         }
@@ -91,6 +97,7 @@ def copy_file(source_relative: str, package_dir: Path, group_name: str) -> dict[
     return {
         "source": source_relative,
         "destination": str(destination.relative_to(PROJECT_ROOT)),
+        "package_path": str((Path(group_name) / source.name).as_posix()),
         "status": "copied",
         "source_modified_at": source_modified_at,
         "destination_modified_at": destination_modified_at,
@@ -114,12 +121,13 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
     ]
 
     for number, path in enumerate(PACKAGE_REVIEW_ORDER, start=1):
-        lines.append(f"{number}. `{path}`")
+        lines.append(f"{number}. {package_link(path)}")
 
     lines.extend(["", "## Included files", ""])
 
     for item in copied:
-        lines.append(f"- `{item['destination']}`")
+        path = item["package_path"]
+        lines.append(f"- {package_link(path)}")
     lines.append("")
 
     if missing:
@@ -132,7 +140,7 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
         [
             "## Source of package file lists",
             "",
-            "Package contents are defined in `data/config/output_manifest_v1.json`.",
+            "Package contents are defined in [data/config/output_manifest_v1.json](config/output_manifest_v1.json).",
             "",
             "## Limitation",
             "",
