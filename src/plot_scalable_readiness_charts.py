@@ -317,7 +317,7 @@ def plot_data_confidence(results: pd.DataFrame, output_dir: Path) -> Path | None
     ax.axvspan(0, 50, alpha=0.06)
     ax.axvspan(50, 75, alpha=0.10)
     ax.axvspan(75, 100, alpha=0.06)
-    bars = ax.barh(labels, rows["data_confidence_score"])
+    ax.barh(labels, rows["data_confidence_score"])
     ax.invert_yaxis()
 
     for index, row in rows.iterrows():
@@ -347,7 +347,8 @@ def plot_readiness_map(results: pd.DataFrame, input_sites: pd.DataFrame | None, 
     if input_sites is None:
         return None
 
-    data = results.merge(input_sites[["site_id", "lat", "lon"]], on="site_id", how="inner")
+    map_points = input_sites[["site_id", "lat", "lon"]].rename(columns={"lat": "map_lat", "lon": "map_lon"})
+    data = results.merge(map_points, on="site_id", how="inner")
     if data.empty:
         return None
 
@@ -355,8 +356,8 @@ def plot_readiness_map(results: pd.DataFrame, input_sites: pd.DataFrame | None, 
     fig, ax = plt.subplots(figsize=(11.5, 7.2))
     sizes = 35 + data["readiness_score"] * 4
     scatter = ax.scatter(
-        data["lon"],
-        data["lat"],
+        data["map_lon"],
+        data["map_lat"],
         s=sizes,
         c=data["readiness_score"],
         alpha=0.72,
@@ -368,7 +369,7 @@ def plot_readiness_map(results: pd.DataFrame, input_sites: pd.DataFrame | None, 
     for _, row in top.iterrows():
         ax.annotate(
             f"#{int(row['model_rank'])} {row['site_id']}",
-            xy=(row["lon"], row["lat"]),
+            xy=(row["map_lon"], row["map_lat"]),
             xytext=(6, 6),
             textcoords="offset points",
             fontsize=7.2,
