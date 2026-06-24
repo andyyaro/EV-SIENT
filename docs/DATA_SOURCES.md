@@ -15,6 +15,64 @@ Model logic = scoring, ranking, scenario, or tiering method created by the proje
 Placeholder = unresolved value intentionally left for future confirmation
 ```
 
+## Source traceability audit result
+
+The current input rows are source-traceable enough for a V1 planning prototype, but not all fields are equally strong.
+
+```text
+Strongest support:
+- candidate addresses and coordinates
+- existing nearby public EV charger counts
+- nearest traffic exposure
+- nearby households
+- nearby jobs
+- equity index
+- FFX002 official parking and facility hours
+- PWC004 official current closure/renovation status
+
+Medium support:
+- amenities_count_0_5mi from reviewed OSM / Overpass POI categories
+
+Weakest support / still needs confirmation:
+- electrical service rating
+- spare electrical capacity
+- emergency disconnect visibility
+- likely charger area
+- distance to service
+- trenching/routing difficulty
+- employees_day
+- visitors_day
+- hours_open except FFX002
+- parking_spaces except FFX002
+- local EV adoption counts
+- PWC002 garage-specific technical review
+- PWC004 future/reopened timeline
+- PWC003 public vs fleet/special-use decision
+```
+
+## Field-to-source summary
+
+| Field or decision | Current source/support | Current source quality | Main caution |
+|---|---|---|---|
+| `address`, `city`, `state`, `zip`, `lat`, `lon` | City of Fairfax GeoHub and Prince William County GIS premise/address data | Official | Coordinates support planning-level mapping, not parcel design. |
+| `existing_l2_ports_1mi`, `existing_dcfc_ports_3mi` | AFDC / NREL public active EV station extract | Official | Counts depend on extract date and filtering method. |
+| `aadt_nearest` | VDOT Bidirectional Traffic Volume 2025 nearest segment | Official-derived | Nearest segment is a traffic exposure proxy, not observed site entries. |
+| `nearby_households_1mi` | ACS 2024 5-Year + TIGER 2024 area-weighted block groups | Official-derived | Buffer method is approximate. |
+| `nearby_jobs_1mi` | LODES 2023 + TIGER 2024 area-weighted block groups | Official-derived | Jobs are workplace-area estimates, not site visitor counts. |
+| `equity_gap_index` | ACS 2024 5-Year equity indicators + TIGER 2024 geometry | Official-derived | Composite index is project-created from official-derived components. |
+| `amenities_count_0_5mi` | Reviewed OpenStreetMap / Overpass six-category POI extract | Open POI / GIS support | Reproducible open data, but not official local government confirmation. |
+| FFX002 `parking_spaces`, `hours_open` | Fairfax County Public Library official branch page | Official | Employees, visitors, and dwell time remain V1 assumptions. |
+| PWC004 current closure/renovation status | Prince William Public Libraries official locations page | Official | Closure status is documented, but PWC004 remains modeled as a future/reopened planning candidate. |
+| `employees_day`, `visitors_day`, `avg_dwell_min` | `demand_assumptions_v1.csv` | Manual estimate | Should be replaced with stakeholder or facility data when available. |
+| `parking_spaces`, except FFX002 | `demand_assumptions_v1.csv` | Manual estimate | Should be replaced with official facility/GIS/stakeholder data. |
+| `hours_open`, except FFX002 | `demand_assumptions_v1.csv` | Manual estimate | Charging hours may differ from building hours. |
+| `distance_to_service_ft`, `trenching_ft`, `service_upgrade_cost_usd` | `electrical_feasibility_v1.csv` | Planning estimate | Not engineering-confirmed; should be updated after likely charger area is known. |
+| `elec_service_rating_amp`, `spare_capacity_kw`, `emergency_disconnect_visible` | Placeholder zeros in current V1 input | Placeholder | Needs facility, utility, electrical, or AHJ confirmation. |
+| `ev_registrations_local`, `ev_share_local` | `local_ev_adoption_v1.csv` | Planning proxy | Not official locality-level DMV registration data. |
+| PWC002 garage review | Model review flag and stakeholder tracker | Unresolved review item | Needs fire/AHJ, ventilation, routing, emergency-response, access, and parking-operator review. |
+| PWC003 public-use status | `public_access = 0` and stakeholder tracker | Unresolved use-case decision | Decide whether it is public, fleet-only, special-use, or removed. |
+| PWC004 future/reopened timeline | Official current closure page + project planning assumption | Unresolved timeline decision | Do not treat as an active-current recommendation until timeline is clearer. |
+
 ## Main official, official-derived, or open-GIS sources used
 
 ```text
@@ -76,6 +134,7 @@ electrical_feasibility_v1.csv
 local_ev_adoption_v1.csv
 sensitivity_scenarios_v1.csv
 stakeholder_data_request_fields.csv
+stakeholder_response_tracker.csv
 ```
 
 ## Raw export policy
@@ -94,11 +153,21 @@ data/raw_exports/README.md
 elec_service_rating_amp
 spare_capacity_kw
 emergency_disconnect_visible
+likely_charger_area
+distance_to_service_ft
+trenching_ft
 employees_day
 visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
 local EV adoption counts
+PWC002 garage-specific review
+PWC004 reopening or usable-planning timeline
+PWC003 public, fleet-only, special-use, or removal decision
 ```
 
 These should be replaced or confirmed with facility, utility, local government, stakeholder, or documented GIS/POI data when possible.
+
+## Do-not-overclaim rule
+
+If a value is a manual estimate, planning estimate, planning proxy, or placeholder, do not describe it as confirmed. Use the value for early comparison only and keep the assumption visible in the input notes, data confidence score, stakeholder tracker, and reporting language.
