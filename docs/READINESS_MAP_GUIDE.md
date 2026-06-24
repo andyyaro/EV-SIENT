@@ -10,9 +10,18 @@ data/outputs/charts/site_readiness_map.png
 
 The map plots the six candidate EV charging sites by longitude and latitude.
 
-Each marker represents one candidate site. Marker size and color are tied to the site's readiness score. Each label shows the site ID, rank, and score.
+Each marker represents one candidate site. The upgraded map uses several visual cues at the same time:
 
-The top-ranked site is highlighted with a star marker.
+```text
+marker size = readiness score
+marker color = readiness score
+marker shape = recommendation tier
+star overlay = top-ranked site
+label = rank, site ID, and readiness score
+right-side summary panel = ranked list with score, tier, and recommended ports
+```
+
+The map also draws simple locality envelopes around the Fairfax City and Prince William County site clusters. These are only visual grouping boxes, not jurisdiction boundaries or parcel boundaries.
 
 ## Current map interpretation
 
@@ -25,6 +34,16 @@ FFX002 is the stable top candidate: #1 in the base model, stable in sensitivity,
 ```
 
 This supports the main project finding that FFX002 is not only the top site under the base model, but also remains strong when uncertainty and stakeholder-priority profiles are tested.
+
+## How to read special cases
+
+```text
+PWC002 = high-review garage candidate
+PWC004 = future/reopened planning assumption
+PWC003 = public-access decision needed
+```
+
+These notes are shown because the map is a planning-support visual. A site can look promising in the model while still needing important real-world confirmation.
 
 ## What the map does not show
 
@@ -39,6 +58,7 @@ a charger placement plan
 a utility-service map
 a permitting decision map
 a final site-design map
+a true GIS basemap
 ```
 
 Any real charger project would still need site-owner review, utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, and stakeholder approval.
