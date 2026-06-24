@@ -234,6 +234,39 @@ Missing files: 0
 
 Reason: the project package is meant to be reviewed by other people, so links inside README files, copied reports, charts, config files, and package contents should work without requiring the reviewer to manually hunt through folders.
 
+## Decision 28 — Enforce input schema and template consistency
+
+The project now treats input-schema consistency as a protection for future site expansion.
+
+Decision: `src/validate_site_data.py` checks the active input CSV against the required schema.
+
+Decision: the validator checks for missing required columns, unexpected extra columns, and column-order drift.
+
+Decision: the validator compares `data/inputs/new_sites_template.csv` against both the required schema and the active input file.
+
+Decision: the validator flags accidental template/example rows, including `NEW001` or notes that say `Template row only`, if they appear in `data/inputs/real_sites_v1.csv`.
+
+Verified validation result after the schema-protection update:
+
+```text
+ERROR: 0
+WARNING: 0
+REVIEW: 20
+INFO: 6
+```
+
+Verified workflow and package result after the schema-protection update:
+
+```text
+Sanity check: PASSED
+Baseline comparison: COMPLETED
+Result: PASSED
+Copied files: 38
+Missing files: 0
+```
+
+Reason: the project may add more candidate sites later. The template and the real input file must stay aligned so new rows do not silently break the model, change column meanings, or allow placeholder/example rows into the active dataset.
+
 ## Current expected recommendation interpretation
 
 ```text
