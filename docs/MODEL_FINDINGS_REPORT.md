@@ -26,6 +26,12 @@ FFX001 — Fairfax City Hall or municipal building
 FFX002 — City of Fairfax Regional Library
 ```
 
+## Site readiness map
+
+The map shows the candidate sites, the two geographic clusters, and the current ranked readiness interpretation.
+
+![Candidate EV charging site readiness map](../data/outputs/charts/site_readiness_map.png)
+
 ## Scoring method
 
 Each site receives planning subscores for demand, feasibility, safety/site context, and equity.
@@ -37,6 +43,25 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ```
 
 Readiness score shows how promising a site looks under current assumptions. Data confidence is separate and shows how complete or confirmed the input data is.
+
+## Final ranked results
+
+```text
+1. FFX002 — City of Fairfax Regional Library — readiness 65.3
+2. FFX001 — Fairfax City Hall or municipal building — readiness 57.3
+3. PWC002 — Neabsco-Potomac Commuter Garage — readiness 56.0
+4. PWC004 — Chinn Park Regional Library — readiness 52.7
+5. PWC001 — PWC McCoart Government Center — readiness 43.2
+6. PWC003 — Prince William County Public Safety Training Center — readiness 29.5
+```
+
+![Readiness score chart](../data/outputs/charts/readiness_score_chart.png)
+
+## Data confidence
+
+Data confidence is not the same thing as readiness. It shows how complete and source-supported the current input data is.
+
+![Data confidence chart](../data/outputs/charts/data_confidence_chart.png)
 
 ## Scoring profile analysis
 
@@ -62,32 +87,13 @@ feasibility_priority — FFX002 ranked #1 with score 64.1
 safety_priority — FFX002 ranked #1 with score 70.1
 ```
 
-Recommended profile-analysis visual:
+The rank-stability chart is the main presentation visual because it shows rank movement directly. A line staying at `#1` means the site remains the top candidate across scoring-priority views.
 
-```text
-data/outputs/charts/profile_rank_stability_chart.png
-```
-
-This is the main presentation visual because it shows rank movement directly. A line staying at `#1` means the site remains the top candidate across scoring-priority views.
-
-Supporting profile visual:
-
-```text
-data/outputs/charts/profile_score_heatmap.png
-```
+![Profile rank stability chart](../data/outputs/charts/profile_rank_stability_chart.png)
 
 The heatmap remains useful when the reader wants the exact score/rank cell values.
 
-## Final ranked results
-
-```text
-1. FFX002 — City of Fairfax Regional Library — readiness 65.3
-2. FFX001 — Fairfax City Hall or municipal building — readiness 57.3
-3. PWC002 — Neabsco-Potomac Commuter Garage — readiness 56.0
-4. PWC004 — Chinn Park Regional Library — readiness 52.7
-5. PWC001 — PWC McCoart Government Center — readiness 43.2
-6. PWC003 — Prince William County Public Safety Training Center — readiness 29.5
-```
+![Profile score heatmap](../data/outputs/charts/profile_score_heatmap.png)
 
 ## Recommendation tiers
 
