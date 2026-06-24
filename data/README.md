@@ -21,7 +21,7 @@ data/inputs/sites_demo.csv      Small starter/demo dataset
 data/inputs/new_sites_template.csv   Template for future candidate-site rows
 ```
 
-Use `docs/ADDING_NEW_SITES_GUIDE.md` before copying new rows into `real_sites_v1.csv`.
+Use `docs/SITE_SCREENING_CHECKLIST.md` and `docs/ADDING_NEW_SITES_GUIDE.md` before copying new rows into `real_sites_v1.csv`.
 
 ## Config files
 
@@ -121,9 +121,18 @@ amenities_0_5mi_v4_osm_reviewed.csv
 electrical_feasibility_v1.csv
 local_ev_adoption_v1.csv
 sensitivity_scenarios_v1.csv
+site_screening_checklist.csv
 stakeholder_data_request_fields.csv
 stakeholder_response_tracker.csv
 ```
+
+## Site screening checklist
+
+```text
+data/source_extracts/site_screening_checklist.csv
+```
+
+Use this checklist before adding new candidate sites.
 
 ## Stakeholder follow-up tracker
 
