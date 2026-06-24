@@ -77,22 +77,20 @@ Done. The deliverable package is ready to review or share.
 git status --short
 ```
 
-It is normal for generated files under `data/outputs/` to be ignored by Git.
+It is normal for generated files under [data/outputs/](data/outputs/) to be ignored by Git.
 
 ## 8. Open the key outputs
 
 Open these files first:
 
-```text
-data/outputs/model_run_summary.md
-data/outputs/results_interpretation.md
-data/outputs/action_matrix.md
-data/outputs/site_results.csv
-data/outputs/charts/readiness_score_chart.png
-data/outputs/charts/data_confidence_chart.png
-data/outputs/charts/profile_rank_stability_chart.png
-data/outputs/charts/site_readiness_map.png
-```
+1. [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
+2. [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
+3. [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
+4. [data/outputs/site_results.csv](data/outputs/site_results.csv)
+5. [data/outputs/charts/readiness_score_chart.png](data/outputs/charts/readiness_score_chart.png)
+6. [data/outputs/charts/data_confidence_chart.png](data/outputs/charts/data_confidence_chart.png)
+7. [data/outputs/charts/profile_rank_stability_chart.png](data/outputs/charts/profile_rank_stability_chart.png)
+8. [data/outputs/charts/site_readiness_map.png](data/outputs/charts/site_readiness_map.png)
 
 ## 9. Confirm the main result
 
@@ -126,36 +124,28 @@ Remaining `REVIEW` items are expected because some electrical, capacity, emergen
 
 ## 11. Confirm the deliverable package
 
-The package should be created at:
-
-```text
-data/outputs/deliverable_package/
-```
+The package should be created at [data/outputs/deliverable_package/](data/outputs/deliverable_package/).
 
 The package should include:
 
-```text
-reports/START_HERE.md
-reports/REPRODUCIBILITY_CHECKLIST.md
-reports/REPO_MAP.md
-run_outputs/model_run_summary.md
-run_outputs/results_interpretation.md
-run_outputs/action_matrix.md
-charts/readiness_score_chart.png
-charts/data_confidence_chart.png
-charts/profile_rank_stability_chart.png
-charts/site_readiness_map.png
-```
+- [reports/START_HERE.md](data/outputs/deliverable_package/reports/START_HERE.md)
+- [reports/REPRODUCIBILITY_CHECKLIST.md](data/outputs/deliverable_package/reports/REPRODUCIBILITY_CHECKLIST.md)
+- [reports/REPO_MAP.md](data/outputs/deliverable_package/reports/REPO_MAP.md)
+- [run_outputs/model_run_summary.md](data/outputs/deliverable_package/run_outputs/model_run_summary.md)
+- [run_outputs/results_interpretation.md](data/outputs/deliverable_package/run_outputs/results_interpretation.md)
+- [run_outputs/action_matrix.md](data/outputs/deliverable_package/run_outputs/action_matrix.md)
+- [charts/readiness_score_chart.png](data/outputs/deliverable_package/charts/readiness_score_chart.png)
+- [charts/data_confidence_chart.png](data/outputs/deliverable_package/charts/data_confidence_chart.png)
+- [charts/profile_rank_stability_chart.png](data/outputs/deliverable_package/charts/profile_rank_stability_chart.png)
+- [charts/site_readiness_map.png](data/outputs/deliverable_package/charts/site_readiness_map.png)
 
 ## 12. What not to edit manually
 
 Do not manually edit generated outputs:
 
-```text
-data/outputs/
-data/outputs/charts/
-data/outputs/deliverable_package/
-```
+- [data/outputs/](data/outputs/)
+- [data/outputs/charts/](data/outputs/charts/)
+- [data/outputs/deliverable_package/](data/outputs/deliverable_package/)
 
 Regenerate them with:
 
