@@ -66,7 +66,7 @@ The main scalable visuals are:
 data/demo/outputs/charts/scalable/readiness_top_15.png
 data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
 data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
-data/demo/outputs/charts/scalable/profile_rank_stability_top_15.png
+data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
 data/demo/outputs/charts/scalable/readiness_score_distribution.png
 data/demo/outputs/charts/scalable/recommendation_tier_counts.png
 data/demo/outputs/charts/scalable/data_confidence_full_compact.png
@@ -82,7 +82,7 @@ Open these in this order:
 2. data/demo/outputs/charts/scalable/readiness_top_15.png
 3. data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
 4. data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
-5. data/demo/outputs/charts/scalable/profile_rank_stability_top_15.png
+5. data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
 6. data/demo/outputs/charts/scalable/readiness_score_distribution.png
 7. data/demo/outputs/charts/scalable/recommendation_tier_counts.png
 8. data/demo/outputs/charts/scalable/data_confidence_full_compact.png
@@ -99,14 +99,20 @@ Demo mode therefore generates scalable visuals:
 
 ```text
 Top-N chart = presentation ranking view
-Top-N map/scatter = geographic spread view
+Multi-panel map/scatter = overview + local zoom geographic spread view
 Top-N profile heatmap = priority-view score comparison
-Top-N rank stability = priority-view rank movement
+Top-8 rank stability = cleaner priority-view rank movement
 Distribution chart = score spread view
 Tier-count chart = planning-funnel view
 Data confidence compact chart = larger-set confidence view
 Full compact chart = audit appendix view
 ```
+
+## Map and rank-stability behavior
+
+The map uses all demo sites in the overview panel, labels only the top 5 in the overview, and uses zoom panels for the Fairfax and Prince William demo clusters.
+
+The rank-stability chart is intentionally smaller than the heatmap. The heatmap can stay at top-N, but the line chart defaults to top 8 so rank movement stays readable. The top 3 base-model sites are emphasized and the rest are faded.
 
 ## Custom examples
 
