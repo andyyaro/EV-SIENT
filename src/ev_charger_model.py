@@ -26,6 +26,8 @@ DEFAULT_UTILIZATION_CHART_DIR = "data/outputs/charts"
 EV_SHARE_HIGH_BENCHMARK = 0.10
 
 
+ def_placeholder = None
+
 def ensure_parent_dir(path: str | Path) -> None:
     """Create the parent folder for an output path if it does not exist."""
     Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -187,14 +189,80 @@ def build_data_needed_next(row: pd.Series) -> str:
     return "; ".join(needs)
 
 
+def data_confidence_level(score: float) -> str:
+    if score >= 75:
+        return "High"
+    if score >= 50:
+        return "Medium"
+    return "Low"
+
+
+def build_data_confidence(row: pd.Series) -> pd.Series:
+    """Score how much the model can trust a site's current input data.
+
+    This is separate from readiness_score. A site can look promising while still
+    needing stronger input confirmation.
+    """
+    score = 100.0
+    reasons: list[str] = []
+
+    def subtract(points: float, reason: str) -> None:
+        nonlocal score
+        score -= points
+        reasons.append(reason)
+
+    notes = str(row.get("notes", "")).lower()
+
+    if row.get("elec_service_rating_amp", 0) <= 0:
+        subtract(15, "electrical service rating unconfirmed")
+    if row.get("spare_capacity_kw", 0) <= 0:
+        subtract(15, "spare capacity unconfirmed")
+    if row.get("emergency_disconnect_visible", 0) == 0:
+        subtract(10, "emergency disconnect visibility unconfirmed")
+    if row.get("distance_to_service_ft", 0) <= 0 or row.get("trenching_ft", 0) <= 0:
+        subtract(8, "routing or trenching estimate incomplete")
+    if row.get("parking_spaces", 0) <= 0:
+        subtract(8, "parking count missing")
+    if row.get("hours_open", 0) <= 0:
+        subtract(8, "operating hours missing")
+    if row.get("visitors_day", 0) <= 0 and row.get("employees_day", 0) <= 0 and row.get("fleet_vehicles", 0) <= 0:
+        subtract(8, "site-use demand inputs are weak")
+    if row.get("public_access", 0) == 0:
+        subtract(8, "public access or use case needs confirmation")
+    if row.get("garage_enclosed", 0) == 1:
+        subtract(8, "garage context needs extra confirmation")
+    if "planning assumption" in notes or "planning assumptions" in notes:
+        subtract(6, "notes identify planning assumptions")
+    if "unconfirmed" in notes:
+        subtract(6, "notes identify unconfirmed fields")
+
+    if "official" in notes:
+        score += 5
+        reasons.append("some inputs have official-source support")
+
+    score = round(max(0, min(100, score)), 1)
+    if not reasons:
+        reasons.append("most key inputs are populated")
+
+    return pd.Series(
+        {
+            "data_confidence_score": score,
+            "data_confidence_level": data_confidence_level(score),
+            "data_confidence_reason": "; ".join(reasons),
+        }
+    )
+
+
 def apply_recommendations(results: pd.DataFrame) -> pd.DataFrame:
-    """Add rank and plain-English planning recommendation columns."""
+    """Add rank, planning recommendations, and data-confidence columns."""
     ranked = results.sort_values("readiness_score", ascending=False).reset_index(drop=True)
     ranked["model_rank"] = range(1, len(ranked) + 1)
     ranked["recommendation_tier"] = ranked.apply(build_recommendation_tier, axis=1)
     ranked["planning_recommendation"] = ranked.apply(build_planning_recommendation, axis=1)
     ranked["priority_reason"] = ranked.apply(build_priority_reason, axis=1)
     ranked["data_needed_next"] = ranked.apply(build_data_needed_next, axis=1)
+    confidence_columns = ranked.apply(build_data_confidence, axis=1)
+    ranked = pd.concat([ranked, confidence_columns], axis=1)
     return ranked
 
 
@@ -419,6 +487,8 @@ def main() -> None:
         "public_access",
         "access_adjustment",
         "readiness_score",
+        "data_confidence_score",
+        "data_confidence_level",
         "recommendation_tier",
         "planning_recommendation",
         "priority_reason",
