@@ -29,12 +29,13 @@ DEFAULT_OUTPUT_ROOT = "data/demo"
 DEFAULT_COUNT = 50
 DEFAULT_SEED = 42
 DEFAULT_TOP_N = 15
+DEFAULT_RANK_STABILITY_TOP_N = 8
 
 SCALABLE_REVIEW_ORDER = [
     "readiness_top_{top_n}.png",
     "readiness_map_top_{top_n}_labeled.png",
     "profile_heatmap_top_{top_n}.png",
-    "profile_rank_stability_top_{top_n}.png",
+    "profile_rank_stability_top_{rank_top_n}.png",
     "readiness_score_distribution.png",
     "recommendation_tier_counts.png",
     "data_confidence_full_compact.png",
@@ -76,10 +77,10 @@ def tier_funnel_sentence(results: pd.DataFrame) -> str:
     )
 
 
-def scalable_review_paths(scalable_dir: Path, top_n: int) -> list[Path]:
+def scalable_review_paths(scalable_dir: Path, top_n: int, rank_top_n: int) -> list[Path]:
     paths: list[Path] = []
     for template in SCALABLE_REVIEW_ORDER:
-        candidate = scalable_dir / template.format(top_n=top_n)
+        candidate = scalable_dir / template.format(top_n=top_n, rank_top_n=rank_top_n)
         if candidate.exists():
             paths.append(candidate.relative_to(PROJECT_ROOT))
     return paths
@@ -102,6 +103,7 @@ def write_demo_summary(
     results = pd.read_csv(results_path)
     ranked = results.sort_values("model_rank").copy()
     actual_top_n = min(top_n, len(ranked))
+    actual_rank_top_n = min(DEFAULT_RANK_STABILITY_TOP_N, actual_top_n, len(ranked))
 
     lines = [
         "# Demo Mode Run Summary",
@@ -115,6 +117,7 @@ def write_demo_summary(
         f"- Candidate sites generated: {count}",
         f"- Random seed: {seed}",
         f"- Top-N chart size: {actual_top_n}",
+        f"- Rank-stability chart size: {actual_rank_top_n}",
         f"- Full compact chart included: {'yes' if include_full_compact else 'no'}",
         "",
         "## Quick interpretation",
@@ -152,7 +155,7 @@ def write_demo_summary(
     for confidence, count_value in ranked["data_confidence_level"].value_counts().items():
         lines.append(f"| {confidence} | {int(count_value)} |")
 
-    review_paths = scalable_review_paths(scalable_dir, actual_top_n)
+    review_paths = scalable_review_paths(scalable_dir, actual_top_n, actual_rank_top_n)
     lines.extend(["", "## Recommended visual review order", ""])
     for number, path in enumerate(review_paths, start=1):
         lines.append(f"{number}. `{path}`")
@@ -275,15 +278,19 @@ def main() -> None:
         include_full_compact=include_full_compact,
     )
 
+    actual_top_n = min(args.top_n, args.count)
+    actual_rank_top_n = min(DEFAULT_RANK_STABILITY_TOP_N, actual_top_n)
+
     print()
     print("DEMO MODE COMPLETE")
     print("------------------")
     print(f"Demo input: {input_path.relative_to(PROJECT_ROOT)}")
     print(f"Demo results: {results_path.relative_to(PROJECT_ROOT)}")
     print(f"Demo summary: {summary_path.relative_to(PROJECT_ROOT)}")
-    print(f"Main scalable chart: {(scalable_dir / f'readiness_top_{min(args.top_n, args.count)}.png').relative_to(PROJECT_ROOT)}")
-    print(f"Scalable map: {(scalable_dir / f'readiness_map_top_{min(args.top_n, args.count)}_labeled.png').relative_to(PROJECT_ROOT)}")
-    print(f"Profile heatmap: {(scalable_dir / f'profile_heatmap_top_{min(args.top_n, args.count)}.png').relative_to(PROJECT_ROOT)}")
+    print(f"Main scalable chart: {(scalable_dir / f'readiness_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
+    print(f"Scalable map: {(scalable_dir / f'readiness_map_top_{actual_top_n}_labeled.png').relative_to(PROJECT_ROOT)}")
+    print(f"Profile heatmap: {(scalable_dir / f'profile_heatmap_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
+    print(f"Profile rank stability: {(scalable_dir / f'profile_rank_stability_top_{actual_rank_top_n}.png').relative_to(PROJECT_ROOT)}")
     print()
     print("These are local demo outputs. They are intentionally separate from the official V1 deliverable package.")
 
