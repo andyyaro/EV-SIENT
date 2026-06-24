@@ -1,5 +1,7 @@
 # Presentation Outline
 
+This file is only a future presentation planning outline. The project can continue without building slides now.
+
 ## Slide 1 — Project title
 
 ```text
@@ -11,7 +13,7 @@ Fairfax City and Prince William County candidate-site analysis
 
 ```text
 Public EV charging decisions need more than a map of empty parking spaces.
-Good sites should balance demand, electrical feasibility, public access, safety, ADA/accessibility, equity, and charger right-sizing.
+Good sites should balance demand, electrical feasibility, public access, safety, ADA/accessibility, equity, data confidence, and charger right-sizing.
 ```
 
 ## Slide 3 — Candidate sites map
@@ -67,6 +69,12 @@ Planning estimates / proxies:
 readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ```
 
+Speaker note:
+
+```text
+Readiness score says how promising a site looks. Data confidence is separate and says how complete or confirmed the current inputs are.
+```
+
 ## Slide 7 — Ranked results
 
 ```text
@@ -80,18 +88,40 @@ Show data/outputs/charts/readiness_score_chart.png
 6. PWC003 — 29.5
 ```
 
-## Slide 8 — Recommendation tiers
+## Slide 8 — Data confidence
 
 ```text
-FFX002 — Tier 1 — advance to site screening
-FFX001 — Tier 1 — advance to site screening
+Show data/outputs/charts/data_confidence_chart.png
+
+Data confidence does not change the ranking.
+It shows which results need more confirmation before advancement.
+```
+
+## Slide 9 — Readiness-confidence action matrix
+
+```text
+Show data/outputs/action_matrix.md or summarize the action labels.
+
+FFX002 — Verify key data, then advance
+FFX001 — Promising, but fix data first
+PWC002 — Technical review before advancement
+PWC004 — Promising with timeline caveat
+PWC001 — Monitor or deprioritize
+PWC003 — Special-use decision needed
+```
+
+## Slide 10 — Recommendation tiers
+
+```text
+FFX002 — Tier 1
+FFX001 — Tier 1
 PWC002 — High-review candidate
-PWC004 — Tier 2 — promising candidate, refine data
-PWC001 — Tier 3 — lower priority / monitor
+PWC004 — Tier 2
+PWC001 — Tier 3
 PWC003 — Low public-priority / special-use
 ```
 
-## Slide 9 — Sensitivity analysis
+## Slide 11 — Sensitivity analysis
 
 ```text
 The model tested five uncertainty scenarios.
@@ -99,7 +129,7 @@ The ranking stayed stable across all five.
 Every site had rank_range = 0.
 ```
 
-## Slide 10 — Scoring profile rank stability
+## Slide 12 — Scoring profile rank stability
 
 ```text
 Show data/outputs/charts/profile_rank_stability_chart.png
@@ -120,7 +150,7 @@ Speaker note:
 This chart is easier to explain than the heatmap because it only shows rank movement. The FFX002 line stays flat at #1, which means the top recommendation is stable even when different planning priorities are emphasized.
 ```
 
-## Slide 11 — Strongest finding
+## Slide 13 — Strongest finding
 
 ```text
 FFX002 is the strongest current candidate because it is:
@@ -129,7 +159,7 @@ FFX002 is the strongest current candidate because it is:
 3. ranked #1 across all scoring-priority profiles.
 ```
 
-## Slide 12 — Remaining data gaps
+## Slide 14 — Remaining data gaps
 
 ```text
 elec_service_rating_amp
@@ -140,9 +170,12 @@ visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
 local EV adoption counts
+PWC004 reopening or usable-planning timeline
+PWC002 garage-specific review
+PWC003 public, fleet-only, special-use, or removal decision
 ```
 
-## Slide 13 — Current source-quality note
+## Slide 15 — Current source-quality note
 
 ```text
 FFX002 parking and hours are now supported by an official facility page.
@@ -153,7 +186,7 @@ Amenities now use reviewed OSM/Overpass six-category POI counts.
 The site map is a planning visual only, not a parcel boundary or engineering map.
 ```
 
-## Slide 14 — Final conclusion
+## Slide 16 — Final conclusion
 
 ```text
 FFX002 is the most stable top candidate.
