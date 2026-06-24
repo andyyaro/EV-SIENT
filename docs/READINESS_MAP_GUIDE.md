@@ -6,13 +6,13 @@ The generated readiness map is:
 data/outputs/charts/site_readiness_map.png
 ```
 
-The committed GitHub-rendered preview is:
+The committed preview used by GitHub Markdown should be synced from the generated chart to:
 
 ```text
-docs/assets/charts/site_readiness_map.svg
+docs/assets/charts/site_readiness_map.png
 ```
 
-![Candidate EV charging site readiness map](assets/charts/site_readiness_map.svg)
+![Candidate EV charging site readiness map](assets/charts/site_readiness_map.png)
 
 ## What the map shows
 
@@ -85,4 +85,4 @@ a final site-design map
 a true GIS basemap
 ```
 
-Any real charger project would still need site-owner review, utility review, engineering design, accessibility review, Fire Marshal or AHJ review, permitting, procurement, and stakeholder approval.
+Any real charger project would still need site-owner review, utility review, engineering design, accessibility review, permitting, procurement, and stakeholder approval.
