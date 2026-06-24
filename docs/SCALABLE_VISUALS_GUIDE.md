@@ -8,15 +8,25 @@ When the model is tested with 25, 50, or more candidate sites, one full bar char
 
 Use scalable visuals for larger test runs.
 
-## Script
+## Easiest path: run demo mode
+
+For a complete 50-site synthetic workflow, run:
+
+```bash
+python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
+```
+
+This generates demo data, validates it, runs the model, adds action labels, and creates scalable visuals.
+
+## Scalable visual script
 
 ```text
 src/plot_scalable_readiness_charts.py
 ```
 
-## Example for a 50-site demo run
+Use this script directly when you already have a model results CSV.
 
-After running the model on a 50-site demo file, run:
+## Example for a 50-site demo result file
 
 ```bash
 python src/plot_scalable_readiness_charts.py \
