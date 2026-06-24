@@ -30,7 +30,7 @@ FFX002 — City of Fairfax Regional Library
 
 The map shows the candidate sites, the two geographic clusters, and the current ranked readiness interpretation.
 
-![Candidate EV charging site readiness map](../data/outputs/charts/site_readiness_map.png)
+![Candidate EV charging site readiness map](assets/charts/site_readiness_map.svg)
 
 ## Scoring method
 
@@ -55,13 +55,13 @@ Readiness score shows how promising a site looks under current assumptions. Data
 6. PWC003 — Prince William County Public Safety Training Center — readiness 29.5
 ```
 
-![Readiness score chart](../data/outputs/charts/readiness_score_chart.png)
+![Readiness score chart](assets/charts/readiness_score_chart.svg)
 
 ## Data confidence
 
 Data confidence is not the same thing as readiness. It shows how complete and source-supported the current input data is.
 
-![Data confidence chart](../data/outputs/charts/data_confidence_chart.png)
+![Data confidence chart](assets/charts/data_confidence_chart.svg)
 
 ## Scoring profile analysis
 
@@ -89,11 +89,11 @@ safety_priority — FFX002 ranked #1 with score 70.1
 
 The rank-stability chart is the main presentation visual because it shows rank movement directly. A line staying at `#1` means the site remains the top candidate across scoring-priority views.
 
-![Profile rank stability chart](../data/outputs/charts/profile_rank_stability_chart.png)
+![Profile rank stability chart](assets/charts/profile_rank_stability_chart.svg)
 
 The heatmap remains useful when the reader wants the exact score/rank cell values.
 
-![Profile score heatmap](../data/outputs/charts/profile_score_heatmap.png)
+![Profile score heatmap](assets/charts/profile_score_heatmap.svg)
 
 ## Recommendation tiers
 
