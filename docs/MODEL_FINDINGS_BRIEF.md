@@ -39,6 +39,17 @@ PWC001 — Tier 3
 PWC003 — Low public-priority / special-use
 ```
 
+## Readiness-confidence action labels
+
+```text
+FFX002 — Verify key data, then advance
+FFX001 — Promising, but fix data first
+PWC002 — Technical review before advancement
+PWC004 — Promising with timeline caveat
+PWC001 — Monitor or deprioritize
+PWC003 — Special-use decision needed
+```
+
 ## Key stability finding
 
 FFX002 stayed ranked #1 across all five scoring profiles:
@@ -72,3 +83,5 @@ The ranking stayed stable across all five sensitivity scenarios. Every site had 
 ## Planning conclusion
 
 FFX002 is the strongest current candidate because it is top-ranked in the base model, stable across sensitivity scenarios, and stable across all scoring-priority profiles. FFX001 remains the second strongest candidate. PWC002 and PWC004 remain important but need more confirmation before advancement. PWC003 should not be treated as a general-public charging site unless its access or use case changes.
+
+The action labels are intentionally cautious: they identify what should be checked next, not what should be built.
