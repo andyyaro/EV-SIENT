@@ -7,6 +7,7 @@ The chart intentionally keeps the visual simple:
 - one bar per candidate site
 - site order follows model rank
 - labels show confidence score and confidence level
+- faint bands mark Low, Medium, and High confidence
 - threshold lines mark Medium and High confidence
 
 Run from the repository root after the model step:
@@ -73,13 +74,34 @@ def confidence_message(results: pd.DataFrame) -> str:
     )
 
 
+def add_confidence_bands(ax) -> None:
+    """Add faint Low / Medium / High background bands."""
+    ax.axvspan(0, MEDIUM_THRESHOLD, facecolor="#fdecec", alpha=0.55, zorder=0)
+    ax.axvspan(MEDIUM_THRESHOLD, HIGH_THRESHOLD, facecolor="#fff4d6", alpha=0.55, zorder=0)
+    ax.axvspan(HIGH_THRESHOLD, 100, facecolor="#eaf6ea", alpha=0.55, zorder=0)
+
+    band_labels = [
+        (25, "Low"),
+        (62.5, "Medium"),
+        (87.5, "High"),
+    ]
+    for x_value, label in band_labels:
+        ax.text(
+            x_value,
+            1.015,
+            label,
+            transform=ax.get_xaxis_transform(),
+            ha="center",
+            va="bottom",
+            fontsize=8,
+            alpha=0.85,
+        )
+
+
 def add_threshold_lines(ax) -> None:
     """Add simple confidence threshold guides."""
-    ax.axvline(MEDIUM_THRESHOLD, linestyle="--", linewidth=1, alpha=0.45)
-    ax.axvline(HIGH_THRESHOLD, linestyle="--", linewidth=1, alpha=0.45)
-
-    ax.text(MEDIUM_THRESHOLD, 1.015, "Medium", transform=ax.get_xaxis_transform(), ha="center", va="bottom", fontsize=8)
-    ax.text(HIGH_THRESHOLD, 1.015, "High", transform=ax.get_xaxis_transform(), ha="center", va="bottom", fontsize=8)
+    ax.axvline(MEDIUM_THRESHOLD, linestyle="--", linewidth=1, alpha=0.45, zorder=1)
+    ax.axvline(HIGH_THRESHOLD, linestyle="--", linewidth=1, alpha=0.45, zorder=1)
 
 
 def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None:
@@ -89,7 +111,8 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
     ordered["label"] = ordered.apply(site_label, axis=1)
 
     fig, ax = plt.subplots(figsize=(12.8, 6.8))
-    bars = ax.barh(ordered["label"], ordered["data_confidence_score"])
+    add_confidence_bands(ax)
+    bars = ax.barh(ordered["label"], ordered["data_confidence_score"], zorder=2)
     ax.invert_yaxis()
 
     for bar, (_, row) in zip(bars, ordered.iterrows()):
@@ -102,6 +125,7 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
             va="center",
             fontsize=9,
             clip_on=False,
+            zorder=3,
         )
 
     add_threshold_lines(ax)
@@ -109,7 +133,7 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
     ax.set_xlim(0, 100)
     ax.set_xlabel("Data confidence score")
     ax.set_title("Data Confidence by Candidate Site", fontsize=14, pad=18)
-    ax.grid(axis="x", alpha=0.20)
+    ax.grid(axis="x", alpha=0.18, zorder=0)
     ax.set_axisbelow(True)
 
     fig.text(0.5, 0.90, confidence_message(ordered), ha="center", fontsize=9)
