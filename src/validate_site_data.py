@@ -1,8 +1,8 @@
 """Validate candidate-site input data for the EV charging prototype.
 
 This script is a planning checklist, not an engineering approval tool.
-It helps identify missing values, placeholder assumptions, and review flags in
-candidate-site CSV files such as data/inputs/real_sites_v1.csv.
+It helps identify missing values, placeholder assumptions, review flags, and
+schema drift in candidate-site CSV files such as data/inputs/real_sites_v1.csv.
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ import pandas as pd
 
 DEFAULT_INPUT = "data/inputs/real_sites_v1.csv"
 DEFAULT_OUTPUT = "data/outputs/data_quality_report.csv"
+DEFAULT_TEMPLATE = "data/inputs/new_sites_template.csv"
 
 REQUIRED_COLUMNS = [
     "site_id", "site_name", "site_type", "address", "city", "state", "zip",
@@ -76,6 +77,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate EV charging candidate-site input data.")
     parser.add_argument("--input", default=DEFAULT_INPUT, help="Candidate-site CSV to validate.")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="CSV report to create.")
+    parser.add_argument("--template", default=DEFAULT_TEMPLATE, help="New-site template CSV to compare against the input schema.")
     return parser.parse_args()
 
 
@@ -84,6 +86,11 @@ def clean_value(value: Any) -> str:
         return ""
     text = str(value)
     return text if len(text) <= 160 else text[:157] + "..."
+
+
+def column_summary(columns: list[str]) -> str:
+    """Return a compact column-list summary for the report."""
+    return ", ".join(columns)
 
 
 def normalized_note(row: pd.Series) -> str:
@@ -122,6 +129,68 @@ def validate_required_columns(df: pd.DataFrame, issues: list[dict[str, str]]) ->
     for column in [col for col in REQUIRED_COLUMNS if col not in df.columns]:
         add_issue(issues, "ERROR", "GLOBAL", "Dataset", column, "Missing required column",
                   "missing", "Add this column to the input CSV or update the model/schema if intentionally removed.")
+
+
+def validate_column_schema(df: pd.DataFrame, issues: list[dict[str, str]]) -> None:
+    """Validate missing, unexpected, and out-of-order input columns."""
+    actual_columns = list(df.columns)
+    validate_required_columns(df, issues)
+
+    unexpected_columns = [column for column in actual_columns if column not in REQUIRED_COLUMNS]
+    for column in unexpected_columns:
+        add_issue(issues, "ERROR", "GLOBAL", "Dataset", column, "Unexpected input column",
+                  column, "Remove the column or update REQUIRED_COLUMNS and downstream model logic if this field is intentional.")
+
+    if set(actual_columns) == set(REQUIRED_COLUMNS) and actual_columns != REQUIRED_COLUMNS:
+        add_issue(issues, "ERROR", "GLOBAL", "Dataset", "column_order", "Input column order does not match the required schema",
+                  column_summary(actual_columns), "Reorder the input header to match REQUIRED_COLUMNS and new_sites_template.csv.")
+
+
+def validate_template_schema(template_path: Path, input_path: Path, df: pd.DataFrame, issues: list[dict[str, str]]) -> None:
+    """Make sure the expansion template stays aligned with the active input schema."""
+    if not template_path.exists():
+        add_issue(issues, "ERROR", "GLOBAL", "Template", "template", "Template file not found",
+                  str(template_path), "Restore data/inputs/new_sites_template.csv or pass --template with the correct file.")
+        return
+
+    try:
+        template_df = pd.read_csv(template_path)
+    except Exception as exc:  # pragma: no cover - defensive report path
+        add_issue(issues, "ERROR", "GLOBAL", "Template", "template", "Template file could not be read",
+                  exc, "Fix the template CSV formatting before adding new candidate sites.")
+        return
+
+    template_columns = list(template_df.columns)
+    input_columns = list(df.columns)
+
+    if template_columns != REQUIRED_COLUMNS:
+        add_issue(issues, "ERROR", "GLOBAL", "Template", "template_columns", "Template columns do not match the required schema",
+                  column_summary(template_columns), "Make new_sites_template.csv use the same header as REQUIRED_COLUMNS.")
+
+    if template_columns != input_columns:
+        add_issue(issues, "ERROR", "GLOBAL", "Template", "template_vs_input", "Template columns do not match the input file columns",
+                  f"template={template_path}; input={input_path}", "Make new_sites_template.csv and the active input CSV use the same columns in the same order.")
+
+    if "site_id" in template_df.columns and "NEW001" not in template_df["site_id"].astype(str).tolist():
+        add_issue(issues, "REVIEW", "GLOBAL", "Template", "site_id", "Template placeholder row not found",
+                  "NEW001 missing", "Keep one clear NEW001 example row in the template so future site expansion is easy to follow.")
+
+
+def validate_no_template_rows_in_input(df: pd.DataFrame, issues: list[dict[str, str]]) -> None:
+    """Catch accidental copy/paste of the example template row into the active model input."""
+    if "site_id" not in df.columns:
+        return
+
+    site_ids = df["site_id"].fillna("").astype(str).str.strip()
+    template_mask = site_ids.eq("NEW001")
+    if "notes" in df.columns:
+        notes = df["notes"].fillna("").astype(str).str.lower()
+        template_mask = template_mask | notes.str.contains("template row only", regex=False)
+
+    for _, row in df[template_mask].iterrows():
+        site_id, site_name = site_label(row)
+        add_issue(issues, "ERROR", site_id, site_name, "site_id", "Template example row found in active input",
+                  row.get("site_id", ""), "Replace NEW001/example values with a real site before adding the row to real_sites_v1.csv.")
 
 
 def validate_blank_required_values(df: pd.DataFrame, issues: list[dict[str, str]]) -> None:
@@ -273,7 +342,7 @@ def validate_dataset_level_patterns(df: pd.DataFrame, issues: list[dict[str, str
                   "Add planning-level electrical cost assumptions or document why costs are not yet estimated.")
 
 
-def build_report(input_path: Path) -> pd.DataFrame:
+def build_report(input_path: Path, template_path: Path) -> pd.DataFrame:
     issues: list[dict[str, str]] = []
     if not input_path.exists():
         add_issue(issues, "ERROR", "GLOBAL", "Dataset", "input", "Input file not found",
@@ -281,7 +350,9 @@ def build_report(input_path: Path) -> pd.DataFrame:
         return pd.DataFrame(issues)
 
     df = pd.read_csv(input_path)
-    validate_required_columns(df, issues)
+    validate_column_schema(df, issues)
+    validate_template_schema(template_path, input_path, df, issues)
+    validate_no_template_rows_in_input(df, issues)
     validate_blank_required_values(df, issues)
     validate_duplicate_site_ids(df, issues)
     numeric_df = validate_numeric_columns(df, issues)
@@ -304,10 +375,11 @@ def build_report(input_path: Path) -> pd.DataFrame:
     return report
 
 
-def print_summary(report: pd.DataFrame, input_path: Path, output_path: Path) -> None:
+def print_summary(report: pd.DataFrame, input_path: Path, output_path: Path, template_path: Path) -> None:
     print("EV CHARGER SITE DATA QUALITY CHECK")
     print("----------------------------------")
     print(f"Input file: {input_path}")
+    print(f"Template file: {template_path}")
     print(f"Output report: {output_path}")
     print()
     counts = report["severity"].value_counts().to_dict()
@@ -334,10 +406,11 @@ def main() -> None:
     args = parse_args()
     input_path = Path(args.input)
     output_path = Path(args.output)
-    report = build_report(input_path)
+    template_path = Path(args.template)
+    report = build_report(input_path, template_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     report.to_csv(output_path, index=False)
-    print_summary(report, input_path, output_path)
+    print_summary(report, input_path, output_path, template_path)
 
 
 if __name__ == "__main__":
