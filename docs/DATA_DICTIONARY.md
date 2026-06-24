@@ -34,6 +34,7 @@ data/outputs/deliverable_package/
 
 ```text
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
 data/outputs/charts/site_readiness_map.png
 data/outputs/charts/profile_rank_stability_chart.png
 data/outputs/charts/profile_score_heatmap.png
