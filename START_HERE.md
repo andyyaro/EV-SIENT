@@ -54,11 +54,11 @@ The output summary should also show `OK` for the main generated files.
 
 Start with the map to understand where the sites are and which sites rank highest.
 
-![Candidate EV charging site readiness map](data/outputs/charts/site_readiness_map.png)
+![Candidate EV charging site readiness map](docs/assets/charts/site_readiness_map.svg)
 
 Then use the readiness chart to see the ranked scores directly.
 
-![Readiness score chart](data/outputs/charts/readiness_score_chart.png)
+![Readiness score chart](docs/assets/charts/readiness_score_chart.svg)
 
 ## Files to open first
 
@@ -67,10 +67,10 @@ Open these in this order:
 1. [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
 2. [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
 3. [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
-4. [data/outputs/charts/readiness_score_chart.png](data/outputs/charts/readiness_score_chart.png)
-5. [data/outputs/charts/data_confidence_chart.png](data/outputs/charts/data_confidence_chart.png)
-6. [data/outputs/charts/profile_rank_stability_chart.png](data/outputs/charts/profile_rank_stability_chart.png)
-7. [data/outputs/charts/site_readiness_map.png](data/outputs/charts/site_readiness_map.png)
+4. [Readiness score visual](docs/assets/charts/readiness_score_chart.svg)
+5. [Data confidence visual](docs/assets/charts/data_confidence_chart.svg)
+6. [Profile rank stability visual](docs/assets/charts/profile_rank_stability_chart.svg)
+7. [Site readiness map visual](docs/assets/charts/site_readiness_map.svg)
 
 ## Most important input file
 
