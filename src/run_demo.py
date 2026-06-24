@@ -50,9 +50,11 @@ def write_demo_summary(
     count: int,
     seed: int,
     top_n: int,
+    include_full_compact: bool,
 ) -> None:
     results = pd.read_csv(results_path)
     ranked = results.sort_values("model_rank").copy()
+    actual_top_n = min(top_n, len(ranked))
 
     lines = [
         "# Demo Mode Run Summary",
@@ -65,7 +67,8 @@ def write_demo_summary(
         "",
         f"- Candidate sites generated: {count}",
         f"- Random seed: {seed}",
-        f"- Top-N chart size: {top_n}",
+        f"- Top-N chart size: {actual_top_n}",
+        f"- Full compact chart included: {'yes' if include_full_compact else 'no'}",
         "",
         "## Main files",
         "",
@@ -109,14 +112,19 @@ def write_demo_summary(
     for confidence, count_value in ranked["data_confidence_level"].value_counts().items():
         lines.append(f"| {confidence} | {int(count_value)} |")
 
+    review_paths = [
+        scalable_dir.relative_to(PROJECT_ROOT) / f"readiness_top_{actual_top_n}.png",
+        scalable_dir.relative_to(PROJECT_ROOT) / "readiness_score_distribution.png",
+        scalable_dir.relative_to(PROJECT_ROOT) / "recommendation_tier_counts.png",
+    ]
+    if include_full_compact:
+        review_paths.append(scalable_dir.relative_to(PROJECT_ROOT) / "readiness_full_compact.png")
+
+    lines.extend(["", "## Recommended visual review order", ""])
+    for number, path in enumerate(review_paths, start=1):
+        lines.append(f"{number}. `{path}`")
+
     lines.extend([
-        "",
-        "## Recommended visual review order",
-        "",
-        f"1. `{scalable_dir.relative_to(PROJECT_ROOT) / f'readiness_top_{min(top_n, len(ranked))}.png'}`",
-        f"2. `{scalable_dir.relative_to(PROJECT_ROOT) / 'readiness_score_distribution.png'}`",
-        f"3. `{scalable_dir.relative_to(PROJECT_ROOT) / 'recommendation_tier_counts.png'}`",
-        f"4. `{scalable_dir.relative_to(PROJECT_ROOT) / 'readiness_full_compact.png'}`",
         "",
         "## Reminder",
         "",
@@ -223,6 +231,7 @@ def main() -> None:
         scalable_command.append("--skip-full")
     run_command(scalable_command)
 
+    include_full_compact = not args.skip_full_compact
     write_demo_summary(
         results_path=results_path,
         summary_path=summary_path,
@@ -232,6 +241,7 @@ def main() -> None:
         count=args.count,
         seed=args.seed,
         top_n=args.top_n,
+        include_full_compact=include_full_compact,
     )
 
     print()
