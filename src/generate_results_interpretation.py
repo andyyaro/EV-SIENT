@@ -114,7 +114,8 @@ def top_candidate_text(results: pd.DataFrame) -> str:
     top = ranked.iloc[0]
     return (
         f"The current top candidate is `{top.get('site_id', '')}` — {top.get('site_name', '')} "
-        f"with readiness score `{top.get('readiness_score', '')}` and tier `{top.get('recommendation_tier', '')}`."
+        f"with readiness score `{top.get('readiness_score', '')}`, data confidence "
+        f"`{top.get('data_confidence_level', 'not available')}`, and tier `{top.get('recommendation_tier', '')}`."
     )
 
 
@@ -165,6 +166,17 @@ def quality_text(quality: pd.DataFrame) -> str:
     return (
         f"Data-quality counts: ERROR `{counts.get('ERROR', 0)}`, WARNING `{counts.get('WARNING', 0)}`, "
         f"REVIEW `{counts.get('REVIEW', 0)}`, INFO `{counts.get('INFO', 0)}`."
+    )
+
+
+def confidence_text(results: pd.DataFrame) -> str:
+    if results.empty or "data_confidence_level" not in results.columns:
+        return "No data-confidence output was found."
+
+    counts = results["data_confidence_level"].value_counts().to_dict()
+    return (
+        f"Data confidence is separate from readiness score. Current confidence counts are: "
+        f"High `{counts.get('High', 0)}`, Medium `{counts.get('Medium', 0)}`, Low `{counts.get('Low', 0)}`."
     )
 
 
@@ -231,6 +243,9 @@ def site_interpretation(row: pd.Series) -> str:
     site_name = as_text(row.get("site_name", ""))
     rank = row.get("model_rank", "")
     score = row.get("readiness_score", "")
+    confidence_score = row.get("data_confidence_score", "")
+    confidence_level = as_text(row.get("data_confidence_level", ""))
+    confidence_reason = as_text(row.get("data_confidence_reason", ""))
     tier = as_text(row.get("recommendation_tier", ""))
     review_reason = as_text(row.get("review_reason", ""))
     data_needed = as_text(row.get("data_needed_next", ""))
@@ -238,10 +253,15 @@ def site_interpretation(row: pd.Series) -> str:
 
     lines = [f"### {site_id} — {site_name}", ""]
     lines.append(f"Rank `{rank}` with readiness score `{score}`. Current tier: `{tier}`.")
+    if confidence_level:
+        lines.append(f"Data confidence: `{confidence_level}` with score `{confidence_score}`.")
     lines.append("")
     lines.append(f"Rank meaning: {rank_position_text(as_int(rank), tier)}")
     lines.append("")
     lines.append(f"Why it ranks this way: {smarter_reason(row)}")
+    if confidence_reason:
+        lines.append("")
+        lines.append(f"Data-confidence reason: {confidence_reason}")
     lines.append("")
     lines.append(f"Planning interpretation: {smarter_planning_recommendation(row)}")
     if context_note:
@@ -284,13 +304,26 @@ def build_interpretation(
     lines.append("")
     lines.append(quality_text(quality))
     lines.append("")
+    lines.append(confidence_text(ranked))
+    lines.append("")
 
     lines.append("## Ranked results")
     lines.append("")
     lines.append(
         markdown_table(
             ranked,
-            ["model_rank", "site_id", "site_name", "readiness_score", "recommendation_tier", "recommended_ports_now", "recommended_ports_2035", "recommended_ports_2050"],
+            [
+                "model_rank",
+                "site_id",
+                "site_name",
+                "readiness_score",
+                "data_confidence_score",
+                "data_confidence_level",
+                "recommendation_tier",
+                "recommended_ports_now",
+                "recommended_ports_2035",
+                "recommended_ports_2050",
+            ],
         )
     )
     lines.append("")
@@ -309,6 +342,8 @@ def build_interpretation(
     lines.append("The result identifies stronger and weaker early planning candidates under the current data, assumptions, and scoring logic.")
     lines.append("")
     lines.append("A high rank does not mean a site is ready to build. It means the site is a stronger candidate for stakeholder review, site screening, and data confirmation.")
+    lines.append("")
+    lines.append("Readiness score and data confidence should be read together: readiness says how promising the site looks, while data confidence says how much the current inputs can be trusted.")
     lines.append("")
 
     lines.append("## What this result does not replace")
