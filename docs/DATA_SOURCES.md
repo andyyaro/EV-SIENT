@@ -15,6 +15,66 @@ Model logic = scoring, ranking, scenario, or tiering method created by the proje
 Placeholder = unresolved value intentionally left for future confirmation
 ```
 
+## Dataset freshness and metadata
+
+Dataset freshness, publication details, record counts, access status, license notes, and raw-export names are tracked in:
+
+```text
+data/dataset_metadata.csv
+```
+
+This file is the reviewer-facing metadata table for answering questions like:
+
+```text
+Where did the dataset come from?
+How fresh was the dataset or export?
+How many records did the source show?
+Was the data public?
+What license or access note was shown?
+Which raw export or screenshot supported the metadata?
+```
+
+Important metadata fields:
+
+```text
+dataset_name
+source_owner
+source_type
+dataset_status
+records
+info_updated
+data_updated
+published_date
+access
+license
+raw_export_used
+metadata_source
+notes
+```
+
+Example documented metadata item:
+
+```text
+VDOT Bidirectional Traffic Volume 2025
+records: 126,011
+info_updated: 2026-06-12 3:49:27 PM EDT
+data_updated: 2026-06-15 3:30:15 PM EDT
+published_date: 2026-06-12 11:26:56 AM EDT
+access: Public
+license: Custom License
+metadata_source: Virginia Roads dataset details panel screenshot
+```
+
+The companion source-use log is:
+
+```text
+data/source_dataset_log.csv
+```
+
+Use `dataset_metadata.csv` for dataset freshness and portal details. Use `source_dataset_log.csv` for how each source supports model fields.
+
+If a source does not expose a metadata item clearly, keep the value as `Unknown` instead of guessing.
+
 ## Source traceability audit result
 
 The current input rows are source-traceable enough for a V1 planning prototype, but not all fields are equally strong.
