@@ -28,6 +28,8 @@ DEFAULT_OUTPUT = "data/outputs/model_run_summary.md"
 
 CHART_OUTPUTS = [
     "data/outputs/charts/readiness_score_chart.png",
+    "data/outputs/charts/data_confidence_chart.png",
+    "data/outputs/charts/profile_rank_stability_chart.png",
     "data/outputs/charts/site_readiness_map.png",
 ]
 
@@ -61,6 +63,16 @@ def markdown_table(df: pd.DataFrame, columns: list[str]) -> str:
         values = [str(row[col]) for col in view.columns]
         rows.append("| " + " | ".join(values) + " |")
     return "\n".join([header, separator] + rows)
+
+
+def ranked_results(results: pd.DataFrame) -> pd.DataFrame:
+    if results.empty:
+        return results
+    if "model_rank" not in results.columns:
+        return results.copy()
+    ranked = results.copy()
+    ranked["model_rank"] = pd.to_numeric(ranked["model_rank"], errors="coerce")
+    return ranked.sort_values("model_rank")
 
 
 def quality_summary(quality: pd.DataFrame) -> tuple[str, pd.DataFrame]:
@@ -141,10 +153,7 @@ def profile_top_table(profile_results: pd.DataFrame) -> str:
         .first()
         .sort_values("profile_name")
     )
-    return markdown_table(
-        top_by_profile,
-        ["profile_name", "site_id", "site_name", "profile_readiness_score"],
-    )
+    return markdown_table(top_by_profile, ["profile_name", "site_id", "site_name", "profile_readiness_score"])
 
 
 def confidence_summary_text(results: pd.DataFrame) -> str:
@@ -156,6 +165,15 @@ def confidence_summary_text(results: pd.DataFrame) -> str:
         f"Data confidence levels: High={counts.get('High', 0)}, "
         f"Medium={counts.get('Medium', 0)}, Low={counts.get('Low', 0)}."
     )
+
+
+def action_summary_text(results: pd.DataFrame) -> str:
+    if results.empty or "action_label" not in results.columns:
+        return "_No action-matrix output found._"
+
+    counts = results["action_label"].value_counts().to_dict()
+    parts = [f"{label}={count}" for label, count in counts.items()]
+    return "Action labels: " + ", ".join(parts) + "."
 
 
 def build_summary(
@@ -170,20 +188,22 @@ def build_summary(
     sensitivity_text = sensitivity_summary_text(sensitivity)
     profile_text = profile_summary_text(profile_results)
     confidence_text = confidence_summary_text(results)
+    action_text = action_summary_text(results)
+    ranked = ranked_results(results)
 
-    if results.empty:
+    if ranked.empty:
         top_line = "_No model results found._"
     else:
-        ranked = results.sort_values("model_rank") if "model_rank" in results.columns else results.copy()
         top = ranked.iloc[0]
         top_line = (
             f"**Top candidate:** {top.get('site_id', '')} — {top.get('site_name', '')} "
-            f"with readiness score **{top.get('readiness_score', '')}** "
-            f"and data confidence **{top.get('data_confidence_level', 'not available')}**."
+            f"with readiness score **{top.get('readiness_score', '')}**, "
+            f"data confidence **{top.get('data_confidence_level', 'not available')}**, "
+            f"and next action **{top.get('action_label', 'not available')}**."
         )
 
     ranking_table = markdown_table(
-        results.sort_values("model_rank") if not results.empty and "model_rank" in results.columns else results,
+        ranked,
         [
             "model_rank",
             "site_id",
@@ -191,6 +211,7 @@ def build_summary(
             "readiness_score",
             "data_confidence_score",
             "data_confidence_level",
+            "action_label",
             "recommendation_tier",
             "recommended_ports_now",
             "recommended_ports_2035",
@@ -198,8 +219,13 @@ def build_summary(
         ],
     )
 
+    action_table = markdown_table(
+        ranked,
+        ["model_rank", "site_id", "readiness_confidence_cell", "action_label", "action_detail"],
+    )
+
     confidence_table = markdown_table(
-        results.sort_values("model_rank") if not results.empty and "model_rank" in results.columns else results,
+        ranked,
         ["model_rank", "site_id", "readiness_score", "data_confidence_score", "data_confidence_level", "data_confidence_reason"],
     )
 
@@ -221,15 +247,23 @@ Generated: {generated_at}
 
 {confidence_text}
 
+{action_text}
+
 This is a planning-support output only. It does not replace utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, or stakeholder approval.
 
 ## Data-quality summary
 
 {quality_text}
 
-## Current ranking, confidence, and right-sizing output
+## Current ranking, confidence, action, and right-sizing output
 
 {ranking_table}
+
+## Readiness-confidence action matrix
+
+{action_table}
+
+See `data/outputs/action_matrix.md` for the dedicated action-matrix report.
 
 ## Data confidence summary
 
