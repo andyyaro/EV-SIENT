@@ -18,8 +18,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from project_config import load_output_manifest, require_list
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SUCCESS_MARKER = "data/outputs/workflow_success.json"
+OUTPUT_MANIFEST = load_output_manifest(PROJECT_ROOT)
+SUCCESS_MARKER = str(OUTPUT_MANIFEST.get("success_marker", "data/outputs/workflow_success.json"))
+EXPECTED_OUTPUTS = require_list(OUTPUT_MANIFEST, "expected_outputs")
 
 STEPS = [
     {"name": "Validate input data", "command": [sys.executable, "src/validate_site_data.py"]},
@@ -35,27 +39,6 @@ STEPS = [
     {"name": "Generate Markdown run summary", "command": [sys.executable, "src/generate_run_summary.py"]},
     {"name": "Generate results interpretation", "command": [sys.executable, "src/generate_results_interpretation.py"]},
     {"name": "Check outputs and compare to V1 baseline", "command": [sys.executable, "src/check_outputs.py"]},
-]
-
-EXPECTED_OUTPUTS = [
-    "data/outputs/data_quality_report.csv",
-    "data/outputs/site_results.csv",
-    "data/outputs/action_matrix.md",
-    "data/outputs/sensitivity_results.csv",
-    "data/outputs/sensitivity_summary.csv",
-    "data/outputs/profile_results.csv",
-    "data/outputs/profile_rank_summary.csv",
-    "data/outputs/profile_comparison.md",
-    "data/outputs/charts/readiness_score_chart.png",
-    "data/outputs/charts/data_confidence_chart.png",
-    "data/outputs/charts/profile_score_heatmap.png",
-    "data/outputs/charts/profile_rank_stability_chart.png",
-    "data/outputs/charts/site_readiness_map.png",
-    "data/outputs/model_run_summary.md",
-    "data/outputs/results_interpretation.md",
-    "data/outputs/baseline_comparison.csv",
-    "data/outputs/baseline_comparison.md",
-    SUCCESS_MARKER,
 ]
 
 
@@ -83,6 +66,7 @@ def write_success_marker() -> None:
         "completed_at": datetime.now().isoformat(timespec="seconds"),
         "status": "passed",
         "steps": [step["name"] for step in STEPS],
+        "output_manifest": "data/config/output_manifest_v1.json",
     }
     marker_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
@@ -106,6 +90,7 @@ def print_output_summary() -> None:
 def main() -> None:
     print("FULL EV CHARGER MODEL WORKFLOW")
     print("Repository root:", PROJECT_ROOT)
+    print("Output manifest:", "data/config/output_manifest_v1.json")
 
     for step in STEPS:
         run_step(step)
