@@ -2,27 +2,24 @@
 
 This folder contains the longer project documentation.
 
-For the shortest reproduction path, start with:
+## Start files
 
 ```text
 ../START_HERE.md
-```
-
-For a map of the repository, use:
-
-```text
-docs/REPO_MAP.md
+../REPRODUCIBILITY_CHECKLIST.md
+REPO_MAP.md
 ```
 
 ## Short reading path
 
 ```text
 1. ../START_HERE.md
-2. REPO_MAP.md
-3. DATA_DICTIONARY.md
-4. DATA_SOURCES.md
-5. METHODOLOGY.md
-6. PROJECT_STATUS.md
+2. ../REPRODUCIBILITY_CHECKLIST.md
+3. REPO_MAP.md
+4. DATA_DICTIONARY.md
+5. DATA_SOURCES.md
+6. METHODOLOGY.md
+7. PROJECT_STATUS.md
 ```
 
 ## Main generated outputs
@@ -76,23 +73,13 @@ OSM_AMENITIES_REVIEW_NOTE.md
 PROJECT_DECISIONS_LOG.md
 ```
 
-## Main code folder
+## Main folders
 
 ```text
 src/
-```
-
-## Main input data folder
-
-```text
 data/inputs/
-```
-
-## Main config files
-
-```text
-data/config/scoring_profiles.csv
-data/config/output_check_rules_v1.json
+data/config/
+data/outputs/
 ```
 
 ## Shareable local package
