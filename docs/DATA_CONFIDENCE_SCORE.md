@@ -42,13 +42,13 @@ The generated chart is:
 data/outputs/charts/data_confidence_chart.png
 ```
 
-The committed GitHub-rendered preview is:
+The committed preview used by GitHub Markdown should be synced from the generated chart to:
 
 ```text
-docs/assets/charts/data_confidence_chart.svg
+docs/assets/charts/data_confidence_chart.png
 ```
 
-![Data confidence chart](assets/charts/data_confidence_chart.svg)
+![Data confidence chart](assets/charts/data_confidence_chart.png)
 
 The chart is intentionally simple:
 
@@ -75,22 +75,7 @@ Low readiness + Low confidence = weak result until data improves
 
 ## What affects the score
 
-The score looks at simple project fields such as:
-
-```text
-elec_service_rating_amp
-spare_capacity_kw
-emergency_disconnect_visible
-distance_to_service_ft
-trenching_ft
-parking_spaces
-hours_open
-visitors_day
-employees_day
-public_access
-garage_enclosed
-notes
-```
+The score looks at simple project fields such as parking, hours, public access, service distance, trenching distance, estimated activity, and electrical placeholders.
 
 ## Current source-confidence interpretation
 
@@ -98,21 +83,6 @@ notes
 Official or official-derived values raise trust.
 Reviewed open GIS / POI values are usable but should still be labeled as open-data support.
 Manual estimates, planning estimates, planning proxies, placeholders, and unconfirmed notes lower confidence.
-```
-
-The current weakest confidence drivers are:
-
-```text
-elec_service_rating_amp = 0 placeholder
-spare_capacity_kw = 0 placeholder
-emergency_disconnect_visible = 0 placeholder/unconfirmed
-employees_day and visitors_day = V1 assumptions
-parking_spaces = V1 assumption except FFX002
-hours_open = V1 assumption except FFX002
-local EV adoption = V1 planning proxy
-PWC002 garage review = unresolved high-review context
-PWC004 timeline = future/reopened planning caveat
-PWC003 public access = special-use/public-use decision unresolved
 ```
 
 ## How to improve confidence
