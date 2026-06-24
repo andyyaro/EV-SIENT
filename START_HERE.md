@@ -16,6 +16,12 @@ What should we do next for each site?
 
 The model is for early planning support only. It does not replace utility, engineering, permitting, accessibility, fire/AHJ, procurement, or stakeholder review.
 
+## Python version
+
+Use Python 3.10 or newer.
+
+Python 3.11 is the tested version used by the GitHub Actions workflow.
+
 ## Quickest way to run everything
 
 From the repository root:
