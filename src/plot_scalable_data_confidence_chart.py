@@ -111,6 +111,33 @@ def plot_top_n_confidence(results: pd.DataFrame, output_dir: Path, top_n: int) -
     return output_path
 
 
+def update_scalable_summary(output_dir: Path, chart_path: Path) -> None:
+    """Add the Top-N confidence chart to the generated scalable summary if present."""
+    summary_path = output_dir / "scalable_readiness_visuals_summary.md"
+    if not summary_path.exists():
+        return
+
+    chart_line = f"- [{chart_path.name}]({chart_path.name})"
+    text = summary_path.read_text(encoding="utf-8")
+    if chart_line in text:
+        return
+
+    readiness_line = "- [readiness_top_"
+    lines = text.splitlines()
+    updated: list[str] = []
+    inserted = False
+    for line in lines:
+        updated.append(line)
+        if not inserted and line.startswith(readiness_line):
+            updated.append(chart_line)
+            inserted = True
+
+    if not inserted:
+        updated.extend(["", chart_line])
+
+    summary_path.write_text("\n".join(updated) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create a scalable Top-N data-confidence chart.")
     parser.add_argument("--results", default=DEFAULT_RESULTS, help="Model results CSV to visualize.")
@@ -130,6 +157,7 @@ def main() -> None:
 
     top_n = max(1, min(args.top_n, len(results)))
     output_path = plot_top_n_confidence(results, output_dir, top_n)
+    update_scalable_summary(output_dir, output_path)
 
     print("SCALABLE DATA CONFIDENCE CHART")
     print("------------------------------")
