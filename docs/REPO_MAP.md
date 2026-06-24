@@ -13,7 +13,7 @@ README.md                        Project overview
 src/                             Python scripts
 data/inputs/                     Input datasets
 data/outputs/                    Generated local outputs
-data/config/                     Scoring and checker configuration
+data/config/                     Scoring, checker, and output manifest configuration
 docs/                            Project documentation
 data/baselines/                  Saved V1 benchmark outputs
 ```
@@ -52,14 +52,16 @@ python src/build_deliverable_package.py
 | `src/check_outputs.py` | Checks expected outputs and runs baseline comparison. |
 | `src/build_deliverable_package.py` | Copies key files into a shareable deliverable package. |
 | `src/build_osm_amenities.py` | Optional helper for OpenStreetMap amenity data. |
+| `src/project_config.py` | Loads shared project configuration files. |
 
-## Main input files
+## Main input and config files
 
 | File | Purpose |
 |---|---|
 | `data/inputs/real_sites_v1.csv` | Main candidate-site input dataset. |
 | `data/inputs/sites_demo.csv` | Smaller starter/demo dataset. |
 | `data/inputs/new_sites_template.csv` | Template for adding future candidate sites. |
+| `data/config/output_manifest_v1.json` | Single source of truth for expected outputs and package contents. |
 | `data/config/scoring_profiles.csv` | Alternative scoring-priority profiles. |
 | `data/config/output_check_rules_v1.json` | Expected output rules for the checker. |
 
