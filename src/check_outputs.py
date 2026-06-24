@@ -10,26 +10,10 @@ from typing import Any
 
 import pandas as pd
 
+from project_config import load_output_manifest, require_list
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RULES_FILE = "data/config/output_check_rules_v1.json"
-
-REQUIRED_FILES = [
-    "data/outputs/data_quality_report.csv",
-    "data/outputs/site_results.csv",
-    "data/outputs/action_matrix.md",
-    "data/outputs/sensitivity_results.csv",
-    "data/outputs/sensitivity_summary.csv",
-    "data/outputs/profile_results.csv",
-    "data/outputs/profile_rank_summary.csv",
-    "data/outputs/profile_comparison.md",
-    "data/outputs/model_run_summary.md",
-    "data/outputs/results_interpretation.md",
-    "data/outputs/charts/readiness_score_chart.png",
-    "data/outputs/charts/data_confidence_chart.png",
-    "data/outputs/charts/profile_rank_stability_chart.png",
-    "data/outputs/charts/profile_score_heatmap.png",
-    "data/outputs/charts/site_readiness_map.png",
-]
 
 SITE_COLUMNS = [
     "model_rank",
@@ -85,8 +69,17 @@ def load_rules(issues: list[str]) -> dict[str, Any]:
     return data
 
 
-def require_files(issues: list[str]) -> None:
-    for relative_path in REQUIRED_FILES:
+def load_required_files(issues: list[str]) -> list[str]:
+    try:
+        manifest = load_output_manifest(PROJECT_ROOT)
+        return require_list(manifest, "check_required_outputs")
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        add(issues, str(exc))
+        return []
+
+
+def require_files(issues: list[str], required_files: list[str]) -> None:
+    for relative_path in required_files:
         path = p(relative_path)
         if not path.exists():
             add(issues, f"Missing expected output file: {relative_path}")
@@ -245,7 +238,8 @@ def check_profiles(issues: list[str], rules: dict[str, Any]) -> None:
 def run_checks() -> list[str]:
     issues: list[str] = []
     rules = load_rules(issues)
-    require_files(issues)
+    required_files = load_required_files(issues)
+    require_files(issues, required_files)
     if rules:
         check_site_results(issues, rules)
         check_quality_report(issues, rules)
