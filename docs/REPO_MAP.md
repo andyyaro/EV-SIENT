@@ -7,14 +7,15 @@ Use this when you want to understand the project without reading every file.
 ## Short version
 
 ```text
-START_HERE.md           Short reproduction guide
-README.md               Project overview
-src/                    Python scripts
-data/inputs/            Input datasets
-data/outputs/           Generated local outputs
-data/config/            Scoring and checker configuration
-docs/                   Project documentation
-data/baselines/         Saved V1 benchmark outputs
+START_HERE.md                    Short reproduction guide
+REPRODUCIBILITY_CHECKLIST.md     Step-by-step reproduction checklist
+README.md                        Project overview
+src/                             Python scripts
+data/inputs/                     Input datasets
+data/outputs/                    Generated local outputs
+data/config/                     Scoring and checker configuration
+docs/                            Project documentation
+data/baselines/                  Saved V1 benchmark outputs
 ```
 
 ## Main workflow
@@ -101,6 +102,7 @@ For a quick review:
 
 ```text
 START_HERE.md
+REPRODUCIBILITY_CHECKLIST.md
 data/outputs/model_run_summary.md
 data/outputs/action_matrix.md
 data/outputs/results_interpretation.md
