@@ -1,6 +1,6 @@
 # Methodology
 
-This document explains how the EV Charger Site-Readiness and Right-Sizing Prototype scores candidate sites, recommends starter charging ports, and translates outputs into planning recommendation tiers.
+This document explains how the EV Charger Site-Readiness and Right-Sizing Prototype scores candidate sites, estimates starter charging ports, tracks data confidence, and translates outputs into planning actions.
 
 The model is a planning-support tool. It does not replace utility review, engineering, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, or stakeholder approval.
 
@@ -9,7 +9,8 @@ The model is a planning-support tool. It does not replace utility review, engine
 ```text
 1. Should this site be prioritized for public EV charging?
 2. If yes, how many starter charging ports should be considered?
-3. What planning action should happen next?
+3. How complete or confirmed is the current site data?
+4. What planning action should happen next?
 ```
 
 ## Main input
@@ -160,6 +161,63 @@ High-review candidate
 Low public-priority / special-use
 Tier 3 — lower priority / monitor
 ```
+
+The tier layer summarizes broad planning priority. It does not mean a site is ready to build.
+
+## Data confidence layer
+
+The model also adds a separate data-confidence layer.
+
+```text
+data_confidence_score
+data_confidence_level
+data_confidence_reason
+```
+
+The confidence score does not change the readiness ranking. It shows how complete or confirmed the current inputs are.
+
+The score is lowered by missing, placeholder, or high-review items such as:
+
+```text
+elec_service_rating_amp
+spare_capacity_kw
+emergency_disconnect_visible
+distance_to_service_ft
+trenching_ft
+parking_spaces
+hours_open
+visitors_day
+employees_day
+public_access
+garage_enclosed
+planning-assumption notes
+unconfirmed notes
+```
+
+## Readiness-confidence action matrix
+
+After the main model runs, `src/add_action_matrix.py` combines readiness and confidence into simple next-action fields:
+
+```text
+readiness_band
+confidence_band
+readiness_confidence_cell
+action_label
+action_detail
+```
+
+Current expected action interpretation:
+
+```text
+FFX002 — Verify key data, then advance
+FFX001 — Promising, but fix data first
+PWC002 — Technical review before advancement
+PWC004 — Promising with timeline caveat
+PWC001 — Monitor or deprioritize
+PWC003 — Special-use decision needed
+```
+
+This prevents the project from treating a high readiness score as permission to build. The action matrix says what should be checked next.
 
 ## Sensitivity analysis
 
