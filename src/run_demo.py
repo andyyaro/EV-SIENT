@@ -87,11 +87,43 @@ def scalable_review_paths(scalable_dir: Path, top_n: int, rank_top_n: int) -> li
     return paths
 
 
+def sensitivity_snapshot_lines(sensitivity_summary_path: Path) -> list[str]:
+    if not sensitivity_summary_path.exists():
+        return ["Sensitivity summary was not generated."]
+
+    sensitivity = pd.read_csv(sensitivity_summary_path)
+    required = {
+        "site_id",
+        "best_rank",
+        "worst_rank",
+        "average_rank",
+        "rank_range",
+        "readiness_score_range",
+    }
+    if sensitivity.empty or not required.issubset(sensitivity.columns):
+        return ["Sensitivity summary was generated, but it does not contain the expected stability columns."]
+
+    sensitivity = sensitivity.sort_values(["average_rank", "rank_range"]).head(10)
+    lines = [
+        "| Site ID | Best rank | Worst rank | Rank range | Average rank | Score range |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for _, row in sensitivity.iterrows():
+        lines.append(
+            f"| {row['site_id']} | {int(row['best_rank'])} | {int(row['worst_rank'])} | "
+            f"{int(row['rank_range'])} | {float(row['average_rank']):.1f} | "
+            f"{float(row['readiness_score_range']):.1f} |"
+        )
+    return lines
+
+
 def write_demo_summary(
     results_path: Path,
     summary_path: Path,
     quality_report_path: Path,
     action_matrix_path: Path,
+    sensitivity_results_path: Path,
+    sensitivity_summary_path: Path,
     profile_results_path: Path,
     profile_summary_path: Path,
     profile_report_path: Path,
@@ -130,6 +162,8 @@ def write_demo_summary(
         f"- Results CSV: `{results_path.relative_to(PROJECT_ROOT)}`",
         f"- Data quality report: `{quality_report_path.relative_to(PROJECT_ROOT)}`",
         f"- Action matrix: `{action_matrix_path.relative_to(PROJECT_ROOT)}`",
+        f"- Sensitivity results CSV: `{sensitivity_results_path.relative_to(PROJECT_ROOT)}`",
+        f"- Sensitivity summary CSV: `{sensitivity_summary_path.relative_to(PROJECT_ROOT)}`",
         f"- Profile results CSV: `{profile_results_path.relative_to(PROJECT_ROOT)}`",
         f"- Profile summary CSV: `{profile_summary_path.relative_to(PROJECT_ROOT)}`",
         f"- Profile comparison report: `{profile_report_path.relative_to(PROJECT_ROOT)}`",
@@ -155,6 +189,15 @@ def write_demo_summary(
     lines.extend(["", "## Data confidence counts", "", "| Confidence level | Count |", "|---|---:|"])
     for confidence, count_value in ranked["data_confidence_level"].value_counts().items():
         lines.append(f"| {confidence} | {int(count_value)} |")
+
+    lines.extend([
+        "",
+        "## Sensitivity stability snapshot",
+        "",
+        "Sensitivity analysis reruns the model under alternate demand/cost assumptions to check whether rankings stay stable.",
+        "",
+    ])
+    lines.extend(sensitivity_snapshot_lines(sensitivity_summary_path))
 
     review_paths = scalable_review_paths(scalable_dir, actual_top_n, actual_rank_top_n)
     lines.extend(["", "## Recommended visual review order", ""])
@@ -202,6 +245,8 @@ def main() -> None:
     quality_report_path = output_dir / f"demo_data_quality_report_{args.count}.csv"
     results_path = output_dir / f"demo_site_results_{args.count}.csv"
     action_matrix_path = output_dir / f"demo_action_matrix_{args.count}.md"
+    sensitivity_results_path = output_dir / f"demo_sensitivity_results_{args.count}.csv"
+    sensitivity_summary_path = output_dir / f"demo_sensitivity_summary_{args.count}.csv"
     profile_results_path = output_dir / f"demo_profile_results_{args.count}.csv"
     profile_summary_path = output_dir / f"demo_profile_rank_summary_{args.count}.csv"
     profile_report_path = output_dir / f"demo_profile_comparison_{args.count}.md"
@@ -230,6 +275,16 @@ def main() -> None:
         str(utilization_dir.relative_to(PROJECT_ROOT)),
     ])
     run_command([py, "src/add_action_matrix.py", "--results", str(results_path.relative_to(PROJECT_ROOT)), "--report", str(action_matrix_path.relative_to(PROJECT_ROOT))])
+    run_command([
+        py,
+        "src/run_sensitivity_analysis.py",
+        "--input",
+        str(input_path.relative_to(PROJECT_ROOT)),
+        "--results-output",
+        str(sensitivity_results_path.relative_to(PROJECT_ROOT)),
+        "--summary-output",
+        str(sensitivity_summary_path.relative_to(PROJECT_ROOT)),
+    ])
     run_command([
         py,
         "src/run_profile_analysis.py",
@@ -279,6 +334,8 @@ def main() -> None:
         summary_path=summary_path,
         quality_report_path=quality_report_path,
         action_matrix_path=action_matrix_path,
+        sensitivity_results_path=sensitivity_results_path,
+        sensitivity_summary_path=sensitivity_summary_path,
         profile_results_path=profile_results_path,
         profile_summary_path=profile_summary_path,
         profile_report_path=profile_report_path,
@@ -297,6 +354,7 @@ def main() -> None:
     print("------------------")
     print(f"Demo input: {input_path.relative_to(PROJECT_ROOT)}")
     print(f"Demo results: {results_path.relative_to(PROJECT_ROOT)}")
+    print(f"Demo sensitivity summary: {sensitivity_summary_path.relative_to(PROJECT_ROOT)}")
     print(f"Demo summary: {summary_path.relative_to(PROJECT_ROOT)}")
     print(f"Main scalable chart: {(scalable_dir / f'readiness_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
     print(f"Top-N confidence chart: {(scalable_dir / f'data_confidence_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
