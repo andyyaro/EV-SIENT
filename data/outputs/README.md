@@ -9,6 +9,7 @@ Generated outputs are ignored by Git so local runs do not clutter `git status`.
 ```text
 data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
+data/outputs/action_matrix.md
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
 data/outputs/profile_results.csv
@@ -21,12 +22,14 @@ data/outputs/baseline_comparison.md
 data/outputs/workflow_success.json
 ```
 
-`site_results.csv` includes both `readiness_score` and `data_confidence_score`.
+`site_results.csv` includes readiness, confidence, and action-matrix fields.
 
 ```text
 readiness_score = how promising the site looks
 
 data_confidence_score = how complete the current input data is
+
+action_label = what to do next
 ```
 
 `workflow_success.json` is written only after `src/run_all.py` completes successfully. The deliverable package builder uses it to avoid packaging stale outputs after a failed or partial run.
@@ -78,4 +81,4 @@ python src/build_deliverable_package.py && \
 git status --short
 ```
 
-`src/run_all.py` runs the validator, model, readiness chart, data confidence chart, sensitivity analysis, scoring profile analysis, profile visuals, readiness map, generated summaries, output checks, and baseline comparison.
+`src/run_all.py` runs the validator, model, action matrix, readiness chart, data confidence chart, sensitivity analysis, scoring profile analysis, profile visuals, readiness map, generated summaries, output checks, and baseline comparison.
