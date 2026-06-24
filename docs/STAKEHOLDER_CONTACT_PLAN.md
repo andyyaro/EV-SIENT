@@ -37,6 +37,8 @@ parking or operations contact
 public works or sustainability contact
 library or municipal operations contact
 technical reviewer for electrical/site questions
+Fire Marshal / AHJ or safety reviewer
+ADA/accessibility reviewer
 GIS or planning data contact
 ```
 
@@ -65,6 +67,19 @@ Thank you,
 Andy Yaro
 Future City Fellowship
 George Mason University
+```
+
+## Site-specific add-on questions
+
+Use these when the site needs a more targeted question.
+
+```text
+FFX002: Can likely charger placement, practical charging hours, electrical capacity, ADA route, and operations support next-stage site screening?
+FFX001: Can municipal visitor/staff parking, likely charger placement, electrical route, and public charging hours be confirmed?
+PWC002: Are there garage-specific fire/AHJ, ventilation, emergency-response, conduit routing, access, or parking-operator constraints?
+PWC004: What is the realistic reopening or usable-planning timeline after renovation?
+PWC003: Should this site be treated as public charging, fleet/support charging, special-use only, or removed from the public candidate list?
+PWC001: Are visitor parking, likely charger area, electrical route, and site-use assumptions worth confirming now or should the site stay lower priority?
 ```
 
 ## How to record responses
@@ -110,15 +125,31 @@ High
 Unknown
 ```
 
+## Minimum evidence before changing the model
+
+Do not overwrite a V1 assumption unless the answer has enough traceability.
+
+Minimum information to record:
+
+```text
+who or what source provided the answer
+response date or source date
+whether the value is confirmed or estimated
+confidence level
+which model field should change
+whether the current input notes need to change
+```
+
 ## How responses should update the model
 
 ```text
 1. Update stakeholder_response_tracker.csv.
 2. If a model field changes, update data/inputs/real_sites_v1.csv.
 3. Add a note in the input row explaining the source.
-4. Re-run python src/run_all.py.
-5. Review data/outputs/results_interpretation.md.
-6. Rebuild the package with python src/build_deliverable_package.py.
+4. Update data/source_dataset_log.csv and data/dataset_metadata.csv if a new source is used.
+5. Re-run python src/run_all.py.
+6. Review data/outputs/results_interpretation.md and data/outputs/action_matrix.md.
+7. Rebuild the package with python src/build_deliverable_package.py.
 ```
 
 ## Highest-priority fields
@@ -136,6 +167,9 @@ visitors_day
 employees_day
 hours_open
 public_access
+PWC002 garage-specific review
+PWC004 future/reopened timeline
+PWC003 public vs fleet/special-use decision
 ```
 
 ## Simple rule
