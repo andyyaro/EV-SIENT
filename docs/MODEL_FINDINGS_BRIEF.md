@@ -28,6 +28,8 @@ FFX002 — City of Fairfax Regional Library
 6. PWC003 — Prince William County Public Safety Training Center — 29.5
 ```
 
+![Readiness score chart](../data/outputs/charts/readiness_score_chart.png)
+
 ## Recommendation tiers
 
 ```text
@@ -38,6 +40,12 @@ PWC004 — Tier 2
 PWC001 — Tier 3
 PWC003 — Low public-priority / special-use
 ```
+
+## Data confidence reminder
+
+Readiness and confidence are separate. A site can be promising while still needing better site-owner, electrical, accessibility, Fire Marshal/AHJ, or operations confirmation.
+
+![Data confidence chart](../data/outputs/charts/data_confidence_chart.png)
 
 ## Readiness-confidence action labels
 
@@ -62,11 +70,7 @@ feasibility_priority
 safety_priority
 ```
 
-Recommended profile-analysis visual:
-
-```text
-data/outputs/charts/profile_rank_stability_chart.png
-```
+![Profile rank stability chart](../data/outputs/charts/profile_rank_stability_chart.png)
 
 This chart is the main profile-analysis visual because it is easy to explain: a line staying at `#1` means the site remains the top candidate across scoring-priority views.
 
