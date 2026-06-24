@@ -42,23 +42,17 @@ The generated chart is:
 data/outputs/charts/data_confidence_chart.png
 ```
 
-The current visual has two panels:
+The chart is intentionally simple:
 
 ```text
-left panel = readiness score vs. data confidence score
-right panel = data confidence by site in model-rank order
+one horizontal bar per candidate site
+site order follows model rank
+bar length = data confidence score
+label = confidence score and confidence level
+vertical guides = Medium and High thresholds
 ```
 
-The left panel helps separate site promise from evidence quality:
-
-```text
-upper-right = promising site with stronger supporting data
-upper-left = promising site, but verify first
-lower-right = lower-readiness site with stronger supporting data
-lower-left = lower-readiness site with weaker supporting data
-```
-
-The right panel shows each site's current confidence score, confidence level, readiness score, and how many points are needed to reach High confidence.
+The purpose is not to re-rank sites. The purpose is to show how careful we should be with each model result.
 
 ## Main idea
 
