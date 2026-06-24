@@ -7,6 +7,7 @@ This file defines the main inputs, config files, and generated outputs used by t
 ```text
 data/inputs/real_sites_v1.csv              Main candidate-site input dataset
 data/inputs/sites_demo.csv                 Small starter/demo dataset
+data/inputs/new_sites_template.csv         Template for future candidate-site rows
 data/config/scoring_profiles.csv           Alternative scoring-priority profiles
 data/config/output_check_rules_v1.json     V1 output-check expectations
 ```
@@ -82,6 +83,9 @@ The heatmap remains available when exact score and rank values are helpful.
 |---|---|
 | `model_rank` | Rank after sorting by readiness score. |
 | `readiness_score` | Final weighted readiness score. |
+| `data_confidence_score` | Separate 0-100 score showing how complete/confirmed the current input data is. |
+| `data_confidence_level` | Plain-English level for the confidence score: High, Medium, or Low. |
+| `data_confidence_reason` | Short explanation of what raised or lowered the confidence score. |
 | `recommendation_tier` | Plain-English planning tier. |
 | `planning_recommendation` | Suggested next planning action. |
 | `priority_reason` | Short reason for the recommendation. |
@@ -96,6 +100,16 @@ The heatmap remains available when exact score and rank values are helpful.
 | `estimated_utilization` | Utilization for the recommended current port count. |
 | `mean_wait_min` | Estimated mean wait time in minutes. |
 | `install_cost_est_usd` | Planning install cost estimate. |
+
+## Data confidence interpretation
+
+```text
+readiness_score = how promising the site looks
+
+data_confidence_score = how complete/confirmed the current inputs are
+```
+
+The confidence score does not change the ranking. It helps explain how carefully each result should be interpreted.
 
 ## Important `profile_results.csv` columns
 
