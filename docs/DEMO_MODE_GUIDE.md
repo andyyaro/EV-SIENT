@@ -12,6 +12,8 @@ ranking behavior
 chart readability
 recommendation-tier distribution
 data-confidence behavior
+profile-priority behavior
+map/scatter readability
 workflow robustness
 ```
 
@@ -52,10 +54,22 @@ For a 50-site run, the main files are:
 data/demo/demo_sites_50.csv
 data/demo/outputs/demo_site_results_50.csv
 data/demo/outputs/demo_action_matrix_50.md
+data/demo/outputs/demo_profile_results_50.csv
+data/demo/outputs/demo_profile_rank_summary_50.csv
+data/demo/outputs/demo_profile_comparison_50.md
 data/demo/outputs/demo_run_summary_50.md
+```
+
+The main scalable visuals are:
+
+```text
 data/demo/outputs/charts/scalable/readiness_top_15.png
+data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
+data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
+data/demo/outputs/charts/scalable/profile_rank_stability_top_15.png
 data/demo/outputs/charts/scalable/readiness_score_distribution.png
 data/demo/outputs/charts/scalable/recommendation_tier_counts.png
+data/demo/outputs/charts/scalable/data_confidence_full_compact.png
 data/demo/outputs/charts/scalable/readiness_full_compact.png
 ```
 
@@ -66,9 +80,13 @@ Open these in this order:
 ```text
 1. data/demo/outputs/demo_run_summary_50.md
 2. data/demo/outputs/charts/scalable/readiness_top_15.png
-3. data/demo/outputs/charts/scalable/readiness_score_distribution.png
-4. data/demo/outputs/charts/scalable/recommendation_tier_counts.png
-5. data/demo/outputs/charts/scalable/readiness_full_compact.png
+3. data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
+4. data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
+5. data/demo/outputs/charts/scalable/profile_rank_stability_top_15.png
+6. data/demo/outputs/charts/scalable/readiness_score_distribution.png
+7. data/demo/outputs/charts/scalable/recommendation_tier_counts.png
+8. data/demo/outputs/charts/scalable/data_confidence_full_compact.png
+9. data/demo/outputs/charts/scalable/readiness_full_compact.png
 ```
 
 ## Why scalable visuals are needed
@@ -80,9 +98,13 @@ It does not work well for 50 sites because labels overlap and the chart becomes 
 Demo mode therefore generates scalable visuals:
 
 ```text
-Top-N chart = presentation view
+Top-N chart = presentation ranking view
+Top-N map/scatter = geographic spread view
+Top-N profile heatmap = priority-view score comparison
+Top-N rank stability = priority-view rank movement
 Distribution chart = score spread view
 Tier-count chart = planning-funnel view
+Data confidence compact chart = larger-set confidence view
 Full compact chart = audit appendix view
 ```
 
@@ -129,8 +151,17 @@ python src/add_action_matrix.py \
   --results data/demo/outputs/demo_site_results_50.csv \
   --report data/demo/outputs/demo_action_matrix_50.md
 
+python src/run_profile_analysis.py \
+  --site-results data/demo/outputs/demo_site_results_50.csv \
+  --input-sites data/demo/demo_sites_50.csv \
+  --output data/demo/outputs/demo_profile_results_50.csv \
+  --summary-output data/demo/outputs/demo_profile_rank_summary_50.csv \
+  --report-output data/demo/outputs/demo_profile_comparison_50.md
+
 python src/plot_scalable_readiness_charts.py \
   --results data/demo/outputs/demo_site_results_50.csv \
+  --input-sites data/demo/demo_sites_50.csv \
+  --profile-results data/demo/outputs/demo_profile_results_50.csv \
   --output-dir data/demo/outputs/charts/scalable \
   --top-n 15
 ```
