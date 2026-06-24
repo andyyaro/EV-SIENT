@@ -41,6 +41,10 @@ The readiness score chart shows the current ranking directly.
 
 ![Readiness score chart](docs/assets/charts/readiness_score_chart.png)
 
+The profile heatmap shows whether the same sites stay strong when different planning priorities are emphasized.
+
+![Scoring profile heatmap](docs/assets/charts/profile_score_heatmap.png)
+
 ## Main outputs to review
 
 - [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
@@ -49,6 +53,7 @@ The readiness score chart shows the current ranking directly.
 - [Readiness score visual](docs/assets/charts/readiness_score_chart.png)
 - [Data confidence visual](docs/assets/charts/data_confidence_chart.png)
 - [Profile rank stability visual](docs/assets/charts/profile_rank_stability_chart.png)
+- [Profile score heatmap visual](docs/assets/charts/profile_score_heatmap.png)
 - [Site readiness map visual](docs/assets/charts/site_readiness_map.png)
 
 ## Main input and output files
