@@ -19,6 +19,7 @@ src/generate_results_interpretation.py
 src/build_deliverable_package.py
 src/ev_charger_model.py
 src/validate_site_data.py
+src/add_action_matrix.py
 src/run_sensitivity_analysis.py
 src/run_profile_analysis.py
 src/plot_readiness_score_chart.py
@@ -65,7 +66,7 @@ python src/build_deliverable_package.py && \
 git status --short
 ```
 
-`src/run_all.py` runs the validator, readiness/right-sizing model, readiness chart, data confidence chart, sensitivity analysis, scoring profile analysis, profile visuals, readiness map, Markdown run summary, generated results interpretation, and output checks.
+`src/run_all.py` runs the validator, readiness/right-sizing model, action matrix, readiness chart, data confidence chart, sensitivity analysis, scoring profile analysis, profile visuals, readiness map, Markdown run summary, generated results interpretation, and output checks.
 
 The package builder checks for `data/outputs/workflow_success.json`, which is written only after the full workflow passes. This helps avoid packaging stale outputs after a failed or partial run.
 
@@ -74,6 +75,7 @@ Manual step order:
 ```bash
 python src/validate_site_data.py
 python src/ev_charger_model.py
+python src/add_action_matrix.py
 python src/plot_readiness_score_chart.py
 python src/plot_data_confidence_chart.py
 python src/run_sensitivity_analysis.py
@@ -98,6 +100,7 @@ python src/build_osm_amenities.py
 ```text
 data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
+data/outputs/action_matrix.md
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
 data/outputs/profile_results.csv
@@ -117,18 +120,21 @@ data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/deliverable_package/
 ```
 
-`site_results.csv` includes both readiness and data-confidence outputs:
+`site_results.csv` includes readiness, confidence, and action-matrix outputs:
 
 ```text
 readiness_score = how promising the site looks
 
 data_confidence_score = how complete the current input data is
+
+action_label = what to do next
 ```
 
 More detail:
 
 ```text
 docs/DATA_CONFIDENCE_SCORE.md
+data/outputs/action_matrix.md
 ```
 
 ## Scoring profile analysis
