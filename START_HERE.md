@@ -54,11 +54,11 @@ The output summary should also show `OK` for the main generated files.
 
 Start with the map to understand where the sites are and which sites rank highest.
 
-![Candidate EV charging site readiness map](https://raw.githubusercontent.com/andyyaro/Future-City-Fellowship-/main/docs/assets/charts/site_readiness_map.svg)
+![Candidate EV charging site readiness map](docs/assets/charts/site_readiness_map.png)
 
 Then use the readiness chart to see the ranked scores directly.
 
-![Readiness score chart](https://raw.githubusercontent.com/andyyaro/Future-City-Fellowship-/main/docs/assets/charts/readiness_score_chart.svg)
+![Readiness score chart](docs/assets/charts/readiness_score_chart.png)
 
 ## Files to open first
 
@@ -67,10 +67,10 @@ Open these in this order:
 1. [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
 2. [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
 3. [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
-4. [Readiness score visual](docs/assets/charts/readiness_score_chart.svg)
-5. [Data confidence visual](docs/assets/charts/data_confidence_chart.svg)
-6. [Profile rank stability visual](docs/assets/charts/profile_rank_stability_chart.svg)
-7. [Site readiness map visual](docs/assets/charts/site_readiness_map.svg)
+4. [Readiness score visual](docs/assets/charts/readiness_score_chart.png)
+5. [Data confidence visual](docs/assets/charts/data_confidence_chart.png)
+6. [Profile rank stability visual](docs/assets/charts/profile_rank_stability_chart.png)
+7. [Site readiness map visual](docs/assets/charts/site_readiness_map.png)
 
 ## Most important input file
 
@@ -101,6 +101,7 @@ recommendation_tier
 | [src/add_action_matrix.py](src/add_action_matrix.py) | Adds next-action labels. |
 | [src/check_outputs.py](src/check_outputs.py) | Checks that outputs are valid. |
 | [src/build_deliverable_package.py](src/build_deliverable_package.py) | Builds the shareable package. |
+| [src/sync_visual_assets.py](src/sync_visual_assets.py) | Copies generated PNG visuals into committed Markdown preview assets. |
 
 For more detail, read [docs/REPO_MAP.md](docs/REPO_MAP.md).
 
