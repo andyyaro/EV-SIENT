@@ -79,8 +79,7 @@
       "docs/DATA_CONFIDENCE_SCORE.md",
       "docs/SITE_SCREENING_CHECKLIST.md",
       "docs/ADDING_NEW_SITES_GUIDE.md",
-      "docs/STAKEHOLDER_DATA_REQUEST.md",
-      "docs/STAKEHOLDER_CONTACT_PLAN.md",
+      "docs/STAKEHOLDER_OUTREACH_PLAN.md",
       "docs/DATA_DICTIONARY.md",
       "docs/DATA_SOURCES.md"
     ],
@@ -113,8 +112,7 @@
     "reports/DATA_DICTIONARY.md",
     "reports/DATA_SOURCES.md",
     "config/output_manifest_v1.json",
-    "reports/STAKEHOLDER_DATA_REQUEST.md",
-    "reports/STAKEHOLDER_CONTACT_PLAN.md",
+    "reports/STAKEHOLDER_OUTREACH_PLAN.md",
     "stakeholder_inputs/stakeholder_response_tracker.csv"
   ]
 }
