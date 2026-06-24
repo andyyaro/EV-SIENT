@@ -36,11 +36,7 @@ On Windows PowerShell, activate the virtual environment with:
 .venv\Scripts\Activate.ps1
 ```
 
-For a stricter step-by-step reproduction check, use:
-
-```text
-REPRODUCIBILITY_CHECKLIST.md
-```
+For a stricter step-by-step reproduction check, use [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md).
 
 ## What success looks like
 
@@ -58,29 +54,23 @@ The output summary should also show `OK` for the main generated files.
 
 Open these in this order:
 
-```text
-data/outputs/model_run_summary.md
-data/outputs/results_interpretation.md
-data/outputs/action_matrix.md
-data/outputs/charts/readiness_score_chart.png
-data/outputs/charts/data_confidence_chart.png
-data/outputs/charts/profile_rank_stability_chart.png
-data/outputs/charts/site_readiness_map.png
-```
+1. [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
+2. [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
+3. [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
+4. [data/outputs/charts/readiness_score_chart.png](data/outputs/charts/readiness_score_chart.png)
+5. [data/outputs/charts/data_confidence_chart.png](data/outputs/charts/data_confidence_chart.png)
+6. [data/outputs/charts/profile_rank_stability_chart.png](data/outputs/charts/profile_rank_stability_chart.png)
+7. [data/outputs/charts/site_readiness_map.png](data/outputs/charts/site_readiness_map.png)
 
 ## Most important input file
 
-```text
-data/inputs/real_sites_v1.csv
-```
+[data/inputs/real_sites_v1.csv](data/inputs/real_sites_v1.csv)
 
 This is the main candidate-site dataset.
 
 ## Most important output file
 
-```text
-data/outputs/site_results.csv
-```
+[data/outputs/site_results.csv](data/outputs/site_results.csv)
 
 This file contains the main model results, including:
 
@@ -94,19 +84,15 @@ recommendation_tier
 
 ## Simple project map
 
-```text
-src/run_all.py                  Run the full workflow
-src/ev_charger_model.py         Main scoring and right-sizing model
-src/add_action_matrix.py        Adds next-action labels
-src/check_outputs.py            Checks that outputs are valid
-src/build_deliverable_package.py Builds the shareable package
-```
+| File | Purpose |
+|---|---|
+| [src/run_all.py](src/run_all.py) | Run the full workflow. |
+| [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
+| [src/add_action_matrix.py](src/add_action_matrix.py) | Adds next-action labels. |
+| [src/check_outputs.py](src/check_outputs.py) | Checks that outputs are valid. |
+| [src/build_deliverable_package.py](src/build_deliverable_package.py) | Builds the shareable package. |
 
-For more detail, read:
-
-```text
-docs/REPO_MAP.md
-```
+For more detail, read [docs/REPO_MAP.md](docs/REPO_MAP.md).
 
 ## Main result right now
 
