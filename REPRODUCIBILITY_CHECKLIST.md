@@ -2,10 +2,95 @@
 
 Use this checklist to reproduce the current model outputs from a clean local run.
 
-## 1. Start from the repository root
+This guide is written for someone who may be using GitHub for the first time.
+
+## 0. One-time computer setup
+
+Before cloning the repository, make sure these tools are installed:
+
+```text
+Git
+GitHub CLI, also called gh
+Python 3
+```
+
+Check whether they are already installed:
+
+macOS, Linux, or Windows terminal:
+
+```bash
+git --version
+gh --version
+python --version
+```
+
+On some macOS or Linux machines, Python may be called `python3` instead of `python`:
+
+```bash
+python3 --version
+```
+
+If `gh` is installed but not signed in, sign in once:
+
+```bash
+gh auth login
+```
+
+Recommended choices for a beginner:
+
+```text
+GitHub.com
+HTTPS
+Login with a web browser
+```
+
+## 1. Choose where the repository should live
+
+Move into the folder where you want to keep the project.
+
+Example for macOS or Linux:
+
+```bash
+mkdir -p ~/Documents/GitHub
+cd ~/Documents/GitHub
+```
+
+Example for Windows PowerShell:
+
+```powershell
+mkdir "$HOME\Documents\GitHub"
+cd "$HOME\Documents\GitHub"
+```
+
+You can choose a different folder. The important thing is to `cd` into the folder **before** cloning.
+
+## 2. Clone the repository
+
+Recommended method using GitHub CLI:
+
+```bash
+gh repo clone andyyaro/Future-City-Fellowship-
+```
+
+Alternative method using regular Git:
+
+```bash
+git clone https://github.com/andyyaro/Future-City-Fellowship-.git
+```
+
+Then enter the repository folder:
+
+```bash
+cd Future-City-Fellowship-
+```
+
+## 3. Confirm you are in the repository root
+
+Run:
 
 ```bash
 pwd
+ls
 ```
 
 You should be inside the project folder:
@@ -14,18 +99,59 @@ You should be inside the project folder:
 Future-City-Fellowship-
 ```
 
-## 2. Get the latest version
+You should see files and folders such as:
+
+```text
+START_HERE.md
+REPRODUCIBILITY_CHECKLIST.md
+requirements.txt
+src
+data
+docs
+```
+
+If you do not see those files, you are probably in the wrong folder. Use `cd` to move into the `Future-City-Fellowship-` folder.
+
+## 4. Choose the version to reproduce
+
+To reproduce the frozen V1 review-ready checkpoint exactly, use the tag:
+
+```bash
+git checkout v1-review-ready
+```
+
+To work from the latest version of `main`, use:
+
+```bash
+git switch main
+git pull --rebase origin main
+```
+
+For normal development, use `main`. For exact V1 review reproduction, use `v1-review-ready`.
+
+## 5. Get the latest version if you are on main
+
+If you are working on `main`, run:
 
 ```bash
 git pull --rebase origin main
 ```
 
-## 3. Create and activate a virtual environment
+If you checked out the frozen `v1-review-ready` tag, skip this step.
+
+## 6. Create and activate a virtual environment
 
 macOS or Linux:
 
 ```bash
 python -m venv .venv
+source .venv/bin/activate
+```
+
+If your computer uses `python3` instead of `python`, run:
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
@@ -36,13 +162,19 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-## 4. Install dependencies
+After activation, your terminal prompt may show:
+
+```text
+(.venv)
+```
+
+## 7. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 5. Run the full workflow
+## 8. Run the full workflow
 
 ```bash
 python src/run_all.py
@@ -58,7 +190,7 @@ Result: PASSED
 
 The output summary should show `OK` for the main generated files.
 
-## 6. Build the deliverable package
+## 9. Build the deliverable package
 
 ```bash
 python src/build_deliverable_package.py
@@ -71,7 +203,9 @@ Missing files: 0
 Done. The deliverable package is ready to review or share.
 ```
 
-## 7. Check local Git status
+For the V1 review-ready checkpoint, the package should copy 40 files.
+
+## 10. Check local Git status
 
 ```bash
 git status --short
@@ -79,7 +213,9 @@ git status --short
 
 It is normal for generated files under [data/outputs/](data/outputs/) to be ignored by Git.
 
-## 8. Open the key outputs
+If the output is empty, there are no uncommitted tracked changes.
+
+## 11. Open the key outputs
 
 Open these files first:
 
@@ -92,7 +228,7 @@ Open these files first:
 7. [data/outputs/charts/profile_rank_stability_chart.png](data/outputs/charts/profile_rank_stability_chart.png)
 8. [data/outputs/charts/site_readiness_map.png](data/outputs/charts/site_readiness_map.png)
 
-## 9. Confirm the main result
+## 12. Confirm the main result
 
 The current expected top site is:
 
@@ -111,7 +247,7 @@ Expected ranking:
 6. PWC003
 ```
 
-## 10. Confirm the checker output
+## 13. Confirm the checker output
 
 The checker should confirm:
 
@@ -122,7 +258,7 @@ Sanity check: PASSED
 
 Remaining `REVIEW` items are expected because some electrical, capacity, emergency-disconnect, access, and stakeholder fields still need confirmation.
 
-## 11. Confirm the deliverable package
+## 14. Confirm the deliverable package
 
 The package should be created at [data/outputs/deliverable_package/](data/outputs/deliverable_package/).
 
@@ -138,8 +274,9 @@ The package should include:
 - [charts/data_confidence_chart.png](data/outputs/deliverable_package/charts/data_confidence_chart.png)
 - [charts/profile_rank_stability_chart.png](data/outputs/deliverable_package/charts/profile_rank_stability_chart.png)
 - [charts/site_readiness_map.png](data/outputs/deliverable_package/charts/site_readiness_map.png)
+- [stakeholder_inputs/stakeholder_contact_targets.csv](data/outputs/deliverable_package/stakeholder_inputs/stakeholder_contact_targets.csv)
 
-## 12. What not to edit manually
+## 15. What not to edit manually
 
 Do not manually edit generated outputs:
 
@@ -156,7 +293,7 @@ python src/build_deliverable_package.py
 
 ## Simple one-command version
 
-After the virtual environment and dependencies are ready, use:
+After the repository is cloned, the virtual environment is active, and dependencies are installed, use:
 
 ```bash
 git pull --rebase origin main && \
@@ -164,3 +301,5 @@ python src/run_all.py && \
 python src/build_deliverable_package.py && \
 git status --short
 ```
+
+If you are reproducing the frozen V1 tag instead of `main`, do not run `git pull --rebase origin main` after checking out the tag.
