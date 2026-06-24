@@ -42,7 +42,13 @@ The generated chart is:
 data/outputs/charts/data_confidence_chart.png
 ```
 
-![Data confidence chart](../data/outputs/charts/data_confidence_chart.png)
+The committed GitHub-rendered preview is:
+
+```text
+docs/assets/charts/data_confidence_chart.svg
+```
+
+![Data confidence chart](assets/charts/data_confidence_chart.svg)
 
 The chart is intentionally simple:
 
