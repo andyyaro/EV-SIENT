@@ -6,6 +6,8 @@ The generated readiness map is:
 data/outputs/charts/site_readiness_map.png
 ```
 
+![Candidate EV charging site readiness map](../data/outputs/charts/site_readiness_map.png)
+
 ## What the map shows
 
 The map plots the six candidate EV charging sites by longitude and latitude.
