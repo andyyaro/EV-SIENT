@@ -41,6 +41,8 @@ python src/build_deliverable_package.py
 | [src/add_action_matrix.py](../src/add_action_matrix.py) | Adds next-action labels. |
 | [src/check_outputs.py](../src/check_outputs.py) | Checks outputs and runs baseline comparison. |
 | [src/build_deliverable_package.py](../src/build_deliverable_package.py) | Builds the shareable package. |
+| [src/plot_scalable_readiness_charts.py](../src/plot_scalable_readiness_charts.py) | Creates scalable visuals for larger test runs. |
+| [src/sync_visual_assets.py](../src/sync_visual_assets.py) | Copies generated PNG visuals into committed Markdown preview assets. |
 | [src/project_config.py](../src/project_config.py) | Loads shared config files. |
 
 ## Main input and config files
@@ -70,6 +72,19 @@ python src/build_deliverable_package.py
 - [data/outputs/charts/profile_rank_stability_chart.png](../data/outputs/charts/profile_rank_stability_chart.png)
 - [data/outputs/charts/site_readiness_map.png](../data/outputs/charts/site_readiness_map.png)
 - [data/outputs/charts/profile_score_heatmap.png](../data/outputs/charts/profile_score_heatmap.png)
+
+## Scalable visuals for larger tests
+
+For 25, 50, or more candidate sites, use:
+
+```bash
+python src/plot_scalable_readiness_charts.py \
+  --results data/demo/outputs/demo_site_results_50.csv \
+  --output-dir data/demo/outputs/charts/scalable \
+  --top-n 15
+```
+
+See [SCALABLE_VISUALS_GUIDE.md](SCALABLE_VISUALS_GUIDE.md).
 
 ## Recommended reading path
 
