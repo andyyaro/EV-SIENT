@@ -1,83 +1,88 @@
 # Documentation
 
-This folder is for human-readable project documentation, reporting, and presentation material.
+This folder contains the longer project documentation.
 
-## Recommended reading order
+For the shortest reproduction path, start with:
 
 ```text
-1. PROJECT_STATUS.md
-2. MODEL_FINDINGS_BRIEF.md
-3. MODEL_FINDINGS_REPORT.md
-4. PRESENTATION_OUTLINE.md
-5. RESULTS_INTERPRETATION.md
-6. READINESS_MAP_GUIDE.md
-7. DATA_CONFIDENCE_SCORE.md
-8. SITE_SCREENING_CHECKLIST.md
-9. ADDING_NEW_SITES_GUIDE.md
-10. STAKEHOLDER_DATA_REQUEST.md
-11. STAKEHOLDER_CONTACT_PLAN.md
-12. METHODOLOGY.md
-13. DATA_DICTIONARY.md
-14. DATA_SOURCES.md
-15. RECOMMENDATION_TIERS.md
-16. SENSITIVITY_ANALYSIS.md
-17. SENSITIVITY_RESULTS_INTERPRETATION.md
-18. OSM_AMENITIES_WORKFLOW.md
-19. OSM_AMENITIES_REVIEW_NOTE.md
-20. PROJECT_DECISIONS_LOG.md
+../START_HERE.md
 ```
 
-## Latest generated outputs
+For a map of the repository, use:
+
+```text
+docs/REPO_MAP.md
+```
+
+## Short reading path
+
+```text
+1. ../START_HERE.md
+2. REPO_MAP.md
+3. DATA_DICTIONARY.md
+4. DATA_SOURCES.md
+5. METHODOLOGY.md
+6. PROJECT_STATUS.md
+```
+
+## Main generated outputs
 
 For the latest model-run result, use:
 
 ```text
-data/outputs/results_interpretation.md
 data/outputs/model_run_summary.md
+data/outputs/results_interpretation.md
+data/outputs/action_matrix.md
 data/outputs/profile_comparison.md
 data/outputs/baseline_comparison.md
-data/outputs/charts/site_readiness_map.png
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
 data/outputs/charts/profile_rank_stability_chart.png
+data/outputs/charts/site_readiness_map.png
 ```
 
-Recommended profile-analysis visual:
+## Main planning/reporting docs
 
 ```text
-data/outputs/charts/profile_rank_stability_chart.png
+PROJECT_STATUS.md
+MODEL_FINDINGS_BRIEF.md
+MODEL_FINDINGS_REPORT.md
+PRESENTATION_OUTLINE.md
+RESULTS_INTERPRETATION.md
+READINESS_MAP_GUIDE.md
+DATA_CONFIDENCE_SCORE.md
+RECOMMENDATION_TIERS.md
+SENSITIVITY_ANALYSIS.md
+SENSITIVITY_RESULTS_INTERPRETATION.md
 ```
 
-## Confidence-score file
+## Expansion and stakeholder docs
 
 ```text
-docs/DATA_CONFIDENCE_SCORE.md
+SITE_SCREENING_CHECKLIST.md
+ADDING_NEW_SITES_GUIDE.md
+STAKEHOLDER_DATA_REQUEST.md
+STAKEHOLDER_CONTACT_PLAN.md
 ```
 
-## Expansion files
+## Technical/source docs
 
 ```text
-docs/SITE_SCREENING_CHECKLIST.md
-docs/ADDING_NEW_SITES_GUIDE.md
-data/inputs/new_sites_template.csv
-data/source_extracts/site_screening_checklist.csv
+METHODOLOGY.md
+DATA_DICTIONARY.md
+DATA_SOURCES.md
+OSM_AMENITIES_WORKFLOW.md
+OSM_AMENITIES_REVIEW_NOTE.md
+PROJECT_DECISIONS_LOG.md
 ```
 
-## Stakeholder follow-up files
-
-```text
-docs/STAKEHOLDER_DATA_REQUEST.md
-docs/STAKEHOLDER_CONTACT_PLAN.md
-data/source_extracts/stakeholder_data_request_fields.csv
-data/source_extracts/stakeholder_response_tracker.csv
-```
-
-## Main code
+## Main code folder
 
 ```text
 src/
 ```
 
-## Main input data
+## Main input data folder
 
 ```text
 data/inputs/
