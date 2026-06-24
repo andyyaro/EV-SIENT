@@ -45,7 +45,7 @@ The script can create:
 readiness_top_15.png
 readiness_map_top_15_labeled.png
 profile_heatmap_top_15.png
-profile_rank_stability_top_15.png
+profile_rank_stability_top_8.png
 readiness_score_distribution.png
 recommendation_tier_counts.png
 data_confidence_full_compact.png
@@ -68,11 +68,11 @@ Use this as the main presentation ranking chart.
 
 It shows only the strongest sites, so it stays readable even when the full dataset has 50 or more candidates.
 
-### Top-N readiness map
+### Multi-panel readiness map
 
 Use this as the scalable geographic planning visual.
 
-It plots all demo sites by longitude/latitude, colors points by readiness score, and labels only the top-N sites so the map remains readable.
+It uses an overview panel for all sites and separate zoom panels for the Fairfax and Prince William demo clusters. The overview labels only the top 5 sites, while the zoom panels label the strongest local sites.
 
 ### Top-N profile heatmap
 
@@ -80,11 +80,11 @@ Use this as the scalable version of the official profile heatmap.
 
 It keeps only the top-N base-model sites and shows how their scores/ranks change across scoring-priority profiles.
 
-### Top-N profile rank stability chart
+### Top-8 profile rank stability chart
 
 Use this as the scalable version of the official rank-stability visual.
 
-It limits the line chart to the top-N sites so the rank movement remains readable.
+The heatmap can stay at top-N, but the line chart gets crowded faster. The default rank-stability chart is therefore limited to the top 8 base-model sites, with the top 3 emphasized and the rest faded.
 
 ### Readiness score distribution
 
@@ -133,10 +133,10 @@ It includes every site but intentionally uses compact labels. It is useful for c
   normal readiness chart is fine
 
 11–25 sites:
-  top-N chart + scalable map + compact full chart
+  top-N chart + multi-panel map + compact full chart
 
 26+ sites:
-  top-N chart + scalable map + profile heatmap + rank-stability chart
+  top-N chart + multi-panel map + profile heatmap + top-8 rank-stability chart
   distribution chart + tier-count chart
   full compact charts only as appendix
 ```
