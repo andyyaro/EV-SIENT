@@ -31,6 +31,16 @@ Baseline comparison: COMPLETED
 Missing files: 0
 ```
 
+## Visual snapshot
+
+The readiness map gives the fastest visual overview of the candidate sites, their relative locations, and their ranked readiness result.
+
+![Candidate EV charging site readiness map](data/outputs/charts/site_readiness_map.png)
+
+The readiness score chart shows the current ranking directly.
+
+![Readiness score chart](data/outputs/charts/readiness_score_chart.png)
+
 ## Main outputs to review
 
 - [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
