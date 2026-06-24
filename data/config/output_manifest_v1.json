@@ -98,7 +98,8 @@
     ],
     "stakeholder_inputs": [
       "data/source_extracts/stakeholder_data_request_fields.csv",
-      "data/source_extracts/stakeholder_response_tracker.csv"
+      "data/source_extracts/stakeholder_response_tracker.csv",
+      "data/source_extracts/stakeholder_contact_targets.csv"
     ]
   },
   "package_review_order": [
@@ -119,6 +120,7 @@
     "metadata_tables/source_dataset_log.csv",
     "config/output_manifest_v1.json",
     "reports/STAKEHOLDER_OUTREACH_PLAN.md",
-    "stakeholder_inputs/stakeholder_response_tracker.csv"
+    "stakeholder_inputs/stakeholder_response_tracker.csv",
+    "stakeholder_inputs/stakeholder_contact_targets.csv"
   ]
 }
