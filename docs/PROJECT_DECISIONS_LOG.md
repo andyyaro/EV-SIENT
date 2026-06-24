@@ -206,6 +206,34 @@ Decision: `src/run_all.py` writes `data/outputs/workflow_success.json` only afte
 
 Reason: this prevents packaging stale local outputs after a failed or partial pipeline run.
 
+## Decision 27 — Verify Markdown links in repo docs and the deliverable package
+
+The project now treats Markdown link correctness as part of documentation quality.
+
+Decision: keep the main README-style docs clickable and make the generated deliverable package README clickable.
+
+Decision: when Markdown reports are copied into the local deliverable package, `src/build_deliverable_package.py` rewrites internal links so they resolve correctly from inside `data/outputs/deliverable_package/`.
+
+Decision: if a copied package document links to a repo file that is not included in the package, the package builder rewrites that target as a GitHub repository link instead of leaving a broken local path.
+
+Verified local audit result:
+
+```text
+Checked local Markdown links: 369
+Skipped external/anchor links: 19
+Broken local links: 0
+All checked local Markdown links exist.
+```
+
+Verified package result:
+
+```text
+Copied files: 38
+Missing files: 0
+```
+
+Reason: the project package is meant to be reviewed by other people, so links inside README files, copied reports, charts, config files, and package contents should work without requiring the reviewer to manually hunt through folders.
+
 ## Current expected recommendation interpretation
 
 ```text
