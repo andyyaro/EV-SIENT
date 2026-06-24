@@ -147,6 +147,17 @@ def profile_top_table(profile_results: pd.DataFrame) -> str:
     )
 
 
+def confidence_summary_text(results: pd.DataFrame) -> str:
+    if results.empty or "data_confidence_level" not in results.columns:
+        return "_No data-confidence output found._"
+
+    counts = results["data_confidence_level"].value_counts().to_dict()
+    return (
+        f"Data confidence levels: High={counts.get('High', 0)}, "
+        f"Medium={counts.get('Medium', 0)}, Low={counts.get('Low', 0)}."
+    )
+
+
 def build_summary(
     results: pd.DataFrame,
     quality: pd.DataFrame,
@@ -158,6 +169,7 @@ def build_summary(
     quality_text, review_items = quality_summary(quality)
     sensitivity_text = sensitivity_summary_text(sensitivity)
     profile_text = profile_summary_text(profile_results)
+    confidence_text = confidence_summary_text(results)
 
     if results.empty:
         top_line = "_No model results found._"
@@ -166,12 +178,29 @@ def build_summary(
         top = ranked.iloc[0]
         top_line = (
             f"**Top candidate:** {top.get('site_id', '')} — {top.get('site_name', '')} "
-            f"with readiness score **{top.get('readiness_score', '')}**."
+            f"with readiness score **{top.get('readiness_score', '')}** "
+            f"and data confidence **{top.get('data_confidence_level', 'not available')}**."
         )
 
     ranking_table = markdown_table(
         results.sort_values("model_rank") if not results.empty and "model_rank" in results.columns else results,
-        ["model_rank", "site_id", "site_name", "readiness_score", "recommendation_tier", "recommended_ports_now", "recommended_ports_2035", "recommended_ports_2050"],
+        [
+            "model_rank",
+            "site_id",
+            "site_name",
+            "readiness_score",
+            "data_confidence_score",
+            "data_confidence_level",
+            "recommendation_tier",
+            "recommended_ports_now",
+            "recommended_ports_2035",
+            "recommended_ports_2050",
+        ],
+    )
+
+    confidence_table = markdown_table(
+        results.sort_values("model_rank") if not results.empty and "model_rank" in results.columns else results,
+        ["model_rank", "site_id", "readiness_score", "data_confidence_score", "data_confidence_level", "data_confidence_reason"],
     )
 
     review_table = remaining_review_summary(review_items)
@@ -190,15 +219,21 @@ Generated: {generated_at}
 
 {profile_text}
 
+{confidence_text}
+
 This is a planning-support output only. It does not replace utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, or stakeholder approval.
 
 ## Data-quality summary
 
 {quality_text}
 
-## Current ranking and right-sizing output
+## Current ranking, confidence, and right-sizing output
 
 {ranking_table}
+
+## Data confidence summary
+
+{confidence_table}
 
 ## Remaining review items by field
 
