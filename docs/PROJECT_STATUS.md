@@ -4,7 +4,7 @@
 
 Phase 2 prototype development for the Public EV Charging Site-Readiness and Right-Sizing Model.
 
-The project is now a working planning-support prototype. It validates candidate-site data, runs the readiness and right-sizing model, adds a readiness-confidence action matrix, tests sensitivity scenarios, compares alternative scoring profiles, generates charts and a readiness map, creates dynamic Markdown summaries, checks outputs against V1 expectations, compares the run to a committed baseline, and builds a local deliverable package.
+The project is now a working planning-support prototype. It validates candidate-site data, runs the readiness and right-sizing model, adds a readiness-confidence action matrix, tests sensitivity scenarios, compares alternative scoring profiles, generates charts and a readiness map, creates dynamic Markdown summaries, checks outputs against V1 expectations, compares the run to a committed baseline, builds a local deliverable package, and supports synthetic demo-mode scalability testing.
 
 This project is a planning-support model only. It does not replace required technical, permitting, procurement, or stakeholder review.
 
@@ -16,11 +16,12 @@ data/inputs/           Input datasets
 data/config/           Config files for scoring profiles, output checks, and output/package manifest
 data/source_extracts/  Small source extracts and source notes
 data/baselines/        Committed V1 baseline outputs for comparison
-data/outputs/          Generated outputs ignored by Git
+data/outputs/          Generated official outputs ignored by Git
+data/demo/             Generated synthetic demo outputs ignored by Git
 docs/                  Documentation and reporting
 ```
 
-## Current full workflow
+## Current full official workflow
 
 Run from the repository root:
 
@@ -57,26 +58,52 @@ data/outputs/deliverable_package/
 
 Generated outputs are local and ignored by Git.
 
-## Latest confirmed successful run
+## Current demo scalability workflow
 
-Latest confirmed user rerun: 2026-06-23.
+Run from the repository root:
+
+```bash
+python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
+```
+
+`src/run_demo.py` currently runs:
 
 ```text
-Data-quality result: ERROR 0, WARNING 0, REVIEW 20, INFO 6
+1. Generate synthetic demo sites
+2. Validate demo input data
+3. Run the main readiness/right-sizing model on demo sites
+4. Add action-matrix labels
+5. Run demo sensitivity analysis
+6. Run demo scoring-profile analysis
+7. Generate scalable readiness, confidence, map, profile, distribution, and tier-count visuals
+8. Write a demo run summary
+```
+
+Demo outputs are local-only and are written under:
+
+```text
+data/demo/
+```
+
+## Latest confirmed successful run
+
+Latest confirmed user rerun: official workflow and demo workflow passed after the scalable-demo updates.
+
+```text
+Official workflow: PASSED
+Data-quality result: ERROR 0
 Output check: PASSED
 Baseline comparison: COMPLETED
 Workflow success marker: OK
 Deliverable package: PASSED with 0 missing files
+Demo mode: COMPLETE with 50 synthetic sites
 ```
 
 Latest confirmed documentation/package link audit:
 
 ```text
-Checked local Markdown links: 369
-Skipped external/anchor links: 19
-Broken local links: 0
-Copied files: 38
-Missing files: 0
+Broken local Markdown links: 0
+Missing package files: 0
 ```
 
 ## V1 reviewer-ready checkpoint
@@ -95,10 +122,9 @@ Current reviewer package result:
 
 ```text
 Workflow status: passed
-Copied files: 38
+Copied files: 40
 Missing files: 0
 Broken local package links: 0
-No __MACOSX or .DS_Store files in the clean ZIP
 ```
 
 Current main result:
@@ -133,6 +159,31 @@ Next phase:
 ```text
 Stakeholder confirmation and selected site screening, starting with FFX002, then FFX001, then PWC002.
 ```
+
+## Demo scalability checkpoint status
+
+The repo now has a synthetic demo workflow for checking whether the model remains usable with larger candidate sets.
+
+The demo workflow includes:
+
+```text
+synthetic candidate-site generation
+demo validation
+demo model run
+demo action matrix
+demo sensitivity analysis
+demo scoring-profile analysis
+Top-N readiness chart
+Top-N data-confidence chart
+multi-panel readiness map
+profile heatmap
+top-8 rank-stability chart
+readiness score distribution
+recommendation tier counts
+compact appendix charts
+```
+
+Demo mode is not an official recommendation layer. It is for stress-testing scalability, visual readability, workflow robustness, and larger candidate-pool behavior.
 
 ## Baseline decision
 
@@ -173,10 +224,16 @@ Output manifest added as the shared source for expected outputs and package cont
 Workflow success marker added to prevent stale packaging after failed runs.
 Deliverable package builder added and expanded.
 Deliverable package Markdown links now rewrite correctly when docs are copied.
+Dataset metadata and source-log tables added to the deliverable package.
+Stakeholder contact targets added to the deliverable package.
 Findings brief, full findings report, and presentation outline added.
 Stakeholder outreach plan added.
 Repository reorganized into cleaner folders.
 Overlapping OSM, sensitivity, and stakeholder docs merged into cleaner consolidated docs.
+Synthetic demo mode added for 25/50/100-site scalability testing.
+Demo sensitivity analysis added.
+Scalable demo visuals added and polished.
+Top-N scalable data-confidence chart added.
 ```
 
 ## Current strongest findings
@@ -213,9 +270,9 @@ PWC001 — Monitor or deprioritize
 PWC003 — Special-use decision needed
 ```
 
-## Current generated outputs
+## Current generated official outputs
 
-Expected local outputs include:
+Expected local official outputs include:
 
 ```text
 data/outputs/data_quality_report.csv
@@ -248,6 +305,31 @@ data/outputs/charts/profile_rank_stability_chart.png
 
 Use `data/outputs/results_interpretation.md` for the latest generated plain-English interpretation of the current run.
 
+## Current generated demo outputs
+
+Expected local demo outputs include:
+
+```text
+data/demo/demo_sites_<count>.csv
+data/demo/outputs/demo_site_results_<count>.csv
+data/demo/outputs/demo_action_matrix_<count>.md
+data/demo/outputs/demo_sensitivity_results_<count>.csv
+data/demo/outputs/demo_sensitivity_summary_<count>.csv
+data/demo/outputs/demo_profile_results_<count>.csv
+data/demo/outputs/demo_profile_rank_summary_<count>.csv
+data/demo/outputs/demo_profile_comparison_<count>.md
+data/demo/outputs/demo_run_summary_<count>.md
+data/demo/outputs/charts/scalable/readiness_top_<top_n>.png
+data/demo/outputs/charts/scalable/data_confidence_top_<top_n>.png
+data/demo/outputs/charts/scalable/readiness_map_top_<top_n>_labeled.png
+data/demo/outputs/charts/scalable/profile_heatmap_top_<top_n>.png
+data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
+data/demo/outputs/charts/scalable/readiness_score_distribution.png
+data/demo/outputs/charts/scalable/recommendation_tier_counts.png
+data/demo/outputs/charts/scalable/data_confidence_full_compact.png
+data/demo/outputs/charts/scalable/readiness_full_compact.png
+```
+
 ## Remaining data improvements
 
 ```text
@@ -270,6 +352,7 @@ PWC003 public, fleet-only, special-use, or removal decision
 docs/STAKEHOLDER_OUTREACH_PLAN.md
 data/source_extracts/stakeholder_data_request_fields.csv
 data/source_extracts/stakeholder_response_tracker.csv
+data/source_extracts/stakeholder_contact_targets.csv
 ```
 
 Use these files to ask contacts for the data needed to replace assumptions and placeholders.
