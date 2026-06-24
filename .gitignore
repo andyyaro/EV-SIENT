@@ -26,6 +26,9 @@ data/outputs/*.json
 data/outputs/charts/*.png
 data/outputs/deliverable_package/
 
+# Local-only demo mode files
+data/demo/
+
 # GitHub-rendered Markdown preview assets
 !docs/assets/charts/*.png
 !docs/assets/charts/*.svg
