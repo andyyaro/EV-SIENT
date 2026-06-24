@@ -34,6 +34,9 @@ SITE_COLUMNS = [
     "site_id",
     "site_name",
     "readiness_score",
+    "data_confidence_score",
+    "data_confidence_level",
+    "data_confidence_reason",
     "recommendation_tier",
     "recommended_ports_now",
     "recommended_ports_2035",
@@ -47,6 +50,8 @@ PROFILE_COLUMNS = [
     "site_name",
     "profile_readiness_score",
 ]
+
+VALID_CONFIDENCE_LEVELS = {"High", "Medium", "Low"}
 
 
 def p(relative_path: str) -> Path:
@@ -144,6 +149,17 @@ def check_site_results(issues: list[str], rules: dict[str, Any]) -> None:
             add(issues, f"Expected top site {expected_top}, got {top_site}")
 
     require_range(df, "readiness_score", 0, 100, "site_results.csv", issues)
+    require_range(df, "data_confidence_score", 0, 100, "site_results.csv", issues)
+
+    invalid_levels = sorted(set(df["data_confidence_level"].astype(str)) - VALID_CONFIDENCE_LEVELS)
+    if invalid_levels:
+        add(issues, f"site_results.csv has invalid data_confidence_level values: {invalid_levels}")
+
+    blank_reasons = df["data_confidence_reason"].astype(str).str.strip().eq("")
+    if blank_reasons.any():
+        sites = df.loc[blank_reasons, "site_id"].astype(str).tolist()
+        add(issues, f"site_results.csv has blank data_confidence_reason values for: {sites}")
+
     for column in ["recommended_ports_now", "recommended_ports_2035", "recommended_ports_2050"]:
         require_range(df, column, 0, 100, "site_results.csv", issues)
 
