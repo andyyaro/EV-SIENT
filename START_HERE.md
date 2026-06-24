@@ -50,6 +50,16 @@ Missing files: 0
 
 The output summary should also show `OK` for the main generated files.
 
+## Visual quick look
+
+Start with the map to understand where the sites are and which sites rank highest.
+
+![Candidate EV charging site readiness map](data/outputs/charts/site_readiness_map.png)
+
+Then use the readiness chart to see the ranked scores directly.
+
+![Readiness score chart](data/outputs/charts/readiness_score_chart.png)
+
 ## Files to open first
 
 Open these in this order:
