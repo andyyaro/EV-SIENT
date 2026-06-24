@@ -64,6 +64,7 @@ The main scalable visuals are:
 
 ```text
 data/demo/outputs/charts/scalable/readiness_top_15.png
+data/demo/outputs/charts/scalable/data_confidence_top_15.png
 data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
 data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
 data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
@@ -80,13 +81,14 @@ Open these in this order:
 ```text
 1. data/demo/outputs/demo_run_summary_50.md
 2. data/demo/outputs/charts/scalable/readiness_top_15.png
-3. data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
-4. data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
-5. data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
-6. data/demo/outputs/charts/scalable/readiness_score_distribution.png
-7. data/demo/outputs/charts/scalable/recommendation_tier_counts.png
-8. data/demo/outputs/charts/scalable/data_confidence_full_compact.png
-9. data/demo/outputs/charts/scalable/readiness_full_compact.png
+3. data/demo/outputs/charts/scalable/data_confidence_top_15.png
+4. data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png
+5. data/demo/outputs/charts/scalable/profile_heatmap_top_15.png
+6. data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
+7. data/demo/outputs/charts/scalable/readiness_score_distribution.png
+8. data/demo/outputs/charts/scalable/recommendation_tier_counts.png
+9. data/demo/outputs/charts/scalable/data_confidence_full_compact.png
+10. data/demo/outputs/charts/scalable/readiness_full_compact.png
 ```
 
 ## Why scalable visuals are needed
@@ -99,12 +101,13 @@ Demo mode therefore generates scalable visuals:
 
 ```text
 Top-N chart = presentation ranking view
+Top-N data-confidence chart = readable confidence view
 Multi-panel map/scatter = overview + local zoom geographic spread view
 Top-N profile heatmap = priority-view score comparison
 Top-8 rank stability = cleaner priority-view rank movement
 Distribution chart = score spread view
 Tier-count chart = planning-funnel view
-Data confidence compact chart = larger-set confidence view
+Data confidence compact chart = larger-set appendix/audit view
 Full compact chart = audit appendix view
 ```
 
@@ -113,6 +116,8 @@ Full compact chart = audit appendix view
 The map uses all demo sites in the overview panel, labels only the top 5 in the overview, and uses zoom panels for the Fairfax and Prince William demo clusters.
 
 The rank-stability chart is intentionally smaller than the heatmap. The heatmap can stay at top-N, but the line chart defaults to top 8 so rank movement stays readable. The top 3 base-model sites are emphasized and the rest are faded.
+
+The Top-N data-confidence chart is the readable confidence view. The full compact confidence chart is kept as an appendix-style audit chart.
 
 ## Custom examples
 
@@ -168,6 +173,11 @@ python src/plot_scalable_readiness_charts.py \
   --results data/demo/outputs/demo_site_results_50.csv \
   --input-sites data/demo/demo_sites_50.csv \
   --profile-results data/demo/outputs/demo_profile_results_50.csv \
+  --output-dir data/demo/outputs/charts/scalable \
+  --top-n 15
+
+python src/plot_scalable_data_confidence_chart.py \
+  --results data/demo/outputs/demo_site_results_50.csv \
   --output-dir data/demo/outputs/charts/scalable \
   --top-n 15
 ```
