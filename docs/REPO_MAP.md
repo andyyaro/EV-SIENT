@@ -35,7 +35,9 @@ python src/build_deliverable_package.py
 
 | File | Purpose |
 |---|---|
-| [src/run_all.py](../src/run_all.py) | Runs the full workflow. |
+| [src/run_all.py](../src/run_all.py) | Runs the official V1 workflow. |
+| [src/run_demo.py](../src/run_demo.py) | Runs a synthetic larger-site demo workflow. |
+| [src/generate_demo_sites.py](../src/generate_demo_sites.py) | Creates synthetic demo candidate sites. |
 | [src/validate_site_data.py](../src/validate_site_data.py) | Checks input data. |
 | [src/ev_charger_model.py](../src/ev_charger_model.py) | Main readiness and right-sizing model. |
 | [src/add_action_matrix.py](../src/add_action_matrix.py) | Adds next-action labels. |
@@ -72,6 +74,16 @@ python src/build_deliverable_package.py
 - [data/outputs/charts/profile_rank_stability_chart.png](../data/outputs/charts/profile_rank_stability_chart.png)
 - [data/outputs/charts/site_readiness_map.png](../data/outputs/charts/site_readiness_map.png)
 - [data/outputs/charts/profile_score_heatmap.png](../data/outputs/charts/profile_score_heatmap.png)
+
+## Demo mode for larger tests
+
+For a full 50-site synthetic test, use:
+
+```bash
+python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
+```
+
+See [DEMO_MODE_GUIDE.md](DEMO_MODE_GUIDE.md).
 
 ## Scalable visuals for larger tests
 
@@ -111,10 +123,17 @@ Do not edit generated outputs directly:
 - [data/outputs/](../data/outputs/)
 - [data/outputs/charts/](../data/outputs/charts/)
 - [data/outputs/deliverable_package/](../data/outputs/deliverable_package/)
+- [data/demo/](../data/demo/)
 
-Regenerate them with:
+Regenerate official outputs with:
 
 ```bash
 python src/run_all.py
 python src/build_deliverable_package.py
+```
+
+Generate demo outputs with:
+
+```bash
+python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
 ```
