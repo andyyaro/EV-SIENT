@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The model now keeps two ideas separate:
+The model keeps two ideas separate:
 
 ```text
 readiness_score = how promising the site looks
@@ -33,6 +33,32 @@ data_confidence_reason
 50 to 74.9 = Medium
 0 to 49.9 = Low
 ```
+
+## Data confidence visual
+
+The generated chart is:
+
+```text
+data/outputs/charts/data_confidence_chart.png
+```
+
+The current visual has two panels:
+
+```text
+left panel = readiness score vs. data confidence score
+right panel = data confidence by site in model-rank order
+```
+
+The left panel helps separate site promise from evidence quality:
+
+```text
+upper-right = promising site with stronger supporting data
+upper-left = promising site, but verify first
+lower-right = lower-readiness site with stronger supporting data
+lower-left = lower-readiness site with weaker supporting data
+```
+
+The right panel shows each site's current confidence score, confidence level, readiness score, and how many points are needed to reach High confidence.
 
 ## Main idea
 
