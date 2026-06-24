@@ -26,8 +26,6 @@ DEFAULT_UTILIZATION_CHART_DIR = "data/outputs/charts"
 EV_SHARE_HIGH_BENCHMARK = 0.10
 
 
- def_placeholder = None
-
 def ensure_parent_dir(path: str | Path) -> None:
     """Create the parent folder for an output path if it does not exist."""
     Path(path).parent.mkdir(parents=True, exist_ok=True)
