@@ -12,6 +12,7 @@ ranking behavior
 chart readability
 recommendation-tier distribution
 data-confidence behavior
+scenario sensitivity behavior
 profile-priority behavior
 map/scatter readability
 workflow robustness
@@ -54,6 +55,8 @@ For a 50-site run, the main files are:
 data/demo/demo_sites_50.csv
 data/demo/outputs/demo_site_results_50.csv
 data/demo/outputs/demo_action_matrix_50.md
+data/demo/outputs/demo_sensitivity_results_50.csv
+data/demo/outputs/demo_sensitivity_summary_50.csv
 data/demo/outputs/demo_profile_results_50.csv
 data/demo/outputs/demo_profile_rank_summary_50.csv
 data/demo/outputs/demo_profile_comparison_50.md
@@ -87,8 +90,9 @@ Open these in this order:
 6. data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
 7. data/demo/outputs/charts/scalable/readiness_score_distribution.png
 8. data/demo/outputs/charts/scalable/recommendation_tier_counts.png
-9. data/demo/outputs/charts/scalable/data_confidence_full_compact.png
-10. data/demo/outputs/charts/scalable/readiness_full_compact.png
+9. data/demo/outputs/demo_sensitivity_summary_50.csv
+10. data/demo/outputs/charts/scalable/data_confidence_full_compact.png
+11. data/demo/outputs/charts/scalable/readiness_full_compact.png
 ```
 
 ## Why scalable visuals are needed
@@ -110,6 +114,16 @@ Tier-count chart = planning-funnel view
 Data confidence compact chart = larger-set appendix/audit view
 Full compact chart = audit appendix view
 ```
+
+## Sensitivity and profile behavior
+
+Demo mode now includes both sensitivity analysis and scoring-profile analysis.
+
+Sensitivity analysis tests whether rankings stay stable when uncertain input assumptions change, such as lower demand, higher cost, higher EV adoption, or different service/trenching assumptions.
+
+Scoring-profile analysis tests whether rankings stay stable when the scoring priorities change, such as demand priority, equity priority, feasibility priority, or safety priority.
+
+The demo summary includes a sensitivity stability snapshot, and the full sensitivity CSVs are saved under `data/demo/outputs/`.
 
 ## Map and rank-stability behavior
 
@@ -161,6 +175,11 @@ python src/ev_charger_model.py \
 python src/add_action_matrix.py \
   --results data/demo/outputs/demo_site_results_50.csv \
   --report data/demo/outputs/demo_action_matrix_50.md
+
+python src/run_sensitivity_analysis.py \
+  --input data/demo/demo_sites_50.csv \
+  --results-output data/demo/outputs/demo_sensitivity_results_50.csv \
+  --summary-output data/demo/outputs/demo_sensitivity_summary_50.csv
 
 python src/run_profile_analysis.py \
   --site-results data/demo/outputs/demo_site_results_50.csv \
