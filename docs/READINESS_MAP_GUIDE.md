@@ -6,7 +6,13 @@ The generated readiness map is:
 data/outputs/charts/site_readiness_map.png
 ```
 
-![Candidate EV charging site readiness map](../data/outputs/charts/site_readiness_map.png)
+The committed GitHub-rendered preview is:
+
+```text
+docs/assets/charts/site_readiness_map.svg
+```
+
+![Candidate EV charging site readiness map](assets/charts/site_readiness_map.svg)
 
 ## What the map shows
 
@@ -33,7 +39,7 @@ label = rank, site ID, and readiness score
 right-side summary panel = ranked list with score, tier, and recommended ports
 ```
 
-The overview panel draws light dashed boxes around the site clusters. These boxes are only visual grouping aids. They are not jurisdiction boundaries, parcel boundaries, or engineering areas.
+The overview panel draws light dashed boxes around the site clusters. These boxes are visual grouping aids only. They are not jurisdiction boundaries, parcel boundaries, or engineering areas.
 
 ## Current map interpretation
 
@@ -79,4 +85,4 @@ a final site-design map
 a true GIS basemap
 ```
 
-Any real charger project would still need site-owner review, utility review, engineering design, ADA/accessibility review, Fire Marshal/AHJ review, stormwater review, permitting, procurement, and stakeholder approval.
+Any real charger project would still need site-owner review, utility review, engineering design, accessibility review, Fire Marshal or AHJ review, permitting, procurement, and stakeholder approval.
