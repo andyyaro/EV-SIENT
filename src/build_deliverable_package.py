@@ -9,61 +9,15 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+from project_config import load_output_manifest, require_dict_of_lists, require_list
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PACKAGE_DIR = "data/outputs/deliverable_package"
-SUCCESS_MARKER = "data/outputs/workflow_success.json"
-
-PACKAGE_GROUPS = {
-    "charts": [
-        "data/outputs/charts/site_readiness_map.png",
-        "data/outputs/charts/readiness_score_chart.png",
-        "data/outputs/charts/data_confidence_chart.png",
-        "data/outputs/charts/profile_rank_stability_chart.png",
-        "data/outputs/charts/profile_score_heatmap.png",
-    ],
-    "run_outputs": [
-        "data/outputs/workflow_success.json",
-        "data/outputs/model_run_summary.md",
-        "data/outputs/results_interpretation.md",
-        "data/outputs/action_matrix.md",
-        "data/outputs/profile_comparison.md",
-        "data/outputs/baseline_comparison.md",
-    ],
-    "data_tables": [
-        "data/outputs/site_results.csv",
-        "data/outputs/sensitivity_summary.csv",
-        "data/outputs/profile_rank_summary.csv",
-        "data/outputs/data_quality_report.csv",
-    ],
-    "reports": [
-        "START_HERE.md",
-        "REPRODUCIBILITY_CHECKLIST.md",
-        "docs/REPO_MAP.md",
-        "docs/PROJECT_STATUS.md",
-        "docs/MODEL_FINDINGS_BRIEF.md",
-        "docs/MODEL_FINDINGS_REPORT.md",
-        "docs/PRESENTATION_OUTLINE.md",
-        "docs/RESULTS_INTERPRETATION.md",
-        "docs/READINESS_MAP_GUIDE.md",
-        "docs/DATA_CONFIDENCE_SCORE.md",
-        "docs/SITE_SCREENING_CHECKLIST.md",
-        "docs/ADDING_NEW_SITES_GUIDE.md",
-        "docs/STAKEHOLDER_DATA_REQUEST.md",
-        "docs/STAKEHOLDER_CONTACT_PLAN.md",
-        "docs/DATA_DICTIONARY.md",
-        "docs/DATA_SOURCES.md",
-    ],
-    "expansion_inputs": [
-        "data/inputs/new_sites_template.csv",
-        "data/source_extracts/site_screening_checklist.csv",
-    ],
-    "stakeholder_inputs": [
-        "data/source_extracts/stakeholder_data_request_fields.csv",
-        "data/source_extracts/stakeholder_response_tracker.csv",
-    ],
-}
-
-GENERATED_GROUPS = {"charts", "run_outputs", "data_tables"}
+OUTPUT_MANIFEST = load_output_manifest(PROJECT_ROOT)
+SUCCESS_MARKER = str(OUTPUT_MANIFEST.get("success_marker", "data/outputs/workflow_success.json"))
+PACKAGE_GROUPS = require_dict_of_lists(OUTPUT_MANIFEST, "package_groups")
+GENERATED_GROUPS = set(require_list(OUTPUT_MANIFEST, "generated_package_groups"))
+PACKAGE_REVIEW_ORDER = require_list(OUTPUT_MANIFEST, "package_review_order")
 
 
 def parse_args() -> argparse.Namespace:
@@ -157,26 +111,12 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
         "",
         "## Recommended review order",
         "",
-        "1. `reports/START_HERE.md`",
-        "2. `reports/REPRODUCIBILITY_CHECKLIST.md`",
-        "3. `reports/REPO_MAP.md`",
-        "4. `run_outputs/model_run_summary.md`",
-        "5. `run_outputs/results_interpretation.md`",
-        "6. `run_outputs/action_matrix.md`",
-        "7. `charts/site_readiness_map.png`",
-        "8. `charts/readiness_score_chart.png`",
-        "9. `charts/data_confidence_chart.png`",
-        "10. `charts/profile_rank_stability_chart.png`",
-        "11. `reports/MODEL_FINDINGS_BRIEF.md`",
-        "12. `reports/DATA_DICTIONARY.md`",
-        "13. `reports/DATA_SOURCES.md`",
-        "14. `reports/STAKEHOLDER_DATA_REQUEST.md`",
-        "15. `reports/STAKEHOLDER_CONTACT_PLAN.md`",
-        "16. `stakeholder_inputs/stakeholder_response_tracker.csv`",
-        "",
-        "## Included files",
-        "",
     ]
+
+    for number, path in enumerate(PACKAGE_REVIEW_ORDER, start=1):
+        lines.append(f"{number}. `{path}`")
+
+    lines.extend(["", "## Included files", ""])
 
     for item in copied:
         lines.append(f"- `{item['destination']}`")
@@ -188,7 +128,18 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
             lines.append(f"- `{item['source']}`")
         lines.append("")
 
-    lines.extend(["## Limitation", "", "This package is for planning communication only.", ""])
+    lines.extend(
+        [
+            "## Source of package file lists",
+            "",
+            "Package contents are defined in `data/config/output_manifest_v1.json`.",
+            "",
+            "## Limitation",
+            "",
+            "This package is for planning communication only.",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -215,6 +166,7 @@ def main() -> None:
     manifest_payload = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "package_dir": str(package_dir.relative_to(PROJECT_ROOT)),
+        "source_manifest": "data/config/output_manifest_v1.json",
         "files": manifest,
     }
     manifest_path.write_text(json.dumps(manifest_payload, indent=2) + "\n", encoding="utf-8")
@@ -225,6 +177,7 @@ def main() -> None:
     print("DELIVERABLE PACKAGE")
     print("-------------------")
     print(f"Package folder: {package_dir.relative_to(PROJECT_ROOT)}")
+    print("Source manifest: data/config/output_manifest_v1.json")
     print(f"Copied files: {copied_count}")
     print(f"Missing files: {missing_count}")
     print(f"Saved: {readme_path.relative_to(PROJECT_ROOT)}")
