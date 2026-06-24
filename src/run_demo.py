@@ -33,6 +33,7 @@ DEFAULT_RANK_STABILITY_TOP_N = 8
 
 SCALABLE_REVIEW_ORDER = [
     "readiness_top_{top_n}.png",
+    "data_confidence_top_{top_n}.png",
     "readiness_map_top_{top_n}_labeled.png",
     "profile_heatmap_top_{top_n}.png",
     "profile_rank_stability_top_{rank_top_n}.png",
@@ -261,6 +262,16 @@ def main() -> None:
     if args.skip_full_compact:
         scalable_command.append("--skip-full")
     run_command(scalable_command)
+    run_command([
+        py,
+        "src/plot_scalable_data_confidence_chart.py",
+        "--results",
+        str(results_path.relative_to(PROJECT_ROOT)),
+        "--output-dir",
+        str(scalable_dir.relative_to(PROJECT_ROOT)),
+        "--top-n",
+        str(args.top_n),
+    ])
 
     include_full_compact = not args.skip_full_compact
     write_demo_summary(
@@ -288,6 +299,7 @@ def main() -> None:
     print(f"Demo results: {results_path.relative_to(PROJECT_ROOT)}")
     print(f"Demo summary: {summary_path.relative_to(PROJECT_ROOT)}")
     print(f"Main scalable chart: {(scalable_dir / f'readiness_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
+    print(f"Top-N confidence chart: {(scalable_dir / f'data_confidence_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
     print(f"Scalable map: {(scalable_dir / f'readiness_map_top_{actual_top_n}_labeled.png').relative_to(PROJECT_ROOT)}")
     print(f"Profile heatmap: {(scalable_dir / f'profile_heatmap_top_{actual_top_n}.png').relative_to(PROJECT_ROOT)}")
     print(f"Profile rank stability: {(scalable_dir / f'profile_rank_stability_top_{actual_rank_top_n}.png').relative_to(PROJECT_ROOT)}")
