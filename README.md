@@ -22,6 +22,7 @@ src/validate_site_data.py
 src/run_sensitivity_analysis.py
 src/run_profile_analysis.py
 src/plot_readiness_score_chart.py
+src/plot_data_confidence_chart.py
 src/plot_profile_rank_stability.py
 src/plot_profile_score_heatmap.py
 src/build_osm_amenities.py
@@ -64,7 +65,7 @@ python src/build_deliverable_package.py && \
 git status --short
 ```
 
-`src/run_all.py` runs the validator, readiness/right-sizing model, polished readiness chart, sensitivity analysis, scoring profile analysis, profile rank-stability chart, supporting profile heatmap, readiness map, Markdown run summary, generated results interpretation, and output checks.
+`src/run_all.py` runs the validator, readiness/right-sizing model, readiness chart, data confidence chart, sensitivity analysis, scoring profile analysis, profile visuals, readiness map, Markdown run summary, generated results interpretation, and output checks.
 
 The package builder checks for `data/outputs/workflow_success.json`, which is written only after the full workflow passes. This helps avoid packaging stale outputs after a failed or partial run.
 
@@ -74,6 +75,7 @@ Manual step order:
 python src/validate_site_data.py
 python src/ev_charger_model.py
 python src/plot_readiness_score_chart.py
+python src/plot_data_confidence_chart.py
 python src/run_sensitivity_analysis.py
 python src/run_profile_analysis.py
 python src/plot_profile_rank_stability.py
@@ -107,6 +109,7 @@ data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
 data/outputs/workflow_success.json
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
 data/outputs/charts/profile_rank_stability_chart.png
 data/outputs/charts/profile_score_heatmap.png
 data/outputs/charts/site_readiness_map.png
