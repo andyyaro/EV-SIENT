@@ -10,7 +10,17 @@ data/outputs/charts/site_readiness_map.png
 
 The map plots the six candidate EV charging sites by longitude and latitude.
 
-Each marker represents one candidate site. The upgraded map uses several visual cues at the same time:
+The current version is a multi-panel planning visual:
+
+```text
+left panel = overview of all six candidate sites
+upper middle panel = zoomed Fairfax City view
+lower middle panel = zoomed Prince William County view
+right panel = ranked readiness summary
+bottom/right colorbar = readiness score scale
+```
+
+Each marker represents one candidate site. The map uses several visual cues at the same time:
 
 ```text
 marker size = readiness score
@@ -21,7 +31,7 @@ label = rank, site ID, and readiness score
 right-side summary panel = ranked list with score, tier, and recommended ports
 ```
 
-The map also draws simple locality envelopes around the Fairfax City and Prince William County site clusters. These are only visual grouping boxes, not jurisdiction boundaries or parcel boundaries.
+The overview panel draws light dashed boxes around the site clusters. These boxes are only visual grouping aids. They are not jurisdiction boundaries, parcel boundaries, or engineering areas.
 
 ## Current map interpretation
 
@@ -44,6 +54,12 @@ PWC003 = public-access decision needed
 ```
 
 These notes are shown because the map is a planning-support visual. A site can look promising in the model while still needing important real-world confirmation.
+
+## Why the zoom panels exist
+
+The six sites are spread across two geographic areas. A single overview map makes the regional spread clear, but it can make nearby labels hard to read.
+
+The Fairfax City and Prince William County zoom panels make the site clusters easier to inspect without requiring a GIS basemap.
 
 ## What the map does not show
 
