@@ -14,6 +14,12 @@ For the shortest reproduction guide, open:
 START_HERE.md
 ```
 
+For a stricter step-by-step reproduction checklist, open:
+
+```text
+REPRODUCIBILITY_CHECKLIST.md
+```
+
 For a simple map of the repo, open:
 
 ```text
@@ -96,6 +102,7 @@ PWC003 — special-use / not general-public priority under current assumptions
 
 ```text
 START_HERE.md
+REPRODUCIBILITY_CHECKLIST.md
 docs/REPO_MAP.md
 docs/DATA_DICTIONARY.md
 docs/DATA_SOURCES.md
