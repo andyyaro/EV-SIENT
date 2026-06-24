@@ -35,11 +35,11 @@ Missing files: 0
 
 The readiness map gives the fastest visual overview of the candidate sites, their relative locations, and their ranked readiness result.
 
-![Candidate EV charging site readiness map](docs/assets/charts/site_readiness_map.svg)
+![Candidate EV charging site readiness map](https://raw.githubusercontent.com/andyyaro/Future-City-Fellowship-/main/docs/assets/charts/site_readiness_map.svg)
 
 The readiness score chart shows the current ranking directly.
 
-![Readiness score chart](docs/assets/charts/readiness_score_chart.svg)
+![Readiness score chart](https://raw.githubusercontent.com/andyyaro/Future-City-Fellowship-/main/docs/assets/charts/readiness_score_chart.svg)
 
 ## Main outputs to review
 
