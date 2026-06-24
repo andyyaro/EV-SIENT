@@ -16,7 +16,7 @@ For a complete 50-site synthetic workflow, run:
 python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
 ```
 
-This generates demo data, validates it, runs the model, adds action labels, and creates scalable visuals.
+This generates demo data, validates it, runs the model, adds action labels, runs scoring-profile analysis, and creates scalable visuals.
 
 ## Scalable visual script
 
@@ -31,33 +31,66 @@ Use this script directly when you already have a model results CSV.
 ```bash
 python src/plot_scalable_readiness_charts.py \
   --results data/demo/outputs/demo_site_results_50.csv \
+  --input-sites data/demo/demo_sites_50.csv \
+  --profile-results data/demo/outputs/demo_profile_results_50.csv \
   --output-dir data/demo/outputs/charts/scalable \
   --top-n 15
 ```
 
 ## Generated visuals
 
-The script creates:
+The script can create:
 
 ```text
 readiness_top_15.png
+readiness_map_top_15_labeled.png
+profile_heatmap_top_15.png
+profile_rank_stability_top_15.png
 readiness_score_distribution.png
 recommendation_tier_counts.png
+data_confidence_full_compact.png
 readiness_full_compact.png
 scalable_readiness_visuals_summary.md
+```
+
+Some visuals require optional inputs:
+
+```text
+--input-sites enables the scalable readiness map
+--profile-results enables the profile heatmap and rank-stability chart
 ```
 
 ## How to use each visual
 
 ### Top-N readiness chart
 
-Use this as the main presentation chart.
+Use this as the main presentation ranking chart.
 
 It shows only the strongest sites, so it stays readable even when the full dataset has 50 or more candidates.
+
+### Top-N readiness map
+
+Use this as the scalable geographic planning visual.
+
+It plots all demo sites by longitude/latitude, colors points by readiness score, and labels only the top-N sites so the map remains readable.
+
+### Top-N profile heatmap
+
+Use this as the scalable version of the official profile heatmap.
+
+It keeps only the top-N base-model sites and shows how their scores/ranks change across scoring-priority profiles.
+
+### Top-N profile rank stability chart
+
+Use this as the scalable version of the official rank-stability visual.
+
+It limits the line chart to the top-N sites so the rank movement remains readable.
 
 ### Readiness score distribution
 
 Use this to understand the overall score spread.
+
+It now zooms to the observed score range instead of always using 0–100, so it avoids wasted empty chart space.
 
 It answers:
 
@@ -71,6 +104,8 @@ Are there many low-priority sites?
 
 Use this to understand the planning funnel.
 
+It is horizontal for readability and includes an automatic interpretation sentence.
+
 It answers:
 
 ```text
@@ -78,6 +113,12 @@ How many sites advance?
 How many sites need technical review?
 How many sites stay lower priority?
 ```
+
+### Data confidence compact chart
+
+Use this to review confidence across larger result sets.
+
+It is an audit-style chart, not the main presentation chart.
 
 ### Full compact readiness chart
 
@@ -92,11 +133,12 @@ It includes every site but intentionally uses compact labels. It is useful for c
   normal readiness chart is fine
 
 11–25 sites:
-  top-N chart + compact full chart
+  top-N chart + scalable map + compact full chart
 
 26+ sites:
-  top-N chart + distribution chart + tier-count chart
-  full compact chart only as appendix
+  top-N chart + scalable map + profile heatmap + rank-stability chart
+  distribution chart + tier-count chart
+  full compact charts only as appendix
 ```
 
 ## Important note
