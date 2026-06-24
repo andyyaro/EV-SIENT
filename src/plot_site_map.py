@@ -1,12 +1,17 @@
-"""Create a simple candidate-site readiness map.
+"""Create a candidate-site readiness map.
 
 This script intentionally uses only pandas and matplotlib. It does not require
 GeoPandas, QGIS, web map tiles, or a GIS basemap. The output is a planning
 visual that plots candidate sites by longitude/latitude and labels each site
 with its readiness score.
 
-The map also adds a short interpretation note when the top candidate is stable
-across sensitivity scenarios and scoring profiles.
+The upgraded map adds:
+- marker size by readiness score
+- marker shape by recommendation tier
+- a star overlay for the top-ranked site
+- simple locality envelopes for Fairfax City and Prince William County clusters
+- a ranked summary panel beside the map
+- planning notes for sites that need special interpretation
 
 Default output:
 - data/outputs/charts/site_readiness_map.png
@@ -18,6 +23,8 @@ import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 import pandas as pd
 
 DEFAULT_INPUT = "data/inputs/real_sites_v1.csv"
@@ -41,6 +48,21 @@ TIER_SHORT_LABELS = {
     "High-review candidate": "High-review",
     "Tier 3 — lower priority / monitor": "Tier 3",
     "Low public-priority / special-use": "Special-use",
+}
+
+TIER_MARKERS = {
+    "Tier 1": "o",
+    "High-review": "s",
+    "Tier 2": "^",
+    "Tier 3": "D",
+    "Special-use": "X",
+}
+
+TIER_ORDER = ["Tier 1", "High-review", "Tier 2", "Tier 3", "Special-use"]
+
+LOCALITY_LABELS = {
+    "FFX": "Fairfax City candidates",
+    "PWC": "Prince William County candidates",
 }
 
 
@@ -92,13 +114,21 @@ def load_map_data(input_path: Path, results_path: Path) -> pd.DataFrame:
     data["lat"] = pd.to_numeric(data["lat"], errors="coerce")
     data["lon"] = pd.to_numeric(data["lon"], errors="coerce")
     data = data.dropna(subset=["lat", "lon"]).copy()
+    data["tier_short"] = data.get("recommendation_tier", "").apply(compact_tier)
+    data["readiness_score_num"] = pd.to_numeric(data.get("readiness_score", ""), errors="coerce")
+    data["model_rank_num"] = pd.to_numeric(data.get("model_rank", ""), errors="coerce")
+    data["locality_group"] = data["site_id"].astype(str).str.extract(r"^(FFX|PWC)", expand=False).fillna("Other")
     return data
 
 
 def top_site_id_from_results(data: pd.DataFrame) -> str:
-    if "model_rank" not in data.columns or "site_id" not in data.columns:
+    if "model_rank_num" in data.columns and "site_id" in data.columns:
+        ranks = pd.to_numeric(data["model_rank_num"], errors="coerce")
+    elif "model_rank" in data.columns and "site_id" in data.columns:
+        ranks = pd.to_numeric(data["model_rank"], errors="coerce")
+    else:
         return ""
-    ranks = pd.to_numeric(data["model_rank"], errors="coerce")
+
     if ranks.isna().all():
         return ""
     top_row = data.loc[ranks.idxmin()]
@@ -154,29 +184,35 @@ def stable_top_candidate_found(data: pd.DataFrame, sensitivity: pd.DataFrame, pr
     return bool(top_site and sensitivity_is_stable(sensitivity) and profile_site == top_site and profile_count > 0)
 
 
+def safe_float(value) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if pd.isna(number):
+        return None
+    return number
+
+
 def site_label(row: pd.Series) -> str:
     """Create a compact map label."""
     site_id = str(row.get("site_id", ""))
-    score = row.get("readiness_score", "")
-    rank = row.get("model_rank", "")
+    score = safe_float(row.get("readiness_score_num", row.get("readiness_score", "")))
+    rank = safe_float(row.get("model_rank_num", row.get("model_rank", "")))
 
-    if pd.isna(score) or score == "":
+    if score is None:
         return site_id
 
-    try:
-        rank_text = f"#{int(rank)} " if pd.notna(rank) and str(rank) != "" else ""
-    except (TypeError, ValueError):
-        rank_text = ""
-
-    return f"{rank_text}{site_id}\n{float(score):.1f}"
+    rank_text = f"#{int(rank)} " if rank is not None else ""
+    return f"{rank_text}{site_id}\n{score:.1f}"
 
 
 def marker_size(score) -> float:
     """Scale marker size by readiness score while keeping all sites visible."""
-    try:
-        return 80 + float(score) * 6
-    except (TypeError, ValueError):
+    score_number = safe_float(score)
+    if score_number is None:
         return 180
+    return 90 + score_number * 6
 
 
 def label_offset(site_id: str) -> tuple[int, int]:
@@ -191,7 +227,122 @@ def planning_note(data: pd.DataFrame) -> str:
         notes.append("PWC002 = high-review garage candidate")
     if "PWC004" in site_ids:
         notes.append("PWC004 = future/reopened planning assumption")
+    if "PWC003" in site_ids:
+        notes.append("PWC003 = public-access decision needed")
     return "; ".join(notes)
+
+
+def score_norm(scores: pd.Series) -> tuple[plt.Normalize, str]:
+    """Return a stable color normalization and colormap name."""
+    valid_scores = scores.dropna()
+    if valid_scores.empty:
+        return plt.Normalize(vmin=0, vmax=100), "viridis"
+
+    vmin = float(valid_scores.min())
+    vmax = float(valid_scores.max())
+    if vmin == vmax:
+        vmin = max(0, vmin - 1)
+        vmax = vmax + 1
+    return plt.Normalize(vmin=vmin, vmax=vmax), "viridis"
+
+
+def draw_locality_envelopes(ax, data: pd.DataFrame) -> None:
+    """Draw simple bounding boxes around locality clusters."""
+    if data.empty or "locality_group" not in data.columns:
+        return
+
+    for locality, group in data.groupby("locality_group"):
+        if locality == "Other" or group.empty:
+            continue
+
+        lon_min, lon_max = group["lon"].min(), group["lon"].max()
+        lat_min, lat_max = group["lat"].min(), group["lat"].max()
+        lon_pad = max((lon_max - lon_min) * 0.45, 0.010)
+        lat_pad = max((lat_max - lat_min) * 0.45, 0.010)
+
+        rect = Rectangle(
+            (lon_min - lon_pad, lat_min - lat_pad),
+            (lon_max - lon_min) + 2 * lon_pad,
+            (lat_max - lat_min) + 2 * lat_pad,
+            fill=False,
+            linestyle="--",
+            linewidth=0.9,
+            alpha=0.45,
+            zorder=1,
+        )
+        ax.add_patch(rect)
+        ax.text(
+            lon_min - lon_pad,
+            lat_max + lat_pad,
+            LOCALITY_LABELS.get(locality, locality),
+            fontsize=8,
+            va="bottom",
+            ha="left",
+            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.75, "lw": 0.3},
+            zorder=3,
+        )
+
+
+def ranked_summary(data: pd.DataFrame) -> str:
+    """Create a right-side ranked summary for quick interpretation."""
+    if data.empty:
+        return "Ranked summary\nNo sites loaded."
+
+    sort_col = "model_rank_num" if "model_rank_num" in data.columns else "readiness_score_num"
+    summary = data.sort_values(sort_col, na_position="last").copy()
+    lines = ["Ranked readiness"]
+
+    for _, row in summary.iterrows():
+        site_id = str(row.get("site_id", ""))
+        score = safe_float(row.get("readiness_score_num", row.get("readiness_score", "")))
+        rank = safe_float(row.get("model_rank_num", row.get("model_rank", "")))
+        tier = compact_tier(row.get("recommendation_tier", ""))
+        ports = row.get("recommended_ports_now", "")
+
+        rank_text = f"#{int(rank)}" if rank is not None else "--"
+        score_text = f"{score:.1f}" if score is not None else "n/a"
+        ports_text = ""
+        if str(ports) not in {"", "nan", "None"}:
+            try:
+                ports_text = f" | ports: {int(float(ports))}"
+            except (TypeError, ValueError):
+                ports_text = f" | ports: {ports}"
+
+        lines.append(f"{rank_text} {site_id}: {score_text} | {tier}{ports_text}")
+
+    lines.append("")
+    lines.append("Shape = recommendation tier")
+    lines.append("Size/color = readiness score")
+    lines.append("Star = top-ranked site")
+    return "\n".join(lines)
+
+
+def add_tier_legend(ax, data: pd.DataFrame) -> None:
+    """Add a marker-shape legend for recommendation tiers."""
+    if "tier_short" not in data.columns:
+        return
+
+    present_tiers = [tier for tier in TIER_ORDER if tier in set(data["tier_short"].astype(str))]
+    extra_tiers = sorted(set(data["tier_short"].astype(str)) - set(present_tiers))
+    tiers = present_tiers + extra_tiers
+    if not tiers:
+        return
+
+    handles = [
+        Line2D(
+            [0],
+            [0],
+            marker=TIER_MARKERS.get(tier, "o"),
+            linestyle="None",
+            markerfacecolor="white",
+            markeredgecolor="black",
+            color="black",
+            markersize=7,
+            label=tier,
+        )
+        for tier in tiers
+    ]
+    ax.legend(handles=handles, title="Recommendation tier", loc="lower left", fontsize=8, title_fontsize=8, framealpha=0.88)
 
 
 def plot_site_map(
@@ -205,38 +356,44 @@ def plot_site_map(
     sensitivity = sensitivity if sensitivity is not None else pd.DataFrame()
     profile_results = profile_results if profile_results is not None else pd.DataFrame()
 
-    fig, ax = plt.subplots(figsize=(11.2, 8.4))
+    fig, ax = plt.subplots(figsize=(13.2, 8.4))
 
-    if "readiness_score" in data.columns:
-        scores = pd.to_numeric(data["readiness_score"], errors="coerce")
-    else:
-        scores = pd.Series([0] * len(data), index=data.index)
+    scores = data["readiness_score_num"] if "readiness_score_num" in data.columns else pd.Series([0] * len(data), index=data.index)
+    norm, cmap_name = score_norm(scores)
 
-    sizes = [marker_size(score) for score in scores]
-    scatter = ax.scatter(
-        data["lon"],
-        data["lat"],
-        s=sizes,
-        c=scores,
-        alpha=0.75,
-        edgecolors="black",
-        linewidths=0.8,
-        zorder=2,
-    )
+    draw_locality_envelopes(ax, data)
+
+    for tier, group in data.groupby("tier_short", dropna=False):
+        tier_text = str(tier)
+        group_scores = pd.to_numeric(group["readiness_score_num"], errors="coerce")
+        sizes = [marker_size(score) for score in group_scores]
+        ax.scatter(
+            group["lon"],
+            group["lat"],
+            s=sizes,
+            c=group_scores,
+            cmap=cmap_name,
+            norm=norm,
+            marker=TIER_MARKERS.get(tier_text, "o"),
+            alpha=0.78,
+            edgecolors="black",
+            linewidths=0.8,
+            zorder=2,
+        )
 
     top_site = top_site_id_from_results(data)
     if top_site:
         top_row = data[data["site_id"].astype(str) == top_site]
         if not top_row.empty:
-            star_size = 260 if stable_top_candidate_found(data, sensitivity, profile_results) else 220
+            star_size = 300 if stable_top_candidate_found(data, sensitivity, profile_results) else 250
             ax.scatter(
                 top_row["lon"],
                 top_row["lat"],
                 s=star_size,
                 marker="*",
-                alpha=0.9,
+                facecolors="none",
                 edgecolors="black",
-                linewidths=0.9,
+                linewidths=1.2,
                 zorder=4,
             )
 
@@ -249,35 +406,52 @@ def plot_site_map(
             textcoords="offset points",
             fontsize=8,
             arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
-            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.80, "lw": 0.3},
+            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.84, "lw": 0.3},
             zorder=5,
         )
 
-    cbar = fig.colorbar(scatter, ax=ax, label="Readiness score")
+    mappable = plt.cm.ScalarMappable(norm=norm, cmap=cmap_name)
+    mappable.set_array([])
+    cbar = fig.colorbar(mappable, ax=ax, label="Readiness score", fraction=0.034, pad=0.03)
     cbar.ax.tick_params(labelsize=8)
+
+    add_tier_legend(ax, data)
+
+    ax.text(
+        1.03,
+        0.98,
+        ranked_summary(data),
+        transform=ax.transAxes,
+        fontsize=8,
+        va="top",
+        ha="left",
+        linespacing=1.35,
+        bbox={"boxstyle": "round,pad=0.45", "fc": "white", "alpha": 0.92, "lw": 0.5},
+    )
+
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     fig.suptitle("Candidate EV Charging Sites — Readiness Map", fontsize=14)
     ax.set_title(map_interpretation_note(data, sensitivity, profile_results), fontsize=9, pad=8)
     ax.grid(True, alpha=0.25)
 
-    lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.16, 0.01)
-    lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.16, 0.01)
+    lon_padding = max((data["lon"].max() - data["lon"].min()) * 0.20, 0.015)
+    lat_padding = max((data["lat"].max() - data["lat"].min()) * 0.20, 0.015)
     ax.set_xlim(data["lon"].min() - lon_padding, data["lon"].max() + lon_padding)
     ax.set_ylim(data["lat"].min() - lat_padding, data["lat"].max() + lat_padding)
 
     note = planning_note(data)
     if note:
-        fig.text(0.5, 0.055, f"Planning notes: {note}.", ha="center", fontsize=8)
+        fig.text(0.44, 0.055, f"Planning notes: {note}.", ha="center", fontsize=8)
     footer = "Planning visual only — longitude/latitude scatter, no basemap, parcel boundary, engineering layout, or permitting decision."
-    fig.text(0.5, 0.018, footer, ha="center", fontsize=8)
-    fig.tight_layout(rect=[0, 0.08, 1, 0.95])
-    fig.savefig(output_path, dpi=200)
+    fig.text(0.44, 0.018, footer, ha="center", fontsize=8)
+    fig.tight_layout(rect=[0, 0.08, 0.82, 0.95])
+    fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Create a simple readiness map of candidate EV charging sites.")
+    parser = argparse.ArgumentParser(description="Create a readiness map of candidate EV charging sites.")
     parser.add_argument("--input", default=DEFAULT_INPUT, help="Candidate-site input CSV.")
     parser.add_argument("--results", default=DEFAULT_RESULTS, help="Model results CSV with readiness scores.")
     parser.add_argument("--sensitivity", default=DEFAULT_SENSITIVITY, help="Sensitivity summary CSV.")
