@@ -79,6 +79,61 @@ Copied files: 38
 Missing files: 0
 ```
 
+## V1 reviewer-ready checkpoint
+
+Status: V1 reviewer-ready package prepared.
+
+Local shareable ZIP:
+
+```text
+data/outputs/deliverable_package_clean.zip
+```
+
+The clean ZIP is generated locally and ignored by Git. It should be recreated from the latest successful workflow before sharing.
+
+Current reviewer package result:
+
+```text
+Workflow status: passed
+Copied files: 38
+Missing files: 0
+Broken local package links: 0
+No __MACOSX or .DS_Store files in the clean ZIP
+```
+
+Current main result:
+
+```text
+FFX002 — City of Fairfax Regional Library is the strongest current candidate.
+```
+
+Main caution:
+
+```text
+A high readiness score does not mean a site is build-ready.
+The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, Fire Marshal/AHJ, permitting, procurement, and site review.
+```
+
+Main unresolved items before any advancement:
+
+```text
+electrical service rating
+spare electrical capacity
+emergency disconnect visibility
+likely charger placement
+employees_day and visitors_day
+parking and charging hours except where already officially supported
+PWC002 garage-specific review
+PWC004 reopening or usable-planning timeline
+PWC003 public, fleet-only, special-use, or removal decision
+```
+
+Next phase:
+
+```text
+Stakeholder confirmation and selected site screening, starting with FFX002, then FFX001, then PWC002.
+```
+
 ## Baseline decision
 
 The committed V1 baseline will stay as-is for now. The corrected current run should be compared against the existing baseline instead of replacing it.
@@ -217,25 +272,3 @@ data/source_extracts/stakeholder_response_tracker.csv
 ```
 
 Use these files to ask contacts for the data needed to replace assumptions and placeholders.
-
-## Current config and quality-control files
-
-```text
-data/config/output_manifest_v1.json
-data/config/scoring_profiles.csv
-data/config/output_check_rules_v1.json
-data/baselines/v1_baseline/site_results.csv
-data/baselines/v1_baseline/sensitivity_summary.csv
-data/baselines/v1_baseline/data_quality_report.csv
-data/baselines/v1_baseline/baseline_manifest.json
-```
-
-## Next good improvements
-
-```text
-1. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
-2. Improve facility hours and parking for sites other than FFX002.
-3. Re-check package, link, and stale-text consistency after major repo or output changes.
-4. Prepare final presentation slides later, when presentation timing is closer.
-5. Add more candidate sites if the project scope expands.
-```
