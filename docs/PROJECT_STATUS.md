@@ -4,7 +4,7 @@
 
 Phase 2 prototype development for the Public EV Charging Site-Readiness and Right-Sizing Model.
 
-The project is now a working planning-support prototype. It validates candidate-site data, runs the readiness and right-sizing model, tests sensitivity scenarios, compares alternative scoring profiles, generates charts and a readiness map, creates dynamic Markdown summaries, checks outputs against V1 expectations, compares the run to a committed baseline, and builds a local deliverable package.
+The project is now a working planning-support prototype. It validates candidate-site data, runs the readiness and right-sizing model, adds a readiness-confidence action matrix, tests sensitivity scenarios, compares alternative scoring profiles, generates charts and a readiness map, creates dynamic Markdown summaries, checks outputs against V1 expectations, compares the run to a committed baseline, and builds a local deliverable package.
 
 This project is a planning-support model only. It does not replace required technical, permitting, procurement, or stakeholder review.
 
@@ -13,7 +13,7 @@ This project is a planning-support model only. It does not replace required tech
 ```text
 src/                  Python scripts
 data/inputs/           Input datasets
-data/config/           Config files for scoring profiles and output-check rules
+data/config/           Config files for scoring profiles, output checks, and output/package manifest
 data/source_extracts/  Small source extracts and source notes
 data/baselines/        Committed V1 baseline outputs for comparison
 data/outputs/          Generated outputs ignored by Git
@@ -36,15 +36,17 @@ git status --short
 ```text
 1. src/validate_site_data.py
 2. src/ev_charger_model.py
-3. src/plot_readiness_score_chart.py
-4. src/run_sensitivity_analysis.py
-5. src/run_profile_analysis.py
-6. src/plot_profile_score_heatmap.py
-7. src/plot_profile_rank_stability.py
-8. src/plot_site_map.py
-9. src/generate_run_summary.py
-10. src/generate_results_interpretation.py
-11. src/check_outputs.py
+3. src/add_action_matrix.py
+4. src/plot_readiness_score_chart.py
+5. src/plot_data_confidence_chart.py
+6. src/run_sensitivity_analysis.py
+7. src/run_profile_analysis.py
+8. src/plot_profile_score_heatmap.py
+9. src/plot_profile_rank_stability.py
+10. src/plot_site_map.py
+11. src/generate_run_summary.py
+12. src/generate_results_interpretation.py
+13. src/check_outputs.py
 ```
 
 The package builder creates a shareable local folder at:
@@ -65,6 +67,16 @@ Output check: PASSED
 Baseline comparison: COMPLETED
 Workflow success marker: OK
 Deliverable package: PASSED with 0 missing files
+```
+
+Latest confirmed documentation/package link audit:
+
+```text
+Checked local Markdown links: 369
+Skipped external/anchor links: 19
+Broken local links: 0
+Copied files: 38
+Missing files: 0
 ```
 
 ## Baseline decision
@@ -88,10 +100,13 @@ Reviewed OSM/Overpass amenities count added and applied.
 Planning electrical feasibility estimates added.
 Local EV adoption proxy added.
 Recommendation tier layer added.
+Data confidence score added.
+Readiness-confidence action matrix added.
 Right-sizing logic added for recommended ports now, 2035, and 2050.
 Sensitivity analysis added and strengthened.
 Scoring profile analysis added.
 Readiness score chart polished with score and tier annotations.
+Data confidence chart added.
 Profile rank-stability chart added as the main profile-analysis visual.
 Profile score heatmap kept as a supporting visual.
 Readiness map label offsets and planning notes improved.
@@ -99,8 +114,10 @@ Dynamic model run summary added.
 Dynamic generated results interpretation added.
 Baseline snapshot and baseline comparison added.
 Configurable output-check rules added.
+Output manifest added as the shared source for expected outputs and package contents.
 Workflow success marker added to prevent stale packaging after failed runs.
 Deliverable package builder added and expanded.
+Deliverable package Markdown links now rewrite correctly when docs are copied.
 Findings brief, full findings report, and presentation outline added.
 Stakeholder data request pack added.
 Repository reorganized into cleaner folders.
@@ -129,6 +146,17 @@ PWC003 should not be treated as a general-public priority unless public access o
 6. PWC003 — Prince William County Public Safety Training Center — 29.5 — Low public-priority / special-use
 ```
 
+## Current action-matrix interpretation
+
+```text
+FFX002 — Verify key data, then advance
+FFX001 — Promising, but fix data first
+PWC002 — Technical review before advancement
+PWC004 — Promising with timeline caveat
+PWC001 — Monitor or deprioritize
+PWC003 — Special-use decision needed
+```
+
 ## Current generated outputs
 
 Expected local outputs include:
@@ -136,6 +164,7 @@ Expected local outputs include:
 ```text
 data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
+data/outputs/action_matrix.md
 data/outputs/sensitivity_results.csv
 data/outputs/sensitivity_summary.csv
 data/outputs/profile_results.csv
@@ -147,6 +176,7 @@ data/outputs/baseline_comparison.csv
 data/outputs/baseline_comparison.md
 data/outputs/workflow_success.json
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
 data/outputs/charts/profile_rank_stability_chart.png
 data/outputs/charts/profile_score_heatmap.png
 data/outputs/charts/site_readiness_map.png
@@ -183,6 +213,7 @@ PWC003 public, fleet-only, special-use, or removal decision
 ```text
 docs/STAKEHOLDER_DATA_REQUEST.md
 data/source_extracts/stakeholder_data_request_fields.csv
+data/source_extracts/stakeholder_response_tracker.csv
 ```
 
 Use these files to ask contacts for the data needed to replace assumptions and placeholders.
@@ -190,6 +221,7 @@ Use these files to ask contacts for the data needed to replace assumptions and p
 ## Current config and quality-control files
 
 ```text
+data/config/output_manifest_v1.json
 data/config/scoring_profiles.csv
 data/config/output_check_rules_v1.json
 data/baselines/v1_baseline/site_results.csv
@@ -201,9 +233,9 @@ data/baselines/v1_baseline/baseline_manifest.json
 ## Next good improvements
 
 ```text
-1. Use the rank-stability chart in the final presentation.
-2. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
-3. Improve facility hours and parking for sites other than FFX002.
-4. Prepare final presentation slides from docs/PRESENTATION_OUTLINE.md and the deliverable package.
+1. Replace visitor, employee, parking, and electrical assumptions with stronger stakeholder-confirmed site data when available.
+2. Improve facility hours and parking for sites other than FFX002.
+3. Re-check package, link, and stale-text consistency after major repo or output changes.
+4. Prepare final presentation slides later, when presentation timing is closer.
 5. Add more candidate sites if the project scope expands.
 ```
