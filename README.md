@@ -35,21 +35,21 @@ Missing files: 0
 
 The readiness map gives the fastest visual overview of the candidate sites, their relative locations, and their ranked readiness result.
 
-![Candidate EV charging site readiness map](data/outputs/charts/site_readiness_map.png)
+![Candidate EV charging site readiness map](docs/assets/charts/site_readiness_map.svg)
 
 The readiness score chart shows the current ranking directly.
 
-![Readiness score chart](data/outputs/charts/readiness_score_chart.png)
+![Readiness score chart](docs/assets/charts/readiness_score_chart.svg)
 
 ## Main outputs to review
 
 - [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
 - [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
 - [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
-- [data/outputs/charts/readiness_score_chart.png](data/outputs/charts/readiness_score_chart.png)
-- [data/outputs/charts/data_confidence_chart.png](data/outputs/charts/data_confidence_chart.png)
-- [data/outputs/charts/profile_rank_stability_chart.png](data/outputs/charts/profile_rank_stability_chart.png)
-- [data/outputs/charts/site_readiness_map.png](data/outputs/charts/site_readiness_map.png)
+- [Readiness score visual](docs/assets/charts/readiness_score_chart.svg)
+- [Data confidence visual](docs/assets/charts/data_confidence_chart.svg)
+- [Profile rank stability visual](docs/assets/charts/profile_rank_stability_chart.svg)
+- [Site readiness map visual](docs/assets/charts/site_readiness_map.svg)
 
 ## Main input and output files
 
