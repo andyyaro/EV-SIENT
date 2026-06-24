@@ -174,8 +174,9 @@ Workflow success marker added to prevent stale packaging after failed runs.
 Deliverable package builder added and expanded.
 Deliverable package Markdown links now rewrite correctly when docs are copied.
 Findings brief, full findings report, and presentation outline added.
-Stakeholder data request pack added.
+Stakeholder outreach plan added.
 Repository reorganized into cleaner folders.
+Overlapping OSM, sensitivity, and stakeholder docs merged into cleaner consolidated docs.
 ```
 
 ## Current strongest findings
@@ -266,7 +267,7 @@ PWC003 public, fleet-only, special-use, or removal decision
 ## Current stakeholder request files
 
 ```text
-docs/STAKEHOLDER_DATA_REQUEST.md
+docs/STAKEHOLDER_OUTREACH_PLAN.md
 data/source_extracts/stakeholder_data_request_fields.csv
 data/source_extracts/stakeholder_response_tracker.csv
 ```
