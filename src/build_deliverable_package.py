@@ -21,7 +21,7 @@ PACKAGE_GROUPS = require_dict_of_lists(OUTPUT_MANIFEST, "package_groups")
 GENERATED_GROUPS = set(require_list(OUTPUT_MANIFEST, "generated_package_groups"))
 PACKAGE_REVIEW_ORDER = require_list(OUTPUT_MANIFEST, "package_review_order")
 GITHUB_REPO_URL = "https://github.com/andyyaro/Future-City-Fellowship-"
-MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)")
+MARKDOWN_LINK_RE = re.compile(r"(!?)\[([^\]]+)\]\(([^)]+)\)")
 
 
 def parse_args() -> argparse.Namespace:
@@ -126,6 +126,7 @@ def package_folder_target(repo_target: str) -> str | None:
         "data/outputs/deliverable_package": ".",
         "data/config": "config",
         "docs": "reports",
+        "docs/assets/charts": "visual_assets",
     }
     return folder_map.get(repo_target.rstrip("/"))
 
@@ -136,14 +137,15 @@ def rewrite_markdown_links_for_package(
     current_package_path: str,
     copied_paths: dict[str, str],
 ) -> int:
-    """Rewrite Markdown links in copied package docs so local package links work."""
+    """Rewrite Markdown links and images in copied package docs so local package links work."""
     text = destination.read_text(encoding="utf-8")
     rewrite_count = 0
 
     def replace(match: re.Match[str]) -> str:
         nonlocal rewrite_count
-        label = match.group(1)
-        raw_target = match.group(2).strip()
+        image_prefix = match.group(1)
+        label = match.group(2)
+        raw_target = match.group(3).strip()
 
         if raw_target.startswith(("http://", "https://", "mailto:", "#")):
             return match.group(0)
@@ -164,7 +166,7 @@ def rewrite_markdown_links_for_package(
                 new_target = external_repo_link(repo_target, is_folder) + anchor
 
         rewrite_count += 1
-        return f"[{label}]({new_target})"
+        return f"{image_prefix}[{label}]({new_target})"
 
     updated = MARKDOWN_LINK_RE.sub(replace, text)
     if updated != text:
