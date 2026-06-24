@@ -26,6 +26,10 @@ data/outputs/*.json
 data/outputs/charts/*.png
 data/outputs/deliverable_package/
 
+# GitHub-rendered Markdown preview assets
+!docs/assets/charts/*.png
+!docs/assets/charts/*.svg
+
 # Local-only run archives
 data/run_history/
 
