@@ -54,11 +54,11 @@ The output summary should also show `OK` for the main generated files.
 
 Start with the map to understand where the sites are and which sites rank highest.
 
-![Candidate EV charging site readiness map](docs/assets/charts/site_readiness_map.svg)
+![Candidate EV charging site readiness map](https://raw.githubusercontent.com/andyyaro/Future-City-Fellowship-/main/docs/assets/charts/site_readiness_map.svg)
 
 Then use the readiness chart to see the ranked scores directly.
 
-![Readiness score chart](docs/assets/charts/readiness_score_chart.svg)
+![Readiness score chart](https://raw.githubusercontent.com/andyyaro/Future-City-Fellowship-/main/docs/assets/charts/readiness_score_chart.svg)
 
 ## Files to open first
 
