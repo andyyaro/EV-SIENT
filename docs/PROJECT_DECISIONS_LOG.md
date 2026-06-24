@@ -220,8 +220,6 @@ Decision: if a copied package document links to a repo file that is not included
 Verified local audit result:
 
 ```text
-Checked local Markdown links: 369
-Skipped external/anchor links: 19
 Broken local links: 0
 All checked local Markdown links exist.
 ```
@@ -229,7 +227,7 @@ All checked local Markdown links exist.
 Verified package result:
 
 ```text
-Copied files: 38
+Copied files: 40
 Missing files: 0
 ```
 
@@ -262,7 +260,7 @@ Verified workflow and package result after the schema-protection update:
 Sanity check: PASSED
 Baseline comparison: COMPLETED
 Result: PASSED
-Copied files: 38
+Copied files: 40
 Missing files: 0
 ```
 
@@ -290,6 +288,39 @@ Decision: keep `DATA_CONFIDENCE_SCORE.md` and `RECOMMENDATION_TIERS.md` separate
 Decision: keep `MODEL_FINDINGS_BRIEF.md` and `MODEL_FINDINGS_REPORT.md` separate because one is a quick summary and the other is the fuller report.
 
 Reason: this reduces documentation clutter while preserving the docs that have distinct reviewer purposes.
+
+## Decision 30 — Add scalable demo mode, demo sensitivity, and Top-N confidence visuals
+
+The project now includes a local-only synthetic demo workflow for checking larger candidate pools without changing the official six-site V1 dataset.
+
+```text
+src/generate_demo_sites.py
+src/run_demo.py
+src/plot_scalable_readiness_charts.py
+src/plot_scalable_data_confidence_chart.py
+docs/DEMO_MODE_GUIDE.md
+docs/SCALABLE_VISUALS_GUIDE.md
+data/demo/
+```
+
+Decision: keep demo outputs under `data/demo/` and ignore them in Git. Demo data is synthetic and should not be treated as real recommendations.
+
+Decision: demo mode should test the same major reasoning layers as the official workflow where practical: validation, model scoring, action matrix, sensitivity analysis, scoring-profile analysis, and visual review.
+
+Decision: for larger candidate pools, use scalable visual patterns instead of forcing one crowded all-site chart:
+
+```text
+Top-N readiness chart
+Top-N data-confidence chart
+multi-panel overview/zoom readiness map
+Top-N profile heatmap
+top-8 rank-stability chart
+score distribution chart
+tier-count chart
+full compact appendix charts
+```
+
+Reason: the project needs to show that the model can scale beyond six sites while staying readable, reproducible, and beginner-friendly.
 
 ## Current expected recommendation interpretation
 
@@ -320,4 +351,4 @@ PWC003 public, fleet-only, special-use, or removal decision
 
 ## Maintenance rule
 
-Whenever the project changes a source, assumption, formula, output interpretation, or stakeholder-facing conclusion, update the relevant docs in `docs/`.
+Whenever the project changes a source, assumption, formula, output interpretation, workflow, demo feature, or stakeholder-facing conclusion, update the relevant docs in `docs/`.
