@@ -34,3 +34,6 @@ jobs:
 
       - name: Build deliverable package
         run: python src/build_deliverable_package.py
+
+      - name: Run synthetic demo workflow
+        run: python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean --skip-full-compact
