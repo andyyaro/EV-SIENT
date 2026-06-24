@@ -36,6 +36,12 @@ On Windows PowerShell, activate the virtual environment with:
 .venv\Scripts\Activate.ps1
 ```
 
+For a stricter step-by-step reproduction check, use:
+
+```text
+REPRODUCIBILITY_CHECKLIST.md
+```
+
 ## What success looks like
 
 A successful run should show:
