@@ -11,9 +11,9 @@ Core visuals:
 4. Recommendation tier count chart
 
 Optional visuals when extra inputs are provided:
-5. Scalable readiness map/scatter with only top-N labels
+5. Multi-panel readiness map/scatter with overview and zooms
 6. Top-N scoring-profile heatmap
-7. Top-N profile rank stability chart
+7. Cleaner top-8 profile rank stability chart
 8. Compact data-confidence chart
 
 Example:
@@ -38,6 +38,7 @@ import pandas as pd
 DEFAULT_RESULTS = "data/outputs/site_results.csv"
 DEFAULT_OUTPUT_DIR = "data/outputs/charts/scalable"
 DEFAULT_TOP_N = 15
+DEFAULT_RANK_STABILITY_TOP_N = 8
 
 REQUIRED_COLUMNS = {
     "site_id",
@@ -170,6 +171,19 @@ def score_axis_bounds(scores: pd.Series, floor_to: int = 5, padding: int = 5) ->
     if high <= low:
         high = min(100, low + 10)
     return low, high
+
+
+def set_padded_map_limits(ax, data: pd.DataFrame, lon_col: str = "map_lon", lat_col: str = "map_lat") -> None:
+    if data.empty:
+        return
+    lon_min = float(data[lon_col].min())
+    lon_max = float(data[lon_col].max())
+    lat_min = float(data[lat_col].min())
+    lat_max = float(data[lat_col].max())
+    lon_pad = max((lon_max - lon_min) * 0.12, 0.005)
+    lat_pad = max((lat_max - lat_min) * 0.12, 0.005)
+    ax.set_xlim(lon_min - lon_pad, lon_max + lon_pad)
+    ax.set_ylim(lat_min - lat_pad, lat_max + lat_pad)
 
 
 def tier_funnel_sentence(results: pd.DataFrame) -> str:
@@ -343,6 +357,52 @@ def plot_data_confidence(results: pd.DataFrame, output_dir: Path) -> Path | None
     return output_path
 
 
+def map_subset(data: pd.DataFrame, prefix: str) -> pd.DataFrame:
+    subset = data[data["site_id"].astype(str).str.startswith(prefix)].copy()
+    return subset.sort_values("model_rank")
+
+
+def label_map_sites(ax, data: pd.DataFrame, label_ids: set[str]) -> None:
+    labeled = data[data["site_id"].astype(str).isin(label_ids)].sort_values("model_rank")
+    for _, row in labeled.iterrows():
+        ax.annotate(
+            f"#{int(row['model_rank'])} {row['site_id']}",
+            xy=(row["map_lon"], row["map_lat"]),
+            xytext=(6, 6),
+            textcoords="offset points",
+            fontsize=7.0,
+            bbox={"boxstyle": "round,pad=0.15", "fc": "white", "alpha": 0.82, "lw": 0.25},
+        )
+
+
+def scatter_map_panel(ax, data: pd.DataFrame, title: str, label_ids: set[str], *, zoom: bool) -> None:
+    if data.empty:
+        ax.text(0.5, 0.5, "No sites in this panel", ha="center", va="center", transform=ax.transAxes)
+        ax.set_title(title, fontsize=10)
+        return
+
+    sizes = 35 + data["readiness_score"] * 3.5
+    ax.scatter(
+        data["map_lon"],
+        data["map_lat"],
+        s=sizes,
+        c=data["readiness_score"],
+        alpha=0.72,
+        edgecolors="black",
+        linewidths=0.35,
+        vmin=data.attrs.get("score_min"),
+        vmax=data.attrs.get("score_max"),
+    )
+    label_map_sites(ax, data, label_ids)
+    set_padded_map_limits(ax, data)
+    ax.set_title(title, fontsize=10, pad=8)
+    ax.grid(alpha=0.22)
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    if zoom:
+        ax.tick_params(axis="both", labelsize=8)
+
+
 def plot_readiness_map(results: pd.DataFrame, input_sites: pd.DataFrame | None, output_dir: Path, top_n: int) -> Path | None:
     if input_sites is None:
         return None
@@ -352,41 +412,45 @@ def plot_readiness_map(results: pd.DataFrame, input_sites: pd.DataFrame | None, 
     if data.empty:
         return None
 
-    top_ids = set(top_site_ids(results, top_n))
-    fig, ax = plt.subplots(figsize=(11.5, 7.2))
-    sizes = 35 + data["readiness_score"] * 4
-    scatter = ax.scatter(
-        data["map_lon"],
-        data["map_lat"],
-        s=sizes,
-        c=data["readiness_score"],
-        alpha=0.72,
-        edgecolors="black",
-        linewidths=0.35,
-    )
+    data = data.sort_values("model_rank").reset_index(drop=True)
+    data.attrs["score_min"] = float(data["readiness_score"].min())
+    data.attrs["score_max"] = float(data["readiness_score"].max())
 
-    top = data[data["site_id"].isin(top_ids)].copy()
-    for _, row in top.iterrows():
-        ax.annotate(
-            f"#{int(row['model_rank'])} {row['site_id']}",
-            xy=(row["map_lon"], row["map_lat"]),
-            xytext=(6, 6),
-            textcoords="offset points",
-            fontsize=7.2,
-            bbox={"boxstyle": "round,pad=0.15", "fc": "white", "alpha": 0.82, "lw": 0.25},
-        )
+    ffx = map_subset(data, "DEMOFFX")
+    pwc = map_subset(data, "DEMOPWC")
+    for subset in (ffx, pwc):
+        subset.attrs["score_min"] = data.attrs["score_min"]
+        subset.attrs["score_max"] = data.attrs["score_max"]
 
-    cbar = fig.colorbar(scatter, ax=ax)
+    overview_label_ids = set(top_site_ids(results, min(5, top_n)))
+    ffx_label_ids = set(ffx.head(min(6, len(ffx), top_n))["site_id"].astype(str))
+    pwc_label_ids = set(pwc.head(min(6, len(pwc), top_n))["site_id"].astype(str))
+
+    fig = plt.figure(figsize=(14.0, 8.2))
+    grid = fig.add_gridspec(2, 2, width_ratios=[1.35, 1.0], height_ratios=[1, 1], wspace=0.22, hspace=0.32)
+    ax_overview = fig.add_subplot(grid[:, 0])
+    ax_ffx = fig.add_subplot(grid[0, 1])
+    ax_pwc = fig.add_subplot(grid[1, 1])
+
+    scatter_map_panel(ax_overview, data, "Overview: all demo sites, top 5 labeled", overview_label_ids, zoom=False)
+    scatter_map_panel(ax_ffx, ffx, "Zoom: Fairfax demo cluster", ffx_label_ids, zoom=True)
+    scatter_map_panel(ax_pwc, pwc, "Zoom: Prince William demo cluster", pwc_label_ids, zoom=True)
+
+    scatter = ax_overview.collections[0]
+    cbar = fig.colorbar(scatter, ax=[ax_overview, ax_ffx, ax_pwc], fraction=0.028, pad=0.025)
     cbar.set_label("Readiness score")
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
-    ax.set_title(f"Scalable Demo Readiness Map — Top {len(top)} Labeled", fontsize=14, pad=16)
-    ax.grid(alpha=0.22)
 
-    fig.text(0.5, 0.025, "Planning visual only: longitude/latitude scatter with top-N labels, no basemap or parcel boundary.", ha="center", fontsize=8)
-    fig.tight_layout(rect=[0.04, 0.05, 0.98, 0.95])
+    fig.suptitle(f"Scalable Demo Readiness Map — Overview + Zooms (Top {top_n} Context)", fontsize=16, y=0.98)
+    fig.text(
+        0.5,
+        0.025,
+        "Planning visual only: longitude/latitude scatter, no basemap or parcel boundary. Overview labels only top 5; zooms label local top sites.",
+        ha="center",
+        fontsize=8,
+    )
+    fig.tight_layout(rect=[0.03, 0.05, 0.98, 0.95])
 
-    output_path = output_dir / f"readiness_map_top_{len(top)}_labeled.png"
+    output_path = output_dir / f"readiness_map_top_{top_n}_labeled.png"
     fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
     return output_path
@@ -453,8 +517,9 @@ def plot_profile_rank_stability(results: pd.DataFrame, profile_results: pd.DataF
     if profile_results is None:
         return None
 
+    stability_top_n = min(DEFAULT_RANK_STABILITY_TOP_N, top_n, len(results))
     profiles = profile_order(profile_results)
-    sites = top_site_ids(results, top_n)
+    sites = top_site_ids(results, stability_top_n)
     available_sites = [site_id for site_id in sites if site_id in set(profile_results["site_id"].astype(str))]
     if not available_sites:
         return None
@@ -467,22 +532,24 @@ def plot_profile_rank_stability(results: pd.DataFrame, profile_results: pd.DataF
     for site_id in available_sites:
         y_values = ranks.loc[site_id].astype(float).tolist()
         base_rank = int(results.loc[results["site_id"] == site_id, "model_rank"].iloc[0])
-        line_width = 2.4 if base_rank <= 3 else 1.35
-        alpha = 0.95 if base_rank <= 3 else 0.62
-        ax.plot(x_values, y_values, marker="o", linewidth=line_width, alpha=alpha)
-        ax.text(x_values[-1] + 0.06, y_values[-1], site_id, va="center", fontsize=7.2)
+        line_width = 3.0 if base_rank <= 3 else 1.25
+        alpha = 0.98 if base_rank <= 3 else 0.42
+        marker_size = 6.5 if base_rank <= 3 else 4.5
+        ax.plot(x_values, y_values, marker="o", markersize=marker_size, linewidth=line_width, alpha=alpha)
+        label_prefix = f"#{base_rank} " if base_rank <= 3 else ""
+        ax.text(x_values[-1] + 0.06, y_values[-1], f"{label_prefix}{site_id}", va="center", fontsize=7.2)
 
     max_rank = int(ranks.max().max())
     ax.set_xticks(x_values)
     ax.set_xticklabels(labels)
-    ax.set_ylim(max_rank + 0.6, 0.5)
+    ax.set_ylim(max_rank + 0.8, 0.5)
     ax.set_ylabel("Rank within profile (#1 is best)")
     ax.set_xlabel("Scoring profile")
     ax.set_title(f"Top {len(available_sites)} Rank Stability Across Profiles", fontsize=14, pad=16)
     ax.grid(axis="y", alpha=0.22)
     ax.set_xlim(-0.15, len(profiles) - 0.15)
 
-    fig.text(0.5, 0.025, "Limited to top-N base-model sites so rank movement remains readable.", ha="center", fontsize=8)
+    fig.text(0.5, 0.025, "Cleaner default: limited to top 8 base-model sites; top 3 are emphasized and the rest are faded.", ha="center", fontsize=8)
     fig.tight_layout(rect=[0.04, 0.05, 0.98, 0.95])
 
     output_path = output_dir / f"profile_rank_stability_top_{len(available_sites)}.png"
@@ -500,6 +567,7 @@ def write_summary(results: pd.DataFrame, output_dir: Path, chart_paths: list[Pat
         "",
         f"Sites evaluated: {len(results)}",
         f"Top-N chart size: {len(top)}",
+        f"Rank-stability chart size: {min(DEFAULT_RANK_STABILITY_TOP_N, top_n, len(results))}",
         "",
         "## Quick interpretation",
         "",
@@ -528,9 +596,9 @@ def write_summary(results: pd.DataFrame, output_dir: Path, chart_paths: list[Pat
         "",
         "## How to use these visuals",
         "",
-        "Use the top-N readiness chart and top-N map for presentation.",
+        "Use the top-N readiness chart and multi-panel readiness map for presentation.",
         "Use the distribution and tier-count charts to understand whether the model creates a reasonable planning funnel.",
-        "Use profile heatmap/rank-stability charts to check whether priority changes affect the top candidates.",
+        "Use the profile heatmap to compare priority-view scores and the top-8 rank-stability chart to check rank movement.",
         "Use full compact charts only for audit/review.",
         "",
     ])
