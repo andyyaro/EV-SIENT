@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520" role="img" aria-label="Readiness score chart">
+  <rect width="980" height="520" fill="white"/>
+  <text x="490" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700">Readiness Score by Candidate Site</text>
+  <text x="490" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#444">Higher score means stronger planning readiness under current assumptions.</text>
+  <g font-family="Arial, sans-serif" font-size="13" fill="#666">
+    <line x1="170" y1="95" x2="170" y2="405" stroke="#ddd"/><line x1="360" y1="95" x2="360" y2="405" stroke="#ddd"/><line x1="550" y1="95" x2="550" y2="405" stroke="#ddd"/><line x1="740" y1="95" x2="740" y2="405" stroke="#ddd"/><line x1="930" y1="95" x2="930" y2="405" stroke="#ddd"/>
+    <text x="170" y="430" text-anchor="middle">0</text><text x="360" y="430" text-anchor="middle">20</text><text x="550" y="430" text-anchor="middle">40</text><text x="740" y="430" text-anchor="middle">60</text><text x="930" y="430" text-anchor="middle">80</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="16">
+    <text x="20" y="125">#1 FFX002</text><rect x="170" y="104" width="620" height="34" rx="3" fill="#2c7fb8"/><text x="805" y="126">65.3 — Tier 1</text>
+    <text x="20" y="175">#2 FFX001</text><rect x="170" y="154" width="544" height="34" rx="3" fill="#2c7fb8"/><text x="729" y="176">57.3 — Tier 1</text>
+    <text x="20" y="225">#3 PWC002</text><rect x="170" y="204" width="532" height="34" rx="3" fill="#2c7fb8"/><text x="717" y="226">56.0 — High-review</text>
+    <text x="20" y="275">#4 PWC004</text><rect x="170" y="254" width="501" height="34" rx="3" fill="#2c7fb8"/><text x="686" y="276">52.7 — Tier 2</text>
+    <text x="20" y="325">#5 PWC001</text><rect x="170" y="304" width="410" height="34" rx="3" fill="#2c7fb8"/><text x="595" y="326">43.2 — Tier 3</text>
+    <text x="20" y="375">#6 PWC003</text><rect x="170" y="354" width="280" height="34" rx="3" fill="#2c7fb8"/><text x="465" y="376">29.5 — Special-use</text>
+  </g>
+  <text x="550" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="14">Readiness score</text>
+</svg>
