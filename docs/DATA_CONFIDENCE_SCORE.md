@@ -42,6 +42,8 @@ The generated chart is:
 data/outputs/charts/data_confidence_chart.png
 ```
 
+![Data confidence chart](../data/outputs/charts/data_confidence_chart.png)
+
 The chart is intentionally simple:
 
 ```text
