@@ -114,6 +114,20 @@ data/outputs/charts/utilization_vs_ports_<site>.png
 data/outputs/deliverable_package/
 ```
 
+`site_results.csv` includes both readiness and data-confidence outputs:
+
+```text
+readiness_score = how promising the site looks
+
+data_confidence_score = how complete the current input data is
+```
+
+More detail:
+
+```text
+docs/DATA_CONFIDENCE_SCORE.md
+```
+
 ## Scoring profile analysis
 
 `src/run_profile_analysis.py` tests whether rankings change when different planning priorities are emphasized.
@@ -191,6 +205,9 @@ docs/MODEL_FINDINGS_REPORT.md
 docs/PRESENTATION_OUTLINE.md
 docs/RESULTS_INTERPRETATION.md
 docs/READINESS_MAP_GUIDE.md
+docs/DATA_CONFIDENCE_SCORE.md
+docs/SITE_SCREENING_CHECKLIST.md
+docs/ADDING_NEW_SITES_GUIDE.md
 docs/STAKEHOLDER_DATA_REQUEST.md
 docs/METHODOLOGY.md
 docs/DATA_DICTIONARY.md
