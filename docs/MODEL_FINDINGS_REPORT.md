@@ -4,12 +4,13 @@
 
 This prototype is a planning-support model for public EV charging site readiness and right-sizing in Fairfax City and Prince William County.
 
-The model helps answer three questions:
+The model helps answer four questions:
 
 ```text
 1. Which candidate sites look strongest?
 2. How many starter charging ports should be considered?
-3. What should be checked next before a site advances?
+3. How complete or confirmed is the current data?
+4. What should be checked next before a site advances?
 ```
 
 The model supports early planning. It is not a final approval or construction tool.
@@ -34,6 +35,8 @@ The final readiness score uses this weighting:
 ```text
 readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 ```
+
+Readiness score shows how promising a site looks under current assumptions. Data confidence is separate and shows how complete or confirmed the input data is.
 
 ## Scoring profile analysis
 
@@ -97,6 +100,19 @@ PWC001 — Tier 3
 PWC003 — Low public-priority / special-use
 ```
 
+## Readiness-confidence action labels
+
+```text
+FFX002 — Verify key data, then advance
+FFX001 — Promising, but fix data first
+PWC002 — Technical review before advancement
+PWC004 — Promising with timeline caveat
+PWC001 — Monitor or deprioritize
+PWC003 — Special-use decision needed
+```
+
+These action labels are more cautious than simple ranking. They combine readiness and data confidence so the project does not treat a high score as permission to build.
+
 ## Port-planning result
 
 ```text
@@ -127,8 +143,13 @@ visitors_day
 hours_open for sites except FFX002
 parking_spaces for sites except FFX002
 local EV adoption counts
+PWC004 reopening or usable-planning timeline
+PWC002 garage-specific review
+PWC003 public, fleet-only, special-use, or removal decision
 ```
 
 ## Planning conclusion
 
 FFX002 is the most stable top candidate because it ranks first in the base model, stays stable in sensitivity analysis, and remains first across all scoring profiles. FFX001 is the second strongest candidate. PWC002 and PWC004 remain important candidates but need more confirmation before advancement. PWC003 should stay low priority unless its access or use case changes.
+
+The model should be used to prioritize follow-up questions and site screening, not to authorize construction, procurement, or final site selection.
