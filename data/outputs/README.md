@@ -21,6 +21,14 @@ data/outputs/baseline_comparison.md
 data/outputs/workflow_success.json
 ```
 
+`site_results.csv` includes both `readiness_score` and `data_confidence_score`.
+
+```text
+readiness_score = how promising the site looks
+
+data_confidence_score = how complete the current input data is
+```
+
 `workflow_success.json` is written only after `src/run_all.py` completes successfully. The deliverable package builder uses it to avoid packaging stale outputs after a failed or partial run.
 
 ## Generated chart outputs
