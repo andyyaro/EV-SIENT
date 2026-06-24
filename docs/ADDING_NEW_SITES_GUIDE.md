@@ -18,6 +18,18 @@ Main model input file:
 data/inputs/real_sites_v1.csv
 ```
 
+## Template consistency status
+
+The current template is meant to have the same column names and column order as the main input file.
+
+```text
+data/inputs/new_sites_template.csv
+should match
+data/inputs/real_sites_v1.csv
+```
+
+The example row uses `NEW001` only as a placeholder. Do not copy `NEW001` into the final model as a real site.
+
 ## Simple workflow
 
 ```text
@@ -28,7 +40,7 @@ data/inputs/real_sites_v1.csv
 5. Add the new row to data/inputs/real_sites_v1.csv.
 6. Run the validator.
 7. Run the full workflow.
-8. Review the rankings and data-quality report.
+8. Review the rankings, data confidence, action labels, and data-quality report.
 9. Only prioritize outreach for sites that rank well or have major uncertainty.
 ```
 
@@ -207,9 +219,23 @@ Then review:
 ```text
 data/outputs/data_quality_report.csv
 data/outputs/site_results.csv
+data/outputs/action_matrix.md
+data/outputs/model_run_summary.md
 data/outputs/results_interpretation.md
 data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
 data/outputs/charts/profile_rank_stability_chart.png
+```
+
+## What to check after the run
+
+```text
+1. Did the new site appear in site_results.csv?
+2. Did the new site create any ERROR rows in data_quality_report.csv?
+3. Did the new site rank high enough to matter?
+4. Did the new site have low data confidence?
+5. Did the action_label say to advance, verify data, review technically, monitor, or deprioritize?
+6. Did the new site change the top candidate or the stability finding?
 ```
 
 ## When to add outreach rows
