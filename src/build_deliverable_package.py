@@ -17,6 +17,7 @@ PACKAGE_GROUPS = {
     "charts": [
         "data/outputs/charts/site_readiness_map.png",
         "data/outputs/charts/readiness_score_chart.png",
+        "data/outputs/charts/data_confidence_chart.png",
         "data/outputs/charts/profile_rank_stability_chart.png",
         "data/outputs/charts/profile_score_heatmap.png",
     ],
@@ -65,11 +66,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a local deliverable package.")
     parser.add_argument("--output-dir", default=DEFAULT_PACKAGE_DIR, help="Package output folder.")
     parser.add_argument("--no-clean", action="store_true", help="Do not delete the existing package folder first.")
-    parser.add_argument(
-        "--skip-success-check",
-        action="store_true",
-        help="Allow package creation without checking that the full workflow completed successfully.",
-    )
+    parser.add_argument("--skip-success-check", action="store_true", help="Skip the workflow success check.")
     return parser.parse_args()
 
 
@@ -84,10 +81,7 @@ def generated_sources() -> list[Path]:
 def validate_success_marker() -> None:
     marker_path = PROJECT_ROOT / SUCCESS_MARKER
     if not marker_path.exists():
-        raise SystemExit(
-            f"Missing workflow success marker: {SUCCESS_MARKER}. "
-            "Run `python src/run_all.py` successfully before building the deliverable package."
-        )
+        raise SystemExit(f"Missing workflow success marker: {SUCCESS_MARKER}. Run `python src/run_all.py` first.")
 
     marker_mtime = marker_path.stat().st_mtime
     newer_outputs = [
@@ -97,11 +91,7 @@ def validate_success_marker() -> None:
     ]
     if newer_outputs:
         joined = ", ".join(str(path) for path in newer_outputs)
-        raise SystemExit(
-            "Some generated outputs are newer than the latest successful workflow marker. "
-            "Re-run `python src/run_all.py` successfully first. "
-            f"Newer outputs: {joined}"
-        )
+        raise SystemExit(f"Generated outputs are newer than the success marker. Re-run `python src/run_all.py`. Newer outputs: {joined}")
 
 
 def sha256_file(path: Path) -> str:
@@ -161,31 +151,26 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
         "",
         f"Generated: {generated_at}",
         "",
-        "This folder collects the main files needed to review or present the current model run.",
-        "",
-        "## Freshness check",
-        "",
-        "The package builder recreates this package by default. Copied files receive a fresh package-build modified time. The manifest records each source file's original modified time and SHA-256 hash.",
-        "",
         "## Recommended review order",
         "",
         "1. `reports/PROJECT_STATUS.md`",
         "2. `reports/MODEL_FINDINGS_BRIEF.md`",
         "3. `charts/site_readiness_map.png`",
         "4. `charts/readiness_score_chart.png`",
-        "5. `charts/profile_rank_stability_chart.png`",
-        "6. `run_outputs/results_interpretation.md`",
-        "7. `run_outputs/model_run_summary.md`",
-        "8. `run_outputs/profile_comparison.md`",
-        "9. `reports/PRESENTATION_OUTLINE.md`",
-        "10. `reports/DATA_CONFIDENCE_SCORE.md`",
-        "11. `reports/SITE_SCREENING_CHECKLIST.md`",
-        "12. `reports/ADDING_NEW_SITES_GUIDE.md`",
-        "13. `expansion_inputs/new_sites_template.csv`",
-        "14. `expansion_inputs/site_screening_checklist.csv`",
-        "15. `reports/STAKEHOLDER_DATA_REQUEST.md`",
-        "16. `reports/STAKEHOLDER_CONTACT_PLAN.md`",
-        "17. `stakeholder_inputs/stakeholder_response_tracker.csv`",
+        "5. `charts/data_confidence_chart.png`",
+        "6. `charts/profile_rank_stability_chart.png`",
+        "7. `run_outputs/results_interpretation.md`",
+        "8. `run_outputs/model_run_summary.md`",
+        "9. `run_outputs/profile_comparison.md`",
+        "10. `reports/PRESENTATION_OUTLINE.md`",
+        "11. `reports/DATA_CONFIDENCE_SCORE.md`",
+        "12. `reports/SITE_SCREENING_CHECKLIST.md`",
+        "13. `reports/ADDING_NEW_SITES_GUIDE.md`",
+        "14. `expansion_inputs/new_sites_template.csv`",
+        "15. `expansion_inputs/site_screening_checklist.csv`",
+        "16. `reports/STAKEHOLDER_DATA_REQUEST.md`",
+        "17. `reports/STAKEHOLDER_CONTACT_PLAN.md`",
+        "18. `stakeholder_inputs/stakeholder_response_tracker.csv`",
         "",
         "## Included files",
         "",
@@ -201,14 +186,7 @@ def build_package_readme(manifest: list[dict[str, str]]) -> str:
             lines.append(f"- `{item['source']}`")
         lines.append("")
 
-    lines.extend(
-        [
-            "## Limitation",
-            "",
-            "This package is for planning communication only. It does not replace required technical, permitting, procurement, or stakeholder review.",
-            "",
-        ]
-    )
+    lines.extend(["## Limitation", "", "This package is for planning communication only.", ""])
     return "\n".join(lines)
 
 
