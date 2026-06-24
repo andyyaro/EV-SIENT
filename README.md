@@ -12,6 +12,10 @@ The model evaluates sites using demand, implementation feasibility, site review,
 - Step-by-step reproduction checklist: [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
 - Simple repo map: [docs/REPO_MAP.md](docs/REPO_MAP.md)
 
+## Python version
+
+Use Python 3.10 or newer. Python 3.11 is the tested version used by the GitHub Actions workflow.
+
 ## Quick run
 
 From the repository root:
