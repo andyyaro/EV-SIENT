@@ -57,11 +57,11 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
     ordered = results.sort_values("data_confidence_score", ascending=True).copy()
     ordered["label"] = ordered["site_id"] + "\n" + ordered["site_name"]
 
-    fig, ax = plt.subplots(figsize=(11, 6.4))
+    fig, ax = plt.subplots(figsize=(12.5, 6.4))
     bars = ax.barh(ordered["label"], ordered["data_confidence_score"])
 
     max_score = float(ordered["data_confidence_score"].max())
-    ax.set_xlim(0, max(80, max_score + 12))
+    ax.set_xlim(0, max(90, max_score + 25))
     ax.set_xlabel("Data confidence score")
     ax.set_title("EV Charger Site Data Confidence — Current Model Run")
 
@@ -75,6 +75,7 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
             f"{confidence_score:.1f}  |  {confidence_level}  |  readiness {readiness_score:.1f}",
             va="center",
             fontsize=9,
+            clip_on=False,
         )
 
     ax.axvline(50, linestyle="--", linewidth=1, alpha=0.5)
@@ -88,8 +89,8 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
     footer = "Confidence is separate from readiness. It shows how complete the current input data is, not whether a site is good or bad."
     fig.text(0.5, 0.01, footer, ha="center", fontsize=8)
 
-    fig.tight_layout(rect=[0, 0.04, 1, 1])
-    fig.savefig(output_path, dpi=200)
+    fig.tight_layout(rect=[0, 0.04, 0.98, 1])
+    fig.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
 
