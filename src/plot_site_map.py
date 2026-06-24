@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
+from matplotlib.ticker import FormatStrFormatter, MaxNLocator
 import pandas as pd
 
 DEFAULT_INPUT = "data/inputs/real_sites_v1.csv"
@@ -70,6 +71,7 @@ TIER_MARKERS = {
 }
 
 TIER_ORDER = ["Tier 1", "High-review", "Tier 2", "Tier 3", "Special-use"]
+LOCALITY_PANEL_LABELS = {"FFX": "Fairfax City zoom", "PWC": "Prince William County zoom"}
 
 
 def ensure_parent_dir(path: str | Path) -> None:
@@ -242,12 +244,25 @@ def axis_bounds(data: pd.DataFrame, pad_factor: float = 0.20, min_lon_pad: float
     return lon_min - lon_pad, lon_max + lon_pad, lat_min - lat_pad, lat_max + lat_pad
 
 
+def style_axis(ax, zoom: bool = False) -> None:
+    """Apply consistent, low-clutter map-axis formatting."""
+    ax.grid(True, alpha=0.20, linewidth=0.7)
+    ax.tick_params(labelsize=8)
+    ax.xaxis.set_major_locator(MaxNLocator(5 if zoom else 6))
+    ax.yaxis.set_major_locator(MaxNLocator(5 if zoom else 6))
+    ax.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
+    ax.yaxis.set_major_formatter(FormatStrFormatter("%.3f"))
+    for spine in ax.spines.values():
+        spine.set_linewidth(0.8)
+        spine.set_alpha(0.85)
+
+
 def draw_cluster_boxes(ax, data: pd.DataFrame) -> None:
     """Draw light dashed boxes around clusters in the overview panel only."""
     if data.empty or "locality_group" not in data.columns:
         return
 
-    for _, group in data.groupby("locality_group"):
+    for locality, group in data.groupby("locality_group"):
         if group.empty:
             continue
         lon0, lon1, lat0, lat1 = axis_bounds(group, pad_factor=0.55, min_lon_pad=0.010, min_lat_pad=0.010)
@@ -258,10 +273,20 @@ def draw_cluster_boxes(ax, data: pd.DataFrame) -> None:
             fill=False,
             linestyle="--",
             linewidth=0.9,
-            alpha=0.40,
+            alpha=0.38,
             zorder=1,
         )
         ax.add_patch(rect)
+        ax.text(
+            (lon0 + lon1) / 2,
+            lat1,
+            LOCALITY_PANEL_LABELS.get(locality, locality),
+            fontsize=7.5,
+            va="bottom",
+            ha="center",
+            bbox={"boxstyle": "round,pad=0.18", "fc": "white", "alpha": 0.78, "lw": 0.25},
+            zorder=3,
+        )
 
 
 def plot_sites_on_axis(
@@ -315,15 +340,14 @@ def plot_sites_on_axis(
             xy=(row["lon"], row["lat"]),
             xytext=label_offsets.get(site_id, (8, 8)),
             textcoords="offset points",
-            fontsize=8,
+            fontsize=7.8,
             arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
-            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.84, "lw": 0.3},
+            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.86, "lw": 0.3},
             zorder=5,
         )
 
-    ax.grid(True, alpha=0.25)
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
+    ax.set_xlabel("Longitude", fontsize=9)
+    ax.set_ylabel("Latitude", fontsize=9)
 
     if show_legend:
         add_tier_legend(ax, data)
@@ -334,7 +358,7 @@ def ranked_summary(data: pd.DataFrame) -> str:
         return "Ranked readiness\nNo sites loaded."
 
     summary = data.sort_values("model_rank_num", na_position="last").copy()
-    lines = ["Ranked readiness", ""]
+    lines = ["Ranked readiness", "score | tier | ports", ""]
     for _, row in summary.iterrows():
         site_id = str(row.get("site_id", ""))
         score = safe_float(row.get("readiness_score_num", row.get("readiness_score", "")))
@@ -343,14 +367,11 @@ def ranked_summary(data: pd.DataFrame) -> str:
         ports = row.get("recommended_ports_now", "")
         rank_text = f"#{int(rank)}" if rank is not None else "--"
         score_text = f"{score:.1f}" if score is not None else "n/a"
-        ports_text = ""
-        if str(ports) not in {"", "nan", "None"}:
-            try:
-                ports_text = f" | ports: {int(float(ports))}"
-            except (TypeError, ValueError):
-                ports_text = f" | ports: {ports}"
-        lines.append(f"{rank_text} {site_id}: {score_text}")
-        lines.append(f"   {tier}{ports_text}")
+        try:
+            ports_text = str(int(float(ports)))
+        except (TypeError, ValueError):
+            ports_text = "n/a"
+        lines.append(f"{rank_text} {site_id}: {score_text} | {tier} | {ports_text}")
 
     lines.extend([
         "",
@@ -378,13 +399,13 @@ def add_tier_legend(ax, data: pd.DataFrame) -> None:
             markerfacecolor="white",
             markeredgecolor="black",
             color="black",
-            markersize=7,
+            markersize=6.8,
             label=tier,
         )
         for tier in tiers
     ]
     if handles:
-        ax.legend(handles=handles, title="Recommendation tier", loc="lower left", fontsize=8, title_fontsize=8, framealpha=0.90)
+        ax.legend(handles=handles, title="Recommendation tier", loc="lower left", fontsize=7.8, title_fontsize=8, framealpha=0.90)
 
 
 def plot_site_map(
@@ -402,17 +423,17 @@ def plot_site_map(
     norm, cmap_name = score_norm(scores)
     top_site = top_site_id_from_results(data)
 
-    fig = plt.figure(figsize=(15.8, 9.2))
+    fig = plt.figure(figsize=(16.2, 9.3))
     grid = fig.add_gridspec(
         2,
         3,
-        width_ratios=[1.70, 1.06, 0.86],
+        width_ratios=[1.72, 1.08, 0.90],
         height_ratios=[1, 1],
-        left=0.055,
+        left=0.052,
         right=0.985,
         bottom=0.15,
         top=0.88,
-        wspace=0.28,
+        wspace=0.30,
         hspace=0.34,
     )
 
@@ -428,6 +449,7 @@ def plot_site_map(
     lon0, lon1, lat0, lat1 = axis_bounds(data, pad_factor=0.22, min_lon_pad=0.018, min_lat_pad=0.018)
     ax_overview.set_xlim(lon0, lon1)
     ax_overview.set_ylim(lat0, lat1)
+    style_axis(ax_overview, zoom=False)
 
     ffx = data[data["locality_group"] == "FFX"].copy()
     if not ffx.empty:
@@ -436,6 +458,7 @@ def plot_site_map(
         lon0, lon1, lat0, lat1 = axis_bounds(ffx, pad_factor=1.10, min_lon_pad=0.008, min_lat_pad=0.008)
         ax_ffx.set_xlim(lon0, lon1)
         ax_ffx.set_ylim(lat0, lat1)
+        style_axis(ax_ffx, zoom=True)
 
     pwc = data[data["locality_group"] == "PWC"].copy()
     if not pwc.empty:
@@ -444,20 +467,21 @@ def plot_site_map(
         lon0, lon1, lat0, lat1 = axis_bounds(pwc, pad_factor=0.30, min_lon_pad=0.012, min_lat_pad=0.012)
         ax_pwc.set_xlim(lon0, lon1)
         ax_pwc.set_ylim(lat0, lat1)
+        style_axis(ax_pwc, zoom=True)
 
     panel_ax.text(
         0.0,
         1.0,
         ranked_summary(data),
         transform=panel_ax.transAxes,
-        fontsize=8.5,
+        fontsize=8.4,
         va="top",
         ha="left",
-        linespacing=1.30,
+        linespacing=1.28,
         bbox={"boxstyle": "round,pad=0.55", "fc": "white", "alpha": 0.95, "lw": 0.6},
     )
 
-    cax = panel_ax.inset_axes([0.02, 0.04, 0.58, 0.035])
+    cax = panel_ax.inset_axes([0.00, 0.045, 0.78, 0.040])
     mappable = plt.cm.ScalarMappable(norm=norm, cmap=cmap_name)
     mappable.set_array([])
     cbar = fig.colorbar(mappable, cax=cax, orientation="horizontal")
