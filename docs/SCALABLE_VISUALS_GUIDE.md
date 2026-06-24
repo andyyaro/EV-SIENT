@@ -18,13 +18,14 @@ python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
 
 This generates demo data, validates it, runs the model, adds action labels, runs scoring-profile analysis, and creates scalable visuals.
 
-## Scalable visual script
+## Scalable visual scripts
 
 ```text
 src/plot_scalable_readiness_charts.py
+src/plot_scalable_data_confidence_chart.py
 ```
 
-Use this script directly when you already have a model results CSV.
+Use these scripts directly when you already have a model results CSV.
 
 ## Example for a 50-site demo result file
 
@@ -35,14 +36,20 @@ python src/plot_scalable_readiness_charts.py \
   --profile-results data/demo/outputs/demo_profile_results_50.csv \
   --output-dir data/demo/outputs/charts/scalable \
   --top-n 15
+
+python src/plot_scalable_data_confidence_chart.py \
+  --results data/demo/outputs/demo_site_results_50.csv \
+  --output-dir data/demo/outputs/charts/scalable \
+  --top-n 15
 ```
 
 ## Generated visuals
 
-The script can create:
+The scripts can create:
 
 ```text
 readiness_top_15.png
+data_confidence_top_15.png
 readiness_map_top_15_labeled.png
 profile_heatmap_top_15.png
 profile_rank_stability_top_8.png
@@ -67,6 +74,12 @@ Some visuals require optional inputs:
 Use this as the main presentation ranking chart.
 
 It shows only the strongest sites, so it stays readable even when the full dataset has 50 or more candidates.
+
+### Top-N data-confidence chart
+
+Use this as the main readable confidence chart.
+
+It shows confidence for the same top-N ranked candidates. Confidence is separate from readiness: it shows how complete and source-supported the input data is, not whether a site is good or bad.
 
 ### Multi-panel readiness map
 
@@ -116,9 +129,9 @@ How many sites stay lower priority?
 
 ### Data confidence compact chart
 
-Use this to review confidence across larger result sets.
+Use this only as an appendix or audit chart.
 
-It is an audit-style chart, not the main presentation chart.
+It includes every site but intentionally uses compact labels. Use the Top-N data-confidence chart first.
 
 ### Full compact readiness chart
 
@@ -130,13 +143,14 @@ It includes every site but intentionally uses compact labels. It is useful for c
 
 ```text
 1–10 sites:
-  normal readiness chart is fine
+  normal readiness/confidence charts are fine
 
 11–25 sites:
-  top-N chart + multi-panel map + compact full chart
+  top-N readiness chart + top-N confidence chart + multi-panel map + compact full chart
 
 26+ sites:
-  top-N chart + multi-panel map + profile heatmap + top-8 rank-stability chart
+  top-N readiness chart + top-N confidence chart + multi-panel map
+  profile heatmap + top-8 rank-stability chart
   distribution chart + tier-count chart
   full compact charts only as appendix
 ```
