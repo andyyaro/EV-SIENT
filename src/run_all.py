@@ -24,6 +24,7 @@ SUCCESS_MARKER = "data/outputs/workflow_success.json"
 STEPS = [
     {"name": "Validate input data", "command": [sys.executable, "src/validate_site_data.py"]},
     {"name": "Run readiness and right-sizing model", "command": [sys.executable, "src/ev_charger_model.py"]},
+    {"name": "Add readiness-confidence action matrix", "command": [sys.executable, "src/add_action_matrix.py"]},
     {"name": "Create polished readiness score chart", "command": [sys.executable, "src/plot_readiness_score_chart.py"]},
     {"name": "Create data confidence chart", "command": [sys.executable, "src/plot_data_confidence_chart.py"]},
     {"name": "Run sensitivity analysis", "command": [sys.executable, "src/run_sensitivity_analysis.py"]},
@@ -39,6 +40,7 @@ STEPS = [
 EXPECTED_OUTPUTS = [
     "data/outputs/data_quality_report.csv",
     "data/outputs/site_results.csv",
+    "data/outputs/action_matrix.md",
     "data/outputs/sensitivity_results.csv",
     "data/outputs/sensitivity_summary.csv",
     "data/outputs/profile_results.csv",
