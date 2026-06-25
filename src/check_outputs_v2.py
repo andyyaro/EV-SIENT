@@ -15,6 +15,7 @@ Then:
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -34,6 +35,7 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_right_sizing_report.md"),
     Path("data/outputs/v2_results_interpretation.md"),
     Path("data/outputs/v2_run_summary.md"),
+    Path("data/outputs/v2_workflow_success.json"),
     Path("data/outputs/charts/v2_readiness_score_chart.png"),
     Path("data/outputs/charts/v2_polished_readiness_score_chart.png"),
     Path("data/outputs/charts/v2_data_confidence_chart.png"),
@@ -43,41 +45,20 @@ EXPECTED_FILES = [
 ]
 
 REQUIRED_RESULT_COLUMNS = [
-    "model_rank",
-    "site_id",
-    "site_name",
-    "readiness_score",
-    "data_confidence_score",
-    "data_confidence_level",
-    "recommendation_tier",
-    "recommended_ports_now",
-    "recommended_ports_2035",
-    "recommended_ports_2050",
-    "action_label",
+    "model_rank", "site_id", "site_name", "readiness_score", "data_confidence_score",
+    "data_confidence_level", "recommendation_tier", "recommended_ports_now",
+    "recommended_ports_2035", "recommended_ports_2050", "action_label",
 ]
 
 REQUIRED_ELECTRICAL_COLUMNS = [
-    "site_id",
-    "site_name",
-    "base_rank",
-    "electrical_risk_level",
-    "expected_rank",
-    "conservative_rank",
-    "expected_score",
-    "conservative_score",
+    "site_id", "site_name", "base_rank", "electrical_risk_level", "expected_rank",
+    "conservative_rank", "expected_score", "conservative_score",
 ]
 
 REQUIRED_RIGHT_SIZING_COLUMNS = [
-    "site_id",
-    "site_name",
-    "model_rank",
-    "ports_now",
-    "ports_2035_base",
-    "ports_2035_high",
-    "ports_2050_base",
-    "ports_2050_high",
-    "future_ready_capacity",
-    "expansion_strategy",
+    "site_id", "site_name", "model_rank", "ports_now", "ports_2035_base",
+    "ports_2035_high", "ports_2050_base", "ports_2050_high",
+    "future_ready_capacity", "expansion_strategy",
 ]
 
 REQUIRED_SITE_IDS = {"FFX001", "FFX002", "FFX003", "FFX004", "PWC001", "PWC002", "PWC003", "PWC004"}
@@ -100,7 +81,6 @@ def check_results_table() -> list[str]:
         return [f"Cannot check V2 results table because {results_path} is missing."]
 
     results = pd.read_csv(results_path)
-
     missing_columns = [col for col in REQUIRED_RESULT_COLUMNS if col not in results.columns]
     if missing_columns:
         errors.append(f"v2_site_results.csv is missing required columns: {missing_columns}")
@@ -187,6 +167,28 @@ def check_run_summary() -> list[str]:
     return []
 
 
+def check_workflow_manifest() -> list[str]:
+    manifest_path = Path("data/outputs/v2_workflow_success.json")
+    if not manifest_path.exists():
+        return [f"Cannot check V2 workflow manifest because {manifest_path} is missing."]
+
+    try:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"v2_workflow_success.json is not valid JSON: {exc}"]
+
+    errors = []
+    if data.get("workflow") != "v2_expansion_planning":
+        errors.append("v2_workflow_success.json has the wrong workflow name.")
+    if data.get("status") != "success":
+        errors.append(f"v2_workflow_success.json status is not success: {data.get('status')}")
+    if int(data.get("site_count", 0)) < len(REQUIRED_SITE_IDS):
+        errors.append("v2_workflow_success.json site_count is lower than expected.")
+    if data.get("missing_or_empty_outputs"):
+        errors.append("v2_workflow_success.json reports missing or empty outputs.")
+    return errors
+
+
 def main() -> None:
     print("V2 OUTPUT CHECK")
     print("---------------")
@@ -196,6 +198,7 @@ def main() -> None:
     errors.extend(check_electrical_summary())
     errors.extend(check_right_sizing())
     errors.extend(check_run_summary())
+    errors.extend(check_workflow_manifest())
 
     if errors:
         print("Status: FAILED")
