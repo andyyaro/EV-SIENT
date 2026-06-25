@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 import zipfile
 from pathlib import Path
@@ -63,6 +64,14 @@ EQUITY_WEIGHTS = {
     "multifamily_component": 0.15,
 }
 
+COUNTY_LABELS = {
+    "51059": "Fairfax County",
+    "51153": "Prince William County",
+    "51600": "Fairfax city",
+    "51683": "Manassas city",
+    "51685": "Manassas Park city",
+}
+
 
 def find_first(pattern: str, folder: Path = RAW_DIR) -> Path | None:
     """Find first local file whose filename contains pattern."""
@@ -70,6 +79,16 @@ def find_first(pattern: str, folder: Path = RAW_DIR) -> Path | None:
         return None
     matches = sorted(p for p in folder.rglob("*") if pattern.lower() in p.name.lower())
     return matches[0] if matches else None
+
+
+def clean_text(value: Any) -> str:
+    """Normalize labels from Census display exports."""
+    return re.sub(r"\s+", " ", str(value).replace("\ufeff", "").replace("\xa0", " ")).strip()
+
+
+def clean_key(value: Any) -> str:
+    """Normalize labels for case-insensitive matching."""
+    return clean_text(value).lower()
 
 
 def to_number(series: pd.Series) -> pd.Series:
@@ -81,22 +100,23 @@ def to_number(series: pd.Series) -> pd.Series:
         .str.replace("—", "", regex=False)
         .str.replace("(X)", "", regex=False)
         .str.replace("N", "", regex=False)
+        .str.replace("±", "", regex=False)
     )
     return pd.to_numeric(cleaned, errors="coerce").fillna(0)
 
 
-def read_census_geo_csv(path: Path) -> pd.DataFrame:
-    """Read a Census CSV that has a GEO_ID column.
+def find_col(df: pd.DataFrame, candidates: list[str]) -> str:
+    """Find the first available column from a list of possible column IDs."""
+    for col in candidates:
+        if col in df.columns:
+            return col
+    raise ValueError(f"None of these columns were found: {candidates}")
 
-    Some Census table-display exports are wide tables with columns such as
-    `Block Group 1; Census Tract ...!!Estimate` and do not include `GEO_ID`.
-    Those cannot be joined directly to TIGER GEOIDs here. For that case, this
-    function raises a clear error and callers can use a stronger fallback table
-    that already has GEO_ID, such as B25044 for occupied households.
-    """
+
+def read_census_geo_csv(path: Path) -> pd.DataFrame:
+    """Read a Census CSV that has a GEO_ID column."""
     df = pd.read_csv(path, dtype=str, low_memory=False)
-    # Handle UTF-8 BOM on the first header if present.
-    df.columns = [str(col).replace("\ufeff", "") for col in df.columns]
+    df.columns = [clean_text(col) for col in df.columns]
 
     if "GEO_ID" not in df.columns:
         raise ValueError(
@@ -109,12 +129,104 @@ def read_census_geo_csv(path: Path) -> pd.DataFrame:
     return df
 
 
-def find_col(df: pd.DataFrame, candidates: list[str]) -> str:
-    """Find the first available column from a list of possible column IDs."""
-    for col in candidates:
-        if col in df.columns:
-            return col
-    raise ValueError(f"None of these columns were found: {candidates}")
+def format_tract(tractce: str) -> str:
+    """Convert TIGER tract code like 415401 to Census display text like 4154.01."""
+    tractce = str(tractce).zfill(6)
+    prefix = str(int(tractce[:4]))
+    suffix = tractce[4:]
+    return prefix if suffix == "00" else f"{prefix}.{suffix}"
+
+
+def table_display_label(row: pd.Series) -> str:
+    """Build the expected Census table-display column stem for one block group."""
+    countyfp = str(row.get("countyfp", ""))
+    county_label = COUNTY_LABELS.get(str(row.get("statefp", "")) + countyfp, f"County {countyfp}")
+    tract = format_tract(str(row.get("tractce", "")))
+    block_group = str(row.get("blkgrpce", ""))
+    return f"Block Group {block_group}; Census Tract {tract}; {county_label}; Virginia"
+
+
+def label_matches(label: str, selectors: list[str]) -> bool:
+    """Return True when a normalized Census row label matches one selector.
+
+    A selector ending with ':' is treated as an exact label match. Other selectors
+    are treated as case-insensitive contains matches.
+    """
+    key = clean_key(label)
+    for selector in selectors:
+        selector_key = clean_key(selector)
+        if selector_key.endswith(":"):
+            if key == selector_key:
+                return True
+        elif selector_key in key:
+            return True
+    return False
+
+
+def extract_display_table_values(
+    path: Path,
+    bg_metadata: pd.DataFrame,
+    row_selectors: list[str],
+    value_name: str,
+) -> pd.DataFrame:
+    """Extract one value per block group from a Census table-display CSV.
+
+    This handles Census downloads where geography is stored across columns like:
+    `Block Group 1; Census Tract 4151; Fairfax County; Virginia!!Estimate`.
+    """
+    df = pd.read_csv(path, dtype=str, low_memory=False)
+    df.columns = [clean_text(col) for col in df.columns]
+    label_col = df.columns[0]
+
+    matched_rows = df[df[label_col].apply(lambda label: label_matches(label, row_selectors))]
+    if matched_rows.empty:
+        raise ValueError(f"Could not find row selector(s) {row_selectors} in {path}")
+
+    normalized_columns = {clean_key(col): col for col in df.columns}
+    rows = []
+    missing_columns = 0
+
+    for _, bg in bg_metadata.iterrows():
+        stem = table_display_label(bg)
+        col_key = clean_key(f"{stem}!!Estimate")
+        col_name = normalized_columns.get(col_key)
+        if col_name is None:
+            missing_columns += 1
+            value = 0.0
+        else:
+            value = float(to_number(matched_rows[col_name]).sum())
+
+        rows.append({
+            "geoid": str(bg["geoid"]),
+            value_name: value,
+            "display_column_found": 0 if col_name is None else 1,
+        })
+
+    if missing_columns:
+        print(f"NOTICE: {path.name}: {missing_columns} block-group display column(s) were not matched.")
+
+    return pd.DataFrame(rows)
+
+
+def read_geo_or_display_value(
+    path: Path,
+    bg_metadata: pd.DataFrame,
+    geo_candidates: list[str],
+    row_selectors: list[str],
+    value_name: str,
+) -> pd.DataFrame:
+    """Read a value from either a GEO_ID CSV or a Census table-display CSV."""
+    try:
+        geo_df = read_census_geo_csv(path)
+        col = find_col(geo_df, geo_candidates)
+        out = geo_df[["geoid", col]].copy()
+        out[value_name] = to_number(out[col])
+        out["display_column_found"] = 1
+        return out[["geoid", value_name, "display_column_found"]]
+    except Exception as exc:
+        print(f"NOTICE: Reading {path.name} as GEO_ID CSV failed: {exc}")
+        print(f"NOTICE: Trying Census table-display parsing for {path.name}.")
+        return extract_display_table_values(path, bg_metadata, row_selectors, value_name)
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -155,8 +267,8 @@ def polygon_centroid(points: list[tuple[float, float]]) -> tuple[float, float]:
     return cy, cx
 
 
-def load_block_group_centroids(tiger_zip: Path) -> pd.DataFrame:
-    """Load TIGER block-group centroid points from a shapefile ZIP using pyshp."""
+def load_block_group_metadata(tiger_zip: Path) -> pd.DataFrame:
+    """Load TIGER block-group centroid points and metadata from a shapefile ZIP."""
     if shapefile is None:
         raise ImportError("Missing optional package 'pyshp'. Install it with: python -m pip install pyshp")
 
@@ -166,10 +278,11 @@ def load_block_group_centroids(tiger_zip: Path) -> pd.DataFrame:
 
     for shape_rec in reader.iterShapeRecords():
         attrs = dict(zip(field_names, shape_rec.record))
-        geoid = str(attrs.get("GEOID", ""))
-        if not geoid:
-            parts = [attrs.get("STATEFP", ""), attrs.get("COUNTYFP", ""), attrs.get("TRACTCE", ""), attrs.get("BLKGRPCE", "")]
-            geoid = "".join(str(p) for p in parts)
+        statefp = str(attrs.get("STATEFP", ""))
+        countyfp = str(attrs.get("COUNTYFP", ""))
+        tractce = str(attrs.get("TRACTCE", ""))
+        blkgrpce = str(attrs.get("BLKGRPCE", ""))
+        geoid = str(attrs.get("GEOID", "")) or f"{statefp}{countyfp}{tractce}{blkgrpce}"
 
         pts = shape_rec.shape.points
         parts = list(shape_rec.shape.parts) + [len(pts)]
@@ -180,7 +293,17 @@ def load_block_group_centroids(tiger_zip: Path) -> pd.DataFrame:
                 best_part = candidate
 
         lat, lon = polygon_centroid(best_part)
-        rows.append({"geoid": geoid, "bg_lat": lat, "bg_lon": lon})
+        row = {
+            "geoid": geoid,
+            "statefp": statefp,
+            "countyfp": countyfp,
+            "tractce": tractce,
+            "blkgrpce": blkgrpce,
+            "bg_lat": lat,
+            "bg_lon": lon,
+        }
+        row["census_display_label"] = table_display_label(pd.Series(row))
+        rows.append(row)
 
     return pd.DataFrame(rows)
 
@@ -204,39 +327,37 @@ def site_bg_membership(sites: pd.DataFrame, bg: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def household_table_from_b11001_or_fallback(b11001_path: Path, b25044_path: Path) -> tuple[pd.DataFrame, str, str]:
-    """Return block-group household counts from B11001 when possible, otherwise B25044.
-
-    The user's B11001 export may be a Census table-display CSV without GEO_ID.
-    In that case, use B25044 total occupied households because it is already one
-    of the official ACS equity inputs and includes GEO_ID in this project.
-    """
+def build_households(membership: pd.DataFrame, bg_metadata: pd.DataFrame, b11001_path: Path, b25044_path: Path) -> pd.DataFrame:
+    """Build nearby household counts from B11001, with B25044 as fallback."""
     try:
-        b11001 = read_census_geo_csv(b11001_path)
-        hh_col = find_col(b11001, ["B11001_001E"])
-        households = b11001[["geoid", hh_col]].copy()
-        households["households"] = to_number(households[hh_col])
-        return households[["geoid", "households"]], "ACS B11001", "official_derived"
+        households = read_geo_or_display_value(
+            b11001_path,
+            bg_metadata,
+            geo_candidates=["B11001_001E"],
+            row_selectors=["Households:"],
+            value_name="households",
+        )
+        source_table = "ACS B11001 households"
     except Exception as exc:
-        print(f"NOTICE: Could not use B11001 directly: {exc}")
-        print("NOTICE: Falling back to ACS B25044 total occupied households for nearby_households_1mi.")
-        b25044 = read_census_geo_csv(b25044_path)
-        hh_col = find_col(b25044, ["B25044_001E"])
-        households = b25044[["geoid", hh_col]].copy()
-        households["households"] = to_number(households[hh_col])
-        return households[["geoid", "households"]], "ACS B25044 occupied households fallback", "official_derived"
+        print(f"NOTICE: Could not use B11001 for households: {exc}")
+        print("NOTICE: Falling back to ACS B25044 occupied housing units for nearby_households_1mi.")
+        households = read_geo_or_display_value(
+            b25044_path,
+            bg_metadata,
+            geo_candidates=["B25044_001E"],
+            row_selectors=["Occupied housing units:"],
+            value_name="households",
+        )
+        source_table = "ACS B25044 occupied households fallback"
 
-
-def build_households(membership: pd.DataFrame, b11001_path: Path, b25044_path: Path) -> pd.DataFrame:
-    households, source_table, source_status = household_table_from_b11001_or_fallback(b11001_path, b25044_path)
-    merged = membership.merge(households, on="geoid", how="left")
+    merged = membership.merge(households[["geoid", "households"]], on="geoid", how="left")
     summary = merged.groupby(["site_id", "site_name"], as_index=False).agg(
         nearby_households_1mi=("households", "sum"),
         block_groups_used=("geoid", "nunique"),
     )
     summary["nearby_households_1mi"] = summary["nearby_households_1mi"].round().astype(int)
     summary["method"] = f"1-mile centroid-in-buffer estimate from {source_table} + TIGER block groups"
-    summary["source_status"] = source_status
+    summary["source_status"] = "official_derived"
     return summary
 
 
@@ -374,53 +495,79 @@ def build_traffic(sites: pd.DataFrame, vdot_path: Path) -> pd.DataFrame:
 
 def build_equity_inputs(
     membership: pd.DataFrame,
+    bg_metadata: pd.DataFrame,
     b19013_path: Path,
     b25044_path: Path,
     b25003_path: Path,
     b25024_path: Path,
 ) -> pd.DataFrame:
-    income = read_census_geo_csv(b19013_path)
-    vehicles = read_census_geo_csv(b25044_path)
-    tenure = read_census_geo_csv(b25003_path)
-    units = read_census_geo_csv(b25024_path)
+    median_income = read_geo_or_display_value(
+        b19013_path,
+        bg_metadata,
+        geo_candidates=["B19013_001E"],
+        row_selectors=["median household income"],
+        value_name="median_household_income",
+    )
+    total_households = read_geo_or_display_value(
+        b25044_path,
+        bg_metadata,
+        geo_candidates=["B25044_001E"],
+        row_selectors=["Occupied housing units:"],
+        value_name="total_households",
+    )
+    no_vehicle = read_geo_or_display_value(
+        b25044_path,
+        bg_metadata,
+        geo_candidates=["B25044_003E", "B25044_010E"],
+        row_selectors=["No vehicle available"],
+        value_name="no_vehicle_households",
+    )
+    occupied = read_geo_or_display_value(
+        b25003_path,
+        bg_metadata,
+        geo_candidates=["B25003_001E"],
+        row_selectors=["Occupied housing units:"],
+        value_name="occupied_housing_units",
+    )
+    renter = read_geo_or_display_value(
+        b25003_path,
+        bg_metadata,
+        geo_candidates=["B25003_003E"],
+        row_selectors=["Renter occupied"],
+        value_name="renter_occupied_households",
+    )
+    total_units = read_geo_or_display_value(
+        b25024_path,
+        bg_metadata,
+        geo_candidates=["B25024_001E"],
+        row_selectors=["Total housing units:"],
+        value_name="total_housing_units",
+    )
+    multifamily = read_geo_or_display_value(
+        b25024_path,
+        bg_metadata,
+        geo_candidates=["B25024_004E", "B25024_005E", "B25024_006E", "B25024_007E", "B25024_008E"],
+        row_selectors=["2 apartments", "3 or 4 apartments", "5 to 9 apartments", "10 to 19 apartments", "20 to 49 apartments", "50 or more apartments"],
+        value_name="multifamily_units",
+    )
 
-    income_col = find_col(income, ["B19013_001E"])
-    income_df = income[["geoid", income_col]].copy()
-    income_df["median_household_income"] = to_number(income_df[income_col])
+    bg = median_income[["geoid", "median_household_income"]]
+    for table in [total_households, no_vehicle, occupied, renter, total_units, multifamily]:
+        bg = bg.merge(table.drop(columns=["display_column_found"], errors="ignore"), on="geoid", how="outer")
 
-    vehicles_df = vehicles[["geoid"]].copy()
-    vehicles_df["total_households"] = to_number(vehicles[find_col(vehicles, ["B25044_001E"])])
-    vehicles_df["no_vehicle_households"] = to_number(vehicles[find_col(vehicles, ["B25044_003E"])]) + to_number(vehicles[find_col(vehicles, ["B25044_010E"])])
-
-    tenure_df = tenure[["geoid"]].copy()
-    tenure_df["occupied_housing_units"] = to_number(tenure[find_col(tenure, ["B25003_001E"])])
-    tenure_df["renter_occupied_households"] = to_number(tenure[find_col(tenure, ["B25003_003E"])])
-
-    units_df = units[["geoid"]].copy()
-    units_df["total_housing_units"] = to_number(units[find_col(units, ["B25024_001E"])])
-    multifamily_cols = [col for col in ["B25024_004E", "B25024_005E", "B25024_006E", "B25024_007E", "B25024_008E"] if col in units.columns]
-    if multifamily_cols:
-        units_df["multifamily_units"] = sum(to_number(units[col]) for col in multifamily_cols)
-    else:
-        units_df["multifamily_units"] = 0
-
-    bg = income_df.merge(vehicles_df, on="geoid", how="outer")
-    bg = bg.merge(tenure_df, on="geoid", how="outer")
-    bg = bg.merge(units_df, on="geoid", how="outer")
     merged = membership.merge(bg, on="geoid", how="left").fillna(0)
-
     rows = []
     for (site_id, site_name), group in merged.groupby(["site_id", "site_name"]):
         weights = group["occupied_housing_units"].replace(0, np.nan)
         if weights.notna().sum() == 0:
-            median_income = float(group["median_household_income"].mean()) if len(group) else 0.0
+            median = float(group["median_household_income"].mean()) if len(group) else 0.0
         else:
-            median_income = float(np.average(group["median_household_income"], weights=weights.fillna(0)))
+            median = float(np.average(group["median_household_income"], weights=weights.fillna(0)))
 
         rows.append({
             "site_id": site_id,
             "site_name": site_name,
-            "median_household_income": round(median_income),
+            "median_household_income": round(median),
             "total_households": round(float(group["total_households"].sum())),
             "no_vehicle_households": round(float(group["no_vehicle_households"].sum())),
             "occupied_housing_units": round(float(group["occupied_housing_units"].sum())),
@@ -556,20 +703,21 @@ def main() -> None:
         print(f"- {site['site_id']} — {site['site_name']}")
     print()
 
-    print("Loading TIGER block-group centroids...")
-    bg = load_block_group_centroids(tiger_path)  # type: ignore[arg-type]
-    print(f"Block groups loaded: {len(bg):,}")
+    print("Loading TIGER block-group metadata...")
+    bg_metadata = load_block_group_metadata(tiger_path)  # type: ignore[arg-type]
+    print(f"Block groups loaded: {len(bg_metadata):,}")
 
     print("Finding block groups within 1 mile of target sites...")
-    membership = site_bg_membership(sites, bg)
+    membership = site_bg_membership(sites, bg_metadata)
     if membership.empty:
         raise RuntimeError("No block groups were found within 1 mile of the target sites. Check coordinates/projection assumptions.")
 
-    households = build_households(membership, b11001_path, b25044_path)  # type: ignore[arg-type]
+    households = build_households(membership, bg_metadata, b11001_path, b25044_path)  # type: ignore[arg-type]
     jobs = build_jobs(membership, lodes_path)  # type: ignore[arg-type]
     traffic = build_traffic(sites, vdot_path)  # type: ignore[arg-type]
     equity_inputs = build_equity_inputs(
         membership,
+        bg_metadata,
         b19013_path,  # type: ignore[arg-type]
         b25044_path,  # type: ignore[arg-type]
         b25003_path,  # type: ignore[arg-type]
