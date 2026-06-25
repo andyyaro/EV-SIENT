@@ -1,10 +1,4 @@
-"""Build a consolidated V2 executive site summary table.
-
-This script joins the most decision-useful V2 outputs into one clean table for
-reporting, screenshots, and presentations. It combines ranking, confidence,
-electrical risk, right-sizing, port-simulation outputs, action labels, and
-review flags.
-"""
+"""Build a consolidated V2 executive site summary table."""
 
 from __future__ import annotations
 
@@ -62,9 +56,7 @@ def read_required_csv(path: Path, label: str) -> pd.DataFrame:
 
 
 def read_optional_csv(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        return pd.DataFrame()
-    return pd.read_csv(path)
+    return pd.read_csv(path) if path.exists() else pd.DataFrame()
 
 
 def normalize_electrical_columns(electrical: pd.DataFrame) -> pd.DataFrame:
@@ -74,19 +66,15 @@ def normalize_electrical_columns(electrical: pd.DataFrame) -> pd.DataFrame:
         rename_map["electrical_adjusted_rank"] = "expected_rank"
     if "electrical_adjusted_score" in data.columns and "expected_score" not in data.columns:
         rename_map["electrical_adjusted_score"] = "expected_score"
-    if rename_map:
-        data = data.rename(columns=rename_map)
-    return data
+    return data.rename(columns=rename_map) if rename_map else data
 
 
 def semicolon_join(items: list[str]) -> str:
-    cleaned = []
+    cleaned: list[str] = []
     seen = set()
     for item in items:
         text = str(item).strip()
-        if not text or text.lower() == "nan":
-            continue
-        if text not in seen:
+        if text and text.lower() != "nan" and text not in seen:
             cleaned.append(text)
             seen.add(text)
     return "; ".join(cleaned)
@@ -94,12 +82,11 @@ def semicolon_join(items: list[str]) -> str:
 
 def build_review_flags(row: pd.Series) -> str:
     flags: list[str] = []
-
     review_reason = str(row.get("review_reason", "")).strip()
     if review_reason and review_reason.lower() != "nan":
         flags.extend([part.strip() for part in review_reason.split(";") if part.strip()])
 
-    risk = str(row.get("electrical_risk_level", "")).strip().lower()
+    risk = str(row.get("electrical_risk_level", "")).lower()
     if risk == "high":
         flags.append("High electrical-risk screen")
     elif risk == "medium":
@@ -118,34 +105,29 @@ def build_review_flags(row: pd.Series) -> str:
     if "do_not_advance" in strategy:
         flags.append("Do not advance as general-public buildout")
 
-    current_status = str(row.get("sim_queue_risk_current_at_ports_now", "")).lower()
+    current_risk = str(row.get("sim_queue_risk_current_at_ports_now", "")).lower()
     future_status = str(row.get("sim_status_2050_high_at_future_ready", "")).lower()
-    if current_status in {"elevated", "high"}:
+    if current_risk in {"elevated", "high"}:
         flags.append("Current port count may need closer utilization review")
     if future_status == "underbuilt":
         flags.append("Future-ready capacity may be underbuilt in 2050 high case")
 
-    access = row.get("public_access", None)
     try:
-        if float(access) < 1:
+        if float(row.get("public_access", 1)) < 1:
             flags.append("Public access/use case needs confirmation")
     except (TypeError, ValueError):
         pass
 
-    if not flags:
-        flags.append("Standard site screening needed")
-    return semicolon_join(flags)
+    return semicolon_join(flags or ["Standard site screening needed"])
 
 
 def pick_min_ports(group: pd.DataFrame) -> object:
     if group.empty:
         return ""
-    acceptable = group[group["capacity_status"].isin(["right_sized", "acceptable_but_monitor"])]
-    if acceptable.empty:
-        best = group.sort_values(["estimated_wait_min", "utilization_pct"]).iloc[0]
-    else:
-        best = acceptable.sort_values("port_count").iloc[0]
-    return int(best["port_count"])
+    usable = group[group["capacity_status"] != "underbuilt"]
+    if not usable.empty:
+        return int(usable.sort_values("port_count").iloc[0]["port_count"])
+    return int(group.sort_values(["estimated_wait_min", "port_count"], ascending=[True, False]).iloc[0]["port_count"])
 
 
 def summarize_port_simulation(simulation: pd.DataFrame) -> pd.DataFrame:
@@ -158,17 +140,16 @@ def summarize_port_simulation(simulation: pd.DataFrame) -> pd.DataFrame:
         high_2035 = site_rows[site_rows["demand_case"] == "2035_high"].copy()
         high_2050 = site_rows[site_rows["demand_case"] == "2050_high"].copy()
 
-        current_ports_now = current[current.get("is_ports_now", False) == True] if "is_ports_now" in current.columns else pd.DataFrame()
+        current_ports_now = current[current["is_ports_now"] == True] if "is_ports_now" in current.columns else pd.DataFrame()
         if current_ports_now.empty and not current.empty:
             current_ports_now = current.sort_values("port_count").head(1)
 
-        future_ready = high_2050[high_2050.get("is_future_ready_capacity", False) == True] if "is_future_ready_capacity" in high_2050.columns else pd.DataFrame()
+        future_ready = high_2050[high_2050["is_future_ready_capacity"] == True] if "is_future_ready_capacity" in high_2050.columns else pd.DataFrame()
         if future_ready.empty and not high_2050.empty:
             future_ready = high_2050.sort_values("port_count").tail(1)
 
         current_row = current_ports_now.iloc[0] if not current_ports_now.empty else None
         future_row = future_ready.iloc[0] if not future_ready.empty else None
-
         rows.append(
             {
                 "site_id": site_id,
@@ -184,62 +165,42 @@ def summarize_port_simulation(simulation: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def build_executive_summary(
-    results: pd.DataFrame,
-    electrical: pd.DataFrame,
-    right_sizing: pd.DataFrame,
-    port_simulation: pd.DataFrame,
-) -> pd.DataFrame:
+def build_executive_summary(results: pd.DataFrame, electrical: pd.DataFrame, right_sizing: pd.DataFrame, port_simulation: pd.DataFrame) -> pd.DataFrame:
     required_results = {"site_id", "model_rank", "site_name", "readiness_score"}
     missing = required_results - set(results.columns)
     if missing:
         raise ValueError(f"V2 site results are missing required columns: {sorted(missing)}")
 
     electrical = normalize_electrical_columns(electrical)
-    port_summary = summarize_port_simulation(port_simulation)
-
     electrical_keep = [col for col in ["site_id", "electrical_risk_level", "expected_rank", "expected_score"] if col in electrical.columns]
-    if "site_id" not in electrical_keep:
-        raise ValueError("Electrical summary is missing site_id.")
-
-    right_sizing_keep = [
+    right_keep = [
         col
-        for col in [
-            "site_id",
-            "ports_now",
-            "ports_2035_base",
-            "ports_2035_high",
-            "ports_2050_base",
-            "ports_2050_high",
-            "future_ready_capacity",
-            "expansion_strategy",
-        ]
+        for col in ["site_id", "ports_now", "ports_2035_base", "ports_2035_high", "ports_2050_base", "ports_2050_high", "future_ready_capacity", "expansion_strategy"]
         if col in right_sizing.columns
     ]
-    if "site_id" not in right_sizing_keep:
+    if "site_id" not in electrical_keep:
+        raise ValueError("Electrical summary is missing site_id.")
+    if "site_id" not in right_keep:
         raise ValueError("Right-sizing output is missing site_id.")
 
     merged = results.merge(electrical[electrical_keep], on="site_id", how="left")
-    merged = merged.merge(right_sizing[right_sizing_keep], on="site_id", how="left")
+    merged = merged.merge(right_sizing[right_keep], on="site_id", how="left")
+    port_summary = summarize_port_simulation(port_simulation)
     if not port_summary.empty:
         merged = merged.merge(port_summary, on="site_id", how="left")
     merged = merged.rename(columns={"expected_rank": "expected_electrical_rank", "expected_score": "expected_electrical_score"})
-
     merged["major_review_flags"] = merged.apply(build_review_flags, axis=1)
     merged["model_rank"] = pd.to_numeric(merged["model_rank"], errors="coerce")
     merged = merged.sort_values("model_rank")
-
     for col in OUTPUT_COLUMNS:
         if col not in merged.columns:
             merged[col] = ""
-
     return merged[OUTPUT_COLUMNS]
 
 
 def markdown_table(data: pd.DataFrame, columns: list[str]) -> str:
     if data.empty:
         return "_No executive summary data available._"
-
     view = data[[col for col in columns if col in data.columns]].copy()
     view.columns = [col.replace("_", " ") for col in view.columns]
     header = "| " + " | ".join(view.columns) + " |"
@@ -255,17 +216,11 @@ def build_markdown_report(summary: pd.DataFrame) -> str:
     top = summary.iloc[0] if not summary.empty else None
     top_text = "No top site available."
     if top is not None:
-        top_text = (
-            f"Top candidate: **{top['site_id']} — {top['site_name']}** "
-            f"with readiness score **{top['readiness_score']}**, strategy **{top['expansion_strategy']}**, "
-            f"and future-ready capacity **{top['future_ready_capacity']}**."
-        )
-
+        top_text = f"Top candidate: **{top['site_id']} — {top['site_name']}** with readiness score **{top['readiness_score']}**."
     compact_columns = [
         "model_rank",
         "site_id",
         "readiness_score",
-        "electrical_risk_level",
         "ports_now",
         "sim_min_ports_current",
         "sim_utilization_current_at_ports_now",
@@ -274,12 +229,11 @@ def build_markdown_report(summary: pd.DataFrame) -> str:
         "sim_status_2050_high_at_future_ready",
         "major_review_flags",
     ]
-
     return f"""# V2 Executive Site Summary
 
 {top_text}
 
-This report consolidates the most decision-useful V2 outputs into one table. It now includes the port-utilization simulation summary alongside ranking, electrical risk, and right-sizing.
+This table combines ranking, electrical risk, right-sizing, and port-utilization simulation outputs.
 
 ## Executive decision table
 
@@ -287,45 +241,36 @@ This report consolidates the most decision-useful V2 outputs into one table. It 
 
 ## Notes
 
-- `ports_now` is the near-term installation recommendation from the V2 right-sizing module.
-- `sim_min_ports_current` is the smallest simulated port count that avoids underbuilt status under current demand.
-- `sim_min_ports_2050_high` is the smallest simulated port count that avoids underbuilt status under the 2050 high-growth case.
-- `sim_status_2050_high_at_future_ready` checks whether the future-ready capacity still looks acceptable in the 2050 high-growth case.
-- These simulation outputs are planning-screen signals, not detailed queueing, utility, or engineering results.
+- `sim_min_ports_current` is the smallest tested port count that avoids `underbuilt` under current demand.
+- `sim_min_ports_2050_high` is the smallest tested port count that avoids `underbuilt` under the 2050 high-growth case.
+- These fields are planning-screen signals, not final design or permitting results.
 """
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a consolidated V2 executive site summary table.")
-    parser.add_argument("--results", default=DEFAULT_RESULTS, help="V2 site results CSV.")
-    parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY, help="V2 electrical risk summary CSV.")
-    parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING, help="V2 right-sizing scenario CSV.")
-    parser.add_argument("--port-simulation", default=DEFAULT_PORT_SIMULATION, help="V2 port simulation CSV.")
-    parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Executive summary CSV output.")
-    parser.add_argument("--report", default=DEFAULT_REPORT, help="Executive summary Markdown report output.")
+    parser.add_argument("--results", default=DEFAULT_RESULTS)
+    parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY)
+    parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING)
+    parser.add_argument("--port-simulation", default=DEFAULT_PORT_SIMULATION)
+    parser.add_argument("--output", default=DEFAULT_OUTPUT)
+    parser.add_argument("--report", default=DEFAULT_REPORT)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    results_path = Path(args.results)
-    electrical_path = Path(args.electrical_summary)
-    right_sizing_path = Path(args.right_sizing)
-    port_simulation_path = Path(args.port_simulation)
+    results = read_required_csv(Path(args.results), "V2 site results")
+    electrical = read_required_csv(Path(args.electrical_summary), "V2 electrical summary")
+    right_sizing = read_required_csv(Path(args.right_sizing), "V2 right-sizing")
+    port_simulation = read_optional_csv(Path(args.port_simulation))
+    summary = build_executive_summary(results, electrical, right_sizing, port_simulation)
     output_path = Path(args.output)
     report_path = Path(args.report)
-
-    results = read_required_csv(results_path, "V2 site results")
-    electrical = read_required_csv(electrical_path, "V2 electrical summary")
-    right_sizing = read_required_csv(right_sizing_path, "V2 right-sizing")
-    port_simulation = read_optional_csv(port_simulation_path)
-
-    summary = build_executive_summary(results, electrical, right_sizing, port_simulation)
     ensure_parent_dir(output_path)
     ensure_parent_dir(report_path)
     summary.to_csv(output_path, index=False)
     report_path.write_text(build_markdown_report(summary), encoding="utf-8")
-
     print("V2 EXECUTIVE SITE SUMMARY")
     print("-------------------------")
     print(f"Rows: {len(summary)}")
