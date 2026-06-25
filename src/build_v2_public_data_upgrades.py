@@ -4,7 +4,7 @@ This script upgrades selected V2 rows from planning assumptions toward stronger
 public-data-supported values.
 
 It calculates, when local raw exports are available:
-- nearby_households_1mi from ACS B11001 + TIGER block groups
+- nearby_households_1mi from ACS household inputs when available
 - nearby_jobs_1mi from LODES WAC + TIGER block groups
 - aadt_nearest from VDOT traffic GeoJSON
 - equity_gap_index from ACS equity tables + TIGER block groups
@@ -27,8 +27,6 @@ Review the outputs first, then decide whether to apply the values.
 
 from __future__ import annotations
 
-import csv
-import gzip
 import json
 import math
 import sys
@@ -74,28 +72,45 @@ def find_first(pattern: str, folder: Path = RAW_DIR) -> Path | None:
     return matches[0] if matches else None
 
 
-def read_census_csv(path: Path) -> pd.DataFrame:
-    """Read a Census-style CSV and remove metadata rows when present."""
-    df = pd.read_csv(path, dtype=str, low_memory=False)
-    if "GEO_ID" not in df.columns:
-        raise ValueError(f"Expected GEO_ID column in {path}")
+def to_number(series: pd.Series) -> pd.Series:
+    """Convert a pandas series to numeric, stripping commas and common placeholders."""
+    cleaned = (
+        series.astype(str)
+        .str.replace(",", "", regex=False)
+        .str.replace("-", "", regex=False)
+        .str.replace("—", "", regex=False)
+        .str.replace("(X)", "", regex=False)
+        .str.replace("N", "", regex=False)
+    )
+    return pd.to_numeric(cleaned, errors="coerce").fillna(0)
 
-    # Some Census downloads include a second row with label text like Geography.
+
+def read_census_geo_csv(path: Path) -> pd.DataFrame:
+    """Read a Census CSV that has a GEO_ID column.
+
+    Some Census table-display exports are wide tables with columns such as
+    `Block Group 1; Census Tract ...!!Estimate` and do not include `GEO_ID`.
+    Those cannot be joined directly to TIGER GEOIDs here. For that case, this
+    function raises a clear error and callers can use a stronger fallback table
+    that already has GEO_ID, such as B25044 for occupied households.
+    """
+    df = pd.read_csv(path, dtype=str, low_memory=False)
+    # Handle UTF-8 BOM on the first header if present.
+    df.columns = [str(col).replace("\ufeff", "") for col in df.columns]
+
+    if "GEO_ID" not in df.columns:
+        raise ValueError(
+            f"{path} does not contain GEO_ID. It looks like a Census table-display export, "
+            "not a geography-ready CSV."
+        )
+
     df = df[df["GEO_ID"].astype(str).str.contains("US", na=False)].copy()
     df["geoid"] = df["GEO_ID"].astype(str).str.extract(r"US(\d+)$", expand=False)
     return df
 
 
-def to_number(series: pd.Series) -> pd.Series:
-    """Convert a pandas series to numeric, stripping commas and placeholders."""
-    return pd.to_numeric(
-        series.astype(str).str.replace(",", "", regex=False).str.replace("-", "", regex=False),
-        errors="coerce",
-    ).fillna(0)
-
-
 def find_col(df: pd.DataFrame, candidates: list[str]) -> str:
-    """Find the first available column from a list of possible Census column IDs."""
+    """Find the first available column from a list of possible column IDs."""
     for col in candidates:
         if col in df.columns:
             return col
@@ -113,10 +128,7 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 def polygon_centroid(points: list[tuple[float, float]]) -> tuple[float, float]:
-    """Approximate polygon centroid from lon/lat points.
-
-    Returns (lat, lon). Falls back to mean point when polygon area is near zero.
-    """
+    """Approximate polygon centroid from lon/lat points. Returns (lat, lon)."""
     if not points:
         return 0.0, 0.0
 
@@ -146,13 +158,12 @@ def polygon_centroid(points: list[tuple[float, float]]) -> tuple[float, float]:
 def load_block_group_centroids(tiger_zip: Path) -> pd.DataFrame:
     """Load TIGER block-group centroid points from a shapefile ZIP using pyshp."""
     if shapefile is None:
-        raise ImportError(
-            "Missing optional package 'pyshp'. Install it with: python -m pip install pyshp"
-        )
+        raise ImportError("Missing optional package 'pyshp'. Install it with: python -m pip install pyshp")
 
     reader = shapefile.Reader(str(tiger_zip))
     field_names = [field[0] for field in reader.fields[1:]]
     rows = []
+
     for shape_rec in reader.iterShapeRecords():
         attrs = dict(zip(field_names, shape_rec.record))
         geoid = str(attrs.get("GEOID", ""))
@@ -160,7 +171,6 @@ def load_block_group_centroids(tiger_zip: Path) -> pd.DataFrame:
             parts = [attrs.get("STATEFP", ""), attrs.get("COUNTYFP", ""), attrs.get("TRACTCE", ""), attrs.get("BLKGRPCE", "")]
             geoid = "".join(str(p) for p in parts)
 
-        # Use the largest polygon part if multipart.
         pts = shape_rec.shape.points
         parts = list(shape_rec.shape.parts) + [len(pts)]
         best_part: list[tuple[float, float]] = []
@@ -194,28 +204,45 @@ def site_bg_membership(sites: pd.DataFrame, bg: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def build_households(sites: pd.DataFrame, membership: pd.DataFrame, b11001_path: Path) -> pd.DataFrame:
-    b11001 = read_census_csv(b11001_path)
-    hh_col = find_col(b11001, ["B11001_001E"])
-    households = b11001[["geoid", hh_col]].copy()
-    households["households"] = to_number(households[hh_col])
+def household_table_from_b11001_or_fallback(b11001_path: Path, b25044_path: Path) -> tuple[pd.DataFrame, str, str]:
+    """Return block-group household counts from B11001 when possible, otherwise B25044.
 
-    merged = membership.merge(households[["geoid", "households"]], on="geoid", how="left")
+    The user's B11001 export may be a Census table-display CSV without GEO_ID.
+    In that case, use B25044 total occupied households because it is already one
+    of the official ACS equity inputs and includes GEO_ID in this project.
+    """
+    try:
+        b11001 = read_census_geo_csv(b11001_path)
+        hh_col = find_col(b11001, ["B11001_001E"])
+        households = b11001[["geoid", hh_col]].copy()
+        households["households"] = to_number(households[hh_col])
+        return households[["geoid", "households"]], "ACS B11001", "official_derived"
+    except Exception as exc:
+        print(f"NOTICE: Could not use B11001 directly: {exc}")
+        print("NOTICE: Falling back to ACS B25044 total occupied households for nearby_households_1mi.")
+        b25044 = read_census_geo_csv(b25044_path)
+        hh_col = find_col(b25044, ["B25044_001E"])
+        households = b25044[["geoid", hh_col]].copy()
+        households["households"] = to_number(households[hh_col])
+        return households[["geoid", "households"]], "ACS B25044 occupied households fallback", "official_derived"
+
+
+def build_households(membership: pd.DataFrame, b11001_path: Path, b25044_path: Path) -> pd.DataFrame:
+    households, source_table, source_status = household_table_from_b11001_or_fallback(b11001_path, b25044_path)
+    merged = membership.merge(households, on="geoid", how="left")
     summary = merged.groupby(["site_id", "site_name"], as_index=False).agg(
         nearby_households_1mi=("households", "sum"),
         block_groups_used=("geoid", "nunique"),
     )
     summary["nearby_households_1mi"] = summary["nearby_households_1mi"].round().astype(int)
-    summary["method"] = "1-mile centroid-in-buffer estimate from ACS B11001 + TIGER block groups"
-    summary["source_status"] = "official_derived"
+    summary["method"] = f"1-mile centroid-in-buffer estimate from {source_table} + TIGER block groups"
+    summary["source_status"] = source_status
     return summary
 
 
-def build_jobs(sites: pd.DataFrame, membership: pd.DataFrame, lodes_path: Path) -> pd.DataFrame:
-    if lodes_path.suffix == ".gz":
-        lodes = pd.read_csv(lodes_path, dtype={"w_geocode": str}, compression="gzip", low_memory=False)
-    else:
-        lodes = pd.read_csv(lodes_path, dtype={"w_geocode": str}, low_memory=False)
+def build_jobs(membership: pd.DataFrame, lodes_path: Path) -> pd.DataFrame:
+    compression = "gzip" if lodes_path.suffix == ".gz" else None
+    lodes = pd.read_csv(lodes_path, dtype={"w_geocode": str}, compression=compression, low_memory=False)
 
     if "w_geocode" not in lodes.columns:
         raise ValueError("LODES file must contain w_geocode")
@@ -249,15 +276,13 @@ def load_geojson_from_zip(path: Path) -> dict[str, Any]:
 
 
 def iter_line_segments(coords: Any):
-    """Yield lon/lat line segments from LineString or MultiLineString coordinates."""
+    """Yield lat/lon line segments from LineString or MultiLineString coordinates."""
     if not coords:
         return
-    # LineString: [[lon, lat], [lon, lat]]
     if isinstance(coords[0][0], (int, float)):
         for a, b in zip(coords[:-1], coords[1:]):
             yield (float(a[1]), float(a[0])), (float(b[1]), float(b[0]))
     else:
-        # MultiLineString: [[[lon, lat], ...], ...]
         for line in coords:
             for a, b in zip(line[:-1], line[1:]):
                 yield (float(a[1]), float(a[0])), (float(b[1]), float(b[0]))
@@ -274,16 +299,15 @@ def point_segment_distance_m(point: tuple[float, float], a: tuple[float, float],
     lat, lon = point
     ax, ay = equirect_xy(a[0], a[1], lat, lon)
     bx, by = equirect_xy(b[0], b[1], lat, lon)
-    px, py = 0.0, 0.0
     dx = bx - ax
     dy = by - ay
     denom = dx * dx + dy * dy
     if denom == 0:
-        return math.hypot(px - ax, py - ay)
-    t = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / denom))
+        return math.hypot(ax, ay)
+    t = max(0.0, min(1.0, (-(ax * dx + ay * dy)) / denom))
     proj_x = ax + t * dx
     proj_y = ay + t * dy
-    return math.hypot(px - proj_x, py - proj_y)
+    return math.hypot(proj_x, proj_y)
 
 
 def get_prop(props: dict[str, Any], names: list[str]) -> Any:
@@ -294,6 +318,14 @@ def get_prop(props: dict[str, Any], names: list[str]) -> Any:
     return ""
 
 
+def parse_int_like(value: Any) -> int:
+    text = str(value).replace(",", "").strip()
+    try:
+        return int(float(text))
+    except ValueError:
+        return 0
+
+
 def build_traffic(sites: pd.DataFrame, vdot_path: Path) -> pd.DataFrame:
     data = load_geojson_from_zip(vdot_path)
     features = data.get("features", [])
@@ -301,21 +333,20 @@ def build_traffic(sites: pd.DataFrame, vdot_path: Path) -> pd.DataFrame:
 
     for _, site in sites.iterrows():
         site_point = (float(site["lat"]), float(site["lon"]))
-        best: dict[str, Any] | None = None
+        best_props: dict[str, Any] | None = None
         best_distance = float("inf")
         for feature in features:
             geom = feature.get("geometry") or {}
             props = feature.get("properties") or {}
-            geom_type = geom.get("type")
-            if geom_type not in {"LineString", "MultiLineString"}:
+            if geom.get("type") not in {"LineString", "MultiLineString"}:
                 continue
             for a, b in iter_line_segments(geom.get("coordinates")):
                 distance = point_segment_distance_m(site_point, a, b)
                 if distance < best_distance:
                     best_distance = distance
-                    best = props
+                    best_props = props
 
-        if best is None:
+        if best_props is None:
             rows.append({
                 "site_id": site["site_id"],
                 "site_name": site["site_name"],
@@ -328,14 +359,13 @@ def build_traffic(sites: pd.DataFrame, vdot_path: Path) -> pd.DataFrame:
             })
             continue
 
-        adt = get_prop(best, ["ADT", "AADT", "AADT_NBR", "TRAFFIC", "ANNUAL_AVG_DAILY_TRAFFIC"])
         rows.append({
             "site_id": site["site_id"],
             "site_name": site["site_name"],
-            "aadt_nearest": int(float(str(adt).replace(",", ""))) if str(adt).replace(",", "").replace(".", "", 1).isdigit() else 0,
+            "aadt_nearest": parse_int_like(get_prop(best_props, ["ADT", "AADT", "AADT_NBR", "TRAFFIC", "ANNUAL_AVG_DAILY_TRAFFIC"])),
             "nearest_segment_distance_m": round(best_distance, 1),
-            "route_name": get_prop(best, ["ROUTE_NAME", "ROUTE_COMM", "RTE_NM", "STREET_NAME"]),
-            "segment_label": f"{get_prop(best, ['START_LABE', 'START_LABEL', 'FROM_DESC'])} to {get_prop(best, ['END_LABEL', 'END_LABE', 'TO_DESC'])}".strip(),
+            "route_name": get_prop(best_props, ["ROUTE_NAME", "ROUTE_COMM", "RTE_NM", "STREET_NAME"]),
+            "segment_label": f"{get_prop(best_props, ['START_LABE', 'START_LABEL', 'FROM_DESC'])} to {get_prop(best_props, ['END_LABEL', 'END_LABE', 'TO_DESC'])}".strip(),
             "method": "Nearest VDOT Bidirectional Traffic Volume segment from GeoJSON",
             "source_status": "official_derived",
         })
@@ -343,25 +373,23 @@ def build_traffic(sites: pd.DataFrame, vdot_path: Path) -> pd.DataFrame:
 
 
 def build_equity_inputs(
-    sites: pd.DataFrame,
     membership: pd.DataFrame,
-    households: pd.DataFrame,
     b19013_path: Path,
     b25044_path: Path,
     b25003_path: Path,
     b25024_path: Path,
 ) -> pd.DataFrame:
-    income = read_census_csv(b19013_path)
-    vehicles = read_census_csv(b25044_path)
-    tenure = read_census_csv(b25003_path)
-    units = read_census_csv(b25024_path)
+    income = read_census_geo_csv(b19013_path)
+    vehicles = read_census_geo_csv(b25044_path)
+    tenure = read_census_geo_csv(b25003_path)
+    units = read_census_geo_csv(b25024_path)
 
     income_col = find_col(income, ["B19013_001E"])
     income_df = income[["geoid", income_col]].copy()
     income_df["median_household_income"] = to_number(income_df[income_col])
 
     vehicles_df = vehicles[["geoid"]].copy()
-    vehicles_df["total_households_vehicle_table"] = to_number(vehicles[find_col(vehicles, ["B25044_001E"])])
+    vehicles_df["total_households"] = to_number(vehicles[find_col(vehicles, ["B25044_001E"])])
     vehicles_df["no_vehicle_households"] = to_number(vehicles[find_col(vehicles, ["B25044_003E"])]) + to_number(vehicles[find_col(vehicles, ["B25044_010E"])])
 
     tenure_df = tenure[["geoid"]].copy()
@@ -371,37 +399,33 @@ def build_equity_inputs(
     units_df = units[["geoid"]].copy()
     units_df["total_housing_units"] = to_number(units[find_col(units, ["B25024_001E"])])
     multifamily_cols = [col for col in ["B25024_004E", "B25024_005E", "B25024_006E", "B25024_007E", "B25024_008E"] if col in units.columns]
-    units_df["multifamily_units"] = sum(to_number(units[col]) for col in multifamily_cols) if multifamily_cols else 0
+    if multifamily_cols:
+        units_df["multifamily_units"] = sum(to_number(units[col]) for col in multifamily_cols)
+    else:
+        units_df["multifamily_units"] = 0
 
     bg = income_df.merge(vehicles_df, on="geoid", how="outer")
     bg = bg.merge(tenure_df, on="geoid", how="outer")
     bg = bg.merge(units_df, on="geoid", how="outer")
-    hh_for_weight = households[["site_id", "site_name", "nearby_households_1mi"]].copy()
+    merged = membership.merge(bg, on="geoid", how="left").fillna(0)
 
-    merged = membership.merge(bg, on="geoid", how="left")
-    merged = merged.fillna(0)
     rows = []
     for (site_id, site_name), group in merged.groupby(["site_id", "site_name"]):
-        # Household-weighted median income approximation.
         weights = group["occupied_housing_units"].replace(0, np.nan)
         if weights.notna().sum() == 0:
             median_income = float(group["median_household_income"].mean()) if len(group) else 0.0
         else:
             median_income = float(np.average(group["median_household_income"], weights=weights.fillna(0)))
 
-        total_households = float(group["total_households_vehicle_table"].sum())
-        occupied = float(group["occupied_housing_units"].sum())
-        total_units = float(group["total_housing_units"].sum())
-
         rows.append({
             "site_id": site_id,
             "site_name": site_name,
             "median_household_income": round(median_income),
-            "total_households": round(total_households),
+            "total_households": round(float(group["total_households"].sum())),
             "no_vehicle_households": round(float(group["no_vehicle_households"].sum())),
-            "occupied_housing_units": round(occupied),
+            "occupied_housing_units": round(float(group["occupied_housing_units"].sum())),
             "renter_occupied_households": round(float(group["renter_occupied_households"].sum())),
-            "total_housing_units": round(total_units),
+            "total_housing_units": round(float(group["total_housing_units"].sum())),
             "multifamily_units": round(float(group["multifamily_units"].sum())),
             "block_groups_intersected": int(group["geoid"].nunique()),
             "method": "1-mile centroid-in-buffer block-group estimate; median income approximated by occupied-unit-weighted block-group medians",
@@ -461,6 +485,7 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
             "source_status": ["missing"] * len(sites),
             "method": ["Run src/build_osm_amenities.py for V2 sites and review output"] * len(sites),
         })
+
     source = pd.read_csv(summary_path)
     subset = source[source["site_id"].isin(TARGET_SITE_IDS)].copy()
     if subset.empty:
@@ -471,6 +496,7 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
             "source_status": ["needs_v2_osm_run"] * len(sites),
             "method": ["Existing OSM reviewed extract does not include these V2 sites yet"] * len(sites),
         })
+
     out = subset[["site_id", "site_name", "reviewed_amenities_count_0_5mi", "source_quality", "notes"]].copy()
     out = out.rename(columns={"reviewed_amenities_count_0_5mi": "amenities_count_0_5mi"})
     out["source_status"] = "open_gis_support"
@@ -508,7 +534,7 @@ def main() -> None:
         "LODES WAC jobs": lodes_path,
         "VDOT GeoJSON traffic": vdot_path,
         "ACS B19013 income": b19013_path,
-        "ACS B25044 vehicles": b25044_path,
+        "ACS B25044 vehicles/households": b25044_path,
         "ACS B25003 tenure": b25003_path,
         "ACS B25024 units": b25024_path,
     }
@@ -539,13 +565,11 @@ def main() -> None:
     if membership.empty:
         raise RuntimeError("No block groups were found within 1 mile of the target sites. Check coordinates/projection assumptions.")
 
-    households = build_households(sites, membership, b11001_path)  # type: ignore[arg-type]
-    jobs = build_jobs(sites, membership, lodes_path)  # type: ignore[arg-type]
+    households = build_households(membership, b11001_path, b25044_path)  # type: ignore[arg-type]
+    jobs = build_jobs(membership, lodes_path)  # type: ignore[arg-type]
     traffic = build_traffic(sites, vdot_path)  # type: ignore[arg-type]
     equity_inputs = build_equity_inputs(
-        sites,
         membership,
-        households,
         b19013_path,  # type: ignore[arg-type]
         b25044_path,  # type: ignore[arg-type]
         b25003_path,  # type: ignore[arg-type]
@@ -564,7 +588,7 @@ def main() -> None:
         "ev_registrations_local": "current_ev_registrations_local",
         "ev_share_local": "current_ev_share_local",
     })
-    combined = combined.merge(households[["site_id", "nearby_households_1mi"]], on="site_id", how="left")
+    combined = combined.merge(households[["site_id", "nearby_households_1mi", "method"]].rename(columns={"method": "households_method"}), on="site_id", how="left")
     combined = combined.merge(jobs[["site_id", "nearby_jobs_1mi"]], on="site_id", how="left")
     combined = combined.merge(traffic[["site_id", "aadt_nearest", "route_name", "nearest_segment_distance_m"]], on="site_id", how="left")
     combined = combined.merge(amenities[["site_id", "amenities_count_0_5mi", "source_status"]].rename(columns={"source_status": "amenities_source_status"}), on="site_id", how="left")
