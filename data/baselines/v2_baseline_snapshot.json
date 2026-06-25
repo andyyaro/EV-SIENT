@@ -1,7 +1,7 @@
 {
   "baseline_name": "v2_expansion_planning_baseline_001",
-  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, right-sizing validation, executive summary, and deliverable package hardening.",
-  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, right-sizing validation, executive summary, and deliverable package enabled.",
+  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, right-sizing validation, executive summary, decision map, and deliverable package hardening.",
+  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, right-sizing validation, executive summary, decision map, and deliverable package enabled.",
   "score_tolerance": 0.2,
   "expected_site_count": 12,
   "quality_counts": {
@@ -125,8 +125,8 @@
   "deliverable_package_manifest": {
     "package": "v2_deliverable_package",
     "status": "complete",
-    "expected_count": 28,
-    "copied_count": 28,
+    "expected_count": 29,
+    "copied_count": 29,
     "missing_or_empty_sources": [],
     "clean_rebuild": true,
     "required_destinations": [
@@ -138,6 +138,7 @@
       "data/outputs/deliverable_package_v2/reports/v2_port_utilization_simulation_report.md",
       "data/outputs/deliverable_package_v2/manifests/v2_baseline_comparison.json",
       "data/outputs/deliverable_package_v2/manifests/v2_workflow_success.json",
+      "data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png",
       "data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png"
     ]
   }
