@@ -8,15 +8,17 @@ Use this guide when working on the `v2-expansion-planning` branch.
 
 V2 is the active Phase 2 prototype branch.
 
-The latest validated V2 workflow includes:
+The latest V2 workflow includes:
 
 ```text
 12 real candidate sites
-22 workflow steps
+23 workflow steps
 right-sizing scenarios
 port-use simulation
 right-sizing validation
 executive site summary
+readiness map
+new decision map
 expanded baseline comparison
 deliverable package
 workflow manifest
@@ -78,13 +80,14 @@ python src/check_outputs_v2.py
 13. Run V2 port-use simulation
 14. Validate V2 right-sizing with simulation
 15. Build V2 executive site summary
-16. Generate V2 interpretation report
-17. Generate V2 run summary
-18. Compare V2 outputs to baseline
-19. Write V2 workflow completion manifest
-20. Build V2 deliverable package
-21. Compare V2 deliverable package manifest to baseline
-22. Rebuild V2 deliverable package with final baseline comparison
+16. Create V2 decision map
+17. Generate V2 interpretation report
+18. Generate V2 run summary
+19. Compare V2 outputs to baseline
+20. Write V2 workflow completion manifest
+21. Build V2 deliverable package
+22. Compare V2 deliverable package manifest to baseline
+23. Rebuild V2 deliverable package with final baseline comparison
 ```
 
 The first baseline comparison creates the comparison files needed by the package. The second baseline comparison verifies the generated package manifest, then the final package rebuild copies the final comparison report into the package.
@@ -100,6 +103,8 @@ all 12 V2 candidate sites are represented
 port simulation output exists
 right-sizing validation output exists
 executive summary output exists
+readiness map output exists
+decision map output exists
 deliverable package output exists
 workflow manifest reports success
 baseline comparison reports pass
@@ -107,7 +112,7 @@ baseline comparison reports pass
 
 ## What the expanded baseline comparison validates
 
-`src/compare_v2_to_baseline.py` now checks:
+`src/compare_v2_to_baseline.py` checks:
 
 ```text
 site count
@@ -145,6 +150,7 @@ After a successful V2 run, start here:
 
 ```text
 data/outputs/deliverable_package_v2/README.md
+data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
@@ -195,8 +201,20 @@ data/outputs/charts/v2_data_confidence_chart.png
 data/outputs/charts/v2_profile_score_heatmap.png
 data/outputs/charts/v2_profile_rank_stability_chart.png
 data/outputs/charts/v2_site_readiness_map.png
+data/outputs/charts/v2_site_decision_map.png
 data/outputs/charts/v2_port_utilization_simulation.png
 ```
+
+## Readiness map vs decision map
+
+The workflow now produces two map-style visuals:
+
+```text
+v2_site_readiness_map.png = analytical geography/readiness scatter
+v2_site_decision_map.png = presentation-oriented decision graphic combining rank, tier, review risk, and port-sizing
+```
+
+Use the decision map for README, presentation, and stakeholder-facing review. Keep the readiness map as the more technical geography view.
 
 ## Deliverable package
 
@@ -224,7 +242,7 @@ A healthy package build should show:
 ```text
 Status: complete
 Clean rebuild: True
-Copied files: 28/28
+Copied files: 29/29
 ```
 
 ## Current model interpretation
