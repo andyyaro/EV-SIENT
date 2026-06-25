@@ -5,14 +5,7 @@ GeoPandas, QGIS, web map tiles, or a GIS basemap. The output is a planning
 visual that plots candidate sites by longitude/latitude and labels each site
 with its readiness score.
 
-The map includes:
-- an overview panel for all six candidate sites
-- a Fairfax City zoom panel
-- a Prince William County zoom panel
-- marker size/color by readiness score
-- marker shape by recommendation tier
-- a star overlay for the top-ranked site
-- a ranked summary panel for quick interpretation
+The script supports both V1 and V2 through command-line path arguments.
 
 Default output:
 - data/outputs/charts/site_readiness_map.png
@@ -21,6 +14,7 @@ Default output:
 from __future__ import annotations
 
 import argparse
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -35,24 +29,6 @@ DEFAULT_RESULTS = "data/outputs/site_results.csv"
 DEFAULT_SENSITIVITY = "data/outputs/sensitivity_summary.csv"
 DEFAULT_PROFILE_RESULTS = "data/outputs/profile_results.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/site_readiness_map.png"
-
-LABEL_OFFSETS = {
-    "FFX001": (-84, -10),
-    "FFX002": (14, 16),
-    "PWC001": (12, 12),
-    "PWC002": (-84, 14),
-    "PWC003": (8, 8),
-    "PWC004": (12, 4),
-}
-
-ZOOM_LABEL_OFFSETS = {
-    "FFX001": (-88, -12),
-    "FFX002": (12, 16),
-    "PWC001": (12, 12),
-    "PWC002": (-78, 14),
-    "PWC003": (8, 8),
-    "PWC004": (12, 0),
-}
 
 TIER_SHORT_LABELS = {
     "Tier 1 — advance to site screening": "Tier 1",
@@ -71,7 +47,39 @@ TIER_MARKERS = {
 }
 
 TIER_ORDER = ["Tier 1", "High-review", "Tier 2", "Tier 3", "Special-use"]
-LOCALITY_PANEL_LABELS = {"FFX": "Fairfax City zoom", "PWC": "Prince William County zoom"}
+LOCALITY_PANEL_LABELS = {"FFX": "Fairfax-area zoom", "PWC": "Prince William County zoom", "Other": "Other sites"}
+
+# Optional hand-tuned offsets for the expanded V2 candidate set. Any site not
+# listed here gets a deterministic automatic offset.
+LABEL_OFFSETS = {
+    "FFX001": (-92, -12),
+    "FFX002": (14, 16),
+    "FFX003": (12, -16),
+    "FFX004": (12, 12),
+    "PWC001": (12, 12),
+    "PWC002": (-92, 16),
+    "PWC003": (10, -14),
+    "PWC004": (12, 4),
+    "PWC005": (10, 16),
+    "PWC006": (-92, 10),
+    "PWC007": (12, -18),
+    "PWC008": (10, 12),
+}
+
+ZOOM_LABEL_OFFSETS = {
+    "FFX001": (-98, -12),
+    "FFX002": (12, 16),
+    "FFX003": (12, -16),
+    "FFX004": (12, 12),
+    "PWC001": (12, 12),
+    "PWC002": (-86, 14),
+    "PWC003": (10, -16),
+    "PWC004": (12, 0),
+    "PWC005": (10, 16),
+    "PWC006": (-92, 10),
+    "PWC007": (12, -18),
+    "PWC008": (10, 12),
+}
 
 
 def ensure_parent_dir(path: str | Path) -> None:
@@ -86,6 +94,16 @@ def read_csv_if_exists(path: Path) -> pd.DataFrame:
 
 def compact_tier(value: str) -> str:
     return TIER_SHORT_LABELS.get(str(value), str(value))
+
+
+def safe_float(value) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if pd.isna(number):
+        return None
+    return number
 
 
 def load_map_data(input_path: Path, results_path: Path) -> pd.DataFrame:
@@ -172,7 +190,7 @@ def map_interpretation_note(data: pd.DataFrame, sensitivity: pd.DataFrame, profi
     if top_site and profile_site == top_site and profile_count > 0:
         return f"{top_site} is #1 in the base model and #1 across {profile_count} scoring profiles."
     if top_site and stable_sensitivity:
-        return f"{top_site} is #1 in the base model; sensitivity ranks stayed stable."
+        return f"{top_site} is #1 in the base model; sensitivity ranks stayed stable. Profile results show the priority tradeoffs."
     if top_site:
         return f"{top_site} is the current #1 site under the base model."
     return "Candidate locations shown with readiness-score markers."
@@ -182,16 +200,6 @@ def stable_top_candidate_found(data: pd.DataFrame, sensitivity: pd.DataFrame, pr
     top_site = top_site_id_from_results(data)
     profile_site, profile_count = profile_top_site(profile_results)
     return bool(top_site and sensitivity_is_stable(sensitivity) and profile_site == top_site and profile_count > 0)
-
-
-def safe_float(value) -> float | None:
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        return None
-    if pd.isna(number):
-        return None
-    return number
 
 
 def site_label(row: pd.Series) -> str:
@@ -216,10 +224,12 @@ def planning_note(data: pd.DataFrame) -> str:
     notes = []
     if "PWC002" in site_ids:
         notes.append("PWC002 = high-review garage candidate")
-    if "PWC004" in site_ids:
-        notes.append("PWC004 = future/reopened planning assumption")
     if "PWC003" in site_ids:
         notes.append("PWC003 = public-access decision needed")
+    if "PWC008" in site_ids:
+        notes.append("PWC008 = monitor due to nearby charging supply")
+    if "PWC006" in site_ids:
+        notes.append("PWC006 = strongest current PWC library candidate")
     return "; ".join(notes)
 
 
@@ -289,6 +299,13 @@ def draw_cluster_boxes(ax, data: pd.DataFrame) -> None:
         )
 
 
+def automatic_offset(index: int) -> tuple[int, int]:
+    """Return a deterministic label offset if no hand-tuned offset exists."""
+    angle = (index * 137.5) % 360
+    radius = 18
+    return int(round(math.cos(math.radians(angle)) * radius)), int(round(math.sin(math.radians(angle)) * radius))
+
+
 def plot_sites_on_axis(
     ax,
     data: pd.DataFrame,
@@ -333,12 +350,14 @@ def plot_sites_on_axis(
                 zorder=4,
             )
 
-    for _, row in data.iterrows():
+    ordered = data.sort_values("model_rank_num", na_position="last").reset_index(drop=True)
+    for index, row in ordered.iterrows():
         site_id = str(row.get("site_id", ""))
+        offset = label_offsets.get(site_id, automatic_offset(index))
         ax.annotate(
             site_label(row),
             xy=(row["lon"], row["lat"]),
-            xytext=label_offsets.get(site_id, (8, 8)),
+            xytext=offset,
             textcoords="offset points",
             fontsize=7.8,
             arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
@@ -454,7 +473,7 @@ def plot_site_map(
     ffx = data[data["locality_group"] == "FFX"].copy()
     if not ffx.empty:
         plot_sites_on_axis(ax_ffx, ffx, norm, cmap_name, top_site, sensitivity, profile_results, ZOOM_LABEL_OFFSETS)
-        ax_ffx.set_title("Zoom: Fairfax City", fontsize=10, pad=8)
+        ax_ffx.set_title("Zoom: Fairfax-area candidates", fontsize=10, pad=8)
         lon0, lon1, lat0, lat1 = axis_bounds(ffx, pad_factor=1.10, min_lon_pad=0.008, min_lat_pad=0.008)
         ax_ffx.set_xlim(lon0, lon1)
         ax_ffx.set_ylim(lat0, lat1)
@@ -474,10 +493,10 @@ def plot_site_map(
         1.0,
         ranked_summary(data),
         transform=panel_ax.transAxes,
-        fontsize=8.4,
+        fontsize=8.1,
         va="top",
         ha="left",
-        linespacing=1.28,
+        linespacing=1.24,
         bbox={"boxstyle": "round,pad=0.55", "fc": "white", "alpha": 0.95, "lw": 0.6},
     )
 
