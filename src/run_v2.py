@@ -25,6 +25,8 @@ PYTHON = sys.executable
 V2_INPUT = "data/inputs/real_sites_v2.csv"
 V2_RESULTS = "data/outputs/v2_site_results.csv"
 V2_READINESS_CHART = "data/outputs/charts/v2_readiness_score_chart.png"
+V2_POLISHED_READINESS_CHART = "data/outputs/charts/v2_polished_readiness_score_chart.png"
+V2_DATA_CONFIDENCE_CHART = "data/outputs/charts/v2_data_confidence_chart.png"
 V2_UTILIZATION_CHART_DIR = "data/outputs/charts/v2"
 V2_ACTION_MATRIX = "data/outputs/v2_action_matrix.md"
 V2_QUALITY = "data/outputs/v2_data_quality_report.csv"
@@ -33,6 +35,8 @@ V2_SENSITIVITY_SUMMARY = "data/outputs/v2_sensitivity_summary.csv"
 V2_PROFILE_RESULTS = "data/outputs/v2_profile_results.csv"
 V2_PROFILE_RANK_SUMMARY = "data/outputs/v2_profile_rank_summary.csv"
 V2_PROFILE_REPORT = "data/outputs/v2_profile_comparison.md"
+V2_PROFILE_SCORE_HEATMAP = "data/outputs/charts/v2_profile_score_heatmap.png"
+V2_PROFILE_RANK_STABILITY_CHART = "data/outputs/charts/v2_profile_rank_stability_chart.png"
 V2_ELECTRICAL_SCENARIO_RESULTS = "data/outputs/v2_electrical_scenario_results.csv"
 V2_ELECTRICAL_RISK_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
 V2_ELECTRICAL_REPORT = "data/outputs/v2_electrical_feasibility_report.md"
@@ -85,7 +89,31 @@ def main() -> None:
     )
 
     run_step(
-        "3. Validate V2 site input data",
+        "3. Create V2 polished readiness score chart",
+        [
+            PYTHON,
+            "src/plot_readiness_score_chart.py",
+            "--results",
+            V2_RESULTS,
+            "--output",
+            V2_POLISHED_READINESS_CHART,
+        ],
+    )
+
+    run_step(
+        "4. Create V2 data confidence chart",
+        [
+            PYTHON,
+            "src/plot_data_confidence_chart.py",
+            "--results",
+            V2_RESULTS,
+            "--output",
+            V2_DATA_CONFIDENCE_CHART,
+        ],
+    )
+
+    run_step(
+        "5. Validate V2 site input data",
         [
             PYTHON,
             "src/validate_site_data.py",
@@ -97,7 +125,7 @@ def main() -> None:
     )
 
     run_step(
-        "4. Run V2 sensitivity analysis",
+        "6. Run V2 sensitivity analysis",
         [
             PYTHON,
             "src/run_sensitivity_analysis.py",
@@ -111,7 +139,7 @@ def main() -> None:
     )
 
     run_step(
-        "5. Run V2 scoring-profile analysis",
+        "7. Run V2 scoring-profile analysis",
         [
             PYTHON,
             "src/run_profile_analysis.py",
@@ -129,7 +157,31 @@ def main() -> None:
     )
 
     run_step(
-        "6. Run V2 electrical-feasibility scenario analysis",
+        "8. Create V2 profile score heatmap",
+        [
+            PYTHON,
+            "src/plot_profile_score_heatmap.py",
+            "--profile-results",
+            V2_PROFILE_RESULTS,
+            "--output",
+            V2_PROFILE_SCORE_HEATMAP,
+        ],
+    )
+
+    run_step(
+        "9. Create V2 profile rank stability chart",
+        [
+            PYTHON,
+            "src/plot_profile_rank_stability.py",
+            "--profile-results",
+            V2_PROFILE_RESULTS,
+            "--output",
+            V2_PROFILE_RANK_STABILITY_CHART,
+        ],
+    )
+
+    run_step(
+        "10. Run V2 electrical-feasibility scenario analysis",
         [
             PYTHON,
             "src/run_electrical_risk_scenarios.py",
@@ -145,7 +197,7 @@ def main() -> None:
     )
 
     run_step(
-        "7. Run V2 right-sizing scenario analysis",
+        "11. Run V2 right-sizing scenario analysis",
         [
             PYTHON,
             "src/run_right_sizing_scenarios.py",
@@ -161,7 +213,7 @@ def main() -> None:
     )
 
     run_step(
-        "8. Generate V2 interpretation report",
+        "12. Generate V2 interpretation report",
         [
             PYTHON,
             "src/generate_results_interpretation.py",
@@ -196,6 +248,10 @@ def main() -> None:
         V2_RIGHT_SIZING_REPORT,
         V2_INTERPRETATION,
         V2_READINESS_CHART,
+        V2_POLISHED_READINESS_CHART,
+        V2_DATA_CONFIDENCE_CHART,
+        V2_PROFILE_SCORE_HEATMAP,
+        V2_PROFILE_RANK_STABILITY_CHART,
     ]:
         print(f"- {path}")
 
