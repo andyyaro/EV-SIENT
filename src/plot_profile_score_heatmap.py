@@ -138,6 +138,23 @@ def build_row_labels(data: pd.DataFrame, sites: list[str]) -> list[str]:
     return labels
 
 
+def heatmap_footer(data: pd.DataFrame) -> str:
+    required = {"profile_name", "profile_rank", "site_id"}
+    if not required.issubset(data.columns):
+        return "Each cell shows readiness score and profile rank. Compare columns to see rank stability across priority views."
+
+    top_by_profile = (
+        data.sort_values(["profile_name", "profile_rank"])
+        .groupby("profile_name", as_index=False)
+        .first()
+    )
+    top_sites = top_by_profile["site_id"].astype(str).unique().tolist()
+    profile_count = len(top_by_profile)
+    if len(top_sites) == 1 and profile_count > 0:
+        return f"Each cell shows readiness score and profile rank. {top_sites[0]} is #1 across all {profile_count} scoring-priority views."
+    return "Each cell shows readiness score and profile rank. Different top sites across profiles indicate tradeoffs between demand, equity, feasibility, and safety."
+
+
 def plot_heatmap(data: pd.DataFrame, output_path: Path) -> None:
     ensure_parent_dir(output_path)
 
@@ -176,8 +193,7 @@ def plot_heatmap(data: pd.DataFrame, output_path: Path) -> None:
     ax.set_xlabel("Scoring profile")
     ax.set_ylabel("Candidate site")
 
-    footer = "Each cell shows readiness score and profile rank. FFX002 stays #1 across all five scoring-priority views."
-    fig.text(0.5, 0.015, footer, ha="center", fontsize=8)
+    fig.text(0.5, 0.015, heatmap_footer(data), ha="center", fontsize=8)
     fig.tight_layout(rect=[0, 0.05, 1, 1])
     fig.savefig(output_path, dpi=200)
     plt.close(fig)
