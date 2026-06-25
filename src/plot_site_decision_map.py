@@ -1,533 +1,455 @@
-"""Create a V2 EV charging decision map.
+"""Create a redesigned V2 EV charging decision board.
 
-This figure is designed to be more presentation-oriented than the detailed
-readiness map. It combines geography, rank, readiness score, action category,
-right-sizing, electrical risk, and validation notes into one decision graphic.
+This visual is intentionally not a latitude/longitude scatter map. The detailed
+geographic map already exists as ``v2_site_readiness_map.png``. This script
+creates a stakeholder-facing decision board that groups candidate sites by the
+planning action the model suggests.
 
-Run from the repository root after the V2 workflow has generated model outputs:
+Default input:
+- data/outputs/v2_executive_site_summary.csv
 
-    python src/plot_site_decision_map.py \
-      --input data/inputs/real_sites_v2.csv \
-      --results data/outputs/v2_site_results.csv \
-      --electrical-summary data/outputs/v2_electrical_risk_summary.csv \
-      --right-sizing data/outputs/v2_right_sizing_scenarios.csv \
-      --right-sizing-validation data/outputs/v2_right_sizing_validation.csv \
-      --output data/outputs/charts/v2_site_decision_map.png
+Default output:
+- data/outputs/charts/v2_site_decision_map.png
 """
 
 from __future__ import annotations
 
 import argparse
-import math
+import textwrap
 from pathlib import Path
-from textwrap import shorten
+from typing import Any
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
-from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
-from matplotlib.ticker import FormatStrFormatter, MaxNLocator
+from matplotlib.patches import FancyBboxPatch, Rectangle
 import pandas as pd
 
-DEFAULT_INPUT = "data/inputs/real_sites_v2.csv"
-DEFAULT_RESULTS = "data/outputs/v2_site_results.csv"
-DEFAULT_ELECTRICAL_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
-DEFAULT_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
-DEFAULT_RIGHT_SIZING_VALIDATION = "data/outputs/v2_right_sizing_validation.csv"
+DEFAULT_INPUT = "data/outputs/v2_executive_site_summary.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/v2_site_decision_map.png"
 
-TIER_SHORT_LABELS = {
-    "Tier 1 — advance to site screening": "Advance",
-    "Tier 2 — promising candidate, refine data": "Promising",
-    "High-review candidate": "High-review",
-    "Tier 3 — lower priority / monitor": "Monitor",
-    "Low public-priority / special-use": "Special-use",
-}
+ACTION_ORDER = [
+    "Advance now",
+    "Refine assumptions",
+    "High-review",
+    "Monitor",
+    "Special-use",
+]
 
-TIER_MARKERS = {
-    "Advance": "o",
-    "Promising": "^",
-    "High-review": "s",
-    "Monitor": "D",
-    "Special-use": "X",
-}
-
-TIER_ORDER = ["Advance", "Promising", "High-review", "Monitor", "Special-use"]
-
-CALLOUT_OFFSETS = {
-    "FFX001": (-72, -12),
-    "FFX002": (16, -2),
-    "FFX003": (12, -14),
-    "FFX004": (-66, 18),
-    "PWC001": (-66, 26),
-    "PWC002": (-72, 14),
-    "PWC003": (12, -22),
-    "PWC004": (12, 22),
-    "PWC005": (10, 16),
-    "PWC006": (-58, -8),
-    "PWC007": (12, -20),
-    "PWC008": (12, -18),
+BUCKET_DESCRIPTIONS = {
+    "Advance now": "Best near-term candidates",
+    "Refine assumptions": "Promising, verify details",
+    "High-review": "Requires technical review",
+    "Monitor": "Lower priority / watchlist",
+    "Special-use": "Not general-public buildout",
 }
 
 
-def ensure_parent_dir(path: str | Path) -> None:
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
+def ensure_parent(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def read_csv(path: Path, required: bool = True) -> pd.DataFrame:
-    if not path.exists():
-        if required:
-            raise FileNotFoundError(f"Required file not found: {path}")
-        return pd.DataFrame()
-    return pd.read_csv(path)
-
-
-def safe_float(value) -> float | None:
+def safe_float(value: Any) -> float | None:
     try:
-        number = float(value)
+        if pd.isna(value):
+            return None
+        return float(value)
     except (TypeError, ValueError):
         return None
-    if pd.isna(number):
-        return None
-    return number
 
 
-def safe_int(value) -> int | None:
+def safe_int(value: Any) -> int | None:
     number = safe_float(value)
     if number is None:
         return None
     return int(round(number))
 
 
-def compact_tier(value: str) -> str:
-    return TIER_SHORT_LABELS.get(str(value), str(value))
+def compact_tier(value: Any) -> str:
+    text = str(value or "").strip()
+    lower = text.lower()
+    if "tier 1" in lower:
+        return "Tier 1"
+    if "tier 2" in lower:
+        return "Tier 2"
+    if "tier 3" in lower:
+        return "Tier 3"
+    if "high-review" in lower:
+        return "High-review"
+    if "special-use" in lower or "low public-priority" in lower:
+        return "Special-use"
+    return text if text else "Unclassified"
 
 
-def load_decision_data(
-    input_path: Path,
-    results_path: Path,
-    electrical_path: Path,
-    right_sizing_path: Path,
-    validation_path: Path,
-) -> pd.DataFrame:
-    """Load and merge the V2 output layers used by the decision map."""
-    sites = read_csv(input_path)
-    required_site_cols = {"site_id", "site_name", "lat", "lon"}
-    missing_site_cols = required_site_cols - set(sites.columns)
-    if missing_site_cols:
-        raise ValueError(f"Input file is missing required columns: {sorted(missing_site_cols)}")
+def classify_action(row: pd.Series) -> str:
+    tier = compact_tier(row.get("recommendation_tier", ""))
+    action = str(row.get("action_label", "")).lower()
+    strategy = str(row.get("expansion_strategy", "")).lower()
+    site_id = str(row.get("site_id", ""))
 
-    results = read_csv(results_path)
-    electrical = read_csv(electrical_path)
-    right_sizing = read_csv(right_sizing_path)
-    validation = read_csv(validation_path)
-
-    result_cols = [
-        col for col in [
-            "site_id", "model_rank", "readiness_score", "recommendation_tier",
-            "action_label", "review_reason", "data_confidence_level",
-        ] if col in results.columns
-    ]
-    electrical_cols = [
-        col for col in ["site_id", "electrical_risk_level", "expected_rank", "expected_score"]
-        if col in electrical.columns
-    ]
-    sizing_cols = [
-        col for col in [
-            "site_id", "ports_now", "ports_2035_base", "ports_2035_high",
-            "ports_2050_base", "ports_2050_high", "future_ready_capacity",
-            "expansion_strategy",
-        ] if col in right_sizing.columns
-    ]
-    validation_cols = [
-        col for col in [
-            "site_id", "current_alignment", "future_alignment",
-            "simulation_supported_strategy", "right_sizing_validation_note",
-        ] if col in validation.columns
-    ]
-
-    data = sites.merge(results[result_cols], on="site_id", how="left")
-    data = data.merge(electrical[electrical_cols], on="site_id", how="left")
-    data = data.merge(right_sizing[sizing_cols], on="site_id", how="left")
-    data = data.merge(validation[validation_cols], on="site_id", how="left")
-
-    data["lat"] = pd.to_numeric(data["lat"], errors="coerce")
-    data["lon"] = pd.to_numeric(data["lon"], errors="coerce")
-    data["model_rank_num"] = pd.to_numeric(data.get("model_rank", ""), errors="coerce")
-    data["readiness_score_num"] = pd.to_numeric(data.get("readiness_score", ""), errors="coerce")
-    data["tier_short"] = data.get("recommendation_tier", "").apply(compact_tier)
-    data["locality_group"] = data["site_id"].astype(str).str.extract(r"^(FFX|PWC)", expand=False).fillna("Other")
-    data = data.dropna(subset=["lat", "lon"]).sort_values("model_rank_num", na_position="last").copy()
-    return data
+    if tier == "Special-use" or "special" in strategy or site_id == "PWC003":
+        return "Special-use"
+    if tier == "High-review" or "review" in strategy or "technical review" in action:
+        return "High-review"
+    if tier == "Tier 3" or "monitor" in strategy or "monitor" in action:
+        return "Monitor"
+    if tier == "Tier 1":
+        return "Advance now"
+    return "Refine assumptions"
 
 
-def top_site_id(data: pd.DataFrame) -> str:
-    ranked = data.sort_values("model_rank_num", na_position="last")
-    if ranked.empty:
-        return ""
-    return str(ranked.iloc[0].get("site_id", ""))
+def wrap_text(text: Any, width: int) -> str:
+    text = "" if pd.isna(text) else str(text)
+    return "\n".join(textwrap.wrap(text, width=width))
 
 
-def score_norm(scores: pd.Series) -> tuple[Normalize, str]:
-    valid = pd.to_numeric(scores, errors="coerce").dropna()
-    if valid.empty:
-        return Normalize(vmin=0, vmax=100), "viridis"
-    vmin = float(valid.min())
-    vmax = float(valid.max())
-    if vmin == vmax:
-        vmin = max(0, vmin - 1)
-        vmax += 1
-    return Normalize(vmin=vmin, vmax=vmax), "viridis"
+def load_data(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        raise FileNotFoundError(f"Input file not found: {path}")
+
+    data = pd.read_csv(path)
+    required = {"model_rank", "site_id", "site_name", "readiness_score", "recommendation_tier"}
+    missing = sorted(required - set(data.columns))
+    if missing:
+        raise ValueError(f"Decision-map input is missing required columns: {missing}")
+
+    if "ports_now" not in data.columns and "recommended_ports_now" in data.columns:
+        data["ports_now"] = data["recommended_ports_now"]
+    if "ports_now" not in data.columns:
+        data["ports_now"] = ""
+
+    if "future_ready_capacity" not in data.columns and "recommended_ports_2050" in data.columns:
+        data["future_ready_capacity"] = data["recommended_ports_2050"]
+    if "future_ready_capacity" not in data.columns:
+        data["future_ready_capacity"] = ""
+
+    if "electrical_risk_level" not in data.columns:
+        data["electrical_risk_level"] = "unknown"
+    if "major_review_flags" not in data.columns:
+        data["major_review_flags"] = ""
+    if "expansion_strategy" not in data.columns:
+        data["expansion_strategy"] = ""
+    if "current_alignment" not in data.columns:
+        data["current_alignment"] = ""
+    if "future_alignment" not in data.columns:
+        data["future_alignment"] = ""
+
+    data["model_rank"] = pd.to_numeric(data["model_rank"], errors="coerce")
+    data["readiness_score"] = pd.to_numeric(data["readiness_score"], errors="coerce")
+    data["decision_bucket"] = data.apply(classify_action, axis=1)
+    data["tier_short"] = data["recommendation_tier"].apply(compact_tier)
+    return data.sort_values(["model_rank", "site_id"]).reset_index(drop=True)
 
 
-def axis_bounds(data: pd.DataFrame, pad_factor: float, min_lon_pad: float, min_lat_pad: float) -> tuple[float, float, float, float]:
-    lon_min, lon_max = data["lon"].min(), data["lon"].max()
-    lat_min, lat_max = data["lat"].min(), data["lat"].max()
-    lon_pad = max((lon_max - lon_min) * pad_factor, min_lon_pad)
-    lat_pad = max((lat_max - lat_min) * pad_factor, min_lat_pad)
-    return lon_min - lon_pad, lon_max + lon_pad, lat_min - lat_pad, lat_max + lat_pad
+def score_norm(data: pd.DataFrame) -> Normalize:
+    scores = pd.to_numeric(data["readiness_score"], errors="coerce").dropna()
+    if scores.empty:
+        return Normalize(vmin=0, vmax=100)
+    low = max(0.0, float(scores.min()) - 3)
+    high = min(100.0, float(scores.max()) + 3)
+    if low == high:
+        high = low + 1
+    return Normalize(vmin=low, vmax=high)
 
 
-def marker_size(score) -> float:
-    number = safe_float(score)
-    if number is None:
-        return 180
-    return 105 + number * 6.0
+def score_color(cmap, norm: Normalize, value: Any, alpha: float = 1.0) -> tuple[float, float, float, float]:
+    score = safe_float(value)
+    if score is None:
+        return (0.88, 0.88, 0.88, alpha)
+    r, g, b, _ = cmap(norm(score))
+    return (r, g, b, alpha)
 
 
-def marker_text_color(score) -> str:
-    number = safe_float(score)
-    if number is None:
-        return "black"
-    return "white" if number < 43 else "black"
+def text_color_for_score(value: Any) -> str:
+    score = safe_float(value)
+    if score is None:
+        return "#111827"
+    return "white" if score < 43 else "#111827"
 
 
-def needs_review(row: pd.Series) -> bool:
+def format_int(value: Any) -> str:
+    number = safe_int(value)
+    return str(number) if number is not None else "-"
+
+
+def review_note(row: pd.Series) -> str:
+    flags = str(row.get("major_review_flags", "")).strip()
+    if flags and flags.lower() != "nan":
+        return flags
+
+    site_id = str(row.get("site_id", ""))
+    risk = str(row.get("electrical_risk_level", "")).lower()
+    bucket = str(row.get("decision_bucket", ""))
+    if site_id == "PWC002":
+        return "Garage / Fire Marshal / AHJ / electrical review"
+    if site_id == "PWC003":
+        return "Special-use or public-access decision"
+    if site_id == "PWC008":
+        return "Monitor due to nearby charging supply"
+    if risk == "high":
+        return "Electrical review before expansion"
+    if bucket == "Refine assumptions":
+        return "Verify site assumptions before advancement"
+    return ""
+
+
+def add_card(ax, x: float, y: float, width: float, height: float, row: pd.Series, cmap, norm: Normalize) -> None:
+    score = row.get("readiness_score", None)
+    color = score_color(cmap, norm, score, alpha=1.0)
+    soft_color = score_color(cmap, norm, score, alpha=0.13)
+
+    card = FancyBboxPatch(
+        (x, y),
+        width,
+        height,
+        boxstyle="round,pad=0.010,rounding_size=0.015",
+        linewidth=1.15,
+        edgecolor=color,
+        facecolor=soft_color,
+        zorder=2,
+    )
+    ax.add_patch(card)
+
+    stripe_height = max(0.010, height * 0.075)
+    ax.add_patch(Rectangle((x, y + height - stripe_height), width, stripe_height, facecolor=color, edgecolor="none", zorder=3))
+
+    rank = format_int(row.get("model_rank"))
+    site_id = str(row.get("site_id", ""))
+    site_name = wrap_text(row.get("site_name", ""), 23)
+    score_text = f"{safe_float(score):.1f}" if safe_float(score) is not None else "n/a"
     tier = str(row.get("tier_short", ""))
-    electrical_risk = str(row.get("electrical_risk_level", "")).lower()
-    return tier in {"High-review", "Special-use"} or electrical_risk == "high"
+    ports_now = format_int(row.get("ports_now"))
+    future_ready = format_int(row.get("future_ready_capacity"))
+    risk = str(row.get("electrical_risk_level", "unknown")).title()
+    current_alignment = str(row.get("current_alignment", "")).replace("_", " ")
+    note = wrap_text(review_note(row), 31)
+
+    left = x + 0.018
+    top = y + height - 0.028
+    ax.text(left, top, f"#{rank}  {site_id}", ha="left", va="top", fontsize=10.2, fontweight="bold", color="#111827", zorder=4)
+    ax.text(left, top - height * 0.18, site_name, ha="left", va="top", fontsize=8.8, color="#111827", linespacing=1.05, zorder=4)
+    ax.text(left, top - height * 0.46, f"Score {score_text} | {tier}", ha="left", va="top", fontsize=8.2, color="#1f2937", zorder=4)
+    ax.text(left, top - height * 0.60, f"Ports {ports_now} now -> {future_ready} future", ha="left", va="top", fontsize=8.1, color="#1f2937", zorder=4)
+    ax.text(left, top - height * 0.74, f"Electrical risk: {risk}", ha="left", va="top", fontsize=8.0, color="#1f2937", zorder=4)
+
+    if current_alignment and current_alignment.lower() != "nan":
+        ax.text(left, y + 0.043, current_alignment.title(), ha="left", va="bottom", fontsize=7.3, color="#374151", zorder=4)
+    if note:
+        ax.text(left, y + 0.016, f"Review: {note}", ha="left", va="bottom", fontsize=7.1, color="#6b3f00", linespacing=1.0, zorder=4)
 
 
-def style_axis(ax, zoom: bool = False) -> None:
-    ax.grid(True, alpha=0.18, linewidth=0.7)
-    ax.tick_params(labelsize=8)
-    ax.xaxis.set_major_locator(MaxNLocator(5 if zoom else 6))
-    ax.yaxis.set_major_locator(MaxNLocator(5 if zoom else 6))
-    ax.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
-    ax.yaxis.set_major_formatter(FormatStrFormatter("%.3f"))
-    ax.set_xlabel("Longitude", fontsize=8.5)
-    ax.set_ylabel("Latitude", fontsize=8.5)
-    for spine in ax.spines.values():
-        spine.set_linewidth(0.8)
-        spine.set_alpha(0.85)
+def draw_board(ax, data: pd.DataFrame, cmap, norm: Normalize) -> None:
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
 
+    gap_x = 0.014
+    column_width = (1 - gap_x * (len(ACTION_ORDER) + 1)) / len(ACTION_ORDER)
+    column_bottom = 0.018
+    column_top = 0.985
+    header_height = 0.088
+    cards_top = column_top - header_height - 0.022
+    cards_bottom = 0.040
 
-def draw_focus_box(ax, data: pd.DataFrame, locality: str) -> None:
-    group = data[data["locality_group"] == locality]
-    if group.empty:
-        return
-    lon0, lon1, lat0, lat1 = axis_bounds(group, pad_factor=0.55, min_lon_pad=0.010, min_lat_pad=0.010)
-    ax.add_patch(
-        Rectangle(
-            (lon0, lat0),
-            lon1 - lon0,
-            lat1 - lat0,
-            fill=False,
-            linestyle="--",
-            linewidth=0.9,
-            alpha=0.35,
+    for index, bucket in enumerate(ACTION_ORDER):
+        x = gap_x + index * (column_width + gap_x)
+        sites = data[data["decision_bucket"] == bucket].sort_values("model_rank")
+
+        column = FancyBboxPatch(
+            (x, column_bottom),
+            column_width,
+            column_top - column_bottom,
+            boxstyle="round,pad=0.006,rounding_size=0.014",
+            linewidth=1.0,
+            edgecolor="#d0d7de",
+            facecolor="#f8fafc",
             zorder=1,
         )
-    )
+        ax.add_patch(column)
 
+        header = FancyBboxPatch(
+            (x + 0.010, column_top - header_height),
+            column_width - 0.020,
+            header_height - 0.010,
+            boxstyle="round,pad=0.006,rounding_size=0.012",
+            linewidth=0.8,
+            edgecolor="#c7ccd1",
+            facecolor="#eef2f7",
+            zorder=2,
+        )
+        ax.add_patch(header)
 
-def automatic_offset(index: int) -> tuple[int, int]:
-    angle = (index * 137.5) % 360
-    radius = 18
-    return int(round(math.cos(math.radians(angle)) * radius)), int(round(math.sin(math.radians(angle)) * radius))
-
-
-def plot_map_panel(
-    ax,
-    data: pd.DataFrame,
-    norm: Normalize,
-    cmap_name: str,
-    top_site: str,
-    title: str,
-    zoom: bool,
-    callouts: bool,
-) -> None:
-    """Plot numbered markers and optional short callouts."""
-    for _, row in data.iterrows():
-        tier = str(row.get("tier_short", ""))
-        score = row.get("readiness_score_num", None)
-        rank = safe_int(row.get("model_rank_num"))
-        site_id = str(row.get("site_id", ""))
-        line_width = 2.0 if needs_review(row) else 0.8
-        edge = "black"
-        ax.scatter(
-            [row["lon"]],
-            [row["lat"]],
-            s=marker_size(score),
-            c=[score],
-            cmap=cmap_name,
-            norm=norm,
-            marker=TIER_MARKERS.get(tier, "o"),
-            alpha=0.86,
-            edgecolors=edge,
-            linewidths=line_width,
+        ax.text(
+            x + column_width / 2,
+            column_top - 0.031,
+            f"{bucket} ({len(sites)})",
+            ha="center",
+            va="top",
+            fontsize=10.0,
+            fontweight="bold",
+            color="#111827",
             zorder=3,
         )
-        if rank is not None:
-            ax.text(
-                row["lon"],
-                row["lat"],
-                str(rank),
-                ha="center",
-                va="center",
-                fontsize=7.2,
-                fontweight="bold",
-                color=marker_text_color(score),
-                zorder=4,
-            )
-        if site_id == top_site:
-            ax.scatter(
-                [row["lon"]],
-                [row["lat"]],
-                s=310,
-                marker="*",
-                facecolors="none",
-                edgecolors="black",
-                linewidths=1.2,
-                zorder=5,
-            )
+        ax.text(
+            x + column_width / 2,
+            column_top - 0.058,
+            BUCKET_DESCRIPTIONS[bucket],
+            ha="center",
+            va="top",
+            fontsize=7.0,
+            color="#4b5563",
+            zorder=3,
+        )
 
-    if callouts:
-        ordered = data.sort_values("model_rank_num", na_position="last").reset_index(drop=True)
-        for index, row in ordered.iterrows():
-            site_id = str(row.get("site_id", ""))
-            rank = safe_int(row.get("model_rank_num"))
-            label = f"#{rank} {site_id}" if rank is not None else site_id
-            offset = CALLOUT_OFFSETS.get(site_id, automatic_offset(index))
-            ax.annotate(
-                label,
-                xy=(row["lon"], row["lat"]),
-                xytext=offset,
-                textcoords="offset points",
-                fontsize=6.8,
-                ha="right" if offset[0] < 0 else "left",
-                va="center",
-                arrowprops={"arrowstyle": "-", "lw": 0.32, "alpha": 0.52},
-                bbox={"boxstyle": "round,pad=0.16", "fc": "white", "alpha": 0.88, "lw": 0.25},
-                zorder=6,
-            )
+        if sites.empty:
+            ax.text(x + column_width / 2, 0.48, "No sites", ha="center", va="center", fontsize=9, color="#6b7280", style="italic")
+            continue
 
-    ax.set_title(title, fontsize=10, pad=8)
-    style_axis(ax, zoom=zoom)
+        card_gap = 0.015
+        available_height = cards_top - cards_bottom
+        card_height = min(0.164, (available_height - card_gap * (len(sites) - 1)) / len(sites))
+        y = cards_top - card_height
+        for _, row in sites.iterrows():
+            add_card(ax, x + 0.010, y, column_width - 0.020, card_height, row, cmap, norm)
+            y -= card_height + card_gap
 
 
-def site_title(row: pd.Series) -> str:
-    return f"{row.get('site_id', '')} — {shorten(str(row.get('site_name', '')), width=36, placeholder='...')}"
+def top_pwc_site(data: pd.DataFrame) -> pd.Series | None:
+    pwc = data[data["site_id"].astype(str).str.startswith("PWC")].sort_values("model_rank")
+    if pwc.empty:
+        return None
+    return pwc.iloc[0]
 
 
-def decision_line(row: pd.Series) -> str:
-    score = safe_float(row.get("readiness_score_num"))
-    score_text = f"{score:.1f}" if score is not None else "n/a"
-    ports_now = safe_int(row.get("ports_now"))
-    future_ready = safe_int(row.get("future_ready_capacity"))
-    ports_text = f"{ports_now}->{future_ready} ports" if ports_now is not None and future_ready is not None else "ports n/a"
-    tier = str(row.get("tier_short", ""))
-    return f"#{safe_int(row.get('model_rank_num'))} {row.get('site_id')} | {score_text} | {tier} | {ports_text}"
+def draw_sidebar(ax, data: pd.DataFrame) -> None:
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
 
-
-def decision_summary(data: pd.DataFrame) -> str:
-    ranked = data.sort_values("model_rank_num", na_position="last")
-    lines = ["Decision summary", ""]
-    lines.append("Advance first")
-    advance = ranked[ranked["tier_short"] == "Advance"].head(2)
-    if advance.empty:
-        advance = ranked.head(2)
-    for _, row in advance.iterrows():
-        lines.append(f"• {decision_line(row)}")
-
-    if "PWC006" in set(data["site_id"].astype(str)):
-        pwc006 = data[data["site_id"].astype(str) == "PWC006"].iloc[0]
-        lines.extend(["", "Best current PWC library option", f"• {decision_line(pwc006)}"])
-
-    review_rows = ranked[ranked.apply(needs_review, axis=1)]
-    if not review_rows.empty:
-        lines.extend(["", "Review before advancement"])
-        for _, row in review_rows.head(4).iterrows():
-            risk = str(row.get("electrical_risk_level", "unknown"))
-            tier = str(row.get("tier_short", ""))
-            lines.append(f"• {row.get('site_id')} | {tier} | electrical risk: {risk}")
-
-    return "\n".join(lines)
-
-
-def port_plan(data: pd.DataFrame, max_rows: int = 7) -> str:
-    ranked = data.sort_values("model_rank_num", na_position="last").head(max_rows)
-    lines = ["Right-sizing snapshot", "", "Site     Now  2035  2050  Future", "-------------------------------"]
-    for _, row in ranked.iterrows():
-        site = str(row.get("site_id", ""))
-        now = safe_int(row.get("ports_now"))
-        p2035 = safe_int(row.get("ports_2035_base"))
-        p2050 = safe_int(row.get("ports_2050_base"))
-        future = safe_int(row.get("future_ready_capacity"))
-        lines.append(f"{site:<7} {now or '-':>3}  {p2035 or '-':>4}  {p2050 or '-':>4}  {future or '-':>6}")
-    return "\n".join(lines)
-
-
-def guardrail_notes(data: pd.DataFrame) -> str:
-    site_ids = set(data["site_id"].astype(str))
-    lines = ["Planning guardrails", ""]
-    if "PWC002" in site_ids:
-        lines.append("• PWC002: garage / Fire Marshal / AHJ / electrical review")
-    if "PWC003" in site_ids:
-        lines.append("• PWC003: special-use or public-access decision")
-    if "PWC008" in site_ids:
-        lines.append("• PWC008: monitor because nearby charging supply is high")
-    high_electrical = data[data.get("electrical_risk_level", "").astype(str).str.lower() == "high"]
-    if not high_electrical.empty:
-        ids = ", ".join(high_electrical["site_id"].astype(str).tolist())
-        lines.append(f"• High electrical-risk screen: {ids}")
-    return "\n".join(lines)
-
-
-def add_text_box(ax, x: float, y: float, text: str, fontsize: float = 8.0, monospace: bool = False) -> None:
-    ax.text(
-        x,
-        y,
-        text,
-        transform=ax.transAxes,
-        va="top",
-        ha="left",
-        fontsize=fontsize,
-        family="monospace" if monospace else None,
-        linespacing=1.25,
-        bbox={"boxstyle": "round,pad=0.52", "fc": "white", "alpha": 0.96, "lw": 0.6},
+    box = FancyBboxPatch(
+        (0.015, 0.015),
+        0.970,
+        0.970,
+        boxstyle="round,pad=0.012,rounding_size=0.020",
+        linewidth=1.0,
+        edgecolor="#c7ccd1",
+        facecolor="#ffffff",
+        zorder=1,
     )
+    ax.add_patch(box)
 
+    ranked = data.sort_values("model_rank")
+    top = ranked.iloc[0]
+    top_pwc = top_pwc_site(data)
 
-def add_decision_legend(ax) -> None:
-    handles = [
-        Line2D([0], [0], marker=TIER_MARKERS[tier], linestyle="None", markerfacecolor="white", markeredgecolor="black", color="black", markersize=7, label=tier)
-        for tier in TIER_ORDER
+    lines = [
+        "Decision highlights",
+        "",
+        "Top candidate",
+        f"#{format_int(top.get('model_rank'))} {top.get('site_id')}",
+        wrap_text(top.get("site_name", ""), 26),
+        f"Score {safe_float(top.get('readiness_score')):.1f} | {compact_tier(top.get('recommendation_tier'))}",
+        f"Ports {format_int(top.get('ports_now'))} now -> {format_int(top.get('future_ready_capacity'))} future",
+        "",
     ]
-    handles.append(Line2D([0], [0], marker="*", linestyle="None", markerfacecolor="white", markeredgecolor="black", color="black", markersize=9, label="Top-ranked"))
-    handles.append(Line2D([0], [0], marker="o", linestyle="None", markerfacecolor="white", markeredgecolor="black", markeredgewidth=2.0, color="black", markersize=7, label="Needs review"))
-    ax.legend(handles=handles, title="Map encoding", loc="lower left", fontsize=7.5, title_fontsize=8, framealpha=0.92)
+
+    if top_pwc is not None:
+        lines.extend([
+            "Top Prince William site",
+            f"#{format_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')}",
+            wrap_text(top_pwc.get("site_name", ""), 26),
+            f"Score {safe_float(top_pwc.get('readiness_score')):.1f}",
+            "",
+        ])
+
+    lines.append("Top 3 overall")
+    for _, row in ranked.head(3).iterrows():
+        lines.append(f"• #{format_int(row.get('model_rank'))} {row.get('site_id')} — {safe_float(row.get('readiness_score')):.1f}")
+
+    lines.extend(["", "Bucket counts"])
+    for bucket in ACTION_ORDER:
+        lines.append(f"• {bucket}: {int((data['decision_bucket'] == bucket).sum())}")
+
+    lines.extend([
+        "",
+        "How to read",
+        "• Columns = action decision",
+        "• Card shade = readiness score",
+        "• Ports line = now -> future-ready",
+        "• Risk line = electrical screen",
+    ])
+
+    ax.text(0.055, 0.955, "\n".join(lines), ha="left", va="top", fontsize=9.3, color="#111827", linespacing=1.28, zorder=2)
 
 
-def plot_decision_map(data: pd.DataFrame, output_path: Path) -> None:
-    ensure_parent_dir(output_path)
-    norm, cmap_name = score_norm(data["readiness_score_num"])
-    top_site = top_site_id(data)
-
-    fig = plt.figure(figsize=(16.8, 9.4))
-    grid = fig.add_gridspec(
-        2,
-        3,
-        width_ratios=[1.55, 1.00, 1.05],
-        height_ratios=[1, 1],
-        left=0.055,
-        right=0.985,
-        bottom=0.11,
-        top=0.875,
-        wspace=0.28,
-        hspace=0.34,
-    )
-    ax_overview = fig.add_subplot(grid[:, 0])
-    ax_ffx = fig.add_subplot(grid[0, 1])
-    ax_pwc = fig.add_subplot(grid[1, 1])
-    panel_ax = fig.add_subplot(grid[:, 2])
-    panel_ax.axis("off")
-
-    draw_focus_box(ax_overview, data, "FFX")
-    draw_focus_box(ax_overview, data, "PWC")
-    plot_map_panel(ax_overview, data, norm, cmap_name, top_site, "Overview: ranked candidate sites", zoom=False, callouts=False)
-    lon0, lon1, lat0, lat1 = axis_bounds(data, pad_factor=0.20, min_lon_pad=0.018, min_lat_pad=0.018)
-    ax_overview.set_xlim(lon0, lon1)
-    ax_overview.set_ylim(lat0, lat1)
-    add_decision_legend(ax_overview)
-
-    ffx = data[data["locality_group"] == "FFX"].copy()
-    if not ffx.empty:
-        plot_map_panel(ax_ffx, ffx, norm, cmap_name, top_site, "Fairfax-area zoom", zoom=True, callouts=True)
-        lon0, lon1, lat0, lat1 = axis_bounds(ffx, pad_factor=1.10, min_lon_pad=0.012, min_lat_pad=0.010)
-        ax_ffx.set_xlim(lon0, lon1)
-        ax_ffx.set_ylim(lat0, lat1)
-
-    pwc = data[data["locality_group"] == "PWC"].copy()
-    if not pwc.empty:
-        plot_map_panel(ax_pwc, pwc, norm, cmap_name, top_site, "Prince William County zoom", zoom=True, callouts=True)
-        lon0, lon1, lat0, lat1 = axis_bounds(pwc, pad_factor=0.36, min_lon_pad=0.018, min_lat_pad=0.016)
-        ax_pwc.set_xlim(lon0, lon1)
-        ax_pwc.set_ylim(lat0, lat1)
-
-    add_text_box(panel_ax, 0.00, 1.00, decision_summary(data), fontsize=8.0)
-    add_text_box(panel_ax, 0.00, 0.50, port_plan(data), fontsize=7.7, monospace=True)
-    add_text_box(panel_ax, 0.00, 0.235, guardrail_notes(data), fontsize=7.8)
-
-    cax = panel_ax.inset_axes([0.00, 0.055, 0.82, 0.035])
-    mappable = plt.cm.ScalarMappable(norm=norm, cmap=cmap_name)
-    mappable.set_array([])
-    cbar = fig.colorbar(mappable, cax=cax, orientation="horizontal")
-    cbar.set_label("Readiness score", fontsize=8)
-    cbar.ax.tick_params(labelsize=7)
-
-    fig.suptitle("EV Charging Site Readiness & Right-Sizing Decision Map", fontsize=15.5, y=0.965)
+def draw_header(fig, data: pd.DataFrame) -> None:
+    top = data.sort_values("model_rank").iloc[0]
+    fig.text(0.043, 0.965, "Candidate EV Charging Sites — Decision Board", ha="left", va="top", fontsize=21, fontweight="bold", color="#111827")
     fig.text(
-        0.50,
-        0.915,
-        "V2 planning screen: ranked readiness, action category, review risk, and port-sizing strategy.",
-        ha="center",
-        fontsize=9,
+        0.043,
+        0.936,
+        f"{len(data)} candidate sites grouped by planning action | top current site: {top.get('site_id')} ({safe_float(top.get('readiness_score')):.1f})",
+        ha="left",
+        va="top",
+        fontsize=11.2,
+        color="#4b5563",
     )
+
+
+def draw_footer(fig) -> None:
     fig.text(
-        0.50,
-        0.045,
-        "Planning screen only — not engineering design, permitting approval, utility approval, procurement, or construction direction.",
-        ha="center",
-        fontsize=8,
+        0.043,
+        0.018,
+        "Planning prototype visual only — supports early screening and prioritization; not a permitting, engineering, utility, procurement, or construction approval.",
+        ha="left",
+        va="bottom",
+        fontsize=8.8,
+        color="#6b7280",
     )
+
+
+def plot_decision_board(data: pd.DataFrame, output_path: Path) -> None:
+    ensure_parent(output_path)
+    cmap = plt.get_cmap("viridis")
+    norm = score_norm(data)
+
+    fig = plt.figure(figsize=(19, 11), facecolor="white")
+    board_ax = fig.add_axes([0.035, 0.080, 0.735, 0.825])
+    sidebar_ax = fig.add_axes([0.790, 0.120, 0.180, 0.742])
+
+    draw_board(board_ax, data, cmap, norm)
+    draw_sidebar(sidebar_ax, data)
+    draw_header(fig, data)
+    draw_footer(fig)
+
     fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Create a V2 EV charging decision map.")
-    parser.add_argument("--input", default=DEFAULT_INPUT, help="V2 candidate-site input CSV.")
-    parser.add_argument("--results", default=DEFAULT_RESULTS, help="V2 site results CSV.")
-    parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY, help="V2 electrical risk summary CSV.")
-    parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING, help="V2 right-sizing scenario CSV.")
-    parser.add_argument("--right-sizing-validation", default=DEFAULT_RIGHT_SIZING_VALIDATION, help="V2 right-sizing validation CSV.")
+    parser = argparse.ArgumentParser(description="Create a redesigned V2 site decision board.")
+    parser.add_argument("--input", default=DEFAULT_INPUT, help="V2 executive summary CSV input.")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Output PNG path.")
+    # Backward-compatible ignored arguments so older workflow commands do not crash.
+    parser.add_argument("--results", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--electrical-summary", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--right-sizing", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--right-sizing-validation", default=None, help=argparse.SUPPRESS)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
     input_path = Path(args.input)
-    results_path = Path(args.results)
-    electrical_path = Path(args.electrical_summary)
-    right_sizing_path = Path(args.right_sizing)
-    validation_path = Path(args.right_sizing_validation)
     output_path = Path(args.output)
+    data = load_data(input_path)
+    plot_decision_board(data, output_path)
 
-    data = load_decision_data(input_path, results_path, electrical_path, right_sizing_path, validation_path)
-    plot_decision_map(data, output_path)
-
-    print("V2 SITE DECISION MAP")
-    print("--------------------")
-    print(f"Input file: {input_path}")
-    print(f"Results file: {results_path}")
-    print(f"Electrical summary: {electrical_path}")
-    print(f"Right-sizing: {right_sizing_path}")
-    print(f"Right-sizing validation: {validation_path}")
-    print(f"Saved map: {output_path}")
+    print("V2 SITE DECISION BOARD")
+    print("----------------------")
+    print(f"Input: {input_path}")
+    print(f"Output: {output_path}")
     print(f"Sites plotted: {len(data)}")
-    print(f"Top site: {top_site_id(data)}")
+    print("Done.")
 
 
 if __name__ == "__main__":
