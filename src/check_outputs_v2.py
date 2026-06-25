@@ -36,6 +36,8 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_results_interpretation.md"),
     Path("data/outputs/v2_run_summary.md"),
     Path("data/outputs/v2_workflow_success.json"),
+    Path("data/outputs/v2_baseline_comparison.json"),
+    Path("data/outputs/v2_baseline_comparison.md"),
     Path("data/outputs/charts/v2_readiness_score_chart.png"),
     Path("data/outputs/charts/v2_polished_readiness_score_chart.png"),
     Path("data/outputs/charts/v2_data_confidence_chart.png"),
@@ -189,6 +191,25 @@ def check_workflow_manifest() -> list[str]:
     return errors
 
 
+def check_baseline_comparison() -> list[str]:
+    comparison_path = Path("data/outputs/v2_baseline_comparison.json")
+    if not comparison_path.exists():
+        return [f"Cannot check V2 baseline comparison because {comparison_path} is missing."]
+
+    try:
+        data = json.loads(comparison_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"v2_baseline_comparison.json is not valid JSON: {exc}"]
+
+    errors = []
+    if data.get("status") != "pass":
+        errors.append(f"v2_baseline_comparison.json status is not pass: {data.get('status')}")
+    failed_checks = [check for check in data.get("checks", []) if check.get("status") != "pass"]
+    if failed_checks:
+        errors.append(f"v2_baseline_comparison.json has failed checks: {[check.get('check') for check in failed_checks]}")
+    return errors
+
+
 def main() -> None:
     print("V2 OUTPUT CHECK")
     print("---------------")
@@ -199,6 +220,7 @@ def main() -> None:
     errors.extend(check_right_sizing())
     errors.extend(check_run_summary())
     errors.extend(check_workflow_manifest())
+    errors.extend(check_baseline_comparison())
 
     if errors:
         print("Status: FAILED")
