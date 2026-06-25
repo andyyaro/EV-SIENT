@@ -27,6 +27,7 @@ V2_RESULTS = "data/outputs/v2_site_results.csv"
 V2_READINESS_CHART = "data/outputs/charts/v2_readiness_score_chart.png"
 V2_POLISHED_READINESS_CHART = "data/outputs/charts/v2_polished_readiness_score_chart.png"
 V2_DATA_CONFIDENCE_CHART = "data/outputs/charts/v2_data_confidence_chart.png"
+V2_SITE_READINESS_MAP = "data/outputs/charts/v2_site_readiness_map.png"
 V2_UTILIZATION_CHART_DIR = "data/outputs/charts/v2"
 V2_ACTION_MATRIX = "data/outputs/v2_action_matrix.md"
 V2_QUALITY = "data/outputs/v2_data_quality_report.csv"
@@ -181,7 +182,25 @@ def main() -> None:
     )
 
     run_step(
-        "10. Run V2 electrical-feasibility scenario analysis",
+        "10. Create V2 readiness map",
+        [
+            PYTHON,
+            "src/plot_site_map.py",
+            "--input",
+            V2_INPUT,
+            "--results",
+            V2_RESULTS,
+            "--sensitivity",
+            V2_SENSITIVITY_SUMMARY,
+            "--profile-results",
+            V2_PROFILE_RESULTS,
+            "--output",
+            V2_SITE_READINESS_MAP,
+        ],
+    )
+
+    run_step(
+        "11. Run V2 electrical-feasibility scenario analysis",
         [
             PYTHON,
             "src/run_electrical_risk_scenarios.py",
@@ -197,7 +216,7 @@ def main() -> None:
     )
 
     run_step(
-        "11. Run V2 right-sizing scenario analysis",
+        "12. Run V2 right-sizing scenario analysis",
         [
             PYTHON,
             "src/run_right_sizing_scenarios.py",
@@ -213,7 +232,7 @@ def main() -> None:
     )
 
     run_step(
-        "12. Generate V2 interpretation report",
+        "13. Generate V2 interpretation report",
         [
             PYTHON,
             "src/generate_results_interpretation.py",
@@ -252,6 +271,7 @@ def main() -> None:
         V2_DATA_CONFIDENCE_CHART,
         V2_PROFILE_SCORE_HEATMAP,
         V2_PROFILE_RANK_STABILITY_CHART,
+        V2_SITE_READINESS_MAP,
     ]:
         print(f"- {path}")
 
