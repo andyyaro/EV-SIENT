@@ -1,7 +1,7 @@
 {
   "baseline_name": "v2_expansion_planning_baseline_001",
-  "description": "Stable V2 baseline after V1-to-V2 feature parity batches through workflow manifest.",
-  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, and workflow manifest enabled.",
+  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, right-sizing validation, executive summary, and deliverable package hardening.",
+  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, right-sizing validation, executive summary, and deliverable package enabled.",
   "score_tolerance": 0.2,
   "expected_site_count": 12,
   "quality_counts": {
@@ -58,5 +58,87 @@
     {"site_id": "PWC001", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 3, "ports_2050_base": 3, "ports_2050_high": 3, "future_ready_capacity": 3, "expansion_strategy": "electrical_review_before_expansion"},
     {"site_id": "PWC005", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 2, "ports_2050_base": 2, "ports_2050_high": 2, "future_ready_capacity": 2, "expansion_strategy": "monitor_or_small_pilot"},
     {"site_id": "PWC003", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 2, "ports_2050_base": 2, "ports_2050_high": 2, "future_ready_capacity": 2, "expansion_strategy": "do_not_advance_general_public_buildout"}
-  ]
+  ],
+  "port_simulation": {
+    "row_count": 300,
+    "demand_cases": ["current", "2035_base", "2035_high", "2050_base", "2050_high"],
+    "port_options": [2, 3, 4, 6, 8],
+    "avg_charge_hours": 1.25,
+    "charging_window_hours": 12.0,
+    "peak_factor": 1.35,
+    "current_min_ports_by_site": {
+      "FFX002": 2,
+      "FFX004": 2,
+      "PWC006": 2,
+      "FFX001": 2,
+      "PWC002": 2,
+      "PWC007": 2,
+      "PWC004": 2,
+      "FFX003": 2,
+      "PWC008": 2,
+      "PWC001": 2,
+      "PWC005": 2,
+      "PWC003": 2
+    }
+  },
+  "right_sizing_validation": {
+    "row_count": 12,
+    "required_columns": ["site_id", "ports_now", "sim_min_ports_current", "current_alignment", "future_ready_capacity", "sim_min_ports_2050_high", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note"],
+    "current_alignment_by_site": {
+      "FFX002": "aligned_now",
+      "FFX004": "conservative_under_current_demand",
+      "PWC006": "aligned_now",
+      "FFX001": "aligned_now",
+      "PWC002": "aligned_now",
+      "PWC007": "aligned_now",
+      "PWC004": "aligned_now",
+      "FFX003": "aligned_now",
+      "PWC008": "aligned_now",
+      "PWC001": "aligned_now",
+      "PWC005": "aligned_now",
+      "PWC003": "aligned_now"
+    },
+    "future_alignment_allowed_values": ["aligned_future_capacity", "conservative_future_capacity", "extra_future_capacity"],
+    "forbidden_alignment_prefixes": ["possibly_low"],
+    "simulation_supported_strategy_allowed_values": ["simulation_supports_strategy", "simulation_supports_conservative_strategy", "simulation_broadly_supports_strategy"]
+  },
+  "executive_summary": {
+    "row_count": 12,
+    "top_site_id": "FFX002",
+    "required_columns": ["model_rank", "site_id", "site_name", "readiness_score", "data_confidence_level", "recommendation_tier", "action_label", "electrical_risk_level", "expected_electrical_rank", "expected_electrical_score", "ports_now", "future_ready_capacity", "expansion_strategy", "sim_min_ports_current", "sim_utilization_current_at_ports_now", "sim_wait_current_at_ports_now", "sim_queue_risk_current_at_ports_now", "sim_min_ports_2035_high", "sim_min_ports_2050_high", "sim_status_2050_high_at_future_ready", "current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags"],
+    "non_empty_columns": ["current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags"],
+    "current_alignment_by_site": {
+      "FFX002": "aligned_now",
+      "FFX004": "conservative_under_current_demand",
+      "PWC006": "aligned_now",
+      "FFX001": "aligned_now",
+      "PWC002": "aligned_now",
+      "PWC007": "aligned_now",
+      "PWC004": "aligned_now",
+      "FFX003": "aligned_now",
+      "PWC008": "aligned_now",
+      "PWC001": "aligned_now",
+      "PWC005": "aligned_now",
+      "PWC003": "aligned_now"
+    }
+  },
+  "deliverable_package_manifest": {
+    "package": "v2_deliverable_package",
+    "status": "complete",
+    "expected_count": 28,
+    "copied_count": 28,
+    "missing_or_empty_sources": [],
+    "clean_rebuild": true,
+    "required_destinations": [
+      "data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv",
+      "data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md",
+      "data/outputs/deliverable_package_v2/tables/v2_right_sizing_validation.csv",
+      "data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md",
+      "data/outputs/deliverable_package_v2/tables/v2_port_utilization_simulation.csv",
+      "data/outputs/deliverable_package_v2/reports/v2_port_utilization_simulation_report.md",
+      "data/outputs/deliverable_package_v2/manifests/v2_baseline_comparison.json",
+      "data/outputs/deliverable_package_v2/manifests/v2_workflow_success.json",
+      "data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png"
+    ]
+  }
 }
