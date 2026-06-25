@@ -87,7 +87,22 @@ REQUIRED_EXECUTIVE_COLUMNS = [
     "right_sizing_validation_note", "major_review_flags",
 ]
 
-REQUIRED_SITE_IDS = {"FFX001", "FFX002", "FFX003", "FFX004", "PWC001", "PWC002", "PWC003", "PWC004"}
+# Full current V2 candidate set: Fairfax + Prince William Batch 001 and Batch 002 sites.
+REQUIRED_SITE_IDS = {
+    "FFX001",
+    "FFX002",
+    "FFX003",
+    "FFX004",
+    "PWC001",
+    "PWC002",
+    "PWC003",
+    "PWC004",
+    "PWC005",
+    "PWC006",
+    "PWC007",
+    "PWC008",
+}
+EXPECTED_SITE_COUNT = len(REQUIRED_SITE_IDS)
 
 
 def check_expected_files() -> list[str]:
@@ -100,6 +115,19 @@ def check_expected_files() -> list[str]:
     return errors
 
 
+def check_site_ids(table: pd.DataFrame, table_name: str) -> list[str]:
+    errors = []
+    if "site_id" not in table.columns:
+        return [f"{table_name} is missing site_id."]
+    found_site_ids = set(table["site_id"].astype(str))
+    missing_site_ids = sorted(REQUIRED_SITE_IDS - found_site_ids)
+    if missing_site_ids:
+        errors.append(f"{table_name} is missing expected V2 site IDs: {missing_site_ids}")
+    if len(table) < EXPECTED_SITE_COUNT:
+        errors.append(f"{table_name} has {len(table)} rows; expected at least {EXPECTED_SITE_COUNT} rows.")
+    return errors
+
+
 def check_results_table() -> list[str]:
     errors = []
     path = Path("data/outputs/v2_site_results.csv")
@@ -109,10 +137,7 @@ def check_results_table() -> list[str]:
     missing_columns = [col for col in REQUIRED_RESULT_COLUMNS if col not in results.columns]
     if missing_columns:
         errors.append(f"v2_site_results.csv is missing required columns: {missing_columns}")
-    found_site_ids = set(results.get("site_id", pd.Series(dtype=str)).astype(str))
-    missing_site_ids = sorted(REQUIRED_SITE_IDS - found_site_ids)
-    if missing_site_ids:
-        errors.append(f"v2_site_results.csv is missing expected site IDs: {missing_site_ids}")
+    errors.extend(check_site_ids(results, "v2_site_results.csv"))
     if "readiness_score" in results.columns:
         readiness = pd.to_numeric(results["readiness_score"], errors="coerce")
         if readiness.isna().any() or ((readiness < 0) | (readiness > 100)).any():
@@ -133,6 +158,7 @@ def check_electrical_summary() -> list[str]:
     missing_columns = [col for col in REQUIRED_ELECTRICAL_COLUMNS if col not in summary.columns]
     if missing_columns:
         errors.append(f"v2_electrical_risk_summary.csv is missing required columns: {missing_columns}")
+    errors.extend(check_site_ids(summary, "v2_electrical_risk_summary.csv"))
     if "electrical_risk_level" in summary.columns:
         invalid = sorted(set(summary["electrical_risk_level"].dropna().astype(str)) - {"low", "medium", "high"})
         if invalid:
@@ -149,6 +175,7 @@ def check_right_sizing() -> list[str]:
     missing_columns = [col for col in REQUIRED_RIGHT_SIZING_COLUMNS if col not in right_sizing.columns]
     if missing_columns:
         errors.append(f"v2_right_sizing_scenarios.csv is missing required columns: {missing_columns}")
+    errors.extend(check_site_ids(right_sizing, "v2_right_sizing_scenarios.csv"))
     for col in ["ports_now", "ports_2035_base", "ports_2035_high", "ports_2050_base", "ports_2050_high", "future_ready_capacity"]:
         if col in right_sizing.columns:
             values = pd.to_numeric(right_sizing[col], errors="coerce")
@@ -166,8 +193,10 @@ def check_port_simulation() -> list[str]:
     missing_columns = [col for col in REQUIRED_PORT_SIM_COLUMNS if col not in simulation.columns]
     if missing_columns:
         errors.append(f"v2_port_utilization_simulation.csv is missing required columns: {missing_columns}")
-    if len(simulation) < len(REQUIRED_SITE_IDS) * 5:
-        errors.append("v2_port_utilization_simulation.csv has fewer rows than expected.")
+    errors.extend(check_site_ids(simulation, "v2_port_utilization_simulation.csv"))
+    expected_min_rows = EXPECTED_SITE_COUNT * 5
+    if len(simulation) < expected_min_rows:
+        errors.append(f"v2_port_utilization_simulation.csv has {len(simulation)} rows; expected at least {expected_min_rows} rows.")
     return errors
 
 
@@ -180,8 +209,7 @@ def check_right_sizing_validation() -> list[str]:
     missing_columns = [col for col in REQUIRED_RIGHT_SIZING_VALIDATION_COLUMNS if col not in validation.columns]
     if missing_columns:
         errors.append(f"v2_right_sizing_validation.csv is missing required columns: {missing_columns}")
-    if len(validation) < len(REQUIRED_SITE_IDS):
-        errors.append("v2_right_sizing_validation.csv has fewer rows than expected.")
+    errors.extend(check_site_ids(validation, "v2_right_sizing_validation.csv"))
     return errors
 
 
@@ -194,8 +222,7 @@ def check_executive_summary() -> list[str]:
     missing_columns = [col for col in REQUIRED_EXECUTIVE_COLUMNS if col not in summary.columns]
     if missing_columns:
         errors.append(f"v2_executive_site_summary.csv is missing required columns: {missing_columns}")
-    if len(summary) < len(REQUIRED_SITE_IDS):
-        errors.append("v2_executive_site_summary.csv has fewer rows than expected.")
+    errors.extend(check_site_ids(summary, "v2_executive_site_summary.csv"))
     return errors
 
 
@@ -240,8 +267,8 @@ def check_workflow_manifest() -> list[str]:
         errors.append("v2_workflow_success.json has the wrong workflow name.")
     if data.get("status") != "success":
         errors.append(f"v2_workflow_success.json status is not success: {data.get('status')}")
-    if int(data.get("site_count", 0)) < len(REQUIRED_SITE_IDS):
-        errors.append("v2_workflow_success.json site_count is lower than expected.")
+    if int(data.get("site_count", 0)) < EXPECTED_SITE_COUNT:
+        errors.append(f"v2_workflow_success.json site_count is lower than expected: expected at least {EXPECTED_SITE_COUNT}.")
     if data.get("missing_or_empty_outputs"):
         errors.append("v2_workflow_success.json reports missing or empty outputs.")
     return errors
@@ -285,7 +312,7 @@ def main() -> None:
             print(f"- {error}")
         sys.exit(1)
     print("Status: PASSED")
-    print("All expected V2 outputs are present and the main V2 results table has the required structure.")
+    print("All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.")
 
 
 if __name__ == "__main__":
