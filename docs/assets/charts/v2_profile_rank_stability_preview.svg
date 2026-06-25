@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
+  <title id="title">V2 Profile Rank Stability Preview</title>
+  <desc id="desc">Preview showing that V2 profile and sensitivity rankings are stable across planning profiles.</desc>
+  <rect width="1100" height="620" fill="#ffffff"/>
+  <text x="40" y="46" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1f2937">V2 Rank Stability Preview</text>
+  <text x="40" y="76" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#4b5563">All sites had rank_range = 0 in the latest sensitivity summary. Profile top sites remain concentrated at FFX002 and FFX004.</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="14">
+    <rect x="60" y="125" width="980" height="60" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="85" y="160" font-size="19" font-weight="700" fill="#1d4ed8">Sensitivity result</text>
+    <text x="310" y="160" fill="#111827">Rankings stayed stable across tested demand/cost sensitivity cases: each site had rank_range = 0.</text>
+    <rect x="60" y="220" width="980" height="300" rx="12" fill="#f9fafb" stroke="#e5e7eb"/>
+    <text x="85" y="255" font-size="20" font-weight="700" fill="#111827">Top site by scoring profile</text>
+    <line x1="85" y1="285" x2="1015" y2="285" stroke="#e5e7eb"/>
+    <text x="90" y="325" fill="#111827">base</text><rect x="270" y="306" width="520" height="30" rx="6" fill="#2563eb"/><text x="810" y="326" fill="#111827">FFX002 · 58.8</text>
+    <text x="90" y="375" fill="#111827">demand_priority</text><rect x="270" y="356" width="490" height="30" rx="6" fill="#f59e0b"/><text x="780" y="376" fill="#111827">FFX004 · 55.8</text>
+    <text x="90" y="425" fill="#111827">equity_priority</text><rect x="270" y="406" width="565" height="30" rx="6" fill="#2563eb"/><text x="855" y="426" fill="#111827">FFX002 · 63.7</text>
+    <text x="90" y="475" fill="#111827">feasibility_priority</text><rect x="270" y="456" width="525" height="30" rx="6" fill="#2563eb"/><text x="815" y="476" fill="#111827">FFX002 · 59.1</text>
+    <text x="90" y="525" fill="#111827">safety_priority</text><rect x="270" y="506" width="580" height="30" rx="6" fill="#2563eb"/><text x="870" y="526" fill="#111827">FFX002 · 65.1</text>
+  </g>
+  <rect x="60" y="555" width="980" height="35" rx="8" fill="#ecfdf5" stroke="#bbf7d0"/>
+  <text x="85" y="578" font-family="Arial" font-size="15" fill="#166534">Interpretation: FFX002 is the most robust public candidate; FFX004 leads only when demand is weighted highest.</text>
+</svg>
