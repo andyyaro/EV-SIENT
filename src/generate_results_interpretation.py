@@ -49,6 +49,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sensitivity", default=DEFAULT_SENSITIVITY, help="Sensitivity summary CSV.")
     parser.add_argument("--profile-results", default=DEFAULT_PROFILE_RESULTS, help="Scoring profile results CSV.")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Output Markdown path.")
+    parser.add_argument("--action-report", default="data/outputs/action_matrix.md", help="Action matrix Markdown report path to reference.")
     return parser.parse_args()
 
 
@@ -300,6 +301,7 @@ def build_interpretation(
     quality: pd.DataFrame,
     sensitivity: pd.DataFrame,
     profile_results: pd.DataFrame,
+    action_report_path: str,
 ) -> str:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
     ranked = get_ranked_results(results)
@@ -358,7 +360,7 @@ def build_interpretation(
         )
     )
     lines.append("")
-    lines.append("See `data/outputs/action_matrix.md` for the dedicated action-matrix report.")
+    lines.append(f"See `{action_report_path}` for the dedicated action-matrix report.")
     lines.append("")
 
     lines.append("## Site-by-site interpretation")
@@ -393,6 +395,7 @@ def main() -> None:
     sensitivity_path = Path(args.sensitivity)
     profile_results_path = Path(args.profile_results)
     output_path = Path(args.output)
+    action_report_path = args.action_report
 
     results = read_csv_if_exists(results_path)
     quality = read_csv_if_exists(quality_path)
@@ -400,7 +403,7 @@ def main() -> None:
     profile_results = read_csv_if_exists(profile_results_path)
 
     ensure_parent_dir(output_path)
-    output_path.write_text(build_interpretation(results, quality, sensitivity, profile_results), encoding="utf-8")
+    output_path.write_text(build_interpretation(results, quality, sensitivity, profile_results, action_report_path), encoding="utf-8")
 
     print("GENERATED RESULTS INTERPRETATION")
     print("--------------------------------")
