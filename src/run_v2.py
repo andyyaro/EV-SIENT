@@ -46,6 +46,9 @@ V2_RIGHT_SIZING_REPORT = "data/outputs/v2_right_sizing_report.md"
 V2_INTERPRETATION = "data/outputs/v2_results_interpretation.md"
 V2_RUN_SUMMARY = "data/outputs/v2_run_summary.md"
 V2_WORKFLOW_STATUS = "data/outputs/v2_workflow_success.json"
+V2_BASELINE = "data/baselines/v2_baseline_snapshot.json"
+V2_BASELINE_COMPARISON_JSON = "data/outputs/v2_baseline_comparison.json"
+V2_BASELINE_COMPARISON_MD = "data/outputs/v2_baseline_comparison.md"
 
 
 def run_step(title: str, args: list[str]) -> None:
@@ -78,6 +81,7 @@ def main() -> None:
     run_step("13. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
     run_step("14. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
     run_step("15. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
+    run_step("16. Compare V2 outputs to baseline", [PYTHON, "src/compare_v2_to_baseline.py", "--baseline", V2_BASELINE, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--json-output", V2_BASELINE_COMPARISON_JSON, "--md-output", V2_BASELINE_COMPARISON_MD])
 
     print()
     print("V2 workflow complete.")
@@ -87,6 +91,7 @@ def main() -> None:
         V2_PROFILE_RESULTS, V2_PROFILE_REPORT, V2_ELECTRICAL_RISK_SUMMARY,
         V2_ELECTRICAL_REPORT, V2_RIGHT_SIZING, V2_RIGHT_SIZING_REPORT,
         V2_INTERPRETATION, V2_RUN_SUMMARY, V2_WORKFLOW_STATUS,
+        V2_BASELINE_COMPARISON_JSON, V2_BASELINE_COMPARISON_MD,
         V2_READINESS_CHART, V2_POLISHED_READINESS_CHART,
         V2_DATA_CONFIDENCE_CHART, V2_PROFILE_SCORE_HEATMAP,
         V2_PROFILE_RANK_STABILITY_CHART, V2_SITE_READINESS_MAP,
