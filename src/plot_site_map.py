@@ -55,27 +55,27 @@ NOTABLE_OVERVIEW_SITE_IDS = {"PWC002", "PWC003", "PWC008"}
 # Hand-tuned offsets for the expanded V2 candidate set. Any site not listed here
 # gets a deterministic automatic offset.
 OVERVIEW_LABEL_OFFSETS = {
-    "FFX002": (12, 14),
-    "FFX004": (12, 12),
+    "FFX002": (14, -4),
+    "FFX004": (-60, 18),
     "PWC006": (-58, 14),
     "PWC002": (-54, 16),
-    "PWC003": (10, -14),
+    "PWC003": (10, -16),
     "PWC008": (12, 10),
 }
 
 ZOOM_LABEL_OFFSETS = {
-    "FFX001": (-72, -10),
-    "FFX002": (12, 14),
-    "FFX003": (12, -12),
-    "FFX004": (12, 10),
-    "PWC001": (12, 28),
-    "PWC002": (-66, 14),
-    "PWC003": (10, -16),
-    "PWC004": (12, 10),
+    "FFX001": (-72, -12),
+    "FFX002": (18, -2),
+    "FFX003": (12, -14),
+    "FFX004": (-64, 18),
+    "PWC001": (-66, 26),
+    "PWC002": (-72, 14),
+    "PWC003": (12, -24),
+    "PWC004": (12, 22),
     "PWC005": (10, 16),
-    "PWC006": (-52, -8),
-    "PWC007": (12, -20),
-    "PWC008": (12, -12),
+    "PWC006": (-54, -8),
+    "PWC007": (12, -22),
+    "PWC008": (12, -18),
 }
 
 
@@ -333,11 +333,11 @@ def plot_sites_on_axis(
             xy=(row["lon"], row["lat"]),
             xytext=offset,
             textcoords="offset points",
-            fontsize=7.2,
+            fontsize=6.9,
             ha="right" if offset[0] < 0 else "left",
             va="center",
-            arrowprops={"arrowstyle": "-", "lw": 0.35, "alpha": 0.55},
-            bbox={"boxstyle": "round,pad=0.18", "fc": "white", "alpha": 0.88, "lw": 0.25},
+            arrowprops={"arrowstyle": "-", "lw": 0.32, "alpha": 0.52},
+            bbox={"boxstyle": "round,pad=0.16", "fc": "white", "alpha": 0.88, "lw": 0.25},
             zorder=5,
         )
 
@@ -471,7 +471,7 @@ def plot_site_map(
     if not ffx.empty:
         plot_sites_on_axis(ax_ffx, ffx, norm, cmap_name, top_site, sensitivity, profile_results, ZOOM_LABEL_OFFSETS)
         ax_ffx.set_title("Zoom: Fairfax-area candidates", fontsize=10, pad=8)
-        lon0, lon1, lat0, lat1 = axis_bounds(ffx, pad_factor=1.10, min_lon_pad=0.008, min_lat_pad=0.008)
+        lon0, lon1, lat0, lat1 = axis_bounds(ffx, pad_factor=1.10, min_lon_pad=0.012, min_lat_pad=0.010)
         ax_ffx.set_xlim(lon0, lon1)
         ax_ffx.set_ylim(lat0, lat1)
         style_axis(ax_ffx, zoom=True)
@@ -480,7 +480,7 @@ def plot_site_map(
     if not pwc.empty:
         plot_sites_on_axis(ax_pwc, pwc, norm, cmap_name, top_site, sensitivity, profile_results, ZOOM_LABEL_OFFSETS)
         ax_pwc.set_title("Zoom: Prince William County", fontsize=10, pad=8)
-        lon0, lon1, lat0, lat1 = axis_bounds(pwc, pad_factor=0.30, min_lon_pad=0.012, min_lat_pad=0.012)
+        lon0, lon1, lat0, lat1 = axis_bounds(pwc, pad_factor=0.36, min_lon_pad=0.018, min_lat_pad=0.016)
         ax_pwc.set_xlim(lon0, lon1)
         ax_pwc.set_ylim(lat0, lat1)
         style_axis(ax_pwc, zoom=True)
