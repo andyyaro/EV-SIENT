@@ -111,7 +111,7 @@ data/outputs/v2_baseline_comparison.md
 data/outputs/v2_workflow_success.json
 ```
 
-Important V2 charts:
+Important V2 charts generated locally:
 
 ```text
 data/outputs/charts/v2_polished_readiness_score_chart.png
@@ -121,6 +121,26 @@ data/outputs/charts/v2_profile_rank_stability_chart.png
 data/outputs/charts/v2_site_readiness_map.png
 data/outputs/charts/v2_port_utilization_simulation.png
 ```
+
+## V2 preview visuals
+
+These committed README preview visuals reflect the active V2 workflow rather than the older V1 workflow. The full-resolution generated charts are still created locally under `data/outputs/charts/` when `python src/run_v2.py` runs.
+
+### V2 readiness ranking
+
+![V2 readiness ranking preview](docs/assets/charts/v2_readiness_preview.svg)
+
+### V2 candidate site map
+
+![V2 candidate site map preview](docs/assets/charts/v2_site_map_preview.svg)
+
+### V2 rank stability across profiles
+
+![V2 profile rank stability preview](docs/assets/charts/v2_profile_rank_stability_preview.svg)
+
+### V2 port-use simulation and right-sizing validation
+
+![V2 port simulation preview](docs/assets/charts/v2_port_simulation_preview.svg)
 
 ## Main input and output files
 
