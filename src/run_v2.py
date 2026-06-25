@@ -45,6 +45,7 @@ V2_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
 V2_RIGHT_SIZING_REPORT = "data/outputs/v2_right_sizing_report.md"
 V2_INTERPRETATION = "data/outputs/v2_results_interpretation.md"
 V2_RUN_SUMMARY = "data/outputs/v2_run_summary.md"
+V2_WORKFLOW_STATUS = "data/outputs/v2_workflow_success.json"
 
 
 def run_step(title: str, args: list[str]) -> None:
@@ -62,240 +63,33 @@ def main() -> None:
     print(f"Python: {PYTHON}")
     print(f"Input: {V2_INPUT}")
 
-    run_step(
-        "1. Run V2 site-readiness model",
-        [
-            PYTHON,
-            "src/ev_charger_model.py",
-            "--input",
-            V2_INPUT,
-            "--output",
-            V2_RESULTS,
-            "--chart",
-            V2_READINESS_CHART,
-            "--utilization-chart-dir",
-            V2_UTILIZATION_CHART_DIR,
-        ],
-    )
-
-    run_step(
-        "2. Add V2 readiness-confidence action matrix",
-        [
-            PYTHON,
-            "src/add_action_matrix.py",
-            "--results",
-            V2_RESULTS,
-            "--report",
-            V2_ACTION_MATRIX,
-        ],
-    )
-
-    run_step(
-        "3. Create V2 polished readiness score chart",
-        [
-            PYTHON,
-            "src/plot_readiness_score_chart.py",
-            "--results",
-            V2_RESULTS,
-            "--output",
-            V2_POLISHED_READINESS_CHART,
-        ],
-    )
-
-    run_step(
-        "4. Create V2 data confidence chart",
-        [
-            PYTHON,
-            "src/plot_data_confidence_chart.py",
-            "--results",
-            V2_RESULTS,
-            "--output",
-            V2_DATA_CONFIDENCE_CHART,
-        ],
-    )
-
-    run_step(
-        "5. Validate V2 site input data",
-        [
-            PYTHON,
-            "src/validate_site_data.py",
-            "--input",
-            V2_INPUT,
-            "--output",
-            V2_QUALITY,
-        ],
-    )
-
-    run_step(
-        "6. Run V2 sensitivity analysis",
-        [
-            PYTHON,
-            "src/run_sensitivity_analysis.py",
-            "--input",
-            V2_INPUT,
-            "--results-output",
-            V2_SENSITIVITY_RESULTS,
-            "--summary-output",
-            V2_SENSITIVITY_SUMMARY,
-        ],
-    )
-
-    run_step(
-        "7. Run V2 scoring-profile analysis",
-        [
-            PYTHON,
-            "src/run_profile_analysis.py",
-            "--site-results",
-            V2_RESULTS,
-            "--input-sites",
-            V2_INPUT,
-            "--output",
-            V2_PROFILE_RESULTS,
-            "--summary-output",
-            V2_PROFILE_RANK_SUMMARY,
-            "--report-output",
-            V2_PROFILE_REPORT,
-        ],
-    )
-
-    run_step(
-        "8. Create V2 profile score heatmap",
-        [
-            PYTHON,
-            "src/plot_profile_score_heatmap.py",
-            "--profile-results",
-            V2_PROFILE_RESULTS,
-            "--output",
-            V2_PROFILE_SCORE_HEATMAP,
-        ],
-    )
-
-    run_step(
-        "9. Create V2 profile rank stability chart",
-        [
-            PYTHON,
-            "src/plot_profile_rank_stability.py",
-            "--profile-results",
-            V2_PROFILE_RESULTS,
-            "--output",
-            V2_PROFILE_RANK_STABILITY_CHART,
-        ],
-    )
-
-    run_step(
-        "10. Create V2 readiness map",
-        [
-            PYTHON,
-            "src/plot_site_map.py",
-            "--input",
-            V2_INPUT,
-            "--results",
-            V2_RESULTS,
-            "--sensitivity",
-            V2_SENSITIVITY_SUMMARY,
-            "--profile-results",
-            V2_PROFILE_RESULTS,
-            "--output",
-            V2_SITE_READINESS_MAP,
-        ],
-    )
-
-    run_step(
-        "11. Run V2 electrical-feasibility scenario analysis",
-        [
-            PYTHON,
-            "src/run_electrical_risk_scenarios.py",
-            "--results",
-            V2_RESULTS,
-            "--scenario-output",
-            V2_ELECTRICAL_SCENARIO_RESULTS,
-            "--summary-output",
-            V2_ELECTRICAL_RISK_SUMMARY,
-            "--report-output",
-            V2_ELECTRICAL_REPORT,
-        ],
-    )
-
-    run_step(
-        "12. Run V2 right-sizing scenario analysis",
-        [
-            PYTHON,
-            "src/run_right_sizing_scenarios.py",
-            "--results",
-            V2_RESULTS,
-            "--electrical-summary",
-            V2_ELECTRICAL_RISK_SUMMARY,
-            "--output",
-            V2_RIGHT_SIZING,
-            "--report",
-            V2_RIGHT_SIZING_REPORT,
-        ],
-    )
-
-    run_step(
-        "13. Generate V2 interpretation report",
-        [
-            PYTHON,
-            "src/generate_results_interpretation.py",
-            "--results",
-            V2_RESULTS,
-            "--quality",
-            V2_QUALITY,
-            "--sensitivity",
-            V2_SENSITIVITY_SUMMARY,
-            "--profile-results",
-            V2_PROFILE_RESULTS,
-            "--action-report",
-            V2_ACTION_MATRIX,
-            "--output",
-            V2_INTERPRETATION,
-        ],
-    )
-
-    run_step(
-        "14. Generate V2 run summary",
-        [
-            PYTHON,
-            "src/generate_run_summary_v2.py",
-            "--results",
-            V2_RESULTS,
-            "--quality",
-            V2_QUALITY,
-            "--sensitivity",
-            V2_SENSITIVITY_SUMMARY,
-            "--profile-results",
-            V2_PROFILE_RESULTS,
-            "--electrical-summary",
-            V2_ELECTRICAL_RISK_SUMMARY,
-            "--right-sizing",
-            V2_RIGHT_SIZING,
-            "--output",
-            V2_RUN_SUMMARY,
-        ],
-    )
+    run_step("1. Run V2 site-readiness model", [PYTHON, "src/ev_charger_model.py", "--input", V2_INPUT, "--output", V2_RESULTS, "--chart", V2_READINESS_CHART, "--utilization-chart-dir", V2_UTILIZATION_CHART_DIR])
+    run_step("2. Add V2 readiness-confidence action matrix", [PYTHON, "src/add_action_matrix.py", "--results", V2_RESULTS, "--report", V2_ACTION_MATRIX])
+    run_step("3. Create V2 polished readiness score chart", [PYTHON, "src/plot_readiness_score_chart.py", "--results", V2_RESULTS, "--output", V2_POLISHED_READINESS_CHART])
+    run_step("4. Create V2 data confidence chart", [PYTHON, "src/plot_data_confidence_chart.py", "--results", V2_RESULTS, "--output", V2_DATA_CONFIDENCE_CHART])
+    run_step("5. Validate V2 site input data", [PYTHON, "src/validate_site_data.py", "--input", V2_INPUT, "--output", V2_QUALITY])
+    run_step("6. Run V2 sensitivity analysis", [PYTHON, "src/run_sensitivity_analysis.py", "--input", V2_INPUT, "--results-output", V2_SENSITIVITY_RESULTS, "--summary-output", V2_SENSITIVITY_SUMMARY])
+    run_step("7. Run V2 scoring-profile analysis", [PYTHON, "src/run_profile_analysis.py", "--site-results", V2_RESULTS, "--input-sites", V2_INPUT, "--output", V2_PROFILE_RESULTS, "--summary-output", V2_PROFILE_RANK_SUMMARY, "--report-output", V2_PROFILE_REPORT])
+    run_step("8. Create V2 profile score heatmap", [PYTHON, "src/plot_profile_score_heatmap.py", "--profile-results", V2_PROFILE_RESULTS, "--output", V2_PROFILE_SCORE_HEATMAP])
+    run_step("9. Create V2 profile rank stability chart", [PYTHON, "src/plot_profile_rank_stability.py", "--profile-results", V2_PROFILE_RESULTS, "--output", V2_PROFILE_RANK_STABILITY_CHART])
+    run_step("10. Create V2 readiness map", [PYTHON, "src/plot_site_map.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--output", V2_SITE_READINESS_MAP])
+    run_step("11. Run V2 electrical-feasibility scenario analysis", [PYTHON, "src/run_electrical_risk_scenarios.py", "--results", V2_RESULTS, "--scenario-output", V2_ELECTRICAL_SCENARIO_RESULTS, "--summary-output", V2_ELECTRICAL_RISK_SUMMARY, "--report-output", V2_ELECTRICAL_REPORT])
+    run_step("12. Run V2 right-sizing scenario analysis", [PYTHON, "src/run_right_sizing_scenarios.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--output", V2_RIGHT_SIZING, "--report", V2_RIGHT_SIZING_REPORT])
+    run_step("13. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
+    run_step("14. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
+    run_step("15. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
 
     print()
     print("V2 workflow complete.")
     print("Key outputs:")
     for path in [
-        V2_RESULTS,
-        V2_ACTION_MATRIX,
-        V2_QUALITY,
-        V2_SENSITIVITY_SUMMARY,
-        V2_PROFILE_RESULTS,
-        V2_PROFILE_REPORT,
-        V2_ELECTRICAL_RISK_SUMMARY,
-        V2_ELECTRICAL_REPORT,
-        V2_RIGHT_SIZING,
-        V2_RIGHT_SIZING_REPORT,
-        V2_INTERPRETATION,
-        V2_RUN_SUMMARY,
-        V2_READINESS_CHART,
-        V2_POLISHED_READINESS_CHART,
-        V2_DATA_CONFIDENCE_CHART,
-        V2_PROFILE_SCORE_HEATMAP,
-        V2_PROFILE_RANK_STABILITY_CHART,
-        V2_SITE_READINESS_MAP,
+        V2_RESULTS, V2_ACTION_MATRIX, V2_QUALITY, V2_SENSITIVITY_SUMMARY,
+        V2_PROFILE_RESULTS, V2_PROFILE_REPORT, V2_ELECTRICAL_RISK_SUMMARY,
+        V2_ELECTRICAL_REPORT, V2_RIGHT_SIZING, V2_RIGHT_SIZING_REPORT,
+        V2_INTERPRETATION, V2_RUN_SUMMARY, V2_WORKFLOW_STATUS,
+        V2_READINESS_CHART, V2_POLISHED_READINESS_CHART,
+        V2_DATA_CONFIDENCE_CHART, V2_PROFILE_SCORE_HEATMAP,
+        V2_PROFILE_RANK_STABILITY_CHART, V2_SITE_READINESS_MAP,
     ]:
         print(f"- {path}")
 
