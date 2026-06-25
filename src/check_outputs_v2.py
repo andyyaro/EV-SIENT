@@ -37,6 +37,7 @@ EXPECTED_FILES = [
     Path("data/outputs/charts/v2_profile_score_heatmap.png"),
     Path("data/outputs/charts/v2_profile_rank_stability_chart.png"),
     Path("data/outputs/charts/v2_site_readiness_map.png"),
+    Path("data/outputs/charts/v2_site_decision_map.png"),
     Path("data/outputs/charts/v2_port_utilization_simulation.png"),
     Path("data/outputs/deliverable_package_v2/README.md"),
     Path("data/outputs/deliverable_package_v2/package_manifest.json"),
@@ -49,6 +50,7 @@ EXPECTED_FILES = [
     Path("data/outputs/deliverable_package_v2/tables/v2_profile_rank_summary.csv"),
     Path("data/outputs/deliverable_package_v2/charts/v2_polished_readiness_score_chart.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png"),
+    Path("data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png"),
 ]
 
 REQUIRED_RESULT_COLUMNS = [
@@ -92,20 +94,10 @@ REQUIRED_EXECUTIVE_COLUMNS = [
     "right_sizing_validation_note", "major_review_flags",
 ]
 
-# Full current V2 candidate set: Fairfax + Prince William Batch 001 and Batch 002 sites.
 REQUIRED_SITE_IDS = {
-    "FFX001",
-    "FFX002",
-    "FFX003",
-    "FFX004",
-    "PWC001",
-    "PWC002",
-    "PWC003",
-    "PWC004",
-    "PWC005",
-    "PWC006",
-    "PWC007",
-    "PWC008",
+    "FFX001", "FFX002", "FFX003", "FFX004",
+    "PWC001", "PWC002", "PWC003", "PWC004",
+    "PWC005", "PWC006", "PWC007", "PWC008",
 }
 EXPECTED_SITE_COUNT = len(REQUIRED_SITE_IDS)
 
@@ -118,6 +110,11 @@ def check_expected_files() -> list[str]:
         elif path.stat().st_size == 0:
             errors.append(f"Expected V2 output is empty: {path}")
     return errors
+
+
+def check_columns(table: pd.DataFrame, table_name: str, required_columns: list[str]) -> list[str]:
+    missing = [col for col in required_columns if col not in table.columns]
+    return [f"{table_name} is missing required columns: {missing}"] if missing else []
 
 
 def check_site_ids(table: pd.DataFrame, table_name: str) -> list[str]:
@@ -133,15 +130,18 @@ def check_site_ids(table: pd.DataFrame, table_name: str) -> list[str]:
     return errors
 
 
-def check_results_table() -> list[str]:
-    errors = []
-    path = Path("data/outputs/v2_site_results.csv")
+def read_table(path: Path, label: str) -> tuple[pd.DataFrame | None, list[str]]:
     if not path.exists():
-        return [f"Cannot check V2 results table because {path} is missing."]
-    results = pd.read_csv(path)
-    missing_columns = [col for col in REQUIRED_RESULT_COLUMNS if col not in results.columns]
-    if missing_columns:
-        errors.append(f"v2_site_results.csv is missing required columns: {missing_columns}")
+        return None, [f"Cannot check {label} because {path} is missing."]
+    return pd.read_csv(path), []
+
+
+def check_results_table() -> list[str]:
+    path = Path("data/outputs/v2_site_results.csv")
+    results, errors = read_table(path, "V2 results table")
+    if results is None:
+        return errors
+    errors.extend(check_columns(results, "v2_site_results.csv", REQUIRED_RESULT_COLUMNS))
     errors.extend(check_site_ids(results, "v2_site_results.csv"))
     if "readiness_score" in results.columns:
         readiness = pd.to_numeric(results["readiness_score"], errors="coerce")
@@ -155,14 +155,10 @@ def check_results_table() -> list[str]:
 
 
 def check_electrical_summary() -> list[str]:
-    path = Path("data/outputs/v2_electrical_risk_summary.csv")
-    if not path.exists():
-        return [f"Cannot check electrical risk summary because {path} is missing."]
-    summary = pd.read_csv(path)
-    errors = []
-    missing_columns = [col for col in REQUIRED_ELECTRICAL_COLUMNS if col not in summary.columns]
-    if missing_columns:
-        errors.append(f"v2_electrical_risk_summary.csv is missing required columns: {missing_columns}")
+    summary, errors = read_table(Path("data/outputs/v2_electrical_risk_summary.csv"), "electrical risk summary")
+    if summary is None:
+        return errors
+    errors.extend(check_columns(summary, "v2_electrical_risk_summary.csv", REQUIRED_ELECTRICAL_COLUMNS))
     errors.extend(check_site_ids(summary, "v2_electrical_risk_summary.csv"))
     if "electrical_risk_level" in summary.columns:
         invalid = sorted(set(summary["electrical_risk_level"].dropna().astype(str)) - {"low", "medium", "high"})
@@ -172,14 +168,10 @@ def check_electrical_summary() -> list[str]:
 
 
 def check_right_sizing() -> list[str]:
-    path = Path("data/outputs/v2_right_sizing_scenarios.csv")
-    if not path.exists():
-        return [f"Cannot check right-sizing output because {path} is missing."]
-    right_sizing = pd.read_csv(path)
-    errors = []
-    missing_columns = [col for col in REQUIRED_RIGHT_SIZING_COLUMNS if col not in right_sizing.columns]
-    if missing_columns:
-        errors.append(f"v2_right_sizing_scenarios.csv is missing required columns: {missing_columns}")
+    right_sizing, errors = read_table(Path("data/outputs/v2_right_sizing_scenarios.csv"), "right-sizing output")
+    if right_sizing is None:
+        return errors
+    errors.extend(check_columns(right_sizing, "v2_right_sizing_scenarios.csv", REQUIRED_RIGHT_SIZING_COLUMNS))
     errors.extend(check_site_ids(right_sizing, "v2_right_sizing_scenarios.csv"))
     for col in ["ports_now", "ports_2035_base", "ports_2035_high", "ports_2050_base", "ports_2050_high", "future_ready_capacity"]:
         if col in right_sizing.columns:
@@ -190,14 +182,10 @@ def check_right_sizing() -> list[str]:
 
 
 def check_port_simulation() -> list[str]:
-    path = Path("data/outputs/v2_port_utilization_simulation.csv")
-    if not path.exists():
-        return [f"Cannot check V2 port simulation because {path} is missing."]
-    simulation = pd.read_csv(path)
-    errors = []
-    missing_columns = [col for col in REQUIRED_PORT_SIM_COLUMNS if col not in simulation.columns]
-    if missing_columns:
-        errors.append(f"v2_port_utilization_simulation.csv is missing required columns: {missing_columns}")
+    simulation, errors = read_table(Path("data/outputs/v2_port_utilization_simulation.csv"), "V2 port simulation")
+    if simulation is None:
+        return errors
+    errors.extend(check_columns(simulation, "v2_port_utilization_simulation.csv", REQUIRED_PORT_SIM_COLUMNS))
     errors.extend(check_site_ids(simulation, "v2_port_utilization_simulation.csv"))
     expected_min_rows = EXPECTED_SITE_COUNT * 5
     if len(simulation) < expected_min_rows:
@@ -206,27 +194,19 @@ def check_port_simulation() -> list[str]:
 
 
 def check_right_sizing_validation() -> list[str]:
-    path = Path("data/outputs/v2_right_sizing_validation.csv")
-    if not path.exists():
-        return [f"Cannot check right-sizing validation because {path} is missing."]
-    validation = pd.read_csv(path)
-    errors = []
-    missing_columns = [col for col in REQUIRED_RIGHT_SIZING_VALIDATION_COLUMNS if col not in validation.columns]
-    if missing_columns:
-        errors.append(f"v2_right_sizing_validation.csv is missing required columns: {missing_columns}")
+    validation, errors = read_table(Path("data/outputs/v2_right_sizing_validation.csv"), "right-sizing validation")
+    if validation is None:
+        return errors
+    errors.extend(check_columns(validation, "v2_right_sizing_validation.csv", REQUIRED_RIGHT_SIZING_VALIDATION_COLUMNS))
     errors.extend(check_site_ids(validation, "v2_right_sizing_validation.csv"))
     return errors
 
 
 def check_executive_summary() -> list[str]:
-    path = Path("data/outputs/v2_executive_site_summary.csv")
-    if not path.exists():
-        return [f"Cannot check V2 executive summary because {path} is missing."]
-    summary = pd.read_csv(path)
-    errors = []
-    missing_columns = [col for col in REQUIRED_EXECUTIVE_COLUMNS if col not in summary.columns]
-    if missing_columns:
-        errors.append(f"v2_executive_site_summary.csv is missing required columns: {missing_columns}")
+    summary, errors = read_table(Path("data/outputs/v2_executive_site_summary.csv"), "V2 executive summary")
+    if summary is None:
+        return errors
+    errors.extend(check_columns(summary, "v2_executive_site_summary.csv", REQUIRED_EXECUTIVE_COLUMNS))
     errors.extend(check_site_ids(summary, "v2_executive_site_summary.csv"))
     return errors
 
