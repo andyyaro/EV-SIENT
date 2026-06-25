@@ -1,0 +1,48 @@
+name: V2 Model Pipeline Check
+
+on:
+  push:
+    branches: [v2-expansion-planning]
+  pull_request:
+    branches: [v2-expansion-planning]
+  workflow_dispatch:
+
+jobs:
+  run-v2-model-pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      MPLBACKEND: Agg
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install base dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile Python files
+        run: python -m compileall src
+
+      - name: Run V2 model workflow
+        run: python src/run_v2.py
+
+      - name: Upload V2 generated outputs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v2-generated-outputs
+          path: |
+            data/outputs/v2_*.csv
+            data/outputs/v2_*.md
+            data/outputs/charts/v2_readiness_score_chart.png
+            data/outputs/charts/v2/*.png
+          if-no-files-found: warn
