@@ -1,0 +1,10 @@
+# Optional GIS dependencies for the V2 shapefile/basemap decision map.
+# Install only when working on GIS map visuals:
+#
+#     pip install -r requirements-gis.txt
+#
+# The core model still uses requirements.txt.
+
+geopandas>=0.14
+contextily>=1.5
+xyzservices>=2024.0
