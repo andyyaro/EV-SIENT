@@ -4,6 +4,22 @@ Use this checklist to reproduce the current model outputs from a clean local run
 
 This guide is written for someone who may be using GitHub for the first time.
 
+## Current recommendation
+
+For active Phase 2 work, reproduce the V2 workflow on:
+
+```text
+v2-expansion-planning
+```
+
+The main V2 guide is:
+
+```text
+docs/V2_CURRENT_WORKFLOW_GUIDE.md
+```
+
+Use `main` only when reproducing the stable V1 workflow.
+
 ## 0. One-time computer setup
 
 Before cloning the repository, make sure these tools are installed:
@@ -17,8 +33,6 @@ Python 3.10 or newer
 Python 3.11 is the tested version used by the GitHub Actions workflow. Python 3.10+ is recommended because the scripts use modern Python type syntax.
 
 Check whether they are already installed:
-
-macOS, Linux, or Windows terminal:
 
 ```bash
 git --version
@@ -46,27 +60,7 @@ HTTPS
 Login with a web browser
 ```
 
-## 1. Choose where the repository should live
-
-Move into the folder where you want to keep the project.
-
-Example for macOS or Linux:
-
-```bash
-mkdir -p ~/Documents/GitHub
-cd ~/Documents/GitHub
-```
-
-Example for Windows PowerShell:
-
-```powershell
-mkdir "$HOME\Documents\GitHub"
-cd "$HOME\Documents\GitHub"
-```
-
-You can choose a different folder. The important thing is to `cd` into the folder **before** cloning.
-
-## 2. Clone the repository
+## 1. Clone the repository
 
 Recommended method using GitHub CLI:
 
@@ -86,19 +80,13 @@ Then enter the repository folder:
 cd Future-City-Fellowship-
 ```
 
-## 3. Confirm you are in the repository root
+## 2. Confirm you are in the repository root
 
 Run:
 
 ```bash
 pwd
 ls
-```
-
-You should be inside the project folder:
-
-```text
-Future-City-Fellowship-
 ```
 
 You should see files and folders such as:
@@ -112,36 +100,7 @@ data
 docs
 ```
 
-If you do not see those files, you are probably in the wrong folder. Use `cd` to move into the `Future-City-Fellowship-` folder.
-
-## 4. Choose the version to reproduce
-
-To reproduce the frozen V1 review-ready checkpoint exactly, use the tag:
-
-```bash
-git checkout v1-review-ready
-```
-
-To work from the latest version of `main`, use:
-
-```bash
-git switch main
-git pull --rebase origin main
-```
-
-For normal development, use `main`. For exact V1 review reproduction, use `v1-review-ready`.
-
-## 5. Get the latest version if you are on main
-
-If you are working on `main`, run:
-
-```bash
-git pull --rebase origin main
-```
-
-If you checked out the frozen `v1-review-ready` tag, skip this step.
-
-## 6. Create and activate a virtual environment
+## 3. Create and activate a virtual environment
 
 macOS or Linux:
 
@@ -170,67 +129,60 @@ After activation, your terminal prompt may show:
 (.venv)
 ```
 
-## 7. Install dependencies
+## 4. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 8. Run the full workflow
+## 5. Reproduce the active V2 workflow
 
 ```bash
-python src/run_all.py
+git switch v2-expansion-planning
+git pull --rebase origin v2-expansion-planning
+python src/run_v2.py
+python src/check_outputs_v2.py
 ```
 
 Expected success signs:
 
 ```text
-Sanity check: PASSED
-Baseline comparison: COMPLETED
-Result: PASSED
+V2 workflow complete.
+V2 OUTPUT CHECK
+Status: PASSED
+All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
 ```
 
-The output summary should show `OK` for the main generated files.
-
-## 9. Build the deliverable package
-
-```bash
-python src/build_deliverable_package.py
-```
-
-Expected success signs:
+The deliverable package step should show:
 
 ```text
-Missing files: 0
-Done. The deliverable package is ready to review or share.
+Status: complete
+Clean rebuild: True
+Copied files: 28/28
 ```
 
-For the V1 review-ready checkpoint, the package should copy 40 files on the latest `main` version. Older frozen tags may copy fewer files depending on the package manifest at that tag.
-
-## 10. Check local Git status
-
-```bash
-git status --short
-```
-
-It is normal for generated files under [data/outputs/](data/outputs/) to be ignored by Git.
-
-If the output is empty, there are no uncommitted tracked changes.
-
-## 11. Open the key outputs
+## 6. Open the key V2 outputs
 
 Open these files first:
 
-1. [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
-2. [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
-3. [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
-4. [data/outputs/site_results.csv](data/outputs/site_results.csv)
-5. [data/outputs/charts/readiness_score_chart.png](data/outputs/charts/readiness_score_chart.png)
-6. [data/outputs/charts/data_confidence_chart.png](data/outputs/charts/data_confidence_chart.png)
-7. [data/outputs/charts/profile_rank_stability_chart.png](data/outputs/charts/profile_rank_stability_chart.png)
-8. [data/outputs/charts/site_readiness_map.png](data/outputs/charts/site_readiness_map.png)
+```text
+data/outputs/deliverable_package_v2/README.md
+data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
+data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
+data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
+data/outputs/deliverable_package_v2/reports/v2_run_summary.md
+```
 
-## 12. Confirm the main result
+Then review the main charts:
+
+```text
+data/outputs/deliverable_package_v2/charts/v2_polished_readiness_score_chart.png
+data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png
+data/outputs/deliverable_package_v2/charts/v2_profile_rank_stability_chart.png
+data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png
+```
+
+## 7. Confirm the current V2 result
 
 The current expected top site is:
 
@@ -238,47 +190,85 @@ The current expected top site is:
 FFX002 — City of Fairfax Regional Library
 ```
 
-Expected ranking:
+Current V2 expected ranking:
 
 ```text
 1. FFX002
-2. FFX001
-3. PWC002
-4. PWC004
-5. PWC001
-6. PWC003
+2. FFX004
+3. PWC006
+4. FFX001
+5. PWC002
+6. PWC007
+7. PWC004
+8. FFX003
+9. PWC008
+10. PWC001
+11. PWC005
+12. PWC003
 ```
 
-## 13. Confirm the checker output
+## 8. Confirm the V2 checker output
 
 The checker should confirm:
 
 ```text
-ERROR: 0
-Sanity check: PASSED
+Status: PASSED
 ```
 
-Remaining `REVIEW` items are expected because some electrical, capacity, emergency-disconnect, access, and stakeholder fields still need confirmation.
+Remaining `REVIEW` items are expected because some electrical, capacity, emergency-disconnect, access, operating-hours, parking, and stakeholder fields still need confirmation.
 
-## 14. Confirm the deliverable package
+## 9. Confirm the V2 deliverable package
 
-The package should be created at [data/outputs/deliverable_package/](data/outputs/deliverable_package/).
+The package should be created at:
+
+```text
+data/outputs/deliverable_package_v2/
+```
 
 The package should include:
 
-- [reports/START_HERE.md](data/outputs/deliverable_package/reports/START_HERE.md)
-- [reports/REPRODUCIBILITY_CHECKLIST.md](data/outputs/deliverable_package/reports/REPRODUCIBILITY_CHECKLIST.md)
-- [reports/REPO_MAP.md](data/outputs/deliverable_package/reports/REPO_MAP.md)
-- [run_outputs/model_run_summary.md](data/outputs/deliverable_package/run_outputs/model_run_summary.md)
-- [run_outputs/results_interpretation.md](data/outputs/deliverable_package/run_outputs/results_interpretation.md)
-- [run_outputs/action_matrix.md](data/outputs/deliverable_package/run_outputs/action_matrix.md)
-- [charts/readiness_score_chart.png](data/outputs/deliverable_package/charts/readiness_score_chart.png)
-- [charts/data_confidence_chart.png](data/outputs/deliverable_package/charts/data_confidence_chart.png)
-- [charts/profile_rank_stability_chart.png](data/outputs/deliverable_package/charts/profile_rank_stability_chart.png)
-- [charts/site_readiness_map.png](data/outputs/deliverable_package/charts/site_readiness_map.png)
-- [stakeholder_inputs/stakeholder_contact_targets.csv](data/outputs/deliverable_package/stakeholder_inputs/stakeholder_contact_targets.csv)
+```text
+README.md
+package_manifest.json
+reports/
+tables/
+charts/
+manifests/
+```
 
-## 15. Optional: run demo mode
+The package is rebuilt cleanly by default so stale copied files do not remain.
+
+## 10. Check local Git status
+
+```bash
+git status --short
+```
+
+It is normal for generated files under `data/outputs/` to be ignored by Git.
+
+If the output is empty, there are no uncommitted tracked changes.
+
+## 11. Stable V1 reproduction
+
+To reproduce the stable V1 workflow on `main`:
+
+```bash
+git switch main
+git pull --rebase origin main
+python src/run_all.py
+python src/build_deliverable_package.py
+git status --short
+```
+
+A successful V1 run should show signs like:
+
+```text
+Sanity check: PASSED
+Baseline comparison: COMPLETED
+Missing files: 0
+```
+
+## 12. Optional: run demo mode
 
 Demo mode stress-tests the workflow with synthetic larger candidate pools.
 
@@ -286,33 +276,30 @@ Demo mode stress-tests the workflow with synthetic larger candidate pools.
 python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
 ```
 
-Demo outputs are local-only and ignored by Git under [data/demo/](data/demo/).
+Demo outputs are local-only and ignored by Git under `data/demo/`.
 
-## 16. What not to edit manually
+## 13. What not to edit manually
 
 Do not manually edit generated outputs:
 
-- [data/outputs/](data/outputs/)
-- [data/outputs/charts/](data/outputs/charts/)
-- [data/outputs/deliverable_package/](data/outputs/deliverable_package/)
-- [data/demo/](data/demo/)
+```text
+data/outputs/
+data/outputs/charts/
+data/outputs/deliverable_package/
+data/outputs/deliverable_package_v2/
+data/demo/
+```
 
-Regenerate them with:
+Regenerate V2 outputs with:
+
+```bash
+python src/run_v2.py
+python src/check_outputs_v2.py
+```
+
+Regenerate V1 outputs with:
 
 ```bash
 python src/run_all.py
 python src/build_deliverable_package.py
 ```
-
-## Simple one-command version
-
-After the repository is cloned, the virtual environment is active, and dependencies are installed, use:
-
-```bash
-git pull --rebase origin main && \
-python src/run_all.py && \
-python src/build_deliverable_package.py && \
-git status --short
-```
-
-If you are reproducing the frozen V1 tag instead of `main`, do not run `git pull --rebase origin main` after checking out the tag.
