@@ -4,8 +4,9 @@ This file explains the main parts of the repo without making you read every file
 
 ## Start files
 
-- [START_HERE.md](../START_HERE.md) — short reproduction guide
-- [REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — step-by-step reproduction checklist
+- [docs/V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md) — main landing page for the active V2 workflow
+- [START_HERE.md](../START_HERE.md) — shortest project entry point
+- [REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — step-by-step local reproduction checklist
 - [README.md](../README.md) — project overview
 
 ## Main folders
@@ -13,72 +14,148 @@ This file explains the main parts of the repo without making you read every file
 - [src/](../src/) — Python scripts
 - [data/inputs/](../data/inputs/) — input datasets
 - [data/config/](../data/config/) — scoring, checker, and output manifest configuration
-- [data/outputs/](../data/outputs/) — generated official outputs
+- [data/source_extracts/](../data/source_extracts/) — source extracts and source notes
+- [data/baselines/](../data/baselines/) — committed baseline snapshots
+- [data/outputs/](../data/outputs/) — generated local outputs ignored by Git
 - [data/demo/](../data/demo/) — generated local-only synthetic demo outputs
-- [data/baselines/](../data/baselines/) — saved V1 benchmark outputs
-- [docs/](../docs/) — project documentation
+- [docs/](../docs/) — project documentation and checkpoint notes
 
-## Main official workflow
+## Active V2 workflow
 
-Run everything with:
+Run the active V2 workflow with:
 
 ```bash
-python src/run_all.py
+git switch v2-expansion-planning
+git pull --rebase origin v2-expansion-planning
+python src/run_v2.py
+python src/check_outputs_v2.py
 ```
 
-Then build the package with:
+The V2 runner generates the active Phase 2 prototype outputs and the clean package at:
+
+```text
+data/outputs/deliverable_package_v2/
+```
+
+## Stable V1 workflow
+
+Run the stable V1 workflow with:
 
 ```bash
+git switch main
+git pull --rebase origin main
+python src/run_all.py
 python src/build_deliverable_package.py
 ```
 
-## Main scripts
+The V1 package is created at:
+
+```text
+data/outputs/deliverable_package/
+```
+
+## Main V2 scripts
 
 | File | Purpose |
 |---|---|
-| [src/run_all.py](../src/run_all.py) | Runs the official V1 workflow. |
+| [src/run_v2.py](../src/run_v2.py) | Runs the full active V2 workflow. |
+| [src/check_outputs_v2.py](../src/check_outputs_v2.py) | Checks V2 outputs, required columns, required files, package, manifest, baseline comparison, and all 12 candidate sites. |
+| [src/build_v2_deliverable_package.py](../src/build_v2_deliverable_package.py) | Builds the clean V2 deliverable package. |
+| [src/build_v2_executive_summary.py](../src/build_v2_executive_summary.py) | Builds the V2 executive site summary table and report. |
+| [src/run_electrical_risk_scenarios.py](../src/run_electrical_risk_scenarios.py) | Runs V2 electrical-feasibility scenario screening. |
+| [src/run_right_sizing_scenarios.py](../src/run_right_sizing_scenarios.py) | Builds near-term, 2035, and 2050 port recommendations. |
+| [src/run_port_utilization_simulation.py](../src/run_port_utilization_simulation.py) | Runs the simple V2 port-use simulation. |
+| [src/validate_right_sizing_with_simulation.py](../src/validate_right_sizing_with_simulation.py) | Compares right-sizing recommendations with port-use simulation results. |
+| [src/generate_run_summary_v2.py](../src/generate_run_summary_v2.py) | Generates the V2 run summary. |
+| [src/write_v2_workflow_success_marker.py](../src/write_v2_workflow_success_marker.py) | Writes the V2 workflow manifest. |
+| [src/compare_v2_to_baseline.py](../src/compare_v2_to_baseline.py) | Compares stable V2 outputs against the V2 baseline snapshot. |
+
+## Shared / V1 scripts
+
+| File | Purpose |
+|---|---|
+| [src/ev_charger_model.py](../src/ev_charger_model.py) | Main readiness and right-sizing model used by V1 and V2. |
+| [src/validate_site_data.py](../src/validate_site_data.py) | Checks input data. |
+| [src/add_action_matrix.py](../src/add_action_matrix.py) | Adds next-action labels. |
+| [src/run_sensitivity_analysis.py](../src/run_sensitivity_analysis.py) | Tests rankings under alternate demand/cost assumptions. |
+| [src/run_profile_analysis.py](../src/run_profile_analysis.py) | Tests rankings under alternate scoring-priority profiles. |
+| [src/plot_readiness_score_chart.py](../src/plot_readiness_score_chart.py) | Creates readiness score charts. |
+| [src/plot_data_confidence_chart.py](../src/plot_data_confidence_chart.py) | Creates data-confidence charts. |
+| [src/plot_profile_score_heatmap.py](../src/plot_profile_score_heatmap.py) | Creates profile score heatmaps. |
+| [src/plot_profile_rank_stability.py](../src/plot_profile_rank_stability.py) | Creates profile rank-stability charts. |
+| [src/plot_site_map.py](../src/plot_site_map.py) | Creates candidate-site readiness maps. |
+| [src/run_all.py](../src/run_all.py) | Runs the stable V1 workflow. |
+| [src/check_outputs.py](../src/check_outputs.py) | Checks V1 generated outputs. |
+| [src/build_deliverable_package.py](../src/build_deliverable_package.py) | Builds the V1 shareable package. |
 | [src/run_demo.py](../src/run_demo.py) | Runs a synthetic larger-site demo workflow. |
 | [src/generate_demo_sites.py](../src/generate_demo_sites.py) | Creates synthetic demo candidate sites. |
-| [src/validate_site_data.py](../src/validate_site_data.py) | Checks input data. |
-| [src/ev_charger_model.py](../src/ev_charger_model.py) | Main readiness and right-sizing model. |
-| [src/add_action_matrix.py](../src/add_action_matrix.py) | Adds next-action labels. |
-| [src/run_sensitivity_analysis.py](../src/run_sensitivity_analysis.py) | Tests rankings under alternate demand/cost scenarios. |
-| [src/run_profile_analysis.py](../src/run_profile_analysis.py) | Tests rankings under alternate scoring-priority profiles. |
-| [src/check_outputs.py](../src/check_outputs.py) | Checks outputs and runs baseline comparison. |
-| [src/build_deliverable_package.py](../src/build_deliverable_package.py) | Builds the shareable package. |
-| [src/plot_scalable_readiness_charts.py](../src/plot_scalable_readiness_charts.py) | Creates scalable readiness, map, profile, distribution, and tier-count visuals for larger test runs. |
-| [src/plot_scalable_data_confidence_chart.py](../src/plot_scalable_data_confidence_chart.py) | Creates the readable Top-N data-confidence chart for larger test runs. |
-| [src/sync_visual_assets.py](../src/sync_visual_assets.py) | Copies generated PNG visuals into committed Markdown preview assets. |
-| [src/project_config.py](../src/project_config.py) | Loads shared config files. |
 
 ## Main input and config files
 
 | File | Purpose |
 |---|---|
-| [data/inputs/real_sites_v1.csv](../data/inputs/real_sites_v1.csv) | Main candidate-site dataset. |
+| [data/inputs/real_sites_v2.csv](../data/inputs/real_sites_v2.csv) | Active V2 candidate-site input dataset. |
+| [data/inputs/real_sites_v1.csv](../data/inputs/real_sites_v1.csv) | Stable V1 candidate-site input dataset. |
 | [data/inputs/new_sites_template.csv](../data/inputs/new_sites_template.csv) | Template for new candidate sites. |
-| [data/config/output_manifest_v1.json](../data/config/output_manifest_v1.json) | Expected outputs and package contents. |
 | [data/config/scoring_profiles.csv](../data/config/scoring_profiles.csv) | Scoring-priority profiles. |
-| [data/config/output_check_rules_v1.json](../data/config/output_check_rules_v1.json) | Checker rules. |
+| [data/baselines/v2_baseline_snapshot.json](../data/baselines/v2_baseline_snapshot.json) | V2 baseline snapshot for comparison. |
 
-## Main official generated outputs
+## Main V2 generated outputs
 
-- [data/outputs/site_results.csv](../data/outputs/site_results.csv)
-- [data/outputs/model_run_summary.md](../data/outputs/model_run_summary.md)
-- [data/outputs/results_interpretation.md](../data/outputs/results_interpretation.md)
-- [data/outputs/action_matrix.md](../data/outputs/action_matrix.md)
-- [data/outputs/sensitivity_summary.csv](../data/outputs/sensitivity_summary.csv)
-- [data/outputs/profile_comparison.md](../data/outputs/profile_comparison.md)
-- [data/outputs/baseline_comparison.md](../data/outputs/baseline_comparison.md)
-- [data/outputs/data_quality_report.csv](../data/outputs/data_quality_report.csv)
+Important V2 output files include:
 
-## Main official charts
+```text
+data/outputs/v2_site_results.csv
+data/outputs/v2_action_matrix.md
+data/outputs/v2_data_quality_report.csv
+data/outputs/v2_sensitivity_summary.csv
+data/outputs/v2_profile_results.csv
+data/outputs/v2_profile_rank_summary.csv
+data/outputs/v2_profile_comparison.md
+data/outputs/v2_electrical_risk_summary.csv
+data/outputs/v2_electrical_feasibility_report.md
+data/outputs/v2_right_sizing_scenarios.csv
+data/outputs/v2_right_sizing_report.md
+data/outputs/v2_port_utilization_simulation.csv
+data/outputs/v2_port_utilization_simulation_report.md
+data/outputs/v2_right_sizing_validation.csv
+data/outputs/v2_right_sizing_validation_report.md
+data/outputs/v2_executive_site_summary.csv
+data/outputs/v2_executive_site_summary.md
+data/outputs/v2_results_interpretation.md
+data/outputs/v2_run_summary.md
+data/outputs/v2_baseline_comparison.md
+data/outputs/v2_workflow_success.json
+```
 
-- [data/outputs/charts/readiness_score_chart.png](../data/outputs/charts/readiness_score_chart.png)
-- [data/outputs/charts/data_confidence_chart.png](../data/outputs/charts/data_confidence_chart.png)
-- [data/outputs/charts/profile_rank_stability_chart.png](../data/outputs/charts/profile_rank_stability_chart.png)
-- [data/outputs/charts/site_readiness_map.png](../data/outputs/charts/site_readiness_map.png)
-- [data/outputs/charts/profile_score_heatmap.png](../data/outputs/charts/profile_score_heatmap.png)
+Important V2 chart files include:
+
+```text
+data/outputs/charts/v2_polished_readiness_score_chart.png
+data/outputs/charts/v2_data_confidence_chart.png
+data/outputs/charts/v2_profile_score_heatmap.png
+data/outputs/charts/v2_profile_rank_stability_chart.png
+data/outputs/charts/v2_site_readiness_map.png
+data/outputs/charts/v2_port_utilization_simulation.png
+```
+
+## Deliverable packages
+
+| Folder | Purpose |
+|---|---|
+| `data/outputs/deliverable_package_v2/` | Clean active V2 review package. |
+| `data/outputs/deliverable_package/` | Stable V1 review package. |
+
+The V2 package contains:
+
+```text
+README.md
+package_manifest.json
+reports/
+tables/
+charts/
+manifests/
+```
 
 ## Demo mode for larger tests
 
@@ -92,98 +169,37 @@ This generates demo data, validates it, runs the model, adds action labels, runs
 
 See [DEMO_MODE_GUIDE.md](DEMO_MODE_GUIDE.md).
 
-## Main demo generated outputs
+## Recommended V2 reading path
 
-After a 50-site run, key local-only files include:
-
-- `data/demo/demo_sites_50.csv`
-- `data/demo/outputs/demo_site_results_50.csv`
-- `data/demo/outputs/demo_action_matrix_50.md`
-- `data/demo/outputs/demo_sensitivity_results_50.csv`
-- `data/demo/outputs/demo_sensitivity_summary_50.csv`
-- `data/demo/outputs/demo_profile_results_50.csv`
-- `data/demo/outputs/demo_profile_rank_summary_50.csv`
-- `data/demo/outputs/demo_profile_comparison_50.md`
-- `data/demo/outputs/demo_run_summary_50.md`
-
-## Scalable visuals for larger tests
-
-For 25, 50, or more candidate sites, the easiest path is demo mode:
-
-```bash
-python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
-```
-
-To manually regenerate scalable visuals from an existing demo results file, use:
-
-```bash
-python src/plot_scalable_readiness_charts.py \
-  --results data/demo/outputs/demo_site_results_50.csv \
-  --input-sites data/demo/demo_sites_50.csv \
-  --profile-results data/demo/outputs/demo_profile_results_50.csv \
-  --output-dir data/demo/outputs/charts/scalable \
-  --top-n 15
-
-python src/plot_scalable_data_confidence_chart.py \
-  --results data/demo/outputs/demo_site_results_50.csv \
-  --output-dir data/demo/outputs/charts/scalable \
-  --top-n 15
-```
-
-See [SCALABLE_VISUALS_GUIDE.md](SCALABLE_VISUALS_GUIDE.md).
-
-## Main scalable demo visuals
-
-After a 50-site, top-15 demo run, key visuals include:
-
-- `data/demo/outputs/charts/scalable/readiness_top_15.png`
-- `data/demo/outputs/charts/scalable/data_confidence_top_15.png`
-- `data/demo/outputs/charts/scalable/readiness_map_top_15_labeled.png`
-- `data/demo/outputs/charts/scalable/profile_heatmap_top_15.png`
-- `data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png`
-- `data/demo/outputs/charts/scalable/readiness_score_distribution.png`
-- `data/demo/outputs/charts/scalable/recommendation_tier_counts.png`
-- `data/demo/outputs/charts/scalable/data_confidence_full_compact.png`
-- `data/demo/outputs/charts/scalable/readiness_full_compact.png`
-
-## Recommended reading path
-
-Quick review:
-
-1. [START_HERE.md](../START_HERE.md)
-2. [REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
-3. [data/outputs/model_run_summary.md](../data/outputs/model_run_summary.md)
-4. [data/outputs/action_matrix.md](../data/outputs/action_matrix.md)
-5. [data/outputs/results_interpretation.md](../data/outputs/results_interpretation.md)
-
-Deeper review:
-
-1. [MODEL_FINDINGS_BRIEF.md](MODEL_FINDINGS_BRIEF.md)
-2. [MODEL_FINDINGS_REPORT.md](MODEL_FINDINGS_REPORT.md)
-3. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
-4. [DATA_SOURCES.md](DATA_SOURCES.md)
-5. [METHODOLOGY.md](METHODOLOGY.md)
-6. [DEMO_MODE_GUIDE.md](DEMO_MODE_GUIDE.md)
-7. [SCALABLE_VISUALS_GUIDE.md](SCALABLE_VISUALS_GUIDE.md)
+1. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
+2. `data/outputs/deliverable_package_v2/README.md`
+3. `data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md`
+4. `data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md`
+5. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
+6. `data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md`
 
 ## What not to edit first
 
 Do not edit generated outputs directly:
 
-- [data/outputs/](../data/outputs/)
-- [data/outputs/charts/](../data/outputs/charts/)
-- [data/outputs/deliverable_package/](../data/outputs/deliverable_package/)
-- [data/demo/](../data/demo/)
+```text
+data/outputs/
+data/outputs/charts/
+data/outputs/deliverable_package/
+data/outputs/deliverable_package_v2/
+data/demo/
+```
 
-Regenerate official outputs with:
+Regenerate V2 outputs with:
+
+```bash
+python src/run_v2.py
+python src/check_outputs_v2.py
+```
+
+Regenerate V1 outputs with:
 
 ```bash
 python src/run_all.py
 python src/build_deliverable_package.py
-```
-
-Generate demo outputs with:
-
-```bash
-python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
 ```
