@@ -30,6 +30,8 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_electrical_scenario_results.csv"),
     Path("data/outputs/v2_electrical_risk_summary.csv"),
     Path("data/outputs/v2_electrical_feasibility_report.md"),
+    Path("data/outputs/v2_right_sizing_scenarios.csv"),
+    Path("data/outputs/v2_right_sizing_report.md"),
     Path("data/outputs/v2_results_interpretation.md"),
     Path("data/outputs/charts/v2_readiness_score_chart.png"),
 ]
@@ -57,6 +59,19 @@ REQUIRED_ELECTRICAL_COLUMNS = [
     "conservative_rank",
     "expected_score",
     "conservative_score",
+]
+
+REQUIRED_RIGHT_SIZING_COLUMNS = [
+    "site_id",
+    "site_name",
+    "model_rank",
+    "ports_now",
+    "ports_2035_base",
+    "ports_2035_high",
+    "ports_2050_base",
+    "ports_2050_high",
+    "future_ready_capacity",
+    "expansion_strategy",
 ]
 
 REQUIRED_SITE_IDS = {"FFX001", "FFX002", "FFX003", "FFX004", "PWC001", "PWC002", "PWC003", "PWC004"}
@@ -128,6 +143,26 @@ def check_electrical_summary() -> list[str]:
     return errors
 
 
+def check_right_sizing() -> list[str]:
+    errors = []
+    right_sizing_path = Path("data/outputs/v2_right_sizing_scenarios.csv")
+    if not right_sizing_path.exists():
+        return [f"Cannot check right-sizing output because {right_sizing_path} is missing."]
+
+    right_sizing = pd.read_csv(right_sizing_path)
+    missing_columns = [col for col in REQUIRED_RIGHT_SIZING_COLUMNS if col not in right_sizing.columns]
+    if missing_columns:
+        errors.append(f"v2_right_sizing_scenarios.csv is missing required columns: {missing_columns}")
+
+    for col in ["ports_now", "ports_2035_base", "ports_2035_high", "ports_2050_base", "ports_2050_high", "future_ready_capacity"]:
+        if col in right_sizing.columns:
+            values = pd.to_numeric(right_sizing[col], errors="coerce")
+            if values.isna().any() or (values < 0).any():
+                errors.append(f"v2_right_sizing_scenarios.csv has invalid values in {col}.")
+
+    return errors
+
+
 def main() -> None:
     print("V2 OUTPUT CHECK")
     print("---------------")
@@ -135,6 +170,7 @@ def main() -> None:
     errors.extend(check_expected_files())
     errors.extend(check_results_table())
     errors.extend(check_electrical_summary())
+    errors.extend(check_right_sizing())
 
     if errors:
         print("Status: FAILED")
