@@ -1,0 +1,11 @@
+# Optional V2 public-data upgrade dependencies
+#
+# The base model stays lightweight in requirements.txt.
+# Install this file only when running scripts that process raw public data,
+# such as TIGER/ACS/LODES/VDOT upgrade helpers.
+#
+# Usage:
+#   python -m pip install -r requirements-v2.txt
+
+-r requirements.txt
+pyshp>=2.3
