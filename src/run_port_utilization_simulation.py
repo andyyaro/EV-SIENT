@@ -1,13 +1,4 @@
-"""Run a simple V2 port-utilization simulation.
-
-This module estimates how busy a candidate site may be under different port
-counts and planning horizons. It is intentionally beginner-friendly and uses
-simple deterministic assumptions instead of complex queueing or machine learning.
-
-Run from the repository root after the V2 model and right-sizing outputs exist:
-
-    python src/run_port_utilization_simulation.py
-"""
+"""Run a simple V2 port-utilization simulation."""
 
 from __future__ import annotations
 
@@ -73,22 +64,23 @@ def estimate_wait_minutes(peak_demand_ratio: float) -> float:
     return round(20 + (peak_demand_ratio - 1.00) * 120, 1)
 
 
-def simulate_site(
-    site: pd.Series,
-    right_sizing_row: pd.Series | None,
-    avg_charge_hours: float,
-    charging_window_hours: float,
-    peak_factor: float,
-) -> list[dict[str, object]]:
-    base_sessions = float(site.get("expected_sessions_day", 0) or 0)
-    rows: list[dict[str, object]] = []
+def choose_min_ports(group: pd.DataFrame) -> pd.Series:
+    """Choose the smallest tested port count that does not exceed capacity."""
+    usable = group[group["capacity_status"] != "underbuilt"]
+    if not usable.empty:
+        return usable.sort_values("port_count").iloc[0]
+    return group.sort_values(["estimated_wait_min", "port_count"], ascending=[True, False]).iloc[0]
 
+
+def simulate_site(site: pd.Series, right_sizing_row: pd.Series | None, avg_charge_hours: float, charging_window_hours: float, peak_factor: float) -> list[dict[str, object]]:
+    base_sessions = float(site.get("expected_sessions_day", 0) or 0)
     ports_now = None
     future_ready = None
     if right_sizing_row is not None:
         ports_now = int(right_sizing_row.get("ports_now", 0) or 0)
         future_ready = int(right_sizing_row.get("future_ready_capacity", 0) or 0)
 
+    rows: list[dict[str, object]] = []
     for demand_case, multiplier in DEMAND_CASES.items():
         sessions = base_sessions * multiplier
         for port_count in PORT_OPTIONS:
@@ -97,7 +89,6 @@ def simulate_site(
             if port_count > 0 and charging_window_hours > 0:
                 utilization_pct = (sessions * avg_charge_hours) / (port_count * charging_window_hours) * 100
                 peak_demand_ratio = (sessions * avg_charge_hours * peak_factor) / (port_count * charging_window_hours)
-
             wait_min = estimate_wait_minutes(peak_demand_ratio)
             rows.append(
                 {
@@ -124,31 +115,21 @@ def simulate_site(
     return rows
 
 
-def build_simulation(
-    results: pd.DataFrame,
-    right_sizing: pd.DataFrame,
-    avg_charge_hours: float,
-    charging_window_hours: float,
-    peak_factor: float,
-) -> pd.DataFrame:
+def build_simulation(results: pd.DataFrame, right_sizing: pd.DataFrame, avg_charge_hours: float, charging_window_hours: float, peak_factor: float) -> pd.DataFrame:
     if "site_id" not in results.columns:
         raise ValueError("V2 results must include site_id.")
     if "expected_sessions_day" not in results.columns:
         raise ValueError("V2 results must include expected_sessions_day.")
-
     right_by_id = right_sizing.set_index("site_id", drop=False) if "site_id" in right_sizing.columns else pd.DataFrame()
-    rows: list[dict[str, object]] = []
-
     ranked = results.copy()
     if "model_rank" in ranked.columns:
         ranked["model_rank"] = pd.to_numeric(ranked["model_rank"], errors="coerce")
         ranked = ranked.sort_values("model_rank")
-
+    rows: list[dict[str, object]] = []
     for _, site in ranked.iterrows():
         site_id = site.get("site_id", "")
         right_row = right_by_id.loc[site_id] if not right_by_id.empty and site_id in right_by_id.index else None
         rows.extend(simulate_site(site, right_row, avg_charge_hours, charging_window_hours, peak_factor))
-
     return pd.DataFrame(rows)
 
 
@@ -157,11 +138,7 @@ def recommended_min_ports(simulation: pd.DataFrame) -> pd.DataFrame:
     group_cols = ["site_id", "site_name", "model_rank", "demand_case"]
     for keys, group in simulation.groupby(group_cols, dropna=False):
         site_id, site_name, model_rank, demand_case = keys
-        acceptable = group[group["capacity_status"].isin(["right_sized", "acceptable_but_monitor"])]
-        if acceptable.empty:
-            best = group.sort_values(["estimated_wait_min", "utilization_pct"]).iloc[0]
-        else:
-            best = acceptable.sort_values("port_count").iloc[0]
+        best = choose_min_ports(group)
         rows.append(
             {
                 "site_id": site_id,
@@ -195,21 +172,21 @@ def markdown_table(data: pd.DataFrame, columns: list[str]) -> str:
 def build_report(simulation: pd.DataFrame, recommended: pd.DataFrame) -> str:
     current = recommended[recommended["demand_case"] == "current"].sort_values("model_rank")
     future_high = recommended[recommended["demand_case"] == "2050_high"].sort_values("model_rank")
-
+    avg_hours = simulation["avg_charge_hours"].iloc[0] if not simulation.empty else "n/a"
+    window = simulation["charging_window_hours"].iloc[0] if not simulation.empty else "n/a"
+    peak = simulation["peak_factor"].iloc[0] if not simulation.empty else "n/a"
     return f"""# V2 Port-Utilization Simulation Report
 
 This report estimates how busy each candidate site may be under different port counts and demand-growth cases.
-
-The simulation is intentionally simple. It is a planning screen, not a detailed queueing model or utility engineering result.
 
 ## Assumptions
 
 ```text
 Port options tested: {PORT_OPTIONS}
 Demand cases: {list(DEMAND_CASES.keys())}
-Average charging time: {simulation['avg_charge_hours'].iloc[0] if not simulation.empty else 'n/a'} hours
-Daily charging window: {simulation['charging_window_hours'].iloc[0] if not simulation.empty else 'n/a'} hours
-Peak factor: {simulation['peak_factor'].iloc[0] if not simulation.empty else 'n/a'}
+Average charging time: {avg_hours} hours
+Daily charging window: {window} hours
+Peak factor: {peak}
 ```
 
 ## Current-demand recommended minimum ports
@@ -225,9 +202,8 @@ Peak factor: {simulation['peak_factor'].iloc[0] if not simulation.empty else 'n/
 - `right_sized` means utilization and wait time look reasonable for planning-screen purposes.
 - `acceptable_but_monitor` means the port count may work, but the site should be watched as demand grows.
 - `underbuilt` means simulated wait or utilization is too high.
-- `likely_overbuilt_or_low_demand` means the port count may be more capacity than the demand currently supports.
-
-This output should be used with the right-sizing report, electrical-risk report, ADA/AHJ/Fire Marshal review, and local site constraints.
+- `likely_overbuilt_or_low_demand` means demand is low relative to tested capacity.
+- The recommended minimum is the smallest tested port count that avoids `underbuilt`.
 """
 
 
@@ -235,7 +211,6 @@ def create_chart(simulation: pd.DataFrame, output_path: Path) -> None:
     current = simulation[simulation["demand_case"] == "current"].copy()
     current["model_rank"] = pd.to_numeric(current["model_rank"], errors="coerce")
     top_sites = current[current["model_rank"] <= 6]
-
     ensure_parent_dir(output_path)
     plt.figure(figsize=(11, 6))
     for site_id, group in top_sites.groupby("site_id"):
@@ -268,23 +243,18 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    results_path = Path(args.results)
-    right_sizing_path = Path(args.right_sizing)
+    results = read_required_csv(Path(args.results), "V2 site results")
+    right_sizing = read_required_csv(Path(args.right_sizing), "V2 right-sizing")
+    simulation = build_simulation(results, right_sizing, args.avg_charge_hours, args.charging_window_hours, args.peak_factor)
+    recommended = recommended_min_ports(simulation)
     output_path = Path(args.output)
     report_path = Path(args.report)
     chart_path = Path(args.chart)
-
-    results = read_required_csv(results_path, "V2 site results")
-    right_sizing = read_required_csv(right_sizing_path, "V2 right-sizing")
-    simulation = build_simulation(results, right_sizing, args.avg_charge_hours, args.charging_window_hours, args.peak_factor)
-    recommended = recommended_min_ports(simulation)
-
     ensure_parent_dir(output_path)
     ensure_parent_dir(report_path)
     simulation.to_csv(output_path, index=False)
     report_path.write_text(build_report(simulation, recommended), encoding="utf-8")
     create_chart(simulation, chart_path)
-
     print("V2 PORT-UTILIZATION SIMULATION")
     print("------------------------------")
     print(f"Rows: {len(simulation)}")
