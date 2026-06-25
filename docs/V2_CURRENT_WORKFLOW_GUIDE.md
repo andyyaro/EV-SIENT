@@ -12,14 +12,14 @@ The latest validated V2 workflow includes:
 
 ```text
 12 real candidate sites
-20 workflow steps
+22 workflow steps
 right-sizing scenarios
 port-use simulation
 right-sizing validation
 executive site summary
+expanded baseline comparison
 deliverable package
 workflow manifest
-baseline comparison
 output checker
 ```
 
@@ -83,7 +83,11 @@ python src/check_outputs_v2.py
 18. Compare V2 outputs to baseline
 19. Write V2 workflow completion manifest
 20. Build V2 deliverable package
+21. Compare V2 deliverable package manifest to baseline
+22. Rebuild V2 deliverable package with final baseline comparison
 ```
+
+The first baseline comparison creates the comparison files needed by the package. The second baseline comparison verifies the generated package manifest, then the final package rebuild copies the final comparison report into the package.
 
 ## What the checker validates
 
@@ -99,6 +103,23 @@ executive summary output exists
 deliverable package output exists
 workflow manifest reports success
 baseline comparison reports pass
+```
+
+## What the expanded baseline comparison validates
+
+`src/compare_v2_to_baseline.py` now checks:
+
+```text
+site count
+site ranking, readiness scores, tiers, and model port recommendations
+data-quality counts
+profile top sites
+electrical expected-case ranks, scores, and risk levels
+right-sizing ports and expansion strategies
+port-simulation row count, assumptions, tested port options, demand cases, and current simulated minimum ports
+right-sizing-validation alignment guardrails
+executive-summary validation fields and top site
+deliverable-package manifest status, copied file counts, and required package destinations
 ```
 
 ## Current V2 candidate sites
@@ -128,6 +149,7 @@ data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
 data/outputs/deliverable_package_v2/reports/v2_run_summary.md
+data/outputs/deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
 
 The deliverable package is the cleanest review folder because it collects the most important outputs into one place.
@@ -226,7 +248,7 @@ PWC003 — special-use / low public-priority unless the public-access use case c
 
 ## What “passed” means
 
-A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, and the baseline comparison passed.
+A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, and the deliverable package manifest passed the package guardrail.
 
 It does not mean a site is ready to build.
 
