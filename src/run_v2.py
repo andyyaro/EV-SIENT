@@ -43,6 +43,9 @@ V2_ELECTRICAL_RISK_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
 V2_ELECTRICAL_REPORT = "data/outputs/v2_electrical_feasibility_report.md"
 V2_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
 V2_RIGHT_SIZING_REPORT = "data/outputs/v2_right_sizing_report.md"
+V2_PORT_SIM = "data/outputs/v2_port_utilization_simulation.csv"
+V2_PORT_SIM_REPORT = "data/outputs/v2_port_utilization_simulation_report.md"
+V2_PORT_SIM_CHART = "data/outputs/charts/v2_port_utilization_simulation.png"
 V2_EXECUTIVE_SUMMARY = "data/outputs/v2_executive_site_summary.csv"
 V2_EXECUTIVE_SUMMARY_REPORT = "data/outputs/v2_executive_site_summary.md"
 V2_INTERPRETATION = "data/outputs/v2_results_interpretation.md"
@@ -80,11 +83,12 @@ def main() -> None:
     run_step("10. Create V2 readiness map", [PYTHON, "src/plot_site_map.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--output", V2_SITE_READINESS_MAP])
     run_step("11. Run V2 electrical-feasibility scenario analysis", [PYTHON, "src/run_electrical_risk_scenarios.py", "--results", V2_RESULTS, "--scenario-output", V2_ELECTRICAL_SCENARIO_RESULTS, "--summary-output", V2_ELECTRICAL_RISK_SUMMARY, "--report-output", V2_ELECTRICAL_REPORT])
     run_step("12. Run V2 right-sizing scenario analysis", [PYTHON, "src/run_right_sizing_scenarios.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--output", V2_RIGHT_SIZING, "--report", V2_RIGHT_SIZING_REPORT])
-    run_step("13. Build V2 executive site summary", [PYTHON, "src/build_v2_executive_summary.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_EXECUTIVE_SUMMARY, "--report", V2_EXECUTIVE_SUMMARY_REPORT])
-    run_step("14. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
-    run_step("15. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
-    run_step("16. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
-    run_step("17. Compare V2 outputs to baseline", [PYTHON, "src/compare_v2_to_baseline.py", "--baseline", V2_BASELINE, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--json-output", V2_BASELINE_COMPARISON_JSON, "--md-output", V2_BASELINE_COMPARISON_MD])
+    run_step("13. Run V2 port-use simulation", [PYTHON, "src/run_port_utilization_simulation.py", "--results", V2_RESULTS, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_PORT_SIM, "--report", V2_PORT_SIM_REPORT, "--chart", V2_PORT_SIM_CHART])
+    run_step("14. Build V2 executive site summary", [PYTHON, "src/build_v2_executive_summary.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_EXECUTIVE_SUMMARY, "--report", V2_EXECUTIVE_SUMMARY_REPORT])
+    run_step("15. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
+    run_step("16. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
+    run_step("17. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
+    run_step("18. Compare V2 outputs to baseline", [PYTHON, "src/compare_v2_to_baseline.py", "--baseline", V2_BASELINE, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--json-output", V2_BASELINE_COMPARISON_JSON, "--md-output", V2_BASELINE_COMPARISON_MD])
 
     print()
     print("V2 workflow complete.")
@@ -93,6 +97,7 @@ def main() -> None:
         V2_RESULTS, V2_ACTION_MATRIX, V2_QUALITY, V2_SENSITIVITY_SUMMARY,
         V2_PROFILE_RESULTS, V2_PROFILE_REPORT, V2_ELECTRICAL_RISK_SUMMARY,
         V2_ELECTRICAL_REPORT, V2_RIGHT_SIZING, V2_RIGHT_SIZING_REPORT,
+        V2_PORT_SIM, V2_PORT_SIM_REPORT, V2_PORT_SIM_CHART,
         V2_EXECUTIVE_SUMMARY, V2_EXECUTIVE_SUMMARY_REPORT,
         V2_INTERPRETATION, V2_RUN_SUMMARY, V2_WORKFLOW_STATUS,
         V2_BASELINE_COMPARISON_JSON, V2_BASELINE_COMPARISON_MD,
