@@ -12,13 +12,16 @@ It calculates, when local raw exports are available:
 
 Run from the repository root:
 
-    python src/build_v2_public_data_upgrades.py
+    python src/build_v2_public_data_upgrades.py --site-ids FFX003 FFX004
+
+If --site-ids is omitted, the script defaults to the first reviewed V2 batch:
+FFX003 and FFX004.
 
 Optional dependency:
     pyshp is used to read the TIGER block-group shapefile inside the ZIP.
     Install only if needed:
 
-    python -m pip install pyshp
+    python -m pip install -r requirements-v2.txt
 
 This script writes reviewable extracts under data/source_extracts/.
 It does NOT automatically overwrite data/inputs/real_sites_v2.csv.
@@ -27,6 +30,7 @@ Review the outputs first, then decide whether to apply the values.
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import re
@@ -46,7 +50,7 @@ except ImportError:  # pragma: no cover
 SITES_PATH = Path("data/inputs/real_sites_v2.csv")
 RAW_DIR = Path("data/raw_exports")
 OUT_DIR = Path("data/source_extracts")
-TARGET_SITE_IDS = ["FFX003", "FFX004"]
+DEFAULT_TARGET_SITE_IDS = ["FFX003", "FFX004"]
 
 TIGER_PATTERN = "tl_2024_51_bg"
 ACS_HOUSEHOLDS_PATTERN = "B11001"
@@ -69,6 +73,32 @@ EQUITY_WEIGHTS = {
     "renter_component": 0.20,
     "multifamily_component": 0.15,
 }
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build public-data upgrade extracts for selected V2 sites.")
+    parser.add_argument(
+        "--site-ids",
+        nargs="+",
+        default=DEFAULT_TARGET_SITE_IDS,
+        help="One or more V2 site IDs to upgrade, such as FFX003 FFX004. Defaults to the first reviewed V2 batch.",
+    )
+    return parser.parse_args()
+
+
+def normalize_site_ids(raw_site_ids: list[str]) -> list[str]:
+    """Return clean, unique site IDs while preserving the user's order."""
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for raw in raw_site_ids:
+        for part in str(raw).replace(",", " ").split():
+            site_id = part.strip().upper()
+            if site_id and site_id not in seen:
+                cleaned.append(site_id)
+                seen.add(site_id)
+    if not cleaned:
+        raise ValueError("At least one site ID is required.")
+    return cleaned
 
 
 def find_first(pattern: str, folder: Path = RAW_DIR) -> Path | None:
@@ -283,7 +313,7 @@ def polygon_centroid(points: list[tuple[float, float]]) -> tuple[float, float]:
 
 def load_block_group_centroids(tiger_zip: Path) -> pd.DataFrame:
     if shapefile is None:
-        raise ImportError("Missing optional package 'pyshp'. Install it with: python -m pip install pyshp")
+        raise ImportError("Missing optional package 'pyshp'. Install it with: python -m pip install -r requirements-v2.txt")
     reader = shapefile.Reader(str(tiger_zip))
     field_names = [field[0] for field in reader.fields[1:]]
     rows = []
@@ -564,7 +594,7 @@ def minmax(series: pd.Series, inverse: bool = False) -> pd.Series:
     return (1 - result if inverse else result).clip(0, 1)
 
 
-def build_equity_index(new_inputs: pd.DataFrame) -> pd.DataFrame:
+def build_equity_index(new_inputs: pd.DataFrame, target_site_ids: list[str]) -> pd.DataFrame:
     existing_path = OUT_DIR / "acs_equity_inputs_1mi.csv"
     combined = pd.concat([pd.read_csv(existing_path), new_inputs], ignore_index=True, sort=False) if existing_path.exists() else new_inputs.copy()
     combined["no_vehicle_household_share"] = combined["no_vehicle_households"] / combined["occupied_housing_units"].replace(0, np.nan)
@@ -580,16 +610,16 @@ def build_equity_index(new_inputs: pd.DataFrame) -> pd.DataFrame:
         + combined["renter_component"] * EQUITY_WEIGHTS["renter_component"]
         + combined["multifamily_component"] * EQUITY_WEIGHTS["multifamily_component"]
     ).round(3)
-    return combined[combined["site_id"].isin(TARGET_SITE_IDS)].copy()
+    return combined[combined["site_id"].isin(target_site_ids)].copy()
 
 
-def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
+def build_amenities(sites: pd.DataFrame, target_site_ids: list[str]) -> pd.DataFrame:
     v2_summary_path = OUT_DIR / "v2_amenities_osm_summary_0_5mi.csv"
     legacy_summary_path = OUT_DIR / "amenities_0_5mi_v4_osm_reviewed.csv"
 
     if v2_summary_path.exists():
         source = pd.read_csv(v2_summary_path)
-        subset = source[source["site_id"].isin(TARGET_SITE_IDS)].copy()
+        subset = source[source["site_id"].isin(target_site_ids)].copy()
         if not subset.empty:
             out = subset[["site_id", "site_name", "osm_category_count_0_5mi", "source_quality"]].copy()
             out = out.rename(columns={"osm_category_count_0_5mi": "amenities_count_0_5mi"})
@@ -608,7 +638,7 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
         })
 
     source = pd.read_csv(legacy_summary_path)
-    subset = source[source["site_id"].isin(TARGET_SITE_IDS)].copy()
+    subset = source[source["site_id"].isin(target_site_ids)].copy()
     if subset.empty:
         return pd.DataFrame({
             "site_id": sites["site_id"],
@@ -633,6 +663,9 @@ def write_outputs(outputs: dict[str, pd.DataFrame]) -> None:
 
 
 def main() -> None:
+    args = parse_args()
+    target_site_ids = normalize_site_ids(args.site_ids)
+
     print("V2 PUBLIC-DATA UPGRADE CALCULATOR")
     print("----------------------------------")
     if not SITES_PATH.exists():
@@ -662,9 +695,15 @@ def main() -> None:
             print(f"- {item}")
         sys.exit(1)
     sites_all = pd.read_csv(SITES_PATH)
-    sites = sites_all[sites_all["site_id"].isin(TARGET_SITE_IDS)].copy()
+    sites = sites_all[sites_all["site_id"].isin(target_site_ids)].copy()
     if sites.empty:
-        raise ValueError(f"No target sites found in {SITES_PATH}: {TARGET_SITE_IDS}")
+        raise ValueError(f"No target sites found in {SITES_PATH}: {target_site_ids}")
+
+    found_site_ids = set(sites["site_id"].astype(str))
+    missing_site_ids = [site_id for site_id in target_site_ids if site_id not in found_site_ids]
+    if missing_site_ids:
+        raise ValueError(f"These requested site IDs are not in {SITES_PATH}: {missing_site_ids}")
+
     print("Target sites:")
     for _, site in sites.iterrows():
         print(f"- {site['site_id']} — {site['site_name']}")
@@ -680,8 +719,8 @@ def main() -> None:
     jobs = build_jobs(membership, lodes_path)  # type: ignore[arg-type]
     traffic = build_traffic(sites, vdot_path)  # type: ignore[arg-type]
     equity_inputs = build_equity_inputs(membership, b19013_path, b25044_path, b25003_path, b25024_path)  # type: ignore[arg-type]
-    equity_index = build_equity_index(equity_inputs)
-    amenities = build_amenities(sites)
+    equity_index = build_equity_index(equity_inputs, target_site_ids)
+    amenities = build_amenities(sites, target_site_ids)
     combined = sites[[
         "site_id",
         "site_name",
