@@ -44,6 +44,7 @@ V2_ELECTRICAL_REPORT = "data/outputs/v2_electrical_feasibility_report.md"
 V2_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
 V2_RIGHT_SIZING_REPORT = "data/outputs/v2_right_sizing_report.md"
 V2_INTERPRETATION = "data/outputs/v2_results_interpretation.md"
+V2_RUN_SUMMARY = "data/outputs/v2_run_summary.md"
 
 
 def run_step(title: str, args: list[str]) -> None:
@@ -251,6 +252,28 @@ def main() -> None:
         ],
     )
 
+    run_step(
+        "14. Generate V2 run summary",
+        [
+            PYTHON,
+            "src/generate_run_summary_v2.py",
+            "--results",
+            V2_RESULTS,
+            "--quality",
+            V2_QUALITY,
+            "--sensitivity",
+            V2_SENSITIVITY_SUMMARY,
+            "--profile-results",
+            V2_PROFILE_RESULTS,
+            "--electrical-summary",
+            V2_ELECTRICAL_RISK_SUMMARY,
+            "--right-sizing",
+            V2_RIGHT_SIZING,
+            "--output",
+            V2_RUN_SUMMARY,
+        ],
+    )
+
     print()
     print("V2 workflow complete.")
     print("Key outputs:")
@@ -266,6 +289,7 @@ def main() -> None:
         V2_RIGHT_SIZING,
         V2_RIGHT_SIZING_REPORT,
         V2_INTERPRETATION,
+        V2_RUN_SUMMARY,
         V2_READINESS_CHART,
         V2_POLISHED_READINESS_CHART,
         V2_DATA_CONFIDENCE_CHART,
