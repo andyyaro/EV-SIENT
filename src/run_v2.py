@@ -70,6 +70,27 @@ def run_step(title: str, args: list[str]) -> None:
     subprocess.run(args, cwd=PROJECT_ROOT, check=True)
 
 
+def baseline_comparison_args(include_deliverable_manifest: bool = False) -> list[str]:
+    """Build the V2 baseline-comparison command arguments."""
+    args = [
+        PYTHON, "src/compare_v2_to_baseline.py",
+        "--baseline", V2_BASELINE,
+        "--results", V2_RESULTS,
+        "--quality", V2_QUALITY,
+        "--profile-results", V2_PROFILE_RESULTS,
+        "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY,
+        "--right-sizing", V2_RIGHT_SIZING,
+        "--port-simulation", V2_PORT_SIM,
+        "--right-sizing-validation", V2_RIGHT_SIZING_VALIDATION,
+        "--executive-summary", V2_EXECUTIVE_SUMMARY,
+        "--json-output", V2_BASELINE_COMPARISON_JSON,
+        "--md-output", V2_BASELINE_COMPARISON_MD,
+    ]
+    if include_deliverable_manifest:
+        args.extend(["--deliverable-manifest", V2_DELIVERABLE_PACKAGE_MANIFEST])
+    return args
+
+
 def main() -> None:
     print("V2 EXPANSION-PLANNING WORKFLOW")
     print("------------------------------")
@@ -93,9 +114,11 @@ def main() -> None:
     run_step("15. Build V2 executive site summary", [PYTHON, "src/build_v2_executive_summary.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--port-simulation", V2_PORT_SIM, "--right-sizing-validation", V2_RIGHT_SIZING_VALIDATION, "--output", V2_EXECUTIVE_SUMMARY, "--report", V2_EXECUTIVE_SUMMARY_REPORT])
     run_step("16. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
     run_step("17. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
-    run_step("18. Compare V2 outputs to baseline", [PYTHON, "src/compare_v2_to_baseline.py", "--baseline", V2_BASELINE, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--json-output", V2_BASELINE_COMPARISON_JSON, "--md-output", V2_BASELINE_COMPARISON_MD])
+    run_step("18. Compare V2 outputs to baseline", baseline_comparison_args())
     run_step("19. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
     run_step("20. Build V2 deliverable package", [PYTHON, "src/build_v2_deliverable_package.py", "--output-dir", V2_DELIVERABLE_PACKAGE_DIR])
+    run_step("21. Compare V2 deliverable package manifest to baseline", baseline_comparison_args(include_deliverable_manifest=True))
+    run_step("22. Rebuild V2 deliverable package with final baseline comparison", [PYTHON, "src/build_v2_deliverable_package.py", "--output-dir", V2_DELIVERABLE_PACKAGE_DIR])
 
     print()
     print("V2 workflow complete.")
