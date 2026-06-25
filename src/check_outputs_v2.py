@@ -65,7 +65,11 @@ REQUIRED_EXECUTIVE_COLUMNS = [
     "model_rank", "site_id", "site_name", "readiness_score", "data_confidence_level",
     "recommendation_tier", "action_label", "electrical_risk_level",
     "expected_electrical_rank", "expected_electrical_score", "ports_now",
-    "future_ready_capacity", "expansion_strategy", "major_review_flags",
+    "future_ready_capacity", "expansion_strategy", "sim_min_ports_current",
+    "sim_utilization_current_at_ports_now", "sim_wait_current_at_ports_now",
+    "sim_queue_risk_current_at_ports_now", "sim_min_ports_2035_high",
+    "sim_min_ports_2050_high", "sim_status_2050_high_at_future_ready",
+    "major_review_flags",
 ]
 
 REQUIRED_SITE_IDS = {"FFX001", "FFX002", "FFX003", "FFX004", "PWC001", "PWC002", "PWC003", "PWC004"}
