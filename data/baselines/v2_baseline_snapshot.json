@@ -1,0 +1,62 @@
+{
+  "baseline_name": "v2_expansion_planning_baseline_001",
+  "description": "Stable V2 baseline after V1-to-V2 feature parity batches through workflow manifest.",
+  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, and workflow manifest enabled.",
+  "score_tolerance": 0.2,
+  "expected_site_count": 12,
+  "quality_counts": {
+    "ERROR": 0,
+    "WARNING": 0,
+    "REVIEW": 38,
+    "INFO": 12
+  },
+  "profile_top_sites": {
+    "base": "FFX002",
+    "demand_priority": "FFX004",
+    "equity_priority": "FFX002",
+    "feasibility_priority": "FFX002",
+    "safety_priority": "FFX002"
+  },
+  "site_results": [
+    {"site_id": "FFX002", "model_rank": 1, "readiness_score": 58.8, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 1 — advance to site screening"},
+    {"site_id": "FFX004", "model_rank": 2, "readiness_score": 54.4, "recommended_ports_now": 3, "recommended_ports_2035": 3, "recommended_ports_2050": 4, "recommendation_tier": "Tier 1 — advance to site screening"},
+    {"site_id": "PWC006", "model_rank": 3, "readiness_score": 52.1, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 2 — promising candidate, refine data"},
+    {"site_id": "FFX001", "model_rank": 4, "readiness_score": 51.0, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 3, "recommendation_tier": "Tier 2 — promising candidate, refine data"},
+    {"site_id": "PWC002", "model_rank": 5, "readiness_score": 50.3, "recommended_ports_now": 2, "recommended_ports_2035": 3, "recommended_ports_2050": 3, "recommendation_tier": "High-review candidate"},
+    {"site_id": "PWC007", "model_rank": 6, "readiness_score": 50.2, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 2 — promising candidate, refine data"},
+    {"site_id": "PWC004", "model_rank": 7, "readiness_score": 48.6, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 2 — promising candidate, refine data"},
+    {"site_id": "FFX003", "model_rank": 8, "readiness_score": 46.8, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 2 — promising candidate, refine data"},
+    {"site_id": "PWC008", "model_rank": 9, "readiness_score": 40.1, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 3 — lower priority / monitor"},
+    {"site_id": "PWC001", "model_rank": 10, "readiness_score": 39.8, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 3, "recommendation_tier": "Tier 3 — lower priority / monitor"},
+    {"site_id": "PWC005", "model_rank": 11, "readiness_score": 36.9, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Tier 3 — lower priority / monitor"},
+    {"site_id": "PWC003", "model_rank": 12, "readiness_score": 29.6, "recommended_ports_now": 2, "recommended_ports_2035": 2, "recommended_ports_2050": 2, "recommendation_tier": "Low public-priority / special-use"}
+  ],
+  "electrical_expected": [
+    {"site_id": "FFX002", "expected_rank": 1, "expected_score": 55.8, "electrical_risk_level": "medium"},
+    {"site_id": "FFX004", "expected_rank": 2, "expected_score": 51.4, "electrical_risk_level": "medium"},
+    {"site_id": "PWC006", "expected_rank": 3, "expected_score": 49.1, "electrical_risk_level": "medium"},
+    {"site_id": "FFX001", "expected_rank": 4, "expected_score": 48.0, "electrical_risk_level": "medium"},
+    {"site_id": "PWC007", "expected_rank": 5, "expected_score": 47.2, "electrical_risk_level": "medium"},
+    {"site_id": "PWC004", "expected_rank": 6, "expected_score": 45.6, "electrical_risk_level": "medium"},
+    {"site_id": "PWC002", "expected_rank": 7, "expected_score": 44.3, "electrical_risk_level": "high"},
+    {"site_id": "FFX003", "expected_rank": 8, "expected_score": 43.8, "electrical_risk_level": "medium"},
+    {"site_id": "PWC008", "expected_rank": 9, "expected_score": 37.1, "electrical_risk_level": "medium"},
+    {"site_id": "PWC005", "expected_rank": 10, "expected_score": 33.9, "electrical_risk_level": "medium"},
+    {"site_id": "PWC001", "expected_rank": 11, "expected_score": 33.8, "electrical_risk_level": "high"},
+    {"site_id": "PWC003", "expected_rank": 12, "expected_score": 23.6, "electrical_risk_level": "high"}
+  ],
+  "right_sizing": [
+    {"site_id": "FFX002", "ports_now": 2, "ports_2035_base": 4, "ports_2035_high": 6, "ports_2050_base": 6, "ports_2050_high": 8, "future_ready_capacity": 8, "expansion_strategy": "install_now_and_make_future_ready"},
+    {"site_id": "FFX004", "ports_now": 3, "ports_2035_base": 4, "ports_2035_high": 6, "ports_2050_base": 6, "ports_2050_high": 8, "future_ready_capacity": 8, "expansion_strategy": "install_now_and_make_future_ready"},
+    {"site_id": "PWC006", "ports_now": 2, "ports_2035_base": 4, "ports_2035_high": 4, "ports_2050_base": 4, "ports_2050_high": 6, "future_ready_capacity": 4, "expansion_strategy": "install_now_and_make_future_ready"},
+    {"site_id": "FFX001", "ports_now": 2, "ports_2035_base": 4, "ports_2035_high": 4, "ports_2050_base": 4, "ports_2050_high": 6, "future_ready_capacity": 4, "expansion_strategy": "starter_install_with_expandable_design"},
+    {"site_id": "PWC002", "ports_now": 2, "ports_2035_base": 3, "ports_2035_high": 3, "ports_2050_base": 3, "ports_2050_high": 4, "future_ready_capacity": 3, "expansion_strategy": "electrical_review_before_expansion"},
+    {"site_id": "PWC007", "ports_now": 2, "ports_2035_base": 4, "ports_2035_high": 4, "ports_2050_base": 4, "ports_2050_high": 4, "future_ready_capacity": 4, "expansion_strategy": "starter_install_with_expandable_design"},
+    {"site_id": "PWC004", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 4, "ports_2050_base": 4, "ports_2050_high": 4, "future_ready_capacity": 4, "expansion_strategy": "starter_install_with_expandable_design"},
+    {"site_id": "FFX003", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 4, "ports_2050_base": 4, "ports_2050_high": 4, "future_ready_capacity": 4, "expansion_strategy": "starter_install_with_expandable_design"},
+    {"site_id": "PWC008", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 2, "ports_2050_base": 2, "ports_2050_high": 3, "future_ready_capacity": 2, "expansion_strategy": "monitor_due_to_nearby_supply"},
+    {"site_id": "PWC001", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 3, "ports_2050_base": 3, "ports_2050_high": 3, "future_ready_capacity": 3, "expansion_strategy": "electrical_review_before_expansion"},
+    {"site_id": "PWC005", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 2, "ports_2050_base": 2, "ports_2050_high": 2, "future_ready_capacity": 2, "expansion_strategy": "monitor_or_small_pilot"},
+    {"site_id": "PWC003", "ports_now": 2, "ports_2035_base": 2, "ports_2035_high": 2, "ports_2050_base": 2, "ports_2050_high": 2, "future_ready_capacity": 2, "expansion_strategy": "do_not_advance_general_public_buildout"}
+  ]
+}
