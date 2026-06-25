@@ -42,6 +42,11 @@ EXPECTED_FILES = [
     Path("data/outputs/deliverable_package_v2/package_manifest.json"),
     Path("data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv"),
     Path("data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md"),
+    Path("data/outputs/deliverable_package_v2/reports/v2_action_matrix.md"),
+    Path("data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md"),
+    Path("data/outputs/deliverable_package_v2/tables/v2_sensitivity_summary.csv"),
+    Path("data/outputs/deliverable_package_v2/tables/v2_profile_results.csv"),
+    Path("data/outputs/deliverable_package_v2/tables/v2_profile_rank_summary.csv"),
     Path("data/outputs/deliverable_package_v2/charts/v2_polished_readiness_score_chart.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png"),
 ]
