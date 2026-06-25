@@ -4,23 +4,126 @@ This folder is for files created when the scripts run locally.
 
 Generated outputs are ignored by Git so local runs do not clutter `git status`.
 
-## Main generated CSV, Markdown, and metadata outputs
+## Active V2 generated outputs
 
-- [data/outputs/data_quality_report.csv](data_quality_report.csv)
-- [data/outputs/site_results.csv](site_results.csv)
-- [data/outputs/action_matrix.md](action_matrix.md)
-- [data/outputs/sensitivity_results.csv](sensitivity_results.csv)
-- [data/outputs/sensitivity_summary.csv](sensitivity_summary.csv)
-- [data/outputs/profile_results.csv](profile_results.csv)
-- [data/outputs/profile_rank_summary.csv](profile_rank_summary.csv)
-- [data/outputs/profile_comparison.md](profile_comparison.md)
-- [data/outputs/model_run_summary.md](model_run_summary.md)
-- [data/outputs/results_interpretation.md](results_interpretation.md)
-- [data/outputs/baseline_comparison.csv](baseline_comparison.csv)
-- [data/outputs/baseline_comparison.md](baseline_comparison.md)
-- [data/outputs/workflow_success.json](workflow_success.json)
+The active V2 workflow is run with:
 
-[site_results.csv](site_results.csv) includes readiness, confidence, and action-matrix fields.
+```bash
+python src/run_v2.py
+python src/check_outputs_v2.py
+```
+
+Main V2 output files:
+
+```text
+v2_site_results.csv
+v2_action_matrix.md
+v2_data_quality_report.csv
+v2_sensitivity_results.csv
+v2_sensitivity_summary.csv
+v2_profile_results.csv
+v2_profile_rank_summary.csv
+v2_profile_comparison.md
+v2_electrical_scenario_results.csv
+v2_electrical_risk_summary.csv
+v2_electrical_feasibility_report.md
+v2_right_sizing_scenarios.csv
+v2_right_sizing_report.md
+v2_port_utilization_simulation.csv
+v2_port_utilization_simulation_report.md
+v2_right_sizing_validation.csv
+v2_right_sizing_validation_report.md
+v2_executive_site_summary.csv
+v2_executive_site_summary.md
+v2_results_interpretation.md
+v2_run_summary.md
+v2_baseline_comparison.json
+v2_baseline_comparison.md
+v2_workflow_success.json
+```
+
+The main V2 executive table is:
+
+```text
+v2_executive_site_summary.csv
+```
+
+It combines ranking, readiness score, data confidence, electrical risk, right-sizing, port-use simulation, right-sizing validation, and review flags.
+
+## Active V2 chart outputs
+
+Important V2 charts:
+
+```text
+charts/v2_readiness_score_chart.png
+charts/v2_polished_readiness_score_chart.png
+charts/v2_data_confidence_chart.png
+charts/v2_profile_score_heatmap.png
+charts/v2_profile_rank_stability_chart.png
+charts/v2_site_readiness_map.png
+charts/v2_port_utilization_simulation.png
+charts/v2/utilization_vs_ports_<site>.png
+```
+
+## V2 deliverable package
+
+The V2 workflow creates a clean local review folder:
+
+```text
+deliverable_package_v2/
+```
+
+Package structure:
+
+```text
+deliverable_package_v2/README.md
+deliverable_package_v2/package_manifest.json
+deliverable_package_v2/reports/
+deliverable_package_v2/tables/
+deliverable_package_v2/charts/
+deliverable_package_v2/manifests/
+```
+
+Start with:
+
+```text
+deliverable_package_v2/README.md
+deliverable_package_v2/reports/v2_executive_site_summary.md
+deliverable_package_v2/tables/v2_executive_site_summary.csv
+deliverable_package_v2/reports/v2_right_sizing_validation_report.md
+deliverable_package_v2/reports/v2_run_summary.md
+```
+
+The V2 package builder uses a clean rebuild by default, so stale copied files are removed before the package is recreated.
+
+## Stable V1 generated outputs
+
+The stable V1 workflow is run with:
+
+```bash
+python src/run_all.py
+python src/build_deliverable_package.py
+```
+
+Main V1 output files:
+
+```text
+data_quality_report.csv
+site_results.csv
+action_matrix.md
+sensitivity_results.csv
+sensitivity_summary.csv
+profile_results.csv
+profile_rank_summary.csv
+profile_comparison.md
+model_run_summary.md
+results_interpretation.md
+baseline_comparison.csv
+baseline_comparison.md
+workflow_success.json
+```
+
+`site_results.csv` includes readiness, confidence, and action-matrix fields.
 
 ```text
 readiness_score = how promising the site looks
@@ -30,43 +133,48 @@ data_confidence_score = how complete the current input data is
 action_label = what to do next
 ```
 
-[workflow_success.json](workflow_success.json) is written only after [src/run_all.py](../../src/run_all.py) completes successfully. The deliverable package builder uses it to avoid packaging stale outputs after a failed or partial run.
+## Stable V1 chart outputs
 
-## Generated chart outputs
+```text
+charts/readiness_score_chart.png
+charts/data_confidence_chart.png
+charts/profile_rank_stability_chart.png
+charts/profile_score_heatmap.png
+charts/site_readiness_map.png
+charts/utilization_vs_ports_<site>.png
+```
 
-- [data/outputs/charts/readiness_score_chart.png](charts/readiness_score_chart.png)
-- [data/outputs/charts/data_confidence_chart.png](charts/data_confidence_chart.png)
-- [data/outputs/charts/profile_rank_stability_chart.png](charts/profile_rank_stability_chart.png)
-- [data/outputs/charts/profile_score_heatmap.png](charts/profile_score_heatmap.png)
-- [data/outputs/charts/site_readiness_map.png](charts/site_readiness_map.png)
-- `data/outputs/charts/utilization_vs_ports_<site>.png`
+## Stable V1 deliverable package
 
-Recommended profile visual: [data/outputs/charts/profile_rank_stability_chart.png](charts/profile_rank_stability_chart.png)
+The V1 package builder creates:
 
-The heatmap is kept as a supporting view, but the rank-stability chart is easier to explain in a presentation.
+```text
+deliverable_package/
+```
 
 ## Optional OSM amenities outputs
 
-- [data/outputs/amenities_osm_summary_0_5mi.csv](amenities_osm_summary_0_5mi.csv)
-- [data/outputs/amenities_osm_pois_0_5mi.csv](amenities_osm_pois_0_5mi.csv)
-
-## Deliverable package
-
-The package builder creates a local shareable folder:
-
-- [data/outputs/deliverable_package/](deliverable_package/)
-
-It includes selected charts, run outputs, data tables, reports, a package README, and a package manifest.
+```text
+amenities_osm_summary_0_5mi.csv
+amenities_osm_pois_0_5mi.csv
+```
 
 ## Regenerate outputs
 
-From the repository root:
+From the repository root, regenerate V2 outputs with:
 
 ```bash
-git pull --rebase origin main && \
-python src/run_all.py && \
-python src/build_deliverable_package.py && \
-git status --short
+git switch v2-expansion-planning
+git pull --rebase origin v2-expansion-planning
+python src/run_v2.py
+python src/check_outputs_v2.py
 ```
 
-[src/run_all.py](../../src/run_all.py) runs the validator, model, action matrix, readiness chart, data confidence chart, sensitivity analysis, scoring profile analysis, profile visuals, readiness map, generated summaries, output checks, and baseline comparison.
+Regenerate V1 outputs with:
+
+```bash
+git switch main
+git pull --rebase origin main
+python src/run_all.py
+python src/build_deliverable_package.py
+```
