@@ -36,6 +36,8 @@ V2_PROFILE_REPORT = "data/outputs/v2_profile_comparison.md"
 V2_ELECTRICAL_SCENARIO_RESULTS = "data/outputs/v2_electrical_scenario_results.csv"
 V2_ELECTRICAL_RISK_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
 V2_ELECTRICAL_REPORT = "data/outputs/v2_electrical_feasibility_report.md"
+V2_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
+V2_RIGHT_SIZING_REPORT = "data/outputs/v2_right_sizing_report.md"
 V2_INTERPRETATION = "data/outputs/v2_results_interpretation.md"
 
 
@@ -143,7 +145,23 @@ def main() -> None:
     )
 
     run_step(
-        "7. Generate V2 interpretation report",
+        "7. Run V2 right-sizing scenario analysis",
+        [
+            PYTHON,
+            "src/run_right_sizing_scenarios.py",
+            "--results",
+            V2_RESULTS,
+            "--electrical-summary",
+            V2_ELECTRICAL_RISK_SUMMARY,
+            "--output",
+            V2_RIGHT_SIZING,
+            "--report",
+            V2_RIGHT_SIZING_REPORT,
+        ],
+    )
+
+    run_step(
+        "8. Generate V2 interpretation report",
         [
             PYTHON,
             "src/generate_results_interpretation.py",
@@ -174,6 +192,8 @@ def main() -> None:
         V2_PROFILE_REPORT,
         V2_ELECTRICAL_RISK_SUMMARY,
         V2_ELECTRICAL_REPORT,
+        V2_RIGHT_SIZING,
+        V2_RIGHT_SIZING_REPORT,
         V2_INTERPRETATION,
         V2_READINESS_CHART,
     ]:
