@@ -38,6 +38,7 @@ EXPECTED_FILES = [
     Path("data/outputs/charts/v2_data_confidence_chart.png"),
     Path("data/outputs/charts/v2_profile_score_heatmap.png"),
     Path("data/outputs/charts/v2_profile_rank_stability_chart.png"),
+    Path("data/outputs/charts/v2_site_readiness_map.png"),
 ]
 
 REQUIRED_RESULT_COLUMNS = [
