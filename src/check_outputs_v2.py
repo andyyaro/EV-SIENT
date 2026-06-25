@@ -34,6 +34,10 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_right_sizing_report.md"),
     Path("data/outputs/v2_results_interpretation.md"),
     Path("data/outputs/charts/v2_readiness_score_chart.png"),
+    Path("data/outputs/charts/v2_polished_readiness_score_chart.png"),
+    Path("data/outputs/charts/v2_data_confidence_chart.png"),
+    Path("data/outputs/charts/v2_profile_score_heatmap.png"),
+    Path("data/outputs/charts/v2_profile_rank_stability_chart.png"),
 ]
 
 REQUIRED_RESULT_COLUMNS = [
