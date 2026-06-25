@@ -27,6 +27,9 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_sensitivity_summary.csv"),
     Path("data/outputs/v2_profile_results.csv"),
     Path("data/outputs/v2_profile_comparison.md"),
+    Path("data/outputs/v2_electrical_scenario_results.csv"),
+    Path("data/outputs/v2_electrical_risk_summary.csv"),
+    Path("data/outputs/v2_electrical_feasibility_report.md"),
     Path("data/outputs/v2_results_interpretation.md"),
     Path("data/outputs/charts/v2_readiness_score_chart.png"),
 ]
@@ -43,6 +46,17 @@ REQUIRED_RESULT_COLUMNS = [
     "recommended_ports_2035",
     "recommended_ports_2050",
     "action_label",
+]
+
+REQUIRED_ELECTRICAL_COLUMNS = [
+    "site_id",
+    "site_name",
+    "base_rank",
+    "electrical_risk_level",
+    "expected_rank",
+    "conservative_rank",
+    "expected_score",
+    "conservative_score",
 ]
 
 REQUIRED_SITE_IDS = {"FFX001", "FFX002", "FFX003", "FFX004", "PWC001", "PWC002", "PWC003", "PWC004"}
@@ -93,12 +107,34 @@ def check_results_table() -> list[str]:
     return errors
 
 
+def check_electrical_summary() -> list[str]:
+    errors = []
+    summary_path = Path("data/outputs/v2_electrical_risk_summary.csv")
+    if not summary_path.exists():
+        return [f"Cannot check electrical risk summary because {summary_path} is missing."]
+
+    summary = pd.read_csv(summary_path)
+    missing_columns = [col for col in REQUIRED_ELECTRICAL_COLUMNS if col not in summary.columns]
+    if missing_columns:
+        errors.append(f"v2_electrical_risk_summary.csv is missing required columns: {missing_columns}")
+
+    if "electrical_risk_level" in summary.columns:
+        valid_levels = {"low", "medium", "high"}
+        found_levels = set(summary["electrical_risk_level"].dropna().astype(str))
+        invalid_levels = sorted(found_levels - valid_levels)
+        if invalid_levels:
+            errors.append(f"v2_electrical_risk_summary.csv has invalid risk levels: {invalid_levels}")
+
+    return errors
+
+
 def main() -> None:
     print("V2 OUTPUT CHECK")
     print("---------------")
     errors = []
     errors.extend(check_expected_files())
     errors.extend(check_results_table())
+    errors.extend(check_electrical_summary())
 
     if errors:
         print("Status: FAILED")
