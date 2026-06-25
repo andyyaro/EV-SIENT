@@ -28,6 +28,7 @@ V2_READINESS_CHART = "data/outputs/charts/v2_readiness_score_chart.png"
 V2_POLISHED_READINESS_CHART = "data/outputs/charts/v2_polished_readiness_score_chart.png"
 V2_DATA_CONFIDENCE_CHART = "data/outputs/charts/v2_data_confidence_chart.png"
 V2_SITE_READINESS_MAP = "data/outputs/charts/v2_site_readiness_map.png"
+V2_SITE_DECISION_MAP = "data/outputs/charts/v2_site_decision_map.png"
 V2_UTILIZATION_CHART_DIR = "data/outputs/charts/v2"
 V2_ACTION_MATRIX = "data/outputs/v2_action_matrix.md"
 V2_QUALITY = "data/outputs/v2_data_quality_report.csv"
@@ -112,13 +113,14 @@ def main() -> None:
     run_step("13. Run V2 port-use simulation", [PYTHON, "src/run_port_utilization_simulation.py", "--results", V2_RESULTS, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_PORT_SIM, "--report", V2_PORT_SIM_REPORT, "--chart", V2_PORT_SIM_CHART])
     run_step("14. Validate V2 right-sizing with simulation", [PYTHON, "src/validate_right_sizing_with_simulation.py", "--right-sizing", V2_RIGHT_SIZING, "--port-simulation", V2_PORT_SIM, "--output", V2_RIGHT_SIZING_VALIDATION, "--report", V2_RIGHT_SIZING_VALIDATION_REPORT])
     run_step("15. Build V2 executive site summary", [PYTHON, "src/build_v2_executive_summary.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--port-simulation", V2_PORT_SIM, "--right-sizing-validation", V2_RIGHT_SIZING_VALIDATION, "--output", V2_EXECUTIVE_SUMMARY, "--report", V2_EXECUTIVE_SUMMARY_REPORT])
-    run_step("16. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
-    run_step("17. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
-    run_step("18. Compare V2 outputs to baseline", baseline_comparison_args())
-    run_step("19. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
-    run_step("20. Build V2 deliverable package", [PYTHON, "src/build_v2_deliverable_package.py", "--output-dir", V2_DELIVERABLE_PACKAGE_DIR])
-    run_step("21. Compare V2 deliverable package manifest to baseline", baseline_comparison_args(include_deliverable_manifest=True))
-    run_step("22. Rebuild V2 deliverable package with final baseline comparison", [PYTHON, "src/build_v2_deliverable_package.py", "--output-dir", V2_DELIVERABLE_PACKAGE_DIR])
+    run_step("16. Create V2 decision map", [PYTHON, "src/plot_site_decision_map.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--right-sizing-validation", V2_RIGHT_SIZING_VALIDATION, "--output", V2_SITE_DECISION_MAP])
+    run_step("17. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
+    run_step("18. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
+    run_step("19. Compare V2 outputs to baseline", baseline_comparison_args())
+    run_step("20. Write V2 workflow completion manifest", [PYTHON, "src/write_v2_workflow_success_marker.py", "--input", V2_INPUT, "--results", V2_RESULTS, "--quality", V2_QUALITY, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_WORKFLOW_STATUS])
+    run_step("21. Build V2 deliverable package", [PYTHON, "src/build_v2_deliverable_package.py", "--output-dir", V2_DELIVERABLE_PACKAGE_DIR])
+    run_step("22. Compare V2 deliverable package manifest to baseline", baseline_comparison_args(include_deliverable_manifest=True))
+    run_step("23. Rebuild V2 deliverable package with final baseline comparison", [PYTHON, "src/build_v2_deliverable_package.py", "--output-dir", V2_DELIVERABLE_PACKAGE_DIR])
 
     print()
     print("V2 workflow complete.")
@@ -136,6 +138,7 @@ def main() -> None:
         V2_READINESS_CHART, V2_POLISHED_READINESS_CHART,
         V2_DATA_CONFIDENCE_CHART, V2_PROFILE_SCORE_HEATMAP,
         V2_PROFILE_RANK_STABILITY_CHART, V2_SITE_READINESS_MAP,
+        V2_SITE_DECISION_MAP,
     ]:
         print(f"- {path}")
 
