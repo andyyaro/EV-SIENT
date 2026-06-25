@@ -46,6 +46,8 @@ EXPECTED_OUTPUTS = [
     "data/outputs/v2_executive_site_summary.md",
     "data/outputs/v2_results_interpretation.md",
     "data/outputs/v2_run_summary.md",
+    "data/outputs/v2_baseline_comparison.json",
+    "data/outputs/v2_baseline_comparison.md",
     "data/outputs/charts/v2_readiness_score_chart.png",
     "data/outputs/charts/v2_polished_readiness_score_chart.png",
     "data/outputs/charts/v2_data_confidence_chart.png",
