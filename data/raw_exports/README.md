@@ -184,7 +184,7 @@ nearby_households_1mi
 
 Source: U.S. Census Bureau TIGER Line 2024 Virginia Block Groups
 
-Used as the geometry layer for area-weighted 1-mile household, job, and equity estimates.
+Used as the geometry layer for centroid-in-buffer 1-mile household, job, and equity screening estimates.
 
 ### va_wac_S000_JT00_2023.csv.gz
 
@@ -196,7 +196,7 @@ Used to calculate:
 nearby_jobs_1mi
 ```
 
-The file gives workplace jobs at census block level. For the current prototype, jobs were aggregated to block groups and then estimated within each 1-mile site buffer by area weighting.
+The file gives workplace jobs at census block level. For the current prototype, jobs were aggregated to block groups and then estimated within each 1-mile site buffer using the centroid-in-buffer screening method.
 
 ### ACS_2024_5Y_B19013_blockgroups_equity.csv
 
