@@ -96,56 +96,47 @@ def to_number(series: pd.Series) -> pd.Series:
 
 
 def tract_to_code(tract_text: str) -> str:
-    tract_text = tract_text.strip()
+    tract_text = str(tract_text).strip()
     if "." in tract_text:
         left, right = tract_text.split(".", 1)
         return left.zfill(4) + right.ljust(2, "0")[:2]
     return tract_text.zfill(4) + "00"
 
 
-def column_to_geoid(column_name: str) -> str | None:
-    text = str(column_name).replace("\ufeff", "")
-    if "!!Estimate" not in text or "Block Group" not in text or "Census Tract" not in text:
-        return None
-    base = text.split("!!", 1)[0]
-    match = re.match(r"Block Group\s+(\d+);\s+Census Tract\s+([0-9.]+);\s+(.+?);\s+Virginia$", base)
+def geography_text_to_geoid(text: Any) -> str | None:
+    """Convert Census table-display geography text into a 12-digit block-group GEOID."""
+    base = clean_label(text)
+    base = base.split("!!", 1)[0].strip()
+
+    match = re.match(
+        r"Block Group\s+(\d+);\s+Census Tract\s+([0-9.]+);\s+(.+?);\s+Virginia$",
+        base,
+    )
     if not match:
         return None
+
     block_group, tract, county_name = match.groups()
     county_fips = VA_COUNTY_FIPS.get(county_name)
     if not county_fips:
         return None
+
     return "51" + county_fips + tract_to_code(tract) + block_group
+
+
+def column_to_geoid(column_name: str) -> str | None:
+    return geography_text_to_geoid(column_name)
 
 
 def read_census_geo_csv(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, dtype=str, low_memory=False)
     df.columns = [str(col).replace("\ufeff", "") for col in df.columns]
+
     if "GEO_ID" not in df.columns:
         raise ValueError(f"{path} does not contain GEO_ID")
+
     df = df[df["GEO_ID"].astype(str).str.contains("US", na=False)].copy()
     df["geoid"] = df["GEO_ID"].astype(str).str.extract(r"US(\d+)$", expand=False)
     return df
-
-
-def wide_table_values(path: Path, row_matcher) -> pd.DataFrame:
-    df = pd.read_csv(path, dtype=str, low_memory=False)
-    df.columns = [str(col).replace("\ufeff", "") for col in df.columns]
-    label_col = df.columns[0]
-    matched = df[df[label_col].map(lambda value: row_matcher(clean_label(value)))].copy()
-    if matched.empty:
-        raise ValueError(f"No matching row labels found in {path}")
-
-    value_by_geoid: dict[str, float] = {}
-    for col in df.columns[1:]:
-        geoid = column_to_geoid(col)
-        if geoid is None:
-            continue
-        total = float(to_number(matched[col]).sum())
-        value_by_geoid[geoid] = value_by_geoid.get(geoid, 0.0) + total
-    if not value_by_geoid:
-        raise ValueError(f"No usable block-group estimate columns found in {path}")
-    return pd.DataFrame({"geoid": list(value_by_geoid.keys()), "value": list(value_by_geoid.values())})
 
 
 def find_col(df: pd.DataFrame, candidates: list[str]) -> str:
@@ -155,16 +146,109 @@ def find_col(df: pd.DataFrame, candidates: list[str]) -> str:
     raise ValueError(f"None of these columns were found: {candidates}")
 
 
+def estimate_column_candidates(df: pd.DataFrame) -> list[str]:
+    cols = []
+    for col in df.columns[1:]:
+        key = label_key(str(col))
+        if "margin" in key or "error" in key:
+            continue
+        if "estimate" in key:
+            cols.append(col)
+    return cols
+
+
+def table_display_values(path: Path, col_candidates: list[str], row_matcher=None) -> pd.DataFrame:
+    """Read Census table-display exports in either orientation.
+
+    Supported shapes:
+    1. rows are variables and columns are block groups, like B11001 from data.census.gov
+    2. rows are block groups and columns are variables/estimates, like some equity exports
+    """
+    df = pd.read_csv(path, dtype=str, low_memory=False)
+    df.columns = [str(col).replace("\ufeff", "") for col in df.columns]
+    label_col = df.columns[0]
+    labels = df[label_col].map(clean_label)
+
+    # Shape 1: block groups are spread across columns.
+    col_geoids = {col: column_to_geoid(col) for col in df.columns[1:]}
+    if any(geoid is not None for geoid in col_geoids.values()):
+        if row_matcher is None:
+            raise ValueError(f"{path} is table-display style, but no row matcher was provided.")
+
+        matched = df[labels.map(row_matcher)].copy()
+        if matched.empty:
+            available_labels = [label for label in labels.tolist() if label and label.lower() != "nan"]
+            raise ValueError(
+                f"No matching row labels found in {path}. "
+                f"First labels seen: {available_labels[:10]}"
+            )
+
+        value_by_geoid: dict[str, float] = {}
+        for col, geoid in col_geoids.items():
+            if geoid is None:
+                continue
+            total = float(to_number(matched[col]).sum())
+            value_by_geoid[geoid] = value_by_geoid.get(geoid, 0.0) + total
+
+        return pd.DataFrame({"geoid": list(value_by_geoid.keys()), "value": list(value_by_geoid.values())})
+
+    # Shape 2: block groups are listed down the first column.
+    row_geoids = labels.map(geography_text_to_geoid)
+    if row_geoids.notna().sum() > 0:
+        value_col = None
+
+        # First try official/API-style column IDs.
+        for candidate in col_candidates:
+            if candidate in df.columns:
+                value_col = candidate
+                break
+
+        # Then try columns that contain the candidate ID.
+        if value_col is None:
+            for col in df.columns[1:]:
+                upper_col = str(col).upper()
+                if any(candidate.upper() in upper_col for candidate in col_candidates):
+                    value_col = col
+                    break
+
+        # Then try table-display estimate columns.
+        if value_col is None:
+            estimate_cols = estimate_column_candidates(df)
+
+            if len(estimate_cols) == 1:
+                value_col = estimate_cols[0]
+            elif "B19013" in path.name.upper() and estimate_cols:
+                # B19013 is a single-variable median-income table.
+                value_col = estimate_cols[0]
+            elif row_matcher is not None:
+                for col in estimate_cols:
+                    if row_matcher(clean_label(col)):
+                        value_col = col
+                        break
+
+        if value_col is None:
+            print(f"NOTICE: Could not identify value column in {path.name}.")
+            print("NOTICE: Columns seen:", list(df.columns[:12]))
+            raise ValueError(f"No usable estimate/value column found in {path}")
+
+        out = pd.DataFrame({
+            "geoid": row_geoids,
+            "value": to_number(df[value_col]),
+        })
+        out = out[out["geoid"].notna()].copy()
+        return out
+
+    raise ValueError(f"Could not detect Census table-display geography shape in {path}")
+
+
 def geo_values(path: Path, col_candidates: list[str], row_matcher=None) -> pd.DataFrame:
     try:
         df = read_census_geo_csv(path)
         col = find_col(df, col_candidates)
         return pd.DataFrame({"geoid": df["geoid"], "value": to_number(df[col])})
     except Exception as exc:
-        if row_matcher is None:
-            raise
         print(f"NOTICE: {path.name} is not GEO_ID-style ({exc}). Reading it as Census table-display export.")
-        return wide_table_values(path, row_matcher)
+        return table_display_values(path, col_candidates, row_matcher)
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -238,37 +322,61 @@ def site_bg_membership(sites: pd.DataFrame, bg: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def label_key(label: str) -> str:
+    """Normalize Census table-display row labels for safer matching."""
+    text = clean_label(label).lower()
+    text = text.replace("–", "-").replace("—", "-")
+    text = re.sub(r":+$", "", text).strip()
+    text = text.replace("-occupied", " occupied")
+    text = re.sub(r"\\s+", " ", text)
+    return text
+
+
 def b11001_household_match(label: str) -> bool:
-    return label.lower().rstrip(":") in {"households", "total households", "total"}
+    key = label_key(label)
+    return key in {"households", "total households", "total"}
 
 
 def b25044_total_households_match(label: str) -> bool:
-    return label.lower().rstrip(":") == "occupied housing units"
+    key = label_key(label)
+    return key in {"occupied housing units", "total"}
 
 
 def b25044_no_vehicle_match(label: str) -> bool:
-    return label.lower().rstrip(":") == "no vehicle available"
+    key = label_key(label)
+    return key == "no vehicle available" or key.endswith(" no vehicle available")
 
 
 def b25003_occupied_match(label: str) -> bool:
-    return label.lower().rstrip(":") == "occupied housing units"
+    key = label_key(label)
+    return key in {"occupied housing units", "total"}
 
 
 def b25003_renter_match(label: str) -> bool:
-    return label.lower().rstrip(":") == "renter occupied"
+    key = label_key(label)
+    return key in {"renter occupied", "renter occupied housing units"}
 
 
 def b19013_income_match(label: str) -> bool:
-    return "median household income" in label.lower()
+    # In Census table-display exports, B19013 median income values are usually
+    # on the "Households" row because the whole table is already median income.
+    key = label_key(label)
+    return key in {"households", "total households", "total"}
 
 
 def b25024_total_units_match(label: str) -> bool:
-    return label.lower().rstrip(":") == "total housing units"
+    key = label_key(label)
+    return key in {"total housing units", "total"}
 
 
 def b25024_multifamily_match(label: str) -> bool:
-    return label.lower().rstrip(":") in {
-        "3 or 4 units", "5 to 9 units", "10 to 19 units", "20 to 49 units", "50 or more units"
+    key = label_key(label)
+    return key in {
+        "3 or 4 units",
+        "5 to 9 units",
+        "10 to 19 units",
+        "20 to 49 units",
+        "50 or more units",
     }
 
 
