@@ -584,8 +584,21 @@ def build_equity_index(new_inputs: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
-    summary_path = OUT_DIR / "amenities_0_5mi_v4_osm_reviewed.csv"
-    if not summary_path.exists():
+    v2_summary_path = OUT_DIR / "v2_amenities_osm_summary_0_5mi.csv"
+    legacy_summary_path = OUT_DIR / "amenities_0_5mi_v4_osm_reviewed.csv"
+
+    if v2_summary_path.exists():
+        source = pd.read_csv(v2_summary_path)
+        subset = source[source["site_id"].isin(TARGET_SITE_IDS)].copy()
+        if not subset.empty:
+            out = subset[["site_id", "site_name", "osm_category_count_0_5mi", "source_quality"]].copy()
+            out = out.rename(columns={"osm_category_count_0_5mi": "amenities_count_0_5mi"})
+            out["source_status"] = "open_gis_support_reviewed"
+            out["method"] = "Reviewed V2 OSM/Overpass category-count extract"
+            out["notes"] = "Amenities use the reviewed OSM category count."
+            return out
+
+    if not legacy_summary_path.exists():
         return pd.DataFrame({
             "site_id": sites["site_id"],
             "site_name": sites["site_name"],
@@ -593,7 +606,8 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
             "source_status": ["missing"] * len(sites),
             "method": ["Run src/build_osm_amenities.py for V2 sites and review output"] * len(sites),
         })
-    source = pd.read_csv(summary_path)
+
+    source = pd.read_csv(legacy_summary_path)
     subset = source[source["site_id"].isin(TARGET_SITE_IDS)].copy()
     if subset.empty:
         return pd.DataFrame({
@@ -605,7 +619,7 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
         })
     out = subset[["site_id", "site_name", "reviewed_amenities_count_0_5mi", "source_quality", "notes"]].copy()
     out = out.rename(columns={"reviewed_amenities_count_0_5mi": "amenities_count_0_5mi"})
-    out["source_status"] = "open_gis_support"
+    out["source_status"] = "open_gis_support_reviewed"
     out["method"] = "Reviewed OSM/Overpass six-category POI extract"
     return out
 
