@@ -328,7 +328,7 @@ def label_key(label: str) -> str:
     text = text.replace("–", "-").replace("—", "-")
     text = re.sub(r":+$", "", text).strip()
     text = text.replace("-occupied", " occupied")
-    text = re.sub(r"\\s+", " ", text)
+    text = re.sub(r"\s+", " ", text)
     return text
 
 
@@ -587,7 +587,8 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
     summary_path = OUT_DIR / "amenities_0_5mi_v4_osm_reviewed.csv"
     if not summary_path.exists():
         return pd.DataFrame({
-            "site_id": sites["site_id"], "site_name": sites["site_name"],
+            "site_id": sites["site_id"],
+            "site_name": sites["site_name"],
             "amenities_count_0_5mi": [""] * len(sites),
             "source_status": ["missing"] * len(sites),
             "method": ["Run src/build_osm_amenities.py for V2 sites and review output"] * len(sites),
@@ -596,7 +597,8 @@ def build_amenities(sites: pd.DataFrame) -> pd.DataFrame:
     subset = source[source["site_id"].isin(TARGET_SITE_IDS)].copy()
     if subset.empty:
         return pd.DataFrame({
-            "site_id": sites["site_id"], "site_name": sites["site_name"],
+            "site_id": sites["site_id"],
+            "site_name": sites["site_name"],
             "amenities_count_0_5mi": [""] * len(sites),
             "source_status": ["needs_v2_osm_run"] * len(sites),
             "method": ["Existing OSM reviewed extract does not include these V2 sites yet"] * len(sites),
@@ -666,7 +668,17 @@ def main() -> None:
     equity_inputs = build_equity_inputs(membership, b19013_path, b25044_path, b25003_path, b25024_path)  # type: ignore[arg-type]
     equity_index = build_equity_index(equity_inputs)
     amenities = build_amenities(sites)
-    combined = sites[["site_id", "site_name", "nearby_households_1mi", "nearby_jobs_1mi", "aadt_nearest", "amenities_count_0_5mi", "equity_gap_index", "ev_registrations_local", "ev_share_local"]].copy()
+    combined = sites[[
+        "site_id",
+        "site_name",
+        "nearby_households_1mi",
+        "nearby_jobs_1mi",
+        "aadt_nearest",
+        "amenities_count_0_5mi",
+        "equity_gap_index",
+        "ev_registrations_local",
+        "ev_share_local",
+    ]].copy()
     combined = combined.rename(columns={
         "nearby_households_1mi": "current_nearby_households_1mi",
         "nearby_jobs_1mi": "current_nearby_jobs_1mi",
