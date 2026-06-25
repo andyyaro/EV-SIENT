@@ -4,9 +4,68 @@
 
 Phase 2 prototype development for the Public EV Charging Site-Readiness and Right-Sizing Model.
 
-The project is now a working planning-support prototype. It validates candidate-site data, runs the readiness and right-sizing model, adds a readiness-confidence action matrix, tests sensitivity scenarios, compares alternative scoring profiles, generates charts and a readiness map, creates dynamic Markdown summaries, checks outputs against V1 expectations, compares the run to a committed baseline, builds a local deliverable package, and supports synthetic demo-mode scalability testing.
+The active technical branch is:
 
-This project is a planning-support model only. It does not replace required technical, permitting, procurement, or stakeholder review.
+```text
+v2-expansion-planning
+```
+
+The main V2 guide is:
+
+```text
+docs/V2_CURRENT_WORKFLOW_GUIDE.md
+```
+
+This project is a planning-support model only. It does not replace required technical, utility, permitting, procurement, accessibility, Fire Marshal/AHJ, or stakeholder review.
+
+## Current V2 status
+
+V2 is a working planning-support prototype with:
+
+```text
+12 real candidate sites
+20-step reproducible workflow
+site-readiness ranking
+data-quality validation
+sensitivity analysis
+scoring-profile analysis
+readiness and confidence charts
+readiness map
+electrical-risk scenario analysis
+right-sizing scenario analysis
+port-use simulation
+right-sizing validation
+executive site summary
+interpretation report
+run summary
+baseline comparison
+workflow manifest
+clean deliverable package
+output checker requiring all 12 V2 sites
+```
+
+The current V2 workflow has been validated locally with:
+
+```bash
+python src/run_v2.py
+python src/check_outputs_v2.py
+```
+
+Expected final checker result:
+
+```text
+V2 OUTPUT CHECK
+Status: PASSED
+All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
+```
+
+Expected deliverable package result:
+
+```text
+Status: complete
+Clean rebuild: True
+Copied files: 28/28
+```
 
 ## Current repo structure
 
@@ -15,130 +74,124 @@ src/                  Python scripts
 data/inputs/           Input datasets
 data/config/           Config files for scoring profiles, output checks, and output/package manifest
 data/source_extracts/  Small source extracts and source notes
-data/baselines/        Committed V1 baseline outputs for comparison
-data/outputs/          Generated official outputs ignored by Git
+data/baselines/        Committed baseline outputs for comparison
+data/outputs/          Generated local outputs ignored by Git
 data/demo/             Generated synthetic demo outputs ignored by Git
 docs/                  Documentation and reporting
 ```
 
-## Current full official workflow
+## Current V2 workflow
 
 Run from the repository root:
 
 ```bash
-git pull --rebase origin main && \
-python src/run_all.py && \
-python src/build_deliverable_package.py && \
-git status --short
+git switch v2-expansion-planning
+git pull --rebase origin v2-expansion-planning
+python src/run_v2.py
+python src/check_outputs_v2.py
 ```
 
-`src/run_all.py` currently runs:
+`src/run_v2.py` currently runs:
 
 ```text
-1. src/validate_site_data.py
-2. src/ev_charger_model.py
-3. src/add_action_matrix.py
-4. src/plot_readiness_score_chart.py
-5. src/plot_data_confidence_chart.py
-6. src/run_sensitivity_analysis.py
-7. src/run_profile_analysis.py
-8. src/plot_profile_score_heatmap.py
-9. src/plot_profile_rank_stability.py
-10. src/plot_site_map.py
-11. src/generate_run_summary.py
-12. src/generate_results_interpretation.py
-13. src/check_outputs.py
+1. Run V2 site-readiness model
+2. Add V2 readiness-confidence action matrix
+3. Create V2 polished readiness score chart
+4. Create V2 data confidence chart
+5. Validate V2 site input data
+6. Run V2 sensitivity analysis
+7. Run V2 scoring-profile analysis
+8. Create V2 profile score heatmap
+9. Create V2 profile rank stability chart
+10. Create V2 readiness map
+11. Run V2 electrical-feasibility scenario analysis
+12. Run V2 right-sizing scenario analysis
+13. Run V2 port-use simulation
+14. Validate V2 right-sizing with simulation
+15. Build V2 executive site summary
+16. Generate V2 interpretation report
+17. Generate V2 run summary
+18. Compare V2 outputs to baseline
+19. Write V2 workflow completion manifest
+20. Build V2 deliverable package
 ```
 
-The package builder creates a shareable local folder at:
+## V2 deliverable package
+
+The V2 workflow creates a clean local package at:
 
 ```text
-data/outputs/deliverable_package/
+data/outputs/deliverable_package_v2/
 ```
 
-Generated outputs are local and ignored by Git.
-
-## Current demo scalability workflow
-
-Run from the repository root:
-
-```bash
-python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
-```
-
-`src/run_demo.py` currently runs:
+The package includes:
 
 ```text
-1. Generate synthetic demo sites
-2. Validate demo input data
-3. Run the main readiness/right-sizing model on demo sites
-4. Add action-matrix labels
-5. Run demo sensitivity analysis
-6. Run demo scoring-profile analysis
-7. Generate scalable readiness, confidence, map, profile, distribution, and tier-count visuals
-8. Write a demo run summary
+README.md
+package_manifest.json
+reports/
+tables/
+charts/
+manifests/
 ```
 
-Demo outputs are local-only and are written under:
+The package builder performs a clean rebuild by default so stale copied files do not survive.
+
+## Current V2 candidate sites
 
 ```text
-data/demo/
+FFX001 — Fairfax City Hall or municipal building
+FFX002 — City of Fairfax Regional Library
+FFX003 — Pohick Regional Library
+FFX004 — Fairfax County Government Center
+PWC001 — PWC McCoart Government Center
+PWC002 — Neabsco-Potomac Commuter Garage
+PWC003 — Prince William County Public Safety Training Center
+PWC004 — Chinn Park Regional Library
+PWC005 — Haymarket Gainesville Library
+PWC006 — Bull Run Library
+PWC007 — Central Library
+PWC008 — Potomac Library
 ```
 
-## Latest confirmed successful run
-
-Latest confirmed user rerun: official workflow and demo workflow passed after the scalable-demo updates.
+## Latest confirmed V2 ranking
 
 ```text
-Official workflow: PASSED
-Data-quality result: ERROR 0
-Output check: PASSED
-Baseline comparison: COMPLETED
-Workflow success marker: OK
-Deliverable package: PASSED with 0 missing files
-Demo mode: COMPLETE with 50 synthetic sites
+1. FFX002 — City of Fairfax Regional Library — 58.8 — Tier 1
+2. FFX004 — Fairfax County Government Center — 54.4 — Tier 1
+3. PWC006 — Bull Run Library — 52.1 — Tier 2
+4. FFX001 — Fairfax City Hall or municipal building — 51.0 — Tier 2
+5. PWC002 — Neabsco-Potomac Commuter Garage — 50.3 — High-review
+6. PWC007 — Central Library — 50.2 — Tier 2
+7. PWC004 — Chinn Park Regional Library — 48.6 — Tier 2
+8. FFX003 — Pohick Regional Library — 46.8 — Tier 2
+9. PWC008 — Potomac Library — 40.1 — Tier 3
+10. PWC001 — PWC McCoart Government Center — 39.8 — Tier 3
+11. PWC005 — Haymarket Gainesville Library — 36.9 — Tier 3
+12. PWC003 — Prince William County Public Safety Training Center — 29.6 — special-use
 ```
 
-Latest confirmed documentation/package link audit:
+## Current strongest findings
 
 ```text
-Broken local Markdown links: 0
-Missing package files: 0
+FFX002 is the strongest current public candidate.
+FFX004 is the second-ranked Tier 1 candidate.
+PWC006 is the strongest current Prince William County library candidate.
+PWC002 remains useful but high-review because it is a garage candidate with fire/AHJ/electrical uncertainty.
+PWC003 should not be treated as a general-public priority unless public access or use-case assumptions change.
 ```
 
-## V1 reviewer-ready checkpoint
-
-Status: V1 reviewer-ready package prepared.
-
-Local shareable ZIP:
+## Current V2 right-sizing interpretation
 
 ```text
-data/outputs/deliverable_package_clean.zip
+Near-term ports are generally aligned with current simulated demand.
+Future-ready capacity is mostly conservative rather than underbuilt.
+The model now checks right-sizing recommendations against the port-use simulation before reporting executive outputs.
 ```
 
-The clean ZIP is generated locally and ignored by Git. It should be recreated from the latest successful workflow before sharing.
+## Current known review gaps
 
-Current reviewer package result:
-
-```text
-Workflow status: passed
-Copied files: 40
-Missing files: 0
-Broken local package links: 0
-```
-
-Current main result:
-
-```text
-FFX002 — City of Fairfax Regional Library is the strongest current candidate.
-```
-
-Main caution:
-
-```text
-A high readiness score does not mean a site is build-ready.
-The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, Fire Marshal/AHJ, permitting, procurement, and site review.
-```
+The data-quality checker currently has no blocking errors, but several fields remain review items.
 
 Main unresolved items before any advancement:
 
@@ -146,213 +199,74 @@ Main unresolved items before any advancement:
 electrical service rating
 spare electrical capacity
 emergency disconnect visibility
-likely charger placement
-employees_day and visitors_day
-parking and charging hours except where already officially supported
+visitor and employee counts
+operating hours
+parking count and likely charger placement
+ADA/accessibility layout review
+Fire Marshal / AHJ review where applicable
+stormwater or site civil constraints where applicable
 PWC002 garage-specific review
-PWC004 reopening or usable-planning timeline
 PWC003 public, fleet-only, special-use, or removal decision
 ```
 
-Next phase:
+These are planning-screen gaps, not workflow failures.
 
-```text
-Stakeholder confirmation and selected site screening, starting with FFX002, then FFX001, then PWC002.
+## Stable V1 status
+
+The stable V1 workflow remains available on `main`.
+
+Run V1 with:
+
+```bash
+git switch main
+git pull --rebase origin main
+python src/run_all.py
+python src/build_deliverable_package.py
 ```
 
-## Demo scalability checkpoint status
+V1 remains useful as the stable baseline. V2 is the active Phase 2 development branch.
 
-The repo now has a synthetic demo workflow for checking whether the model remains usable with larger candidate sets.
+## Demo scalability workflow
 
-The demo workflow includes:
+The repo also has a synthetic demo workflow for checking larger candidate pools.
 
-```text
-synthetic candidate-site generation
-demo validation
-demo model run
-demo action matrix
-demo sensitivity analysis
-demo scoring-profile analysis
-Top-N readiness chart
-Top-N data-confidence chart
-multi-panel readiness map
-profile heatmap
-top-8 rank-stability chart
-readiness score distribution
-recommendation tier counts
-compact appendix charts
+Run from the repository root:
+
+```bash
+python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
 ```
 
 Demo mode is not an official recommendation layer. It is for stress-testing scalability, visual readability, workflow robustness, and larger candidate-pool behavior.
 
-## Baseline decision
-
-The committed V1 baseline will stay as-is for now. The corrected current run should be compared against the existing baseline instead of replacing it.
-
-## Completed so far
+## Completed V2 work so far
 
 ```text
-Real candidate sites added.
-Official and official-derived coordinates added.
-Existing nearby charger supply added from AFDC/NREL.
-VDOT AADT traffic signal added.
-ACS households and equity index added.
-LODES jobs signal added.
-Demand assumptions added and documented.
-Official FFX002 facility hours and parking added.
-Official PWC004 current renovation status documented.
-PWC004 future/reopened planning assumption confirmed.
-Reviewed OSM/Overpass amenities count added and applied.
-Planning electrical feasibility estimates added.
-Local EV adoption proxy added.
-Recommendation tier layer added.
-Data confidence score added.
-Readiness-confidence action matrix added.
-Right-sizing logic added for recommended ports now, 2035, and 2050.
-Sensitivity analysis added and strengthened.
-Scoring profile analysis added.
-Readiness score chart polished with score and tier annotations.
-Data confidence chart added.
-Profile rank-stability chart added as the main profile-analysis visual.
-Profile score heatmap kept as a supporting visual.
-Readiness map label offsets and planning notes improved.
-Dynamic model run summary added.
-Dynamic generated results interpretation added.
-Baseline snapshot and baseline comparison added.
-Configurable output-check rules added.
-Output manifest added as the shared source for expected outputs and package contents.
-Workflow success marker added to prevent stale packaging after failed runs.
-Deliverable package builder added and expanded.
-Deliverable package Markdown links now rewrite correctly when docs are copied.
-Dataset metadata and source-log tables added to the deliverable package.
-Stakeholder contact targets added to the deliverable package.
-Findings brief, full findings report, and presentation outline added.
-Stakeholder outreach plan added.
-Repository reorganized into cleaner folders.
-Overlapping OSM, sensitivity, and stakeholder docs merged into cleaner consolidated docs.
-Synthetic demo mode added for 25/50/100-site scalability testing.
-Demo sensitivity analysis added.
-Scalable demo visuals added and polished.
-Top-N scalable data-confidence chart added.
+Expanded V2 candidate set to 12 sites.
+Added Batch 002 Prince William library candidates.
+Added reviewed public-data extracts.
+Added AFDC nearby charging supply counts.
+Added VDOT/traffic, ACS/equity, jobs, and amenities signals.
+Added electrical-risk scenario analysis.
+Added V2 right-sizing scenarios.
+Added port-use simulation.
+Integrated port simulation into the executive summary.
+Added right-sizing validation layer.
+Added clean V2 deliverable package.
+Expanded package contents with profile and stability outputs.
+Strengthened output checker to require all 12 V2 site IDs.
+Added current V2 workflow guide and refreshed repo documentation.
 ```
 
-## Current strongest findings
+## Next likely technical improvements
 
 ```text
-FFX002 is the strongest current candidate.
-FFX002 ranks #1 in the base model, stays stable across sensitivity scenarios, and ranks #1 across all five scoring profiles.
-FFX001 is the second strongest current candidate and remains a Tier 1 alternative.
-PWC002 moved ahead of PWC004 after the corrected trenching normalization, but remains a high-review garage candidate.
-PWC004 remains a promising Tier 2 library candidate only under the future/reopened planning assumption because of the renovation/closure caveat.
-PWC001 remains a lower-priority monitored candidate under the current V1 dataset.
-PWC003 should not be treated as a general-public priority unless public access or use-case assumptions change.
+Add configurable scenario-assumption inputs for port-use simulation.
+Extend baseline comparison to cover port simulation and right-sizing validation content.
+Continue replacing placeholder electrical/site-review assumptions with verified site data.
 ```
 
-## Latest confirmed ranking
+## Important limitation
 
-```text
-1. FFX002 — City of Fairfax Regional Library — 65.3 — Tier 1
-2. FFX001 — Fairfax City Hall or municipal building — 57.3 — Tier 1
-3. PWC002 — Neabsco-Potomac Commuter Garage — 56.0 — High-review candidate
-4. PWC004 — Chinn Park Regional Library — 52.7 — Tier 2
-5. PWC001 — PWC McCoart Government Center — 43.2 — Tier 3
-6. PWC003 — Prince William County Public Safety Training Center — 29.5 — Low public-priority / special-use
-```
+A high readiness score does not mean a site is build-ready.
 
-## Current action-matrix interpretation
-
-```text
-FFX002 — Verify key data, then advance
-FFX001 — Promising, but fix data first
-PWC002 — Technical review before advancement
-PWC004 — Promising with timeline caveat
-PWC001 — Monitor or deprioritize
-PWC003 — Special-use decision needed
-```
-
-## Current generated official outputs
-
-Expected local official outputs include:
-
-```text
-data/outputs/data_quality_report.csv
-data/outputs/site_results.csv
-data/outputs/action_matrix.md
-data/outputs/sensitivity_results.csv
-data/outputs/sensitivity_summary.csv
-data/outputs/profile_results.csv
-data/outputs/profile_rank_summary.csv
-data/outputs/profile_comparison.md
-data/outputs/model_run_summary.md
-data/outputs/results_interpretation.md
-data/outputs/baseline_comparison.csv
-data/outputs/baseline_comparison.md
-data/outputs/workflow_success.json
-data/outputs/charts/readiness_score_chart.png
-data/outputs/charts/data_confidence_chart.png
-data/outputs/charts/profile_rank_stability_chart.png
-data/outputs/charts/profile_score_heatmap.png
-data/outputs/charts/site_readiness_map.png
-data/outputs/charts/utilization_vs_ports_<site>.png
-data/outputs/deliverable_package/
-```
-
-Recommended profile-analysis visual:
-
-```text
-data/outputs/charts/profile_rank_stability_chart.png
-```
-
-Use `data/outputs/results_interpretation.md` for the latest generated plain-English interpretation of the current run.
-
-## Current generated demo outputs
-
-Expected local demo outputs include:
-
-```text
-data/demo/demo_sites_<count>.csv
-data/demo/outputs/demo_site_results_<count>.csv
-data/demo/outputs/demo_action_matrix_<count>.md
-data/demo/outputs/demo_sensitivity_results_<count>.csv
-data/demo/outputs/demo_sensitivity_summary_<count>.csv
-data/demo/outputs/demo_profile_results_<count>.csv
-data/demo/outputs/demo_profile_rank_summary_<count>.csv
-data/demo/outputs/demo_profile_comparison_<count>.md
-data/demo/outputs/demo_run_summary_<count>.md
-data/demo/outputs/charts/scalable/readiness_top_<top_n>.png
-data/demo/outputs/charts/scalable/data_confidence_top_<top_n>.png
-data/demo/outputs/charts/scalable/readiness_map_top_<top_n>_labeled.png
-data/demo/outputs/charts/scalable/profile_heatmap_top_<top_n>.png
-data/demo/outputs/charts/scalable/profile_rank_stability_top_8.png
-data/demo/outputs/charts/scalable/readiness_score_distribution.png
-data/demo/outputs/charts/scalable/recommendation_tier_counts.png
-data/demo/outputs/charts/scalable/data_confidence_full_compact.png
-data/demo/outputs/charts/scalable/readiness_full_compact.png
-```
-
-## Remaining data improvements
-
-```text
-elec_service_rating_amp
-spare_capacity_kw
-emergency_disconnect_visible
-employees_day
-visitors_day
-hours_open for sites except FFX002
-parking_spaces for sites except FFX002
-local EV adoption counts
-PWC004 reopening or usable-planning timeline
-PWC002 garage-specific review
-PWC003 public, fleet-only, special-use, or removal decision
-```
-
-## Current stakeholder request files
-
-```text
-docs/STAKEHOLDER_OUTREACH_PLAN.md
-data/source_extracts/stakeholder_data_request_fields.csv
-data/source_extracts/stakeholder_response_tracker.csv
-data/source_extracts/stakeholder_contact_targets.csv
-```
-
-Use these files to ask contacts for the data needed to replace assumptions and placeholders.
+The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, Fire Marshal/AHJ, permitting, procurement, and site review.
