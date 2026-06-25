@@ -35,6 +35,9 @@ jobs:
       - name: Run V2 model workflow
         run: python src/run_v2.py
 
+      - name: Check V2 generated outputs
+        run: python src/check_outputs_v2.py
+
       - name: Upload V2 generated outputs
         uses: actions/upload-artifact@v4
         if: always()
