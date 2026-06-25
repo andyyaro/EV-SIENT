@@ -20,6 +20,8 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_electrical_feasibility_report.md"),
     Path("data/outputs/v2_right_sizing_scenarios.csv"),
     Path("data/outputs/v2_right_sizing_report.md"),
+    Path("data/outputs/v2_port_utilization_simulation.csv"),
+    Path("data/outputs/v2_port_utilization_simulation_report.md"),
     Path("data/outputs/v2_executive_site_summary.csv"),
     Path("data/outputs/v2_executive_site_summary.md"),
     Path("data/outputs/v2_results_interpretation.md"),
@@ -33,6 +35,7 @@ EXPECTED_FILES = [
     Path("data/outputs/charts/v2_profile_score_heatmap.png"),
     Path("data/outputs/charts/v2_profile_rank_stability_chart.png"),
     Path("data/outputs/charts/v2_site_readiness_map.png"),
+    Path("data/outputs/charts/v2_port_utilization_simulation.png"),
 ]
 
 REQUIRED_RESULT_COLUMNS = [
@@ -50,6 +53,12 @@ REQUIRED_RIGHT_SIZING_COLUMNS = [
     "site_id", "site_name", "model_rank", "ports_now", "ports_2035_base",
     "ports_2035_high", "ports_2050_base", "ports_2050_high",
     "future_ready_capacity", "expansion_strategy",
+]
+
+REQUIRED_PORT_SIM_COLUMNS = [
+    "site_id", "site_name", "model_rank", "demand_case", "sessions_day",
+    "port_count", "utilization_pct", "peak_demand_ratio", "estimated_wait_min",
+    "queue_risk_level", "capacity_status",
 ]
 
 REQUIRED_EXECUTIVE_COLUMNS = [
@@ -135,6 +144,20 @@ def check_right_sizing() -> list[str]:
     return errors
 
 
+def check_port_simulation() -> list[str]:
+    errors = []
+    path = Path("data/outputs/v2_port_utilization_simulation.csv")
+    if not path.exists():
+        return [f"Cannot check V2 port simulation because {path} is missing."]
+    simulation = pd.read_csv(path)
+    missing_columns = [col for col in REQUIRED_PORT_SIM_COLUMNS if col not in simulation.columns]
+    if missing_columns:
+        errors.append(f"v2_port_utilization_simulation.csv is missing required columns: {missing_columns}")
+    if len(simulation) < len(REQUIRED_SITE_IDS) * 5:
+        errors.append("v2_port_utilization_simulation.csv has fewer rows than expected.")
+    return errors
+
+
 def check_executive_summary() -> list[str]:
     errors = []
     path = Path("data/outputs/v2_executive_site_summary.csv")
@@ -206,6 +229,7 @@ def main() -> None:
     errors.extend(check_results_table())
     errors.extend(check_electrical_summary())
     errors.extend(check_right_sizing())
+    errors.extend(check_port_simulation())
     errors.extend(check_executive_summary())
     errors.extend(check_run_summary())
     errors.extend(check_workflow_manifest())
