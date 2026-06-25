@@ -40,3 +40,7 @@ data/run_history/
 # Temporary files
 *.tmp
 *.log
+
+# Local raw public-data exports for V2 calculations
+data/raw_exports/
+b11001_inspection_output.txt
