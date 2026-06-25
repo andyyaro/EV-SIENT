@@ -38,6 +38,12 @@ EXPECTED_OUTPUTS = [
     "data/outputs/v2_electrical_feasibility_report.md",
     "data/outputs/v2_right_sizing_scenarios.csv",
     "data/outputs/v2_right_sizing_report.md",
+    "data/outputs/v2_port_utilization_simulation.csv",
+    "data/outputs/v2_port_utilization_simulation_report.md",
+    "data/outputs/v2_right_sizing_validation.csv",
+    "data/outputs/v2_right_sizing_validation_report.md",
+    "data/outputs/v2_executive_site_summary.csv",
+    "data/outputs/v2_executive_site_summary.md",
     "data/outputs/v2_results_interpretation.md",
     "data/outputs/v2_run_summary.md",
     "data/outputs/charts/v2_readiness_score_chart.png",
@@ -46,6 +52,7 @@ EXPECTED_OUTPUTS = [
     "data/outputs/charts/v2_profile_score_heatmap.png",
     "data/outputs/charts/v2_profile_rank_stability_chart.png",
     "data/outputs/charts/v2_site_readiness_map.png",
+    "data/outputs/charts/v2_port_utilization_simulation.png",
 ]
 
 
@@ -72,13 +79,11 @@ def read_csv_if_exists(path: Path) -> pd.DataFrame:
 def top_site_summary(results: pd.DataFrame) -> dict[str, Any]:
     if results.empty or "model_rank" not in results.columns:
         return {}
-
     ranked = results.copy()
     ranked["model_rank"] = pd.to_numeric(ranked["model_rank"], errors="coerce")
     ranked = ranked.sort_values("model_rank")
     if ranked.empty:
         return {}
-
     top = ranked.iloc[0]
     return {
         "site_id": str(top.get("site_id", "")),
@@ -107,13 +112,11 @@ def electrical_counts(electrical: pd.DataFrame) -> dict[str, int]:
 def right_sizing_top_summary(right_sizing: pd.DataFrame) -> dict[str, Any]:
     if right_sizing.empty or "model_rank" not in right_sizing.columns:
         return {}
-
     ranked = right_sizing.copy()
     ranked["model_rank"] = pd.to_numeric(ranked["model_rank"], errors="coerce")
     ranked = ranked.sort_values("model_rank")
     if ranked.empty:
         return {}
-
     top = ranked.iloc[0]
     return {
         "site_id": str(top.get("site_id", "")),
@@ -123,22 +126,14 @@ def right_sizing_top_summary(right_sizing: pd.DataFrame) -> dict[str, Any]:
     }
 
 
-def build_success_marker(
-    input_path: Path,
-    results_path: Path,
-    quality_path: Path,
-    electrical_path: Path,
-    right_sizing_path: Path,
-) -> dict[str, Any]:
+def build_success_marker(input_path: Path, results_path: Path, quality_path: Path, electrical_path: Path, right_sizing_path: Path) -> dict[str, Any]:
     results = read_csv_if_exists(results_path)
     quality = read_csv_if_exists(quality_path)
     electrical = read_csv_if_exists(electrical_path)
     right_sizing = read_csv_if_exists(right_sizing_path)
-
     outputs = [file_record(path) for path in EXPECTED_OUTPUTS]
     missing_outputs = [record["path"] for record in outputs if not record["exists"] or record["size_bytes"] == 0]
-
-    marker = {
+    return {
         "workflow": "v2_expansion_planning",
         "status": "success" if not missing_outputs else "incomplete",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -158,7 +153,6 @@ def build_success_marker(
             "It is a workflow reproducibility artifact, not an engineering or permitting approval.",
         ],
     }
-    return marker
 
 
 def parse_args() -> argparse.Namespace:
@@ -180,11 +174,9 @@ def main() -> None:
     electrical_path = Path(args.electrical_summary)
     right_sizing_path = Path(args.right_sizing)
     output_path = Path(args.output)
-
     marker = build_success_marker(input_path, results_path, quality_path, electrical_path, right_sizing_path)
     ensure_parent_dir(output_path)
     output_path.write_text(json.dumps(marker, indent=2), encoding="utf-8")
-
     print("V2 WORKFLOW SUCCESS MARKER")
     print("--------------------------")
     print(f"Status: {marker['status']}")
