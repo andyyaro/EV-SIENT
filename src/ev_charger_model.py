@@ -163,7 +163,7 @@ def build_priority_reason(row: pd.Series) -> str:
         return "Second strongest public candidate under the current model; strong, but not the top-ranked site."
     if row["readiness_score"] >= 45:
         return "Public candidate with moderate readiness, but additional data is needed before advancing."
-    return "Current score is lower than stronger alternatives, mainly because demand/equity/feasibility signals are weaker in this V1 dataset."
+    return "Current score is lower than stronger alternatives, mainly because demand/equity/feasibility signals are weaker in the current dataset."
 
 
 def build_data_needed_next(row: pd.Series) -> str:
