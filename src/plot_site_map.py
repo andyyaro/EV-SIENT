@@ -47,38 +47,35 @@ TIER_MARKERS = {
 }
 
 TIER_ORDER = ["Tier 1", "High-review", "Tier 2", "Tier 3", "Special-use"]
-LOCALITY_PANEL_LABELS = {"FFX": "Fairfax-area zoom", "PWC": "Prince William County zoom", "Other": "Other sites"}
 
-# Optional hand-tuned offsets for the expanded V2 candidate set. Any site not
-# listed here gets a deterministic automatic offset.
-LABEL_OFFSETS = {
-    "FFX001": (-92, -12),
-    "FFX002": (14, 16),
-    "FFX003": (12, -16),
+# Overview labels should tell the story, not repeat every site. Zoom panels still
+# label every site for analytical review.
+NOTABLE_OVERVIEW_SITE_IDS = {"PWC002", "PWC003", "PWC008"}
+
+# Hand-tuned offsets for the expanded V2 candidate set. Any site not listed here
+# gets a deterministic automatic offset.
+OVERVIEW_LABEL_OFFSETS = {
+    "FFX002": (12, 14),
     "FFX004": (12, 12),
-    "PWC001": (12, 12),
-    "PWC002": (-92, 16),
+    "PWC006": (-58, 14),
+    "PWC002": (-54, 16),
     "PWC003": (10, -14),
-    "PWC004": (12, 4),
-    "PWC005": (10, 16),
-    "PWC006": (-92, 10),
-    "PWC007": (12, -18),
-    "PWC008": (10, 12),
+    "PWC008": (12, 10),
 }
 
 ZOOM_LABEL_OFFSETS = {
-    "FFX001": (-98, -12),
-    "FFX002": (12, 16),
-    "FFX003": (12, -16),
-    "FFX004": (12, 12),
-    "PWC001": (12, 12),
-    "PWC002": (-86, 14),
+    "FFX001": (-72, -10),
+    "FFX002": (12, 14),
+    "FFX003": (12, -12),
+    "FFX004": (12, 10),
+    "PWC001": (12, 28),
+    "PWC002": (-66, 14),
     "PWC003": (10, -16),
-    "PWC004": (12, 0),
+    "PWC004": (12, 10),
     "PWC005": (10, 16),
-    "PWC006": (-92, 10),
-    "PWC007": (12, -18),
-    "PWC008": (10, 12),
+    "PWC006": (-52, -8),
+    "PWC007": (12, -20),
+    "PWC008": (12, -12),
 }
 
 
@@ -180,20 +177,10 @@ def sensitivity_is_stable(sensitivity: pd.DataFrame) -> bool:
     return bool(not rank_range.isna().any() and (rank_range == 0).all())
 
 
-def map_interpretation_note(data: pd.DataFrame, sensitivity: pd.DataFrame, profile_results: pd.DataFrame) -> str:
-    top_site = top_site_id_from_results(data)
-    profile_site, profile_count = profile_top_site(profile_results)
-    stable_sensitivity = sensitivity_is_stable(sensitivity)
-
-    if top_site and stable_sensitivity and profile_site == top_site and profile_count > 0:
-        return f"{top_site} is the stable top candidate: #1 in the base model, stable in sensitivity, and #1 across {profile_count} scoring profiles."
-    if top_site and profile_site == top_site and profile_count > 0:
-        return f"{top_site} is #1 in the base model and #1 across {profile_count} scoring profiles."
-    if top_site and stable_sensitivity:
-        return f"{top_site} is #1 in the base model; sensitivity ranks stayed stable. Profile results show the priority tradeoffs."
-    if top_site:
-        return f"{top_site} is the current #1 site under the base model."
-    return "Candidate locations shown with readiness-score markers."
+def map_subtitle(data: pd.DataFrame, sensitivity: pd.DataFrame) -> str:
+    count = len(data)
+    stable_text = "rankings stable in sensitivity" if sensitivity_is_stable(sensitivity) else "sensitivity results available"
+    return f"{count} candidate sites across Fairfax-area and Prince William County; {stable_text}."
 
 
 def stable_top_candidate_found(data: pd.DataFrame, sensitivity: pd.DataFrame, profile_results: pd.DataFrame) -> bool:
@@ -209,28 +196,14 @@ def site_label(row: pd.Series) -> str:
     if score is None:
         return site_id
     rank_text = f"#{int(rank)} " if rank is not None else ""
-    return f"{rank_text}{site_id}\n{score:.1f}"
+    return f"{rank_text}{site_id} | {score:.1f}"
 
 
 def marker_size(score) -> float:
     score_number = safe_float(score)
     if score_number is None:
-        return 180
-    return 90 + score_number * 6
-
-
-def planning_note(data: pd.DataFrame) -> str:
-    site_ids = set(data["site_id"].astype(str)) if "site_id" in data.columns else set()
-    notes = []
-    if "PWC002" in site_ids:
-        notes.append("PWC002 = high-review garage candidate")
-    if "PWC003" in site_ids:
-        notes.append("PWC003 = public-access decision needed")
-    if "PWC008" in site_ids:
-        notes.append("PWC008 = monitor due to nearby charging supply")
-    if "PWC006" in site_ids:
-        notes.append("PWC006 = strongest current PWC library candidate")
-    return "; ".join(notes)
+        return 150
+    return 75 + score_number * 5.2
 
 
 def score_norm(scores: pd.Series) -> tuple[Normalize, str]:
@@ -256,7 +229,7 @@ def axis_bounds(data: pd.DataFrame, pad_factor: float = 0.20, min_lon_pad: float
 
 def style_axis(ax, zoom: bool = False) -> None:
     """Apply consistent, low-clutter map-axis formatting."""
-    ax.grid(True, alpha=0.20, linewidth=0.7)
+    ax.grid(True, alpha=0.18, linewidth=0.7)
     ax.tick_params(labelsize=8)
     ax.xaxis.set_major_locator(MaxNLocator(5 if zoom else 6))
     ax.yaxis.set_major_locator(MaxNLocator(5 if zoom else 6))
@@ -267,36 +240,25 @@ def style_axis(ax, zoom: bool = False) -> None:
         spine.set_alpha(0.85)
 
 
-def draw_cluster_boxes(ax, data: pd.DataFrame) -> None:
-    """Draw light dashed boxes around clusters in the overview panel only."""
+def draw_focus_box(ax, data: pd.DataFrame, locality: str = "FFX") -> None:
+    """Draw a light dashed focus box in the overview without floating text labels."""
     if data.empty or "locality_group" not in data.columns:
         return
-
-    for locality, group in data.groupby("locality_group"):
-        if group.empty:
-            continue
-        lon0, lon1, lat0, lat1 = axis_bounds(group, pad_factor=0.55, min_lon_pad=0.010, min_lat_pad=0.010)
-        rect = Rectangle(
-            (lon0, lat0),
-            lon1 - lon0,
-            lat1 - lat0,
-            fill=False,
-            linestyle="--",
-            linewidth=0.9,
-            alpha=0.38,
-            zorder=1,
-        )
-        ax.add_patch(rect)
-        ax.text(
-            (lon0 + lon1) / 2,
-            lat1,
-            LOCALITY_PANEL_LABELS.get(locality, locality),
-            fontsize=7.5,
-            va="bottom",
-            ha="center",
-            bbox={"boxstyle": "round,pad=0.18", "fc": "white", "alpha": 0.78, "lw": 0.25},
-            zorder=3,
-        )
+    group = data[data["locality_group"] == locality]
+    if group.empty:
+        return
+    lon0, lon1, lat0, lat1 = axis_bounds(group, pad_factor=0.55, min_lon_pad=0.010, min_lat_pad=0.010)
+    rect = Rectangle(
+        (lon0, lat0),
+        lon1 - lon0,
+        lat1 - lat0,
+        fill=False,
+        linestyle="--",
+        linewidth=0.9,
+        alpha=0.38,
+        zorder=1,
+    )
+    ax.add_patch(rect)
 
 
 def automatic_offset(index: int) -> tuple[int, int]:
@@ -304,6 +266,15 @@ def automatic_offset(index: int) -> tuple[int, int]:
     angle = (index * 137.5) % 360
     radius = 18
     return int(round(math.cos(math.radians(angle)) * radius)), int(round(math.sin(math.radians(angle)) * radius))
+
+
+def overview_label_site_ids(data: pd.DataFrame) -> set[str]:
+    """Return the small set of sites labeled in the overview panel."""
+    labels = set(NOTABLE_OVERVIEW_SITE_IDS & set(data["site_id"].astype(str)))
+    ranked = data.sort_values("model_rank_num", na_position="last")
+    top_three = ranked[pd.to_numeric(ranked["model_rank_num"], errors="coerce") <= 3]
+    labels.update(top_three["site_id"].astype(str).tolist())
+    return labels
 
 
 def plot_sites_on_axis(
@@ -315,6 +286,7 @@ def plot_sites_on_axis(
     sensitivity: pd.DataFrame,
     profile_results: pd.DataFrame,
     label_offsets: dict[str, tuple[int, int]],
+    label_site_ids: set[str] | None = None,
     show_legend: bool = False,
 ) -> None:
     """Draw site markers and labels on one map axis."""
@@ -329,7 +301,7 @@ def plot_sites_on_axis(
             cmap=cmap_name,
             norm=norm,
             marker=TIER_MARKERS.get(str(tier), "o"),
-            alpha=0.78,
+            alpha=0.82,
             edgecolors="black",
             linewidths=0.8,
             zorder=2,
@@ -338,7 +310,7 @@ def plot_sites_on_axis(
     if top_site:
         top_row = data[data["site_id"].astype(str) == top_site]
         if not top_row.empty:
-            star_size = 300 if stable_top_candidate_found(data, sensitivity, profile_results) else 250
+            star_size = 280 if stable_top_candidate_found(data, sensitivity, profile_results) else 240
             ax.scatter(
                 top_row["lon"],
                 top_row["lat"],
@@ -353,15 +325,19 @@ def plot_sites_on_axis(
     ordered = data.sort_values("model_rank_num", na_position="last").reset_index(drop=True)
     for index, row in ordered.iterrows():
         site_id = str(row.get("site_id", ""))
+        if label_site_ids is not None and site_id not in label_site_ids:
+            continue
         offset = label_offsets.get(site_id, automatic_offset(index))
         ax.annotate(
             site_label(row),
             xy=(row["lon"], row["lat"]),
             xytext=offset,
             textcoords="offset points",
-            fontsize=7.8,
-            arrowprops={"arrowstyle": "-", "lw": 0.4, "alpha": 0.6},
-            bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.86, "lw": 0.3},
+            fontsize=7.2,
+            ha="right" if offset[0] < 0 else "left",
+            va="center",
+            arrowprops={"arrowstyle": "-", "lw": 0.35, "alpha": 0.55},
+            bbox={"boxstyle": "round,pad=0.18", "fc": "white", "alpha": 0.88, "lw": 0.25},
             zorder=5,
         )
 
@@ -372,32 +348,42 @@ def plot_sites_on_axis(
         add_tier_legend(ax, data)
 
 
-def ranked_summary(data: pd.DataFrame) -> str:
-    if data.empty:
-        return "Ranked readiness\nNo sites loaded."
+def site_line(row: pd.Series) -> str:
+    rank = safe_float(row.get("model_rank_num", row.get("model_rank", "")))
+    site_id = str(row.get("site_id", ""))
+    score = safe_float(row.get("readiness_score_num", row.get("readiness_score", "")))
+    tier = compact_tier(row.get("recommendation_tier", ""))
+    rank_text = f"#{int(rank)}" if rank is not None else "--"
+    score_text = f"{score:.1f}" if score is not None else "n/a"
+    return f"{rank_text} {site_id} — {score_text} — {tier}"
 
-    summary = data.sort_values("model_rank_num", na_position="last").copy()
-    lines = ["Ranked readiness", "score | tier | ports", ""]
-    for _, row in summary.iterrows():
-        site_id = str(row.get("site_id", ""))
-        score = safe_float(row.get("readiness_score_num", row.get("readiness_score", "")))
-        rank = safe_float(row.get("model_rank_num", row.get("model_rank", "")))
-        tier = compact_tier(row.get("recommendation_tier", ""))
-        ports = row.get("recommended_ports_now", "")
-        rank_text = f"#{int(rank)}" if rank is not None else "--"
-        score_text = f"{score:.1f}" if score is not None else "n/a"
-        try:
-            ports_text = str(int(float(ports)))
-        except (TypeError, ValueError):
-            ports_text = "n/a"
-        lines.append(f"{rank_text} {site_id}: {score_text} | {tier} | {ports_text}")
+
+def key_takeaways(data: pd.DataFrame) -> str:
+    if data.empty:
+        return "Key takeaways\nNo sites loaded."
+
+    ranked = data.sort_values("model_rank_num", na_position="last").copy()
+    lines = ["Key takeaways", "", "Top candidates"]
+    for _, row in ranked.head(3).iterrows():
+        lines.append(f"• {site_line(row)}")
+
+    site_ids = set(data["site_id"].astype(str))
+    note_rows = []
+    if "PWC002" in site_ids:
+        note_rows.append("• PWC002 — high-review garage candidate")
+    if "PWC003" in site_ids:
+        note_rows.append("• PWC003 — special-use / public-access decision")
+    if "PWC008" in site_ids:
+        note_rows.append("• PWC008 — monitor due to nearby charging supply")
+    if note_rows:
+        lines.extend(["", "Planning cautions", *note_rows])
 
     lines.extend([
         "",
         "How to read",
-        "shape = recommendation tier",
-        "size/color = readiness score",
-        "star = top-ranked site",
+        "• Shape = recommendation tier",
+        "• Color/size = readiness score",
+        "• Star = top-ranked site",
     ])
     return "\n".join(lines)
 
@@ -446,12 +432,12 @@ def plot_site_map(
     grid = fig.add_gridspec(
         2,
         3,
-        width_ratios=[1.72, 1.08, 0.90],
+        width_ratios=[1.72, 1.08, 0.86],
         height_ratios=[1, 1],
         left=0.052,
         right=0.985,
-        bottom=0.15,
-        top=0.88,
+        bottom=0.125,
+        top=0.875,
         wspace=0.30,
         hspace=0.34,
     )
@@ -462,8 +448,19 @@ def plot_site_map(
     panel_ax = fig.add_subplot(grid[:, 2])
     panel_ax.axis("off")
 
-    draw_cluster_boxes(ax_overview, data)
-    plot_sites_on_axis(ax_overview, data, norm, cmap_name, top_site, sensitivity, profile_results, LABEL_OFFSETS, show_legend=True)
+    draw_focus_box(ax_overview, data, locality="FFX")
+    plot_sites_on_axis(
+        ax_overview,
+        data,
+        norm,
+        cmap_name,
+        top_site,
+        sensitivity,
+        profile_results,
+        OVERVIEW_LABEL_OFFSETS,
+        label_site_ids=overview_label_site_ids(data),
+        show_legend=True,
+    )
     ax_overview.set_title("Overview: all candidate sites", fontsize=10, pad=8)
     lon0, lon1, lat0, lat1 = axis_bounds(data, pad_factor=0.22, min_lon_pad=0.018, min_lat_pad=0.018)
     ax_overview.set_xlim(lon0, lon1)
@@ -491,30 +488,27 @@ def plot_site_map(
     panel_ax.text(
         0.0,
         1.0,
-        ranked_summary(data),
+        key_takeaways(data),
         transform=panel_ax.transAxes,
-        fontsize=8.1,
+        fontsize=8.3,
         va="top",
         ha="left",
-        linespacing=1.24,
+        linespacing=1.30,
         bbox={"boxstyle": "round,pad=0.55", "fc": "white", "alpha": 0.95, "lw": 0.6},
     )
 
-    cax = panel_ax.inset_axes([0.00, 0.045, 0.78, 0.040])
+    cax = panel_ax.inset_axes([0.00, 0.075, 0.82, 0.040])
     mappable = plt.cm.ScalarMappable(norm=norm, cmap=cmap_name)
     mappable.set_array([])
     cbar = fig.colorbar(mappable, cax=cax, orientation="horizontal")
     cbar.set_label("Readiness score", fontsize=8)
     cbar.ax.tick_params(labelsize=7)
 
-    fig.suptitle("Candidate EV Charging Sites — Readiness Map", fontsize=15, y=0.975)
-    fig.text(0.50, 0.915, map_interpretation_note(data, sensitivity, profile_results), ha="center", fontsize=9)
+    fig.suptitle("Candidate EV Charging Sites — Readiness Map", fontsize=15, y=0.965)
+    fig.text(0.50, 0.910, map_subtitle(data, sensitivity), ha="center", fontsize=9)
 
-    note = planning_note(data)
-    if note:
-        fig.text(0.50, 0.075, f"Planning notes: {note}.", ha="center", fontsize=8)
-    footer = "Planning visual only — longitude/latitude scatter, no basemap, parcel boundary, engineering layout, utility-service map, or permitting decision."
-    fig.text(0.50, 0.040, footer, ha="center", fontsize=8)
+    footer = "Planning visual only — not a permitting, design, utility, or construction decision."
+    fig.text(0.50, 0.045, footer, ha="center", fontsize=8)
 
     fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
@@ -541,7 +535,6 @@ def main() -> None:
     data = load_map_data(input_path, results_path)
     sensitivity = read_csv_if_exists(sensitivity_path)
     profile_results = read_csv_if_exists(profile_results_path)
-    interpretation = map_interpretation_note(data, sensitivity, profile_results)
     plot_site_map(data, output_path, sensitivity, profile_results)
 
     print("CANDIDATE SITE READINESS MAP")
@@ -551,8 +544,7 @@ def main() -> None:
     print(f"Sensitivity file: {sensitivity_path if sensitivity_path.exists() else 'not found'}")
     print(f"Profile results file: {profile_results_path if profile_results_path.exists() else 'not found'}")
     print(f"Saved map: {output_path}")
-    print(f"Map note: {interpretation}")
-    print(f"Planning note: {planning_note(data)}")
+    print(f"Map note: {map_subtitle(data, sensitivity)}")
     print()
     print("Sites plotted:")
     display_cols = [col for col in ["site_id", "site_name", "model_rank", "readiness_score", "recommendation_tier"] if col in data.columns]
