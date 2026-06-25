@@ -33,6 +33,9 @@ V2_SENSITIVITY_SUMMARY = "data/outputs/v2_sensitivity_summary.csv"
 V2_PROFILE_RESULTS = "data/outputs/v2_profile_results.csv"
 V2_PROFILE_RANK_SUMMARY = "data/outputs/v2_profile_rank_summary.csv"
 V2_PROFILE_REPORT = "data/outputs/v2_profile_comparison.md"
+V2_ELECTRICAL_SCENARIO_RESULTS = "data/outputs/v2_electrical_scenario_results.csv"
+V2_ELECTRICAL_RISK_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
+V2_ELECTRICAL_REPORT = "data/outputs/v2_electrical_feasibility_report.md"
 V2_INTERPRETATION = "data/outputs/v2_results_interpretation.md"
 
 
@@ -124,7 +127,23 @@ def main() -> None:
     )
 
     run_step(
-        "6. Generate V2 interpretation report",
+        "6. Run V2 electrical-feasibility scenario analysis",
+        [
+            PYTHON,
+            "src/run_electrical_risk_scenarios.py",
+            "--results",
+            V2_RESULTS,
+            "--scenario-output",
+            V2_ELECTRICAL_SCENARIO_RESULTS,
+            "--summary-output",
+            V2_ELECTRICAL_RISK_SUMMARY,
+            "--report-output",
+            V2_ELECTRICAL_REPORT,
+        ],
+    )
+
+    run_step(
+        "7. Generate V2 interpretation report",
         [
             PYTHON,
             "src/generate_results_interpretation.py",
@@ -153,6 +172,8 @@ def main() -> None:
         V2_SENSITIVITY_SUMMARY,
         V2_PROFILE_RESULTS,
         V2_PROFILE_REPORT,
+        V2_ELECTRICAL_RISK_SUMMARY,
+        V2_ELECTRICAL_REPORT,
         V2_INTERPRETATION,
         V2_READINESS_CHART,
     ]:
