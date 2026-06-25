@@ -33,6 +33,7 @@ EXPECTED_FILES = [
     Path("data/outputs/v2_right_sizing_scenarios.csv"),
     Path("data/outputs/v2_right_sizing_report.md"),
     Path("data/outputs/v2_results_interpretation.md"),
+    Path("data/outputs/v2_run_summary.md"),
     Path("data/outputs/charts/v2_readiness_score_chart.png"),
     Path("data/outputs/charts/v2_polished_readiness_score_chart.png"),
     Path("data/outputs/charts/v2_data_confidence_chart.png"),
@@ -168,6 +169,24 @@ def check_right_sizing() -> list[str]:
     return errors
 
 
+def check_run_summary() -> list[str]:
+    summary_path = Path("data/outputs/v2_run_summary.md")
+    if not summary_path.exists():
+        return [f"Cannot check V2 run summary because {summary_path} is missing."]
+
+    text = summary_path.read_text(encoding="utf-8")
+    required_phrases = [
+        "# V2 Model Run Summary",
+        "## Electrical-risk scenario summary",
+        "## Right-sizing scenario summary",
+        "## Generated visual outputs",
+    ]
+    missing = [phrase for phrase in required_phrases if phrase not in text]
+    if missing:
+        return [f"v2_run_summary.md is missing expected sections: {missing}"]
+    return []
+
+
 def main() -> None:
     print("V2 OUTPUT CHECK")
     print("---------------")
@@ -176,6 +195,7 @@ def main() -> None:
     errors.extend(check_results_table())
     errors.extend(check_electrical_summary())
     errors.extend(check_right_sizing())
+    errors.extend(check_run_summary())
 
     if errors:
         print("Status: FAILED")
