@@ -20,6 +20,7 @@ This branch is currently used for V2 expansion-planning work.
 - Step-by-step reproduction checklist: [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
 - Simple repo map: [docs/REPO_MAP.md](docs/REPO_MAP.md)
 - V2 public-data upgrade workflow: [docs/V2_PUBLIC_DATA_UPGRADE_WORKFLOW.md](docs/V2_PUBLIC_DATA_UPGRADE_WORKFLOW.md)
+- V2 next batch plan: [docs/V2_NEXT_BATCH_PLAN.md](docs/V2_NEXT_BATCH_PLAN.md)
 
 ## Python version
 
@@ -118,6 +119,7 @@ The profile heatmap shows whether the same sites stay strong when different plan
 |---|---|
 | [data/inputs/real_sites_v1.csv](data/inputs/real_sites_v1.csv) | Stable V1 candidate-site input dataset. |
 | [data/inputs/real_sites_v2.csv](data/inputs/real_sites_v2.csv) | Active V2 expansion candidate-site input dataset. |
+| [data/source_extracts/v2_next_upgrade_batch.csv](data/source_extracts/v2_next_upgrade_batch.csv) | Selected next V2 public-data upgrade batch. |
 | [data/outputs/site_results.csv](data/outputs/site_results.csv) | Main V1 model result table. |
 | `data/outputs/v2_site_results.csv` | Main V2 model result table generated locally. |
 | [data/outputs/deliverable_package/](data/outputs/deliverable_package/) | Shareable local V1 package after generation. |
@@ -131,6 +133,8 @@ The profile heatmap shows whether the same sites stay strong when different plan
 | [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
 | [src/add_action_matrix.py](src/add_action_matrix.py) | Adds next-action labels. |
 | [src/check_outputs.py](src/check_outputs.py) | Checks V1 generated outputs. |
+| [src/check_outputs_v2.py](src/check_outputs_v2.py) | Checks V2 generated outputs. |
+| [src/check_v2_next_batch_readiness.py](src/check_v2_next_batch_readiness.py) | Checks whether next-batch candidates are ready for model-row promotion. |
 | [src/build_deliverable_package.py](src/build_deliverable_package.py) | Builds the shareable V1 package. |
 | [src/build_v2_public_data_upgrades.py](src/build_v2_public_data_upgrades.py) | Builds reviewable public-data upgrade extracts for selected V2 sites. |
 
@@ -182,6 +186,7 @@ PWC003 — special-use / not general-public priority under current assumptions
 - [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
 - [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
 - [docs/V2_PUBLIC_DATA_UPGRADE_WORKFLOW.md](docs/V2_PUBLIC_DATA_UPGRADE_WORKFLOW.md)
+- [docs/V2_NEXT_BATCH_PLAN.md](docs/V2_NEXT_BATCH_PLAN.md)
 
 The longer documentation and presentation files remain in [docs/](docs/).
 
