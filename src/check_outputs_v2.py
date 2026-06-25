@@ -38,6 +38,12 @@ EXPECTED_FILES = [
     Path("data/outputs/charts/v2_profile_rank_stability_chart.png"),
     Path("data/outputs/charts/v2_site_readiness_map.png"),
     Path("data/outputs/charts/v2_port_utilization_simulation.png"),
+    Path("data/outputs/deliverable_package_v2/README.md"),
+    Path("data/outputs/deliverable_package_v2/package_manifest.json"),
+    Path("data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv"),
+    Path("data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md"),
+    Path("data/outputs/deliverable_package_v2/charts/v2_polished_readiness_score_chart.png"),
+    Path("data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png"),
 ]
 
 REQUIRED_RESULT_COLUMNS = [
@@ -193,6 +199,24 @@ def check_executive_summary() -> list[str]:
     return errors
 
 
+def check_deliverable_package() -> list[str]:
+    path = Path("data/outputs/deliverable_package_v2/package_manifest.json")
+    if not path.exists():
+        return [f"Cannot check deliverable package because {path} is missing."]
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"deliverable package manifest is not valid JSON: {exc}"]
+    errors = []
+    if data.get("package") != "v2_deliverable_package":
+        errors.append("deliverable package manifest has the wrong package name.")
+    if data.get("status") != "complete":
+        errors.append(f"deliverable package manifest status is not complete: {data.get('status')}")
+    if data.get("missing_or_empty_sources"):
+        errors.append("deliverable package manifest reports missing or empty sources.")
+    return errors
+
+
 def check_run_summary() -> list[str]:
     path = Path("data/outputs/v2_run_summary.md")
     if not path.exists():
@@ -251,6 +275,7 @@ def main() -> None:
     errors.extend(check_port_simulation())
     errors.extend(check_right_sizing_validation())
     errors.extend(check_executive_summary())
+    errors.extend(check_deliverable_package())
     errors.extend(check_run_summary())
     errors.extend(check_workflow_manifest())
     errors.extend(check_baseline_comparison())
