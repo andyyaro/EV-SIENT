@@ -1,13 +1,9 @@
 """Build a consolidated V2 executive site summary table.
 
 This script joins the most decision-useful V2 outputs into one clean table for
-reporting, screenshots, and presentations. It does not replace the detailed CSV
-or Markdown outputs; it gives a single view that combines ranking, confidence,
-electrical risk, right-sizing, action labels, and review flags.
-
-Run from the repository root after V2 electrical and right-sizing outputs exist:
-
-    python src/build_v2_executive_summary.py
+reporting, screenshots, and presentations. It combines ranking, confidence,
+electrical risk, right-sizing, port-simulation outputs, action labels, and
+review flags.
 """
 
 from __future__ import annotations
@@ -20,6 +16,7 @@ import pandas as pd
 DEFAULT_RESULTS = "data/outputs/v2_site_results.csv"
 DEFAULT_ELECTRICAL_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
 DEFAULT_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
+DEFAULT_PORT_SIMULATION = "data/outputs/v2_port_utilization_simulation.csv"
 DEFAULT_OUTPUT = "data/outputs/v2_executive_site_summary.csv"
 DEFAULT_REPORT = "data/outputs/v2_executive_site_summary.md"
 
@@ -41,6 +38,13 @@ OUTPUT_COLUMNS = [
     "ports_2050_high",
     "future_ready_capacity",
     "expansion_strategy",
+    "sim_min_ports_current",
+    "sim_utilization_current_at_ports_now",
+    "sim_wait_current_at_ports_now",
+    "sim_queue_risk_current_at_ports_now",
+    "sim_min_ports_2035_high",
+    "sim_min_ports_2050_high",
+    "sim_status_2050_high_at_future_ready",
     "major_review_flags",
     "planning_recommendation",
     "data_needed_next",
@@ -57,8 +61,13 @@ def read_required_csv(path: Path, label: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def read_optional_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
 def normalize_electrical_columns(electrical: pd.DataFrame) -> pd.DataFrame:
-    """Normalize electrical summary column names across earlier V2 versions."""
     data = electrical.copy()
     rename_map = {}
     if "electrical_adjusted_rank" in data.columns and "expected_rank" not in data.columns:
@@ -109,6 +118,13 @@ def build_review_flags(row: pd.Series) -> str:
     if "do_not_advance" in strategy:
         flags.append("Do not advance as general-public buildout")
 
+    current_status = str(row.get("sim_queue_risk_current_at_ports_now", "")).lower()
+    future_status = str(row.get("sim_status_2050_high_at_future_ready", "")).lower()
+    if current_status in {"elevated", "high"}:
+        flags.append("Current port count may need closer utilization review")
+    if future_status == "underbuilt":
+        flags.append("Future-ready capacity may be underbuilt in 2050 high case")
+
     access = row.get("public_access", None)
     try:
         if float(access) < 1:
@@ -121,19 +137,68 @@ def build_review_flags(row: pd.Series) -> str:
     return semicolon_join(flags)
 
 
-def build_executive_summary(results: pd.DataFrame, electrical: pd.DataFrame, right_sizing: pd.DataFrame) -> pd.DataFrame:
+def pick_min_ports(group: pd.DataFrame) -> object:
+    if group.empty:
+        return ""
+    acceptable = group[group["capacity_status"].isin(["right_sized", "acceptable_but_monitor"])]
+    if acceptable.empty:
+        best = group.sort_values(["estimated_wait_min", "utilization_pct"]).iloc[0]
+    else:
+        best = acceptable.sort_values("port_count").iloc[0]
+    return int(best["port_count"])
+
+
+def summarize_port_simulation(simulation: pd.DataFrame) -> pd.DataFrame:
+    if simulation.empty or "site_id" not in simulation.columns:
+        return pd.DataFrame(columns=["site_id"])
+
+    rows = []
+    for site_id, site_rows in simulation.groupby("site_id", dropna=False):
+        current = site_rows[site_rows["demand_case"] == "current"].copy()
+        high_2035 = site_rows[site_rows["demand_case"] == "2035_high"].copy()
+        high_2050 = site_rows[site_rows["demand_case"] == "2050_high"].copy()
+
+        current_ports_now = current[current.get("is_ports_now", False) == True] if "is_ports_now" in current.columns else pd.DataFrame()
+        if current_ports_now.empty and not current.empty:
+            current_ports_now = current.sort_values("port_count").head(1)
+
+        future_ready = high_2050[high_2050.get("is_future_ready_capacity", False) == True] if "is_future_ready_capacity" in high_2050.columns else pd.DataFrame()
+        if future_ready.empty and not high_2050.empty:
+            future_ready = high_2050.sort_values("port_count").tail(1)
+
+        current_row = current_ports_now.iloc[0] if not current_ports_now.empty else None
+        future_row = future_ready.iloc[0] if not future_ready.empty else None
+
+        rows.append(
+            {
+                "site_id": site_id,
+                "sim_min_ports_current": pick_min_ports(current),
+                "sim_utilization_current_at_ports_now": current_row.get("utilization_pct", "") if current_row is not None else "",
+                "sim_wait_current_at_ports_now": current_row.get("estimated_wait_min", "") if current_row is not None else "",
+                "sim_queue_risk_current_at_ports_now": current_row.get("queue_risk_level", "") if current_row is not None else "",
+                "sim_min_ports_2035_high": pick_min_ports(high_2035),
+                "sim_min_ports_2050_high": pick_min_ports(high_2050),
+                "sim_status_2050_high_at_future_ready": future_row.get("capacity_status", "") if future_row is not None else "",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def build_executive_summary(
+    results: pd.DataFrame,
+    electrical: pd.DataFrame,
+    right_sizing: pd.DataFrame,
+    port_simulation: pd.DataFrame,
+) -> pd.DataFrame:
     required_results = {"site_id", "model_rank", "site_name", "readiness_score"}
     missing = required_results - set(results.columns)
     if missing:
         raise ValueError(f"V2 site results are missing required columns: {sorted(missing)}")
 
     electrical = normalize_electrical_columns(electrical)
+    port_summary = summarize_port_simulation(port_simulation)
 
-    electrical_keep = [
-        col
-        for col in ["site_id", "electrical_risk_level", "expected_rank", "expected_score"]
-        if col in electrical.columns
-    ]
+    electrical_keep = [col for col in ["site_id", "electrical_risk_level", "expected_rank", "expected_score"] if col in electrical.columns]
     if "site_id" not in electrical_keep:
         raise ValueError("Electrical summary is missing site_id.")
 
@@ -156,12 +221,9 @@ def build_executive_summary(results: pd.DataFrame, electrical: pd.DataFrame, rig
 
     merged = results.merge(electrical[electrical_keep], on="site_id", how="left")
     merged = merged.merge(right_sizing[right_sizing_keep], on="site_id", how="left")
-    merged = merged.rename(
-        columns={
-            "expected_rank": "expected_electrical_rank",
-            "expected_score": "expected_electrical_score",
-        }
-    )
+    if not port_summary.empty:
+        merged = merged.merge(port_summary, on="site_id", how="left")
+    merged = merged.rename(columns={"expected_rank": "expected_electrical_rank", "expected_score": "expected_electrical_score"})
 
     merged["major_review_flags"] = merged.apply(build_review_flags, axis=1)
     merged["model_rank"] = pd.to_numeric(merged["model_rank"], errors="coerce")
@@ -203,11 +265,13 @@ def build_markdown_report(summary: pd.DataFrame) -> str:
         "model_rank",
         "site_id",
         "readiness_score",
-        "data_confidence_level",
         "electrical_risk_level",
         "ports_now",
+        "sim_min_ports_current",
+        "sim_utilization_current_at_ports_now",
+        "sim_min_ports_2050_high",
         "future_ready_capacity",
-        "expansion_strategy",
+        "sim_status_2050_high_at_future_ready",
         "major_review_flags",
     ]
 
@@ -215,7 +279,7 @@ def build_markdown_report(summary: pd.DataFrame) -> str:
 
 {top_text}
 
-This report consolidates the most decision-useful V2 outputs into one table. It is intended for quick review, reporting, screenshots, and presentation preparation.
+This report consolidates the most decision-useful V2 outputs into one table. It now includes the port-utilization simulation summary alongside ranking, electrical risk, and right-sizing.
 
 ## Executive decision table
 
@@ -224,9 +288,10 @@ This report consolidates the most decision-useful V2 outputs into one table. It 
 ## Notes
 
 - `ports_now` is the near-term installation recommendation from the V2 right-sizing module.
-- `future_ready_capacity` is the practical planning capacity target from the V2 right-sizing module.
-- `electrical_risk_level` is a planning-screening signal, not a utility engineering result.
-- `major_review_flags` summarizes likely follow-up review needs and does not replace AHJ, Fire Marshal, ADA, stormwater, or utility review.
+- `sim_min_ports_current` is the smallest simulated port count that avoids underbuilt status under current demand.
+- `sim_min_ports_2050_high` is the smallest simulated port count that avoids underbuilt status under the 2050 high-growth case.
+- `sim_status_2050_high_at_future_ready` checks whether the future-ready capacity still looks acceptable in the 2050 high-growth case.
+- These simulation outputs are planning-screen signals, not detailed queueing, utility, or engineering results.
 """
 
 
@@ -235,6 +300,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--results", default=DEFAULT_RESULTS, help="V2 site results CSV.")
     parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY, help="V2 electrical risk summary CSV.")
     parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING, help="V2 right-sizing scenario CSV.")
+    parser.add_argument("--port-simulation", default=DEFAULT_PORT_SIMULATION, help="V2 port simulation CSV.")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Executive summary CSV output.")
     parser.add_argument("--report", default=DEFAULT_REPORT, help="Executive summary Markdown report output.")
     return parser.parse_args()
@@ -245,14 +311,16 @@ def main() -> None:
     results_path = Path(args.results)
     electrical_path = Path(args.electrical_summary)
     right_sizing_path = Path(args.right_sizing)
+    port_simulation_path = Path(args.port_simulation)
     output_path = Path(args.output)
     report_path = Path(args.report)
 
     results = read_required_csv(results_path, "V2 site results")
     electrical = read_required_csv(electrical_path, "V2 electrical summary")
     right_sizing = read_required_csv(right_sizing_path, "V2 right-sizing")
+    port_simulation = read_optional_csv(port_simulation_path)
 
-    summary = build_executive_summary(results, electrical, right_sizing)
+    summary = build_executive_summary(results, electrical, right_sizing, port_simulation)
     ensure_parent_dir(output_path)
     ensure_parent_dir(report_path)
     summary.to_csv(output_path, index=False)
@@ -264,7 +332,7 @@ def main() -> None:
     print(f"Saved CSV: {output_path}")
     print(f"Saved report: {report_path}")
     print()
-    print(summary[["model_rank", "site_id", "readiness_score", "electrical_risk_level", "ports_now", "future_ready_capacity", "expansion_strategy"]].to_string(index=False))
+    print(summary[["model_rank", "site_id", "readiness_score", "ports_now", "sim_min_ports_current", "sim_min_ports_2050_high", "future_ready_capacity", "sim_status_2050_high_at_future_ready"]].to_string(index=False))
 
 
 if __name__ == "__main__":
