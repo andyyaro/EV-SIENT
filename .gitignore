@@ -27,6 +27,7 @@ data/outputs/*.zip
 data/outputs/charts/*.png
 data/outputs/charts/v2/*.png
 data/outputs/deliverable_package/
+data/outputs/deliverable_package_v2/
 
 # Local-only demo mode files
 data/demo/
@@ -46,11 +47,13 @@ docs/assets/fonts/
 # Local-only run archives
 data/run_history/
 
-# Temporary files
-*.tmp
-*.log
+# Local downloaded GIS/public-data cache files
+data/source_extracts/gis/
 
 # Local raw public-data exports for V2 calculations
 data/raw_exports/
 b11001_inspection_output.txt
-data/outputs/deliverable_package_v2/
+
+# Temporary files
+*.tmp
+*.log
