@@ -1,9 +1,10 @@
 """Run the V2 GIS decision-map generator with all 12 sites labeled on the report map.
 
-This wrapper keeps the README map less crowded while forcing the full report map
-to label every candidate site. It uses the shared project chart style so the GIS
-map typography matches the other generated charts, and it enlarges the decision
-panel typography for presentation/readability without letting sections overlap.
+This wrapper keeps the README map compact while forcing both the full report map
+and README map to show visible external callout tags for every candidate site.
+It uses the shared project chart style so the GIS map typography matches the
+other generated charts, and it enlarges the decision panel typography for
+presentation/readability without letting sections overlap.
 """
 
 from __future__ import annotations
@@ -13,6 +14,12 @@ import plot_site_decision_map as base
 
 SELECTED_FONT = apply_chart_style()
 SELECTED_FONT = preferred_chart_font()
+
+ALL_DECISION_MAP_LABEL_IDS = {
+    "FFX001", "FFX002", "FFX003", "FFX004",
+    "PWC001", "PWC002", "PWC003", "PWC004",
+    "PWC005", "PWC006", "PWC007", "PWC008",
+}
 
 PANEL_TITLE_SIZE = 13.8
 SECTION_TITLE_SIZE = 10.6
@@ -49,6 +56,50 @@ def project_style_text(
         color=color,
         zorder=3,
     )
+
+
+def add_site_labels_force_visible(
+    ax,
+    sites_3857: base.gpd.GeoDataFrame,
+    label_ids: set[str],
+    fontsize: float = 6.7,
+    show_ports: bool = True,
+) -> None:
+    """Draw external callout tags for every requested site.
+
+    The README decision map previously showed numbered markers for all sites but
+    only labeled a subset. This replacement keeps the normal label-selection
+    behavior for any explicitly requested set, but when the all-label set is
+    passed it guarantees every candidate gets a visible, unclipped callout.
+    """
+    rows = base.label_subset(sites_3857, label_ids)
+    if set(label_ids) >= ALL_DECISION_MAP_LABEL_IDS:
+        rows = sites_3857.sort_values("model_rank")
+
+    for _, row in rows.iterrows():
+        site_id = str(row.get("site_id", ""))
+        score_text = base.fmt_score(row.get("readiness_score"))
+        if show_ports:
+            label = f"#{base.fmt_int(row.get('model_rank'))} {site_id}\n{score_text} | {base.fmt_ports(row)} ports"
+        else:
+            label = f"#{base.fmt_int(row.get('model_rank'))} {site_id}\n{score_text}"
+        dx, dy = base.LABEL_OFFSETS.get(site_id, (12, 10))
+        ax.annotate(
+            label,
+            xy=(row.geometry.x, row.geometry.y),
+            xytext=(dx, dy),
+            textcoords="offset points",
+            ha="right" if dx < 0 else "left",
+            va="center",
+            fontsize=fontsize,
+            fontname=SELECTED_FONT,
+            color="#111827",
+            arrowprops={"arrowstyle": "-", "lw": 0.62, "color": "#334155", "alpha": 0.74},
+            bbox={"boxstyle": "round,pad=0.20", "fc": "white", "ec": "#cbd5e1", "alpha": 0.96, "lw": 0.55},
+            zorder=20,
+            annotation_clip=False,
+            clip_on=False,
+        )
 
 
 def draw_metric_pills_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
@@ -235,6 +286,7 @@ def draw_readme_panel_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
 
 
 base.text = project_style_text
+base.add_site_labels = add_site_labels_force_visible
 base.draw_metric_pills = draw_metric_pills_large
 base.draw_pwc_table = draw_pwc_table_large
 base.draw_port_snapshot = draw_port_snapshot_large
@@ -242,11 +294,8 @@ base.draw_encoding = draw_encoding_large
 base.draw_dashboard_panel = draw_dashboard_panel_large
 base.draw_readme_panel = draw_readme_panel_large
 
-base.MAIN_LABEL_SITE_IDS = {
-    "FFX001", "FFX002", "FFX003", "FFX004",
-    "PWC001", "PWC002", "PWC003", "PWC004",
-    "PWC005", "PWC006", "PWC007", "PWC008",
-}
+base.MAIN_LABEL_SITE_IDS = ALL_DECISION_MAP_LABEL_IDS
+base.README_LABEL_SITE_IDS = ALL_DECISION_MAP_LABEL_IDS
 
 base.LABEL_OFFSETS.update({
     "FFX001": (-84, -14),
@@ -267,4 +316,5 @@ base.LABEL_OFFSETS.update({
 if __name__ == "__main__":
     print(f"GIS map chart font: {SELECTED_FONT}")
     print("GIS decision dashboard: enlarged right-panel typography with compact port summary")
+    print("GIS README map: all 12 candidate callout tags enabled")
     base.main()
