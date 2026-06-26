@@ -43,6 +43,14 @@ From the repository root:
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
+make setup
+make run-v2
+make check-v2
+```
+
+Equivalent raw commands:
+
+```bash
 pip install -r requirements.txt
 pip install -r requirements-gis.txt
 python src/run_v2.py
@@ -66,7 +74,13 @@ clean deliverable package: 35 selected review files
 
 ## Check links
 
-Run:
+Preferred command:
+
+```bash
+make links
+```
+
+Equivalent raw command:
 
 ```bash
 lychee --verbose --no-progress \
@@ -133,8 +147,8 @@ Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PW
 Before trusting a result, confirm:
 
 ```text
-python src/check_outputs_v2.py passes
-link check passes
+make check-v2 passes
+make links passes
 README preview images render
 baseline comparison does not show unexpected failures
 candidate-site count remains 12 unless intentionally changed
