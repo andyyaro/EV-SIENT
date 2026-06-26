@@ -1,58 +1,48 @@
 """Run the V2 GIS decision-map generator with all 12 sites labeled on the report map.
 
 This wrapper keeps the README map less crowded while forcing the full report map
-to label every candidate site. It also locks all Matplotlib text on this map to
-the detected Libre Caslon chart font, including text calls that otherwise pass a
-family such as "monospace".
+to label every candidate site. It intentionally uses the same default Matplotlib
+font behavior as the profile heatmap instead of forcing a separate display font.
 """
 
 from __future__ import annotations
 
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+import matplotlib as mpl
 
-from chart_style import apply_chart_style, preferred_chart_font
 import plot_site_decision_map as base
 
-SELECTED_FONT = apply_chart_style()
-SELECTED_FONT = preferred_chart_font()
+HEATMAP_FONT_STACK = ["DejaVu Sans"]
+
+mpl.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": HEATMAP_FONT_STACK,
+    "font.serif": HEATMAP_FONT_STACK,
+    "font.monospace": HEATMAP_FONT_STACK,
+})
 
 
-def _lock_text_kwargs(kwargs: dict) -> dict:
-    """Force a consistent chart font for every text artist in the GIS map."""
-    locked = dict(kwargs)
-    locked.pop("family", None)
-    locked.pop("fontfamily", None)
-    locked.setdefault("fontname", SELECTED_FONT)
-    return locked
+def heatmap_style_text(panel_ax, x: float, y: float, value: str, size: float = 6.4, weight: str | None = None, family: str | None = None, color: str = "#111827") -> None:
+    """Draw dashboard text with the same default-style font as the heatmap.
+
+    The base decision-map dashboard sometimes asks for monospace text to make
+    mini tables align. For visual consistency with the heatmap, this wrapper
+    ignores that requested family and lets Matplotlib use the shared sans font.
+    """
+    panel_ax.text(
+        x,
+        y,
+        value,
+        transform=panel_ax.transAxes,
+        ha="left",
+        va="top",
+        fontsize=size,
+        fontweight=weight,
+        color=color,
+        zorder=3,
+    )
 
 
-_original_axes_text = Axes.text
-_original_axes_annotate = Axes.annotate
-_original_figure_text = Figure.text
-_original_figure_suptitle = Figure.suptitle
-
-
-def _axes_text_with_locked_font(self, *args, **kwargs):
-    return _original_axes_text(self, *args, **_lock_text_kwargs(kwargs))
-
-
-def _axes_annotate_with_locked_font(self, *args, **kwargs):
-    return _original_axes_annotate(self, *args, **_lock_text_kwargs(kwargs))
-
-
-def _figure_text_with_locked_font(self, *args, **kwargs):
-    return _original_figure_text(self, *args, **_lock_text_kwargs(kwargs))
-
-
-def _figure_suptitle_with_locked_font(self, *args, **kwargs):
-    return _original_figure_suptitle(self, *args, **_lock_text_kwargs(kwargs))
-
-
-Axes.text = _axes_text_with_locked_font
-Axes.annotate = _axes_annotate_with_locked_font
-Figure.text = _figure_text_with_locked_font
-Figure.suptitle = _figure_suptitle_with_locked_font
+base.text = heatmap_style_text
 
 base.MAIN_LABEL_SITE_IDS = {
     "FFX001", "FFX002", "FFX003", "FFX004",
@@ -77,5 +67,5 @@ base.LABEL_OFFSETS.update({
 
 
 if __name__ == "__main__":
-    print(f"GIS map font locked to: {SELECTED_FONT}")
+    print("GIS map font style: heatmap/default Matplotlib sans")
     base.main()
