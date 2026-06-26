@@ -11,6 +11,7 @@ DEFAULT_RESULTS = "data/outputs/v2_site_results.csv"
 DEFAULT_ELECTRICAL_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
 DEFAULT_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
 DEFAULT_PORT_SIMULATION = "data/outputs/v2_port_utilization_simulation.csv"
+DEFAULT_PORT_SIZING_SCENARIOS = "data/outputs/v2_port_sizing_scenario_results.csv"
 DEFAULT_RIGHT_SIZING_VALIDATION = "data/outputs/v2_right_sizing_validation.csv"
 DEFAULT_OUTPUT = "data/outputs/v2_executive_site_summary.csv"
 DEFAULT_REPORT = "data/outputs/v2_executive_site_summary.md"
@@ -22,9 +23,11 @@ OUTPUT_COLUMNS = [
     "ports_2050_base", "ports_2050_high", "future_ready_capacity", "expansion_strategy",
     "sim_min_ports_current", "sim_utilization_current_at_ports_now", "sim_wait_current_at_ports_now",
     "sim_queue_risk_current_at_ports_now", "sim_min_ports_2035_high", "sim_min_ports_2050_high",
-    "sim_status_2050_high_at_future_ready", "current_alignment", "future_alignment",
-    "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags",
-    "planning_recommendation", "data_needed_next",
+    "sim_status_2050_high_at_future_ready", "scenario_max_min_ports_2050_high",
+    "scenario_future_capacity_gap", "scenario_sensitivity_level", "scenario_stress_note",
+    "current_alignment", "future_alignment", "simulation_supported_strategy",
+    "right_sizing_validation_note", "major_review_flags", "planning_recommendation",
+    "data_needed_next",
 ]
 
 
@@ -90,6 +93,10 @@ def build_review_flags(row: pd.Series) -> str:
         flags.append("Right-sizing and simulation need review")
     if str(row.get("future_alignment", "")).lower() == "possibly_low_future_capacity":
         flags.append("Future-ready capacity may be low in 2050 high case")
+    if str(row.get("scenario_sensitivity_level", "")).lower() == "combined_stress_sensitive":
+        flags.append("Combined-stress scenario may require extra future-ready capacity")
+    elif str(row.get("scenario_sensitivity_level", "")).lower() == "scenario_sensitive":
+        flags.append("Scenario stress test may require extra future-ready capacity")
 
     try:
         if float(row.get("public_access", 1)) < 1:
@@ -137,7 +144,75 @@ def summarize_port_simulation(simulation: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def build_executive_summary(results: pd.DataFrame, electrical: pd.DataFrame, right_sizing: pd.DataFrame, port_simulation: pd.DataFrame, validation: pd.DataFrame) -> pd.DataFrame:
+def sentence_join(items: list[str]) -> str:
+    cleaned = [item for item in items if item]
+    if not cleaned:
+        return ""
+    if len(cleaned) == 1:
+        return cleaned[0]
+    return ", ".join(cleaned[:-1]) + f", and {cleaned[-1]}"
+
+
+def lower_first(text: str) -> str:
+    if not text:
+        return text
+    return text[:1].lower() + text[1:]
+
+
+def summarize_port_sizing_scenarios(scenarios: pd.DataFrame) -> pd.DataFrame:
+    """Summarize the scenario stress-test results at one row per site."""
+    output_columns = [
+        "site_id", "scenario_max_min_ports_2050_high", "scenario_future_capacity_gap",
+        "scenario_sensitivity_level", "scenario_stress_note",
+    ]
+    required = {"site_id", "scenario_name", "scenario_min_ports_2050_high", "future_capacity_gap"}
+    missing = sorted(required - set(scenarios.columns))
+    if scenarios.empty or missing:
+        return pd.DataFrame(columns=output_columns)
+
+    data = scenarios.copy()
+    data["scenario_min_ports_2050_high"] = pd.to_numeric(data["scenario_min_ports_2050_high"], errors="coerce").fillna(0)
+    data["future_capacity_gap"] = pd.to_numeric(data["future_capacity_gap"], errors="coerce").fillna(0)
+
+    rows = []
+    for site_id, site_rows in data.groupby("site_id", dropna=False):
+        max_min_ports = int(site_rows["scenario_min_ports_2050_high"].max())
+        max_gap = int(site_rows["future_capacity_gap"].max())
+        gap_rows = site_rows[site_rows["future_capacity_gap"] > 0].copy()
+
+        if gap_rows.empty:
+            sensitivity = "robust"
+            note = "Future-ready capacity covers all tested port-sizing scenarios."
+        else:
+            scenario_names = set(gap_rows["scenario_name"].astype(str))
+            sensitivity = "combined_stress_sensitive" if scenario_names == {"combined_stress"} else "scenario_sensitive"
+            label_column = "scenario_label" if "scenario_label" in gap_rows.columns else "scenario_name"
+            labels = gap_rows[label_column].astype(str).drop_duplicates().tolist()
+            scenario_text = lower_first(sentence_join(labels))
+            port_word = "port" if max_gap == 1 else "ports"
+            if sensitivity == "combined_stress_sensitive":
+                note = f"Stable under normal scenarios, but {scenario_text} may require {max_gap} additional future-ready {port_word}."
+            else:
+                note = f"{sentence_join(labels)} may require up to {max_gap} additional future-ready {port_word}."
+
+        rows.append({
+            "site_id": site_id,
+            "scenario_max_min_ports_2050_high": max_min_ports,
+            "scenario_future_capacity_gap": max_gap,
+            "scenario_sensitivity_level": sensitivity,
+            "scenario_stress_note": note,
+        })
+    return pd.DataFrame(rows, columns=output_columns)
+
+
+def build_executive_summary(
+    results: pd.DataFrame,
+    electrical: pd.DataFrame,
+    right_sizing: pd.DataFrame,
+    port_simulation: pd.DataFrame,
+    port_sizing_scenarios: pd.DataFrame,
+    validation: pd.DataFrame,
+) -> pd.DataFrame:
     required_results = {"site_id", "model_rank", "site_name", "readiness_score"}
     missing = required_results - set(results.columns)
     if missing:
@@ -156,6 +231,9 @@ def build_executive_summary(results: pd.DataFrame, electrical: pd.DataFrame, rig
     port_summary = summarize_port_simulation(port_simulation)
     if not port_summary.empty:
         merged = merged.merge(port_summary, on="site_id", how="left")
+    scenario_summary = summarize_port_sizing_scenarios(port_sizing_scenarios)
+    if not scenario_summary.empty:
+        merged = merged.merge(scenario_summary, on="site_id", how="left")
     if not validation.empty and "site_id" in validation.columns:
         validation_keep = [c for c in ["site_id", "current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note"] if c in validation.columns]
         merged = merged.merge(validation[validation_keep], on="site_id", how="left")
@@ -184,21 +262,34 @@ def build_markdown_report(summary: pd.DataFrame) -> str:
     top_text = "No top site available."
     if top is not None:
         top_text = f"Top candidate: **{top['site_id']} — {top['site_name']}** with readiness score **{top['readiness_score']}**."
-    cols = ["model_rank", "site_id", "ports_now", "sim_min_ports_current", "current_alignment", "future_ready_capacity", "sim_min_ports_2050_high", "future_alignment", "simulation_supported_strategy", "major_review_flags"]
+    cols = [
+        "model_rank", "site_id", "ports_now", "sim_min_ports_current",
+        "current_alignment", "future_ready_capacity", "sim_min_ports_2050_high",
+        "scenario_max_min_ports_2050_high", "scenario_future_capacity_gap",
+        "scenario_sensitivity_level", "future_alignment", "simulation_supported_strategy",
+        "major_review_flags",
+    ]
+    scenario_cols = ["model_rank", "site_id", "future_ready_capacity", "scenario_max_min_ports_2050_high", "scenario_future_capacity_gap", "scenario_sensitivity_level", "scenario_stress_note"]
     return f"""# V2 Executive Site Summary
 
 {top_text}
 
-This table combines ranking, electrical risk, right-sizing, port-utilization simulation, and right-sizing validation outputs.
+This table combines ranking, electrical risk, right-sizing, port-utilization simulation, port-sizing scenario stress testing, and right-sizing validation outputs.
 
 ## Executive decision table
 
 {markdown_table(summary, cols)}
 
+## Port-sizing scenario notes
+
+{markdown_table(summary, scenario_cols)}
+
 ## Notes
 
 - `current_alignment` compares `ports_now` with simulated current-demand need.
 - `future_alignment` compares `future_ready_capacity` with simulated 2050 high-growth need.
+- `scenario_sensitivity_level` summarizes whether alternate port-sizing scenarios expose a future-ready capacity gap.
+- `scenario_future_capacity_gap` is the largest extra future-ready port count identified across tested scenarios.
 - These fields are planning-screen signals, not final design or permitting results.
 """
 
@@ -209,6 +300,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY)
     parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING)
     parser.add_argument("--port-simulation", default=DEFAULT_PORT_SIMULATION)
+    parser.add_argument("--port-sizing-scenarios", default=DEFAULT_PORT_SIZING_SCENARIOS)
     parser.add_argument("--right-sizing-validation", default=DEFAULT_RIGHT_SIZING_VALIDATION)
     parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument("--report", default=DEFAULT_REPORT)
@@ -222,6 +314,7 @@ def main() -> None:
         read_required_csv(Path(args.electrical_summary), "V2 electrical summary"),
         read_required_csv(Path(args.right_sizing), "V2 right-sizing"),
         read_optional_csv(Path(args.port_simulation)),
+        read_optional_csv(Path(args.port_sizing_scenarios)),
         read_optional_csv(Path(args.right_sizing_validation)),
     )
     output_path = Path(args.output)
@@ -236,7 +329,12 @@ def main() -> None:
     print(f"Saved CSV: {output_path}")
     print(f"Saved report: {report_path}")
     print()
-    print(summary[["model_rank", "site_id", "ports_now", "sim_min_ports_current", "current_alignment", "future_ready_capacity", "sim_min_ports_2050_high", "future_alignment", "simulation_supported_strategy"]].to_string(index=False))
+    preview_cols = [
+        "model_rank", "site_id", "ports_now", "sim_min_ports_current", "current_alignment",
+        "future_ready_capacity", "sim_min_ports_2050_high", "scenario_max_min_ports_2050_high",
+        "scenario_future_capacity_gap", "scenario_sensitivity_level",
+    ]
+    print(summary[preview_cols].to_string(index=False))
 
 
 if __name__ == "__main__":
