@@ -2,7 +2,7 @@
 
 ## Status
 
-A new V2 port-sizing scenario analysis layer has been added.
+A new V2 port-sizing scenario analysis layer has been added and polished for review.
 
 This is the port-sizing counterpart to the existing scoring-profile analysis.
 
@@ -56,6 +56,24 @@ data/outputs/v2_port_sizing_scenario_report.md
 data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
+## Visual/report polish
+
+The scenario heatmap now uses presentation-friendly labels instead of raw code-style scenario names.
+
+Examples:
+
+```text
+high_growth -> High Growth
+long_sessions -> Long Sessions
+short_daily_window -> Short Daily Window
+peakier_demand -> Peakier Demand
+combined_stress -> Combined Stress
+```
+
+The heatmap title is shorter, text contrast is improved, and the chart includes a note explaining that the cell values are the minimum tested port counts that avoid an underbuilt result under each scenario.
+
+The Markdown report now includes a headline finding before the detailed tables.
+
 ## Workflow integration
 
 The V2 workflow now runs this after the base port-use simulation and before right-sizing validation:
@@ -79,7 +97,7 @@ Copied files: 35/35
 Synced files: 35/35
 ```
 
-## Baseline/checker integration
+## Baseline/checker/manifest integration
 
 The baseline comparison now includes a `port_sizing_scenarios` check.
 
@@ -97,16 +115,34 @@ scenario summary has 6 rows
 package manifest includes the new scenario artifacts
 ```
 
-## Interpretation
-
-The analysis should help answer questions like:
+The V2 workflow success marker now records:
 
 ```text
-Do the future-ready port recommendations still hold if charging sessions are longer?
-Which sites become constrained if future demand grows faster?
-Does a shorter usable charging window change the minimum recommended ports?
-Which future-ready capacities are robust, and which are sensitive to stress assumptions?
+workflow_step_count: 24
+Generated outputs: 35/35
 ```
+
+## Current interpretation
+
+The latest scenario output shows that the current future-ready capacity plan is stable across the first five scenarios.
+
+```text
+base: no future-ready capacity gaps
+high_growth: no future-ready capacity gaps
+long_sessions: no future-ready capacity gaps
+short_daily_window: no future-ready capacity gaps
+peakier_demand: no future-ready capacity gaps
+combined_stress: 2 future-ready capacity gaps
+```
+
+The combined-stress scenario identifies two one-port gaps:
+
+```text
+PWC002: future-ready capacity 3, scenario minimum 4, gap 1
+PWC008: future-ready capacity 2, scenario minimum 3, gap 1
+```
+
+This supports the interpretation that the V2 right-sizing recommendations are robust under normal and moderate stress assumptions, with limited sensitivity under the most aggressive combined-stress case.
 
 ## Important limitation
 
