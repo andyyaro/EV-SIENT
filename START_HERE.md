@@ -40,6 +40,8 @@ From the repository root:
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
+pip install -r requirements.txt
+pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
@@ -124,8 +126,18 @@ data confidence
 electrical-risk screening
 right-sizing recommendation
 port-use simulation
+port-sizing scenario sensitivity
 right-sizing validation
 major review flags
+```
+
+The key scenario-sensitivity fields are:
+
+```text
+scenario_max_min_ports_2050_high
+scenario_future_capacity_gap
+scenario_sensitivity_level
+scenario_stress_note
 ```
 
 ## Port-sizing scenario outputs
