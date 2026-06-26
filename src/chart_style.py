@@ -15,7 +15,6 @@ import matplotlib as mpl
 from matplotlib import font_manager
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-FONT_FAMILY = "Libre Caslon Text"
 FONT_FALLBACKS = [
     "Libre Caslon Text",
     "Libre Caslon Display",
@@ -77,13 +76,37 @@ def _register_local_fonts() -> int:
     return registered
 
 
-def apply_chart_style() -> None:
-    """Apply the shared chart font and calm presentation defaults."""
+def available_libre_caslon_fonts() -> list[str]:
+    """Return Libre Caslon font family names visible to Matplotlib."""
     _register_local_fonts()
+    names = sorted({font.name for font in font_manager.fontManager.ttflist if "Libre Caslon" in font.name})
+    return names
+
+
+def preferred_chart_font() -> str:
+    """Return the best available chart font family name."""
+    available = set(available_libre_caslon_fonts())
+    for family in FONT_FALLBACKS:
+        if family in available:
+            return family
+    for family in sorted(available):
+        if "Libre Caslon" in family:
+            return family
+    return "DejaVu Serif"
+
+
+def apply_chart_style() -> str:
+    """Apply the shared chart font and calm presentation defaults.
+
+    Returns the selected Matplotlib font family name for diagnostics.
+    """
+    selected_font = preferred_chart_font()
+    font_stack = [selected_font] + [font for font in FONT_FALLBACKS if font != selected_font]
     mpl.rcParams.update({
-        "font.family": "serif",
-        "font.serif": FONT_FALLBACKS,
-        "font.sans-serif": FONT_FALLBACKS,
+        "font.family": [selected_font],
+        "font.serif": font_stack,
+        "font.sans-serif": font_stack,
+        "font.monospace": font_stack,
         "axes.titlesize": 14,
         "axes.labelsize": 10,
         "xtick.labelsize": 9,
@@ -94,3 +117,4 @@ def apply_chart_style() -> None:
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
     })
+    return selected_font
