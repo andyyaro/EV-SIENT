@@ -19,12 +19,13 @@ The prototype is a planning-support tool. It does not replace engineering review
 Read these in order:
 
 1. [../README.md](../README.md) — project overview and preview visuals.
-2. [../START_HERE.md](../START_HERE.md) — shortest explanation and run path.
-3. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md) — active workflow guide.
-4. [REPO_MAP.md](REPO_MAP.md) — repository structure and script map.
-5. [../src/README.md](../src/README.md) — script-by-script index.
-6. [DATA_DICTIONARY.md](DATA_DICTIONARY.md) — important input and output fields.
-7. [PROJECT_STATUS.md](PROJECT_STATUS.md) — current project state.
+2. [ACTIVE_DOCS_INDEX.md](ACTIVE_DOCS_INDEX.md) — clean index of active reviewer-facing docs.
+3. [../START_HERE.md](../START_HERE.md) — shortest explanation and run path.
+4. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md) — active workflow guide.
+5. [REPO_MAP.md](REPO_MAP.md) — repository structure and script map.
+6. [../src/README.md](../src/README.md) — script-by-script index.
+7. [DATA_DICTIONARY.md](DATA_DICTIONARY.md) — important input and output fields.
+8. [PROJECT_STATUS.md](PROJECT_STATUS.md) — current project state.
 
 After running the workflow, review the generated package first:
 
