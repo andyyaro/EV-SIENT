@@ -27,9 +27,10 @@ The active Phase 2 prototype is V2 on this branch:
 v2-expansion-planning
 ```
 
-Read the V2 landing page first:
+Read the reviewer guide and V2 landing page first:
 
 ```text
+docs/REVIEWER_GUIDE.md
 docs/V2_CURRENT_WORKFLOW_GUIDE.md
 ```
 
@@ -166,7 +167,12 @@ The README decision map includes all 12 candidate site callout tags. Generated M
 
 | File | Purpose |
 |---|---|
+| [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md) | Best first guide for someone inspecting or reviewing the repo. |
 | [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md) | Main V2 workflow guide. |
+| [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md) | Reproduction checklist. |
+| [docs/MAINTENANCE_CHECKLIST.md](docs/MAINTENANCE_CHECKLIST.md) | Checks to run before pushing or sharing. |
+| [docs/REPO_MAP.md](docs/REPO_MAP.md) | Fuller repository map. |
+| [src/README.md](src/README.md) | Script-by-script index. |
 | [docs/V2_STABLE_WORKFLOW_CHECKPOINT.md](docs/V2_STABLE_WORKFLOW_CHECKPOINT.md) | Stable V2 milestone summary. |
 | [docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md) | Port-sizing scenario checkpoint. |
 | [src/run_v2.py](src/run_v2.py) | Runs the full 24-step V2 workflow. |
@@ -176,8 +182,6 @@ The README decision map includes all 12 candidate site callout tags. Generated M
 | [src/compare_v2_to_baseline.py](src/compare_v2_to_baseline.py) | Compares current V2 outputs to the saved baseline. |
 | [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
 | [src/run_all.py](src/run_all.py) | Runs the stable V1 workflow. |
-
-For more detail, read [docs/REPO_MAP.md](docs/REPO_MAP.md).
 
 ## Main result right now
 
