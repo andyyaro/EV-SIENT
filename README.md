@@ -1,6 +1,6 @@
 # EV Charger Site-Readiness and Right-Sizing Prototype
 
-![Model Pipeline Check](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/model-check.yml/badge.svg)
+![V2 Model Pipeline Check](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/v2-model-check.yml/badge.svg)
 
 This repository contains a Python planning-support prototype for comparing public EV charging candidate sites in Fairfax City and Prince William County.
 
@@ -39,6 +39,8 @@ From the repository root on `v2-expansion-planning`:
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
+pip install -r requirements.txt
+pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
