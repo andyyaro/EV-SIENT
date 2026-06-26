@@ -1,0 +1,27 @@
+name: Repository Link Check
+
+on:
+  push:
+    branches: [v2-expansion-planning]
+  pull_request:
+    branches: [v2-expansion-planning]
+  workflow_dispatch:
+
+jobs:
+  markdown-link-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Markdown links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --accept 200,204,206,301,302,303,307,308
+            --include-fragments
+            './**/*.md'
+          fail: true
