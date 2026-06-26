@@ -29,6 +29,7 @@ v2-expansion-planning = active V2 prototype workflow
 - [src/README.md](src/README.md) — script-by-script index
 - [docs/MAINTENANCE_CHECKLIST.md](docs/MAINTENANCE_CHECKLIST.md) — checks to run before pushing or sharing
 - [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) — current project state
+- [docs/checkpoints/README.md](docs/checkpoints/README.md) — checkpoint and history index
 
 ## Python version
 
@@ -226,6 +227,7 @@ Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PW
 - [docs/REPO_MAP.md](docs/REPO_MAP.md)
 - [src/README.md](src/README.md)
 - [docs/MAINTENANCE_CHECKLIST.md](docs/MAINTENANCE_CHECKLIST.md)
+- [docs/checkpoints/README.md](docs/checkpoints/README.md)
 - [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md)
 - [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
