@@ -12,6 +12,7 @@ These are the active review and reproduction docs:
 README.md
 START_HERE.md
 REPRODUCIBILITY_CHECKLIST.md
+docs/ACTIVE_DOCS_INDEX.md
 docs/REVIEWER_GUIDE.md
 docs/V2_CURRENT_WORKFLOW_GUIDE.md
 docs/REPO_MAP.md
@@ -41,6 +42,7 @@ These checkpoint files now live in this folder:
 - [V2_ENHANCEMENT_RIGHT_SIZING_VALIDATION_CHECKPOINT.md](V2_ENHANCEMENT_RIGHT_SIZING_VALIDATION_CHECKPOINT.md)
 - [V2_ENHANCEMENT_RIGHT_SIZING_VALIDATION_RESULTS.md](V2_ENHANCEMENT_RIGHT_SIZING_VALIDATION_RESULTS.md)
 - [V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
+- [V2_DOCS_AND_WORKFLOW_HEALTH_CHECKPOINT.md](V2_DOCS_AND_WORKFLOW_HEALTH_CHECKPOINT.md)
 
 ## Checkpoint file patterns
 
@@ -66,6 +68,7 @@ port-sizing scenario checkpoints
 GIS/map and visual-cleanup checkpoints
 V1-to-V2 parity checkpoints
 public-data upgrade and batch checkpoints
+docs-and-workflow health checkpoints
 ```
 
 ## Moving policy
