@@ -16,6 +16,7 @@ import pandas as pd
 
 try:
     from chart_style import apply_chart_style
+
     SELECTED_FONT = apply_chart_style()
 except Exception:  # pragma: no cover - chart style should not block analysis
     SELECTED_FONT = None
@@ -71,13 +72,27 @@ def validate_scenarios(scenarios: pd.DataFrame) -> None:
     if scenarios["scenario_name"].astype(str).duplicated().any():
         duplicates = scenarios.loc[scenarios["scenario_name"].astype(str).duplicated(), "scenario_name"].tolist()
         raise ValueError(f"Scenario names must be unique. Duplicates: {duplicates}")
-    for column in ["avg_charge_hours", "charging_window_hours", "peak_factor", "current_multiplier", "2035_high_multiplier", "2050_high_multiplier"]:
+    numeric_columns = [
+        "avg_charge_hours",
+        "charging_window_hours",
+        "peak_factor",
+        "current_multiplier",
+        "2035_high_multiplier",
+        "2050_high_multiplier",
+    ]
+    for column in numeric_columns:
         values = pd.to_numeric(scenarios[column], errors="coerce")
         if values.isna().any() or (values <= 0).any():
             raise ValueError(f"Scenario column must contain positive numeric values: {column}")
 
 
-def evaluate_port_option(sessions_day: float, port_count: int, avg_charge_hours: float, charging_window_hours: float, peak_factor: float) -> dict[str, Any]:
+def evaluate_port_option(
+    sessions_day: float,
+    port_count: int,
+    avg_charge_hours: float,
+    charging_window_hours: float,
+    peak_factor: float,
+) -> dict[str, Any]:
     utilization_pct = 0.0
     peak_demand_ratio = 0.0
     if port_count > 0 and charging_window_hours > 0:
@@ -94,7 +109,12 @@ def evaluate_port_option(sessions_day: float, port_count: int, avg_charge_hours:
     }
 
 
-def choose_min_ports_for_case(sessions_day: float, avg_charge_hours: float, charging_window_hours: float, peak_factor: float) -> dict[str, Any]:
+def choose_min_ports_for_case(
+    sessions_day: float,
+    avg_charge_hours: float,
+    charging_window_hours: float,
+    peak_factor: float,
+) -> dict[str, Any]:
     options = [evaluate_port_option(sessions_day, ports, avg_charge_hours, charging_window_hours, peak_factor) for ports in PORT_OPTIONS]
     usable = [row for row in options if row["capacity_status"] != "underbuilt"]
     if usable:
@@ -102,7 +122,13 @@ def choose_min_ports_for_case(sessions_day: float, avg_charge_hours: float, char
     return sorted(options, key=lambda row: (row["estimated_wait_min"], row["port_count"]), reverse=True)[0]
 
 
-def status_at_port_count(sessions_day: float, port_count: int, avg_charge_hours: float, charging_window_hours: float, peak_factor: float) -> dict[str, Any]:
+def status_at_port_count(
+    sessions_day: float,
+    port_count: int,
+    avg_charge_hours: float,
+    charging_window_hours: float,
+    peak_factor: float,
+) -> dict[str, Any]:
     return evaluate_port_option(sessions_day, int(port_count), avg_charge_hours, charging_window_hours, peak_factor)
 
 
@@ -157,8 +183,12 @@ def build_results(results: pd.DataFrame, right_sizing: pd.DataFrame, scenarios: 
                     "capacity_status": best["capacity_status"],
                 }
 
-            current_at_ports_now = status_at_port_count(case_outputs["current"]["sessions_day"], ports_now, avg_charge_hours, charging_window_hours, peak_factor)
-            future_at_ready = status_at_port_count(case_outputs["2050_high"]["sessions_day"], future_ready, avg_charge_hours, charging_window_hours, peak_factor)
+            current_at_ports_now = status_at_port_count(
+                case_outputs["current"]["sessions_day"], ports_now, avg_charge_hours, charging_window_hours, peak_factor
+            )
+            future_at_ready = status_at_port_count(
+                case_outputs["2050_high"]["sessions_day"], future_ready, avg_charge_hours, charging_window_hours, peak_factor
+            )
             current_min = case_outputs["current"]["min_ports"]
             min_2035 = case_outputs["2035_high"]["min_ports"]
             min_2050 = case_outputs["2050_high"]["min_ports"]
@@ -252,6 +282,22 @@ def markdown_table(data: pd.DataFrame, columns: list[str]) -> str:
     return "\n".join([header, separator] + rows)
 
 
+def build_headline(summary: pd.DataFrame) -> str:
+    if summary.empty:
+        return "No scenario summary was generated."
+    stable = summary[summary["sites_future_ready_capacity_exceeded"] == 0]
+    stress = summary[summary["sites_future_ready_capacity_exceeded"] > 0]
+    if stress.empty:
+        return "All tested port-sizing scenarios are covered by the current future-ready capacity plan."
+    stress_names = ", ".join(stress["scenario_name"].astype(str).tolist())
+    max_gap = int(stress["max_future_capacity_gap"].max())
+    total_sites = int(stress["sites_future_ready_capacity_exceeded"].max())
+    return (
+        f"The current future-ready plan covers {len(stable)} of {len(summary)} scenarios. "
+        f"Capacity gaps appear only in {stress_names}, affecting up to {total_sites} sites with a maximum gap of {max_gap} port."
+    )
+
+
 def build_report(results: pd.DataFrame, summary: pd.DataFrame, scenarios: pd.DataFrame) -> str:
     stress = results[results["future_capacity_alignment"] == "scenario_exceeds_future_ready_capacity"].copy()
     if not stress.empty:
@@ -262,13 +308,17 @@ This report is the port-sizing counterpart to the scoring-profile analysis.
 
 It asks whether the recommended port counts remain reasonable when charging duration, usable daily charging window, peak-demand concentration, and future-demand multipliers change.
 
+## Headline finding
+
+{build_headline(summary)}
+
 ## Scenario inputs
 
 {markdown_table(scenarios, ['scenario_name', 'scenario_label', 'avg_charge_hours', 'charging_window_hours', 'peak_factor', 'current_multiplier', '2035_high_multiplier', '2050_high_multiplier'])}
 
 ## Scenario summary
 
-{markdown_table(summary, ['scenario_name', 'site_count', 'sites_current_ports_may_be_low', 'sites_future_ready_capacity_exceeded', 'max_scenario_min_ports_2050_high', 'average_scenario_min_ports_2050_high', 'max_future_capacity_gap', 'top_future_gap_sites'])}
+{markdown_table(summary, ['scenario_name', 'scenario_label', 'site_count', 'sites_current_ports_may_be_low', 'sites_future_ready_capacity_exceeded', 'max_scenario_min_ports_2050_high', 'average_scenario_min_ports_2050_high', 'max_future_capacity_gap', 'top_future_gap_sites'])}
 
 ## Sites where a scenario exceeds future-ready capacity
 
@@ -286,29 +336,42 @@ It asks whether the recommended port counts remain reasonable when charging dura
 def create_heatmap(results: pd.DataFrame, output_path: Path) -> None:
     data = results.copy()
     data["site_label"] = data["model_rank"].astype(int).astype(str) + ". " + data["site_id"].astype(str)
+    scenario_labels = data[["scenario_name", "scenario_label"]].drop_duplicates().set_index("scenario_name")["scenario_label"].to_dict()
     ordered_sites = data.sort_values("model_rank")["site_label"].drop_duplicates().tolist()
     ordered_scenarios = data["scenario_name"].drop_duplicates().tolist()
-    pivot = data.pivot(index="site_label", columns="scenario_name", values="scenario_min_ports_2050_high").reindex(index=ordered_sites, columns=ordered_scenarios)
+    pivot = data.pivot(index="site_label", columns="scenario_name", values="scenario_min_ports_2050_high").reindex(
+        index=ordered_sites, columns=ordered_scenarios
+    )
 
     ensure_parent_dir(output_path)
-    fig_width = max(10, 1.35 * len(ordered_scenarios) + 4)
-    fig_height = max(6, 0.38 * len(ordered_sites) + 2.5)
+    fig_width = max(11, 1.45 * len(ordered_scenarios) + 4)
+    fig_height = max(6.5, 0.42 * len(ordered_sites) + 2.6)
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     image = ax.imshow(pivot.values, aspect="auto")
-    ax.set_title("V2 Port-Sizing Scenario Analysis: 2050 High-Demand Minimum Ports")
+    ax.set_title("V2 Port-Sizing Scenario Stress Test")
     ax.set_xlabel("Scenario")
     ax.set_ylabel("Candidate site")
     ax.set_xticks(range(len(ordered_scenarios)))
-    ax.set_xticklabels(ordered_scenarios, rotation=25, ha="right")
+    ax.set_xticklabels([scenario_labels.get(name, name).replace(" ", "\n") for name in ordered_scenarios], rotation=0, ha="center")
     ax.set_yticks(range(len(ordered_sites)))
     ax.set_yticklabels(ordered_sites)
+
+    midpoint = (float(pivot.values.min()) + float(pivot.values.max())) / 2
     for y_index, site_label in enumerate(ordered_sites):
         for x_index, scenario_name in enumerate(ordered_scenarios):
             value = pivot.loc[site_label, scenario_name]
-            ax.text(x_index, y_index, str(int(value)), ha="center", va="center")
+            text_color = "black" if float(value) > midpoint else "white"
+            ax.text(x_index, y_index, str(int(value)), ha="center", va="center", color=text_color, fontweight="bold")
+
     cbar = fig.colorbar(image, ax=ax)
-    cbar.set_label("Minimum ports under 2050 high-demand scenario")
-    fig.tight_layout()
+    cbar.set_label("Minimum ports, 2050 high-demand case")
+    fig.text(
+        0.5,
+        0.01,
+        "Numbers show the smallest tested port count that avoids an underbuilt result under each scenario.",
+        ha="center",
+    )
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
     fig.savefig(output_path, dpi=200)
     plt.close(fig)
 
