@@ -2,7 +2,7 @@
 
 ## Status
 
-The active V2 workflow is stable with the port-sizing scenario analysis included.
+The active V2 workflow is stable with the port-sizing scenario analysis included and integrated into the executive site summary.
 
 Run:
 
@@ -38,7 +38,7 @@ right-sizing scenario analysis
 port-use simulation
 port-sizing scenario analysis
 right-sizing validation
-executive site summary
+executive site summary with scenario-sensitivity fields
 GIS decision map
 README GIS decision map
 interpretation report
@@ -108,6 +108,27 @@ PWC002 — future-ready capacity 3, scenario minimum 4, gap 1
 PWC008 — future-ready capacity 2, scenario minimum 3, gap 1
 ```
 
+## Executive-summary scenario fields
+
+The executive summary now pulls the port-sizing scenario output into the main site-level decision table.
+
+New executive-summary fields:
+
+```text
+scenario_max_min_ports_2050_high
+scenario_future_capacity_gap
+scenario_sensitivity_level
+scenario_stress_note
+```
+
+Expected interpretation:
+
+```text
+Most sites: robust
+PWC002: combined_stress_sensitive
+PWC008: combined_stress_sensitive
+```
+
 ## Key files to review
 
 ```text
@@ -131,14 +152,14 @@ right-sizing outputs
 port simulation outputs
 port-sizing scenario outputs
 right-sizing validation
-executive-summary fields
+executive-summary fields, including scenario-sensitivity fields
 README decision-map asset sync
 deliverable-package hash sync
 ```
 
 ## Next development direction
 
-The strongest next coding upgrade is integrating port-sizing scenario fields into the executive site summary.
+The strongest next technical direction is to continue replacing placeholder electrical/site-review assumptions with verified site data, while keeping the scenario-sensitive executive summary as the main decision table.
 
 ## Important limitation
 
