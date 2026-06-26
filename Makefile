@@ -1,4 +1,4 @@
-.PHONY: help setup setup-core setup-gis run-v2 check-v2 full-v2 links docs-health health review clean-local status
+.PHONY: help setup setup-core setup-gis run-v2 check-v2 full-v2 links health review clean-local status
 
 PYTHON ?= python
 PIP ?= pip
@@ -16,7 +16,6 @@ help:
 	@echo "  make check-v2     Check V2 outputs and package sync"
 	@echo "  make full-v2      Run V2 workflow, then check outputs"
 	@echo "  make links        Check Markdown links with Lychee"
-	@echo "  make docs-health  Alias for links"
 	@echo "  make health       Run check-v2 and links"
 	@echo "  make review       Run full-v2, links, and git status"
 	@echo ""
@@ -47,8 +46,6 @@ links:
 	  --exclude-path data/outputs \
 	  --exclude-path data/run_history \
 	  './**/*.md'
-
-docs-health: links
 
 health: check-v2 links
 
