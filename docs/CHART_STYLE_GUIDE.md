@@ -2,10 +2,15 @@
 
 ## Font
 
-All generated Matplotlib charts are configured to use:
+All generated Matplotlib charts are configured to use the Libre Caslon family, with this priority order:
 
 ```text
-Libre Caslon Condensed
+Libre Caslon Text
+Libre Caslon Display
+Libre Caslon
+Georgia
+Times New Roman
+DejaVu Serif
 ```
 
 The shared style lives in:
@@ -25,7 +30,16 @@ python src/plot_site_decision_map_all_labels.py
 
 ## How the font is found
 
-The chart style first tries to register local Libre Caslon Condensed font files from these locations:
+The chart style registers local font files matching:
+
+```text
+*Libre*Caslon*.otf
+*Libre*Caslon*.ttf
+LibreCaslon*.otf
+LibreCaslon*.ttf
+```
+
+It checks these local project folders first:
 
 ```text
 fonts/
@@ -34,14 +48,21 @@ docs/assets/fonts/
 data/fonts/
 ```
 
-It also checks common operating-system font folders such as:
+It also checks common operating-system font folders, including the default user font folder on macOS:
 
 ```text
 ~/Library/Fonts
 /Library/Fonts
+/System/Library/Fonts
 ~/.local/share/fonts
 /usr/local/share/fonts
 /usr/share/fonts
+```
+
+For Andy's Mac, fonts stored here should be found automatically:
+
+```text
+/Users/andyyaro/Library/Fonts
 ```
 
 You can also point the workflow to a custom local font folder:
@@ -66,4 +87,4 @@ python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
-The generated charts should now render with Libre Caslon Condensed when the font is available on the local machine.
+The generated charts should now render with Libre Caslon when the font is available on the local machine.
