@@ -1,7 +1,7 @@
 {
   "baseline_name": "v2_expansion_planning_baseline_001",
-  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, right-sizing validation, executive summary, GIS decision maps, README map output, and deliverable package hardening.",
-  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, right-sizing validation, executive summary, report GIS map, README GIS map, and deliverable package enabled.",
+  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, port-sizing scenario analysis, right-sizing validation, executive summary, GIS decision maps, README map output, and deliverable package hardening.",
+  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, port-sizing scenario analysis, right-sizing validation, executive summary, report GIS map, README GIS map, and deliverable package enabled.",
   "score_tolerance": 0.2,
   "expected_site_count": 12,
   "quality_counts": {"ERROR": 0, "WARNING": 0, "REVIEW": 38, "INFO": 12},
@@ -63,6 +63,15 @@
     "peak_factor": 1.35,
     "current_min_ports_by_site": {"FFX002": 2, "FFX004": 2, "PWC006": 2, "FFX001": 2, "PWC002": 2, "PWC007": 2, "PWC004": 2, "FFX003": 2, "PWC008": 2, "PWC001": 2, "PWC005": 2, "PWC003": 2}
   },
+  "port_sizing_scenarios": {
+    "row_count": 72,
+    "summary_row_count": 6,
+    "site_count": 12,
+    "scenarios": ["base", "high_growth", "long_sessions", "short_daily_window", "peakier_demand", "combined_stress"],
+    "required_columns": ["scenario_name", "model_rank", "site_id", "site_name", "ports_now", "future_ready_capacity", "scenario_min_ports_current", "scenario_min_ports_2035_high", "scenario_min_ports_2050_high", "current_alignment", "future_capacity_alignment", "future_capacity_gap"],
+    "summary_required_columns": ["scenario_name", "site_count", "sites_current_ports_may_be_low", "sites_future_ready_capacity_exceeded", "max_scenario_min_ports_2050_high", "average_scenario_min_ports_2050_high", "max_future_capacity_gap"],
+    "future_capacity_alignment_allowed_values": ["scenario_exceeds_future_ready_capacity", "future_ready_capacity_matches_scenario", "future_ready_capacity_covers_scenario"]
+  },
   "right_sizing_validation": {
     "row_count": 12,
     "required_columns": ["site_id", "ports_now", "sim_min_ports_current", "current_alignment", "future_ready_capacity", "sim_min_ports_2050_high", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note"],
@@ -81,9 +90,9 @@
   "deliverable_package_manifest": {
     "package": "v2_deliverable_package",
     "status": "complete",
-    "expected_count": 30,
-    "copied_count": 30,
-    "synced_count": 30,
+    "expected_count": 35,
+    "copied_count": 35,
+    "synced_count": 35,
     "missing_or_empty_sources": [],
     "out_of_sync_destinations": [],
     "clean_rebuild": true,
@@ -92,6 +101,10 @@
       "data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md",
       "data/outputs/deliverable_package_v2/tables/v2_right_sizing_validation.csv",
       "data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md",
+      "data/outputs/deliverable_package_v2/inputs/v2_port_sizing_scenarios.csv",
+      "data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_results.csv",
+      "data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv",
+      "data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md",
       "data/outputs/deliverable_package_v2/tables/v2_site_results.csv",
       "data/outputs/deliverable_package_v2/reports/v2_action_matrix.md",
       "data/outputs/deliverable_package_v2/tables/v2_sensitivity_summary.csv",
@@ -117,7 +130,8 @@
       "data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png",
       "data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png",
       "data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png",
-      "data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png"
+      "data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png",
+      "data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png"
     ]
   }
 }
