@@ -2,7 +2,7 @@
 
 ## Status
 
-The V2 GIS decision-map workflow has been upgraded from a static report map into a stronger report-plus-README map system.
+The V2 GIS decision-map workflow has been upgraded from a static report map into a stronger report-plus-README map system with a cleaner executive dashboard.
 
 ## Updated script
 
@@ -24,14 +24,16 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 
 ```text
 Removed the circular zoom lens after visual review showed it created clutter.
-Replaced the zoom lens with a dedicated PWC cluster panel.
+Replaced the zoom lens with a dedicated PWC cluster dashboard section.
 Removed the main-map focus ring and connector line.
 Kept the main map clean as the regional geospatial overview.
-Added a PWC cluster panel that lists rank, site ID, score, action category, and now-to-future ports.
-Kept the key-metrics card.
-Kept the visual map-encoding card with marker symbols.
-Condensed the top-decision card to prevent overflow.
-Changed the port plan snapshot into a two-column card so all 12 sites fit cleanly.
+Rebuilt the right-side panel as one unified Decision dashboard instead of stacked cards.
+Reduced spreadsheet-like clutter in the panel.
+Highlighted the top overall site and top PWC site in the top-decision section.
+Added a readable PWC cluster section with rank, site ID, score, action category, and now-to-future ports.
+Simplified the port section so it supports the map instead of dominating it.
+Kept the key-metrics row.
+Kept the visual map-encoding section with marker symbols.
 Kept the full report map.
 Kept the separate README-optimized map.
 Refreshes the README asset under docs/assets/charts/ when the map script runs.
