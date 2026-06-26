@@ -12,9 +12,10 @@ The latest V2 workflow includes:
 
 ```text
 12 real candidate sites
-23 workflow steps
+24 workflow steps
 right-sizing scenarios
 port-use simulation
+port-sizing scenario analysis
 right-sizing validation
 executive site summary
 readiness map
@@ -22,7 +23,7 @@ GIS decision map
 README GIS decision map with all 12 site callout tags
 Times New Roman chart typography
 expanded baseline comparison
-30-file deliverable package
+35-file deliverable package
 workflow manifest
 hardened output/package checker
 ```
@@ -33,7 +34,7 @@ A successful run should end with:
 V2 OUTPUT CHECK
 ---------------
 Status: PASSED
-All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
 ```
 
 A healthy package build should show:
@@ -42,8 +43,8 @@ A healthy package build should show:
 Status: complete
 Clean rebuild: True
 Previous package removed: True
-Copied files: 30/30
-Synced files: 30/30
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 ## Branch to use
@@ -91,16 +92,17 @@ python src/check_outputs_v2.py
 11. Run V2 electrical-feasibility scenario analysis
 12. Run V2 right-sizing scenario analysis
 13. Run V2 port-use simulation
-14. Validate V2 right-sizing with simulation
-15. Build V2 executive site summary
-16. Create V2 GIS decision maps
-17. Generate V2 interpretation report
-18. Generate V2 run summary
-19. Compare V2 outputs to baseline
-20. Write V2 workflow completion manifest
-21. Build V2 deliverable package
-22. Compare V2 deliverable package manifest to baseline
-23. Rebuild V2 deliverable package with final baseline comparison
+14. Run V2 port-sizing scenario analysis
+15. Validate V2 right-sizing with simulation
+16. Build V2 executive site summary
+17. Create V2 GIS decision maps
+18. Generate V2 interpretation report
+19. Generate V2 run summary
+20. Compare V2 outputs to baseline
+21. Write V2 workflow completion manifest
+22. Build V2 deliverable package
+23. Compare V2 deliverable package manifest to baseline
+24. Rebuild V2 deliverable package with final baseline comparison
 ```
 
 The first baseline comparison creates the comparison files needed by the package. The second baseline comparison verifies the generated package manifest, then the final package rebuild copies the final comparison report into the package.
@@ -114,6 +116,7 @@ expected V2 files exist and are non-empty
 main result tables include required columns
 all 12 V2 candidate sites are represented
 port simulation output exists
+port-sizing scenario outputs exist
 right-sizing validation output exists
 executive summary output exists
 readiness map output exists
@@ -122,11 +125,11 @@ README GIS decision map output exists
 README GIS decision-map asset is synced with the generated chart
 deliverable package exists
 package manifest reports a clean rebuild
-package manifest reports 30 copied files and 30 synced files
+package manifest reports 35 copied files and 35 synced files
 package file hashes match current source outputs
 workflow manifest reports success
 baseline comparison reports pass
-baseline comparison covers the newer V2 simulation, validation, executive, and package layers
+baseline comparison covers simulation, port-sizing scenarios, validation, executive, and package layers
 ```
 
 ## What the expanded baseline comparison validates
@@ -141,6 +144,7 @@ profile top sites
 electrical expected-case ranks, scores, and risk levels
 right-sizing ports and expansion strategies
 port-simulation row count, assumptions, tested port options, demand cases, and current simulated minimum ports
+port-sizing scenario row count, scenario names, required fields, and future-capacity alignment labels
 right-sizing-validation alignment guardrails
 executive-summary validation fields and top site
 deliverable-package manifest status, copied file counts, synced file counts, and required package destinations
@@ -174,6 +178,9 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
+data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
+data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv
+data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 data/outputs/deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
@@ -204,6 +211,9 @@ v2_right_sizing_scenarios.csv
 v2_right_sizing_report.md
 v2_port_utilization_simulation.csv
 v2_port_utilization_simulation_report.md
+v2_port_sizing_scenario_results.csv
+v2_port_sizing_scenario_summary.csv
+v2_port_sizing_scenario_report.md
 v2_right_sizing_validation.csv
 v2_right_sizing_validation_report.md
 v2_executive_site_summary.csv
@@ -226,6 +236,7 @@ data/outputs/charts/v2_site_readiness_map.png
 data/outputs/charts/v2_site_decision_map.png
 data/outputs/charts/v2_site_decision_map_readme.png
 data/outputs/charts/v2_port_utilization_simulation.png
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
 ## Readiness map vs GIS decision map
@@ -239,6 +250,37 @@ v2_site_decision_map_readme.png = README-optimized GIS decision graphic with all
 ```
 
 Use the decision map for README, presentation, and stakeholder-facing review. Keep the readiness map as the more technical geography view.
+
+## Port-sizing scenario analysis
+
+The port-sizing scenario analysis is the port-sizing counterpart to the scoring-profile analysis.
+
+```text
+Scoring-profile analysis = stress-tests site ranking under different scoring priorities
+Port-sizing scenario analysis = stress-tests port recommendations under different charging and demand assumptions
+```
+
+The active scenario input is:
+
+```text
+data/inputs/v2_port_sizing_scenarios.csv
+```
+
+The main scenario outputs are:
+
+```text
+data/outputs/v2_port_sizing_scenario_results.csv
+data/outputs/v2_port_sizing_scenario_summary.csv
+data/outputs/v2_port_sizing_scenario_report.md
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
+```
+
+Current scenario interpretation:
+
+```text
+The future-ready capacity plan is stable across the first five tested scenarios.
+Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PWC008.
+```
 
 ## Chart typography
 
@@ -265,6 +307,7 @@ The package contains:
 ```text
 README.md
 package_manifest.json
+inputs/
 reports/
 tables/
 charts/
@@ -279,8 +322,8 @@ A healthy package build should show:
 Status: complete
 Clean rebuild: True
 Previous package removed: True
-Copied files: 30/30
-Synced files: 30/30
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 ## Current model interpretation
@@ -316,7 +359,7 @@ PWC003 — do not advance as a general-public buildout without use-case confirma
 
 ## What “passed” means
 
-A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, the README GIS decision-map asset is synced, and the deliverable package manifest passed the package guardrails.
+A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, the port-sizing scenario layer is present, the README GIS decision-map asset is synced, and the deliverable package manifest passed the package guardrails.
 
 It does not mean a site is ready to build.
 
