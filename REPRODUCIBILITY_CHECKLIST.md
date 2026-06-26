@@ -81,6 +81,7 @@ You should see files and folders such as:
 START_HERE.md
 REPRODUCIBILITY_CHECKLIST.md
 requirements.txt
+requirements-gis.txt
 src
 data
 docs
@@ -110,9 +111,14 @@ After activation, your terminal prompt may show:
 
 ## 4. Install dependencies
 
+The active V2 workflow generates GIS decision maps, so install both the core and GIS dependency files:
+
 ```bash
 pip install -r requirements.txt
+pip install -r requirements-gis.txt
 ```
+
+`requirements-v2.txt` is only needed for optional public-data upgrade helper scripts, not for the standard V2 model run.
 
 ## 5. Reproduce the active V2 workflow
 
