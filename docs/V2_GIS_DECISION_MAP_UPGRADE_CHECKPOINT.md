@@ -23,9 +23,13 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 ## Upgrade details
 
 ```text
-Added a Prince William County cluster zoom inset.
-Added a dashed main-map extent box for the zoomed cluster.
-Rebuilt the right-side panel into a dashboard-style layout.
+Added a circular Prince William County zoom lens.
+Replaced the square zoom-source box with a circular main-map focus ring.
+Removed basemap attribution from the inset so the lens is cleaner.
+Added a connector line between the main-map focus circle and the circular inset lens.
+Reduced inset marker and label density.
+Reduced the top-decision card from top 5 to top 4 to prevent overflow.
+Rebalanced the right-side dashboard cards.
 Added a key-metrics card.
 Added a visual map-encoding card with marker symbols.
 Kept the full report map.
