@@ -18,7 +18,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
-from matplotlib.patches import Circle, ConnectionPatch, FancyBboxPatch
+from matplotlib.patches import FancyBboxPatch
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
 
@@ -108,6 +108,10 @@ def fmt_int(value: Any) -> str:
 def fmt_score(value: Any) -> str:
     number = safe_float(value)
     return f"{number:.1f}" if number is not None else "n/a"
+
+
+def fmt_ports(row: pd.Series) -> str:
+    return f"{fmt_int(row.get('ports_now'))}->{fmt_int(row.get('future_ready_capacity'))}"
 
 
 def short_tier(value: Any) -> str:
@@ -211,15 +215,14 @@ def load_county_boundaries(boundary_zip: Path) -> gpd.GeoDataFrame:
     return counties
 
 
-def add_basemap(ax, alpha: float = 0.98, show_attribution: bool = True) -> bool:
+def add_basemap(ax, alpha: float = 0.98) -> bool:
     if ctx is None:
         return False
     try:
-        attribution = ctx.providers.CartoDB.Positron.attribution if show_attribution else False
         ctx.add_basemap(
             ax,
             source=ctx.providers.CartoDB.Positron,
-            attribution=attribution,
+            attribution=ctx.providers.CartoDB.Positron.attribution,
             attribution_size=6,
             alpha=alpha,
         )
@@ -242,11 +245,6 @@ def set_map_extent(ax, sites_3857: gpd.GeoDataFrame, pad_meters: float = 15000) 
     minx, miny, maxx, maxy = sites_3857.total_bounds
     ax.set_xlim(minx - pad_meters, maxx + pad_meters)
     ax.set_ylim(miny - pad_meters, maxy + pad_meters)
-
-
-def padded_bounds(layer: gpd.GeoDataFrame, pad_meters: float) -> tuple[float, float, float, float]:
-    minx, miny, maxx, maxy = layer.total_bounds
-    return minx - pad_meters, miny - pad_meters, maxx + pad_meters, maxy + pad_meters
 
 
 def county_label(row: pd.Series) -> str:
@@ -349,7 +347,7 @@ def add_site_labels(
         site_id = str(row.get("site_id", ""))
         score_text = fmt_score(row.get("readiness_score"))
         if show_ports:
-            label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text} | {fmt_int(row.get('ports_now'))}->{fmt_int(row.get('future_ready_capacity'))} ports"
+            label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text} | {fmt_ports(row)} ports"
         else:
             label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text}"
         dx, dy = LABEL_OFFSETS.get(site_id, (10, 10))
@@ -435,18 +433,13 @@ def decision_lines(sites: gpd.GeoDataFrame) -> list[str]:
     top = data.iloc[0]
     pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
     lines = [
-        f"Top overall: #{fmt_int(top.get('model_rank'))} {top.get('site_id')}",
-        f"Score {fmt_score(top.get('readiness_score'))} | {fmt_int(top.get('ports_now'))}->{fmt_int(top.get('future_ready_capacity'))} ports",
+        f"Top overall: #{fmt_int(top.get('model_rank'))} {top.get('site_id')} | {fmt_score(top.get('readiness_score'))} | {fmt_ports(top)} ports",
     ]
     if not pwc.empty:
         top_pwc = pwc.iloc[0]
-        lines.extend([
-            "",
-            f"Top PWC: #{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')}",
-            f"Score {fmt_score(top_pwc.get('readiness_score'))} | {fmt_int(top_pwc.get('ports_now'))}->{fmt_int(top_pwc.get('future_ready_capacity'))} ports",
-        ])
-    lines.extend(["", "Top 4 action list"])
-    for _, row in data.head(4).iterrows():
+        lines.append(f"Top PWC: #{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} | {fmt_score(top_pwc.get('readiness_score'))} | {fmt_ports(top_pwc)} ports")
+    lines.extend(["", "Next decisions"])
+    for _, row in data.iloc[1:4].iterrows():
         lines.append(f"#{fmt_int(row.get('model_rank'))} {row.get('site_id')} | {fmt_score(row.get('readiness_score'))} | {row.get('action_group')}")
     return lines
 
@@ -455,20 +448,14 @@ def review_lines(sites: gpd.GeoDataFrame) -> list[str]:
     watch = review_watchlist(sites)
     if watch.empty:
         return ["No high-review or special-use sites flagged."]
-    return [f"{row.get('site_id')} — {review_note(row)}" for _, row in watch.head(6).iterrows()]
+    return [f"{row.get('site_id')} — {review_note(row)}" for _, row in watch.head(3).iterrows()]
 
 
-def port_lines(sites: gpd.GeoDataFrame, limit: int | None = None) -> list[str]:
-    lines = ["Site    Now -> Future"]
-    data = ranked(sites)
-    if limit is not None:
-        data = data.head(limit)
-    for _, row in data.iterrows():
-        lines.append(f"{row.get('site_id'):<7} {fmt_int(row.get('ports_now')):>2} -> {fmt_int(row.get('future_ready_capacity')):<2}")
-    return lines
+def port_rows(sites: gpd.GeoDataFrame) -> list[str]:
+    return [f"{row.get('site_id'):<7} {fmt_int(row.get('ports_now')):>2}->{fmt_int(row.get('future_ready_capacity')):<2}" for _, row in ranked(sites).iterrows()]
 
 
-def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[str], monospace: bool = False, fontsize: float = 8.0) -> None:
+def draw_base_card(panel_ax, y: float, height: float, title: str) -> None:
     card = FancyBboxPatch(
         (0.02, y),
         0.96,
@@ -483,6 +470,10 @@ def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[st
     )
     panel_ax.add_patch(card)
     panel_ax.text(0.07, y + height - 0.035, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.0, fontweight="bold", color="#111827", zorder=2)
+
+
+def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[str], monospace: bool = False, fontsize: float = 8.0) -> None:
+    draw_base_card(panel_ax, y, height, title)
     panel_ax.text(
         0.07,
         y + height - 0.075,
@@ -498,29 +489,15 @@ def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[st
     )
 
 
-def draw_metric_card(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.820, height: float = 0.160) -> None:
-    card = FancyBboxPatch(
-        (0.02, y),
-        0.96,
-        height,
-        transform=panel_ax.transAxes,
-        boxstyle="round,pad=0.014,rounding_size=0.018",
-        linewidth=1.0,
-        edgecolor="#cbd5e1",
-        facecolor="white",
-        alpha=0.98,
-        zorder=1,
-    )
-    panel_ax.add_patch(card)
-    panel_ax.text(0.07, y + height - 0.035, "Key metrics", transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.0, fontweight="bold", color="#111827", zorder=2)
-
+def draw_metric_card(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.845, height: float = 0.135) -> None:
+    draw_base_card(panel_ax, y, height, "Key metrics")
     metrics = [
         ("Sites", len(sites)),
         ("Advance", action_count(sites, "Advance")),
         ("Review", action_count(sites, "High-review")),
         ("High risk", high_risk_count(sites)),
     ]
-    box_y = y + 0.030
+    box_y = y + 0.022
     box_w = 0.205
     gap = 0.025
     for index, (label, value) in enumerate(metrics):
@@ -528,7 +505,7 @@ def draw_metric_card(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.820, height
         pill = FancyBboxPatch(
             (box_x, box_y),
             box_w,
-            0.070,
+            0.062,
             transform=panel_ax.transAxes,
             boxstyle="round,pad=0.010,rounding_size=0.012",
             linewidth=0.7,
@@ -537,26 +514,12 @@ def draw_metric_card(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.820, height
             zorder=2,
         )
         panel_ax.add_patch(pill)
-        panel_ax.text(box_x + box_w / 2, box_y + 0.046, str(value), transform=panel_ax.transAxes, ha="center", va="center", fontsize=11.5, fontweight="bold", color="#111827", zorder=3)
-        panel_ax.text(box_x + box_w / 2, box_y + 0.018, label, transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.6, color="#475569", zorder=3)
+        panel_ax.text(box_x + box_w / 2, box_y + 0.040, str(value), transform=panel_ax.transAxes, ha="center", va="center", fontsize=11.2, fontweight="bold", color="#111827", zorder=3)
+        panel_ax.text(box_x + box_w / 2, box_y + 0.015, label, transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.3, color="#475569", zorder=3)
 
 
-def draw_encoding_card(panel_ax, y: float = 0.020, height: float = 0.170) -> None:
-    card = FancyBboxPatch(
-        (0.02, y),
-        0.96,
-        height,
-        transform=panel_ax.transAxes,
-        boxstyle="round,pad=0.014,rounding_size=0.018",
-        linewidth=1.0,
-        edgecolor="#cbd5e1",
-        facecolor="white",
-        alpha=0.98,
-        zorder=1,
-    )
-    panel_ax.add_patch(card)
-    panel_ax.text(0.07, y + height - 0.034, "Map encoding", transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.0, fontweight="bold", color="#111827", zorder=2)
-
+def draw_encoding_card(panel_ax, y: float = 0.020, height: float = 0.155) -> None:
+    draw_base_card(panel_ax, y, height, "Map encoding")
     items = [
         ("Advance", ACTION_COLORS["Advance"], "filled"),
         ("Promising", ACTION_COLORS["Promising"], "filled"),
@@ -568,129 +531,71 @@ def draw_encoding_card(panel_ax, y: float = 0.020, height: float = 0.170) -> Non
     ]
     x_left = 0.09
     x_right = 0.52
-    start_y = y + height - 0.076
-    row_gap = 0.028
+    start_y = y + height - 0.072
+    row_gap = 0.025
     for idx, (label, color, mode) in enumerate(items):
         col_x = x_left if idx < 4 else x_right
         row_y = start_y - (idx if idx < 4 else idx - 4) * row_gap
         if mode == "halo":
-            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=54, facecolors="none", edgecolors=color, linewidths=1.9, zorder=3)
+            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=52, facecolors="none", edgecolors=color, linewidths=1.9, zorder=3)
         elif mode == "number":
-            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=54, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
-            panel_ax.text(col_x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.0, fontweight="bold", color="white", zorder=4)
+            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=52, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+            panel_ax.text(col_x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=5.8, fontweight="bold", color="white", zorder=4)
         else:
-            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=54, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
-        panel_ax.text(col_x + 0.030, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=6.9, color="#111827", zorder=3)
+            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=52, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+        panel_ax.text(col_x + 0.030, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=6.7, color="#111827", zorder=3)
+
+
+def draw_pwc_cluster_panel(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.505, height: float = 0.170) -> None:
+    draw_base_card(panel_ax, y, height, "PWC cluster panel")
+    cluster = ranked(sites[sites["site_id"].astype(str).isin(PWC_CLUSTER_IDS)]).copy()
+    if cluster.empty:
+        panel_ax.text(0.07, y + height - 0.075, "No PWC cluster sites found.", transform=panel_ax.transAxes, ha="left", va="top", fontsize=7.0, color="#111827", zorder=2)
+        return
+
+    header_y = y + height - 0.073
+    panel_ax.text(0.07, header_y, "Rank  Site    Score  Action       Ports", transform=panel_ax.transAxes, ha="left", va="top", fontsize=6.45, family="monospace", color="#475569", zorder=2)
+    row_y = header_y - 0.025
+    for _, row in cluster.iterrows():
+        color = ACTION_COLORS.get(str(row.get("action_group", "")), "#64748b")
+        panel_ax.scatter([0.085], [row_y + 0.002], transform=panel_ax.transAxes, s=34, color=color, edgecolors="#111827", linewidths=0.5, zorder=3)
+        panel_ax.text(
+            0.115,
+            row_y,
+            f"#{fmt_int(row.get('model_rank')):<2}  {row.get('site_id'):<7} {fmt_score(row.get('readiness_score')):<5} {str(row.get('action_group')):<11} {fmt_ports(row)}",
+            transform=panel_ax.transAxes,
+            ha="left",
+            va="top",
+            fontsize=6.35,
+            family="monospace",
+            color="#111827",
+            zorder=2,
+        )
+        row_y -= 0.022
+
+
+def draw_port_snapshot_card(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.195, height: float = 0.175) -> None:
+    draw_base_card(panel_ax, y, height, "Port plan snapshot")
+    rows = port_rows(sites)
+    left = rows[:6]
+    right = rows[6:]
+    header_y = y + height - 0.073
+    panel_ax.text(0.07, header_y, "Site    Now->Future", transform=panel_ax.transAxes, ha="left", va="top", fontsize=6.2, family="monospace", color="#475569", zorder=2)
+    panel_ax.text(0.52, header_y, "Site    Now->Future", transform=panel_ax.transAxes, ha="left", va="top", fontsize=6.2, family="monospace", color="#475569", zorder=2)
+    for idx, text in enumerate(left):
+        panel_ax.text(0.07, header_y - 0.022 - idx * 0.020, text, transform=panel_ax.transAxes, ha="left", va="top", fontsize=6.05, family="monospace", color="#111827", zorder=2)
+    for idx, text in enumerate(right):
+        panel_ax.text(0.52, header_y - 0.022 - idx * 0.020, text, transform=panel_ax.transAxes, ha="left", va="top", fontsize=6.05, family="monospace", color="#111827", zorder=2)
 
 
 def draw_dashboard_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
     panel_ax.set_axis_off()
-    draw_metric_card(panel_ax, sites, 0.815, 0.165)
-    draw_info_card(panel_ax, 0.625, 0.165, "Top decisions", decision_lines(sites), fontsize=6.95)
-    draw_info_card(panel_ax, 0.505, 0.105, "Review watchlist", review_lines(sites), fontsize=7.0)
-    draw_info_card(panel_ax, 0.205, 0.275, "Port plan snapshot", port_lines(sites), monospace=True, fontsize=6.35)
-    draw_encoding_card(panel_ax, 0.020, 0.160)
-
-
-def add_pwc_focus_circle(ax, cluster: gpd.GeoDataFrame, pad_meters: float = 4200) -> tuple[float, float, float]:
-    minx, miny, maxx, maxy = padded_bounds(cluster, pad_meters)
-    center_x = (minx + maxx) / 2
-    center_y = (miny + maxy) / 2
-    radius = max(maxx - minx, maxy - miny) * 0.58
-    focus_circle = Circle(
-        (center_x, center_y),
-        radius,
-        fill=False,
-        linewidth=1.25,
-        linestyle="--",
-        edgecolor="#475569",
-        alpha=0.78,
-        zorder=4,
-    )
-    ax.add_patch(focus_circle)
-    return center_x, center_y, radius
-
-
-def apply_circular_inset_clip(inset_ax):
-    clip_circle = Circle((0.5, 0.5), 0.495, transform=inset_ax.transAxes)
-    artists = []
-    artists.extend(list(inset_ax.collections))
-    artists.extend(list(inset_ax.images))
-    artists.extend(list(inset_ax.lines))
-    artists.extend([patch for patch in inset_ax.patches if patch is not clip_circle])
-    for artist in artists:
-        try:
-            artist.set_clip_path(clip_circle)
-        except Exception:
-            pass
-
-    inset_ax.set_facecolor("none")
-    for spine in inset_ax.spines.values():
-        spine.set_visible(False)
-    inset_ax.set_xticks([])
-    inset_ax.set_yticks([])
-
-    frame_circle = Circle(
-        (0.5, 0.5),
-        0.495,
-        transform=inset_ax.transAxes,
-        fill=False,
-        edgecolor="#334155",
-        linewidth=1.45,
-        zorder=20,
-        clip_on=False,
-    )
-    frame_circle.set_path_effects([
-        pe.withSimplePatchShadow(offset=(2, -2), alpha=0.18),
-        pe.Normal(),
-    ])
-    inset_ax.add_patch(frame_circle)
-    return frame_circle
-
-
-def draw_pwc_zoom_inset(parent_ax, sites_3857: gpd.GeoDataFrame, counties_3857: gpd.GeoDataFrame, include_labels: bool = True) -> None:
-    cluster = sites_3857[sites_3857["site_id"].astype(str).isin(PWC_CLUSTER_IDS)].copy()
-    if cluster.empty:
-        return
-
-    center_x, center_y, radius = add_pwc_focus_circle(parent_ax, cluster, pad_meters=4200)
-    minx, miny, maxx, maxy = padded_bounds(cluster, 4200)
-
-    inset_ax = parent_ax.inset_axes([0.045, 0.650, 0.275, 0.275])
-    inset_ax.set_xlim(minx, maxx)
-    inset_ax.set_ylim(miny, maxy)
-
-    add_basemap(inset_ax, alpha=0.94, show_attribution=False)
-    counties_3857.boundary.plot(ax=inset_ax, color="#0f172a", linewidth=0.65, alpha=0.42, zorder=3)
-    plot_sites(inset_ax, cluster, size_scale=0.60, rank_fontsize=6.7, high_risk_halo=True)
-    if include_labels:
-        add_site_labels(inset_ax, cluster, {"PWC002", "PWC008"}, fontsize=5.5, show_ports=False)
-    apply_circular_inset_clip(inset_ax)
-
-    parent_ax.text(
-        0.182,
-        0.947,
-        "Zoom: PWC cluster",
-        transform=parent_ax.transAxes,
-        ha="center",
-        va="center",
-        fontsize=7.2,
-        color="#111827",
-        bbox={"boxstyle": "round,pad=0.18", "fc": "white", "ec": "#cbd5e1", "alpha": 0.95, "lw": 0.7},
-        zorder=25,
-    )
-
-    connector = ConnectionPatch(
-        xyA=(center_x + radius * 0.70, center_y + radius * 0.12),
-        coordsA=parent_ax.transData,
-        xyB=(0.86, 0.24),
-        coordsB=inset_ax.transAxes,
-        color="#64748b",
-        linewidth=0.9,
-        alpha=0.75,
-        zorder=9,
-    )
-    parent_ax.add_artist(connector)
+    draw_metric_card(panel_ax, sites, 0.845, 0.135)
+    draw_info_card(panel_ax, 0.695, 0.130, "Top decisions", decision_lines(sites), fontsize=6.65)
+    draw_pwc_cluster_panel(panel_ax, sites, 0.505, 0.170)
+    draw_info_card(panel_ax, 0.390, 0.095, "Review watchlist", review_lines(sites), fontsize=6.85)
+    draw_port_snapshot_card(panel_ax, sites, 0.195, 0.175)
+    draw_encoding_card(panel_ax, 0.020, 0.155)
 
 
 def draw_readme_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
@@ -704,17 +609,17 @@ def draw_readme_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
         "Top decisions",
         "",
         f"#{fmt_int(top.get('model_rank'))} {top.get('site_id')} — top overall",
-        f"{fmt_score(top.get('readiness_score'))} | {fmt_int(top.get('ports_now'))}->{fmt_int(top.get('future_ready_capacity'))} ports",
+        f"{fmt_score(top.get('readiness_score'))} | {fmt_ports(top)} ports",
     ]
     if top_pwc is not None:
         lines.extend([
             "",
             f"#{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} — top PWC",
-            f"{fmt_score(top_pwc.get('readiness_score'))} | {fmt_int(top_pwc.get('ports_now'))}->{fmt_int(top_pwc.get('future_ready_capacity'))} ports",
+            f"{fmt_score(top_pwc.get('readiness_score'))} | {fmt_ports(top_pwc)} ports",
         ])
-    lines.extend(["", "Review flags"])
-    for _, row in review_watchlist(sites).head(3).iterrows():
-        lines.append(f"{row.get('site_id')} — {review_note(row)}")
+    lines.extend(["", "PWC cluster"])
+    for _, row in ranked(sites[sites["site_id"].astype(str).isin(PWC_CLUSTER_IDS)]).head(3).iterrows():
+        lines.append(f"#{fmt_int(row.get('model_rank'))} {row.get('site_id')} — {row.get('action_group')} | {fmt_ports(row)}")
 
     card = FancyBboxPatch(
         (0.03, 0.50),
@@ -729,7 +634,7 @@ def draw_readme_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
         zorder=1,
     )
     panel_ax.add_patch(card)
-    panel_ax.text(0.09, 0.93, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=8.3, color="#111827", linespacing=1.18, zorder=2)
+    panel_ax.text(0.09, 0.93, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=8.0, color="#111827", linespacing=1.16, zorder=2)
 
     draw_encoding_card(panel_ax, y=0.07, height=0.34)
 
@@ -739,17 +644,14 @@ def plot_map_core(
     sites_3857: gpd.GeoDataFrame,
     counties_3857: gpd.GeoDataFrame,
     label_ids: set[str],
-    include_inset: bool,
     compact: bool = False,
 ) -> bool:
     ax.set_facecolor("#eef2f7")
     set_map_extent(ax, sites_3857, pad_meters=14500 if compact else 15000)
-    basemap_added = add_basemap(ax, show_attribution=True)
+    basemap_added = add_basemap(ax)
     plot_county_context(ax, counties_3857, basemap_added, labels=not compact)
     plot_sites(ax, sites_3857, size_scale=1.05 if compact else 1.0, rank_fontsize=8.5 if compact else 8.7)
     add_site_labels(ax, sites_3857, label_ids, fontsize=6.7 if compact else 7.1, show_ports=not compact)
-    if include_inset:
-        draw_pwc_zoom_inset(ax, sites_3857, counties_3857, include_labels=not compact)
     add_north_arrow(ax)
     add_scale_bar(ax)
     style_map_axis(ax, compact=compact)
@@ -765,10 +667,10 @@ def plot_gis_decision_map_report(sites: gpd.GeoDataFrame, counties: gpd.GeoDataF
     ax = fig.add_axes([0.045, 0.115, 0.695, 0.765])
     panel_ax = fig.add_axes([0.758, 0.115, 0.222, 0.765])
 
-    basemap_added = plot_map_core(ax, sites_3857, counties_3857, MAIN_LABEL_SITE_IDS, include_inset=True, compact=False)
+    basemap_added = plot_map_core(ax, sites_3857, counties_3857, MAIN_LABEL_SITE_IDS, compact=False)
     draw_dashboard_panel(panel_ax, sites)
 
-    subtitle = "Official boundaries, basemap context, ranked candidates, circular PWC zoom lens, action categories, and port-sizing notes."
+    subtitle = "Official boundaries, basemap context, ranked candidates, PWC cluster panel, action categories, and port-sizing notes."
     if not basemap_added:
         subtitle = "Official county boundaries and ranked candidate sites; basemap skipped or unavailable."
 
@@ -788,10 +690,10 @@ def plot_gis_decision_map_readme(sites: gpd.GeoDataFrame, counties: gpd.GeoDataF
     ax = fig.add_axes([0.045, 0.130, 0.690, 0.760])
     panel_ax = fig.add_axes([0.758, 0.155, 0.220, 0.695])
 
-    basemap_added = plot_map_core(ax, sites_3857, counties_3857, README_LABEL_SITE_IDS, include_inset=True, compact=True)
+    basemap_added = plot_map_core(ax, sites_3857, counties_3857, README_LABEL_SITE_IDS, compact=True)
     draw_readme_panel(panel_ax, sites)
 
-    subtitle = "Ranked public charging candidates with action categories, review flags, and circular PWC zoom lens."
+    subtitle = "Ranked public charging candidates with action categories, review flags, and PWC cluster notes."
     if not basemap_added:
         subtitle = "Ranked public charging candidates; basemap skipped or unavailable."
 
