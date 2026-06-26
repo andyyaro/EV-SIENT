@@ -20,17 +20,20 @@ This project is a planning-support model only. It does not replace required tech
 
 ## Current V2 status
 
-V2 is a working planning-support prototype with:
+V2 is now a stable, reproducible planning-support workflow with:
 
 ```text
 12 real candidate sites
-20-step reproducible workflow
+23-step reproducible workflow
 site-readiness ranking
 data-quality validation
 sensitivity analysis
 scoring-profile analysis
 readiness and confidence charts
+profile heatmap and rank-stability chart
 readiness map
+GIS decision map
+README GIS decision map with all 12 site callout tags
 electrical-risk scenario analysis
 right-sizing scenario analysis
 port-use simulation
@@ -38,10 +41,12 @@ right-sizing validation
 executive site summary
 interpretation report
 run summary
-baseline comparison
+expanded baseline comparison
 workflow manifest
-clean deliverable package
-output checker requiring all 12 V2 sites
+30-file clean deliverable package
+hardened output checker requiring all 12 V2 sites
+hash-sync package validation
+Times New Roman chart typography
 ```
 
 The current V2 workflow has been validated locally with:
@@ -55,8 +60,9 @@ Expected final checker result:
 
 ```text
 V2 OUTPUT CHECK
+---------------
 Status: PASSED
-All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
 ```
 
 Expected deliverable package result:
@@ -64,7 +70,9 @@ Expected deliverable package result:
 ```text
 Status: complete
 Clean rebuild: True
-Copied files: 28/28
+Previous package removed: True
+Copied files: 30/30
+Synced files: 30/30
 ```
 
 ## Current repo structure
@@ -109,11 +117,14 @@ python src/check_outputs_v2.py
 13. Run V2 port-use simulation
 14. Validate V2 right-sizing with simulation
 15. Build V2 executive site summary
-16. Generate V2 interpretation report
-17. Generate V2 run summary
-18. Compare V2 outputs to baseline
-19. Write V2 workflow completion manifest
-20. Build V2 deliverable package
+16. Create V2 GIS decision maps
+17. Generate V2 interpretation report
+18. Generate V2 run summary
+19. Compare V2 outputs to baseline
+20. Write V2 workflow completion manifest
+21. Build V2 deliverable package
+22. Compare V2 deliverable package manifest to baseline
+23. Rebuild V2 deliverable package with final baseline comparison
 ```
 
 ## V2 deliverable package
@@ -135,7 +146,7 @@ charts/
 manifests/
 ```
 
-The package builder performs a clean rebuild by default so stale copied files do not survive.
+The package builder performs a clean rebuild by default so stale copied files do not survive. The package manifest stores SHA-256 hashes and is only healthy when every copied file matches its current source output.
 
 ## Current V2 candidate sites
 
@@ -184,10 +195,25 @@ PWC003 should not be treated as a general-public priority unless public access o
 ## Current V2 right-sizing interpretation
 
 ```text
-Near-term ports are generally aligned with current simulated demand.
-Future-ready capacity is mostly conservative rather than underbuilt.
-The model now checks right-sizing recommendations against the port-use simulation before reporting executive outputs.
+FFX002 — install 2 now; plan future-ready capacity of 8
+FFX004 — install 3 now; plan future-ready capacity of 8
+PWC006 — install 2 now; plan future-ready capacity of 4
+FFX001, PWC007, PWC004, FFX003 — starter install with expandable design
+PWC002 and PWC001 — electrical review before expansion
+PWC008 — monitor due to nearby supply
+PWC005 — monitor or small pilot
+PWC003 — do not advance general-public buildout without use-case confirmation
 ```
+
+## Current V2 visual status
+
+```text
+v2_site_decision_map.png = full report GIS decision map
+v2_site_decision_map_readme.png = README-optimized GIS decision map with all 12 site callout tags
+docs/assets/charts/v2_site_decision_map_readme.png = committed README asset synced from generated output
+```
+
+Generated Matplotlib charts use the shared Times New Roman chart style. Basemap tile labels cannot be restyled because they are baked into the background tile image.
 
 ## Current known review gaps
 
@@ -251,9 +277,14 @@ Added V2 right-sizing scenarios.
 Added port-use simulation.
 Integrated port simulation into the executive summary.
 Added right-sizing validation layer.
-Added clean V2 deliverable package.
-Expanded package contents with profile and stability outputs.
+Added GIS decision map and README decision map.
+Added all 12 site callout tags to the README decision map.
+Set generated chart typography to Times New Roman.
+Added clean 30-file V2 deliverable package.
+Expanded package contents with profile, stability, GIS-map, simulation, validation, and baseline outputs.
 Strengthened output checker to require all 12 V2 site IDs.
+Hardened package and README asset hash-sync checks.
+Expanded baseline comparison to cover simulation, validation, executive, and package manifest layers.
 Added current V2 workflow guide and refreshed repo documentation.
 ```
 
@@ -261,8 +292,8 @@ Added current V2 workflow guide and refreshed repo documentation.
 
 ```text
 Add configurable scenario-assumption inputs for port-use simulation.
-Extend baseline comparison to cover port simulation and right-sizing validation content.
 Continue replacing placeholder electrical/site-review assumptions with verified site data.
+Add a higher-level scenario comparison report for conservative/base/aggressive future demand assumptions.
 ```
 
 ## Important limitation
