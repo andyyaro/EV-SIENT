@@ -4,11 +4,13 @@ This file explains the main parts of the repo without making you read every file
 
 ## Start files
 
-- [docs/V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md) — main landing page for the active V2 workflow
+- [ACTIVE_DOCS_INDEX.md](ACTIVE_DOCS_INDEX.md) — clean index of active reviewer-facing docs
+- [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md) — main landing page for the active V2 workflow
 - [START_HERE.md](../START_HERE.md) — shortest project entry point
 - [REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — step-by-step local reproduction checklist
 - [README.md](../README.md) — project overview
-- [V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md) — checkpoint for the port-sizing scenario layer
+- [checkpoints/README.md](checkpoints/README.md) — checkpoint and history index
+- [checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md) — checkpoint for the port-sizing scenario layer
 
 ## Main folders
 
@@ -19,7 +21,8 @@ This file explains the main parts of the repo without making you read every file
 - [data/baselines/](../data/baselines/) — committed baseline snapshots
 - [data/outputs/](../data/outputs/) — generated local outputs ignored by Git
 - [data/demo/](../data/demo/) — generated local-only synthetic demo outputs
-- [docs/](../docs/) — project documentation and checkpoint notes
+- [docs/](../docs/) — active documentation and project notes
+- [docs/checkpoints/](checkpoints/) — checkpoint/history notes moved out of the active-docs path
 
 ## Active V2 workflow
 
@@ -28,6 +31,16 @@ Run the active V2 workflow with:
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
+make setup
+make run-v2
+make check-v2
+```
+
+Equivalent raw commands:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
@@ -174,6 +187,16 @@ charts/
 manifests/
 ```
 
+## Documentation organization
+
+| Folder or file | Purpose |
+|---|---|
+| [ACTIVE_DOCS_INDEX.md](ACTIVE_DOCS_INDEX.md) | Clean active-docs index for reviewers. |
+| [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md) | Main reviewer guide. |
+| [REPO_MAP.md](REPO_MAP.md) | This repository map. |
+| [checkpoints/README.md](checkpoints/README.md) | Checkpoint/history index. |
+| [checkpoints/](checkpoints/) | Moved implementation history and milestone notes. |
+
 ## Demo mode for larger tests
 
 For a full 50-site synthetic test, use:
@@ -188,13 +211,14 @@ See [DEMO_MODE_GUIDE.md](DEMO_MODE_GUIDE.md).
 
 ## Recommended V2 reading path
 
-1. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
-2. `data/outputs/deliverable_package_v2/README.md`
-3. `data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md`
-4. `data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md`
-5. `data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md`
-6. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
-7. `data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md`
+1. [ACTIVE_DOCS_INDEX.md](ACTIVE_DOCS_INDEX.md)
+2. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
+3. `data/outputs/deliverable_package_v2/README.md`
+4. `data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md`
+5. `data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md`
+6. `data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md`
+7. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
+8. `data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md`
 
 ## What not to edit first
 
@@ -211,8 +235,8 @@ data/demo/
 Regenerate V2 outputs with:
 
 ```bash
-python src/run_v2.py
-python src/check_outputs_v2.py
+make run-v2
+make check-v2
 ```
 
 Regenerate V1 outputs with:
