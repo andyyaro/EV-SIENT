@@ -14,6 +14,10 @@ PACKAGE_FILES = [
     ("data/outputs/v2_executive_site_summary.md", "reports/v2_executive_site_summary.md"),
     ("data/outputs/v2_right_sizing_validation.csv", "tables/v2_right_sizing_validation.csv"),
     ("data/outputs/v2_right_sizing_validation_report.md", "reports/v2_right_sizing_validation_report.md"),
+    ("data/inputs/v2_port_sizing_scenarios.csv", "inputs/v2_port_sizing_scenarios.csv"),
+    ("data/outputs/v2_port_sizing_scenario_results.csv", "tables/v2_port_sizing_scenario_results.csv"),
+    ("data/outputs/v2_port_sizing_scenario_summary.csv", "tables/v2_port_sizing_scenario_summary.csv"),
+    ("data/outputs/v2_port_sizing_scenario_report.md", "reports/v2_port_sizing_scenario_report.md"),
     ("data/outputs/v2_site_results.csv", "tables/v2_site_results.csv"),
     ("data/outputs/v2_action_matrix.md", "reports/v2_action_matrix.md"),
     ("data/outputs/v2_sensitivity_summary.csv", "tables/v2_sensitivity_summary.csv"),
@@ -40,6 +44,7 @@ PACKAGE_FILES = [
     ("data/outputs/charts/v2_site_decision_map.png", "charts/v2_site_decision_map.png"),
     ("data/outputs/charts/v2_site_decision_map_readme.png", "charts/v2_site_decision_map_readme.png"),
     ("data/outputs/charts/v2_port_utilization_simulation.png", "charts/v2_port_utilization_simulation.png"),
+    ("data/outputs/charts/v2_port_sizing_scenario_heatmap.png", "charts/v2_port_sizing_scenario_heatmap.png"),
 ]
 
 DEFAULT_PACKAGE_DIR = Path("data/outputs/deliverable_package_v2")
@@ -49,7 +54,7 @@ SAFE_OUTPUT_ROOT = Path("data/outputs")
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+        for chunk in iter(lambda: handle.read(1024 * 1024), b=""):
             digest.update(chunk)
     return digest.hexdigest()
 
@@ -137,17 +142,20 @@ Previous package removed: {manifest['previous_package_removed']}
 
 ```text
 1. reports/v2_executive_site_summary.md
-2. tables/v2_executive_site_summary.csv
-3. reports/v2_right_sizing_validation_report.md
-4. charts/v2_site_decision_map.png
-5. charts/v2_site_decision_map_readme.png
-6. reports/v2_run_summary.md
-7. reports/v2_action_matrix.md
-8. reports/v2_profile_comparison.md
-9. tables/v2_sensitivity_summary.csv
-10. charts/v2_polished_readiness_score_chart.png
-11. charts/v2_site_readiness_map.png
-12. charts/v2_profile_rank_stability_chart.png
+2. charts/v2_site_decision_map.png
+3. charts/v2_site_decision_map_readme.png
+4. reports/v2_right_sizing_validation_report.md
+5. reports/v2_port_sizing_scenario_report.md
+6. tables/v2_port_sizing_scenario_summary.csv
+7. charts/v2_port_sizing_scenario_heatmap.png
+8. reports/v2_run_summary.md
+9. reports/v2_baseline_comparison.md
+10. reports/v2_action_matrix.md
+11. reports/v2_profile_comparison.md
+12. tables/v2_sensitivity_summary.csv
+13. charts/v2_polished_readiness_score_chart.png
+14. charts/v2_site_readiness_map.png
+15. charts/v2_profile_rank_stability_chart.png
 ```
 
 ## Sync guarantee
