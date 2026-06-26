@@ -39,7 +39,7 @@ right-sizing scenario analysis
 port-use simulation
 port-sizing scenario analysis
 right-sizing validation
-executive site summary
+executive site summary with scenario-sensitivity fields
 interpretation report
 run summary
 expanded baseline comparison
@@ -217,6 +217,25 @@ Only the combined-stress scenario creates one-port gaps.
 The combined-stress gaps affect PWC002 and PWC008.
 ```
 
+## Executive-summary scenario fields
+
+The executive summary now includes one site-level scenario sensitivity summary from the port-sizing scenario analysis.
+
+```text
+scenario_max_min_ports_2050_high
+scenario_future_capacity_gap
+scenario_sensitivity_level
+scenario_stress_note
+```
+
+Expected interpretation:
+
+```text
+Most sites — robust
+PWC002 — combined_stress_sensitive
+PWC008 — combined_stress_sensitive
+```
+
 ## Current V2 visual status
 
 ```text
@@ -290,6 +309,7 @@ Added V2 right-sizing scenarios.
 Added port-use simulation.
 Added port-sizing scenario analysis.
 Integrated port simulation into the executive summary.
+Integrated port-sizing scenario fields into the executive summary.
 Added right-sizing validation layer.
 Added GIS decision map and README decision map.
 Added all 12 site callout tags to the README decision map.
@@ -305,9 +325,9 @@ Added current V2 workflow guide and refreshed repo documentation.
 ## Next likely technical improvements
 
 ```text
-Integrate port-sizing scenario fields into the executive site summary.
 Continue replacing placeholder electrical/site-review assumptions with verified site data.
 Add a concise scenario interpretation block to the stakeholder-facing package README.
+Consider a small site-review data intake template for AHJ / ADA / utility follow-up.
 ```
 
 ## Important limitation
