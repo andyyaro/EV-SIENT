@@ -1,9 +1,9 @@
 """Shared chart styling for the Future City Fellowship prototype.
 
-The project uses Libre Caslon Condensed for generated Matplotlib charts when the
-font is available locally. Font files are intentionally not committed to the repo;
-install the font on your machine or place the .otf files in a local ignored font
-folder such as fonts/.
+Generated Matplotlib charts use the Libre Caslon family when it is available
+locally. Font files are intentionally not committed to the repo; install the
+font on your machine, keep it in ~/Library/Fonts, or place the files in a local
+ignored folder such as fonts/.
 """
 
 from __future__ import annotations
@@ -15,12 +15,20 @@ import matplotlib as mpl
 from matplotlib import font_manager
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-FONT_FAMILY = "Libre Caslon Condensed"
+FONT_FAMILY = "Libre Caslon Text"
+FONT_FALLBACKS = [
+    "Libre Caslon Text",
+    "Libre Caslon Display",
+    "Libre Caslon",
+    "Georgia",
+    "Times New Roman",
+    "DejaVu Serif",
+]
 FONT_PATTERNS = (
-    "LibreCaslonCondensed-*.otf",
-    "LibreCaslonCondensed-*.ttf",
-    "Libre Caslon Condensed*.otf",
-    "Libre Caslon Condensed*.ttf",
+    "*Libre*Caslon*.otf",
+    "*Libre*Caslon*.ttf",
+    "LibreCaslon*.otf",
+    "LibreCaslon*.ttf",
 )
 LOCAL_FONT_DIRS = (
     PROJECT_ROOT / "fonts",
@@ -74,8 +82,8 @@ def apply_chart_style() -> None:
     _register_local_fonts()
     mpl.rcParams.update({
         "font.family": "serif",
-        "font.serif": [FONT_FAMILY, "Libre Caslon", "Georgia", "Times New Roman", "DejaVu Serif"],
-        "font.sans-serif": [FONT_FAMILY, "Libre Caslon", "DejaVu Sans"],
+        "font.serif": FONT_FALLBACKS,
+        "font.sans-serif": FONT_FALLBACKS,
         "axes.titlesize": 14,
         "axes.labelsize": 10,
         "xtick.labelsize": 9,
