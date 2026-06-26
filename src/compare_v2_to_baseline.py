@@ -17,6 +17,8 @@ DEFAULT_PROFILE_RESULTS = "data/outputs/v2_profile_results.csv"
 DEFAULT_ELECTRICAL_SUMMARY = "data/outputs/v2_electrical_risk_summary.csv"
 DEFAULT_RIGHT_SIZING = "data/outputs/v2_right_sizing_scenarios.csv"
 DEFAULT_PORT_SIMULATION = "data/outputs/v2_port_utilization_simulation.csv"
+DEFAULT_PORT_SIZING_SCENARIOS = "data/outputs/v2_port_sizing_scenario_results.csv"
+DEFAULT_PORT_SIZING_SUMMARY = "data/outputs/v2_port_sizing_scenario_summary.csv"
 DEFAULT_RIGHT_SIZING_VALIDATION = "data/outputs/v2_right_sizing_validation.csv"
 DEFAULT_EXECUTIVE_SUMMARY = "data/outputs/v2_executive_site_summary.csv"
 DEFAULT_JSON_OUTPUT = "data/outputs/v2_baseline_comparison.json"
@@ -196,6 +198,38 @@ def compare_port_simulation(baseline: dict[str, Any], simulation: pd.DataFrame, 
     add(checks, "port_simulation", "fail" if failures else "pass", "; ".join(failures[:12]) if failures else "Port simulation guardrails match baseline.")
 
 
+def compare_port_sizing_scenarios(baseline: dict[str, Any], scenario_results: pd.DataFrame, scenario_summary: pd.DataFrame, checks: list[dict[str, Any]]) -> None:
+    expected = baseline.get("port_sizing_scenarios", {})
+    required = expected.get("required_columns", [])
+    summary_required = expected.get("summary_required_columns", [])
+    missing = missing_columns(scenario_results, required)
+    summary_missing = missing_columns(scenario_summary, summary_required)
+    failures = []
+    if missing:
+        failures.append(f"results missing columns: {missing}")
+    if summary_missing:
+        failures.append(f"summary missing columns: {summary_missing}")
+    if not failures:
+        if expected.get("row_count") is not None and len(scenario_results) != int(expected["row_count"]):
+            failures.append(f"row_count expected {expected['row_count']}, got {len(scenario_results)}")
+        if expected.get("summary_row_count") is not None and len(scenario_summary) != int(expected["summary_row_count"]):
+            failures.append(f"summary_row_count expected {expected['summary_row_count']}, got {len(scenario_summary)}")
+        if expected.get("scenarios"):
+            actual = list(scenario_summary["scenario_name"].astype(str))
+            if actual != list(expected["scenarios"]):
+                failures.append(f"scenarios expected {expected['scenarios']}, got {actual}")
+        if expected.get("site_count") is not None:
+            counts = scenario_results.groupby("scenario_name")["site_id"].nunique().astype(int).tolist()
+            if any(count != int(expected["site_count"]) for count in counts):
+                failures.append(f"each scenario should include {expected['site_count']} sites, got {counts}")
+        allowed_future = set(expected.get("future_capacity_alignment_allowed_values", []))
+        if allowed_future and "future_capacity_alignment" in scenario_results.columns:
+            invalid = sorted(set(scenario_results["future_capacity_alignment"].dropna().astype(str)) - allowed_future)
+            if invalid:
+                failures.append(f"future_capacity_alignment unexpected values: {invalid}")
+    add(checks, "port_sizing_scenarios", "fail" if failures else "pass", "; ".join(failures[:12]) if failures else "Port-sizing scenario guardrails match baseline.")
+
+
 def compare_validation(baseline: dict[str, Any], validation: pd.DataFrame, checks: list[dict[str, Any]]) -> None:
     expected = baseline.get("right_sizing_validation", {})
     missing = missing_columns(validation, expected.get("required_columns", []))
@@ -291,7 +325,7 @@ def build_markdown(baseline: dict[str, Any], checks: list[dict[str, Any]], statu
         f"Status: **{status.upper()}**",
         "",
         "This report compares the current V2 outputs against the saved V2 baseline snapshot.",
-        "It catches accidental ranking, scoring, simulation, validation, executive-summary, GIS-map package, and package-manifest changes.",
+        "It catches accidental ranking, scoring, simulation, validation, port-sizing scenario, executive-summary, GIS-map package, and package-manifest changes.",
         "",
         "## Checks",
         "",
@@ -314,6 +348,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY)
     parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING)
     parser.add_argument("--port-simulation", default=DEFAULT_PORT_SIMULATION)
+    parser.add_argument("--port-sizing-scenarios", default=DEFAULT_PORT_SIZING_SCENARIOS)
+    parser.add_argument("--port-sizing-summary", default=DEFAULT_PORT_SIZING_SUMMARY)
     parser.add_argument("--right-sizing-validation", default=DEFAULT_RIGHT_SIZING_VALIDATION)
     parser.add_argument("--executive-summary", default=DEFAULT_EXECUTIVE_SUMMARY)
     parser.add_argument("--deliverable-manifest", default=None)
@@ -333,6 +369,7 @@ def main() -> None:
     compare_electrical(baseline, read_csv(args.electrical_summary), checks)
     compare_right_sizing(baseline, read_csv(args.right_sizing), checks)
     compare_port_simulation(baseline, read_csv(args.port_simulation), checks)
+    compare_port_sizing_scenarios(baseline, read_csv(args.port_sizing_scenarios), read_csv(args.port_sizing_summary), checks)
     compare_validation(baseline, read_csv(args.right_sizing_validation), checks)
     compare_executive(baseline, read_csv(args.executive_summary), checks)
     compare_package_manifest(baseline, read_json(args.deliverable_manifest) if args.deliverable_manifest else None, checks)
