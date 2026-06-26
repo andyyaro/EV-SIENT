@@ -1,10 +1,4 @@
-"""Check generated V2 model outputs.
-
-The checker verifies that expected V2 artifacts exist, all 12 candidate sites are
-represented, the README decision-map asset is synchronized, the port-sizing
-scenario layer is present, the baseline comparison passed, and the deliverable
-package is hash-synced with current source outputs.
-"""
+"""Check generated V2 model outputs."""
 
 from __future__ import annotations
 
@@ -21,6 +15,13 @@ REQUIRED_SITE_IDS = {
     "PWC005", "PWC006", "PWC007", "PWC008",
 }
 EXPECTED_SITE_COUNT = len(REQUIRED_SITE_IDS)
+EXPECTED_SENSITIVITY_SCENARIOS = {
+    "very_low_demand_high_cost",
+    "low_demand_high_cost",
+    "base_case",
+    "high_demand_base_cost",
+    "very_high_demand_low_cost",
+}
 EXPECTED_PORT_SCENARIOS = {"base", "high_growth", "long_sessions", "short_daily_window", "peakier_demand", "combined_stress"}
 EXPECTED_PACKAGE_PAYLOAD_COUNT = 35
 
@@ -28,6 +29,7 @@ CORE_OUTPUT_FILES = [
     Path("data/outputs/v2_site_results.csv"),
     Path("data/outputs/v2_action_matrix.md"),
     Path("data/outputs/v2_data_quality_report.csv"),
+    Path("data/outputs/v2_sensitivity_results.csv"),
     Path("data/outputs/v2_sensitivity_summary.csv"),
     Path("data/outputs/v2_profile_results.csv"),
     Path("data/outputs/v2_profile_rank_summary.csv"),
@@ -101,25 +103,11 @@ PACKAGE_PAYLOAD_FILES = [
     Path("data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png"),
 ]
-
-PACKAGE_FILES = [
-    Path("data/outputs/deliverable_package_v2/README.md"),
-    Path("data/outputs/deliverable_package_v2/package_manifest.json"),
-    *PACKAGE_PAYLOAD_FILES,
-]
-
+PACKAGE_FILES = [Path("data/outputs/deliverable_package_v2/README.md"), Path("data/outputs/deliverable_package_v2/package_manifest.json"), *PACKAGE_PAYLOAD_FILES]
 REQUIRED_BASELINE_CHECKS = {
-    "site_count",
-    "site_results",
-    "quality_counts",
-    "profile_top_sites",
-    "electrical_expected",
-    "right_sizing",
-    "port_simulation",
-    "port_sizing_scenarios",
-    "right_sizing_validation",
-    "executive_summary",
-    "deliverable_package_manifest",
+    "site_count", "site_results", "quality_counts", "profile_top_sites", "electrical_expected",
+    "right_sizing", "port_simulation", "port_sizing_scenarios", "right_sizing_validation",
+    "executive_summary", "deliverable_package_manifest",
 }
 
 
@@ -176,6 +164,32 @@ def check_site_table(path: Path, label: str, exact_rows: int | None = None) -> l
     return errors
 
 
+def check_sensitivity_results() -> list[str]:
+    results, errors = read_csv(Path("data/outputs/v2_sensitivity_results.csv"), "V2 sensitivity results")
+    summary, summary_errors = read_csv(Path("data/outputs/v2_sensitivity_summary.csv"), "V2 sensitivity summary")
+    errors.extend(summary_errors)
+    if results is None or summary is None:
+        return errors
+    required_results = {"scenario", "scenario_description", "rank", "site_id", "site_name", "readiness_score"}
+    required_summary = {"site_id", "site_name", "best_rank", "worst_rank", "average_rank", "rank_range", "readiness_score_range"}
+    missing_results = sorted(required_results - set(results.columns))
+    missing_summary = sorted(required_summary - set(summary.columns))
+    if missing_results:
+        errors.append(f"v2_sensitivity_results.csv is missing columns: {missing_results}")
+    if missing_summary:
+        errors.append(f"v2_sensitivity_summary.csv is missing columns: {missing_summary}")
+    if "scenario" in results.columns:
+        found = set(results["scenario"].astype(str))
+        if found != EXPECTED_SENSITIVITY_SCENARIOS:
+            errors.append(f"v2_sensitivity_results.csv scenario set changed: {sorted(found)}")
+    expected_rows = EXPECTED_SITE_COUNT * len(EXPECTED_SENSITIVITY_SCENARIOS)
+    if len(results) != expected_rows:
+        errors.append(f"v2_sensitivity_results.csv has {len(results)} rows; expected {expected_rows} rows.")
+    errors.extend(check_site_table(Path("data/outputs/v2_sensitivity_results.csv"), "v2_sensitivity_results.csv"))
+    errors.extend(check_site_table(Path("data/outputs/v2_sensitivity_summary.csv"), "v2_sensitivity_summary.csv", exact_rows=EXPECTED_SITE_COUNT))
+    return errors
+
+
 def check_chart_sync() -> list[str]:
     source = Path("data/outputs/charts/v2_site_decision_map_readme.png")
     destination = Path("docs/assets/charts/v2_site_decision_map_readme.png")
@@ -194,9 +208,8 @@ def check_port_sizing_scenarios() -> list[str]:
         return errors
     required = {
         "scenario_name", "site_id", "model_rank", "ports_now", "future_ready_capacity",
-        "scenario_min_ports_current", "scenario_min_ports_2035_high",
-        "scenario_min_ports_2050_high", "current_alignment", "future_capacity_alignment",
-        "future_capacity_gap",
+        "scenario_min_ports_current", "scenario_min_ports_2035_high", "scenario_min_ports_2050_high",
+        "current_alignment", "future_capacity_alignment", "future_capacity_gap",
     }
     missing_columns = sorted(required - set(results.columns))
     if missing_columns:
@@ -303,6 +316,7 @@ def main() -> None:
     errors.extend(check_site_table(Path("data/outputs/v2_right_sizing_scenarios.csv"), "v2_right_sizing_scenarios.csv", exact_rows=EXPECTED_SITE_COUNT))
     errors.extend(check_site_table(Path("data/outputs/v2_right_sizing_validation.csv"), "v2_right_sizing_validation.csv", exact_rows=EXPECTED_SITE_COUNT))
     errors.extend(check_site_table(Path("data/outputs/v2_executive_site_summary.csv"), "v2_executive_site_summary.csv", exact_rows=EXPECTED_SITE_COUNT))
+    errors.extend(check_sensitivity_results())
     errors.extend(check_port_sizing_scenarios())
     errors.extend(check_chart_sync())
     errors.extend(check_baseline_comparison())
@@ -316,7 +330,7 @@ def main() -> None:
         sys.exit(1)
 
     print("Status: PASSED")
-    print("All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.")
+    print("All expected V2 outputs are present, all 12 V2 candidate sites are represented, sensitivity outputs and the port-sizing scenario layer are present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.")
 
 
 if __name__ == "__main__":
