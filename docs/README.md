@@ -5,23 +5,44 @@ This folder contains the longer project documentation.
 ## Start files
 
 - [../START_HERE.md](../START_HERE.md)
+- [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)
 - [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
 - [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
-- [V2_STABLE_WORKFLOW_CHECKPOINT.md](V2_STABLE_WORKFLOW_CHECKPOINT.md)
-- [V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
 - [REPO_MAP.md](REPO_MAP.md)
+- [../src/README.md](../src/README.md)
+- [MAINTENANCE_CHECKLIST.md](MAINTENANCE_CHECKLIST.md)
+- [PROJECT_STATUS.md](PROJECT_STATUS.md)
+- [V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
 
-## Short reading path
+## Recommended reading paths
+
+### New reviewer
+
+1. [../README.md](../README.md)
+2. [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)
+3. [../START_HERE.md](../START_HERE.md)
+4. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
+5. [REPO_MAP.md](REPO_MAP.md)
+6. [../src/README.md](../src/README.md)
+7. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
+8. [PROJECT_STATUS.md](PROJECT_STATUS.md)
+
+### Reproducing the model
 
 1. [../START_HERE.md](../START_HERE.md)
-2. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
-3. [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
-4. [REPO_MAP.md](REPO_MAP.md)
-5. [PROJECT_STATUS.md](PROJECT_STATUS.md)
+2. [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
+3. [MAINTENANCE_CHECKLIST.md](MAINTENANCE_CHECKLIST.md)
+4. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
+5. [REPO_MAP.md](REPO_MAP.md)
+
+### Understanding the technical method
+
+1. [METHODOLOGY.md](METHODOLOGY.md)
+2. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
+3. [DATA_SOURCES.md](DATA_SOURCES.md)
+4. [V2_ELECTRICAL_RISK_SCENARIO_METHOD.md](V2_ELECTRICAL_RISK_SCENARIO_METHOD.md)
+5. [V2_RIGHT_SIZING_SCENARIO_METHOD.md](V2_RIGHT_SIZING_SCENARIO_METHOD.md)
 6. [V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
-7. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
-8. [DATA_SOURCES.md](DATA_SOURCES.md)
-9. [METHODOLOGY.md](METHODOLOGY.md)
 
 ## Active V2 generated outputs
 
@@ -74,6 +95,10 @@ Important direct V2 outputs:
 - [SITE_SCREENING_CHECKLIST.md](SITE_SCREENING_CHECKLIST.md)
 - [ADDING_NEW_SITES_GUIDE.md](ADDING_NEW_SITES_GUIDE.md)
 - [STAKEHOLDER_OUTREACH_PLAN.md](STAKEHOLDER_OUTREACH_PLAN.md)
+- [SITE_EXPANSION_AND_OUTREACH_TRIAGE.md](SITE_EXPANSION_AND_OUTREACH_TRIAGE.md)
+- [V2_PUBLIC_DATA_UPGRADE_WORKFLOW.md](V2_PUBLIC_DATA_UPGRADE_WORKFLOW.md)
+- [V2_NEXT_BATCH_PLAN.md](V2_NEXT_BATCH_PLAN.md)
+- [V2_BACKLOG_TRIAGE_CHECKLIST.md](V2_BACKLOG_TRIAGE_CHECKLIST.md)
 
 ## Technical/source docs
 
@@ -82,13 +107,19 @@ Important direct V2 outputs:
 - [DATA_SOURCES.md](DATA_SOURCES.md)
 - [OSM_AMENITIES.md](OSM_AMENITIES.md)
 - [PROJECT_DECISIONS_LOG.md](PROJECT_DECISIONS_LOG.md)
+- [CHART_STYLE_GUIDE.md](CHART_STYLE_GUIDE.md)
+
+## Checkpoint docs
+
+Checkpoint docs preserve project history and implementation milestones. They are useful for auditability, but a new reviewer should start with [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md), [REPO_MAP.md](REPO_MAP.md), and [../src/README.md](../src/README.md) first.
 
 ## Main folders
 
-- [src/](../src/)
-- [data/inputs/](../data/inputs/)
-- [data/config/](../data/config/)
-- [data/outputs/](../data/outputs/)
+- [src/](../src/) — Python scripts
+- [data/inputs/](../data/inputs/) — active input files
+- [data/config/](../data/config/) — config and check rules
+- [data/source_extracts/](../data/source_extracts/) — source extracts and notes
+- `../data/outputs/` — generated local outputs ignored by Git
 
 ## Shareable local package
 
