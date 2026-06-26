@@ -49,7 +49,7 @@ A successful V2 run should end with:
 ```text
 V2 OUTPUT CHECK
 Status: PASSED
-All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, and the deliverable package is hash-synced with current source outputs.
 ```
 
 ## Stable V1 quick run
@@ -80,6 +80,7 @@ right-sizing scenario analysis
 port-use simulation
 right-sizing validation
 executive site summary
+GIS decision maps for report and README use
 interpretation report
 run summary
 baseline comparison
@@ -95,6 +96,8 @@ Start with the V2 deliverable package:
 data/outputs/deliverable_package_v2/README.md
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
+data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
+data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
 data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 ```
@@ -119,6 +122,8 @@ data/outputs/charts/v2_data_confidence_chart.png
 data/outputs/charts/v2_profile_score_heatmap.png
 data/outputs/charts/v2_profile_rank_stability_chart.png
 data/outputs/charts/v2_site_readiness_map.png
+data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
 data/outputs/charts/v2_port_utilization_simulation.png
 ```
 
@@ -130,9 +135,9 @@ These committed README visuals are copied from the latest validated V2 model-gen
 
 ![V2 readiness ranking preview](docs/assets/charts/v2_polished_readiness_score_chart.png)
 
-### V2 candidate site map
+### V2 GIS decision map
 
-![V2 candidate site map preview](docs/assets/charts/v2_site_readiness_map.png)
+![V2 GIS decision map preview](docs/assets/charts/v2_site_decision_map_readme.png)
 
 ### V2 rank stability across profiles
 
@@ -158,8 +163,9 @@ These committed README visuals are copied from the latest validated V2 model-gen
 | File | Purpose |
 |---|---|
 | [src/run_v2.py](src/run_v2.py) | Run the active V2 workflow. |
-| [src/check_outputs_v2.py](src/check_outputs_v2.py) | Check V2 outputs and required site coverage. |
+| [src/check_outputs_v2.py](src/check_outputs_v2.py) | Check V2 outputs, site coverage, and deliverable-package hash sync. |
 | [src/build_v2_deliverable_package.py](src/build_v2_deliverable_package.py) | Build the clean V2 deliverable package. |
+| [src/plot_site_decision_map.py](src/plot_site_decision_map.py) | Build the GIS decision maps for report and README use. |
 | [src/run_port_utilization_simulation.py](src/run_port_utilization_simulation.py) | Run the V2 port-use simulation. |
 | [src/validate_right_sizing_with_simulation.py](src/validate_right_sizing_with_simulation.py) | Compare right-sizing recommendations with simulation results. |
 | [src/build_v2_executive_summary.py](src/build_v2_executive_summary.py) | Build the V2 executive decision table. |
