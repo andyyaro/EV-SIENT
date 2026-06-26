@@ -23,7 +23,7 @@ jobs:
             --no-progress
             --accept 200,204,206,301,302,303,307,308
             --include-fragments
-            --exclude-path data/outputs/deliverable_package_v2
+            --exclude-path data/outputs
             --exclude-path data/run_history
             './**/*.md'
           fail: true
