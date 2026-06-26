@@ -40,6 +40,9 @@ EXPECTED_OUTPUTS = [
     "data/outputs/v2_right_sizing_report.md",
     "data/outputs/v2_port_utilization_simulation.csv",
     "data/outputs/v2_port_utilization_simulation_report.md",
+    "data/outputs/v2_port_sizing_scenario_results.csv",
+    "data/outputs/v2_port_sizing_scenario_summary.csv",
+    "data/outputs/v2_port_sizing_scenario_report.md",
     "data/outputs/v2_right_sizing_validation.csv",
     "data/outputs/v2_right_sizing_validation_report.md",
     "data/outputs/v2_executive_site_summary.csv",
@@ -57,6 +60,7 @@ EXPECTED_OUTPUTS = [
     "data/outputs/charts/v2_site_decision_map.png",
     "data/outputs/charts/v2_site_decision_map_readme.png",
     "data/outputs/charts/v2_port_utilization_simulation.png",
+    "data/outputs/charts/v2_port_sizing_scenario_heatmap.png",
     "docs/assets/charts/v2_site_decision_map_readme.png",
 ]
 
@@ -149,12 +153,14 @@ def build_success_marker(input_path: Path, results_path: Path, quality_path: Pat
         "quality_counts": quality_counts(quality),
         "electrical_risk_counts": electrical_counts(electrical),
         "top_right_sizing": right_sizing_top_summary(right_sizing),
+        "workflow_step_count": 24,
         "expected_outputs_count": len(outputs),
         "generated_outputs_count": len(outputs) - len(missing_outputs),
         "missing_or_empty_outputs": missing_outputs,
         "outputs": outputs,
         "notes": [
             "This marker confirms that the local V2 workflow outputs were generated.",
+            "It includes the port-sizing scenario analysis layer.",
             "It is a workflow reproducibility artifact, not an engineering or permitting approval.",
         ],
     }
@@ -186,6 +192,7 @@ def main() -> None:
     print("--------------------------")
     print(f"Status: {marker['status']}")
     print(f"Input file: {input_path}")
+    print(f"Workflow steps: {marker['workflow_step_count']}")
     print(f"Site count: {marker['site_count']}")
     print(f"Top site: {marker.get('top_site', {}).get('site_id', 'not available')}")
     print(f"Generated outputs: {marker['generated_outputs_count']}/{marker['expected_outputs_count']}")
