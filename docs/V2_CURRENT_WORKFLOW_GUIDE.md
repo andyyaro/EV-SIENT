@@ -17,7 +17,7 @@ right-sizing scenarios
 port-use simulation
 port-sizing scenario analysis
 right-sizing validation
-executive site summary
+executive site summary with scenario-sensitivity fields
 readiness map
 GIS decision map
 README GIS decision map with all 12 site callout tags
@@ -119,6 +119,7 @@ port simulation output exists
 port-sizing scenario outputs exist
 right-sizing validation output exists
 executive summary output exists
+executive summary includes scenario-sensitivity fields
 readiness map output exists
 GIS decision map output exists
 README GIS decision map output exists
@@ -146,7 +147,7 @@ right-sizing ports and expansion strategies
 port-simulation row count, assumptions, tested port options, demand cases, and current simulated minimum ports
 port-sizing scenario row count, scenario names, required fields, and future-capacity alignment labels
 right-sizing-validation alignment guardrails
-executive-summary validation fields and top site
+executive-summary validation fields, scenario-sensitivity fields, and top site
 deliverable-package manifest status, copied file counts, synced file counts, and required package destinations
 ```
 
@@ -282,6 +283,19 @@ The future-ready capacity plan is stable across the first five tested scenarios.
 Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PWC008.
 ```
 
+## Executive-summary scenario fields
+
+The executive summary now includes the scenario stress-test result at the site level.
+
+```text
+scenario_max_min_ports_2050_high
+scenario_future_capacity_gap
+scenario_sensitivity_level
+scenario_stress_note
+```
+
+Use these fields to quickly see whether a site is robust across tested assumptions or sensitive only under combined stress.
+
 ## Chart typography
 
 Generated Matplotlib charts use the shared Times New Roman chart style configured in:
@@ -359,7 +373,7 @@ PWC003 — do not advance as a general-public buildout without use-case confirma
 
 ## What “passed” means
 
-A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, the port-sizing scenario layer is present, the README GIS decision-map asset is synced, and the deliverable package manifest passed the package guardrails.
+A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, the port-sizing scenario layer is present, the executive summary includes scenario-sensitivity fields, the README GIS decision-map asset is synced, and the deliverable package manifest passed the package guardrails.
 
 It does not mean a site is ready to build.
 
