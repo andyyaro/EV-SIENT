@@ -31,6 +31,9 @@ v2_right_sizing_scenarios.csv
 v2_right_sizing_report.md
 v2_port_utilization_simulation.csv
 v2_port_utilization_simulation_report.md
+v2_port_sizing_scenario_results.csv
+v2_port_sizing_scenario_summary.csv
+v2_port_sizing_scenario_report.md
 v2_right_sizing_validation.csv
 v2_right_sizing_validation_report.md
 v2_executive_site_summary.csv
@@ -50,6 +53,16 @@ v2_executive_site_summary.csv
 
 It combines ranking, readiness score, data confidence, electrical risk, right-sizing, port-use simulation, right-sizing validation, and review flags.
 
+The main V2 port-sizing scenario outputs are:
+
+```text
+v2_port_sizing_scenario_results.csv
+v2_port_sizing_scenario_summary.csv
+v2_port_sizing_scenario_report.md
+```
+
+These stress-test port recommendations under alternate charging-duration, charging-window, peak-demand, and future-demand assumptions.
+
 ## Active V2 chart outputs
 
 Important V2 charts:
@@ -64,6 +77,7 @@ charts/v2_site_readiness_map.png
 charts/v2_site_decision_map.png
 charts/v2_site_decision_map_readme.png
 charts/v2_port_utilization_simulation.png
+charts/v2_port_sizing_scenario_heatmap.png
 charts/v2/utilization_vs_ports_<site>.png
 ```
 
@@ -90,6 +104,7 @@ Package structure:
 ```text
 deliverable_package_v2/README.md
 deliverable_package_v2/package_manifest.json
+deliverable_package_v2/inputs/
 deliverable_package_v2/reports/
 deliverable_package_v2/tables/
 deliverable_package_v2/charts/
@@ -105,6 +120,9 @@ deliverable_package_v2/charts/v2_site_decision_map_readme.png
 deliverable_package_v2/reports/v2_executive_site_summary.md
 deliverable_package_v2/tables/v2_executive_site_summary.csv
 deliverable_package_v2/reports/v2_right_sizing_validation_report.md
+deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
+deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv
+deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 deliverable_package_v2/reports/v2_run_summary.md
 deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
@@ -114,8 +132,8 @@ The V2 package builder uses a clean rebuild by default, so stale copied files ar
 A healthy package has:
 
 ```text
-Copied files: 30/30
-Synced files: 30/30
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 The package manifest stores SHA-256 hashes for each source output and copied package file.
