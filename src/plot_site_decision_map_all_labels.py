@@ -1,32 +1,25 @@
 """Run the V2 GIS decision-map generator with all 12 sites labeled on the report map.
 
 This wrapper keeps the README map less crowded while forcing the full report map
-to label every candidate site. It intentionally uses the same default Matplotlib
-font behavior as the profile heatmap instead of forcing a separate display font.
+to label every candidate site. It uses the shared project chart style so the GIS
+map typography matches the other generated charts.
 """
 
 from __future__ import annotations
 
-import matplotlib as mpl
-
+from chart_style import apply_chart_style, preferred_chart_font
 import plot_site_decision_map as base
 
-HEATMAP_FONT_STACK = ["DejaVu Sans"]
-
-mpl.rcParams.update({
-    "font.family": "sans-serif",
-    "font.sans-serif": HEATMAP_FONT_STACK,
-    "font.serif": HEATMAP_FONT_STACK,
-    "font.monospace": HEATMAP_FONT_STACK,
-})
+SELECTED_FONT = apply_chart_style()
+SELECTED_FONT = preferred_chart_font()
 
 
-def heatmap_style_text(panel_ax, x: float, y: float, value: str, size: float = 6.4, weight: str | None = None, family: str | None = None, color: str = "#111827") -> None:
-    """Draw dashboard text with the same default-style font as the heatmap.
+def project_style_text(panel_ax, x: float, y: float, value: str, size: float = 6.4, weight: str | None = None, family: str | None = None, color: str = "#111827") -> None:
+    """Draw dashboard text with the shared chart font.
 
     The base decision-map dashboard sometimes asks for monospace text to make
-    mini tables align. For visual consistency with the heatmap, this wrapper
-    ignores that requested family and lets Matplotlib use the shared sans font.
+    mini tables align. For consistency across charts, this wrapper ignores that
+    requested family and uses the shared Times New Roman style.
     """
     panel_ax.text(
         x,
@@ -37,12 +30,13 @@ def heatmap_style_text(panel_ax, x: float, y: float, value: str, size: float = 6
         va="top",
         fontsize=size,
         fontweight=weight,
+        fontname=SELECTED_FONT,
         color=color,
         zorder=3,
     )
 
 
-base.text = heatmap_style_text
+base.text = project_style_text
 
 base.MAIN_LABEL_SITE_IDS = {
     "FFX001", "FFX002", "FFX003", "FFX004",
@@ -67,5 +61,5 @@ base.LABEL_OFFSETS.update({
 
 
 if __name__ == "__main__":
-    print("GIS map font style: heatmap/default Matplotlib sans")
+    print(f"GIS map chart font: {SELECTED_FONT}")
     base.main()
