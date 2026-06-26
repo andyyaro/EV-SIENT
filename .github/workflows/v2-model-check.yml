@@ -47,6 +47,9 @@ jobs:
           path: |
             data/outputs/v2_*.csv
             data/outputs/v2_*.md
-            data/outputs/charts/v2_readiness_score_chart.png
+            data/outputs/v2_*.json
+            data/outputs/charts/v2_*.png
             data/outputs/charts/v2/*.png
+            data/outputs/deliverable_package_v2/**
+            docs/assets/charts/v2_site_decision_map_readme.png
           if-no-files-found: warn
