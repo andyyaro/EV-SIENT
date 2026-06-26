@@ -4,7 +4,17 @@
 
 This guide explains how to add new EV charging candidate sites without breaking the model.
 
-Use this when expanding beyond the first six sites.
+The active Phase 2 workflow is V2 on:
+
+```text
+v2-expansion-planning
+```
+
+Active V2 input file:
+
+```text
+data/inputs/real_sites_v2.csv
+```
 
 Template file:
 
@@ -12,30 +22,27 @@ Template file:
 data/inputs/new_sites_template.csv
 ```
 
-Main model input file:
+Stable V1 input file:
 
 ```text
 data/inputs/real_sites_v1.csv
 ```
 
-## Important V1 checker warning
+Use V1 only when reproducing the original stable baseline. Use V2 for current expansion-planning work.
 
-The current official output checker is intentionally locked to the six-site V1 dataset.
+## Important checker warning
 
-If you add, remove, or rename official real candidate sites in `data/inputs/real_sites_v1.csv`, `src/run_all.py` may fail at the final output-check step unless the V1 check rules are updated.
+The V2 checker is intentionally strict. It expects the current 12-site V2 candidate set and the current V2 output/package guardrails.
 
-The rule file is:
-
-```text
-data/config/output_check_rules_v1.json
-```
-
-For a real expansion beyond the six official V1 sites, do one of these before treating the run as a new official checkpoint:
+If you add, remove, or rename official V2 sites in `data/inputs/real_sites_v2.csv`, update these before treating the run as stable:
 
 ```text
-Option A: update output_check_rules_v1.json to match the new official site list and expectations.
-Option B: create a V2 rules/baseline setup so the original V1 benchmark stays preserved.
+src/check_outputs_v2.py
+data/baselines/v2_baseline_snapshot.json
+src/compare_v2_to_baseline.py
 ```
+
+The V1 checker remains locked to the stable V1 baseline.
 
 For synthetic stress tests, do not edit the official input file. Use demo mode instead:
 
@@ -49,24 +56,23 @@ The current template is meant to have the same column names and column order as 
 
 ```text
 data/inputs/new_sites_template.csv
-should match
-data/inputs/real_sites_v1.csv
+should match the active real-sites input being expanded
 ```
 
 The example row uses `NEW001` only as a placeholder. Do not copy `NEW001` into the final model as a real site.
 
-## Simple workflow
+## Simple V2 workflow for adding a site
 
 ```text
 1. Copy the template row from data/inputs/new_sites_template.csv.
 2. Create a new site_id.
 3. Fill in the best public data first.
 4. Label uncertain values clearly in notes.
-5. Add the new row to data/inputs/real_sites_v1.csv.
-6. Update output_check_rules_v1.json or prepare a V2 rules/baseline setup if this is an official expansion.
+5. Add the new row to data/inputs/real_sites_v2.csv only when it is an official V2 expansion.
+6. Update V2 checker and baseline expectations before treating the result as a stable checkpoint.
 7. Run the validator.
-8. Run the full workflow.
-9. Review the rankings, data confidence, action labels, and data-quality report.
+8. Run the full V2 workflow.
+9. Review rankings, data confidence, action labels, data-quality report, right-sizing, and port-sizing scenario output.
 10. Only prioritize outreach for sites that rank well or have major uncertainty.
 ```
 
@@ -102,7 +108,7 @@ parks and recreation centers
 community centers
 public garages
 transit-adjacent parking
-public safety or fleet-support sites, if marked special-use
+special-use public agency sites, if clearly marked special-use
 ```
 
 ## Quick screening questions
@@ -227,70 +233,25 @@ What still needs follow-up?
 Example:
 
 ```text
-Coordinates and address from official facility page; parking and visitors are V1 assumptions; electrical service rating, spare capacity, and emergency disconnect remain unconfirmed.
+Coordinates and address from official facility page; parking and visitors are assumptions; electrical service rating, spare capacity, and emergency disconnect remain unconfirmed.
 ```
 
-## After adding new sites
+## After adding new V2 sites
 
-First decide whether the new rows are a local experiment or an official expansion.
-
-For local experiments, consider demo mode instead of changing `real_sites_v1.csv`.
-
-For an official expansion, update the checker expectations before relying on the final workflow result:
-
-```text
-data/config/output_check_rules_v1.json
-```
-
-Then run:
+For an official V2 expansion, run:
 
 ```bash
-python src/validate_site_data.py
-python src/run_all.py
-python src/build_deliverable_package.py
+python src/validate_site_data.py --input data/inputs/real_sites_v2.csv --output data/outputs/v2_data_quality_report.csv
+python src/run_v2.py
+python src/check_outputs_v2.py
 ```
 
 Then review:
 
 ```text
-data/outputs/data_quality_report.csv
-data/outputs/site_results.csv
-data/outputs/action_matrix.md
-data/outputs/model_run_summary.md
-data/outputs/results_interpretation.md
-data/outputs/charts/readiness_score_chart.png
-data/outputs/charts/data_confidence_chart.png
-data/outputs/charts/profile_rank_stability_chart.png
-```
-
-## What to check after the run
-
-```text
-1. Did the new site appear in site_results.csv?
-2. Did the new site create any ERROR rows in data_quality_report.csv?
-3. Did the new site rank high enough to matter?
-4. Did the new site have low data confidence?
-5. Did the action_label say to advance, verify data, review technically, monitor, or deprioritize?
-6. Did the new site change the top candidate or the stability finding?
-7. Did the final output checker pass with the updated official site expectations?
-```
-
-## When to add outreach rows
-
-Do not reach out for every new site immediately.
-
-First run the model. Then add outreach tasks for:
-
-```text
-sites that rank near the top
-sites with unclear public access
-sites with garage or special-use complexity
-sites where electrical assumptions strongly affect the score
-sites that look promising but have weak input confidence
-```
-
-Add those tasks to:
-
-```text
-data/source_extracts/stakeholder_response_tracker.csv
+data/outputs/v2_site_results.csv
+data/outputs/v2_right_sizing_scenarios.csv
+data/outputs/v2_port_sizing_scenario_summary.csv
+data/outputs/v2_executive_site_summary.csv
+data/outputs/deliverable_package_v2/README.md
 ```
