@@ -143,7 +143,7 @@ data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 
 ### V2 GIS decision map
 
-![V2 GIS decision map preview](docs/assets/charts/v2_site_decision_map_readme.png)
+![V2 GIS decision map preview](docs/assets/charts/v2_site_decision_map_readme.svg)
 
 ### V2 rank stability across profiles
 
