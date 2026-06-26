@@ -25,10 +25,7 @@ import pandas as pd
 try:
     import geopandas as gpd
 except ImportError as exc:
-    raise SystemExit(
-        "GeoPandas is required. Install optional GIS dependencies with: "
-        "pip install -r requirements-gis.txt"
-    ) from exc
+    raise SystemExit("GeoPandas is required. Install optional GIS dependencies with: pip install -r requirements-gis.txt") from exc
 
 try:
     import contextily as ctx
@@ -48,7 +45,6 @@ DEFAULT_PACKAGE_README_CHART = "data/outputs/deliverable_package_v2/charts/v2_si
 WEB_MERCATOR = "EPSG:3857"
 WGS84 = "EPSG:4326"
 TARGET_GEOIDS = {"51059", "51600", "51153", "51683", "51685"}
-
 ACTION_ORDER = ["Advance", "Promising", "High-review", "Monitor", "Special-use"]
 ACTION_COLORS = {
     "Advance": "#1b9e77",
@@ -57,11 +53,9 @@ ACTION_COLORS = {
     "Monitor": "#8c8c8c",
     "Special-use": "#b55a7a",
 }
-
 MAIN_LABEL_SITE_IDS = {"FFX002", "FFX004", "PWC006", "PWC002", "PWC003", "PWC001", "PWC008"}
 README_LABEL_SITE_IDS = {"FFX002", "FFX004", "PWC006", "PWC002", "PWC003"}
 PWC_CLUSTER_IDS = {"PWC001", "PWC002", "PWC004", "PWC007", "PWC008"}
-
 LABEL_OFFSETS = {
     "FFX002": (12, 12),
     "FFX004": (-82, 18),
@@ -176,7 +170,6 @@ def load_site_data(sites_path: Path, executive_path: Path) -> gpd.GeoDataFrame:
         raise ValueError(f"Site input is missing required columns: {missing_sites}")
     if missing_exec:
         raise ValueError(f"Executive summary is missing required columns: {missing_exec}")
-
     merged = executive.merge(sites[["site_id", "lat", "lon"]], on="site_id", how="left")
     merged["lat"] = pd.to_numeric(merged["lat"], errors="coerce")
     merged["lon"] = pd.to_numeric(merged["lon"], errors="coerce")
@@ -185,11 +178,7 @@ def load_site_data(sites_path: Path, executive_path: Path) -> gpd.GeoDataFrame:
     merged = merged.dropna(subset=["lat", "lon"]).copy()
     merged["action_group"] = merged.apply(action_group, axis=1)
     merged["tier_short"] = merged["recommendation_tier"].apply(short_tier)
-    return gpd.GeoDataFrame(
-        merged,
-        geometry=gpd.points_from_xy(merged["lon"], merged["lat"]),
-        crs=WGS84,
-    )
+    return gpd.GeoDataFrame(merged, geometry=gpd.points_from_xy(merged["lon"], merged["lat"]), crs=WGS84)
 
 
 def download_boundary_if_needed(boundary_zip: Path, boundary_url: str, no_download: bool) -> None:
@@ -219,13 +208,7 @@ def add_basemap(ax, alpha: float = 0.98) -> bool:
     if ctx is None:
         return False
     try:
-        ctx.add_basemap(
-            ax,
-            source=ctx.providers.CartoDB.Positron,
-            attribution=ctx.providers.CartoDB.Positron.attribution,
-            attribution_size=6,
-            alpha=alpha,
-        )
+        ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, attribution=ctx.providers.CartoDB.Positron.attribution, attribution_size=6, alpha=alpha)
         return True
     except Exception as exc:
         print(f"Basemap skipped: {exc}")
@@ -267,60 +250,20 @@ def plot_county_context(ax, counties_3857: gpd.GeoDataFrame, basemap_added: bool
         if not label:
             continue
         point = row.geometry.representative_point()
-        ax.text(
-            point.x,
-            point.y,
-            label,
-            ha="center",
-            va="center",
-            fontsize=8,
-            color="#334155",
-            alpha=0.66,
-            path_effects=[pe.withStroke(linewidth=3.5, foreground="white", alpha=0.86)],
-            zorder=2 if basemap_added else 4,
-        )
+        ax.text(point.x, point.y, label, ha="center", va="center", fontsize=8, color="#334155", alpha=0.66, path_effects=[pe.withStroke(linewidth=3.5, foreground="white", alpha=0.86)], zorder=2 if basemap_added else 4)
 
 
 def plot_sites(ax, sites_3857: gpd.GeoDataFrame, size_scale: float = 1.0, rank_fontsize: float = 8.7) -> None:
     high_risk = sites_3857[sites_3857["electrical_risk_level"].astype(str).str.lower() == "high"]
     if not high_risk.empty:
-        ax.scatter(
-            high_risk.geometry.x,
-            high_risk.geometry.y,
-            s=[marker_size(score, size_scale) + 170 * size_scale for score in high_risk["readiness_score"]],
-            facecolors="none",
-            edgecolors="#b91c1c",
-            linewidths=2.8,
-            alpha=0.72,
-            zorder=4,
-        )
-
+        ax.scatter(high_risk.geometry.x, high_risk.geometry.y, s=[marker_size(score, size_scale) + 170 * size_scale for score in high_risk["readiness_score"]], facecolors="none", edgecolors="#b91c1c", linewidths=2.8, alpha=0.72, zorder=4)
     for action in ACTION_ORDER:
         subset = sites_3857[sites_3857["action_group"] == action]
         if subset.empty:
             continue
-        subset.plot(
-            ax=ax,
-            markersize=[marker_size(score, size_scale) for score in subset["readiness_score"]],
-            color=ACTION_COLORS[action],
-            edgecolor=["#7f1d1d" if str(risk).lower() == "high" else "#111827" for risk in subset["electrical_risk_level"]],
-            linewidth=[2.2 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]],
-            alpha=0.94,
-            zorder=5,
-        )
+        subset.plot(ax=ax, markersize=[marker_size(score, size_scale) for score in subset["readiness_score"]], color=ACTION_COLORS[action], edgecolor=["#7f1d1d" if str(risk).lower() == "high" else "#111827" for risk in subset["electrical_risk_level"]], linewidth=[2.2 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]], alpha=0.94, zorder=5)
     for _, row in sites_3857.sort_values("model_rank").iterrows():
-        ax.text(
-            row.geometry.x,
-            row.geometry.y,
-            fmt_int(row.get("model_rank")),
-            ha="center",
-            va="center",
-            fontsize=rank_fontsize,
-            fontweight="bold",
-            color="white",
-            path_effects=[pe.withStroke(linewidth=2.25, foreground="#111827")],
-            zorder=6,
-        )
+        ax.text(row.geometry.x, row.geometry.y, fmt_int(row.get("model_rank")), ha="center", va="center", fontsize=rank_fontsize, fontweight="bold", color="white", path_effects=[pe.withStroke(linewidth=2.25, foreground="#111827")], zorder=6)
 
 
 def label_subset(sites_3857: gpd.GeoDataFrame, label_ids: set[str]) -> gpd.GeoDataFrame:
@@ -334,40 +277,13 @@ def add_site_labels(ax, sites_3857: gpd.GeoDataFrame, label_ids: set[str], fonts
     for _, row in label_subset(sites_3857, label_ids).iterrows():
         site_id = str(row.get("site_id", ""))
         score_text = fmt_score(row.get("readiness_score"))
-        if show_ports:
-            label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text} | {fmt_ports(row)} ports"
-        else:
-            label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text}"
+        label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text} | {fmt_ports(row)} ports" if show_ports else f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text}"
         dx, dy = LABEL_OFFSETS.get(site_id, (10, 10))
-        ax.annotate(
-            label,
-            xy=(row.geometry.x, row.geometry.y),
-            xytext=(dx, dy),
-            textcoords="offset points",
-            ha="right" if dx < 0 else "left",
-            va="center",
-            fontsize=fontsize,
-            color="#111827",
-            arrowprops={"arrowstyle": "-", "lw": 0.55, "color": "#334155", "alpha": 0.68},
-            bbox={"boxstyle": "round,pad=0.20", "fc": "white", "ec": "#cbd5e1", "alpha": 0.94, "lw": 0.55},
-            zorder=7,
-        )
+        ax.annotate(label, xy=(row.geometry.x, row.geometry.y), xytext=(dx, dy), textcoords="offset points", ha="right" if dx < 0 else "left", va="center", fontsize=fontsize, color="#111827", arrowprops={"arrowstyle": "-", "lw": 0.55, "color": "#334155", "alpha": 0.68}, bbox={"boxstyle": "round,pad=0.20", "fc": "white", "ec": "#cbd5e1", "alpha": 0.94, "lw": 0.55}, zorder=7)
 
 
 def add_north_arrow(ax) -> None:
-    ax.annotate(
-        "N",
-        xy=(0.962, 0.925),
-        xytext=(0.962, 0.840),
-        xycoords="axes fraction",
-        ha="center",
-        va="center",
-        fontsize=10,
-        fontweight="bold",
-        arrowprops={"arrowstyle": "-|>", "lw": 1.1, "color": "#111827"},
-        color="#111827",
-        zorder=8,
-    )
+    ax.annotate("N", xy=(0.962, 0.925), xytext=(0.962, 0.840), xycoords="axes fraction", ha="center", va="center", fontsize=10, fontweight="bold", arrowprops={"arrowstyle": "-|>", "lw": 1.1, "color": "#111827"}, color="#111827", zorder=8)
 
 
 def add_scale_bar(ax, length_m: int = 16093) -> None:
@@ -410,24 +326,7 @@ def action_count(sites: gpd.GeoDataFrame, action: str) -> int:
 
 def review_watchlist(sites: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     data = ranked(sites)
-    return data[
-        (data["action_group"].isin(["High-review", "Special-use"]))
-        | (data["electrical_risk_level"].astype(str).str.lower() == "high")
-    ]
-
-
-def decision_lines(sites: gpd.GeoDataFrame) -> list[str]:
-    data = ranked(sites)
-    top = data.iloc[0]
-    pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
-    lines = [f"Top: #{fmt_int(top.get('model_rank'))} {top.get('site_id')} | {fmt_score(top.get('readiness_score'))} | {fmt_ports(top)} ports"]
-    if not pwc.empty:
-        top_pwc = pwc.iloc[0]
-        lines.append(f"Top PWC: #{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} | {fmt_score(top_pwc.get('readiness_score'))} | {fmt_ports(top_pwc)} ports")
-    lines.append("")
-    for _, row in data.iloc[1:4].iterrows():
-        lines.append(f"#{fmt_int(row.get('model_rank'))} {row.get('site_id')} | {fmt_score(row.get('readiness_score'))} | {row.get('action_group')}")
-    return lines
+    return data[(data["action_group"].isin(["High-review", "Special-use"])) | (data["electrical_risk_level"].astype(str).str.lower() == "high")]
 
 
 def review_lines(sites: gpd.GeoDataFrame) -> list[str]:
@@ -441,193 +340,133 @@ def port_rows(sites: gpd.GeoDataFrame) -> list[str]:
     return [f"{row.get('site_id'):<7} {fmt_int(row.get('ports_now')):>2}->{fmt_int(row.get('future_ready_capacity')):<2}" for _, row in ranked(sites).iterrows()]
 
 
-def draw_panel_background(panel_ax) -> None:
+def panel_bg(panel_ax) -> None:
     panel_ax.set_axis_off()
-    card = FancyBboxPatch(
-        (0.01, 0.02),
-        0.98,
-        0.96,
-        transform=panel_ax.transAxes,
-        boxstyle="round,pad=0.016,rounding_size=0.020",
-        linewidth=1.0,
-        edgecolor="#cbd5e1",
-        facecolor="white",
-        alpha=0.99,
-        zorder=1,
-    )
-    panel_ax.add_patch(card)
+    panel_ax.add_patch(FancyBboxPatch((0.01, 0.02), 0.98, 0.96, transform=panel_ax.transAxes, boxstyle="round,pad=0.016,rounding_size=0.020", linewidth=1.0, edgecolor="#cbd5e1", facecolor="white", alpha=0.99, zorder=1))
 
 
-def section_title(panel_ax, title: str, y: float) -> None:
-    panel_ax.text(0.07, y, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=8.8, fontweight="bold", color="#111827", zorder=2)
+def text(panel_ax, x: float, y: float, value: str, size: float = 6.4, weight: str | None = None, family: str | None = None, color: str = "#111827") -> None:
+    panel_ax.text(x, y, value, transform=panel_ax.transAxes, ha="left", va="top", fontsize=size, fontweight=weight, family=family, color=color, zorder=3)
 
 
-def section_rule(panel_ax, y: float) -> None:
+def rule(panel_ax, y: float) -> None:
     panel_ax.plot([0.06, 0.94], [y, y], transform=panel_ax.transAxes, color="#e2e8f0", linewidth=0.8, zorder=2)
 
 
-def draw_metric_pills(panel_ax, sites: gpd.GeoDataFrame, y: float = 0.885) -> None:
-    metrics = [
-        ("Sites", len(sites)),
-        ("Advance", action_count(sites, "Advance")),
-        ("Review", action_count(sites, "High-review")),
-        ("High risk", high_risk_count(sites)),
-    ]
-    box_w = 0.205
-    gap = 0.024
+def draw_metric_pills(panel_ax, sites: gpd.GeoDataFrame) -> None:
+    metrics = [("Sites", len(sites)), ("Advance", action_count(sites, "Advance")), ("Review", action_count(sites, "High-review")), ("High risk", high_risk_count(sites))]
     for index, (label, value) in enumerate(metrics):
-        box_x = 0.07 + index * (box_w + gap)
-        pill = FancyBboxPatch(
-            (box_x, y - 0.062),
-            box_w,
-            0.060,
-            transform=panel_ax.transAxes,
-            boxstyle="round,pad=0.010,rounding_size=0.012",
-            linewidth=0.7,
-            edgecolor="#d0d7de",
-            facecolor="#f8fafc",
-            zorder=2,
-        )
-        panel_ax.add_patch(pill)
-        panel_ax.text(box_x + box_w / 2, y - 0.022, str(value), transform=panel_ax.transAxes, ha="center", va="center", fontsize=11.0, fontweight="bold", color="#111827", zorder=3)
-        panel_ax.text(box_x + box_w / 2, y - 0.047, label, transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.2, color="#475569", zorder=3)
+        x = 0.07 + index * 0.229
+        panel_ax.add_patch(FancyBboxPatch((x, 0.842), 0.205, 0.058, transform=panel_ax.transAxes, boxstyle="round,pad=0.010,rounding_size=0.012", linewidth=0.7, edgecolor="#d0d7de", facecolor="#f8fafc", zorder=2))
+        panel_ax.text(x + 0.1025, 0.882, str(value), transform=panel_ax.transAxes, ha="center", va="center", fontsize=10.8, fontweight="bold", color="#111827", zorder=3)
+        panel_ax.text(x + 0.1025, 0.857, label, transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.2, color="#475569", zorder=3)
 
 
-def draw_text_lines(panel_ax, x: float, y: float, lines: list[str], fontsize: float = 6.6, family: str | None = None, line_gap: float = 0.022) -> float:
-    for line in lines:
-        panel_ax.text(x, y, line, transform=panel_ax.transAxes, ha="left", va="top", fontsize=fontsize, family=family, color="#111827", zorder=2)
-        y -= line_gap
-    return y
-
-
-def draw_pwc_cluster_table(panel_ax, sites: gpd.GeoDataFrame, y: float) -> float:
-    cluster = ranked(sites[sites["site_id"].astype(str).isin(PWC_CLUSTER_IDS)]).copy()
-    section_title(panel_ax, "PWC cluster", y)
-    y -= 0.042
-    panel_ax.text(0.07, y, "Rank Site    Score Action       Ports", transform=panel_ax.transAxes, ha="left", va="top", fontsize=6.1, family="monospace", color="#64748b", zorder=2)
-    y -= 0.024
-    for _, row in cluster.iterrows():
+def draw_pwc_table(panel_ax, sites: gpd.GeoDataFrame, y: float) -> None:
+    text(panel_ax, 0.07, y, "PWC cluster", size=8.6, weight="bold")
+    y -= 0.038
+    text(panel_ax, 0.07, y, "Rank Site    Score Action       Ports", size=5.95, family="monospace", color="#64748b")
+    y -= 0.023
+    for _, row in ranked(sites[sites["site_id"].astype(str).isin(PWC_CLUSTER_IDS)]).iterrows():
         color = ACTION_COLORS.get(str(row.get("action_group", "")), "#64748b")
-        panel_ax.scatter([0.082], [y - 0.002], transform=panel_ax.transAxes, s=30, color=color, edgecolors="#111827", linewidths=0.45, zorder=3)
-        panel_ax.text(
-            0.105,
-            y,
-            f"#{fmt_int(row.get('model_rank')):<2} {row.get('site_id'):<7} {fmt_score(row.get('readiness_score')):<5} {str(row.get('action_group')):<11} {fmt_ports(row)}",
-            transform=panel_ax.transAxes,
-            ha="left",
-            va="top",
-            fontsize=6.05,
-            family="monospace",
-            color="#111827",
-            zorder=2,
-        )
-        y -= 0.021
-    return y
+        panel_ax.scatter([0.083], [y - 0.002], transform=panel_ax.transAxes, s=30, color=color, edgecolors="#111827", linewidths=0.45, zorder=3)
+        text(panel_ax, 0.108, y, f"#{fmt_int(row.get('model_rank')):<2} {row.get('site_id'):<7} {fmt_score(row.get('readiness_score')):<5} {str(row.get('action_group')):<11} {fmt_ports(row)}", size=5.95, family="monospace")
+        y -= 0.020
 
 
-def draw_port_snapshot(panel_ax, sites: gpd.GeoDataFrame, y: float) -> float:
-    section_title(panel_ax, "Port plan", y)
+def draw_port_snapshot(panel_ax, sites: gpd.GeoDataFrame, y: float) -> None:
+    text(panel_ax, 0.07, y, "Port plan", size=8.6, weight="bold")
     rows = port_rows(sites)
     left = rows[:6]
     right = rows[6:]
-    y -= 0.040
-    panel_ax.text(0.07, y, "Site    Now->Future", transform=panel_ax.transAxes, ha="left", va="top", fontsize=5.9, family="monospace", color="#64748b", zorder=2)
-    panel_ax.text(0.54, y, "Site    Now->Future", transform=panel_ax.transAxes, ha="left", va="top", fontsize=5.9, family="monospace", color="#64748b", zorder=2)
-    y0 = y - 0.022
-    for idx, text in enumerate(left):
-        panel_ax.text(0.07, y0 - idx * 0.019, text, transform=panel_ax.transAxes, ha="left", va="top", fontsize=5.85, family="monospace", color="#111827", zorder=2)
-    for idx, text in enumerate(right):
-        panel_ax.text(0.54, y0 - idx * 0.019, text, transform=panel_ax.transAxes, ha="left", va="top", fontsize=5.85, family="monospace", color="#111827", zorder=2)
-    return y0 - 6 * 0.019
+    y -= 0.036
+    text(panel_ax, 0.07, y, "Site    Now->Future", size=5.7, family="monospace", color="#64748b")
+    text(panel_ax, 0.54, y, "Site    Now->Future", size=5.7, family="monospace", color="#64748b")
+    y -= 0.021
+    for idx, value in enumerate(left):
+        text(panel_ax, 0.07, y - idx * 0.018, value, size=5.7, family="monospace")
+    for idx, value in enumerate(right):
+        text(panel_ax, 0.54, y - idx * 0.018, value, size=5.7, family="monospace")
 
 
 def draw_encoding(panel_ax, y: float) -> None:
-    section_title(panel_ax, "Map encoding", y)
-    items = [
-        ("Advance", ACTION_COLORS["Advance"], "filled"),
-        ("Promising", ACTION_COLORS["Promising"], "filled"),
-        ("High-review", ACTION_COLORS["High-review"], "filled"),
-        ("Monitor", ACTION_COLORS["Monitor"], "filled"),
-        ("Special-use", ACTION_COLORS["Special-use"], "filled"),
-        ("High electrical risk", "#b91c1c", "halo"),
-        ("Number = model rank", "#4c78a8", "number"),
-    ]
-    x_left = 0.09
-    x_right = 0.54
-    start_y = y - 0.045
-    row_gap = 0.026
+    text(panel_ax, 0.07, y, "Map encoding", size=8.6, weight="bold")
+    items = [("Advance", ACTION_COLORS["Advance"], "filled"), ("Promising", ACTION_COLORS["Promising"], "filled"), ("High-review", ACTION_COLORS["High-review"], "filled"), ("Monitor", ACTION_COLORS["Monitor"], "filled"), ("Special-use", ACTION_COLORS["Special-use"], "filled"), ("High electrical risk", "#b91c1c", "halo"), ("Number = model rank", "#4c78a8", "number")]
+    start_y = y - 0.043
     for idx, (label, color, mode) in enumerate(items):
-        col_x = x_left if idx < 4 else x_right
-        row_y = start_y - (idx if idx < 4 else idx - 4) * row_gap
+        x = 0.09 if idx < 4 else 0.54
+        row_y = start_y - (idx if idx < 4 else idx - 4) * 0.024
         if mode == "halo":
-            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=48, facecolors="none", edgecolors=color, linewidths=1.7, zorder=3)
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=46, facecolors="none", edgecolors=color, linewidths=1.7, zorder=3)
         elif mode == "number":
-            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=48, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
-            panel_ax.text(col_x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=5.6, fontweight="bold", color="white", zorder=4)
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=46, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+            panel_ax.text(x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=5.5, fontweight="bold", color="white", zorder=4)
         else:
-            panel_ax.scatter([col_x], [row_y], transform=panel_ax.transAxes, s=48, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
-        panel_ax.text(col_x + 0.030, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=6.5, color="#111827", zorder=3)
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=46, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+        panel_ax.text(x + 0.030, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=6.25, color="#111827", zorder=3)
 
 
 def draw_dashboard_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
-    draw_panel_background(panel_ax)
-    section_title(panel_ax, "Decision dashboard", 0.948)
-    draw_metric_pills(panel_ax, sites, y=0.895)
-    section_rule(panel_ax, 0.802)
-
-    section_title(panel_ax, "Top decisions", 0.775)
-    y = draw_text_lines(panel_ax, 0.07, 0.735, decision_lines(sites), fontsize=6.35, line_gap=0.022)
-    section_rule(panel_ax, y - 0.012)
-
-    y = draw_pwc_cluster_table(panel_ax, sites, y - 0.038)
-    section_rule(panel_ax, y - 0.012)
-
-    section_title(panel_ax, "Review watchlist", y - 0.038)
-    y = draw_text_lines(panel_ax, 0.07, y - 0.080, review_lines(sites), fontsize=6.35, line_gap=0.021)
-    section_rule(panel_ax, y - 0.012)
-
-    y = draw_port_snapshot(panel_ax, sites, y - 0.038)
-    section_rule(panel_ax, y - 0.010)
-
-    draw_encoding(panel_ax, y - 0.036)
-
-
-def draw_readme_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
-    panel_ax.set_axis_off()
-    card = FancyBboxPatch(
-        (0.03, 0.50),
-        0.94,
-        0.46,
-        transform=panel_ax.transAxes,
-        boxstyle="round,pad=0.016,rounding_size=0.020",
-        linewidth=1.0,
-        edgecolor="#cbd5e1",
-        facecolor="white",
-        alpha=0.98,
-        zorder=1,
-    )
-    panel_ax.add_patch(card)
+    panel_bg(panel_ax)
+    text(panel_ax, 0.07, 0.950, "Decision dashboard", size=9.2, weight="bold")
+    draw_metric_pills(panel_ax, sites)
+    rule(panel_ax, 0.812)
 
     data = ranked(sites)
     top = data.iloc[0]
     pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
-    top_pwc = pwc.iloc[0] if not pwc.empty else None
+    top_pwc = pwc.iloc[0]
+    text(panel_ax, 0.07, 0.785, "Top decisions", size=8.6, weight="bold")
+    top_lines = [
+        f"Top: #{fmt_int(top.get('model_rank'))} {top.get('site_id')} | {fmt_score(top.get('readiness_score'))} | {fmt_ports(top)} ports",
+        f"Top PWC: #{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} | {fmt_score(top_pwc.get('readiness_score'))} | {fmt_ports(top_pwc)} ports",
+        f"Next: #{fmt_int(data.iloc[1].get('model_rank'))} {data.iloc[1].get('site_id')} • #{fmt_int(data.iloc[2].get('model_rank'))} {data.iloc[2].get('site_id')} • #{fmt_int(data.iloc[3].get('model_rank'))} {data.iloc[3].get('site_id')}",
+    ]
+    y = 0.747
+    for line in top_lines:
+        text(panel_ax, 0.07, y, line, size=6.15)
+        y -= 0.023
+    rule(panel_ax, 0.665)
+
+    draw_pwc_table(panel_ax, sites, 0.640)
+    rule(panel_ax, 0.485)
+
+    text(panel_ax, 0.07, 0.460, "Review watchlist", size=8.6, weight="bold")
+    y = 0.425
+    for line in review_lines(sites):
+        text(panel_ax, 0.07, y, line, size=6.15)
+        y -= 0.021
+    rule(panel_ax, 0.350)
+
+    draw_port_snapshot(panel_ax, sites, 0.325)
+    rule(panel_ax, 0.170)
+    draw_encoding(panel_ax, 0.145)
+
+
+def draw_readme_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
+    panel_bg(panel_ax)
+    data = ranked(sites)
+    top = data.iloc[0]
+    pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
+    top_pwc = pwc.iloc[0]
+    text(panel_ax, 0.07, 0.925, "Top decisions", size=9.0, weight="bold")
     lines = [
-        "Top decisions",
-        "",
         f"#{fmt_int(top.get('model_rank'))} {top.get('site_id')} — top overall",
         f"{fmt_score(top.get('readiness_score'))} | {fmt_ports(top)} ports",
+        "",
+        f"#{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} — top PWC",
+        f"{fmt_score(top_pwc.get('readiness_score'))} | {fmt_ports(top_pwc)} ports",
+        "",
+        "PWC cluster",
     ]
-    if top_pwc is not None:
-        lines.extend(["", f"#{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} — top PWC", f"{fmt_score(top_pwc.get('readiness_score'))} | {fmt_ports(top_pwc)} ports"])
-    lines.extend(["", "PWC cluster"])
     for _, row in ranked(sites[sites["site_id"].astype(str).isin(PWC_CLUSTER_IDS)]).head(3).iterrows():
         lines.append(f"#{fmt_int(row.get('model_rank'))} {row.get('site_id')} — {row.get('action_group')} | {fmt_ports(row)}")
-    panel_ax.text(0.09, 0.93, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=8.0, color="#111827", linespacing=1.16, zorder=2)
-
-    draw_panel_background(panel_ax)
-    section_title(panel_ax, "Map encoding", 0.40)
-    draw_encoding(panel_ax, 0.36)
+    y = 0.875
+    for line in lines:
+        text(panel_ax, 0.07, y, line, size=7.4)
+        y -= 0.036 if line == "" else 0.028
+    rule(panel_ax, 0.390)
+    draw_encoding(panel_ax, 0.350)
 
 
 def plot_map_core(ax, sites_3857: gpd.GeoDataFrame, counties_3857: gpd.GeoDataFrame, label_ids: set[str], compact: bool = False) -> bool:
@@ -647,18 +486,14 @@ def plot_gis_decision_map_report(sites: gpd.GeoDataFrame, counties: gpd.GeoDataF
     ensure_parent(output_path)
     sites_3857 = sites.to_crs(WEB_MERCATOR)
     counties_3857 = counties.to_crs(WEB_MERCATOR)
-
     fig = plt.figure(figsize=(17.4, 10.6), facecolor="white")
     ax = fig.add_axes([0.045, 0.112, 0.690, 0.768])
     panel_ax = fig.add_axes([0.755, 0.112, 0.230, 0.768])
-
     basemap_added = plot_map_core(ax, sites_3857, counties_3857, MAIN_LABEL_SITE_IDS, compact=False)
     draw_dashboard_panel(panel_ax, sites)
-
     subtitle = "Official boundaries, basemap context, ranked candidates, decision dashboard, action categories, and port-sizing notes."
     if not basemap_added:
         subtitle = "Official county boundaries and ranked candidate sites; basemap skipped or unavailable."
-
     fig.suptitle("V2 EV Charging Candidate Sites — GIS Decision Map", fontsize=14.6, fontweight="bold", y=0.967)
     fig.text(0.5, 0.922, subtitle, ha="center", fontsize=9.2, color="#111827")
     fig.text(0.5, 0.025, "Planning screen only — not an engineering, utility, permitting, procurement, or construction approval.", ha="center", fontsize=8.4, color="#475569")
@@ -670,18 +505,14 @@ def plot_gis_decision_map_readme(sites: gpd.GeoDataFrame, counties: gpd.GeoDataF
     ensure_parent(output_path)
     sites_3857 = sites.to_crs(WEB_MERCATOR)
     counties_3857 = counties.to_crs(WEB_MERCATOR)
-
     fig = plt.figure(figsize=(14.6, 8.0), facecolor="white")
     ax = fig.add_axes([0.045, 0.130, 0.690, 0.760])
     panel_ax = fig.add_axes([0.758, 0.155, 0.220, 0.695])
-
     basemap_added = plot_map_core(ax, sites_3857, counties_3857, README_LABEL_SITE_IDS, compact=True)
     draw_readme_panel(panel_ax, sites)
-
     subtitle = "Ranked public charging candidates with action categories, review flags, and PWC cluster notes."
     if not basemap_added:
         subtitle = "Ranked public charging candidates; basemap skipped or unavailable."
-
     fig.suptitle("V2 EV Charging Candidate Sites", fontsize=14.0, fontweight="bold", y=0.968)
     fig.text(0.5, 0.925, subtitle, ha="center", fontsize=8.8, color="#111827")
     fig.text(0.5, 0.030, "Planning screen only — not design, permitting, utility approval, procurement, or construction direction.", ha="center", fontsize=7.8, color="#475569")
@@ -696,41 +527,22 @@ def refresh_package_manifest_hashes(manifest_path: Path, synced_pairs: list[tupl
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return
-
     files = manifest.get("files", [])
     existing_destinations = {Path(str(record.get("destination", ""))).as_posix() for record in files}
     for source, destination in synced_pairs or []:
         destination_text = destination.as_posix()
         if destination_text not in existing_destinations:
-            files.append({
-                "source": source.as_posix(),
-                "destination": destination_text,
-                "copied": False,
-                "size_bytes": 0,
-                "source_sha256": None,
-                "destination_sha256": None,
-                "in_sync": False,
-            })
+            files.append({"source": source.as_posix(), "destination": destination_text, "copied": False, "size_bytes": 0, "source_sha256": None, "destination_sha256": None, "in_sync": False})
             existing_destinations.add(destination_text)
-
     for record in files:
         source = Path(str(record.get("source", "")))
         destination = Path(str(record.get("destination", "")))
         if not source.exists() or not destination.exists() or source.stat().st_size == 0 or destination.stat().st_size == 0:
-            record["copied"] = False
-            record["size_bytes"] = 0
-            record["source_sha256"] = None
-            record["destination_sha256"] = None
-            record["in_sync"] = False
+            record.update({"copied": False, "size_bytes": 0, "source_sha256": None, "destination_sha256": None, "in_sync": False})
             continue
         source_hash = sha256_file(source)
         destination_hash = sha256_file(destination)
-        record["copied"] = True
-        record["size_bytes"] = destination.stat().st_size
-        record["source_sha256"] = source_hash
-        record["destination_sha256"] = destination_hash
-        record["in_sync"] = source_hash == destination_hash
-
+        record.update({"copied": True, "size_bytes": destination.stat().st_size, "source_sha256": source_hash, "destination_sha256": destination_hash, "in_sync": source_hash == destination_hash})
     manifest["expected_count"] = len(files)
     manifest["copied_count"] = len([record for record in files if record.get("copied")])
     manifest["synced_count"] = len([record for record in files if record.get("copied") and record.get("in_sync")])
@@ -741,21 +553,12 @@ def refresh_package_manifest_hashes(manifest_path: Path, synced_pairs: list[tupl
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
 
-def sync_generated_maps(
-    report_output: Path,
-    readme_output: Path,
-    docs_readme_output: Path,
-    package_report_chart: Path,
-    package_readme_chart: Path,
-    sync_package: bool = True,
-    sync_docs: bool = True,
-) -> dict[str, bool]:
+def sync_generated_maps(report_output: Path, readme_output: Path, docs_readme_output: Path, package_report_chart: Path, package_readme_chart: Path, sync_package: bool = True, sync_docs: bool = True) -> dict[str, bool]:
     status = {"docs_readme": False, "package_report": False, "package_readme": False}
     if sync_docs:
         ensure_parent(docs_readme_output)
         shutil.copy2(readme_output, docs_readme_output)
         status["docs_readme"] = True
-
     if sync_package:
         package_root = package_report_chart.parents[1]
         if package_root.exists():
@@ -763,10 +566,7 @@ def sync_generated_maps(
             ensure_parent(package_readme_chart)
             shutil.copy2(report_output, package_report_chart)
             shutil.copy2(readme_output, package_readme_chart)
-            refresh_package_manifest_hashes(
-                package_root / "package_manifest.json",
-                [(report_output, package_report_chart), (readme_output, package_readme_chart)],
-            )
+            refresh_package_manifest_hashes(package_root / "package_manifest.json", [(report_output, package_report_chart), (readme_output, package_readme_chart)])
             status["package_report"] = True
             status["package_readme"] = True
     return status
@@ -803,23 +603,12 @@ def main() -> None:
     boundary_zip = Path(args.boundary_zip)
     package_chart = Path(args.package_chart)
     package_readme_chart = Path(args.package_readme_chart)
-
     sites = load_site_data(sites_path, executive_path)
     download_boundary_if_needed(boundary_zip, args.boundary_url, args.no_download_boundary)
     counties = load_county_boundaries(boundary_zip)
-
     plot_gis_decision_map_report(sites, counties, output_path)
     plot_gis_decision_map_readme(sites, counties, readme_output_path)
-    sync_status = sync_generated_maps(
-        output_path,
-        readme_output_path,
-        docs_readme_output_path,
-        package_chart,
-        package_readme_chart,
-        sync_package=not args.no_sync_package,
-        sync_docs=not args.no_sync_docs,
-    )
-
+    sync_status = sync_generated_maps(output_path, readme_output_path, docs_readme_output_path, package_chart, package_readme_chart, sync_package=not args.no_sync_package, sync_docs=not args.no_sync_docs)
     print("V2 GIS DECISION MAPS")
     print("--------------------")
     print(f"Sites: {sites_path}")
