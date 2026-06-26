@@ -8,6 +8,7 @@ This file explains the main parts of the repo without making you read every file
 - [START_HERE.md](../START_HERE.md) — shortest project entry point
 - [REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — step-by-step local reproduction checklist
 - [README.md](../README.md) — project overview
+- [V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md) — checkpoint for the port-sizing scenario layer
 
 ## Main folders
 
@@ -31,10 +32,17 @@ python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
-The V2 runner generates the active Phase 2 prototype outputs and the clean package at:
+The V2 runner has 24 steps and generates the active Phase 2 prototype outputs and the clean package at:
 
 ```text
 data/outputs/deliverable_package_v2/
+```
+
+A healthy V2 package reports:
+
+```text
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 ## Stable V1 workflow
@@ -58,13 +66,14 @@ data/outputs/deliverable_package/
 
 | File | Purpose |
 |---|---|
-| [src/run_v2.py](../src/run_v2.py) | Runs the full active V2 workflow. |
-| [src/check_outputs_v2.py](../src/check_outputs_v2.py) | Checks V2 outputs, required columns, required files, package, manifest, baseline comparison, and all 12 candidate sites. |
-| [src/build_v2_deliverable_package.py](../src/build_v2_deliverable_package.py) | Builds the clean V2 deliverable package. |
+| [src/run_v2.py](../src/run_v2.py) | Runs the full active 24-step V2 workflow. |
+| [src/check_outputs_v2.py](../src/check_outputs_v2.py) | Checks V2 outputs, required files, scenario layer, package, manifest, baseline comparison, and all 12 candidate sites. |
+| [src/build_v2_deliverable_package.py](../src/build_v2_deliverable_package.py) | Builds the clean 35-file V2 deliverable package. |
 | [src/build_v2_executive_summary.py](../src/build_v2_executive_summary.py) | Builds the V2 executive site summary table and report. |
 | [src/run_electrical_risk_scenarios.py](../src/run_electrical_risk_scenarios.py) | Runs V2 electrical-feasibility scenario screening. |
 | [src/run_right_sizing_scenarios.py](../src/run_right_sizing_scenarios.py) | Builds near-term, 2035, and 2050 port recommendations. |
 | [src/run_port_utilization_simulation.py](../src/run_port_utilization_simulation.py) | Runs the simple V2 port-use simulation. |
+| [src/run_port_sizing_scenario_analysis.py](../src/run_port_sizing_scenario_analysis.py) | Stress-tests port recommendations under alternate charging and demand assumptions. |
 | [src/validate_right_sizing_with_simulation.py](../src/validate_right_sizing_with_simulation.py) | Compares right-sizing recommendations with port-use simulation results. |
 | [src/generate_run_summary_v2.py](../src/generate_run_summary_v2.py) | Generates the V2 run summary. |
 | [src/write_v2_workflow_success_marker.py](../src/write_v2_workflow_success_marker.py) | Writes the V2 workflow manifest. |
@@ -95,6 +104,7 @@ data/outputs/deliverable_package/
 | File | Purpose |
 |---|---|
 | [data/inputs/real_sites_v2.csv](../data/inputs/real_sites_v2.csv) | Active V2 candidate-site input dataset. |
+| [data/inputs/v2_port_sizing_scenarios.csv](../data/inputs/v2_port_sizing_scenarios.csv) | V2 port-sizing scenario assumptions. |
 | [data/inputs/real_sites_v1.csv](../data/inputs/real_sites_v1.csv) | Stable V1 candidate-site input dataset. |
 | [data/inputs/new_sites_template.csv](../data/inputs/new_sites_template.csv) | Template for new candidate sites. |
 | [data/config/scoring_profiles.csv](../data/config/scoring_profiles.csv) | Scoring-priority profiles. |
@@ -118,6 +128,9 @@ data/outputs/v2_right_sizing_scenarios.csv
 data/outputs/v2_right_sizing_report.md
 data/outputs/v2_port_utilization_simulation.csv
 data/outputs/v2_port_utilization_simulation_report.md
+data/outputs/v2_port_sizing_scenario_results.csv
+data/outputs/v2_port_sizing_scenario_summary.csv
+data/outputs/v2_port_sizing_scenario_report.md
 data/outputs/v2_right_sizing_validation.csv
 data/outputs/v2_right_sizing_validation_report.md
 data/outputs/v2_executive_site_summary.csv
@@ -136,7 +149,10 @@ data/outputs/charts/v2_data_confidence_chart.png
 data/outputs/charts/v2_profile_score_heatmap.png
 data/outputs/charts/v2_profile_rank_stability_chart.png
 data/outputs/charts/v2_site_readiness_map.png
+data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
 data/outputs/charts/v2_port_utilization_simulation.png
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
 ## Deliverable packages
@@ -151,6 +167,7 @@ The V2 package contains:
 ```text
 README.md
 package_manifest.json
+inputs/
 reports/
 tables/
 charts/
@@ -175,8 +192,9 @@ See [DEMO_MODE_GUIDE.md](DEMO_MODE_GUIDE.md).
 2. `data/outputs/deliverable_package_v2/README.md`
 3. `data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md`
 4. `data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md`
-5. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
-6. `data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md`
+5. `data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md`
+6. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
+7. `data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md`
 
 ## What not to edit first
 
