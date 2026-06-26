@@ -1,18 +1,7 @@
 """Create a GIS-based V2 EV charging site decision map.
 
-This is a true map redesign. It uses GeoPandas with an official county
-boundary shapefile and, when available, a light web basemap from Contextily.
-
-Default inputs:
-- data/inputs/real_sites_v2.csv
-- data/outputs/v2_executive_site_summary.csv
-
-Default output:
-- data/outputs/charts/v2_site_decision_map.png
-
-Install optional GIS dependencies before running:
-
-    pip install -r requirements-gis.txt
+This is the presentation GIS map. It uses GeoPandas with official Census county
+boundaries and, when available, a light Contextily basemap.
 """
 
 from __future__ import annotations
@@ -34,16 +23,12 @@ import pandas as pd
 
 try:
     import geopandas as gpd
-except ImportError as exc:  # pragma: no cover - friendly runtime message
-    raise SystemExit(
-        "GeoPandas is required for the GIS decision map.\n"
-        "Install the optional GIS dependencies with:\n\n"
-        "    pip install -r requirements-gis.txt\n"
-    ) from exc
+except ImportError as exc:
+    raise SystemExit("GeoPandas is required. Install optional GIS dependencies with: pip install -r requirements-gis.txt") from exc
 
 try:
     import contextily as ctx
-except ImportError:  # Contextily is optional; map still works without tiles.
+except ImportError:
     ctx = None
 
 DEFAULT_SITES = "data/inputs/real_sites_v2.csv"
@@ -53,16 +38,8 @@ DEFAULT_BOUNDARY_ZIP = "data/source_extracts/gis/tl_2024_us_county.zip"
 DEFAULT_BOUNDARY_URL = "https://www2.census.gov/geo/tiger/TIGER2024/COUNTY/tl_2024_us_county.zip"
 WEB_MERCATOR = "EPSG:3857"
 WGS84 = "EPSG:4326"
-
-# Target local geographies plus small independent cities inside/near the PWC area.
-TARGET_GEOIDS = {
-    "51059",  # Fairfax County
-    "51600",  # Fairfax City
-    "51153",  # Prince William County
-    "51683",  # Manassas City
-    "51685",  # Manassas Park City
-}
-
+TARGET_GEOIDS = {"51059", "51600", "51153", "51683", "51685"}
+ACTION_ORDER = ["Advance", "Promising", "High-review", "Monitor", "Special-use"]
 ACTION_COLORS = {
     "Advance": "#1b9e77",
     "Promising": "#4c78a8",
@@ -70,21 +47,16 @@ ACTION_COLORS = {
     "Monitor": "#8c8c8c",
     "Special-use": "#b55a7a",
 }
-
-ACTION_ORDER = ["Advance", "Promising", "High-review", "Monitor", "Special-use"]
-
-# Only label the sites that carry the story. All sites still get ranked markers.
-ALWAYS_LABEL_SITE_IDS = {"FFX002", "FFX004", "PWC006", "PWC002", "PWC003", "PWC008", "PWC001"}
-
+LABEL_SITE_IDS = {"FFX002", "FFX004", "PWC006", "PWC002", "PWC003", "PWC008", "PWC001"}
 LABEL_OFFSETS = {
     "FFX002": (12, 12),
-    "FFX004": (-80, 18),
-    "PWC006": (-82, -12),
-    "FFX001": (-82, -14),
-    "PWC002": (-90, 14),
+    "FFX004": (-82, 18),
+    "PWC006": (-84, -12),
+    "FFX001": (-84, -14),
+    "PWC002": (-92, 14),
     "PWC003": (12, -26),
     "PWC008": (14, -20),
-    "PWC001": (-82, 28),
+    "PWC001": (-84, 28),
 }
 
 
@@ -103,37 +75,33 @@ def safe_float(value: Any) -> float | None:
 
 def safe_int(value: Any) -> int | None:
     number = safe_float(value)
-    if number is None:
-        return None
-    return int(round(number))
+    return int(round(number)) if number is not None else None
 
 
-def format_int(value: Any) -> str:
+def fmt_int(value: Any) -> str:
     number = safe_int(value)
     return str(number) if number is not None else "-"
 
 
 def short_tier(value: Any) -> str:
-    text = str(value or "")
-    lower = text.lower()
-    if "tier 1" in lower:
+    text = str(value or "").lower()
+    if "tier 1" in text:
         return "Tier 1"
-    if "tier 2" in lower:
+    if "tier 2" in text:
         return "Tier 2"
-    if "tier 3" in lower:
+    if "tier 3" in text:
         return "Tier 3"
-    if "high-review" in lower:
+    if "high-review" in text:
         return "High-review"
-    if "special-use" in lower or "low public-priority" in lower:
+    if "special-use" in text or "low public-priority" in text:
         return "Special-use"
-    return text if text else "Unclassified"
+    return str(value or "Unclassified")
 
 
 def action_group(row: pd.Series) -> str:
     tier = short_tier(row.get("recommendation_tier", ""))
     strategy = str(row.get("expansion_strategy", "")).lower()
     site_id = str(row.get("site_id", ""))
-
     if tier == "Special-use" or site_id == "PWC003" or "do_not_advance" in strategy:
         return "Special-use"
     if tier == "High-review" or "review" in strategy:
@@ -147,9 +115,7 @@ def action_group(row: pd.Series) -> str:
 
 def marker_size(score: Any) -> float:
     number = safe_float(score)
-    if number is None:
-        return 140
-    return 85 + number * 7.0
+    return 140 if number is None else 85 + number * 7.0
 
 
 def review_note(row: pd.Series) -> str:
@@ -158,7 +124,7 @@ def review_note(row: pd.Series) -> str:
     if flags and flags.lower() != "nan":
         return flags
     if site_id == "PWC002":
-        return "garage / Fire Marshal / AHJ review"
+        return "garage / AHJ / electrical review"
     if site_id == "PWC003":
         return "special-use or public-access decision"
     if site_id == "PWC008":
@@ -169,23 +135,16 @@ def review_note(row: pd.Series) -> str:
 
 
 def load_site_data(sites_path: Path, executive_path: Path) -> gpd.GeoDataFrame:
-    if not sites_path.exists():
-        raise FileNotFoundError(f"Site input file not found: {sites_path}")
-    if not executive_path.exists():
-        raise FileNotFoundError(f"Executive summary file not found: {executive_path}")
-
     sites = pd.read_csv(sites_path)
     executive = pd.read_csv(executive_path)
-
-    required_site_cols = {"site_id", "lat", "lon"}
-    missing_site_cols = sorted(required_site_cols - set(sites.columns))
-    if missing_site_cols:
-        raise ValueError(f"Site input is missing required columns: {missing_site_cols}")
-
-    required_exec_cols = {"model_rank", "site_id", "site_name", "readiness_score", "recommendation_tier"}
-    missing_exec_cols = sorted(required_exec_cols - set(executive.columns))
-    if missing_exec_cols:
-        raise ValueError(f"Executive summary is missing required columns: {missing_exec_cols}")
+    required_sites = {"site_id", "lat", "lon"}
+    required_exec = {"model_rank", "site_id", "site_name", "readiness_score", "recommendation_tier"}
+    missing_sites = sorted(required_sites - set(sites.columns))
+    missing_exec = sorted(required_exec - set(executive.columns))
+    if missing_sites:
+        raise ValueError(f"Site input is missing required columns: {missing_sites}")
+    if missing_exec:
+        raise ValueError(f"Executive summary is missing required columns: {missing_exec}")
 
     merged = executive.merge(sites[["site_id", "lat", "lon"]], on="site_id", how="left")
     merged["lat"] = pd.to_numeric(merged["lat"], errors="coerce")
@@ -195,22 +154,14 @@ def load_site_data(sites_path: Path, executive_path: Path) -> gpd.GeoDataFrame:
     merged = merged.dropna(subset=["lat", "lon"]).copy()
     merged["action_group"] = merged.apply(action_group, axis=1)
     merged["tier_short"] = merged["recommendation_tier"].apply(short_tier)
-
-    return gpd.GeoDataFrame(
-        merged,
-        geometry=gpd.points_from_xy(merged["lon"], merged["lat"]),
-        crs=WGS84,
-    )
+    return gpd.GeoDataFrame(merged, geometry=gpd.points_from_xy(merged["lon"], merged["lat"]), crs=WGS84)
 
 
 def download_boundary_if_needed(boundary_zip: Path, boundary_url: str, no_download: bool) -> None:
     if boundary_zip.exists() and boundary_zip.stat().st_size > 0:
         return
     if no_download:
-        raise FileNotFoundError(
-            f"Boundary shapefile ZIP not found: {boundary_zip}\n"
-            "Download it manually or rerun without --no-download-boundary."
-        )
+        raise FileNotFoundError(f"Boundary ZIP not found: {boundary_zip}")
     ensure_parent(boundary_zip)
     print(f"Downloading county boundary shapefile: {boundary_url}")
     urllib.request.urlretrieve(boundary_url, boundary_zip)
@@ -225,7 +176,7 @@ def load_county_boundaries(boundary_zip: Path) -> gpd.GeoDataFrame:
     if "GEOID" in counties.columns:
         counties = counties[counties["GEOID"].astype(str).isin(TARGET_GEOIDS)].copy()
     if counties.empty:
-        raise ValueError("County shapefile loaded, but target Fairfax / Prince William geographies were not found.")
+        raise ValueError("Target county boundaries were not found in the shapefile.")
     return counties
 
 
@@ -233,29 +184,23 @@ def add_basemap(ax) -> bool:
     if ctx is None:
         return False
     try:
-        ctx.add_basemap(
-            ax,
-            source=ctx.providers.CartoDB.Positron,
-            attribution_size=6,
-            alpha=0.98,
-        )
+        ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, attribution_size=6, alpha=0.98)
         return True
-    except Exception as exc:  # pragma: no cover - depends on network/tile provider
+    except Exception as exc:
         print(f"Basemap skipped: {exc}")
         return False
 
 
-def webmercator_to_lon_formatter(x: float, _pos: int) -> str:
-    lon = x / 6378137.0 * 180.0 / math.pi
-    return f"{lon:.2f}°"
+def lon_formatter(x: float, _pos: int) -> str:
+    return f"{x / 6378137.0 * 180.0 / math.pi:.2f}°"
 
 
-def webmercator_to_lat_formatter(y: float, _pos: int) -> str:
+def lat_formatter(y: float, _pos: int) -> str:
     lat = (2.0 * math.atan(math.exp(y / 6378137.0)) - math.pi / 2.0) * 180.0 / math.pi
     return f"{lat:.2f}°"
 
 
-def set_map_extent(ax, sites_3857: gpd.GeoDataFrame, pad_meters: float = 14500) -> None:
+def set_map_extent(ax, sites_3857: gpd.GeoDataFrame, pad_meters: float = 15000) -> None:
     minx, miny, maxx, maxy = sites_3857.total_bounds
     ax.set_xlim(minx - pad_meters, maxx + pad_meters)
     ax.set_ylim(miny - pad_meters, maxy + pad_meters)
@@ -267,8 +212,6 @@ def county_label(row: pd.Series) -> str:
         return "Fairfax County"
     if name == "Prince William":
         return "Prince William County"
-    if name == "Manassas Park":
-        return "Manassas Park"
     return name
 
 
@@ -276,7 +219,6 @@ def plot_county_context(ax, counties_3857: gpd.GeoDataFrame, basemap_added: bool
     if not basemap_added:
         counties_3857.plot(ax=ax, facecolor="#f7f8fa", edgecolor="#475569", linewidth=1.0, alpha=0.62, zorder=1)
     counties_3857.boundary.plot(ax=ax, color="#0f172a", linewidth=1.05, alpha=0.72, zorder=3)
-
     for _, row in counties_3857.iterrows():
         label = county_label(row)
         if not label:
@@ -301,24 +243,20 @@ def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
         subset = sites_3857[sites_3857["action_group"] == action]
         if subset.empty:
             continue
-        edgecolors = ["#7f1d1d" if str(risk).lower() == "high" else "#111827" for risk in subset["electrical_risk_level"]]
-        linewidths = [2.6 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]]
         subset.plot(
             ax=ax,
             markersize=[marker_size(score) for score in subset["readiness_score"]],
             color=ACTION_COLORS[action],
-            edgecolor=edgecolors,
-            linewidth=linewidths,
+            edgecolor=["#7f1d1d" if str(risk).lower() == "high" else "#111827" for risk in subset["electrical_risk_level"]],
+            linewidth=[2.6 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]],
             alpha=0.94,
             zorder=5,
         )
-
     for _, row in sites_3857.sort_values("model_rank").iterrows():
-        rank = format_int(row.get("model_rank"))
         ax.text(
             row.geometry.x,
             row.geometry.y,
-            rank,
+            fmt_int(row.get("model_rank")),
             ha="center",
             va="center",
             fontsize=8.7,
@@ -329,22 +267,19 @@ def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
         )
 
 
-def sites_to_label(sites_3857: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def label_subset(sites_3857: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     ranked = sites_3857.sort_values("model_rank")
-    top_five_ids = set(ranked.head(5)["site_id"].astype(str))
-    high_risk_ids = set(ranked[ranked["electrical_risk_level"].astype(str).str.lower() == "high"]["site_id"].astype(str))
-    label_ids = top_five_ids | high_risk_ids | ALWAYS_LABEL_SITE_IDS
-    return ranked[ranked["site_id"].astype(str).isin(label_ids)]
+    top_five = set(ranked.head(5)["site_id"].astype(str))
+    high_risk = set(ranked[ranked["electrical_risk_level"].astype(str).str.lower() == "high"]["site_id"].astype(str))
+    return ranked[ranked["site_id"].astype(str).isin(top_five | high_risk | LABEL_SITE_IDS)]
 
 
 def add_site_labels(ax, sites_3857: gpd.GeoDataFrame) -> None:
-    for _, row in sites_to_label(sites_3857).iterrows():
+    for _, row in label_subset(sites_3857).iterrows():
         site_id = str(row.get("site_id", ""))
         score = safe_float(row.get("readiness_score"))
         score_text = f"{score:.1f}" if score is not None else "n/a"
-        ports_now = format_int(row.get("ports_now"))
-        future = format_int(row.get("future_ready_capacity"))
-        label = f"#{format_int(row.get('model_rank'))} {site_id}\n{score_text} | {ports_now}->{future} ports"
+        label = f"#{fmt_int(row.get('model_rank'))} {site_id}\n{score_text} | {fmt_int(row.get('ports_now'))}->{fmt_int(row.get('future_ready_capacity'))} ports"
         dx, dy = LABEL_OFFSETS.get(site_id, (10, 10))
         ax.annotate(
             label,
@@ -366,9 +301,7 @@ def add_map_legend(ax) -> None:
         Line2D([0], [0], marker="o", linestyle="None", markerfacecolor=ACTION_COLORS[action], markeredgecolor="#111827", markersize=8, label=action)
         for action in ACTION_ORDER
     ]
-    handles.append(
-        Line2D([0], [0], marker="o", linestyle="None", markerfacecolor="white", markeredgecolor="#7f1d1d", markeredgewidth=2.4, markersize=8, label="High electrical risk")
-    )
+    handles.append(Line2D([0], [0], marker="o", linestyle="None", markerfacecolor="white", markeredgecolor="#7f1d1d", markeredgewidth=2.4, markersize=8, label="High electrical risk"))
     ax.legend(handles=handles, loc="lower left", title="Planning action", fontsize=8.0, title_fontsize=8.5, framealpha=0.94)
 
 
@@ -391,7 +324,7 @@ def add_north_arrow(ax) -> None:
 def add_scale_bar(ax, length_m: int = 16093) -> None:
     x0, x1 = ax.get_xlim()
     y0, y1 = ax.get_ylim()
-    start_x = x0 + (x1 - x0) * 0.055
+    start_x = x0 + (x1 - x0) * 0.365
     start_y = y0 + (y1 - y0) * 0.055
     ax.plot([start_x, start_x + length_m], [start_y, start_y], color="#111827", lw=2.2, zorder=8)
     ax.plot([start_x, start_x], [start_y - 700, start_y + 700], color="#111827", lw=1.2, zorder=8)
@@ -402,8 +335,8 @@ def add_scale_bar(ax, length_m: int = 16093) -> None:
 def style_map_axis(ax) -> None:
     ax.set_xlabel("Longitude", fontsize=8)
     ax.set_ylabel("Latitude", fontsize=8)
-    ax.xaxis.set_major_formatter(FuncFormatter(webmercator_to_lon_formatter))
-    ax.yaxis.set_major_formatter(FuncFormatter(webmercator_to_lat_formatter))
+    ax.xaxis.set_major_formatter(FuncFormatter(lon_formatter))
+    ax.yaxis.set_major_formatter(FuncFormatter(lat_formatter))
     ax.tick_params(labelsize=7)
     ax.grid(True, alpha=0.18, linewidth=0.5)
     for spine in ax.spines.values():
@@ -411,73 +344,54 @@ def style_map_axis(ax) -> None:
         spine.set_color("#334155")
 
 
-def wrap_line(text: str, width: int = 40) -> str:
-    return "\n".join(textwrap.wrap(text, width=width))
+def ranked(sites: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    return sites.sort_values("model_rank")
 
 
-def decision_panel_lines(sites: gpd.GeoDataFrame) -> list[str]:
-    ranked = sites.sort_values("model_rank")
-    top = ranked.iloc[0]
-    pwc = ranked[ranked["site_id"].astype(str).str.startswith("PWC")]
-    top_pwc = pwc.iloc[0] if not pwc.empty else None
-
+def decision_lines(sites: gpd.GeoDataFrame) -> list[str]:
+    data = ranked(sites)
+    top = data.iloc[0]
+    pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
     lines = [
-        "Decision summary",
-        "",
-        f"Top site: #{format_int(top.get('model_rank'))} {top.get('site_id')}",
-        f"Score {safe_float(top.get('readiness_score')):.1f} | {format_int(top.get('ports_now'))}->{format_int(top.get('future_ready_capacity'))} ports",
+        f"Top overall: #{fmt_int(top.get('model_rank'))} {top.get('site_id')}",
+        f"Score {safe_float(top.get('readiness_score')):.1f} | {fmt_int(top.get('ports_now'))}->{fmt_int(top.get('future_ready_capacity'))} ports",
     ]
-    if top_pwc is not None:
-        lines.extend([
-            "",
-            f"Top PWC: #{format_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')}",
-            f"Score {safe_float(top_pwc.get('readiness_score')):.1f} | {format_int(top_pwc.get('ports_now'))}->{format_int(top_pwc.get('future_ready_capacity'))} ports",
-        ])
-
+    if not pwc.empty:
+        top_pwc = pwc.iloc[0]
+        lines.extend(["", f"Top PWC: #{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')}", f"Score {safe_float(top_pwc.get('readiness_score')):.1f} | {fmt_int(top_pwc.get('ports_now'))}->{fmt_int(top_pwc.get('future_ready_capacity'))} ports"])
     lines.extend(["", "Top 5 action list"])
-    for _, row in ranked.head(5).iterrows():
-        score = safe_float(row.get("readiness_score"))
-        score_text = f"{score:.1f}" if score is not None else "n/a"
-        lines.append(f"#{format_int(row.get('model_rank'))} {row.get('site_id')} | {score_text} | {row.get('action_group')}")
-
-    lines.extend(["", "Review watchlist"])
-    watchlist = ranked[(ranked["action_group"].isin(["High-review", "Special-use"])) | (ranked["electrical_risk_level"].astype(str).str.lower() == "high")]
-    for _, row in watchlist.head(6).iterrows():
-        lines.append(f"{row.get('site_id')}: {textwrap.shorten(review_note(row), width=38, placeholder='...')}")
-
-    lines.extend(["", "Port plan snapshot", "Site    Now -> Future"])
-    for _, row in ranked.head(8).iterrows():
-        lines.append(f"{row.get('site_id'):<7} {format_int(row.get('ports_now')):>2} -> {format_int(row.get('future_ready_capacity')):<2}")
+    for _, row in data.head(5).iterrows():
+        lines.append(f"#{fmt_int(row.get('model_rank'))} {row.get('site_id')} | {safe_float(row.get('readiness_score')):.1f} | {row.get('action_group')}")
     return lines
+
+
+def review_lines(sites: gpd.GeoDataFrame) -> list[str]:
+    data = ranked(sites)
+    watch = data[(data["action_group"].isin(["High-review", "Special-use"])) | (data["electrical_risk_level"].astype(str).str.lower() == "high")]
+    if watch.empty:
+        return ["No high-review or special-use sites flagged."]
+    return [f"{row.get('site_id')}: {textwrap.shorten(review_note(row), width=42, placeholder='...')}" for _, row in watch.head(6).iterrows()]
+
+
+def port_lines(sites: gpd.GeoDataFrame) -> list[str]:
+    lines = ["Site    Now -> Future"]
+    for _, row in ranked(sites).head(9).iterrows():
+        lines.append(f"{row.get('site_id'):<7} {fmt_int(row.get('ports_now')):>2} -> {fmt_int(row.get('future_ready_capacity')):<2}")
+    return lines
+
+
+def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[str], monospace: bool = False) -> None:
+    card = FancyBboxPatch((0.02, y), 0.96, height, transform=panel_ax.transAxes, boxstyle="round,pad=0.014,rounding_size=0.018", linewidth=1.0, edgecolor="#cbd5e1", facecolor="white", alpha=0.98, zorder=1)
+    panel_ax.add_patch(card)
+    panel_ax.text(0.07, y + height - 0.040, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.2, fontweight="bold", color="#111827", zorder=2)
+    panel_ax.text(0.07, y + height - 0.085, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=8.0 if not monospace else 7.7, family="monospace" if monospace else None, color="#111827", linespacing=1.28, zorder=2)
 
 
 def draw_side_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
     panel_ax.set_axis_off()
-    panel = FancyBboxPatch(
-        (0.02, 0.02),
-        0.96,
-        0.96,
-        transform=panel_ax.transAxes,
-        boxstyle="round,pad=0.014,rounding_size=0.018",
-        linewidth=1.0,
-        edgecolor="#cbd5e1",
-        facecolor="white",
-        alpha=0.98,
-        zorder=1,
-    )
-    panel_ax.add_patch(panel)
-    panel_ax.text(
-        0.07,
-        0.95,
-        "\n".join(decision_panel_lines(sites)),
-        transform=panel_ax.transAxes,
-        ha="left",
-        va="top",
-        fontsize=8.4,
-        color="#111827",
-        linespacing=1.27,
-        zorder=2,
-    )
+    draw_info_card(panel_ax, 0.660, 0.315, "Top decisions", decision_lines(sites))
+    draw_info_card(panel_ax, 0.405, 0.225, "Review watchlist", review_lines(sites))
+    draw_info_card(panel_ax, 0.020, 0.355, "Port plan snapshot", port_lines(sites), monospace=True)
 
 
 def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, output_path: Path) -> None:
@@ -486,11 +400,11 @@ def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, o
     counties_3857 = counties.to_crs(WEB_MERCATOR)
 
     fig = plt.figure(figsize=(16.8, 10.2), facecolor="white")
-    ax = fig.add_axes([0.045, 0.115, 0.690, 0.765])
-    panel_ax = fig.add_axes([0.755, 0.145, 0.215, 0.695])
+    ax = fig.add_axes([0.045, 0.115, 0.700, 0.765])
+    panel_ax = fig.add_axes([0.765, 0.115, 0.205, 0.765])
     ax.set_facecolor("#eef2f7")
 
-    set_map_extent(ax, sites_3857, pad_meters=15000)
+    set_map_extent(ax, sites_3857)
     basemap_added = add_basemap(ax)
     plot_county_context(ax, counties_3857, basemap_added)
     plot_sites(ax, sites_3857)
@@ -505,17 +419,9 @@ def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, o
     if not basemap_added:
         subtitle = "Official county boundaries and ranked candidate sites; basemap skipped or unavailable."
 
-    fig.suptitle("V2 Public EV Charging Candidate Sites — GIS Decision Map", fontsize=16, fontweight="bold", y=0.967)
-    fig.text(0.5, 0.922, subtitle, ha="center", fontsize=9.6, color="#111827")
-    fig.text(
-        0.5,
-        0.025,
-        "Planning screen only — not an engineering, utility, permitting, procurement, or construction approval.",
-        ha="center",
-        fontsize=8.4,
-        color="#475569",
-    )
-
+    fig.suptitle("V2 Public EV Charging Candidate Sites — GIS Decision Map", fontsize=15.2, fontweight="bold", y=0.967)
+    fig.text(0.5, 0.922, subtitle, ha="center", fontsize=9.4, color="#111827")
+    fig.text(0.5, 0.025, "Planning screen only — not an engineering, utility, permitting, procurement, or construction approval.", ha="center", fontsize=8.4, color="#475569")
     fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
@@ -528,7 +434,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--boundary-zip", default=DEFAULT_BOUNDARY_ZIP, help="Local Census county shapefile ZIP path.")
     parser.add_argument("--boundary-url", default=DEFAULT_BOUNDARY_URL, help="Boundary ZIP URL used when local file is missing.")
     parser.add_argument("--no-download-boundary", action="store_true", help="Do not download boundary shapefile automatically.")
-    # Backward-compatible ignored arguments from older workflow versions.
     parser.add_argument("--results", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--electrical-summary", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--right-sizing", default=None, help=argparse.SUPPRESS)
