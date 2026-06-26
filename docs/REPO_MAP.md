@@ -20,7 +20,7 @@ This file explains the main parts of the repo without making you read every file
 - [data/source_extracts/](../data/source_extracts/) — source extracts and source notes
 - [data/baselines/](../data/baselines/) — committed baseline snapshots
 - [data/outputs/](../data/outputs/) — generated local outputs ignored by Git
-- [data/demo/](../data/demo/) — generated local-only synthetic demo outputs
+- `data/demo/` — generated local-only synthetic demo outputs; this folder may not exist until demo mode is run
 - [docs/](../docs/) — active documentation and project notes
 - [docs/checkpoints/](checkpoints/) — checkpoint/history notes moved out of the active-docs path
 
