@@ -1,21 +1,9 @@
-"""Write a V2 workflow success marker and output manifest.
-
-This script runs near the end of the V2 workflow. It checks the expected local
-outputs and writes a machine-readable JSON file that records what was generated,
-when it was generated, and the headline result.
-
-Run from the repository root after the V2 workflow outputs exist:
-
-    python src/write_v2_workflow_success_marker.py
-"""
-
 from __future__ import annotations
 
 import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -30,6 +18,7 @@ EXPECTED_OUTPUTS = [
     "data/outputs/v2_site_results.csv",
     "data/outputs/v2_action_matrix.md",
     "data/outputs/v2_data_quality_report.csv",
+    "data/outputs/v2_sensitivity_results.csv",
     "data/outputs/v2_sensitivity_summary.csv",
     "data/outputs/v2_profile_results.csv",
     "data/outputs/v2_profile_comparison.md",
@@ -65,34 +54,29 @@ EXPECTED_OUTPUTS = [
 ]
 
 
-def ensure_parent_dir(path: str | Path) -> None:
+def ensure_parent_dir(path):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
 
 
-def file_record(path_text: str) -> dict[str, Any]:
+def file_record(path_text):
     path = Path(path_text)
     exists = path.exists()
-    return {
-        "path": path_text,
-        "exists": exists,
-        "size_bytes": path.stat().st_size if exists else 0,
-    }
+    return {"path": path_text, "exists": exists, "size_bytes": path.stat().st_size if exists else 0}
 
 
-def read_csv_if_exists(path: Path) -> pd.DataFrame:
+def read_csv_if_exists(path):
+    path = Path(path)
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path)
 
 
-def top_site_summary(results: pd.DataFrame) -> dict[str, Any]:
+def top_site_summary(results):
     if results.empty or "model_rank" not in results.columns:
         return {}
     ranked = results.copy()
     ranked["model_rank"] = pd.to_numeric(ranked["model_rank"], errors="coerce")
     ranked = ranked.sort_values("model_rank")
-    if ranked.empty:
-        return {}
     top = ranked.iloc[0]
     return {
         "site_id": str(top.get("site_id", "")),
@@ -104,28 +88,19 @@ def top_site_summary(results: pd.DataFrame) -> dict[str, Any]:
     }
 
 
-def quality_counts(quality: pd.DataFrame) -> dict[str, int]:
-    if quality.empty or "severity" not in quality.columns:
+def value_counts(table, column, levels):
+    if table.empty or column not in table.columns:
         return {}
-    counts = quality["severity"].value_counts().to_dict()
-    return {level: int(counts.get(level, 0)) for level in ["ERROR", "WARNING", "REVIEW", "INFO"]}
+    counts = table[column].astype(str).value_counts().to_dict()
+    return {level: int(counts.get(level, 0)) for level in levels}
 
 
-def electrical_counts(electrical: pd.DataFrame) -> dict[str, int]:
-    if electrical.empty or "electrical_risk_level" not in electrical.columns:
-        return {}
-    counts = electrical["electrical_risk_level"].astype(str).value_counts().to_dict()
-    return {level: int(counts.get(level, 0)) for level in ["low", "medium", "high"]}
-
-
-def right_sizing_top_summary(right_sizing: pd.DataFrame) -> dict[str, Any]:
+def right_sizing_top_summary(right_sizing):
     if right_sizing.empty or "model_rank" not in right_sizing.columns:
         return {}
     ranked = right_sizing.copy()
     ranked["model_rank"] = pd.to_numeric(ranked["model_rank"], errors="coerce")
     ranked = ranked.sort_values("model_rank")
-    if ranked.empty:
-        return {}
     top = ranked.iloc[0]
     return {
         "site_id": str(top.get("site_id", "")),
@@ -135,7 +110,8 @@ def right_sizing_top_summary(right_sizing: pd.DataFrame) -> dict[str, Any]:
     }
 
 
-def build_success_marker(input_path: Path, results_path: Path, quality_path: Path, electrical_path: Path, right_sizing_path: Path) -> dict[str, Any]:
+def build_success_marker(input_path, results_path, quality_path, electrical_path, right_sizing_path):
+    input_path = Path(input_path)
     results = read_csv_if_exists(results_path)
     quality = read_csv_if_exists(quality_path)
     electrical = read_csv_if_exists(electrical_path)
@@ -150,8 +126,8 @@ def build_success_marker(input_path: Path, results_path: Path, quality_path: Pat
         "input_exists": input_path.exists(),
         "site_count": int(len(results)) if not results.empty else 0,
         "top_site": top_site_summary(results),
-        "quality_counts": quality_counts(quality),
-        "electrical_risk_counts": electrical_counts(electrical),
+        "quality_counts": value_counts(quality, "severity", ["ERROR", "WARNING", "REVIEW", "INFO"]),
+        "electrical_risk_counts": value_counts(electrical, "electrical_risk_level", ["low", "medium", "high"]),
         "top_right_sizing": right_sizing_top_summary(right_sizing),
         "workflow_step_count": 24,
         "expected_outputs_count": len(outputs),
@@ -159,39 +135,34 @@ def build_success_marker(input_path: Path, results_path: Path, quality_path: Pat
         "missing_or_empty_outputs": missing_outputs,
         "outputs": outputs,
         "notes": [
-            "This marker confirms that the local V2 workflow outputs were generated.",
-            "It includes the port-sizing scenario analysis layer.",
-            "It is a workflow reproducibility artifact, not an engineering or permitting approval.",
+            "Includes the detailed sensitivity output.",
+            "Includes the port-sizing scenario analysis layer.",
+            "Planning artifact only; not an approval document.",
         ],
     }
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Write a V2 workflow success marker and output manifest.")
-    parser.add_argument("--input", default=DEFAULT_INPUT, help="V2 input CSV path.")
-    parser.add_argument("--results", default=DEFAULT_RESULTS, help="V2 site results CSV path.")
-    parser.add_argument("--quality", default=DEFAULT_QUALITY, help="V2 data quality CSV path.")
-    parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY, help="V2 electrical risk summary CSV path.")
-    parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING, help="V2 right-sizing scenario CSV path.")
-    parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Output success marker JSON path.")
+def parse_args():
+    parser = argparse.ArgumentParser(description="Write a V2 workflow output manifest.")
+    parser.add_argument("--input", default=DEFAULT_INPUT)
+    parser.add_argument("--results", default=DEFAULT_RESULTS)
+    parser.add_argument("--quality", default=DEFAULT_QUALITY)
+    parser.add_argument("--electrical-summary", default=DEFAULT_ELECTRICAL_SUMMARY)
+    parser.add_argument("--right-sizing", default=DEFAULT_RIGHT_SIZING)
+    parser.add_argument("--output", default=DEFAULT_OUTPUT)
     return parser.parse_args()
 
 
-def main() -> None:
+def main():
     args = parse_args()
-    input_path = Path(args.input)
-    results_path = Path(args.results)
-    quality_path = Path(args.quality)
-    electrical_path = Path(args.electrical_summary)
-    right_sizing_path = Path(args.right_sizing)
     output_path = Path(args.output)
-    marker = build_success_marker(input_path, results_path, quality_path, electrical_path, right_sizing_path)
+    marker = build_success_marker(args.input, args.results, args.quality, args.electrical_summary, args.right_sizing)
     ensure_parent_dir(output_path)
     output_path.write_text(json.dumps(marker, indent=2), encoding="utf-8")
     print("V2 WORKFLOW SUCCESS MARKER")
     print("--------------------------")
     print(f"Status: {marker['status']}")
-    print(f"Input file: {input_path}")
+    print(f"Input file: {args.input}")
     print(f"Workflow steps: {marker['workflow_step_count']}")
     print(f"Site count: {marker['site_count']}")
     print(f"Top site: {marker.get('top_site', {}).get('site_id', 'not available')}")
