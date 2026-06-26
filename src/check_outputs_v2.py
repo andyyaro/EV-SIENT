@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -100,6 +101,14 @@ REQUIRED_SITE_IDS = {
     "PWC005", "PWC006", "PWC007", "PWC008",
 }
 EXPECTED_SITE_COUNT = len(REQUIRED_SITE_IDS)
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def check_expected_files() -> list[str]:
@@ -226,6 +235,32 @@ def check_deliverable_package() -> list[str]:
         errors.append(f"deliverable package manifest status is not complete: {data.get('status')}")
     if data.get("missing_or_empty_sources"):
         errors.append("deliverable package manifest reports missing or empty sources.")
+    if data.get("out_of_sync_destinations"):
+        errors.append("deliverable package manifest reports out-of-sync copied files.")
+
+    expected_count = int(data.get("expected_count", 0))
+    synced_count = int(data.get("synced_count", -1))
+    if expected_count and synced_count != expected_count:
+        errors.append(f"deliverable package synced_count is {synced_count}; expected {expected_count}.")
+
+    for record in data.get("files", []):
+        source = Path(str(record.get("source", "")))
+        destination = Path(str(record.get("destination", "")))
+        if not record.get("copied"):
+            continue
+        if not source.exists() or not destination.exists():
+            errors.append(f"deliverable package sync check missing path: {source} -> {destination}")
+            continue
+        source_hash = sha256_file(source)
+        destination_hash = sha256_file(destination)
+        if source_hash != destination_hash:
+            errors.append(f"deliverable package copy is stale: {destination} does not match {source}")
+        if record.get("source_sha256") and record.get("source_sha256") != source_hash:
+            errors.append(f"deliverable package manifest source hash is stale for {source}")
+        if record.get("destination_sha256") and record.get("destination_sha256") != destination_hash:
+            errors.append(f"deliverable package manifest destination hash is stale for {destination}")
+        if record.get("in_sync") is not True:
+            errors.append(f"deliverable package manifest marks file out of sync: {destination}")
     return errors
 
 
@@ -297,7 +332,7 @@ def main() -> None:
             print(f"- {error}")
         sys.exit(1)
     print("Status: PASSED")
-    print("All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.")
+    print("All expected V2 outputs are present, all 12 V2 candidate sites are represented, and the deliverable package is hash-synced with current source outputs.")
 
 
 if __name__ == "__main__":
