@@ -7,10 +7,11 @@ boundaries and, when available, a light Contextily basemap.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import math
 import shutil
 import sys
-import textwrap
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -63,6 +64,14 @@ LABEL_OFFSETS = {
 
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def safe_float(value: Any) -> float | None:
@@ -397,15 +406,7 @@ def encoding_lines() -> list[str]:
     ]
 
 
-def draw_info_card(
-    panel_ax,
-    y: float,
-    height: float,
-    title: str,
-    lines: list[str],
-    monospace: bool = False,
-    fontsize: float = 8.0,
-) -> None:
+def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[str], monospace: bool = False, fontsize: float = 8.0) -> None:
     card = FancyBboxPatch((0.02, y), 0.96, height, transform=panel_ax.transAxes, boxstyle="round,pad=0.014,rounding_size=0.018", linewidth=1.0, edgecolor="#cbd5e1", facecolor="white", alpha=0.98, zorder=1)
     panel_ax.add_patch(card)
     panel_ax.text(0.07, y + height - 0.035, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.0, fontweight="bold", color="#111827", zorder=2)
@@ -420,6 +421,42 @@ def draw_side_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
     draw_info_card(panel_ax, 0.020, 0.150, "Map encoding", encoding_lines(), fontsize=7.45)
 
 
+def update_package_manifest_for_synced_chart(source: Path, destination: Path) -> None:
+    package_root = destination.parents[1]
+    manifest_path = package_root / "package_manifest.json"
+    if not manifest_path.exists():
+        return
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return
+
+    source_hash = sha256_file(source)
+    destination_hash = sha256_file(destination)
+    destination_text = destination.as_posix()
+    source_text = source.as_posix()
+
+    for record in manifest.get("files", []):
+        record_destination = Path(str(record.get("destination", ""))).as_posix()
+        if record_destination == destination_text:
+            record["source"] = source_text
+            record["destination"] = destination_text
+            record["copied"] = True
+            record["size_bytes"] = destination.stat().st_size
+            record["source_sha256"] = source_hash
+            record["destination_sha256"] = destination_hash
+            record["in_sync"] = source_hash == destination_hash
+            break
+
+    files = manifest.get("files", [])
+    manifest["copied_count"] = len([record for record in files if record.get("copied")])
+    manifest["synced_count"] = len([record for record in files if record.get("copied") and record.get("in_sync")])
+    manifest["missing_or_empty_sources"] = [record.get("source") for record in files if not record.get("copied")]
+    manifest["out_of_sync_destinations"] = [record.get("destination") for record in files if record.get("copied") and not record.get("in_sync")]
+    manifest["status"] = "complete" if not manifest["missing_or_empty_sources"] and not manifest["out_of_sync_destinations"] else "incomplete"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+
 def sync_chart_to_package(output_path: Path, package_chart: Path) -> bool:
     """Keep the deliverable-package chart copy current when the map is regenerated directly."""
     package_root = package_chart.parents[1]
@@ -427,6 +464,7 @@ def sync_chart_to_package(output_path: Path, package_chart: Path) -> bool:
         return False
     ensure_parent(package_chart)
     shutil.copy2(output_path, package_chart)
+    update_package_manifest_for_synced_chart(output_path, package_chart)
     return True
 
 
