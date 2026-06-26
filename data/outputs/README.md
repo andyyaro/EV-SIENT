@@ -61,9 +61,21 @@ charts/v2_data_confidence_chart.png
 charts/v2_profile_score_heatmap.png
 charts/v2_profile_rank_stability_chart.png
 charts/v2_site_readiness_map.png
+charts/v2_site_decision_map.png
+charts/v2_site_decision_map_readme.png
 charts/v2_port_utilization_simulation.png
 charts/v2/utilization_vs_ports_<site>.png
 ```
+
+Generated Matplotlib chart text uses the shared Times New Roman style.
+
+The README decision-map asset is copied to:
+
+```text
+../../docs/assets/charts/v2_site_decision_map_readme.png
+```
+
+The output checker verifies that this committed README asset matches the generated README decision-map chart.
 
 ## V2 deliverable package
 
@@ -88,13 +100,25 @@ Start with:
 
 ```text
 deliverable_package_v2/README.md
+deliverable_package_v2/charts/v2_site_decision_map.png
+deliverable_package_v2/charts/v2_site_decision_map_readme.png
 deliverable_package_v2/reports/v2_executive_site_summary.md
 deliverable_package_v2/tables/v2_executive_site_summary.csv
 deliverable_package_v2/reports/v2_right_sizing_validation_report.md
 deliverable_package_v2/reports/v2_run_summary.md
+deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
 
 The V2 package builder uses a clean rebuild by default, so stale copied files are removed before the package is recreated.
+
+A healthy package has:
+
+```text
+Copied files: 30/30
+Synced files: 30/30
+```
+
+The package manifest stores SHA-256 hashes for each source output and copied package file.
 
 ## Stable V1 generated outputs
 
@@ -113,6 +137,7 @@ site_results.csv
 action_matrix.md
 sensitivity_results.csv
 sensitivity_summary.csv
+readiness_score_chart.png
 profile_results.csv
 profile_rank_summary.csv
 profile_comparison.md
