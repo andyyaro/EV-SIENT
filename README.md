@@ -21,12 +21,14 @@ v2-expansion-planning = active V2 prototype workflow
 
 ## Start here
 
-- [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md)
-- [START_HERE.md](START_HERE.md)
-- [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
-- [docs/REPO_MAP.md](docs/REPO_MAP.md)
-- [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
-- [docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
+- [START_HERE.md](START_HERE.md) — shortest project entry point
+- [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md) — review path for someone inspecting the repo
+- [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md) — step-by-step local reproduction checklist
+- [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md) — active V2 workflow guide
+- [docs/REPO_MAP.md](docs/REPO_MAP.md) — folder and file map
+- [src/README.md](src/README.md) — script-by-script index
+- [docs/MAINTENANCE_CHECKLIST.md](docs/MAINTENANCE_CHECKLIST.md) — checks to run before pushing or sharing
+- [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) — current project state
 
 ## Python version
 
@@ -178,7 +180,7 @@ data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 | [src/run_all.py](src/run_all.py) | Run the stable V1 workflow. |
 | [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
 
-See [docs/REPO_MAP.md](docs/REPO_MAP.md) for the fuller script and file map.
+See [src/README.md](src/README.md) for the script-by-script index and [docs/REPO_MAP.md](docs/REPO_MAP.md) for the fuller repository map.
 
 ## Current planning interpretation
 
@@ -199,10 +201,13 @@ Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PW
 
 ## Documentation
 
-- [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md)
 - [START_HERE.md](START_HERE.md)
+- [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md)
 - [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
+- [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md)
 - [docs/REPO_MAP.md](docs/REPO_MAP.md)
+- [src/README.md](src/README.md)
+- [docs/MAINTENANCE_CHECKLIST.md](docs/MAINTENANCE_CHECKLIST.md)
 - [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md)
 - [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
