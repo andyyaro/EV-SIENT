@@ -14,6 +14,7 @@ How many charging ports should be installed now?
 How many ports should be planned for 2035 and 2050?
 Which sites need better data or technical review?
 What should happen next for each site?
+Do the port recommendations remain stable under alternate demand and charging assumptions?
 ```
 
 The model is for early planning support only and does not replace official review or site confirmation.
@@ -49,14 +50,14 @@ A successful V2 run should end with:
 V2 OUTPUT CHECK
 ---------------
 Status: PASSED
-All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
 ```
 
 A healthy package build should show:
 
 ```text
-Copied files: 30/30
-Synced files: 30/30
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 ## V2 files to open first
@@ -70,6 +71,9 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
+data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
+data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv
+data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 data/outputs/deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
@@ -96,13 +100,14 @@ Use Python 3.10 or newer.
 
 Python 3.11 is the tested version used by the GitHub Actions workflow.
 
-## Main V2 input file
+## Main V2 input files
 
 ```text
 data/inputs/real_sites_v2.csv
+data/inputs/v2_port_sizing_scenarios.csv
 ```
 
-This is the active V2 candidate-site dataset.
+`real_sites_v2.csv` is the active candidate-site dataset. `v2_port_sizing_scenarios.csv` controls the port-sizing stress-test assumptions.
 
 ## Main V2 output file
 
@@ -123,11 +128,23 @@ right-sizing validation
 major review flags
 ```
 
+## Port-sizing scenario outputs
+
+```text
+data/outputs/v2_port_sizing_scenario_results.csv
+data/outputs/v2_port_sizing_scenario_summary.csv
+data/outputs/v2_port_sizing_scenario_report.md
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
+```
+
+This layer stress-tests whether the port recommendations remain reasonable under alternate charging-duration, charging-window, peak-demand, and future-demand assumptions.
+
 ## Main V2 visual outputs
 
 ```text
 data/outputs/charts/v2_site_decision_map.png
 data/outputs/charts/v2_site_decision_map_readme.png
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 docs/assets/charts/v2_site_decision_map_readme.png
 ```
 
@@ -139,8 +156,10 @@ The README decision map includes all 12 candidate site callout tags. Generated M
 |---|---|
 | [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md) | Main V2 workflow guide. |
 | [docs/V2_STABLE_WORKFLOW_CHECKPOINT.md](docs/V2_STABLE_WORKFLOW_CHECKPOINT.md) | Stable V2 milestone summary. |
-| [src/run_v2.py](src/run_v2.py) | Runs the full V2 workflow. |
+| [docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md) | Port-sizing scenario checkpoint. |
+| [src/run_v2.py](src/run_v2.py) | Runs the full 24-step V2 workflow. |
 | [src/check_outputs_v2.py](src/check_outputs_v2.py) | Checks V2 generated outputs and package sync. |
+| [src/run_port_sizing_scenario_analysis.py](src/run_port_sizing_scenario_analysis.py) | Runs the port-sizing scenario analysis. |
 | [src/build_v2_deliverable_package.py](src/build_v2_deliverable_package.py) | Builds the clean V2 deliverable package. |
 | [src/compare_v2_to_baseline.py](src/compare_v2_to_baseline.py) | Compares current V2 outputs to the saved baseline. |
 | [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
@@ -162,6 +181,13 @@ The strongest current Prince William County library candidate is:
 
 ```text
 PWC006 — Bull Run Library
+```
+
+The current port-sizing scenario result is:
+
+```text
+The future-ready capacity plan is stable across the first five tested scenarios.
+Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PWC008.
 ```
 
 ## Important rule
