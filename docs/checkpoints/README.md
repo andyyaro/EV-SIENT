@@ -2,7 +2,7 @@
 
 This folder is the navigation home for project checkpoint and history notes.
 
-The checkpoint files currently remain in `docs/` to avoid breaking many internal links in one large move. Use this index to understand which files are active documentation and which files are history/checkpoints.
+The checkpoint files are being moved here in small verified batches to avoid breaking many internal links at once.
 
 ## Active docs to read first
 
@@ -21,9 +21,16 @@ docs/DATA_DICTIONARY.md
 docs/PROJECT_STATUS.md
 ```
 
+## Moved checkpoint files
+
+These checkpoint files now live in this folder:
+
+- [V2_README_VISUALS_REFRESH_CHECKPOINT.md](V2_README_VISUALS_REFRESH_CHECKPOINT.md)
+- [V2_SITE_MAP_VISUAL_CLEANUP_CHECKPOINT.md](V2_SITE_MAP_VISUAL_CLEANUP_CHECKPOINT.md)
+
 ## Checkpoint file patterns
 
-Most checkpoint or history files follow these patterns:
+Most remaining checkpoint or history files follow these patterns:
 
 ```text
 docs/V2_*_CHECKPOINT.md
