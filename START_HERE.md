@@ -16,7 +16,7 @@ Which sites need better data or technical review?
 What should happen next for each site?
 ```
 
-The model is for early planning support only. It does not replace utility, engineering, permitting, accessibility, fire/AHJ, procurement, or stakeholder review.
+The model is for early planning support only and does not replace official review or site confirmation.
 
 ## Current active workflow
 
@@ -47,8 +47,16 @@ A successful V2 run should end with:
 
 ```text
 V2 OUTPUT CHECK
+---------------
 Status: PASSED
-All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+```
+
+A healthy package build should show:
+
+```text
+Copied files: 30/30
+Synced files: 30/30
 ```
 
 ## V2 files to open first
@@ -57,10 +65,13 @@ After a successful V2 run, open these first:
 
 ```text
 data/outputs/deliverable_package_v2/README.md
+data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
+data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
 data/outputs/deliverable_package_v2/reports/v2_run_summary.md
+data/outputs/deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
 
 The package folder is the cleanest review folder because it collects the most important V2 outputs into one place.
@@ -112,14 +123,26 @@ right-sizing validation
 major review flags
 ```
 
+## Main V2 visual outputs
+
+```text
+data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
+docs/assets/charts/v2_site_decision_map_readme.png
+```
+
+The README decision map includes all 12 candidate site callout tags. Generated Matplotlib chart text uses the shared Times New Roman style.
+
 ## Simple project map
 
 | File | Purpose |
 |---|---|
 | [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md) | Main V2 workflow guide. |
+| [docs/V2_STABLE_WORKFLOW_CHECKPOINT.md](docs/V2_STABLE_WORKFLOW_CHECKPOINT.md) | Stable V2 milestone summary. |
 | [src/run_v2.py](src/run_v2.py) | Runs the full V2 workflow. |
-| [src/check_outputs_v2.py](src/check_outputs_v2.py) | Checks V2 generated outputs. |
+| [src/check_outputs_v2.py](src/check_outputs_v2.py) | Checks V2 generated outputs and package sync. |
 | [src/build_v2_deliverable_package.py](src/build_v2_deliverable_package.py) | Builds the clean V2 deliverable package. |
+| [src/compare_v2_to_baseline.py](src/compare_v2_to_baseline.py) | Compares current V2 outputs to the saved baseline. |
 | [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
 | [src/run_all.py](src/run_all.py) | Runs the stable V1 workflow. |
 
@@ -135,8 +158,12 @@ FFX002 — City of Fairfax Regional Library
 
 as the strongest current public candidate.
 
-## Important rule
+The strongest current Prince William County library candidate is:
 
-Do not treat a high score as permission to build.
+```text
+PWC006 — Bull Run Library
+```
+
+## Important rule
 
 Use the results to decide what site data, stakeholder confirmation, and technical review should happen next.
