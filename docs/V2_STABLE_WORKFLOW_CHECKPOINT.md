@@ -2,41 +2,33 @@
 
 ## Status
 
-The V2 expansion-planning workflow has reached a stable technical checkpoint.
+The active V2 workflow is stable with the port-sizing scenario analysis included.
 
-The validated workflow command is:
+Run:
 
 ```bash
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
-Expected final result:
+Expected checker result:
 
 ```text
-V2 OUTPUT CHECK
----------------
 Status: PASSED
-All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
 ```
 
-Expected deliverable package health:
+Expected package result:
 
 ```text
-Status: complete
-Clean rebuild: True
-Previous package removed: True
-Copied files: 30/30
-Synced files: 30/30
+Copied files: 35/35
+Synced files: 35/35
 ```
 
-## Stable workflow scope
-
-The current stable V2 workflow includes:
+## Current stable scope
 
 ```text
 12 candidate sites
-23 workflow steps
+24 workflow steps
 site-readiness scoring
 data-quality review
 sensitivity analysis
@@ -44,6 +36,7 @@ scoring-profile analysis
 electrical-risk scenario analysis
 right-sizing scenario analysis
 port-use simulation
+port-sizing scenario analysis
 right-sizing validation
 executive site summary
 GIS decision map
@@ -52,28 +45,11 @@ interpretation report
 run summary
 workflow success manifest
 expanded baseline comparison
-30-file deliverable package
+35-file deliverable package
 hardened output/package checker
 ```
 
-## Candidate sites
-
-```text
-FFX001 — Fairfax City Hall or municipal building
-FFX002 — City of Fairfax Regional Library
-FFX003 — Pohick Regional Library
-FFX004 — Fairfax County Government Center
-PWC001 — PWC McCoart Government Center
-PWC002 — Neabsco-Potomac Commuter Garage
-PWC003 — Prince William County Public Safety Training Center
-PWC004 — Chinn Park Regional Library
-PWC005 — Haymarket Gainesville Library
-PWC006 — Bull Run Library
-PWC007 — Central Library
-PWC008 — Potomac Library
-```
-
-## Latest confirmed base ranking
+## Current ranking summary
 
 ```text
 1. FFX002 — City of Fairfax Regional Library — 58.8 — Tier 1
@@ -87,140 +63,83 @@ PWC008 — Potomac Library
 9. PWC008 — Potomac Library — 40.1 — Tier 3
 10. PWC001 — PWC McCoart Government Center — 39.8 — Tier 3
 11. PWC005 — Haymarket Gainesville Library — 36.9 — Tier 3
-12. PWC003 — Prince William County Public Safety Training Center — 29.6 — special-use
+12. PWC003 — special-use — 29.6
 ```
 
 ## Main findings
 
 ```text
-FFX002 is the strongest current public candidate.
+FFX002 is the strongest current candidate.
 FFX004 is the second-ranked Tier 1 candidate.
 PWC006 is the strongest current Prince William County library candidate.
-PWC007 is a credible Tier 2 Prince William candidate close to PWC002 but with fewer garage-specific complications.
-PWC002 remains useful but high-review because it is a garage candidate with fire/AHJ/access/electrical uncertainty.
-PWC003 should not advance as a general-public charging buildout unless public-access or use-case assumptions change.
+PWC002 remains useful but high-review.
+PWC003 should stay special-use unless its use case changes.
 ```
 
 ## Right-sizing summary
 
 ```text
-FFX002 — now 2 ports; future-ready capacity 8; install now and make future-ready
-FFX004 — now 3 ports; future-ready capacity 8; install now and make future-ready
-PWC006 — now 2 ports; future-ready capacity 4; install now and make future-ready
-FFX001 — now 2 ports; future-ready capacity 4; starter install with expandable design
-PWC002 — now 2 ports; future-ready capacity 3; electrical review before expansion
-PWC007 — now 2 ports; future-ready capacity 4; starter install with expandable design
-PWC004 — now 2 ports; future-ready capacity 4; starter install with expandable design
-FFX003 — now 2 ports; future-ready capacity 4; starter install with expandable design
-PWC008 — now 2 ports; future-ready capacity 2; monitor due to nearby supply
-PWC001 — now 2 ports; future-ready capacity 3; electrical review before expansion
-PWC005 — now 2 ports; future-ready capacity 2; monitor or small pilot
-PWC003 — now 2 ports; future-ready capacity 2; do not advance general-public buildout
+FFX002 — now 2 ports; future-ready capacity 8
+FFX004 — now 3 ports; future-ready capacity 8
+PWC006 — now 2 ports; future-ready capacity 4
+Most Tier 2 library candidates — starter install with expandable design
+PWC002 and PWC001 — review before expansion
+PWC008 and PWC005 — monitor or small pilot
+PWC003 — do not advance as a general-public buildout without use-case confirmation
 ```
 
-## Simulation validation summary
+## Port-sizing scenario summary
+
+The scenario layer tests whether port recommendations stay reasonable under alternate charging-duration, daily-window, peak-demand, and future-demand assumptions.
 
 ```text
-Current simulated minimum ports: 2 for all sites
-FFX004 current alignment: conservative_under_current_demand
-Most other current alignments: aligned_now
-Future alignment values: aligned_future_capacity, conservative_future_capacity, or extra_future_capacity
-No current stable output is flagged as underbuilt by the simulation validation layer
+base: no future-ready capacity gaps
+high_growth: no future-ready capacity gaps
+long_sessions: no future-ready capacity gaps
+short_daily_window: no future-ready capacity gaps
+peakier_demand: no future-ready capacity gaps
+combined_stress: 2 future-ready capacity gaps
 ```
 
-## Visual outputs
+Combined-stress gaps:
 
 ```text
-data/outputs/charts/v2_polished_readiness_score_chart.png
-data/outputs/charts/v2_data_confidence_chart.png
-data/outputs/charts/v2_profile_score_heatmap.png
-data/outputs/charts/v2_profile_rank_stability_chart.png
-data/outputs/charts/v2_site_readiness_map.png
-data/outputs/charts/v2_site_decision_map.png
-data/outputs/charts/v2_site_decision_map_readme.png
-data/outputs/charts/v2_port_utilization_simulation.png
-docs/assets/charts/v2_site_decision_map_readme.png
+PWC002 — future-ready capacity 3, scenario minimum 4, gap 1
+PWC008 — future-ready capacity 2, scenario minimum 3, gap 1
 ```
 
-The README decision map includes callout tags for all 12 candidate sites. Generated Matplotlib chart text uses Times New Roman. Basemap tile labels cannot be restyled because they are part of the map background image.
-
-## Deliverable package
-
-The stable package is generated locally at:
-
-```text
-data/outputs/deliverable_package_v2/
-```
-
-Open first:
+## Key files to review
 
 ```text
 data/outputs/deliverable_package_v2/README.md
-data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
-data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
-data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
-data/outputs/deliverable_package_v2/reports/v2_run_summary.md
+data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
+data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv
+data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 data/outputs/deliverable_package_v2/reports/v2_baseline_comparison.md
 ```
 
-## Baseline and checker guardrails
-
-The stable checkpoint includes guardrails for:
+## Guardrails now covered
 
 ```text
 site count
-site ranks, scores, tiers, and model port recommendations
-data-quality counts
+site ranks and scores
 profile top sites
-electrical expected-case ranks, scores, and risk levels
-right-sizing ports and expansion strategies
-port-simulation assumptions, rows, demand cases, and tested port options
-right-sizing-validation alignment fields
-executive-summary validation fields
+electrical expected-case outputs
+right-sizing outputs
+port simulation outputs
+port-sizing scenario outputs
+right-sizing validation
+executive-summary fields
 README decision-map asset sync
-deliverable-package manifest status
-deliverable-package copied and synced counts
-deliverable-package file hash sync
+deliverable-package hash sync
 ```
-
-## Known review gaps
-
-The stable workflow has no blocking code/output errors, but the planning model still depends on assumptions that need confirmation.
-
-Main unresolved review items:
-
-```text
-electrical service rating
-spare electrical capacity
-emergency disconnect visibility
-visitor and employee counts
-operating hours
-parking count and likely charger placement
-ADA/accessibility layout review
-Fire Marshal / AHJ review where applicable
-stormwater or site civil constraints where applicable
-PWC002 garage-specific review
-PWC003 public, fleet-only, special-use, or removal decision
-```
-
-These are planning-screen limitations, not workflow failures.
 
 ## Next development direction
 
-The strongest next coding upgrade is a configurable simulation-assumption scenario layer:
-
-```text
-data/inputs/v2_simulation_assumptions.csv
-src/run_port_assumption_scenarios.py
-data/outputs/v2_port_assumption_scenarios.csv
-data/outputs/v2_port_assumption_scenario_report.md
-data/outputs/charts/v2_port_assumption_scenario_heatmap.png
-```
-
-That layer should test how port-sizing conclusions change under different assumptions for charging duration, charging-window hours, peak factor, and future demand multipliers.
+The strongest next coding upgrade is integrating port-sizing scenario fields into the executive site summary.
 
 ## Important limitation
 
-This is an early planning prototype. It does not replace stakeholder confirmation, utility review, engineering design, accessibility review, Fire Marshal/AHJ review, permitting, procurement, or construction planning.
+This is an early planning prototype. It does not replace required site, engineering, accessibility, utility, permitting, or stakeholder review.
