@@ -291,10 +291,10 @@ def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
 
 
 def label_subset(sites_3857: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    ranked = sites_3857.sort_values("model_rank")
-    top_five = set(ranked.head(5)["site_id"].astype(str))
-    high_risk = set(ranked[ranked["electrical_risk_level"].astype(str).str.lower() == "high"]["site_id"].astype(str))
-    return ranked[ranked["site_id"].astype(str).isin(top_five | high_risk | LABEL_SITE_IDS)]
+    ranked_sites = sites_3857.sort_values("model_rank")
+    top_five = set(ranked_sites.head(5)["site_id"].astype(str))
+    high_risk = set(ranked_sites[ranked_sites["electrical_risk_level"].astype(str).str.lower() == "high"]["site_id"].astype(str))
+    return ranked_sites[ranked_sites["site_id"].astype(str).isin(top_five | high_risk | LABEL_SITE_IDS)]
 
 
 def add_site_labels(ax, sites_3857: gpd.GeoDataFrame) -> None:
@@ -396,10 +396,8 @@ def port_lines(sites: gpd.GeoDataFrame) -> list[str]:
 
 def encoding_lines() -> list[str]:
     return [
-        "Green = advance",
-        "Blue = promising",
-        "Orange = high-review",
-        "Gray = monitor",
+        "Green = advance | Blue = promising",
+        "Orange = high-review | Gray = monitor",
         "Pink = special-use",
         "Red halo = high electrical risk",
         "Number = model rank",
@@ -410,20 +408,18 @@ def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[st
     card = FancyBboxPatch((0.02, y), 0.96, height, transform=panel_ax.transAxes, boxstyle="round,pad=0.014,rounding_size=0.018", linewidth=1.0, edgecolor="#cbd5e1", facecolor="white", alpha=0.98, zorder=1)
     panel_ax.add_patch(card)
     panel_ax.text(0.07, y + height - 0.035, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.0, fontweight="bold", color="#111827", zorder=2)
-    panel_ax.text(0.07, y + height - 0.077, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=fontsize, family="monospace" if monospace else None, color="#111827", linespacing=1.18, zorder=2)
+    panel_ax.text(0.07, y + height - 0.075, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=fontsize, family="monospace" if monospace else None, color="#111827", linespacing=1.15, zorder=2)
 
 
 def draw_side_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
     panel_ax.set_axis_off()
-    draw_info_card(panel_ax, 0.715, 0.265, "Top decisions", decision_lines(sites), fontsize=7.65)
-    draw_info_card(panel_ax, 0.530, 0.165, "Review watchlist", review_lines(sites), fontsize=7.55)
-    draw_info_card(panel_ax, 0.190, 0.320, "Port plan snapshot", port_lines(sites), monospace=True, fontsize=6.85)
-    draw_info_card(panel_ax, 0.020, 0.150, "Map encoding", encoding_lines(), fontsize=7.45)
+    draw_info_card(panel_ax, 0.722, 0.258, "Top decisions", decision_lines(sites), fontsize=7.55)
+    draw_info_card(panel_ax, 0.548, 0.154, "Review watchlist", review_lines(sites), fontsize=7.35)
+    draw_info_card(panel_ax, 0.215, 0.313, "Port plan snapshot", port_lines(sites), monospace=True, fontsize=6.65)
+    draw_info_card(panel_ax, 0.020, 0.175, "Map encoding", encoding_lines(), fontsize=7.05)
 
 
-def update_package_manifest_for_synced_chart(source: Path, destination: Path) -> None:
-    package_root = destination.parents[1]
-    manifest_path = package_root / "package_manifest.json"
+def refresh_package_manifest_hashes(manifest_path: Path) -> None:
     if not manifest_path.exists():
         return
     try:
@@ -431,24 +427,25 @@ def update_package_manifest_for_synced_chart(source: Path, destination: Path) ->
     except json.JSONDecodeError:
         return
 
-    source_hash = sha256_file(source)
-    destination_hash = sha256_file(destination)
-    destination_text = destination.as_posix()
-    source_text = source.as_posix()
-
-    for record in manifest.get("files", []):
-        record_destination = Path(str(record.get("destination", ""))).as_posix()
-        if record_destination == destination_text:
-            record["source"] = source_text
-            record["destination"] = destination_text
-            record["copied"] = True
-            record["size_bytes"] = destination.stat().st_size
-            record["source_sha256"] = source_hash
-            record["destination_sha256"] = destination_hash
-            record["in_sync"] = source_hash == destination_hash
-            break
-
     files = manifest.get("files", [])
+    for record in files:
+        source = Path(str(record.get("source", "")))
+        destination = Path(str(record.get("destination", "")))
+        if not source.exists() or not destination.exists() or source.stat().st_size == 0 or destination.stat().st_size == 0:
+            record["copied"] = False
+            record["size_bytes"] = 0
+            record["source_sha256"] = None
+            record["destination_sha256"] = None
+            record["in_sync"] = False
+            continue
+        source_hash = sha256_file(source)
+        destination_hash = sha256_file(destination)
+        record["copied"] = True
+        record["size_bytes"] = destination.stat().st_size
+        record["source_sha256"] = source_hash
+        record["destination_sha256"] = destination_hash
+        record["in_sync"] = source_hash == destination_hash
+
     manifest["copied_count"] = len([record for record in files if record.get("copied")])
     manifest["synced_count"] = len([record for record in files if record.get("copied") and record.get("in_sync")])
     manifest["missing_or_empty_sources"] = [record.get("source") for record in files if not record.get("copied")]
@@ -464,7 +461,7 @@ def sync_chart_to_package(output_path: Path, package_chart: Path) -> bool:
         return False
     ensure_parent(package_chart)
     shutil.copy2(output_path, package_chart)
-    update_package_manifest_for_synced_chart(output_path, package_chart)
+    refresh_package_manifest_hashes(package_root / "package_manifest.json")
     return True
 
 
