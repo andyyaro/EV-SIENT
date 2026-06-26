@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 from datetime import datetime, timezone
@@ -44,6 +45,14 @@ DEFAULT_PACKAGE_DIR = Path("data/outputs/deliverable_package_v2")
 SAFE_OUTPUT_ROOT = Path("data/outputs")
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def copy_file(source: Path, destination: Path) -> dict[str, object]:
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not source.exists() or source.stat().st_size == 0:
@@ -52,13 +61,21 @@ def copy_file(source: Path, destination: Path) -> dict[str, object]:
             "destination": str(destination),
             "copied": False,
             "size_bytes": 0,
+            "source_sha256": None,
+            "destination_sha256": None,
+            "in_sync": False,
         }
+    source_hash = sha256_file(source)
     shutil.copy2(source, destination)
+    destination_hash = sha256_file(destination)
     return {
         "source": str(source),
         "destination": str(destination),
         "copied": True,
         "size_bytes": destination.stat().st_size,
+        "source_sha256": source_hash,
+        "destination_sha256": destination_hash,
+        "in_sync": source_hash == destination_hash,
     }
 
 
@@ -101,6 +118,7 @@ This folder contains the cleanest outputs from the V2 EV charging site-readiness
 ```text
 Status: {manifest['status']}
 Copied files: {manifest['copied_count']}/{manifest['expected_count']}
+Synced files: {manifest['synced_count']}/{manifest['expected_count']}
 Generated at UTC: {manifest['generated_at_utc']}
 Clean rebuild: {manifest['clean_rebuild']}
 Previous package removed: {manifest['previous_package_removed']}
@@ -130,6 +148,10 @@ Previous package removed: {manifest['previous_package_removed']}
 11. charts/v2_profile_rank_stability_chart.png
 ```
 
+## Sync guarantee
+
+The package manifest stores SHA-256 hashes for each source file and copied package file. A package is only marked `complete` when every copied file matches its current source file.
+
 ## Notes
 
 This is a planning prototype deliverable package. It is not an engineering design, procurement package, utility approval, or permitting approval.
@@ -144,16 +166,20 @@ def build_package(package_dir: Path, clean: bool = True) -> dict[str, object]:
     for source_text, destination_text in PACKAGE_FILES:
         copied_records.append(copy_file(Path(source_text), package_dir / destination_text))
     missing = [record["source"] for record in copied_records if not record["copied"]]
+    out_of_sync = [record["destination"] for record in copied_records if record["copied"] and not record["in_sync"]]
+    synced_count = len([record for record in copied_records if record["copied"] and record["in_sync"]])
     manifest = {
         "package": "v2_deliverable_package",
-        "status": "complete" if not missing else "incomplete",
+        "status": "complete" if not missing and not out_of_sync else "incomplete",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "package_dir": str(package_dir),
         "clean_rebuild": clean,
         "previous_package_removed": removed_existing_package,
         "expected_count": len(copied_records),
         "copied_count": len(copied_records) - len(missing),
+        "synced_count": synced_count,
         "missing_or_empty_sources": missing,
+        "out_of_sync_destinations": out_of_sync,
         "files": copied_records,
     }
     (package_dir / "package_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -183,12 +209,17 @@ def main() -> None:
     print(f"Clean rebuild: {manifest['clean_rebuild']}")
     print(f"Previous package removed: {manifest['previous_package_removed']}")
     print(f"Copied files: {manifest['copied_count']}/{manifest['expected_count']}")
+    print(f"Synced files: {manifest['synced_count']}/{manifest['expected_count']}")
     print(f"Manifest: {package_dir / 'package_manifest.json'}")
     print(f"Readme: {package_dir / 'README.md'}")
     if manifest["missing_or_empty_sources"]:
         print("Missing or empty sources:")
         for source in manifest["missing_or_empty_sources"]:
             print(f"- {source}")
+    if manifest["out_of_sync_destinations"]:
+        print("Out-of-sync copied files:")
+        for destination in manifest["out_of_sync_destinations"]:
+            print(f"- {destination}")
 
 
 if __name__ == "__main__":
