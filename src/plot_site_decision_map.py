@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import shutil
 import sys
 import textwrap
 import urllib.request
@@ -16,7 +17,6 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
-from matplotlib.lines import Line2D
 from matplotlib.patches import FancyBboxPatch
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
@@ -36,6 +36,7 @@ DEFAULT_EXECUTIVE_SUMMARY = "data/outputs/v2_executive_site_summary.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/v2_site_decision_map.png"
 DEFAULT_BOUNDARY_ZIP = "data/source_extracts/gis/tl_2024_us_county.zip"
 DEFAULT_BOUNDARY_URL = "https://www2.census.gov/geo/tiger/TIGER2024/COUNTY/tl_2024_us_county.zip"
+DEFAULT_PACKAGE_CHART = "data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png"
 WEB_MERCATOR = "EPSG:3857"
 WGS84 = "EPSG:4326"
 TARGET_GEOIDS = {"51059", "51600", "51153", "51683", "51685"}
@@ -119,16 +120,16 @@ def marker_size(score: Any) -> float:
 
 
 def review_note(row: pd.Series) -> str:
+    """Return short, complete review notes without ellipses."""
     site_id = str(row.get("site_id", ""))
-    flags = str(row.get("major_review_flags", "")).strip()
-    if flags and flags.lower() != "nan":
-        return flags
     if site_id == "PWC002":
         return "garage / AHJ / electrical review"
+    if site_id == "PWC001":
+        return "emergency disconnect visibility"
     if site_id == "PWC003":
-        return "special-use or public-access decision"
+        return "public-access / special-use decision"
     if site_id == "PWC008":
-        return "nearby charging supply is already high"
+        return "nearby charging supply already high"
     if str(row.get("electrical_risk_level", "")).lower() == "high":
         return "electrical review before expansion"
     return "verify site assumptions"
@@ -217,8 +218,8 @@ def county_label(row: pd.Series) -> str:
 
 def plot_county_context(ax, counties_3857: gpd.GeoDataFrame, basemap_added: bool) -> None:
     if not basemap_added:
-        counties_3857.plot(ax=ax, facecolor="#f7f8fa", edgecolor="#475569", linewidth=1.0, alpha=0.62, zorder=1)
-    counties_3857.boundary.plot(ax=ax, color="#0f172a", linewidth=1.05, alpha=0.72, zorder=3)
+        counties_3857.plot(ax=ax, facecolor="#f7f8fa", edgecolor="#475569", linewidth=1.0, alpha=0.55, zorder=1)
+    counties_3857.boundary.plot(ax=ax, color="#0f172a", linewidth=0.95, alpha=0.55, zorder=3)
     for _, row in counties_3857.iterrows():
         label = county_label(row)
         if not label:
@@ -232,13 +233,26 @@ def plot_county_context(ax, counties_3857: gpd.GeoDataFrame, basemap_added: bool
             va="center",
             fontsize=8,
             color="#334155",
-            alpha=0.70,
-            path_effects=[pe.withStroke(linewidth=3.5, foreground="white", alpha=0.88)],
+            alpha=0.66,
+            path_effects=[pe.withStroke(linewidth=3.5, foreground="white", alpha=0.86)],
             zorder=2 if basemap_added else 4,
         )
 
 
 def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
+    high_risk = sites_3857[sites_3857["electrical_risk_level"].astype(str).str.lower() == "high"]
+    if not high_risk.empty:
+        ax.scatter(
+            high_risk.geometry.x,
+            high_risk.geometry.y,
+            s=[marker_size(score) + 170 for score in high_risk["readiness_score"]],
+            facecolors="none",
+            edgecolors="#b91c1c",
+            linewidths=2.8,
+            alpha=0.72,
+            zorder=4,
+        )
+
     for action in ACTION_ORDER:
         subset = sites_3857[sites_3857["action_group"] == action]
         if subset.empty:
@@ -248,7 +262,7 @@ def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
             markersize=[marker_size(score) for score in subset["readiness_score"]],
             color=ACTION_COLORS[action],
             edgecolor=["#7f1d1d" if str(risk).lower() == "high" else "#111827" for risk in subset["electrical_risk_level"]],
-            linewidth=[2.6 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]],
+            linewidth=[2.2 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]],
             alpha=0.94,
             zorder=5,
         )
@@ -294,15 +308,6 @@ def add_site_labels(ax, sites_3857: gpd.GeoDataFrame) -> None:
             bbox={"boxstyle": "round,pad=0.20", "fc": "white", "ec": "#cbd5e1", "alpha": 0.94, "lw": 0.55},
             zorder=7,
         )
-
-
-def add_map_legend(ax) -> None:
-    handles = [
-        Line2D([0], [0], marker="o", linestyle="None", markerfacecolor=ACTION_COLORS[action], markeredgecolor="#111827", markersize=8, label=action)
-        for action in ACTION_ORDER
-    ]
-    handles.append(Line2D([0], [0], marker="o", linestyle="None", markerfacecolor="white", markeredgecolor="#7f1d1d", markeredgewidth=2.4, markersize=8, label="High electrical risk"))
-    ax.legend(handles=handles, loc="lower left", title="Planning action", fontsize=8.0, title_fontsize=8.5, framealpha=0.94)
 
 
 def add_north_arrow(ax) -> None:
@@ -370,28 +375,59 @@ def review_lines(sites: gpd.GeoDataFrame) -> list[str]:
     watch = data[(data["action_group"].isin(["High-review", "Special-use"])) | (data["electrical_risk_level"].astype(str).str.lower() == "high")]
     if watch.empty:
         return ["No high-review or special-use sites flagged."]
-    return [f"{row.get('site_id')}: {textwrap.shorten(review_note(row), width=42, placeholder='...')}" for _, row in watch.head(6).iterrows()]
+    return [f"{row.get('site_id')} — {review_note(row)}" for _, row in watch.head(6).iterrows()]
 
 
 def port_lines(sites: gpd.GeoDataFrame) -> list[str]:
     lines = ["Site    Now -> Future"]
-    for _, row in ranked(sites).head(9).iterrows():
+    for _, row in ranked(sites).iterrows():
         lines.append(f"{row.get('site_id'):<7} {fmt_int(row.get('ports_now')):>2} -> {fmt_int(row.get('future_ready_capacity')):<2}")
     return lines
 
 
-def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[str], monospace: bool = False) -> None:
+def encoding_lines() -> list[str]:
+    return [
+        "Green = advance",
+        "Blue = promising",
+        "Orange = high-review",
+        "Gray = monitor",
+        "Pink = special-use",
+        "Red halo = high electrical risk",
+        "Number = model rank",
+    ]
+
+
+def draw_info_card(
+    panel_ax,
+    y: float,
+    height: float,
+    title: str,
+    lines: list[str],
+    monospace: bool = False,
+    fontsize: float = 8.0,
+) -> None:
     card = FancyBboxPatch((0.02, y), 0.96, height, transform=panel_ax.transAxes, boxstyle="round,pad=0.014,rounding_size=0.018", linewidth=1.0, edgecolor="#cbd5e1", facecolor="white", alpha=0.98, zorder=1)
     panel_ax.add_patch(card)
-    panel_ax.text(0.07, y + height - 0.040, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.2, fontweight="bold", color="#111827", zorder=2)
-    panel_ax.text(0.07, y + height - 0.085, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=8.0 if not monospace else 7.7, family="monospace" if monospace else None, color="#111827", linespacing=1.28, zorder=2)
+    panel_ax.text(0.07, y + height - 0.035, title, transform=panel_ax.transAxes, ha="left", va="top", fontsize=9.0, fontweight="bold", color="#111827", zorder=2)
+    panel_ax.text(0.07, y + height - 0.077, "\n".join(lines), transform=panel_ax.transAxes, ha="left", va="top", fontsize=fontsize, family="monospace" if monospace else None, color="#111827", linespacing=1.18, zorder=2)
 
 
 def draw_side_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
     panel_ax.set_axis_off()
-    draw_info_card(panel_ax, 0.660, 0.315, "Top decisions", decision_lines(sites))
-    draw_info_card(panel_ax, 0.405, 0.225, "Review watchlist", review_lines(sites))
-    draw_info_card(panel_ax, 0.020, 0.355, "Port plan snapshot", port_lines(sites), monospace=True)
+    draw_info_card(panel_ax, 0.715, 0.265, "Top decisions", decision_lines(sites), fontsize=7.65)
+    draw_info_card(panel_ax, 0.530, 0.165, "Review watchlist", review_lines(sites), fontsize=7.55)
+    draw_info_card(panel_ax, 0.190, 0.320, "Port plan snapshot", port_lines(sites), monospace=True, fontsize=6.85)
+    draw_info_card(panel_ax, 0.020, 0.150, "Map encoding", encoding_lines(), fontsize=7.45)
+
+
+def sync_chart_to_package(output_path: Path, package_chart: Path) -> bool:
+    """Keep the deliverable-package chart copy current when the map is regenerated directly."""
+    package_root = package_chart.parents[1]
+    if not package_root.exists():
+        return False
+    ensure_parent(package_chart)
+    shutil.copy2(output_path, package_chart)
+    return True
 
 
 def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, output_path: Path) -> None:
@@ -409,18 +445,17 @@ def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, o
     plot_county_context(ax, counties_3857, basemap_added)
     plot_sites(ax, sites_3857)
     add_site_labels(ax, sites_3857)
-    add_map_legend(ax)
     add_north_arrow(ax)
     add_scale_bar(ax)
     draw_side_panel(panel_ax, sites)
     style_map_axis(ax)
 
-    subtitle = "Official county boundaries, basemap context, ranked candidate sites, action categories, and right-sizing notes."
+    subtitle = "Official boundaries, basemap context, ranked candidates, action categories, and port-sizing notes."
     if not basemap_added:
         subtitle = "Official county boundaries and ranked candidate sites; basemap skipped or unavailable."
 
-    fig.suptitle("V2 Public EV Charging Candidate Sites — GIS Decision Map", fontsize=15.2, fontweight="bold", y=0.967)
-    fig.text(0.5, 0.922, subtitle, ha="center", fontsize=9.4, color="#111827")
+    fig.suptitle("V2 EV Charging Candidate Sites — GIS Decision Map", fontsize=14.6, fontweight="bold", y=0.967)
+    fig.text(0.5, 0.922, subtitle, ha="center", fontsize=9.2, color="#111827")
     fig.text(0.5, 0.025, "Planning screen only — not an engineering, utility, permitting, procurement, or construction approval.", ha="center", fontsize=8.4, color="#475569")
     fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
@@ -433,7 +468,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="Output PNG path.")
     parser.add_argument("--boundary-zip", default=DEFAULT_BOUNDARY_ZIP, help="Local Census county shapefile ZIP path.")
     parser.add_argument("--boundary-url", default=DEFAULT_BOUNDARY_URL, help="Boundary ZIP URL used when local file is missing.")
+    parser.add_argument("--package-chart", default=DEFAULT_PACKAGE_CHART, help="Deliverable-package copy to sync when package already exists.")
     parser.add_argument("--no-download-boundary", action="store_true", help="Do not download boundary shapefile automatically.")
+    parser.add_argument("--no-sync-package", action="store_true", help="Do not sync the regenerated chart into an existing deliverable package.")
     parser.add_argument("--results", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--electrical-summary", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--right-sizing", default=None, help=argparse.SUPPRESS)
@@ -447,11 +484,13 @@ def main() -> None:
     executive_path = Path(args.input)
     output_path = Path(args.output)
     boundary_zip = Path(args.boundary_zip)
+    package_chart = Path(args.package_chart)
 
     sites = load_site_data(sites_path, executive_path)
     download_boundary_if_needed(boundary_zip, args.boundary_url, args.no_download_boundary)
     counties = load_county_boundaries(boundary_zip)
     plot_gis_decision_map(sites, counties, output_path)
+    package_synced = False if args.no_sync_package else sync_chart_to_package(output_path, package_chart)
 
     print("V2 GIS DECISION MAP")
     print("-------------------")
@@ -460,6 +499,7 @@ def main() -> None:
     print(f"Boundary ZIP: {boundary_zip}")
     print(f"Output: {output_path}")
     print(f"Sites plotted: {len(sites)}")
+    print(f"Package chart sync: {'updated' if package_synced else 'not needed / package not built yet'}")
     print("Done.")
 
 
