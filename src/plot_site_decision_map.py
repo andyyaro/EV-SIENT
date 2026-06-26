@@ -18,6 +18,7 @@ Install optional GIS dependencies before running:
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 import textwrap
 import urllib.request
@@ -72,19 +73,18 @@ ACTION_COLORS = {
 
 ACTION_ORDER = ["Advance", "Promising", "High-review", "Monitor", "Special-use"]
 
+# Only label the sites that carry the story. All sites still get ranked markers.
+ALWAYS_LABEL_SITE_IDS = {"FFX002", "FFX004", "PWC006", "PWC002", "PWC003", "PWC008", "PWC001"}
+
 LABEL_OFFSETS = {
-    "FFX002": (10, 10),
-    "FFX004": (-78, 14),
-    "PWC006": (-74, -12),
-    "FFX001": (-78, -14),
-    "PWC002": (-82, 12),
-    "PWC007": (10, -20),
-    "PWC004": (12, 20),
-    "FFX003": (12, -14),
-    "PWC008": (12, -18),
-    "PWC001": (-76, 26),
-    "PWC005": (12, 14),
-    "PWC003": (12, -24),
+    "FFX002": (12, 12),
+    "FFX004": (-80, 18),
+    "PWC006": (-82, -12),
+    "FFX001": (-82, -14),
+    "PWC002": (-90, 14),
+    "PWC003": (12, -26),
+    "PWC008": (14, -20),
+    "PWC001": (-82, 28),
 }
 
 
@@ -145,18 +145,11 @@ def action_group(row: pd.Series) -> str:
     return "Promising"
 
 
-def risk_label(value: Any) -> str:
-    risk = str(value or "unknown").strip().lower()
-    if risk in {"low", "medium", "high"}:
-        return risk.title()
-    return "Unknown"
-
-
 def marker_size(score: Any) -> float:
     number = safe_float(score)
     if number is None:
-        return 150
-    return 90 + number * 7.0
+        return 140
+    return 85 + number * 7.0
 
 
 def review_note(row: pd.Series) -> str:
@@ -223,23 +216,17 @@ def download_boundary_if_needed(boundary_zip: Path, boundary_url: str, no_downlo
     urllib.request.urlretrieve(boundary_url, boundary_zip)
 
 
-def load_county_boundaries(boundary_zip: Path, sites: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def load_county_boundaries(boundary_zip: Path) -> gpd.GeoDataFrame:
     counties = gpd.read_file(f"zip://{boundary_zip.resolve()}")
     if counties.crs is None:
         counties = counties.set_crs(WGS84)
-
-    counties = counties[counties.get("STATEFP", "") == "51"].copy()
-    target = counties[counties.get("GEOID", "").astype(str).isin(TARGET_GEOIDS)].copy()
-
-    # Keep the target geographies when available. If the shapefile schema changes,
-    # fall back to counties intersecting the candidate-site bounding box.
-    if target.empty:
-        site_bounds = sites.to_crs(WGS84).total_bounds
-        minx, miny, maxx, maxy = site_bounds
-        bbox = gpd.GeoSeries.from_bbox((minx - 0.25, miny - 0.25, maxx + 0.25, maxy + 0.25)).set_crs(WGS84)
-        target = counties[counties.intersects(bbox.iloc[0])].copy()
-
-    return target
+    if "STATEFP" in counties.columns:
+        counties = counties[counties["STATEFP"].astype(str) == "51"].copy()
+    if "GEOID" in counties.columns:
+        counties = counties[counties["GEOID"].astype(str).isin(TARGET_GEOIDS)].copy()
+    if counties.empty:
+        raise ValueError("County shapefile loaded, but target Fairfax / Prince William geographies were not found.")
+    return counties
 
 
 def add_basemap(ax) -> bool:
@@ -250,7 +237,7 @@ def add_basemap(ax) -> bool:
             ax,
             source=ctx.providers.CartoDB.Positron,
             attribution_size=6,
-            alpha=0.96,
+            alpha=0.98,
         )
         return True
     except Exception as exc:  # pragma: no cover - depends on network/tile provider
@@ -259,42 +246,54 @@ def add_basemap(ax) -> bool:
 
 
 def webmercator_to_lon_formatter(x: float, _pos: int) -> str:
-    # Lightweight inverse Web Mercator for readable axes without pyproj calls.
-    lon = x / 6378137.0 * 180.0 / 3.141592653589793
+    lon = x / 6378137.0 * 180.0 / math.pi
     return f"{lon:.2f}°"
 
 
 def webmercator_to_lat_formatter(y: float, _pos: int) -> str:
-    import math
-
     lat = (2.0 * math.atan(math.exp(y / 6378137.0)) - math.pi / 2.0) * 180.0 / math.pi
     return f"{lat:.2f}°"
 
 
-def set_map_extent(ax, sites_3857: gpd.GeoDataFrame, pad_meters: float = 12000) -> None:
+def set_map_extent(ax, sites_3857: gpd.GeoDataFrame, pad_meters: float = 14500) -> None:
     minx, miny, maxx, maxy = sites_3857.total_bounds
     ax.set_xlim(minx - pad_meters, maxx + pad_meters)
     ax.set_ylim(miny - pad_meters, maxy + pad_meters)
 
 
-def plot_counties(ax, counties_3857: gpd.GeoDataFrame) -> None:
-    counties_3857.plot(ax=ax, facecolor="#f7f8fa", edgecolor="#475569", linewidth=1.2, alpha=0.58, zorder=1)
+def county_label(row: pd.Series) -> str:
+    name = str(row.get("NAME", ""))
+    if name == "Fairfax":
+        return "Fairfax County"
+    if name == "Prince William":
+        return "Prince William County"
+    if name == "Manassas Park":
+        return "Manassas Park"
+    return name
+
+
+def plot_county_context(ax, counties_3857: gpd.GeoDataFrame, basemap_added: bool) -> None:
+    if not basemap_added:
+        counties_3857.plot(ax=ax, facecolor="#f7f8fa", edgecolor="#475569", linewidth=1.0, alpha=0.62, zorder=1)
+    counties_3857.boundary.plot(ax=ax, color="#0f172a", linewidth=1.05, alpha=0.72, zorder=3)
+
     for _, row in counties_3857.iterrows():
+        label = county_label(row)
+        if not label:
+            continue
         point = row.geometry.representative_point()
-        name = str(row.get("NAME", ""))
-        if name:
-            ax.text(
-                point.x,
-                point.y,
-                name,
-                ha="center",
-                va="center",
-                fontsize=8,
-                color="#475569",
-                alpha=0.78,
-                path_effects=[pe.withStroke(linewidth=3, foreground="white", alpha=0.86)],
-                zorder=2,
-            )
+        ax.text(
+            point.x,
+            point.y,
+            label,
+            ha="center",
+            va="center",
+            fontsize=8,
+            color="#334155",
+            alpha=0.70,
+            path_effects=[pe.withStroke(linewidth=3.5, foreground="white", alpha=0.88)],
+            zorder=2 if basemap_added else 4,
+        )
 
 
 def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
@@ -302,14 +301,16 @@ def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
         subset = sites_3857[sites_3857["action_group"] == action]
         if subset.empty:
             continue
+        edgecolors = ["#7f1d1d" if str(risk).lower() == "high" else "#111827" for risk in subset["electrical_risk_level"]]
+        linewidths = [2.6 if str(risk).lower() == "high" else 1.05 for risk in subset["electrical_risk_level"]]
         subset.plot(
             ax=ax,
             markersize=[marker_size(score) for score in subset["readiness_score"]],
             color=ACTION_COLORS[action],
-            edgecolor=["#111827" if str(risk).lower() != "high" else "#7f1d1d" for risk in subset["electrical_risk_level"]],
-            linewidth=[1.0 if str(risk).lower() != "high" else 2.4 for risk in subset["electrical_risk_level"]],
-            alpha=0.92,
-            zorder=4,
+            edgecolor=edgecolors,
+            linewidth=linewidths,
+            alpha=0.94,
+            zorder=5,
         )
 
     for _, row in sites_3857.sort_values("model_rank").iterrows():
@@ -320,16 +321,24 @@ def plot_sites(ax, sites_3857: gpd.GeoDataFrame) -> None:
             rank,
             ha="center",
             va="center",
-            fontsize=8.6,
+            fontsize=8.7,
             fontweight="bold",
             color="white",
-            path_effects=[pe.withStroke(linewidth=2.1, foreground="#111827")],
-            zorder=5,
+            path_effects=[pe.withStroke(linewidth=2.25, foreground="#111827")],
+            zorder=6,
         )
 
 
+def sites_to_label(sites_3857: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    ranked = sites_3857.sort_values("model_rank")
+    top_five_ids = set(ranked.head(5)["site_id"].astype(str))
+    high_risk_ids = set(ranked[ranked["electrical_risk_level"].astype(str).str.lower() == "high"]["site_id"].astype(str))
+    label_ids = top_five_ids | high_risk_ids | ALWAYS_LABEL_SITE_IDS
+    return ranked[ranked["site_id"].astype(str).isin(label_ids)]
+
+
 def add_site_labels(ax, sites_3857: gpd.GeoDataFrame) -> None:
-    for _, row in sites_3857.sort_values("model_rank").iterrows():
+    for _, row in sites_to_label(sites_3857).iterrows():
         site_id = str(row.get("site_id", ""))
         score = safe_float(row.get("readiness_score"))
         score_text = f"{score:.1f}" if score is not None else "n/a"
@@ -344,80 +353,50 @@ def add_site_labels(ax, sites_3857: gpd.GeoDataFrame) -> None:
             textcoords="offset points",
             ha="right" if dx < 0 else "left",
             va="center",
-            fontsize=7.2,
+            fontsize=7.1,
             color="#111827",
-            arrowprops={"arrowstyle": "-", "lw": 0.55, "color": "#334155", "alpha": 0.72},
-            bbox={"boxstyle": "round,pad=0.20", "fc": "white", "ec": "#cbd5e1", "alpha": 0.94, "lw": 0.6},
-            zorder=6,
+            arrowprops={"arrowstyle": "-", "lw": 0.55, "color": "#334155", "alpha": 0.68},
+            bbox={"boxstyle": "round,pad=0.20", "fc": "white", "ec": "#cbd5e1", "alpha": 0.94, "lw": 0.55},
+            zorder=7,
         )
 
 
-def add_legend(ax) -> None:
-    action_handles = [
+def add_map_legend(ax) -> None:
+    handles = [
         Line2D([0], [0], marker="o", linestyle="None", markerfacecolor=ACTION_COLORS[action], markeredgecolor="#111827", markersize=8, label=action)
         for action in ACTION_ORDER
     ]
-    action_handles.append(
-        Line2D([0], [0], marker="o", linestyle="None", markerfacecolor="white", markeredgecolor="#7f1d1d", markeredgewidth=2.3, markersize=8, label="High electrical risk")
+    handles.append(
+        Line2D([0], [0], marker="o", linestyle="None", markerfacecolor="white", markeredgecolor="#7f1d1d", markeredgewidth=2.4, markersize=8, label="High electrical risk")
     )
-    ax.legend(handles=action_handles, loc="lower left", title="Planning action", fontsize=8.0, title_fontsize=8.5, framealpha=0.94)
+    ax.legend(handles=handles, loc="lower left", title="Planning action", fontsize=8.0, title_fontsize=8.5, framealpha=0.94)
 
 
-def top_summary_lines(sites: gpd.GeoDataFrame) -> list[str]:
-    ranked = sites.sort_values("model_rank")
-    top = ranked.iloc[0]
-    pwc = ranked[ranked["site_id"].astype(str).str.startswith("PWC")]
-    top_pwc = pwc.iloc[0] if not pwc.empty else None
-
-    lines = [
-        "Decision summary",
-        "",
-        f"Top site: #{format_int(top.get('model_rank'))} {top.get('site_id')} ({safe_float(top.get('readiness_score')):.1f})",
-    ]
-    if top_pwc is not None:
-        lines.append(f"Top PWC: #{format_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} ({safe_float(top_pwc.get('readiness_score')):.1f})")
-
-    lines.extend(["", "Top 5"])
-    for _, row in ranked.head(5).iterrows():
-        score = safe_float(row.get("readiness_score"))
-        score_text = f"{score:.1f}" if score is not None else "n/a"
-        lines.append(
-            f"#{format_int(row.get('model_rank'))} {row.get('site_id')} — {score_text} — {row.get('action_group')} — {format_int(row.get('ports_now'))}->{format_int(row.get('future_ready_capacity'))} ports"
-        )
-
-    lines.extend(["", "Review watchlist"])
-    watchlist = ranked[(ranked["action_group"].isin(["High-review", "Special-use"])) | (ranked["electrical_risk_level"].astype(str).str.lower() == "high")]
-    for _, row in watchlist.head(5).iterrows():
-        lines.append(f"{row.get('site_id')}: {textwrap.shorten(review_note(row), width=54, placeholder='...')}")
-    return lines
-
-
-def add_decision_panel(ax, sites: gpd.GeoDataFrame) -> None:
-    panel = FancyBboxPatch(
-        (0.675, 0.040),
-        0.305,
-        0.355,
-        transform=ax.transAxes,
-        boxstyle="round,pad=0.014,rounding_size=0.018",
-        linewidth=1.0,
-        edgecolor="#cbd5e1",
-        facecolor="white",
-        alpha=0.95,
-        zorder=7,
-    )
-    ax.add_patch(panel)
-    ax.text(
-        0.692,
-        0.377,
-        "\n".join(top_summary_lines(sites)),
-        transform=ax.transAxes,
-        ha="left",
-        va="top",
-        fontsize=7.75,
+def add_north_arrow(ax) -> None:
+    ax.annotate(
+        "N",
+        xy=(0.962, 0.925),
+        xytext=(0.962, 0.840),
+        xycoords="axes fraction",
+        ha="center",
+        va="center",
+        fontsize=10,
+        fontweight="bold",
+        arrowprops={"arrowstyle": "-|>", "lw": 1.1, "color": "#111827"},
         color="#111827",
-        linespacing=1.28,
         zorder=8,
     )
+
+
+def add_scale_bar(ax, length_m: int = 16093) -> None:
+    x0, x1 = ax.get_xlim()
+    y0, y1 = ax.get_ylim()
+    start_x = x0 + (x1 - x0) * 0.055
+    start_y = y0 + (y1 - y0) * 0.055
+    ax.plot([start_x, start_x + length_m], [start_y, start_y], color="#111827", lw=2.2, zorder=8)
+    ax.plot([start_x, start_x], [start_y - 700, start_y + 700], color="#111827", lw=1.2, zorder=8)
+    ax.plot([start_x + length_m, start_x + length_m], [start_y - 700, start_y + 700], color="#111827", lw=1.2, zorder=8)
+    ax.text(start_x + length_m / 2, start_y + 1500, "10 miles", ha="center", va="bottom", fontsize=7.5, color="#111827", zorder=8)
 
 
 def style_map_axis(ax) -> None:
@@ -426,10 +405,79 @@ def style_map_axis(ax) -> None:
     ax.xaxis.set_major_formatter(FuncFormatter(webmercator_to_lon_formatter))
     ax.yaxis.set_major_formatter(FuncFormatter(webmercator_to_lat_formatter))
     ax.tick_params(labelsize=7)
-    ax.grid(True, alpha=0.22, linewidth=0.5)
+    ax.grid(True, alpha=0.18, linewidth=0.5)
     for spine in ax.spines.values():
         spine.set_linewidth(0.9)
         spine.set_color("#334155")
+
+
+def wrap_line(text: str, width: int = 40) -> str:
+    return "\n".join(textwrap.wrap(text, width=width))
+
+
+def decision_panel_lines(sites: gpd.GeoDataFrame) -> list[str]:
+    ranked = sites.sort_values("model_rank")
+    top = ranked.iloc[0]
+    pwc = ranked[ranked["site_id"].astype(str).str.startswith("PWC")]
+    top_pwc = pwc.iloc[0] if not pwc.empty else None
+
+    lines = [
+        "Decision summary",
+        "",
+        f"Top site: #{format_int(top.get('model_rank'))} {top.get('site_id')}",
+        f"Score {safe_float(top.get('readiness_score')):.1f} | {format_int(top.get('ports_now'))}->{format_int(top.get('future_ready_capacity'))} ports",
+    ]
+    if top_pwc is not None:
+        lines.extend([
+            "",
+            f"Top PWC: #{format_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')}",
+            f"Score {safe_float(top_pwc.get('readiness_score')):.1f} | {format_int(top_pwc.get('ports_now'))}->{format_int(top_pwc.get('future_ready_capacity'))} ports",
+        ])
+
+    lines.extend(["", "Top 5 action list"])
+    for _, row in ranked.head(5).iterrows():
+        score = safe_float(row.get("readiness_score"))
+        score_text = f"{score:.1f}" if score is not None else "n/a"
+        lines.append(f"#{format_int(row.get('model_rank'))} {row.get('site_id')} | {score_text} | {row.get('action_group')}")
+
+    lines.extend(["", "Review watchlist"])
+    watchlist = ranked[(ranked["action_group"].isin(["High-review", "Special-use"])) | (ranked["electrical_risk_level"].astype(str).str.lower() == "high")]
+    for _, row in watchlist.head(6).iterrows():
+        lines.append(f"{row.get('site_id')}: {textwrap.shorten(review_note(row), width=38, placeholder='...')}")
+
+    lines.extend(["", "Port plan snapshot", "Site    Now -> Future"])
+    for _, row in ranked.head(8).iterrows():
+        lines.append(f"{row.get('site_id'):<7} {format_int(row.get('ports_now')):>2} -> {format_int(row.get('future_ready_capacity')):<2}")
+    return lines
+
+
+def draw_side_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
+    panel_ax.set_axis_off()
+    panel = FancyBboxPatch(
+        (0.02, 0.02),
+        0.96,
+        0.96,
+        transform=panel_ax.transAxes,
+        boxstyle="round,pad=0.014,rounding_size=0.018",
+        linewidth=1.0,
+        edgecolor="#cbd5e1",
+        facecolor="white",
+        alpha=0.98,
+        zorder=1,
+    )
+    panel_ax.add_patch(panel)
+    panel_ax.text(
+        0.07,
+        0.95,
+        "\n".join(decision_panel_lines(sites)),
+        transform=panel_ax.transAxes,
+        ha="left",
+        va="top",
+        fontsize=8.4,
+        color="#111827",
+        linespacing=1.27,
+        zorder=2,
+    )
 
 
 def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, output_path: Path) -> None:
@@ -437,27 +485,28 @@ def plot_gis_decision_map(sites: gpd.GeoDataFrame, counties: gpd.GeoDataFrame, o
     sites_3857 = sites.to_crs(WEB_MERCATOR)
     counties_3857 = counties.to_crs(WEB_MERCATOR)
 
-    fig, ax = plt.subplots(figsize=(15.5, 10.0))
+    fig = plt.figure(figsize=(16.8, 10.2), facecolor="white")
+    ax = fig.add_axes([0.045, 0.115, 0.690, 0.765])
+    panel_ax = fig.add_axes([0.755, 0.145, 0.215, 0.695])
     ax.set_facecolor("#eef2f7")
 
-    plot_counties(ax, counties_3857)
-    set_map_extent(ax, sites_3857, pad_meters=14500)
+    set_map_extent(ax, sites_3857, pad_meters=15000)
     basemap_added = add_basemap(ax)
-
-    # Replot county outlines after the basemap so official boundaries remain visible.
-    counties_3857.boundary.plot(ax=ax, color="#0f172a", linewidth=1.05, alpha=0.68, zorder=3)
+    plot_county_context(ax, counties_3857, basemap_added)
     plot_sites(ax, sites_3857)
     add_site_labels(ax, sites_3857)
-    add_legend(ax)
-    add_decision_panel(ax, sites)
+    add_map_legend(ax)
+    add_north_arrow(ax)
+    add_scale_bar(ax)
+    draw_side_panel(panel_ax, sites)
     style_map_axis(ax)
 
-    subtitle = "Official county boundaries + candidate sites; basemap tiles shown when internet is available."
+    subtitle = "Official county boundaries, basemap context, ranked candidate sites, action categories, and right-sizing notes."
     if not basemap_added:
-        subtitle = "Official county boundaries + candidate sites; basemap skipped or unavailable."
+        subtitle = "Official county boundaries and ranked candidate sites; basemap skipped or unavailable."
 
-    fig.suptitle("V2 Public EV Charging Candidate Sites — GIS Decision Map", fontsize=16, fontweight="bold", y=0.970)
-    ax.set_title(subtitle, fontsize=9.5, pad=10)
+    fig.suptitle("V2 Public EV Charging Candidate Sites — GIS Decision Map", fontsize=16, fontweight="bold", y=0.967)
+    fig.text(0.5, 0.922, subtitle, ha="center", fontsize=9.6, color="#111827")
     fig.text(
         0.5,
         0.025,
@@ -496,7 +545,7 @@ def main() -> None:
 
     sites = load_site_data(sites_path, executive_path)
     download_boundary_if_needed(boundary_zip, args.boundary_url, args.no_download_boundary)
-    counties = load_county_boundaries(boundary_zip, sites)
+    counties = load_county_boundaries(boundary_zip)
     plot_gis_decision_map(sites, counties, output_path)
 
     print("V2 GIS DECISION MAP")
