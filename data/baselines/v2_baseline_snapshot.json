@@ -1,7 +1,7 @@
 {
   "baseline_name": "v2_expansion_planning_baseline_001",
-  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, port-sizing scenario analysis, right-sizing validation, executive summary, GIS decision maps, README map output, and deliverable package hardening.",
-  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, port-sizing scenario analysis, right-sizing validation, executive summary, report GIS map, README GIS map, and deliverable package enabled.",
+  "description": "Stable V2 baseline after V1-to-V2 feature parity, port simulation, port-sizing scenario analysis, right-sizing validation, executive summary scenario integration, GIS decision maps, README map output, and deliverable package hardening.",
+  "created_from_run": "V2 workflow with 12 candidate sites, visual parity, run summary, workflow manifest, port simulation, port-sizing scenario analysis, right-sizing validation, executive summary with scenario-sensitivity fields, report GIS map, README GIS map, and deliverable package enabled.",
   "score_tolerance": 0.2,
   "expected_site_count": 12,
   "quality_counts": {"ERROR": 0, "WARNING": 0, "REVIEW": 38, "INFO": 12},
@@ -83,8 +83,8 @@
   "executive_summary": {
     "row_count": 12,
     "top_site_id": "FFX002",
-    "required_columns": ["model_rank", "site_id", "site_name", "readiness_score", "data_confidence_level", "recommendation_tier", "action_label", "electrical_risk_level", "expected_electrical_rank", "expected_electrical_score", "ports_now", "future_ready_capacity", "expansion_strategy", "sim_min_ports_current", "sim_utilization_current_at_ports_now", "sim_wait_current_at_ports_now", "sim_queue_risk_current_at_ports_now", "sim_min_ports_2035_high", "sim_min_ports_2050_high", "sim_status_2050_high_at_future_ready", "current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags"],
-    "non_empty_columns": ["current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags"],
+    "required_columns": ["model_rank", "site_id", "site_name", "readiness_score", "data_confidence_level", "recommendation_tier", "action_label", "electrical_risk_level", "expected_electrical_rank", "expected_electrical_score", "ports_now", "future_ready_capacity", "expansion_strategy", "sim_min_ports_current", "sim_utilization_current_at_ports_now", "sim_wait_current_at_ports_now", "sim_queue_risk_current_at_ports_now", "sim_min_ports_2035_high", "sim_min_ports_2050_high", "sim_status_2050_high_at_future_ready", "scenario_max_min_ports_2050_high", "scenario_future_capacity_gap", "scenario_sensitivity_level", "scenario_stress_note", "current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags"],
+    "non_empty_columns": ["current_alignment", "future_alignment", "simulation_supported_strategy", "right_sizing_validation_note", "major_review_flags", "scenario_max_min_ports_2050_high", "scenario_future_capacity_gap", "scenario_sensitivity_level", "scenario_stress_note"],
     "current_alignment_by_site": {"FFX002": "aligned_now", "FFX004": "conservative_under_current_demand", "PWC006": "aligned_now", "FFX001": "aligned_now", "PWC002": "aligned_now", "PWC007": "aligned_now", "PWC004": "aligned_now", "FFX003": "aligned_now", "PWC008": "aligned_now", "PWC001": "aligned_now", "PWC005": "aligned_now", "PWC003": "aligned_now"}
   },
   "deliverable_package_manifest": {
