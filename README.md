@@ -22,6 +22,7 @@ v2-expansion-planning = active V2 prototype workflow
 ## Start here
 
 - [START_HERE.md](START_HERE.md) — shortest project entry point
+- [docs/ACTIVE_DOCS_INDEX.md](docs/ACTIVE_DOCS_INDEX.md) — clean index of active reviewer-facing docs
 - [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md) — review path for someone inspecting the repo
 - [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md) — step-by-step local reproduction checklist
 - [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md) — active V2 workflow guide
@@ -218,9 +219,8 @@ The future-ready capacity plan is stable across the first five tested scenarios.
 Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PWC008.
 ```
 
-## Documentation
-
 - [START_HERE.md](START_HERE.md)
+- [docs/ACTIVE_DOCS_INDEX.md](docs/ACTIVE_DOCS_INDEX.md)
 - [docs/REVIEWER_GUIDE.md](docs/REVIEWER_GUIDE.md)
 - [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
 - [docs/V2_CURRENT_WORKFLOW_GUIDE.md](docs/V2_CURRENT_WORKFLOW_GUIDE.md)
@@ -232,7 +232,7 @@ Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PW
 - [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
 - [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
-- [docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](docs/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
+- [docs/checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](docs/checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
 
 ## Important limitation
 
