@@ -31,6 +31,9 @@ CORE_OUTPUT_FILES = [
     Path("data/outputs/v2_right_sizing_report.md"),
     Path("data/outputs/v2_port_utilization_simulation.csv"),
     Path("data/outputs/v2_port_utilization_simulation_report.md"),
+    Path("data/outputs/v2_port_sizing_scenario_results.csv"),
+    Path("data/outputs/v2_port_sizing_scenario_summary.csv"),
+    Path("data/outputs/v2_port_sizing_scenario_report.md"),
     Path("data/outputs/v2_right_sizing_validation.csv"),
     Path("data/outputs/v2_right_sizing_validation_report.md"),
     Path("data/outputs/v2_executive_site_summary.csv"),
@@ -49,6 +52,7 @@ CORE_OUTPUT_FILES = [
     Path("data/outputs/charts/v2_site_decision_map.png"),
     Path("data/outputs/charts/v2_site_decision_map_readme.png"),
     Path("data/outputs/charts/v2_port_utilization_simulation.png"),
+    Path("data/outputs/charts/v2_port_sizing_scenario_heatmap.png"),
     Path("docs/assets/charts/v2_site_decision_map_readme.png"),
 ]
 
@@ -59,6 +63,10 @@ PACKAGE_FILES = [
     Path("data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md"),
     Path("data/outputs/deliverable_package_v2/tables/v2_right_sizing_validation.csv"),
     Path("data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md"),
+    Path("data/outputs/deliverable_package_v2/inputs/v2_port_sizing_scenarios.csv"),
+    Path("data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_results.csv"),
+    Path("data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv"),
+    Path("data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md"),
     Path("data/outputs/deliverable_package_v2/tables/v2_site_results.csv"),
     Path("data/outputs/deliverable_package_v2/reports/v2_action_matrix.md"),
     Path("data/outputs/deliverable_package_v2/tables/v2_sensitivity_summary.csv"),
@@ -85,6 +93,7 @@ PACKAGE_FILES = [
     Path("data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png"),
+    Path("data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png"),
 ]
 
 EXPECTED_FILES = CORE_OUTPUT_FILES + PACKAGE_FILES
@@ -113,6 +122,19 @@ REQUIRED_PORT_SIM_COLUMNS = [
     "queue_risk_level", "capacity_status",
 ]
 
+REQUIRED_PORT_SIZING_COLUMNS = [
+    "scenario_name", "model_rank", "site_id", "site_name", "ports_now",
+    "future_ready_capacity", "scenario_min_ports_current",
+    "scenario_min_ports_2035_high", "scenario_min_ports_2050_high",
+    "current_alignment", "future_capacity_alignment", "future_capacity_gap",
+]
+
+REQUIRED_PORT_SIZING_SUMMARY_COLUMNS = [
+    "scenario_name", "site_count", "sites_current_ports_may_be_low",
+    "sites_future_ready_capacity_exceeded", "max_scenario_min_ports_2050_high",
+    "average_scenario_min_ports_2050_high", "max_future_capacity_gap",
+]
+
 REQUIRED_RIGHT_SIZING_VALIDATION_COLUMNS = [
     "site_id", "site_name", "ports_now", "sim_min_ports_current", "current_alignment",
     "future_ready_capacity", "sim_min_ports_2050_high", "future_alignment",
@@ -139,6 +161,7 @@ REQUIRED_BASELINE_CHECKS = {
     "electrical_expected",
     "right_sizing",
     "port_simulation",
+    "port_sizing_scenarios",
     "right_sizing_validation",
     "executive_summary",
     "deliverable_package_manifest",
@@ -150,12 +173,13 @@ REQUIRED_SITE_IDS = {
     "PWC005", "PWC006", "PWC007", "PWC008",
 }
 EXPECTED_SITE_COUNT = len(REQUIRED_SITE_IDS)
+EXPECTED_PORT_SCENARIOS = {"base", "high_growth", "long_sessions", "short_daily_window", "peakier_demand", "combined_stress"}
 
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+        for chunk in iter(lambda: handle.read(1024 * 1024), b=""):
             digest.update(chunk)
     return digest.hexdigest()
 
@@ -265,6 +289,31 @@ def check_port_simulation() -> list[str]:
     expected_min_rows = EXPECTED_SITE_COUNT * 5
     if len(simulation) < expected_min_rows:
         errors.append(f"v2_port_utilization_simulation.csv has {len(simulation)} rows; expected at least {expected_min_rows} rows.")
+    return errors
+
+
+def check_port_sizing_scenarios() -> list[str]:
+    results, errors = read_table(Path("data/outputs/v2_port_sizing_scenario_results.csv"), "V2 port-sizing scenario results")
+    summary, summary_errors = read_table(Path("data/outputs/v2_port_sizing_scenario_summary.csv"), "V2 port-sizing scenario summary")
+    errors.extend(summary_errors)
+    if results is None or summary is None:
+        return errors
+    errors.extend(check_columns(results, "v2_port_sizing_scenario_results.csv", REQUIRED_PORT_SIZING_COLUMNS))
+    errors.extend(check_columns(summary, "v2_port_sizing_scenario_summary.csv", REQUIRED_PORT_SIZING_SUMMARY_COLUMNS))
+    errors.extend(check_site_ids(results, "v2_port_sizing_scenario_results.csv"))
+    found_scenarios = set(results["scenario_name"].astype(str)) if "scenario_name" in results.columns else set()
+    if found_scenarios != EXPECTED_PORT_SCENARIOS:
+        errors.append(f"v2_port_sizing_scenario_results.csv scenario set changed: {sorted(found_scenarios)}")
+    expected_rows = EXPECTED_SITE_COUNT * len(EXPECTED_PORT_SCENARIOS)
+    if len(results) != expected_rows:
+        errors.append(f"v2_port_sizing_scenario_results.csv has {len(results)} rows; expected {expected_rows} rows.")
+    if len(summary) != len(EXPECTED_PORT_SCENARIOS):
+        errors.append(f"v2_port_sizing_scenario_summary.csv has {len(summary)} rows; expected {len(EXPECTED_PORT_SCENARIOS)} rows.")
+    if "future_capacity_alignment" in results.columns:
+        allowed = {"scenario_exceeds_future_ready_capacity", "future_ready_capacity_matches_scenario", "future_ready_capacity_covers_scenario"}
+        invalid = sorted(set(results["future_capacity_alignment"].dropna().astype(str)) - allowed)
+        if invalid:
+            errors.append(f"v2_port_sizing_scenario_results.csv has invalid future_capacity_alignment values: {invalid}")
     return errors
 
 
@@ -409,6 +458,7 @@ def main() -> None:
     errors.extend(check_electrical_summary())
     errors.extend(check_right_sizing())
     errors.extend(check_port_simulation())
+    errors.extend(check_port_sizing_scenarios())
     errors.extend(check_right_sizing_validation())
     errors.extend(check_executive_summary())
     errors.extend(check_deliverable_package())
@@ -421,7 +471,7 @@ def main() -> None:
             print(f"- {error}")
         sys.exit(1)
     print("Status: PASSED")
-    print("All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.")
+    print("All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.")
 
 
 if __name__ == "__main__":
