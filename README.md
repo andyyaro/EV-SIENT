@@ -41,6 +41,14 @@ From the repository root on `v2-expansion-planning`:
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
+make setup
+make run-v2
+make check-v2
+```
+
+Equivalent raw Python commands:
+
+```bash
 pip install -r requirements.txt
 pip install -r requirements-gis.txt
 python src/run_v2.py
@@ -53,6 +61,16 @@ A successful V2 run should end with:
 Status: PASSED
 Copied files: 35/35
 Synced files: 35/35
+```
+
+## Useful maintenance commands
+
+```bash
+make help        # show available project commands
+make links       # check Markdown links
+make health      # run V2 output check and Markdown link check
+make clean-local # remove local generated caches
+make status      # show git status
 ```
 
 ## Stable V1 quick run
