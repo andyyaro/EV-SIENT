@@ -2,7 +2,8 @@
 
 This wrapper keeps the README map less crowded while forcing the full report map
 to label every candidate site. It uses the shared project chart style so the GIS
-map typography matches the other generated charts.
+map typography matches the other generated charts, and it enlarges the decision
+panel typography for presentation/readability.
 """
 
 from __future__ import annotations
@@ -13,8 +14,27 @@ import plot_site_decision_map as base
 SELECTED_FONT = apply_chart_style()
 SELECTED_FONT = preferred_chart_font()
 
+PANEL_TITLE_SIZE = 13.8
+SECTION_TITLE_SIZE = 10.8
+BODY_SIZE = 7.8
+SMALL_BODY_SIZE = 7.1
+TABLE_HEADER_SIZE = 6.9
+TABLE_BODY_SIZE = 6.85
+LEGEND_SIZE = 7.4
+METRIC_NUMBER_SIZE = 15.8
+METRIC_LABEL_SIZE = 7.6
 
-def project_style_text(panel_ax, x: float, y: float, value: str, size: float = 6.4, weight: str | None = None, family: str | None = None, color: str = "#111827") -> None:
+
+def project_style_text(
+    panel_ax,
+    x: float,
+    y: float,
+    value: str,
+    size: float = BODY_SIZE,
+    weight: str | None = None,
+    family: str | None = None,
+    color: str = "#111827",
+) -> None:
     """Draw dashboard text with the shared chart font.
 
     The base decision-map dashboard sometimes asks for monospace text to make
@@ -36,7 +56,193 @@ def project_style_text(panel_ax, x: float, y: float, value: str, size: float = 6
     )
 
 
+def draw_metric_pills_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
+    metrics = [
+        ("Sites", len(sites)),
+        ("Advance", base.action_count(sites, "Advance")),
+        ("Review", base.action_count(sites, "High-review")),
+        ("High risk", base.high_risk_count(sites)),
+    ]
+    for index, (label, value) in enumerate(metrics):
+        x = 0.065 + index * 0.232
+        panel_ax.add_patch(
+            base.FancyBboxPatch(
+                (x, 0.830),
+                0.210,
+                0.072,
+                transform=panel_ax.transAxes,
+                boxstyle="round,pad=0.010,rounding_size=0.012",
+                linewidth=0.7,
+                edgecolor="#d0d7de",
+                facecolor="#f8fafc",
+                zorder=2,
+            )
+        )
+        panel_ax.text(
+            x + 0.105,
+            0.878,
+            str(value),
+            transform=panel_ax.transAxes,
+            ha="center",
+            va="center",
+            fontsize=METRIC_NUMBER_SIZE,
+            fontweight="bold",
+            fontname=SELECTED_FONT,
+            color="#111827",
+            zorder=3,
+        )
+        panel_ax.text(
+            x + 0.105,
+            0.845,
+            label,
+            transform=panel_ax.transAxes,
+            ha="center",
+            va="center",
+            fontsize=METRIC_LABEL_SIZE,
+            fontname=SELECTED_FONT,
+            color="#475569",
+            zorder=3,
+        )
+
+
+def draw_pwc_table_large(panel_ax, sites: base.gpd.GeoDataFrame, y: float) -> None:
+    base.text(panel_ax, 0.07, y, "PWC cluster", size=SECTION_TITLE_SIZE, weight="bold")
+    y -= 0.042
+    base.text(panel_ax, 0.07, y, "Rank  Site    Score  Action       Ports", size=TABLE_HEADER_SIZE, color="#64748b")
+    y -= 0.028
+    for _, row in base.ranked(sites[sites["site_id"].astype(str).isin(base.PWC_CLUSTER_IDS)]).iterrows():
+        color = base.ACTION_COLORS.get(str(row.get("action_group", "")), "#64748b")
+        panel_ax.scatter(
+            [0.083],
+            [y - 0.003],
+            transform=panel_ax.transAxes,
+            s=42,
+            color=color,
+            edgecolors="#111827",
+            linewidths=0.50,
+            zorder=3,
+        )
+        base.text(
+            panel_ax,
+            0.110,
+            y,
+            f"#{base.fmt_int(row.get('model_rank')):<2}  {row.get('site_id'):<7} {base.fmt_score(row.get('readiness_score')):<5} {str(row.get('action_group')):<11} {base.fmt_ports(row)}",
+            size=TABLE_BODY_SIZE,
+        )
+        y -= 0.025
+
+
+def draw_port_snapshot_large(panel_ax, sites: base.gpd.GeoDataFrame, y: float) -> None:
+    base.text(panel_ax, 0.07, y, "Port plan", size=SECTION_TITLE_SIZE, weight="bold")
+    rows = base.port_rows(sites)
+    left = rows[:6]
+    right = rows[6:]
+    y -= 0.041
+    base.text(panel_ax, 0.07, y, "Site     Now→Future", size=TABLE_HEADER_SIZE, color="#64748b")
+    base.text(panel_ax, 0.55, y, "Site     Now→Future", size=TABLE_HEADER_SIZE, color="#64748b")
+    y -= 0.026
+    for idx, value in enumerate(left):
+        base.text(panel_ax, 0.07, y - idx * 0.023, value.replace("->", "→"), size=TABLE_BODY_SIZE)
+    for idx, value in enumerate(right):
+        base.text(panel_ax, 0.55, y - idx * 0.023, value.replace("->", "→"), size=TABLE_BODY_SIZE)
+
+
+def draw_encoding_large(panel_ax, y: float) -> None:
+    base.text(panel_ax, 0.07, y, "Map encoding", size=SECTION_TITLE_SIZE, weight="bold")
+    items = [
+        ("Advance", base.ACTION_COLORS["Advance"], "filled"),
+        ("Promising", base.ACTION_COLORS["Promising"], "filled"),
+        ("High-review", base.ACTION_COLORS["High-review"], "filled"),
+        ("Monitor", base.ACTION_COLORS["Monitor"], "filled"),
+        ("Special-use", base.ACTION_COLORS["Special-use"], "filled"),
+        ("High electrical risk", "#b91c1c", "halo"),
+        ("Number = model rank", "#4c78a8", "number"),
+    ]
+    start_y = y - 0.047
+    for idx, (label, color, mode) in enumerate(items):
+        x = 0.09 if idx < 4 else 0.55
+        row_y = start_y - (idx if idx < 4 else idx - 4) * 0.029
+        if mode == "halo":
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=56, facecolors="none", edgecolors=color, linewidths=1.8, zorder=3)
+        elif mode == "number":
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=56, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+            panel_ax.text(x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.2, fontweight="bold", fontname=SELECTED_FONT, color="white", zorder=4)
+        else:
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=56, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+        panel_ax.text(x + 0.034, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=LEGEND_SIZE, fontname=SELECTED_FONT, color="#111827", zorder=3)
+
+
+def draw_dashboard_panel_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
+    base.panel_bg(panel_ax)
+    base.text(panel_ax, 0.07, 0.952, "Decision dashboard", size=PANEL_TITLE_SIZE, weight="bold")
+    draw_metric_pills_large(panel_ax, sites)
+    base.rule(panel_ax, 0.798)
+
+    data = base.ranked(sites)
+    top = data.iloc[0]
+    pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
+    top_pwc = pwc.iloc[0]
+
+    base.text(panel_ax, 0.07, 0.770, "Top decisions", size=SECTION_TITLE_SIZE, weight="bold")
+    top_lines = [
+        f"Top: #{base.fmt_int(top.get('model_rank'))} {top.get('site_id')} | {base.fmt_score(top.get('readiness_score'))} | {base.fmt_ports(top)} ports",
+        f"Top PWC: #{base.fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} | {base.fmt_score(top_pwc.get('readiness_score'))} | {base.fmt_ports(top_pwc)} ports",
+        f"Next: #{base.fmt_int(data.iloc[1].get('model_rank'))} {data.iloc[1].get('site_id')} • #{base.fmt_int(data.iloc[2].get('model_rank'))} {data.iloc[2].get('site_id')} • #{base.fmt_int(data.iloc[3].get('model_rank'))} {data.iloc[3].get('site_id')}",
+    ]
+    y = 0.730
+    for line in top_lines:
+        base.text(panel_ax, 0.07, y, line, size=BODY_SIZE)
+        y -= 0.030
+    base.rule(panel_ax, 0.635)
+
+    draw_pwc_table_large(panel_ax, sites, 0.606)
+    base.rule(panel_ax, 0.430)
+
+    base.text(panel_ax, 0.07, 0.402, "Review watchlist", size=SECTION_TITLE_SIZE, weight="bold")
+    y = 0.362
+    for line in base.review_lines(sites):
+        base.text(panel_ax, 0.07, y, line, size=BODY_SIZE)
+        y -= 0.030
+    base.rule(panel_ax, 0.265)
+
+    draw_port_snapshot_large(panel_ax, sites, 0.238)
+    base.rule(panel_ax, 0.080)
+    draw_encoding_large(panel_ax, 0.058)
+
+
+def draw_readme_panel_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
+    base.panel_bg(panel_ax)
+    data = base.ranked(sites)
+    top = data.iloc[0]
+    pwc = data[data["site_id"].astype(str).str.startswith("PWC")]
+    top_pwc = pwc.iloc[0]
+    base.text(panel_ax, 0.07, 0.925, "Top decisions", size=12.0, weight="bold")
+    lines = [
+        f"#{base.fmt_int(top.get('model_rank'))} {top.get('site_id')} — top overall",
+        f"{base.fmt_score(top.get('readiness_score'))} | {base.fmt_ports(top)} ports",
+        "",
+        f"#{base.fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')} — top PWC",
+        f"{base.fmt_score(top_pwc.get('readiness_score'))} | {base.fmt_ports(top_pwc)} ports",
+        "",
+        "PWC cluster",
+    ]
+    for _, row in base.ranked(sites[sites["site_id"].astype(str).isin(base.PWC_CLUSTER_IDS)]).head(3).iterrows():
+        lines.append(f"#{base.fmt_int(row.get('model_rank'))} {row.get('site_id')} — {row.get('action_group')} | {base.fmt_ports(row)}")
+    y = 0.875
+    for line in lines:
+        base.text(panel_ax, 0.07, y, line, size=8.5)
+        y -= 0.039 if line == "" else 0.032
+    base.rule(panel_ax, 0.390)
+    draw_encoding_large(panel_ax, 0.345)
+
+
 base.text = project_style_text
+base.draw_metric_pills = draw_metric_pills_large
+base.draw_pwc_table = draw_pwc_table_large
+base.draw_port_snapshot = draw_port_snapshot_large
+base.draw_encoding = draw_encoding_large
+base.draw_dashboard_panel = draw_dashboard_panel_large
+base.draw_readme_panel = draw_readme_panel_large
 
 base.MAIN_LABEL_SITE_IDS = {
     "FFX001", "FFX002", "FFX003", "FFX004",
@@ -62,4 +268,5 @@ base.LABEL_OFFSETS.update({
 
 if __name__ == "__main__":
     print(f"GIS map chart font: {SELECTED_FONT}")
+    print("GIS decision dashboard: enlarged right-panel typography")
     base.main()
