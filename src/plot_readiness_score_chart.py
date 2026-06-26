@@ -20,6 +20,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from chart_style import apply_chart_style
+
+apply_chart_style()
+
 DEFAULT_RESULTS = "data/outputs/site_results.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/readiness_score_chart.png"
 
@@ -73,13 +77,7 @@ def plot_readiness_chart(results: pd.DataFrame, output_path: Path) -> None:
     for bar, (_, row) in zip(bars, ordered.iterrows()):
         score = float(row["readiness_score"])
         tier = row["tier_short"]
-        ax.text(
-            score + 0.8,
-            bar.get_y() + bar.get_height() / 2,
-            f"{score:.1f}  |  {tier}",
-            va="center",
-            fontsize=9,
-        )
+        ax.text(score + 0.8, bar.get_y() + bar.get_height() / 2, f"{score:.1f}  |  {tier}", va="center", fontsize=9)
 
     ax.grid(axis="x", alpha=0.2)
     ax.set_axisbelow(True)
