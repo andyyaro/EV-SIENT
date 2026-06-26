@@ -6,7 +6,7 @@ Use this guide when working on the `v2-expansion-planning` branch.
 
 ## Current status
 
-V2 is the active Phase 2 prototype branch.
+V2 is now a stable Phase 2 technical workflow on the active development branch.
 
 The latest V2 workflow includes:
 
@@ -18,19 +18,32 @@ port-use simulation
 right-sizing validation
 executive site summary
 readiness map
-new decision map
+GIS decision map
+README GIS decision map with all 12 site callout tags
+Times New Roman chart typography
 expanded baseline comparison
-deliverable package
+30-file deliverable package
 workflow manifest
-output checker
+hardened output/package checker
 ```
 
 A successful run should end with:
 
 ```text
 V2 OUTPUT CHECK
+---------------
 Status: PASSED
-All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+```
+
+A healthy package build should show:
+
+```text
+Status: complete
+Clean rebuild: True
+Previous package removed: True
+Copied files: 30/30
+Synced files: 30/30
 ```
 
 ## Branch to use
@@ -80,7 +93,7 @@ python src/check_outputs_v2.py
 13. Run V2 port-use simulation
 14. Validate V2 right-sizing with simulation
 15. Build V2 executive site summary
-16. Create V2 decision map
+16. Create V2 GIS decision maps
 17. Generate V2 interpretation report
 18. Generate V2 run summary
 19. Compare V2 outputs to baseline
@@ -104,10 +117,16 @@ port simulation output exists
 right-sizing validation output exists
 executive summary output exists
 readiness map output exists
-decision map output exists
-deliverable package output exists
+GIS decision map output exists
+README GIS decision map output exists
+README GIS decision-map asset is synced with the generated chart
+deliverable package exists
+package manifest reports a clean rebuild
+package manifest reports 30 copied files and 30 synced files
+package file hashes match current source outputs
 workflow manifest reports success
 baseline comparison reports pass
+baseline comparison covers the newer V2 simulation, validation, executive, and package layers
 ```
 
 ## What the expanded baseline comparison validates
@@ -124,7 +143,7 @@ right-sizing ports and expansion strategies
 port-simulation row count, assumptions, tested port options, demand cases, and current simulated minimum ports
 right-sizing-validation alignment guardrails
 executive-summary validation fields and top site
-deliverable-package manifest status, copied file counts, and required package destinations
+deliverable-package manifest status, copied file counts, synced file counts, and required package destinations
 ```
 
 ## Current V2 candidate sites
@@ -151,6 +170,7 @@ After a successful V2 run, start here:
 ```text
 data/outputs/deliverable_package_v2/README.md
 data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
+data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
@@ -172,10 +192,12 @@ Important V2 outputs:
 v2_site_results.csv
 v2_action_matrix.md
 v2_data_quality_report.csv
+v2_sensitivity_results.csv
 v2_sensitivity_summary.csv
 v2_profile_results.csv
 v2_profile_rank_summary.csv
 v2_profile_comparison.md
+v2_electrical_scenario_results.csv
 v2_electrical_risk_summary.csv
 v2_electrical_feasibility_report.md
 v2_right_sizing_scenarios.csv
@@ -202,19 +224,33 @@ data/outputs/charts/v2_profile_score_heatmap.png
 data/outputs/charts/v2_profile_rank_stability_chart.png
 data/outputs/charts/v2_site_readiness_map.png
 data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
 data/outputs/charts/v2_port_utilization_simulation.png
 ```
 
-## Readiness map vs decision map
+## Readiness map vs GIS decision map
 
-The workflow now produces two map-style visuals:
+The workflow produces two map-style visuals:
 
 ```text
 v2_site_readiness_map.png = analytical geography/readiness scatter
-v2_site_decision_map.png = presentation-oriented decision graphic combining rank, tier, review risk, and port-sizing
+v2_site_decision_map.png = presentation-oriented GIS decision graphic combining rank, tier, review risk, and port-sizing
+v2_site_decision_map_readme.png = README-optimized GIS decision graphic with all 12 candidate callout tags
 ```
 
 Use the decision map for README, presentation, and stakeholder-facing review. Keep the readiness map as the more technical geography view.
+
+## Chart typography
+
+Generated Matplotlib charts use the shared Times New Roman chart style configured in:
+
+```text
+src/chart_style.py
+sitecustomize.py
+src/sitecustomize.py
+```
+
+Basemap tile labels cannot be restyled because they are part of the background map image.
 
 ## Deliverable package
 
@@ -242,7 +278,9 @@ A healthy package build should show:
 ```text
 Status: complete
 Clean rebuild: True
-Copied files: 29/29
+Previous package removed: True
+Copied files: 30/30
+Synced files: 30/30
 ```
 
 ## Current model interpretation
@@ -264,9 +302,21 @@ PWC002 — useful high-review garage candidate, but needs garage/fire/AHJ/electr
 PWC003 — special-use / low public-priority unless the public-access use case changes
 ```
 
+## Current right-sizing interpretation
+
+```text
+FFX002 — install 2 now; plan future-ready capacity of 8
+FFX004 — install 3 now; plan future-ready capacity of 8
+PWC006 — install 2 now; plan future-ready capacity of 4
+Most Tier 2 library candidates — starter install with expandable design
+PWC002 and PWC001 — require electrical review before expansion
+PWC008 and PWC005 — monitor or small pilot
+PWC003 — do not advance as a general-public buildout without use-case confirmation
+```
+
 ## What “passed” means
 
-A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, and the deliverable package manifest passed the package guardrail.
+A passing V2 run means the local workflow generated the expected files, the tables have the expected structure, the 12 candidate sites are present, the workflow manifest is healthy, the expanded baseline comparison passed, the README GIS decision-map asset is synced, and the deliverable package manifest passed the package guardrails.
 
 It does not mean a site is ready to build.
 
