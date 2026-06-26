@@ -3,7 +3,7 @@
 This wrapper keeps the README map less crowded while forcing the full report map
 to label every candidate site. It uses the shared project chart style so the GIS
 map typography matches the other generated charts, and it enlarges the decision
-panel typography for presentation/readability.
+panel typography for presentation/readability without letting sections overlap.
 """
 
 from __future__ import annotations
@@ -15,12 +15,12 @@ SELECTED_FONT = apply_chart_style()
 SELECTED_FONT = preferred_chart_font()
 
 PANEL_TITLE_SIZE = 13.8
-SECTION_TITLE_SIZE = 10.8
-BODY_SIZE = 7.8
-SMALL_BODY_SIZE = 7.1
-TABLE_HEADER_SIZE = 6.9
-TABLE_BODY_SIZE = 6.85
-LEGEND_SIZE = 7.4
+SECTION_TITLE_SIZE = 10.6
+BODY_SIZE = 7.7
+SMALL_BODY_SIZE = 7.0
+TABLE_HEADER_SIZE = 6.75
+TABLE_BODY_SIZE = 6.65
+LEGEND_SIZE = 6.9
 METRIC_NUMBER_SIZE = 15.8
 METRIC_LABEL_SIZE = 7.6
 
@@ -35,12 +35,7 @@ def project_style_text(
     family: str | None = None,
     color: str = "#111827",
 ) -> None:
-    """Draw dashboard text with the shared chart font.
-
-    The base decision-map dashboard sometimes asks for monospace text to make
-    mini tables align. For consistency across charts, this wrapper ignores that
-    requested family and uses the shared Times New Roman style.
-    """
+    """Draw dashboard text with the shared Times New Roman chart font."""
     panel_ax.text(
         x,
         y,
@@ -107,16 +102,16 @@ def draw_metric_pills_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
 
 def draw_pwc_table_large(panel_ax, sites: base.gpd.GeoDataFrame, y: float) -> None:
     base.text(panel_ax, 0.07, y, "PWC cluster", size=SECTION_TITLE_SIZE, weight="bold")
-    y -= 0.042
+    y -= 0.040
     base.text(panel_ax, 0.07, y, "Rank  Site    Score  Action       Ports", size=TABLE_HEADER_SIZE, color="#64748b")
-    y -= 0.028
+    y -= 0.026
     for _, row in base.ranked(sites[sites["site_id"].astype(str).isin(base.PWC_CLUSTER_IDS)]).iterrows():
         color = base.ACTION_COLORS.get(str(row.get("action_group", "")), "#64748b")
         panel_ax.scatter(
             [0.083],
             [y - 0.003],
             transform=panel_ax.transAxes,
-            s=42,
+            s=39,
             color=color,
             edgecolors="#111827",
             linewidths=0.50,
@@ -129,22 +124,25 @@ def draw_pwc_table_large(panel_ax, sites: base.gpd.GeoDataFrame, y: float) -> No
             f"#{base.fmt_int(row.get('model_rank')):<2}  {row.get('site_id'):<7} {base.fmt_score(row.get('readiness_score')):<5} {str(row.get('action_group')):<11} {base.fmt_ports(row)}",
             size=TABLE_BODY_SIZE,
         )
-        y -= 0.025
+        y -= 0.0235
 
 
 def draw_port_snapshot_large(panel_ax, sites: base.gpd.GeoDataFrame, y: float) -> None:
+    """Draw a compact port summary so the legend remains readable."""
     base.text(panel_ax, 0.07, y, "Port plan", size=SECTION_TITLE_SIZE, weight="bold")
-    rows = base.port_rows(sites)
-    left = rows[:6]
-    right = rows[6:]
-    y -= 0.041
-    base.text(panel_ax, 0.07, y, "Site     Now→Future", size=TABLE_HEADER_SIZE, color="#64748b")
-    base.text(panel_ax, 0.55, y, "Site     Now→Future", size=TABLE_HEADER_SIZE, color="#64748b")
-    y -= 0.026
-    for idx, value in enumerate(left):
-        base.text(panel_ax, 0.07, y - idx * 0.023, value.replace("->", "→"), size=TABLE_BODY_SIZE)
-    for idx, value in enumerate(right):
-        base.text(panel_ax, 0.55, y - idx * 0.023, value.replace("->", "→"), size=TABLE_BODY_SIZE)
+    data = base.ranked(sites)
+    top = data.iloc[0]
+    top_two = data.iloc[1]
+    pwc = data[data["site_id"].astype(str).str.startswith("PWC")].iloc[0]
+    lines = [
+        f"Largest future-ready sites: {top.get('site_id')} {base.fmt_ports(top)} ports; {top_two.get('site_id')} {base.fmt_ports(top_two)} ports",
+        f"Top PWC library candidate: {pwc.get('site_id')} {base.fmt_ports(pwc)} ports",
+        "Full 12-site port table is in the executive summary and package.",
+    ]
+    yy = y - 0.040
+    for line in lines:
+        base.text(panel_ax, 0.07, yy, line, size=SMALL_BODY_SIZE)
+        yy -= 0.026
 
 
 def draw_encoding_large(panel_ax, y: float) -> None:
@@ -158,18 +156,18 @@ def draw_encoding_large(panel_ax, y: float) -> None:
         ("High electrical risk", "#b91c1c", "halo"),
         ("Number = model rank", "#4c78a8", "number"),
     ]
-    start_y = y - 0.047
+    start_y = y - 0.036
     for idx, (label, color, mode) in enumerate(items):
         x = 0.09 if idx < 4 else 0.55
-        row_y = start_y - (idx if idx < 4 else idx - 4) * 0.029
+        row_y = start_y - (idx if idx < 4 else idx - 4) * 0.0215
         if mode == "halo":
-            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=56, facecolors="none", edgecolors=color, linewidths=1.8, zorder=3)
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=48, facecolors="none", edgecolors=color, linewidths=1.7, zorder=3)
         elif mode == "number":
-            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=56, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
-            panel_ax.text(x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=6.2, fontweight="bold", fontname=SELECTED_FONT, color="white", zorder=4)
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=48, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+            panel_ax.text(x, row_y, "1", transform=panel_ax.transAxes, ha="center", va="center", fontsize=5.9, fontweight="bold", fontname=SELECTED_FONT, color="white", zorder=4)
         else:
-            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=56, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
-        panel_ax.text(x + 0.034, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=LEGEND_SIZE, fontname=SELECTED_FONT, color="#111827", zorder=3)
+            panel_ax.scatter([x], [row_y], transform=panel_ax.transAxes, s=48, color=color, edgecolors="#111827", linewidths=0.7, zorder=3)
+        panel_ax.text(x + 0.032, row_y, label, transform=panel_ax.transAxes, ha="left", va="center", fontsize=LEGEND_SIZE, fontname=SELECTED_FONT, color="#111827", zorder=3)
 
 
 def draw_dashboard_panel_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
@@ -196,18 +194,18 @@ def draw_dashboard_panel_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
     base.rule(panel_ax, 0.635)
 
     draw_pwc_table_large(panel_ax, sites, 0.606)
-    base.rule(panel_ax, 0.430)
+    base.rule(panel_ax, 0.438)
 
-    base.text(panel_ax, 0.07, 0.402, "Review watchlist", size=SECTION_TITLE_SIZE, weight="bold")
-    y = 0.362
+    base.text(panel_ax, 0.07, 0.412, "Review watchlist", size=SECTION_TITLE_SIZE, weight="bold")
+    y = 0.374
     for line in base.review_lines(sites):
         base.text(panel_ax, 0.07, y, line, size=BODY_SIZE)
         y -= 0.030
-    base.rule(panel_ax, 0.265)
+    base.rule(panel_ax, 0.280)
 
-    draw_port_snapshot_large(panel_ax, sites, 0.238)
-    base.rule(panel_ax, 0.080)
-    draw_encoding_large(panel_ax, 0.058)
+    draw_port_snapshot_large(panel_ax, sites, 0.254)
+    base.rule(panel_ax, 0.148)
+    draw_encoding_large(panel_ax, 0.122)
 
 
 def draw_readme_panel_large(panel_ax, sites: base.gpd.GeoDataFrame) -> None:
@@ -268,5 +266,5 @@ base.LABEL_OFFSETS.update({
 
 if __name__ == "__main__":
     print(f"GIS map chart font: {SELECTED_FONT}")
-    print("GIS decision dashboard: enlarged right-panel typography")
+    print("GIS decision dashboard: enlarged right-panel typography with compact port summary")
     base.main()
