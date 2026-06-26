@@ -1,17 +1,4 @@
-"""Run the V2 expansion-planning workflow.
-
-This script is intentionally separate from src/run_all.py, which preserves the
-stable V1 workflow on main. V2 uses the expanded input file and V2-specific
-local output paths so the generated outputs do not overwrite the V1 run.
-
-Run from the repository root:
-
-    python src/run_v2.py
-
-The script writes generated outputs under data/outputs/. Those files are local
-artifacts and are ignored by Git unless a polished summary is intentionally
-copied into docs/.
-"""
+"""Run the V2 expansion-planning workflow."""
 
 from __future__ import annotations
 
@@ -122,7 +109,7 @@ def main() -> None:
     run_step("13. Run V2 port-use simulation", [PYTHON, "src/run_port_utilization_simulation.py", "--results", V2_RESULTS, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_PORT_SIM, "--report", V2_PORT_SIM_REPORT, "--chart", V2_PORT_SIM_CHART])
     run_step("14. Run V2 port-sizing scenario analysis", [PYTHON, "src/run_port_sizing_scenario_analysis.py", "--results", V2_RESULTS, "--right-sizing", V2_RIGHT_SIZING, "--scenarios", V2_PORT_SIZING_SCENARIOS, "--output", V2_PORT_SIZING_SCENARIO_RESULTS, "--summary-output", V2_PORT_SIZING_SCENARIO_SUMMARY, "--report", V2_PORT_SIZING_SCENARIO_REPORT, "--chart", V2_PORT_SIZING_SCENARIO_CHART])
     run_step("15. Validate V2 right-sizing with simulation", [PYTHON, "src/validate_right_sizing_with_simulation.py", "--right-sizing", V2_RIGHT_SIZING, "--port-simulation", V2_PORT_SIM, "--output", V2_RIGHT_SIZING_VALIDATION, "--report", V2_RIGHT_SIZING_VALIDATION_REPORT])
-    run_step("16. Build V2 executive site summary", [PYTHON, "src/build_v2_executive_summary.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--port-simulation", V2_PORT_SIM, "--right-sizing-validation", V2_RIGHT_SIZING_VALIDATION, "--output", V2_EXECUTIVE_SUMMARY, "--report", V2_EXECUTIVE_SUMMARY_REPORT])
+    run_step("16. Build V2 executive site summary", [PYTHON, "src/build_v2_executive_summary.py", "--results", V2_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--port-simulation", V2_PORT_SIM, "--port-sizing-scenarios", V2_PORT_SIZING_SCENARIO_RESULTS, "--right-sizing-validation", V2_RIGHT_SIZING_VALIDATION, "--output", V2_EXECUTIVE_SUMMARY, "--report", V2_EXECUTIVE_SUMMARY_REPORT])
     run_step("17. Create V2 GIS decision maps", [PYTHON, "src/plot_site_decision_map_all_labels.py", "--input", V2_EXECUTIVE_SUMMARY, "--output", V2_SITE_DECISION_MAP, "--readme-output", V2_SITE_DECISION_MAP_README, "--docs-readme-output", V2_DOCS_SITE_DECISION_MAP_README])
     run_step("18. Generate V2 interpretation report", [PYTHON, "src/generate_results_interpretation.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--action-report", V2_ACTION_MATRIX, "--output", V2_INTERPRETATION])
     run_step("19. Generate V2 run summary", [PYTHON, "src/generate_run_summary_v2.py", "--results", V2_RESULTS, "--quality", V2_QUALITY, "--sensitivity", V2_SENSITIVITY_SUMMARY, "--profile-results", V2_PROFILE_RESULTS, "--electrical-summary", V2_ELECTRICAL_RISK_SUMMARY, "--right-sizing", V2_RIGHT_SIZING, "--output", V2_RUN_SUMMARY])
@@ -136,7 +123,7 @@ def main() -> None:
     print("V2 workflow complete.")
     print("Key outputs:")
     for path in [
-        V2_RESULTS, V2_ACTION_MATRIX, V2_QUALITY, V2_SENSITIVITY_SUMMARY,
+        V2_RESULTS, V2_ACTION_MATRIX, V2_QUALITY, V2_SENSITIVITY_RESULTS, V2_SENSITIVITY_SUMMARY,
         V2_PROFILE_RESULTS, V2_PROFILE_REPORT, V2_ELECTRICAL_RISK_SUMMARY,
         V2_ELECTRICAL_REPORT, V2_RIGHT_SIZING, V2_RIGHT_SIZING_REPORT,
         V2_PORT_SIM, V2_PORT_SIM_REPORT, V2_PORT_SIM_CHART,
