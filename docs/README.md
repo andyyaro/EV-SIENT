@@ -28,6 +28,8 @@ This folder contains the longer project documentation.
 For the latest V2 run, use the local deliverable package after running:
 
 ```bash
+pip install -r requirements.txt
+pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
