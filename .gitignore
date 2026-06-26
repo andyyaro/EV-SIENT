@@ -34,6 +34,14 @@ data/demo/
 !docs/assets/charts/*.png
 !docs/assets/charts/*.svg
 
+# Local-only font files for chart rendering
+fonts/
+assets/fonts/
+data/fonts/
+docs/assets/fonts/
+*.otf
+*.ttf
+
 # Local-only run archives
 data/run_history/
 
