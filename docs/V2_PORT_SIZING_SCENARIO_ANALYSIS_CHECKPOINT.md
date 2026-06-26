@@ -11,6 +11,8 @@ Scoring-profile analysis = stress-tests site ranking under different scoring pri
 Port-sizing scenario analysis = stress-tests port recommendations under different demand and charging assumptions
 ```
 
+The scenario layer is now also integrated into the V2 executive site summary.
+
 ## New input
 
 ```text
@@ -56,6 +58,42 @@ data/outputs/v2_port_sizing_scenario_report.md
 data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
+## Executive-summary integration
+
+The executive site summary now reads the detailed scenario result table and adds one scenario-sensitivity summary per site.
+
+Updated script:
+
+```text
+src/build_v2_executive_summary.py
+```
+
+New executive-summary fields:
+
+```text
+scenario_max_min_ports_2050_high
+scenario_future_capacity_gap
+scenario_sensitivity_level
+scenario_stress_note
+```
+
+How to read them:
+
+```text
+scenario_max_min_ports_2050_high = highest scenario-based 2050 high-demand minimum port count
+scenario_future_capacity_gap = largest future-ready capacity gap found across tested scenarios
+scenario_sensitivity_level = robust, combined_stress_sensitive, or scenario_sensitive
+scenario_stress_note = plain-English note for the decision table
+```
+
+Expected site-level interpretation:
+
+```text
+Most sites: robust
+PWC002: combined_stress_sensitive
+PWC008: combined_stress_sensitive
+```
+
 ## Visual/report polish
 
 The scenario heatmap now uses presentation-friendly labels instead of raw code-style scenario names.
@@ -84,11 +122,13 @@ The V2 workflow now runs this after the base port-use simulation and before righ
 15. Validate V2 right-sizing with simulation
 ```
 
-The full workflow now has 24 steps.
+The executive summary then uses the generated scenario output at step 16.
+
+The full workflow still has 24 steps.
 
 ## Package integration
 
-The clean V2 deliverable package now includes the scenario input, scenario results, scenario summary, scenario report, and scenario heatmap.
+The clean V2 deliverable package includes the scenario input, scenario results, scenario summary, scenario report, scenario heatmap, and the updated executive summary carrying the scenario-sensitivity fields.
 
 Expected package health after a full run:
 
@@ -99,9 +139,9 @@ Synced files: 35/35
 
 ## Baseline/checker/manifest integration
 
-The baseline comparison now includes a `port_sizing_scenarios` check.
+The baseline comparison includes a `port_sizing_scenarios` check and now requires the executive summary scenario-sensitivity fields.
 
-The output checker now verifies:
+The output checker verifies:
 
 ```text
 port-sizing scenario result file exists
@@ -112,10 +152,11 @@ all 12 candidate sites are represented in the scenario results
 all 6 expected scenarios are present
 scenario results have 72 rows
 scenario summary has 6 rows
-package manifest includes the new scenario artifacts
+executive summary includes scenario-sensitivity fields
+package manifest includes the scenario artifacts
 ```
 
-The V2 workflow success marker now records:
+The V2 workflow success marker records:
 
 ```text
 workflow_step_count: 24
