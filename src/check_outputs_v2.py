@@ -39,7 +39,9 @@ EXPECTED_FILES = [
     Path("data/outputs/charts/v2_profile_rank_stability_chart.png"),
     Path("data/outputs/charts/v2_site_readiness_map.png"),
     Path("data/outputs/charts/v2_site_decision_map.png"),
+    Path("data/outputs/charts/v2_site_decision_map_readme.png"),
     Path("data/outputs/charts/v2_port_utilization_simulation.png"),
+    Path("docs/assets/charts/v2_site_decision_map_readme.png"),
     Path("data/outputs/deliverable_package_v2/README.md"),
     Path("data/outputs/deliverable_package_v2/package_manifest.json"),
     Path("data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv"),
@@ -52,6 +54,7 @@ EXPECTED_FILES = [
     Path("data/outputs/deliverable_package_v2/charts/v2_polished_readiness_score_chart.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png"),
     Path("data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png"),
+    Path("data/outputs/deliverable_package_v2/charts/v2_site_decision_map_readme.png"),
 ]
 
 REQUIRED_RESULT_COLUMNS = [
