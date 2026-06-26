@@ -38,6 +38,7 @@ PACKAGE_FILES = [
     ("data/outputs/charts/v2_profile_rank_stability_chart.png", "charts/v2_profile_rank_stability_chart.png"),
     ("data/outputs/charts/v2_site_readiness_map.png", "charts/v2_site_readiness_map.png"),
     ("data/outputs/charts/v2_site_decision_map.png", "charts/v2_site_decision_map.png"),
+    ("data/outputs/charts/v2_site_decision_map_readme.png", "charts/v2_site_decision_map_readme.png"),
     ("data/outputs/charts/v2_port_utilization_simulation.png", "charts/v2_port_utilization_simulation.png"),
 ]
 
@@ -139,13 +140,14 @@ Previous package removed: {manifest['previous_package_removed']}
 2. tables/v2_executive_site_summary.csv
 3. reports/v2_right_sizing_validation_report.md
 4. charts/v2_site_decision_map.png
-5. reports/v2_run_summary.md
-6. reports/v2_action_matrix.md
-7. reports/v2_profile_comparison.md
-8. tables/v2_sensitivity_summary.csv
-9. charts/v2_polished_readiness_score_chart.png
-10. charts/v2_site_readiness_map.png
-11. charts/v2_profile_rank_stability_chart.png
+5. charts/v2_site_decision_map_readme.png
+6. reports/v2_run_summary.md
+7. reports/v2_action_matrix.md
+8. reports/v2_profile_comparison.md
+9. tables/v2_sensitivity_summary.csv
+10. charts/v2_polished_readiness_score_chart.png
+11. charts/v2_site_readiness_map.png
+12. charts/v2_profile_rank_stability_chart.png
 ```
 
 ## Sync guarantee
