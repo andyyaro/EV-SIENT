@@ -2,14 +2,15 @@
 
 ## Font
 
-All generated Matplotlib charts are configured to use the Libre Caslon family, with this priority order:
+All generated Matplotlib charts are configured to use **Times New Roman** so the V2 visual outputs have one consistent report-style typography.
+
+Fallback order:
 
 ```text
-Libre Caslon Text
-Libre Caslon Display
-Libre Caslon
-Georgia
 Times New Roman
+Times
+Nimbus Roman
+Liberation Serif
 DejaVu Serif
 ```
 
@@ -18,9 +19,10 @@ The shared style lives in:
 ```text
 src/chart_style.py
 src/sitecustomize.py
+sitecustomize.py
 ```
 
-`src/sitecustomize.py` is loaded automatically when repository scripts are run with commands such as:
+The chart style is applied automatically when repository scripts are run from the project, including:
 
 ```bash
 python src/run_v2.py
@@ -28,63 +30,33 @@ python src/plot_readiness_score_chart.py
 python src/plot_site_decision_map_all_labels.py
 ```
 
-## How the font is found
+## Diagnostic check
 
-The chart style registers local font files matching:
-
-```text
-*Libre*Caslon*.otf
-*Libre*Caslon*.ttf
-LibreCaslon*.otf
-LibreCaslon*.ttf
-```
-
-It checks these local project folders first:
-
-```text
-fonts/
-assets/fonts/
-docs/assets/fonts/
-data/fonts/
-```
-
-It also checks common operating-system font folders, including the default user font folder on macOS:
-
-```text
-~/Library/Fonts
-/Library/Fonts
-/System/Library/Fonts
-~/.local/share/fonts
-/usr/local/share/fonts
-/usr/share/fonts
-```
-
-For Andy's Mac, fonts stored here should be found automatically:
-
-```text
-/Users/andyyaro/Library/Fonts
-```
-
-You can also point the workflow to a custom local font folder:
+Use this command to confirm which font Matplotlib selected:
 
 ```bash
-export FCF_FONT_DIRS="$HOME/Library/Fonts"
-python src/run_v2.py
+python src/check_chart_font.py
 ```
 
-Multiple folders can be separated with the normal OS path separator.
+Expected output on macOS is usually:
 
-## Repository rule
+```text
+Selected chart font: Times New Roman
+```
 
-Font files are local-only and should not be committed to the repository. The `.gitignore` file ignores local font folders and `.otf` / `.ttf` files.
+If Times New Roman is not visible to Matplotlib, the workflow falls back to the next available serif font in the fallback list.
 
-## Validation
+## Regenerating charts
 
-After installing or placing the font locally, regenerate the outputs:
+After changing the style, regenerate the outputs:
 
 ```bash
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
-The generated charts should now render with Libre Caslon when the font is available on the local machine.
+The generated chart files and deliverable package copies should then use the same Times New Roman chart style.
+
+## Basemap note
+
+Text that is part of the map background tiles cannot be restyled by Matplotlib. Generated chart text, labels, legends, axes, titles, and dashboard text can be controlled by the project font style.
