@@ -9,7 +9,7 @@ This folder stores input datasets, configuration files, source extracts, baselin
 - [data/source_extracts/](source_extracts/) — small model-ready extracts and public-data upgrade outputs
 - [data/baselines/](baselines/) — committed benchmark snapshots
 - [data/raw_exports/](raw_exports/) — notes about raw exports not committed to the repo
-- [data/outputs/](outputs/) — generated local outputs ignored by Git
+- `data/outputs/` — generated local outputs ignored by Git
 
 ## Main input files
 
@@ -52,64 +52,70 @@ src/compare_v2_to_baseline.py
 
 Generated outputs are written to:
 
-- [data/outputs/](outputs/)
-- [data/outputs/charts/](outputs/charts/)
-- [data/outputs/deliverable_package/](outputs/deliverable_package/)
-- [data/outputs/deliverable_package_v2/](outputs/deliverable_package_v2/)
+```text
+data/outputs/
+data/outputs/charts/
+data/outputs/deliverable_package/
+data/outputs/deliverable_package_v2/
+```
 
 Typical V1 generated files:
 
-- [data/outputs/data_quality_report.csv](outputs/data_quality_report.csv)
-- [data/outputs/site_results.csv](outputs/site_results.csv)
-- [data/outputs/action_matrix.md](outputs/action_matrix.md)
-- [data/outputs/sensitivity_results.csv](outputs/sensitivity_results.csv)
-- [data/outputs/sensitivity_summary.csv](outputs/sensitivity_summary.csv)
-- [data/outputs/profile_results.csv](outputs/profile_results.csv)
-- [data/outputs/profile_rank_summary.csv](outputs/profile_rank_summary.csv)
-- [data/outputs/profile_comparison.md](outputs/profile_comparison.md)
-- [data/outputs/model_run_summary.md](outputs/model_run_summary.md)
-- [data/outputs/results_interpretation.md](outputs/results_interpretation.md)
-- [data/outputs/baseline_comparison.csv](outputs/baseline_comparison.csv)
-- [data/outputs/baseline_comparison.md](outputs/baseline_comparison.md)
-- [data/outputs/workflow_success.json](outputs/workflow_success.json)
-- [data/outputs/charts/readiness_score_chart.png](outputs/charts/readiness_score_chart.png)
-- [data/outputs/charts/data_confidence_chart.png](outputs/charts/data_confidence_chart.png)
-- [data/outputs/charts/profile_rank_stability_chart.png](outputs/charts/profile_rank_stability_chart.png)
-- [data/outputs/charts/profile_score_heatmap.png](outputs/charts/profile_score_heatmap.png)
-- [data/outputs/charts/site_readiness_map.png](outputs/charts/site_readiness_map.png)
+```text
+data/outputs/data_quality_report.csv
+data/outputs/site_results.csv
+data/outputs/action_matrix.md
+data/outputs/sensitivity_results.csv
+data/outputs/sensitivity_summary.csv
+data/outputs/profile_results.csv
+data/outputs/profile_rank_summary.csv
+data/outputs/profile_comparison.md
+data/outputs/model_run_summary.md
+data/outputs/results_interpretation.md
+data/outputs/baseline_comparison.csv
+data/outputs/baseline_comparison.md
+data/outputs/workflow_success.json
+data/outputs/charts/readiness_score_chart.png
+data/outputs/charts/data_confidence_chart.png
+data/outputs/charts/profile_rank_stability_chart.png
+data/outputs/charts/profile_score_heatmap.png
+data/outputs/charts/site_readiness_map.png
+```
 
 Typical V2 generated files:
 
-- `data/outputs/v2_site_results.csv`
-- `data/outputs/v2_action_matrix.md`
-- `data/outputs/v2_data_quality_report.csv`
-- `data/outputs/v2_sensitivity_results.csv`
-- `data/outputs/v2_sensitivity_summary.csv`
-- `data/outputs/v2_profile_results.csv`
-- `data/outputs/v2_profile_rank_summary.csv`
-- `data/outputs/v2_profile_comparison.md`
-- `data/outputs/v2_electrical_scenario_results.csv`
-- `data/outputs/v2_electrical_risk_summary.csv`
-- `data/outputs/v2_electrical_feasibility_report.md`
-- `data/outputs/v2_right_sizing_scenarios.csv`
-- `data/outputs/v2_right_sizing_report.md`
-- `data/outputs/v2_port_utilization_simulation.csv`
-- `data/outputs/v2_port_utilization_simulation_report.md`
-- `data/outputs/v2_port_sizing_scenario_results.csv`
-- `data/outputs/v2_port_sizing_scenario_summary.csv`
-- `data/outputs/v2_port_sizing_scenario_report.md`
-- `data/outputs/v2_right_sizing_validation.csv`
-- `data/outputs/v2_right_sizing_validation_report.md`
-- `data/outputs/v2_executive_site_summary.csv`
-- `data/outputs/v2_executive_site_summary.md`
-- `data/outputs/v2_results_interpretation.md`
-- `data/outputs/v2_run_summary.md`
-- `data/outputs/v2_baseline_comparison.json`
-- `data/outputs/v2_baseline_comparison.md`
-- `data/outputs/v2_workflow_success.json`
-- `data/outputs/charts/v2_site_decision_map.png`
-- `data/outputs/charts/v2_site_decision_map_readme.png`
-- `data/outputs/charts/v2_port_sizing_scenario_heatmap.png`
+```text
+data/outputs/v2_site_results.csv
+data/outputs/v2_action_matrix.md
+data/outputs/v2_data_quality_report.csv
+data/outputs/v2_sensitivity_results.csv
+data/outputs/v2_sensitivity_summary.csv
+data/outputs/v2_profile_results.csv
+data/outputs/v2_profile_rank_summary.csv
+data/outputs/v2_profile_comparison.md
+data/outputs/v2_electrical_scenario_results.csv
+data/outputs/v2_electrical_risk_summary.csv
+data/outputs/v2_electrical_feasibility_report.md
+data/outputs/v2_right_sizing_scenarios.csv
+data/outputs/v2_right_sizing_report.md
+data/outputs/v2_port_utilization_simulation.csv
+data/outputs/v2_port_utilization_simulation_report.md
+data/outputs/v2_port_sizing_scenario_results.csv
+data/outputs/v2_port_sizing_scenario_summary.csv
+data/outputs/v2_port_sizing_scenario_report.md
+data/outputs/v2_right_sizing_validation.csv
+data/outputs/v2_right_sizing_validation_report.md
+data/outputs/v2_executive_site_summary.csv
+data/outputs/v2_executive_site_summary.md
+data/outputs/v2_results_interpretation.md
+data/outputs/v2_run_summary.md
+data/outputs/v2_baseline_comparison.json
+data/outputs/v2_baseline_comparison.md
+data/outputs/v2_workflow_success.json
+data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
+```
 
 Recommended V2 package:
 
@@ -126,7 +132,7 @@ Synced files: 35/35
 
 V2 outputs are generated by [src/run_v2.py](../src/run_v2.py) and intentionally use `v2_` file names so they do not overwrite V1 outputs.
 
-Files under [data/outputs/](outputs/) are local generated artifacts and are ignored by Git.
+Files under `data/outputs/` are local generated artifacts and are ignored by Git.
 
 ## Source documentation files
 
@@ -139,33 +145,9 @@ Small extracts live in [data/source_extracts/](source_extracts/).
 
 Examples:
 
-- [acs_equity_inputs_1mi.csv](source_extracts/acs_equity_inputs_1mi.csv)
-- [acs_equity_index_1mi.csv](source_extracts/acs_equity_index_1mi.csv)
-- [official_facility_hours_parking_v1.csv](source_extracts/official_facility_hours_parking_v1.csv)
-- [amenity_official_source_inventory_v1.csv](source_extracts/amenity_official_source_inventory_v1.csv)
-- [amenities_0_5mi_v2_official_supported.csv](source_extracts/amenities_0_5mi_v2_official_supported.csv)
-- [amenities_0_5mi_v3_osm_run_summary.csv](source_extracts/amenities_0_5mi_v3_osm_run_summary.csv)
-- [amenities_0_5mi_v4_osm_reviewed.csv](source_extracts/amenities_0_5mi_v4_osm_reviewed.csv)
-- [electrical_feasibility_v1.csv](source_extracts/electrical_feasibility_v1.csv)
-- [local_ev_adoption_v1.csv](source_extracts/local_ev_adoption_v1.csv)
-- [sensitivity_scenarios_v1.csv](source_extracts/sensitivity_scenarios_v1.csv)
-- [site_screening_checklist.csv](source_extracts/site_screening_checklist.csv)
-- [stakeholder_data_request_fields.csv](source_extracts/stakeholder_data_request_fields.csv)
-- [stakeholder_response_tracker.csv](source_extracts/stakeholder_response_tracker.csv)
-- [v2_candidate_site_backlog.csv](source_extracts/v2_candidate_site_backlog.csv)
-- [v2_public_data_upgrade_tasks.csv](source_extracts/v2_public_data_upgrade_tasks.csv)
-- [v2_source_confidence_tracker.csv](source_extracts/v2_source_confidence_tracker.csv)
-- [v2_public_data_upgrade_recommendations_reviewed.csv](source_extracts/v2_public_data_upgrade_recommendations_reviewed.csv)
-- [v2_amenities_osm_summary_0_5mi.csv](source_extracts/v2_amenities_osm_summary_0_5mi.csv)
-
-## Site screening checklist
-
-Use [data/source_extracts/site_screening_checklist.csv](source_extracts/site_screening_checklist.csv) before adding new candidate sites.
-
-## Stakeholder follow-up tracker
-
-Use [data/source_extracts/stakeholder_response_tracker.csv](source_extracts/stakeholder_response_tracker.csv) to record outreach status, response summaries, source dates, confidence levels, and whether a model update is needed.
-
-## Raw exports
-
-Raw-export notes live in [data/raw_exports/README.md](raw_exports/README.md).
+```text
+data/source_extracts/v2_candidate_site_backlog.csv
+data/source_extracts/v2_next_upgrade_batch.csv
+data/source_extracts/v2_source_confidence_tracker.csv
+data/source_extracts/v2_public_data_upgrade_tasks.csv
+```
