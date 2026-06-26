@@ -24,7 +24,7 @@ V2 is now a stable, reproducible planning-support workflow with:
 
 ```text
 12 real candidate sites
-23-step reproducible workflow
+24-step reproducible workflow
 site-readiness ranking
 data-quality validation
 sensitivity analysis
@@ -37,19 +37,20 @@ README GIS decision map with all 12 site callout tags
 electrical-risk scenario analysis
 right-sizing scenario analysis
 port-use simulation
+port-sizing scenario analysis
 right-sizing validation
 executive site summary
 interpretation report
 run summary
 expanded baseline comparison
 workflow manifest
-30-file clean deliverable package
+35-file clean deliverable package
 hardened output checker requiring all 12 V2 sites
 hash-sync package validation
 Times New Roman chart typography
 ```
 
-The current V2 workflow has been validated locally with:
+The current V2 workflow is validated locally with:
 
 ```bash
 python src/run_v2.py
@@ -62,7 +63,7 @@ Expected final checker result:
 V2 OUTPUT CHECK
 ---------------
 Status: PASSED
-All expected V2 outputs are present, all 12 V2 candidate sites are represented, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
 ```
 
 Expected deliverable package result:
@@ -71,8 +72,8 @@ Expected deliverable package result:
 Status: complete
 Clean rebuild: True
 Previous package removed: True
-Copied files: 30/30
-Synced files: 30/30
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 ## Current repo structure
@@ -115,16 +116,17 @@ python src/check_outputs_v2.py
 11. Run V2 electrical-feasibility scenario analysis
 12. Run V2 right-sizing scenario analysis
 13. Run V2 port-use simulation
-14. Validate V2 right-sizing with simulation
-15. Build V2 executive site summary
-16. Create V2 GIS decision maps
-17. Generate V2 interpretation report
-18. Generate V2 run summary
-19. Compare V2 outputs to baseline
-20. Write V2 workflow completion manifest
-21. Build V2 deliverable package
-22. Compare V2 deliverable package manifest to baseline
-23. Rebuild V2 deliverable package with final baseline comparison
+14. Run V2 port-sizing scenario analysis
+15. Validate V2 right-sizing with simulation
+16. Build V2 executive site summary
+17. Create V2 GIS decision maps
+18. Generate V2 interpretation report
+19. Generate V2 run summary
+20. Compare V2 outputs to baseline
+21. Write V2 workflow completion manifest
+22. Build V2 deliverable package
+23. Compare V2 deliverable package manifest to baseline
+24. Rebuild V2 deliverable package with final baseline comparison
 ```
 
 ## V2 deliverable package
@@ -140,6 +142,7 @@ The package includes:
 ```text
 README.md
 package_manifest.json
+inputs/
 reports/
 tables/
 charts/
@@ -205,11 +208,21 @@ PWC005 — monitor or small pilot
 PWC003 — do not advance general-public buildout without use-case confirmation
 ```
 
+## Current V2 port-sizing scenario interpretation
+
+```text
+The future-ready capacity plan is stable across the first five tested scenarios.
+Base, high-growth, long-session, short-window, and peakier-demand scenarios do not exceed future-ready capacity.
+Only the combined-stress scenario creates one-port gaps.
+The combined-stress gaps affect PWC002 and PWC008.
+```
+
 ## Current V2 visual status
 
 ```text
 v2_site_decision_map.png = full report GIS decision map
 v2_site_decision_map_readme.png = README-optimized GIS decision map with all 12 site callout tags
+v2_port_sizing_scenario_heatmap.png = port-sizing scenario stress-test heatmap
 docs/assets/charts/v2_site_decision_map_readme.png = committed README asset synced from generated output
 ```
 
@@ -275,25 +288,26 @@ Added VDOT/traffic, ACS/equity, jobs, and amenities signals.
 Added electrical-risk scenario analysis.
 Added V2 right-sizing scenarios.
 Added port-use simulation.
+Added port-sizing scenario analysis.
 Integrated port simulation into the executive summary.
 Added right-sizing validation layer.
 Added GIS decision map and README decision map.
 Added all 12 site callout tags to the README decision map.
 Set generated chart typography to Times New Roman.
-Added clean 30-file V2 deliverable package.
-Expanded package contents with profile, stability, GIS-map, simulation, validation, and baseline outputs.
+Added clean 35-file V2 deliverable package.
+Expanded package contents with profile, stability, GIS-map, simulation, port-sizing scenario, validation, and baseline outputs.
 Strengthened output checker to require all 12 V2 site IDs.
 Hardened package and README asset hash-sync checks.
-Expanded baseline comparison to cover simulation, validation, executive, and package manifest layers.
+Expanded baseline comparison to cover simulation, port-sizing scenarios, validation, executive, and package manifest layers.
 Added current V2 workflow guide and refreshed repo documentation.
 ```
 
 ## Next likely technical improvements
 
 ```text
-Add configurable scenario-assumption inputs for port-use simulation.
+Integrate port-sizing scenario fields into the executive site summary.
 Continue replacing placeholder electrical/site-review assumptions with verified site data.
-Add a higher-level scenario comparison report for conservative/base/aggressive future demand assumptions.
+Add a concise scenario interpretation block to the stakeholder-facing package README.
 ```
 
 ## Important limitation
