@@ -51,7 +51,16 @@ The main V2 executive table is:
 v2_executive_site_summary.csv
 ```
 
-It combines ranking, readiness score, data confidence, electrical risk, right-sizing, port-use simulation, right-sizing validation, and review flags.
+It combines ranking, readiness score, data confidence, electrical risk, right-sizing, port-use simulation, port-sizing scenario sensitivity, right-sizing validation, and review flags.
+
+Key scenario-sensitivity fields in the executive table:
+
+```text
+scenario_max_min_ports_2050_high
+scenario_future_capacity_gap
+scenario_sensitivity_level
+scenario_stress_note
+```
 
 The main V2 port-sizing scenario outputs are:
 
@@ -171,7 +180,7 @@ workflow_success.json
 ```text
 readiness_score = how promising the site looks
 
-data_confidence_score = how complete the current input data is
+data_confidence_score = how complete/confirmed the current input data is
 
 action_label = what to do next
 ```
@@ -209,6 +218,8 @@ From the repository root, regenerate V2 outputs with:
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
+pip install -r requirements.txt
+pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
