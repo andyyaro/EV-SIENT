@@ -67,7 +67,10 @@ def choose_min_ports(group: pd.DataFrame) -> int | None:
     if group.empty:
         return None
     usable = group[group["capacity_status"] != "underbuilt"]
-    best = usable.sort_values("port_count").iloc[0] if not usable.empty else group.sort_values(["estimated_wait_min", "port_count"], ascending=[True, False]).iloc[0]
+    if not usable.empty:
+        best = usable.sort_values("port_count").iloc[0]
+    else:
+        best = group.sort_values(["estimated_wait_min", "port_count"], ascending=[True, False]).iloc[0]
     return int(best["port_count"])
 
 
@@ -256,18 +259,26 @@ def compare_package_manifest(baseline: dict[str, Any], manifest: dict[str, Any] 
         return
     expected = baseline.get("deliverable_package_manifest", {})
     failures = []
-    for field in ["package", "status", "expected_count", "copied_count", "clean_rebuild"]:
+    for field in ["package", "status", "expected_count", "copied_count", "synced_count", "clean_rebuild"]:
         if field in expected and manifest.get(field) != expected[field]:
             failures.append(f"{field} expected {expected[field]}, got {manifest.get(field)}")
     if expected.get("missing_or_empty_sources", []) == [] and manifest.get("missing_or_empty_sources"):
         failures.append("missing_or_empty_sources is not empty")
+    if expected.get("out_of_sync_destinations", []) == [] and manifest.get("out_of_sync_destinations"):
+        failures.append("out_of_sync_destinations is not empty")
+    if manifest.get("expected_count") != manifest.get("copied_count"):
+        failures.append("copied_count does not equal expected_count")
+    if manifest.get("expected_count") != manifest.get("synced_count"):
+        failures.append("synced_count does not equal expected_count")
     required_destinations = set(expected.get("required_destinations", []))
-    if required_destinations:
-        copied_destinations = {str(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied")}
-        missing = sorted(required_destinations - copied_destinations)
-        if missing:
-            failures.append(f"missing copied destinations: {missing}")
-    add(checks, "deliverable_package_manifest", "fail" if failures else "pass", "; ".join(failures[:12]) if failures else "Deliverable package manifest matches baseline.")
+    copied_destinations = {str(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied")}
+    missing = sorted(required_destinations - copied_destinations)
+    if missing:
+        failures.append(f"missing copied destinations: {missing}")
+    stale = sorted(str(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied") and item.get("in_sync") is not True)
+    if stale:
+        failures.append(f"manifest has copied files not marked in_sync: {stale[:5]}")
+    add(checks, "deliverable_package_manifest", "fail" if failures else "pass", "; ".join(failures[:12]) if failures else "Deliverable package manifest matches baseline and all copied files are synced.")
 
 
 def build_markdown(baseline: dict[str, Any], checks: list[dict[str, Any]], status: str) -> str:
@@ -280,7 +291,7 @@ def build_markdown(baseline: dict[str, Any], checks: list[dict[str, Any]], statu
         f"Status: **{status.upper()}**",
         "",
         "This report compares the current V2 outputs against the saved V2 baseline snapshot.",
-        "It catches accidental ranking, scoring, simulation, validation, executive-summary, and package-manifest changes.",
+        "It catches accidental ranking, scoring, simulation, validation, executive-summary, GIS-map package, and package-manifest changes.",
         "",
         "## Checks",
         "",
