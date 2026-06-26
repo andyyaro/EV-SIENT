@@ -119,7 +119,9 @@ def choose_min_ports_for_case(
     usable = [row for row in options if row["capacity_status"] != "underbuilt"]
     if usable:
         return sorted(usable, key=lambda row: row["port_count"])[0]
-    return sorted(options, key=lambda row: (row["estimated_wait_min"], row["port_count"]), reverse=True)[0]
+    # If every tested option is still underbuilt, use the least-bad tested option:
+    # lowest wait first, then largest port count as the tie-breaker.
+    return sorted(options, key=lambda row: (row["estimated_wait_min"], -row["port_count"]))[0]
 
 
 def status_at_port_count(
@@ -292,9 +294,10 @@ def build_headline(summary: pd.DataFrame) -> str:
     stress_names = ", ".join(stress["scenario_name"].astype(str).tolist())
     max_gap = int(stress["max_future_capacity_gap"].max())
     total_sites = int(stress["sites_future_ready_capacity_exceeded"].max())
+    port_word = "port" if max_gap == 1 else "ports"
     return (
         f"The current future-ready plan covers {len(stable)} of {len(summary)} scenarios. "
-        f"Capacity gaps appear only in {stress_names}, affecting up to {total_sites} sites with a maximum gap of {max_gap} port."
+        f"Capacity gaps appear only in {stress_names}, affecting up to {total_sites} sites with a maximum gap of {max_gap} {port_word}."
     )
 
 
