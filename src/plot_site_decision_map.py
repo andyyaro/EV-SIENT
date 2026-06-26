@@ -18,7 +18,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
-from matplotlib.patches import FancyBboxPatch, Rectangle
+from matplotlib.patches import Circle, ConnectionPatch, FancyBboxPatch
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
 
@@ -211,11 +211,18 @@ def load_county_boundaries(boundary_zip: Path) -> gpd.GeoDataFrame:
     return counties
 
 
-def add_basemap(ax, alpha: float = 0.98) -> bool:
+def add_basemap(ax, alpha: float = 0.98, show_attribution: bool = True) -> bool:
     if ctx is None:
         return False
     try:
-        ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, attribution_size=6, alpha=alpha)
+        attribution = ctx.providers.CartoDB.Positron.attribution if show_attribution else False
+        ctx.add_basemap(
+            ax,
+            source=ctx.providers.CartoDB.Positron,
+            attribution=attribution,
+            attribution_size=6,
+            alpha=alpha,
+        )
         return True
     except Exception as exc:
         print(f"Basemap skipped: {exc}")
@@ -438,8 +445,8 @@ def decision_lines(sites: gpd.GeoDataFrame) -> list[str]:
             f"Top PWC: #{fmt_int(top_pwc.get('model_rank'))} {top_pwc.get('site_id')}",
             f"Score {fmt_score(top_pwc.get('readiness_score'))} | {fmt_int(top_pwc.get('ports_now'))}->{fmt_int(top_pwc.get('future_ready_capacity'))} ports",
         ])
-    lines.extend(["", "Top 5 action list"])
-    for _, row in data.head(5).iterrows():
+    lines.extend(["", "Top 4 action list"])
+    for _, row in data.head(4).iterrows():
         lines.append(f"#{fmt_int(row.get('model_rank'))} {row.get('site_id')} | {fmt_score(row.get('readiness_score'))} | {row.get('action_group')}")
     return lines
 
@@ -486,7 +493,7 @@ def draw_info_card(panel_ax, y: float, height: float, title: str, lines: list[st
         fontsize=fontsize,
         family="monospace" if monospace else None,
         color="#111827",
-        linespacing=1.15,
+        linespacing=1.12,
         zorder=2,
     )
 
@@ -578,51 +585,112 @@ def draw_encoding_card(panel_ax, y: float = 0.020, height: float = 0.170) -> Non
 
 def draw_dashboard_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
     panel_ax.set_axis_off()
-    draw_metric_card(panel_ax, sites, 0.820, 0.160)
-    draw_info_card(panel_ax, 0.650, 0.150, "Top decisions", decision_lines(sites), fontsize=7.15)
-    draw_info_card(panel_ax, 0.505, 0.125, "Review watchlist", review_lines(sites), fontsize=7.05)
-    draw_info_card(panel_ax, 0.210, 0.275, "Port plan snapshot", port_lines(sites), monospace=True, fontsize=6.45)
-    draw_encoding_card(panel_ax, 0.020, 0.170)
+    draw_metric_card(panel_ax, sites, 0.815, 0.165)
+    draw_info_card(panel_ax, 0.625, 0.165, "Top decisions", decision_lines(sites), fontsize=6.95)
+    draw_info_card(panel_ax, 0.505, 0.105, "Review watchlist", review_lines(sites), fontsize=7.0)
+    draw_info_card(panel_ax, 0.205, 0.275, "Port plan snapshot", port_lines(sites), monospace=True, fontsize=6.35)
+    draw_encoding_card(panel_ax, 0.020, 0.160)
 
 
-def add_pwc_extent_box(ax, cluster: gpd.GeoDataFrame, pad_meters: float = 4500) -> tuple[float, float, float, float]:
+def add_pwc_focus_circle(ax, cluster: gpd.GeoDataFrame, pad_meters: float = 4200) -> tuple[float, float, float]:
     minx, miny, maxx, maxy = padded_bounds(cluster, pad_meters)
-    rect = Rectangle(
-        (minx, miny),
-        maxx - minx,
-        maxy - miny,
+    center_x = (minx + maxx) / 2
+    center_y = (miny + maxy) / 2
+    radius = max(maxx - minx, maxy - miny) * 0.58
+    focus_circle = Circle(
+        (center_x, center_y),
+        radius,
         fill=False,
-        linewidth=1.1,
+        linewidth=1.25,
         linestyle="--",
-        edgecolor="#334155",
-        alpha=0.70,
+        edgecolor="#475569",
+        alpha=0.78,
         zorder=4,
     )
-    ax.add_patch(rect)
-    return minx, miny, maxx, maxy
+    ax.add_patch(focus_circle)
+    return center_x, center_y, radius
+
+
+def apply_circular_inset_clip(inset_ax):
+    clip_circle = Circle((0.5, 0.5), 0.495, transform=inset_ax.transAxes)
+    artists = []
+    artists.extend(list(inset_ax.collections))
+    artists.extend(list(inset_ax.images))
+    artists.extend(list(inset_ax.lines))
+    artists.extend([patch for patch in inset_ax.patches if patch is not clip_circle])
+    for artist in artists:
+        try:
+            artist.set_clip_path(clip_circle)
+        except Exception:
+            pass
+
+    inset_ax.set_facecolor("none")
+    for spine in inset_ax.spines.values():
+        spine.set_visible(False)
+    inset_ax.set_xticks([])
+    inset_ax.set_yticks([])
+
+    frame_circle = Circle(
+        (0.5, 0.5),
+        0.495,
+        transform=inset_ax.transAxes,
+        fill=False,
+        edgecolor="#334155",
+        linewidth=1.45,
+        zorder=20,
+        clip_on=False,
+    )
+    frame_circle.set_path_effects([
+        pe.withSimplePatchShadow(offset=(2, -2), alpha=0.18),
+        pe.Normal(),
+    ])
+    inset_ax.add_patch(frame_circle)
+    return frame_circle
 
 
 def draw_pwc_zoom_inset(parent_ax, sites_3857: gpd.GeoDataFrame, counties_3857: gpd.GeoDataFrame, include_labels: bool = True) -> None:
     cluster = sites_3857[sites_3857["site_id"].astype(str).isin(PWC_CLUSTER_IDS)].copy()
     if cluster.empty:
         return
-    minx, miny, maxx, maxy = add_pwc_extent_box(parent_ax, cluster, pad_meters=4500)
 
-    inset_ax = parent_ax.inset_axes([0.040, 0.625, 0.330, 0.315])
-    inset_ax.set_facecolor("#f8fafc")
+    center_x, center_y, radius = add_pwc_focus_circle(parent_ax, cluster, pad_meters=4200)
+    minx, miny, maxx, maxy = padded_bounds(cluster, 4200)
+
+    inset_ax = parent_ax.inset_axes([0.045, 0.650, 0.275, 0.275])
     inset_ax.set_xlim(minx, maxx)
     inset_ax.set_ylim(miny, maxy)
-    add_basemap(inset_ax, alpha=0.95)
-    counties_3857.boundary.plot(ax=inset_ax, color="#0f172a", linewidth=0.70, alpha=0.48, zorder=3)
-    plot_sites(inset_ax, cluster, size_scale=0.64, rank_fontsize=7.0, high_risk_halo=True)
+
+    add_basemap(inset_ax, alpha=0.94, show_attribution=False)
+    counties_3857.boundary.plot(ax=inset_ax, color="#0f172a", linewidth=0.65, alpha=0.42, zorder=3)
+    plot_sites(inset_ax, cluster, size_scale=0.60, rank_fontsize=6.7, high_risk_halo=True)
     if include_labels:
-        add_site_labels(inset_ax, cluster, {"PWC002", "PWC008"}, fontsize=5.8, show_ports=False)
-    inset_ax.set_title("Zoom: PWC cluster", fontsize=7.5, pad=2.5, color="#111827")
-    inset_ax.set_xticks([])
-    inset_ax.set_yticks([])
-    for spine in inset_ax.spines.values():
-        spine.set_linewidth(0.9)
-        spine.set_color("#334155")
+        add_site_labels(inset_ax, cluster, {"PWC002", "PWC008"}, fontsize=5.5, show_ports=False)
+    apply_circular_inset_clip(inset_ax)
+
+    parent_ax.text(
+        0.182,
+        0.947,
+        "Zoom: PWC cluster",
+        transform=parent_ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=7.2,
+        color="#111827",
+        bbox={"boxstyle": "round,pad=0.18", "fc": "white", "ec": "#cbd5e1", "alpha": 0.95, "lw": 0.7},
+        zorder=25,
+    )
+
+    connector = ConnectionPatch(
+        xyA=(center_x + radius * 0.70, center_y + radius * 0.12),
+        coordsA=parent_ax.transData,
+        xyB=(0.86, 0.24),
+        coordsB=inset_ax.transAxes,
+        color="#64748b",
+        linewidth=0.9,
+        alpha=0.75,
+        zorder=9,
+    )
+    parent_ax.add_artist(connector)
 
 
 def draw_readme_panel(panel_ax, sites: gpd.GeoDataFrame) -> None:
@@ -676,7 +744,7 @@ def plot_map_core(
 ) -> bool:
     ax.set_facecolor("#eef2f7")
     set_map_extent(ax, sites_3857, pad_meters=14500 if compact else 15000)
-    basemap_added = add_basemap(ax)
+    basemap_added = add_basemap(ax, show_attribution=True)
     plot_county_context(ax, counties_3857, basemap_added, labels=not compact)
     plot_sites(ax, sites_3857, size_scale=1.05 if compact else 1.0, rank_fontsize=8.5 if compact else 8.7)
     add_site_labels(ax, sites_3857, label_ids, fontsize=6.7 if compact else 7.1, show_ports=not compact)
@@ -700,7 +768,7 @@ def plot_gis_decision_map_report(sites: gpd.GeoDataFrame, counties: gpd.GeoDataF
     basemap_added = plot_map_core(ax, sites_3857, counties_3857, MAIN_LABEL_SITE_IDS, include_inset=True, compact=False)
     draw_dashboard_panel(panel_ax, sites)
 
-    subtitle = "Official boundaries, basemap context, ranked candidates, PWC zoom inset, action categories, and port-sizing notes."
+    subtitle = "Official boundaries, basemap context, ranked candidates, circular PWC zoom lens, action categories, and port-sizing notes."
     if not basemap_added:
         subtitle = "Official county boundaries and ranked candidate sites; basemap skipped or unavailable."
 
@@ -723,7 +791,7 @@ def plot_gis_decision_map_readme(sites: gpd.GeoDataFrame, counties: gpd.GeoDataF
     basemap_added = plot_map_core(ax, sites_3857, counties_3857, README_LABEL_SITE_IDS, include_inset=True, compact=True)
     draw_readme_panel(panel_ax, sites)
 
-    subtitle = "Ranked public charging candidates with action categories, review flags, and PWC cluster zoom."
+    subtitle = "Ranked public charging candidates with action categories, review flags, and circular PWC zoom lens."
     if not basemap_added:
         subtitle = "Ranked public charging candidates; basemap skipped or unavailable."
 
@@ -835,7 +903,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-download-boundary", action="store_true", help="Do not download boundary shapefile automatically.")
     parser.add_argument("--no-sync-package", action="store_true", help="Do not sync regenerated charts into an existing deliverable package.")
     parser.add_argument("--no-sync-docs", action="store_true", help="Do not refresh the README asset under docs/assets.")
-    # Backward-compatible ignored arguments from earlier workflow versions.
     parser.add_argument("--results", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--electrical-summary", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--right-sizing", default=None, help=argparse.SUPPRESS)
