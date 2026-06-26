@@ -27,6 +27,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from chart_style import apply_chart_style
+
+apply_chart_style()
+
 DEFAULT_RESULTS = "data/outputs/site_results.csv"
 DEFAULT_OUTPUT = "data/outputs/charts/data_confidence_chart.png"
 
@@ -43,13 +47,7 @@ def load_results(path: Path) -> pd.DataFrame:
         raise FileNotFoundError(f"Results file not found: {path}. Run src/ev_charger_model.py first.")
 
     results = pd.read_csv(path)
-    required = {
-        "site_id",
-        "model_rank",
-        "readiness_score",
-        "data_confidence_score",
-        "data_confidence_level",
-    }
+    required = {"site_id", "model_rank", "readiness_score", "data_confidence_score", "data_confidence_level"}
     missing = required - set(results.columns)
     if missing:
         raise ValueError(f"Results file is missing required columns: {sorted(missing)}")
@@ -61,12 +59,10 @@ def load_results(path: Path) -> pd.DataFrame:
 
 
 def site_label(row: pd.Series) -> str:
-    """Create a compact left-axis label."""
     return f"#{int(row['model_rank'])} {row['site_id']}"
 
 
 def confidence_message(results: pd.DataFrame) -> str:
-    """Create a short interpretation subtitle."""
     top = results.sort_values("model_rank").iloc[0]
     return (
         f"Top site {top['site_id']} has {float(top['data_confidence_score']):.1f}/100 confidence "
@@ -75,31 +71,16 @@ def confidence_message(results: pd.DataFrame) -> str:
 
 
 def add_confidence_bands(ax) -> None:
-    """Add faint Low / Medium / High background bands."""
     ax.axvspan(0, MEDIUM_THRESHOLD, facecolor="#fdecec", alpha=0.55, zorder=0)
     ax.axvspan(MEDIUM_THRESHOLD, HIGH_THRESHOLD, facecolor="#fff4d6", alpha=0.55, zorder=0)
     ax.axvspan(HIGH_THRESHOLD, 100, facecolor="#eaf6ea", alpha=0.55, zorder=0)
 
-    band_labels = [
-        (25, "Low"),
-        (62.5, "Medium"),
-        (87.5, "High"),
-    ]
+    band_labels = [(25, "Low"), (62.5, "Medium"), (87.5, "High")]
     for x_value, label in band_labels:
-        ax.text(
-            x_value,
-            1.015,
-            label,
-            transform=ax.get_xaxis_transform(),
-            ha="center",
-            va="bottom",
-            fontsize=8,
-            alpha=0.85,
-        )
+        ax.text(x_value, 1.015, label, transform=ax.get_xaxis_transform(), ha="center", va="bottom", fontsize=8, alpha=0.85)
 
 
 def add_threshold_lines(ax) -> None:
-    """Add simple confidence threshold guides."""
     ax.axvline(MEDIUM_THRESHOLD, linestyle="--", linewidth=1, alpha=0.45, zorder=1)
     ax.axvline(HIGH_THRESHOLD, linestyle="--", linewidth=1, alpha=0.45, zorder=1)
 
@@ -118,15 +99,7 @@ def plot_data_confidence_chart(results: pd.DataFrame, output_path: Path) -> None
     for bar, (_, row) in zip(bars, ordered.iterrows()):
         score = float(row["data_confidence_score"])
         level = str(row["data_confidence_level"])
-        ax.text(
-            score + 1.2,
-            bar.get_y() + bar.get_height() / 2,
-            f"{score:.1f} — {level}",
-            va="center",
-            fontsize=9,
-            clip_on=False,
-            zorder=3,
-        )
+        ax.text(score + 1.2, bar.get_y() + bar.get_height() / 2, f"{score:.1f} — {level}", va="center", fontsize=9, clip_on=False, zorder=3)
 
     add_threshold_lines(ax)
 
