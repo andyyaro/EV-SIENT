@@ -55,7 +55,9 @@ EXPECTED_OUTPUTS = [
     "data/outputs/charts/v2_profile_rank_stability_chart.png",
     "data/outputs/charts/v2_site_readiness_map.png",
     "data/outputs/charts/v2_site_decision_map.png",
+    "data/outputs/charts/v2_site_decision_map_readme.png",
     "data/outputs/charts/v2_port_utilization_simulation.png",
+    "docs/assets/charts/v2_site_decision_map_readme.png",
 ]
 
 
