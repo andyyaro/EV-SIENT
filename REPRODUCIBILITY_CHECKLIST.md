@@ -40,24 +40,10 @@ gh --version
 python --version
 ```
 
-On some macOS or Linux machines, Python may be called `python3` instead of `python`:
-
-```bash
-python3 --version
-```
-
 If `gh` is installed but not signed in, sign in once:
 
 ```bash
 gh auth login
-```
-
-Recommended choices for a beginner:
-
-```text
-GitHub.com
-HTTPS
-Login with a web browser
 ```
 
 ## 1. Clone the repository
@@ -109,13 +95,6 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-If your computer uses `python3` instead of `python`, run:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
 Windows PowerShell:
 
 ```powershell
@@ -149,8 +128,16 @@ Expected success signs:
 ```text
 V2 workflow complete.
 V2 OUTPUT CHECK
+---------------
 Status: PASSED
-All expected V2 outputs are present and all 12 V2 candidate sites are represented in the main output tables.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+```
+
+The workflow success marker should show:
+
+```text
+Workflow steps: 24
+Generated outputs: 35/35
 ```
 
 The deliverable package step should show:
@@ -158,7 +145,9 @@ The deliverable package step should show:
 ```text
 Status: complete
 Clean rebuild: True
-Copied files: 28/28
+Previous package removed: True
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 ## 6. Open the key V2 outputs
@@ -170,6 +159,8 @@ data/outputs/deliverable_package_v2/README.md
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
+data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
+data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv
 data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 ```
 
@@ -180,6 +171,7 @@ data/outputs/deliverable_package_v2/charts/v2_polished_readiness_score_chart.png
 data/outputs/deliverable_package_v2/charts/v2_site_readiness_map.png
 data/outputs/deliverable_package_v2/charts/v2_profile_rank_stability_chart.png
 data/outputs/deliverable_package_v2/charts/v2_port_utilization_simulation.png
+data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
 ## 7. Confirm the current V2 result
@@ -207,6 +199,13 @@ Current V2 expected ranking:
 12. PWC003
 ```
 
+Current port-sizing scenario result:
+
+```text
+The first five tested scenarios do not exceed future-ready capacity.
+Only the combined-stress scenario creates one-port gaps for PWC002 and PWC008.
+```
+
 ## 8. Confirm the V2 checker output
 
 The checker should confirm:
@@ -230,6 +229,7 @@ The package should include:
 ```text
 README.md
 package_manifest.json
+inputs/
 reports/
 tables/
 charts/
@@ -258,48 +258,4 @@ git pull --rebase origin main
 python src/run_all.py
 python src/build_deliverable_package.py
 git status --short
-```
-
-A successful V1 run should show signs like:
-
-```text
-Sanity check: PASSED
-Baseline comparison: COMPLETED
-Missing files: 0
-```
-
-## 12. Optional: run demo mode
-
-Demo mode stress-tests the workflow with synthetic larger candidate pools.
-
-```bash
-python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
-```
-
-Demo outputs are local-only and ignored by Git under `data/demo/`.
-
-## 13. What not to edit manually
-
-Do not manually edit generated outputs:
-
-```text
-data/outputs/
-data/outputs/charts/
-data/outputs/deliverable_package/
-data/outputs/deliverable_package_v2/
-data/demo/
-```
-
-Regenerate V2 outputs with:
-
-```bash
-python src/run_v2.py
-python src/check_outputs_v2.py
-```
-
-Regenerate V1 outputs with:
-
-```bash
-python src/run_all.py
-python src/build_deliverable_package.py
 ```
