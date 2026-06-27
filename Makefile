@@ -1,4 +1,4 @@
-.PHONY: help setup setup-core setup-gis run-v2 check-v2 tableau-exports full-v2 full-v2-tableau links health review clean-local status
+.PHONY: help setup setup-core setup-gis run-v2 check-v2 tableau-exports check-tableau full-v2 full-v2-tableau links health review clean-local status
 
 PYTHON ?= python
 PIP ?= pip
@@ -15,10 +15,11 @@ help:
 	@echo "  make run-v2            Run the full active V2 workflow"
 	@echo "  make check-v2          Check V2 outputs and package sync"
 	@echo "  make tableau-exports   Clean and regenerate Tableau CSV inputs from V2 outputs"
+	@echo "  make check-tableau     Validate Tableau export files, schemas, row counts, and site coverage"
 	@echo "  make full-v2           Run V2 workflow, then check outputs"
-	@echo "  make full-v2-tableau   Run/check V2, then clean/regenerate Tableau CSV inputs"
+	@echo "  make full-v2-tableau   Run/check V2, then regenerate and check Tableau CSV inputs"
 	@echo "  make links             Check Markdown links with Lychee"
-	@echo "  make health            Run check-v2 and links"
+	@echo "  make health            Run check-v2, check-tableau, and links"
 	@echo "  make review            Run full-v2-tableau, links, and git status"
 	@echo ""
 	@echo "Maintenance:"
@@ -44,9 +45,12 @@ tableau-exports:
 	rm -f data/outputs/tableau/tableau_*.csv
 	$(PYTHON) src/build_tableau_exports.py
 
+check-tableau:
+	$(PYTHON) src/check_tableau_exports.py
+
 full-v2: run-v2 check-v2
 
-full-v2-tableau: full-v2 tableau-exports
+full-v2-tableau: full-v2 tableau-exports check-tableau
 
 links:
 	lychee --verbose --no-progress \
@@ -56,7 +60,7 @@ links:
 	  --exclude-path data/run_history \
 	  './**/*.md'
 
-health: check-v2 links
+health: check-v2 check-tableau links
 
 review: full-v2-tableau links status
 
