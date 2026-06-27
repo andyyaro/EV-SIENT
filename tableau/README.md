@@ -10,6 +10,14 @@ This folder contains the main interactive Tableau visual artifact for the Future
 
 The workbook is intended to replace the earlier static/model-generated PNG charts with a polished, interactive visual set.
 
+## Tableau Public link
+
+Published workbook entry point:
+
+[EV Charging Site Readiness Workbook on Tableau Public](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
+
+Note: Tableau Public opens the workbook through one starting worksheet URL. The workbook uses visible sheet tabs, so users can navigate to the other worksheets from that page.
+
 ## Visuals included
 
 1. **EV Charging Site Readiness Ranking**  
