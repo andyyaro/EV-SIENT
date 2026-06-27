@@ -2,7 +2,7 @@
 
 The model translates scores and review flags into plain-English planning recommendations.
 
-The project now uses two related planning layers:
+The project uses two related planning layers:
 
 ```text
 recommendation_tier = broad planning priority
@@ -23,6 +23,16 @@ readiness_confidence_cell
 action_label
 action_detail
 ```
+
+## Main public visual artifact
+
+The public-facing tier and action interpretation is now shown most clearly in the Tableau workbook documented in:
+
+```text
+tableau/README.md
+```
+
+Static PNG charts and generated Markdown reports remain technical support outputs.
 
 ## Tier categories
 
@@ -46,28 +56,34 @@ The site should not advance as a general-public charging site until the public-a
 
 The site is lower priority than stronger alternatives in the current model. Monitor and revisit after stronger data is available.
 
-## Current expected tier interpretation
+## Current V2 tier interpretation
 
 ```text
-FFX002 — Tier 1 / stable top candidate
-FFX001 — Tier 1 / stable second candidate
+FFX002 — Tier 1 / strongest current public candidate
+FFX004 — Tier 1 / second-ranked Tier 1 candidate
+PWC006 — Tier 2 / strongest current Prince William County library candidate
+FFX001 — Tier 2 / credible starter-install candidate
 PWC002 — High-review candidate because of garage context
-PWC004 — Tier 2 / strongest current PWC public-library candidate under future/reopened planning assumptions
+PWC007 — Tier 2 / promising candidate, refine data
+PWC004 — Tier 2 / promising library candidate with data and context caveats
+FFX003 — Tier 2 / promising candidate, refine data
+PWC008 — Tier 3 / monitor due to nearby supply and scenario sensitivity
 PWC001 — Tier 3 / lower priority under current assumptions
+PWC005 — Tier 3 / monitor or small pilot
 PWC003 — Low public-priority / special-use because public access is limited
 ```
 
-## Current expected action interpretation
+## Current action interpretation
 
 ```text
-FFX002 — Verify key data, then advance
-FFX001 — Promising, but fix data first
-PWC002 — Technical review before advancement
-PWC004 — Promising with timeline caveat
-PWC001 — Monitor or deprioritize
-PWC003 — Special-use decision needed
+FFX002 — verify key data, then advance to site screening
+FFX004 — verify key data, then advance to site screening
+PWC006 — refine assumptions and keep in active planning discussion
+FFX001 — starter install with expandable design, pending confirmation
+PWC002 — review before advancement
+PWC003 — confirm whether the site is public, fleet-only, special-use, or should be removed
 ```
 
 ## Important caution
 
-Recommendation tiers and action labels are planning-support outputs. They do not replace utility review, facility review, engineering design, ADA review, Fire Marshal/AHJ review, stormwater review, permitting, or procurement decisions.
+Recommendation tiers and action labels are planning-support outputs. They do not replace utility review, facility review, engineering design, ADA review, fire/AHJ review, stormwater review, permitting, or procurement decisions.
