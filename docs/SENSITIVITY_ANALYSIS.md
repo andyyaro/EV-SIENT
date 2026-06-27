@@ -2,26 +2,45 @@
 
 Sensitivity analysis tests whether rankings are stable when uncertain assumptions change.
 
-This file now combines the method note and the latest results interpretation.
+This file summarizes the method and current V2 interpretation.
 
 ## Run command
 
+For the active V2 workflow, run sensitivity analysis through the full workflow:
+
 ```bash
-python src/run_sensitivity_analysis.py
+python src/run_v2.py
+python src/check_outputs_v2.py
 ```
 
-The full workflow also runs this step through:
+or:
 
 ```bash
-python src/run_all.py
+make full-v2
+```
+
+The standalone script is:
+
+```bash
+python src/run_sensitivity_analysis.py --input data/inputs/real_sites_v2.csv --results-output data/outputs/v2_sensitivity_results.csv --summary-output data/outputs/v2_sensitivity_summary.csv
 ```
 
 ## Outputs
 
 ```text
-data/outputs/sensitivity_results.csv
-data/outputs/sensitivity_summary.csv
+data/outputs/v2_sensitivity_results.csv
+data/outputs/v2_sensitivity_summary.csv
 ```
+
+## Public visual layer
+
+The main public-facing visual layer is the Tableau workbook documented in:
+
+```text
+tableau/README.md
+```
+
+Static sensitivity/profile charts remain technical support outputs.
 
 ## Current scenarios
 
@@ -74,42 +93,33 @@ High average_readiness_score = site performs well across scenarios
 Low average_readiness_score = site remains weak across scenarios
 ```
 
-## Latest interpretation
+## Current V2 interpretation
 
-The latest confirmed run tested five scenarios.
-
-Main finding:
+The active V2 workflow uses 12 candidate sites. The latest high-level planning interpretation remains:
 
 ```text
-Every site had rank_range = 0.
+FFX002 is the strongest current public candidate.
+FFX004 is the second-ranked Tier 1 candidate.
+PWC006 is the strongest current Prince William County library candidate.
+PWC002 remains useful but high-review.
+PWC003 should not be treated as a general-public priority unless its use case changes.
 ```
 
-That means the ranking remained stable across the tested V1 uncertainty scenarios.
+## Relation to scoring-profile and port-sizing scenario analysis
 
-Stable ranking across scenarios:
+Sensitivity analysis is only one stability layer.
 
 ```text
-1. FFX002 — City of Fairfax Regional Library
-2. FFX001 — Fairfax City Hall or municipal building
-3. PWC002 — Neabsco-Potomac Commuter Garage
-4. PWC004 — Chinn Park Regional Library
-5. PWC001 — PWC McCoart Government Center
-6. PWC003 — Prince William County Public Safety Training Center
+Sensitivity analysis = changes demand and cost assumptions.
+Scoring-profile analysis = changes planning priority weights.
+Port-sizing scenario analysis = changes charging-duration, charging-window, peak-demand, and future-demand assumptions.
 ```
 
-## Planning conclusion
-
-The current ranking is stable under the tested V1 uncertainty scenarios.
-
-This does not prove the ranking is final. It only means the ranking stayed stable under the five tested scenarios.
-
-Planning interpretation:
+The current port-sizing scenario result is:
 
 ```text
-FFX002 and FFX001 are stable Tier 1 candidates.
-PWC002 remains in the discussion because of its commuter and equity role, but it needs deeper garage, fire/AHJ, electrical, access, and parking-operator review before advancement.
-PWC004 remains promising only under the future/reopened planning assumption.
-PWC003 should not be treated as a general-public charging site unless its access or use case changes.
+The future-ready capacity plan is stable across the first five tested scenarios.
+Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PWC008.
 ```
 
 ## Current limitation
