@@ -1,88 +1,93 @@
 # Readiness Map Guide
 
-The generated readiness map is:
+The static generated readiness and decision maps are support visuals for technical review and reproducibility.
+
+The main public-facing visual artifact is now the Tableau workbook documented in:
 
 ```text
-data/outputs/charts/site_readiness_map.png
+tableau/README.md
 ```
 
-The committed preview used by GitHub Markdown should be synced from the generated chart to:
+Use Tableau for the polished public interactive view. Use the static maps when checking generated outputs, package contents, or GitHub preview assets.
+
+## Static generated map outputs
+
+Current V2 map outputs:
 
 ```text
-docs/assets/charts/site_readiness_map.png
+data/outputs/charts/v2_site_readiness_map.png
+data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
 ```
 
-![Candidate EV charging site readiness map](assets/charts/site_readiness_map.png)
-
-## What the map shows
-
-The map plots the six candidate EV charging sites by longitude and latitude.
-
-The current version is a multi-panel planning visual:
+The committed README preview asset is:
 
 ```text
-left panel = overview of all six candidate sites
-upper middle panel = zoomed Fairfax City view
-lower middle panel = zoomed Prince William County view
-right panel = ranked readiness summary
-bottom/right colorbar = readiness score scale
+docs/assets/charts/v2_site_decision_map_readme.png
 ```
 
-Each marker represents one candidate site. The map uses several visual cues at the same time:
+![V2 GIS decision map preview](assets/charts/v2_site_decision_map_readme.png)
+
+## What the static decision map shows
+
+The V2 decision map summarizes all 12 candidate EV charging sites using visual cues for:
 
 ```text
-marker size = readiness score
-marker color = readiness score
-marker shape = recommendation tier
-star overlay = top-ranked site
-label = rank, site ID, and readiness score
-right-side summary panel = ranked list with score, tier, and recommended ports
+site location
+model rank
+recommendation tier
+review burden / review risk
+right-sizing and future-ready planning context
 ```
 
-The overview panel draws light dashed boxes around the site clusters. These boxes are visual grouping aids only. They are not jurisdiction boundaries, parcel boundaries, or engineering areas.
+The README-optimized version uses all 12 site callout tags so that GitHub readers can identify each candidate without opening Tableau.
+
+## Static map roles
+
+```text
+v2_site_readiness_map.png = analytical geography/readiness scatter
+v2_site_decision_map.png = presentation-oriented GIS decision graphic combining rank, tier, review risk, and port-sizing
+v2_site_decision_map_readme.png = README-optimized GIS decision graphic with all 12 candidate callout tags
+```
+
+## Tableau map roles
+
+The Tableau workbook contains interactive map views for candidate locations and review burden. Those Tableau maps are the public-facing map layer.
 
 ## Current map interpretation
 
-When the full pipeline is run, the map uses the model results, sensitivity summary, and scoring profile results to add a short interpretation note.
-
-For the current V1 run, the expected note is:
-
 ```text
-FFX002 is the stable top candidate: #1 in the base model, stable in sensitivity, and #1 across 5 scoring profiles.
+FFX002 is the strongest current public candidate.
+FFX004 is the second-ranked Tier 1 candidate.
+PWC006 is the strongest current Prince William County library candidate.
+PWC002 is useful but high-review.
+PWC003 should remain special-use unless its use case changes.
 ```
-
-This supports the main project finding that FFX002 is not only the top site under the base model, but also remains strong when uncertainty and stakeholder-priority profiles are tested.
 
 ## How to read special cases
 
 ```text
 PWC002 = high-review garage candidate
-PWC004 = future/reopened planning assumption
-PWC003 = public-access decision needed
+PWC004 = library candidate with context and data caveats
+PWC003 = public-access or fleet/special-use decision needed
+PWC008 = monitor due to nearby supply and combined-stress sensitivity
 ```
 
 These notes are shown because the map is a planning-support visual. A site can look promising in the model while still needing important real-world confirmation.
 
-## Why the zoom panels exist
+## What the static maps do not show
 
-The six sites are spread across two geographic areas. A single overview map makes the regional spread clear, but it can make nearby labels hard to read.
+The maps are planning visuals only.
 
-The Fairfax City and Prince William County zoom panels make the site clusters easier to inspect without requiring a GIS basemap.
-
-## What the map does not show
-
-The map is a planning visual only.
-
-It is not:
+They are not:
 
 ```text
-a parcel boundary map
-an engineering layout
-a charger placement plan
-a utility-service map
-a permitting decision map
-a final site-design map
-a true GIS basemap
+parcel boundary maps
+engineering layouts
+charger placement plans
+utility-service maps
+permitting decision maps
+final site-design maps
 ```
 
 Any real charger project would still need site-owner review, utility review, engineering design, accessibility review, permitting, procurement, and stakeholder approval.
