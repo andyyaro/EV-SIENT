@@ -13,6 +13,12 @@ python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
+Equivalent Makefile command:
+
+```bash
+make full-v2
+```
+
 Main V2 output files:
 
 ```text
@@ -72,7 +78,45 @@ v2_port_sizing_scenario_report.md
 
 These stress-test port recommendations under alternate charging-duration, charging-window, peak-demand, and future-demand assumptions.
 
-## Active V2 chart outputs
+## Tableau generated outputs
+
+The Tableau workbook is the main public-facing visual artifact. Tableau-ready CSV exports are generated under:
+
+```text
+data/outputs/tableau/
+```
+
+These files are created by:
+
+```bash
+python src/build_tableau_exports.py
+```
+
+Equivalent Makefile command:
+
+```bash
+make tableau-exports
+```
+
+They are generated inputs for the packaged Tableau workbook and are ignored by Git by default.
+
+The committed Tableau artifact is:
+
+```text
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
+```
+
+The committed export logic is:
+
+```text
+src/build_tableau_exports.py
+```
+
+Do not manually edit the generated Tableau CSVs. Regenerate them from the model outputs instead.
+
+## Active V2 static chart outputs
+
+Static PNG charts are still generated for reproducibility, GitHub previews, and the technical deliverable package. They are support outputs; Tableau is the main public visual layer.
 
 Important V2 charts:
 
@@ -222,6 +266,7 @@ pip install -r requirements.txt
 pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
+python src/build_tableau_exports.py
 ```
 
 Regenerate V1 outputs with:
@@ -232,27 +277,3 @@ git pull --rebase origin main
 python src/run_all.py
 python src/build_deliverable_package.py
 ```
-
-<!-- TABLEAU_OUTPUTS_START -->
-## Tableau generated outputs
-
-Tableau-ready CSV exports are generated under:
-
-`data/outputs/tableau/`
-
-These files are created by:
-
-`python src/build_tableau_exports.py`
-
-They are generated inputs for the packaged Tableau workbook and are ignored by Git by default.
-
-The committed Tableau artifact is:
-
-`tableau/EV_Charging_Site_Readiness_Workbook.twbx`
-
-The committed export logic is:
-
-`src/build_tableau_exports.py`
-
-Do not manually edit the generated Tableau CSVs. Regenerate them from the model outputs instead.
-<!-- TABLEAU_OUTPUTS_END -->
