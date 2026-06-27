@@ -4,37 +4,49 @@
 
 This prototype is a planning-support model for public EV charging site readiness and right-sizing in Fairfax City and Prince William County.
 
-The model helps answer four questions:
+The model helps answer:
 
 ```text
 1. Which candidate sites look strongest?
 2. How many starter charging ports should be considered?
-3. How complete or confirmed is the current data?
-4. What should be checked next before a site advances?
+3. How much future-ready capacity should be planned for 2035 and 2050?
+4. How complete or confirmed is the current data?
+5. What should be checked next before a site advances?
+6. Do port recommendations remain stable under alternate demand and charging assumptions?
 ```
 
-The model supports early planning. It is not a final approval or construction tool.
+The model supports early planning. It is not a final approval, procurement, permitting, engineering, or construction tool.
+
+## Main public visual artifact
+
+The primary public-facing visual artifact is the Tableau workbook:
+
+[Open the EV Charging Site Readiness Workbook](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
+
+Use the visible sheet tabs in Tableau Public to navigate the full workbook.
+
+Static PNG charts remain useful for reproducibility, GitHub previews, and the technical deliverable package, but Tableau is the main public visual layer.
 
 ## Candidate sites evaluated
 
 ```text
+FFX001 — Fairfax City Hall or municipal building
+FFX002 — City of Fairfax Regional Library
+FFX003 — Pohick Regional Library
+FFX004 — Fairfax County Government Center
 PWC001 — PWC McCoart Government Center
 PWC002 — Neabsco-Potomac Commuter Garage
 PWC003 — Prince William County Public Safety Training Center
 PWC004 — Chinn Park Regional Library
-FFX001 — Fairfax City Hall or municipal building
-FFX002 — City of Fairfax Regional Library
+PWC005 — Haymarket Gainesville Library
+PWC006 — Bull Run Library
+PWC007 — Central Library
+PWC008 — Potomac Library
 ```
-
-## Site readiness map
-
-The map shows the candidate sites, the two geographic clusters, and the current ranked readiness interpretation.
-
-![Candidate EV charging site readiness map](assets/charts/site_readiness_map.png)
 
 ## Scoring method
 
-Each site receives planning subscores for demand, feasibility, safety/site context, and equity.
+Each site receives planning subscores for demand, feasibility, safety/review context, and equity.
 
 The final readiness score uses this weighting:
 
@@ -44,118 +56,82 @@ readiness_score = 0.45*demand + 0.30*feasibility + 0.15*safety + 0.10*equity
 
 Readiness score shows how promising a site looks under current assumptions. Data confidence is separate and shows how complete or confirmed the input data is.
 
-## Final ranked results
+## Current ranked results
 
 ```text
-1. FFX002 — City of Fairfax Regional Library — readiness 65.3
-2. FFX001 — Fairfax City Hall or municipal building — readiness 57.3
-3. PWC002 — Neabsco-Potomac Commuter Garage — readiness 56.0
-4. PWC004 — Chinn Park Regional Library — readiness 52.7
-5. PWC001 — PWC McCoart Government Center — readiness 43.2
-6. PWC003 — Prince William County Public Safety Training Center — readiness 29.5
+1. FFX002 — City of Fairfax Regional Library — readiness 58.8 — Tier 1
+2. FFX004 — Fairfax County Government Center — readiness 54.4 — Tier 1
+3. PWC006 — Bull Run Library — readiness 52.1 — Tier 2
+4. FFX001 — Fairfax City Hall or municipal building — readiness 51.0 — Tier 2
+5. PWC002 — Neabsco-Potomac Commuter Garage — readiness 50.3 — High-review
+6. PWC007 — Central Library — readiness 50.2 — Tier 2
+7. PWC004 — Chinn Park Regional Library — readiness 48.6 — Tier 2
+8. FFX003 — Pohick Regional Library — readiness 46.8 — Tier 2
+9. PWC008 — Potomac Library — readiness 40.1 — Tier 3
+10. PWC001 — PWC McCoart Government Center — readiness 39.8 — Tier 3
+11. PWC005 — Haymarket Gainesville Library — readiness 36.9 — Tier 3
+12. PWC003 — Prince William County Public Safety Training Center — readiness 29.6 — special-use
 ```
 
-![Readiness score chart](assets/charts/readiness_score_chart.png)
-
-## Data confidence
-
-Data confidence is not the same thing as readiness. It shows how complete and source-supported the current input data is.
-
-![Data confidence chart](assets/charts/data_confidence_chart.png)
-
-## Scoring profile analysis
-
-The project tests whether the ranking changes when different planning priorities are emphasized.
-
-Current profiles:
+## Recommendation interpretation
 
 ```text
-base
-demand_priority
-equity_priority
-feasibility_priority
-safety_priority
+FFX002 — strongest current public candidate
+FFX004 — second-ranked Tier 1 candidate
+PWC006 — strongest current Prince William County library candidate
+PWC002 — useful high-review garage candidate
+PWC003 — special-use / low public-priority unless the use case changes
 ```
 
-Latest result:
+## Current right-sizing interpretation
 
 ```text
-base — FFX002 ranked #1 with score 65.3
-demand_priority — FFX002 ranked #1 with score 63.3
-equity_priority — FFX002 ranked #1 with score 68.7
-feasibility_priority — FFX002 ranked #1 with score 64.1
-safety_priority — FFX002 ranked #1 with score 70.1
+FFX002 — install 2 now; plan future-ready capacity of 8
+FFX004 — install 3 now; plan future-ready capacity of 8
+PWC006 — install 2 now; plan future-ready capacity of 4
+FFX001, PWC007, PWC004, FFX003 — starter install with expandable design
+PWC002 and PWC001 — electrical review before expansion
+PWC008 — monitor due to nearby supply
+PWC005 — monitor or small pilot
+PWC003 — do not advance general-public buildout without use-case confirmation
 ```
 
-The rank-stability chart is the main presentation visual because it shows rank movement directly. A line staying at `#1` means the site remains the top candidate across scoring-priority views.
-
-![Profile rank stability chart](assets/charts/profile_rank_stability_chart.png)
-
-The heatmap remains useful when the reader wants the exact score/rank cell values.
-
-![Profile score heatmap](assets/charts/profile_score_heatmap.png)
-
-## Recommendation tiers
+## Port-sizing scenario result
 
 ```text
-FFX002 — Tier 1
-FFX001 — Tier 1
-PWC002 — High-review candidate
-PWC004 — Tier 2
-PWC001 — Tier 3
-PWC003 — Low public-priority / special-use
-```
-
-## Readiness-confidence action labels
-
-```text
-FFX002 — Verify key data, then advance
-FFX001 — Promising, but fix data first
-PWC002 — Technical review before advancement
-PWC004 — Promising with timeline caveat
-PWC001 — Monitor or deprioritize
-PWC003 — Special-use decision needed
-```
-
-These action labels are more cautious than simple ranking. They combine readiness and data confidence so the project does not treat a high score as permission to build.
-
-## Port-planning result
-
-```text
-FFX002 — 2 ports now, 2 by 2035, 2 by 2050
-FFX001 — 2 ports now, 2 by 2035, 3 by 2050
-PWC002 — 2 ports now, 3 by 2035, 3 by 2050
-PWC004 — 2 ports now, 2 by 2035, 2 by 2050
-PWC001 — 2 ports now, 2 by 2035, 3 by 2050
-PWC003 — 2 ports now, 2 by 2035, 2 by 2050
+The future-ready capacity plan is stable across the first five tested scenarios.
+Base, high-growth, long-session, short-window, and peakier-demand scenarios do not exceed future-ready capacity.
+Only the combined-stress scenario creates one-port gaps.
+The combined-stress gaps affect PWC002 and PWC008.
 ```
 
 ## Cross-checks supporting the result
 
 ```text
 1. Base model ranking: FFX002 ranked #1.
-2. Sensitivity analysis: all six sites had rank_range = 0.
-3. Scoring profile analysis: FFX002 ranked #1 across all five scoring profiles.
+2. Scoring-profile analysis: FFX002 remains the strongest current public candidate across priority profiles.
+3. Port-sizing scenario analysis: future-ready capacity is stable except under combined stress for PWC002 and PWC008.
+4. Right-sizing validation: recommendations remain planning-screen outputs and still require site confirmation.
 ```
 
 ## Remaining data gaps
 
 ```text
-elec_service_rating_amp
-spare_capacity_kw
-emergency_disconnect_visible
-employees_day
-visitors_day
-hours_open for sites except FFX002
-parking_spaces for sites except FFX002
-local EV adoption counts
-PWC004 reopening or usable-planning timeline
+electrical service rating
+spare electrical capacity
+emergency disconnect visibility
+visitor and employee counts
+operating hours
+parking count and likely charger placement
+ADA/accessibility layout review
+Fire Marshal / AHJ review where applicable
+stormwater or site civil constraints where applicable
 PWC002 garage-specific review
 PWC003 public, fleet-only, special-use, or removal decision
 ```
 
 ## Planning conclusion
 
-FFX002 is the most stable top candidate because it ranks first in the base model, stays stable in sensitivity analysis, and remains first across all scoring profiles. FFX001 is the second strongest candidate. PWC002 and PWC004 remain important candidates but need more confirmation before advancement. PWC003 should stay low priority unless its access or use case changes.
+FFX002 is the strongest current public candidate. FFX004 is the second-ranked Tier 1 candidate, and PWC006 is the strongest current Prince William County library candidate. PWC002 should remain in discussion but only as a high-review garage candidate. PWC003 should not be treated as a general-public site unless its access or use case changes.
 
 The model should be used to prioritize follow-up questions and site screening, not to authorize construction, procurement, or final site selection.
