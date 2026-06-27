@@ -2,9 +2,23 @@
 
 Use this page to find the current, reviewer-facing documentation without scanning every checkpoint file.
 
+## Public visual artifact
+
+The main public-facing visual artifact is the Tableau Public workbook:
+
+[Open the EV Charging Site Readiness Workbook](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
+
+Tableau Public opens the workbook through one starting worksheet URL. Use the visible sheet tabs on the Tableau Public page to navigate the full workbook.
+
+Workbook documentation:
+
+- [../tableau/README.md](../tableau/README.md)
+
+Static PNG charts are still generated for reproducibility, GitHub previews, and the technical deliverable package, but Tableau is the primary public visual layer.
+
 ## Read first
 
-- [../README.md](../README.md) — project overview and preview visuals
+- [../README.md](../README.md) — project overview, Tableau link, and preview visuals
 - [../START_HERE.md](../START_HERE.md) — shortest project entry point
 - [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md) — reviewer-friendly path through the repo
 - [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — local reproduction checklist
@@ -22,12 +36,25 @@ git pull --rebase origin v2-expansion-planning
 make setup
 make run-v2
 make check-v2
+make tableau-exports
 make links
 ```
 
-## Open generated outputs first
+Equivalent all-in review command:
 
-After running V2, start with:
+```bash
+make review
+```
+
+## Open outputs in the right order
+
+For public-facing visual review, start with Tableau Public:
+
+```text
+https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite
+```
+
+For technical reproducibility review, after running V2, start with:
 
 ```text
 data/outputs/deliverable_package_v2/README.md
