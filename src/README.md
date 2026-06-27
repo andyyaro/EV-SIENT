@@ -11,6 +11,7 @@ Use this file to find the right script without reading every file.
 | `run_v2.py` | Runs the full active V2 model workflow from scoring through deliverable package creation. |
 | `check_outputs_v2.py` | Verifies the active V2 outputs, package sync, baseline comparison, scenario layer, and site coverage. |
 | `build_tableau_exports.py` | Regenerates Tableau-ready CSV inputs from current V2 outputs. |
+| `check_tableau_exports.py` | Validates Tableau export completeness, schema, row counts, numeric fields, and site coverage. |
 | `ev_charger_model.py` | Core scoring and right-sizing model shared by V1 and V2. |
 
 Recommended model run from the repository root:
@@ -20,10 +21,11 @@ python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
-Recommended Tableau export refresh after the model run:
+Recommended Tableau export refresh and check after the model run:
 
 ```bash
 python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 Equivalent Makefile workflow:
@@ -39,6 +41,7 @@ The main public-facing visual artifact is the Tableau workbook, not the static P
 | File | Purpose |
 |---|---|
 | `build_tableau_exports.py` | Builds generated CSV inputs under `data/outputs/tableau/` for the packaged Tableau workbook. |
+| `check_tableau_exports.py` | Checks Tableau export completeness, schema, row counts, numeric fields, and site coverage. |
 | `../tableau/EV_Charging_Site_Readiness_Workbook.twbx` | Packaged Tableau workbook. |
 | `../tableau/README.md` | Tableau workbook documentation, refresh instructions, and Tableau Public link. |
 
@@ -63,7 +66,7 @@ Generated Tableau CSVs are ignored by Git by default. Regenerate them locally fr
 | `run_right_sizing_scenarios.py` | Creates near-term, 2035, and 2050 right-sizing recommendations. |
 | `run_port_utilization_simulation.py` | Runs simple port-use simulation using demand and session assumptions. |
 | `run_port_sizing_scenario_analysis.py` | Stress-tests port recommendations under alternate demand and charging assumptions. |
-| `validate_right_sizing_with_simulation.py` | Compares right-sizing recommendations with simulation results. |
+| `validate_right_sizing_with_simulation.py` | Compares right-sizing recommendations with port-use simulation results. |
 | `generate_run_summary_v2.py` | Generates a high-level V2 run summary. |
 
 ## Public-data upgrade helpers
@@ -115,6 +118,7 @@ Avoid moving scripts unless you update all of these together:
 imports
 src/run_v2.py
 src/build_tableau_exports.py
+src/check_tableau_exports.py
 GitHub Actions workflows
 Makefile
 documentation links
