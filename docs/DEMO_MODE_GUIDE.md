@@ -9,7 +9,7 @@ It is useful for checking:
 ```text
 model scalability
 ranking behavior
-chart readability
+static chart readability
 recommendation-tier distribution
 data-confidence behavior
 scenario sensitivity behavior
@@ -18,12 +18,15 @@ map/scatter readability
 workflow robustness
 ```
 
-Demo mode is separate from the official V1 workflow.
+Demo mode is separate from both official workflows:
 
 ```text
-Official V1 workflow: src/run_all.py
+Stable V1 workflow: src/run_all.py on main
+Active V2 workflow: make full-v2-tableau on v2-expansion-planning
 Demo stress-test workflow: src/run_demo.py
 ```
+
+The active public-facing V2 visual artifact is Tableau. Demo-mode PNG charts are scalability support outputs only.
 
 ## Important rule
 
@@ -97,15 +100,15 @@ Open these in this order:
 
 ## Why scalable visuals are needed
 
-A normal horizontal bar chart works for the official 6-site project.
+The current official 12-site V2 workbook is handled through Tableau.
 
-It does not work well for 50 sites because labels overlap and the chart becomes unreadable.
+Static charts are still useful for demo and future large-site-pool testing, but one full static bar chart does not work well for 50 sites because labels overlap and the chart becomes unreadable.
 
 Demo mode therefore generates scalable visuals:
 
 ```text
-Top-N chart = presentation ranking view
-Top-N data-confidence chart = readable confidence view
+Top-N chart = readable support ranking view
+Top-N data-confidence chart = readable support confidence view
 Multi-panel map/scatter = overview + local zoom geographic spread view
 Top-N profile heatmap = priority-view score comparison
 Top-8 rank stability = cleaner priority-view rank movement
@@ -117,7 +120,7 @@ Full compact chart = audit appendix view
 
 ## Sensitivity and profile behavior
 
-Demo mode now includes both sensitivity analysis and scoring-profile analysis.
+Demo mode includes both sensitivity analysis and scoring-profile analysis.
 
 Sensitivity analysis tests whether rankings stay stable when uncertain input assumptions change, such as lower demand, higher cost, higher EV adoption, or different service/trenching assumptions.
 
@@ -209,8 +212,10 @@ rm -rf data/demo
 
 ## What not to do
 
-Do not replace `data/inputs/real_sites_v1.csv` with demo data.
+Do not replace `data/inputs/real_sites_v2.csv` or `data/inputs/real_sites_v1.csv` with demo data.
 
-Do not run `src/run_all.py` expecting it to validate demo results. The official workflow is intentionally tied to the official V1 dataset and baseline checks.
+Do not run `src/run_all.py` expecting it to validate demo results. The stable V1 workflow is intentionally tied to the V1 dataset and baseline checks.
+
+Do not run `make full-v2-tableau` expecting it to validate demo results. The active V2 workflow is intentionally tied to the official V2 candidate set, Tableau exports, and baseline checks.
 
 Do not commit files under `data/demo/`.
