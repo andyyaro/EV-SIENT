@@ -32,8 +32,8 @@ jobs:
       - name: Compile Python files
         run: python -m compileall src
 
-      - name: Run and check V2 model workflow
-        run: make full-v2
+      - name: Run and check V2 model workflow plus Tableau exports
+        run: make full-v2-tableau
 
       - name: Upload V2 generated outputs
         uses: actions/upload-artifact@v4
