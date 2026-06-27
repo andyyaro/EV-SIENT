@@ -8,22 +8,47 @@ Use this file to find the right script without reading every file.
 
 | Script | Purpose |
 |---|---|
-| `run_v2.py` | Runs the full active V2 workflow from model scoring through deliverable package creation. |
+| `run_v2.py` | Runs the full active V2 model workflow from scoring through deliverable package creation. |
 | `check_outputs_v2.py` | Verifies the active V2 outputs, package sync, baseline comparison, scenario layer, and site coverage. |
+| `build_tableau_exports.py` | Regenerates Tableau-ready CSV inputs from current V2 outputs. |
 | `ev_charger_model.py` | Core scoring and right-sizing model shared by V1 and V2. |
 
-Recommended command from the repository root:
+Recommended model run from the repository root:
 
 ```bash
 python src/run_v2.py
 python src/check_outputs_v2.py
 ```
 
+Recommended Tableau export refresh after the model run:
+
+```bash
+python src/build_tableau_exports.py
+```
+
+Equivalent Makefile workflow:
+
+```bash
+make full-v2-tableau
+```
+
+## Public visual layer
+
+The main public-facing visual artifact is the Tableau workbook, not the static PNG chart set.
+
+| File | Purpose |
+|---|---|
+| `build_tableau_exports.py` | Builds generated CSV inputs under `data/outputs/tableau/` for the packaged Tableau workbook. |
+| `../tableau/EV_Charging_Site_Readiness_Workbook.twbx` | Packaged Tableau workbook. |
+| `../tableau/README.md` | Tableau workbook documentation, refresh instructions, and Tableau Public link. |
+
+Generated Tableau CSVs are ignored by Git by default. Regenerate them locally from current V2 outputs instead of editing them by hand.
+
 ## Active V2 orchestration
 
 | Script | Purpose |
 |---|---|
-| `run_v2.py` | Main active workflow runner. This is the safest entry point for V2. |
+| `run_v2.py` | Main active model workflow runner. This is the safest entry point for V2 model outputs. |
 | `check_outputs_v2.py` | Main active output checker. Run this after every V2 workflow run. |
 | `write_v2_workflow_success_marker.py` | Writes the workflow success marker and expected-output manifest result. |
 | `compare_v2_to_baseline.py` | Compares current V2 outputs against the committed V2 baseline snapshot. |
@@ -51,17 +76,19 @@ python src/check_outputs_v2.py
 | `triage_v2_candidate_backlog.py` | Helps triage future candidate sites. |
 | `build_afdc_ev_supply_counts.py` | Builds EV supply counts from AFDC-style source extracts. |
 
-## Charts and maps
+## Static chart and map support outputs
+
+Static PNG charts are still generated for reproducibility, GitHub previews, and the technical deliverable package. They are no longer the main public-facing visual layer; Tableau is.
 
 | Script | Purpose |
 |---|---|
-| `plot_readiness_score_chart.py` | Creates readiness score charts. |
-| `plot_data_confidence_chart.py` | Creates data-confidence charts. |
-| `plot_profile_score_heatmap.py` | Creates scoring-profile heatmaps. |
-| `plot_profile_rank_stability.py` | Creates profile rank-stability charts. |
-| `plot_site_map.py` | Creates the standard site-readiness map. |
-| `plot_site_decision_map.py` | Creates the V2 GIS decision map. |
-| `plot_site_decision_map_all_labels.py` | Creates a decision-map variant with all site labels. |
+| `plot_readiness_score_chart.py` | Creates readiness score PNG charts for generated-output review. |
+| `plot_data_confidence_chart.py` | Creates data-confidence PNG charts for generated-output review. |
+| `plot_profile_score_heatmap.py` | Creates scoring-profile PNG heatmaps for generated-output review. |
+| `plot_profile_rank_stability.py` | Creates profile rank-stability PNG charts for generated-output review. |
+| `plot_site_map.py` | Creates the standard site-readiness PNG map. |
+| `plot_site_decision_map.py` | Creates the V2 GIS decision PNG map. |
+| `plot_site_decision_map_all_labels.py` | Creates the README/report decision-map PNG variant with all site labels. |
 | `chart_style.py` | Shared chart styling helpers. |
 | `check_chart_font.py` | Checks chart font availability. |
 
@@ -87,10 +114,13 @@ Avoid moving scripts unless you update all of these together:
 ```text
 imports
 src/run_v2.py
+src/build_tableau_exports.py
 GitHub Actions workflows
+Makefile
 documentation links
 reproducibility commands
 baseline/package checks
+Tableau workbook refresh instructions
 ```
 
 For now, the repo is optimized for a beginner-friendly flat script layout, with this README acting as the navigation layer.
