@@ -4,15 +4,27 @@
 
 This document explains how the project uses OpenStreetMap / Overpass points of interest to support the active `amenities_count_0_5mi` field.
 
-It combines the earlier workflow note and review note into one document.
+OpenStreetMap / Overpass outputs are open POI/GIS support. They are useful for nearby-destination screening, but they are not official local government confirmation.
 
-The OSM workflow is used to improve or challenge the original manual amenities count. It does **not** automatically update the main model input. The output must be reviewed before any value is applied to `data/inputs/real_sites_v1.csv`.
+## Active workflow context
+
+The active Phase 2 model input is:
+
+```text
+data/inputs/real_sites_v2.csv
+```
+
+The active V2 workflow is:
+
+```bash
+make full-v2-tableau
+```
+
+The Tableau workbook is the main public visual artifact. OSM amenities are one source-support layer inside the model, not a standalone public visual artifact.
 
 ## Source quality
 
-OpenStreetMap is a public, community-maintained geospatial database. It is useful for nearby points-of-interest screening, but it is not the same as official local government GIS confirmation.
-
-For this project, treat the reviewed OSM result as:
+For this project, treat reviewed OSM results as:
 
 ```text
 Open POI / GIS support
@@ -57,9 +69,7 @@ data/outputs/amenities_osm_summary_0_5mi.csv
 data/outputs/amenities_osm_pois_0_5mi.csv
 ```
 
-The summary output gives one row per candidate site.
-
-The detailed POI output gives the individual OSM features found near each site.
+The summary output gives one row per candidate site. The detailed POI output gives the individual OSM features found near each site.
 
 ## Categories counted
 
@@ -94,7 +104,7 @@ osm_categories_found
 Compare those values to the current model field:
 
 ```text
-current_model_amenities_count_0_5mi
+amenities_count_0_5mi
 ```
 
 If `fetch_status` is `failed`, do not treat blank or missing POI counts as zero amenities.
@@ -106,7 +116,7 @@ Do not blindly replace the current value.
 Use this rule:
 
 ```text
-If OSM categories match the local context and look reasonable, create or update a reviewed amenities extract before changing real_sites_v1.csv.
+If OSM categories match the local context and look reasonable, create or update a reviewed amenities extract before changing real_sites_v2.csv.
 ```
 
 Current reviewed applied extract:
@@ -118,7 +128,7 @@ data/source_extracts/amenities_0_5mi_v4_osm_reviewed.csv
 When changing the active model field, also update:
 
 ```text
-data/inputs/real_sites_v1.csv
+data/inputs/real_sites_v2.csv
 data/source_dataset_log.csv
 data/dataset_metadata.csv
 docs/DATA_SOURCES.md
@@ -126,9 +136,15 @@ docs/METHODOLOGY.md
 docs/PROJECT_DECISIONS_LOG.md
 ```
 
-## Latest reviewed OSM run
+Then run:
 
-The OSM / Overpass amenities workflow successfully fetched points of interest for all six candidate sites after retry handling was added.
+```bash
+make full-v2-tableau
+```
+
+## Historical reviewed OSM run
+
+The reviewed OSM / Overpass amenities workflow originally fetched points of interest for the initial six candidate sites after retry handling was added.
 
 Raw run summary:
 
@@ -142,7 +158,7 @@ Reviewed applied extract:
 data/source_extracts/amenities_0_5mi_v4_osm_reviewed.csv
 ```
 
-Successful fetch summary:
+Historical successful fetch summary:
 
 ```text
 PWC001 — 39 POIs — 5 categories
@@ -153,7 +169,7 @@ FFX001 — 121 POIs — 6 categories
 FFX002 — 113 POIs — 6 categories
 ```
 
-Applied reviewed values:
+Historical applied reviewed values:
 
 ```text
 PWC001 — 5
@@ -164,15 +180,15 @@ FFX001 — 6
 FFX002 — 6
 ```
 
-## Decision
+## Current decision
 
-The project now uses reviewed OSM-only amenity counts for the active `amenities_count_0_5mi` model field.
+The project uses reviewed OSM / Overpass amenity counts as open POI/GIS support for the active `amenities_count_0_5mi` model field.
 
-Manual V1 values are retained only for comparison and history.
+Manual values are retained only for comparison and history.
 
 ## Special review note for PWC003
 
-PWC003 remains 0 even though OSM found one civic/public category. The detailed POI appears tied to the facility itself, and the site is limited or not general public, so it should not increase the general-public amenity signal.
+PWC003 remains 0 even though the historical OSM run found one civic/public category. The detailed POI appears tied to the facility itself, and the site is limited or not general public, so it should not increase the general-public amenity signal.
 
 ## Limitations
 
