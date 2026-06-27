@@ -68,14 +68,12 @@ From the repository root:
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
 make setup
-make run-v2
-make check-v2
+make full-v2-tableau
 ```
 
 Useful follow-up checks:
 
 ```bash
-make tableau-exports
 make links
 make status
 ```
@@ -94,12 +92,20 @@ pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 A healthy run should show:
 
 ```text
+V2 OUTPUT CHECK
 Status: PASSED
+
+TABLEAU EXPORT CHECK
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+
 Copied files: 35/35
 Synced files: 35/35
 ```
@@ -183,6 +189,7 @@ git status --short
 | [src/run_v2.py](src/run_v2.py) | Runs the full 24-step V2 workflow. |
 | [src/check_outputs_v2.py](src/check_outputs_v2.py) | Checks V2 generated outputs and package sync. |
 | [src/build_tableau_exports.py](src/build_tableau_exports.py) | Regenerates Tableau-ready CSV inputs. |
+| [src/check_tableau_exports.py](src/check_tableau_exports.py) | Validates Tableau-ready CSV inputs. |
 | [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
 
 ## Main result right now
