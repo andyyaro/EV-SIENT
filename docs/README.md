@@ -8,11 +8,23 @@ Use this page as a quick index. For the cleanest reviewer-facing path, start wit
 - [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md) — reviewer-friendly path through the repo
 - [../START_HERE.md](../START_HERE.md) — shortest project entry point
 - [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md) — active V2 workflow guide
+- [../tableau/README.md](../tableau/README.md) — Tableau workbook, public link, export, and refresh notes
 - [REPO_MAP.md](REPO_MAP.md) — repository structure and script map
 - [../src/README.md](../src/README.md) — script-by-script source index
 - [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — local reproduction checklist
 - [MAINTENANCE_CHECKLIST.md](MAINTENANCE_CHECKLIST.md) — checks before pushing or sharing
 - [PROJECT_STATUS.md](PROJECT_STATUS.md) — current project state
+
+## Main public visual artifact
+
+The main public-facing visual artifact is the Tableau workbook:
+
+```text
+../tableau/EV_Charging_Site_Readiness_Workbook.twbx
+../tableau/README.md
+```
+
+Static PNG charts remain reproducibility, GitHub preview, and technical package outputs. Tableau is the primary public visual layer.
 
 ## Recommended reading paths
 
@@ -22,12 +34,13 @@ Use this page as a quick index. For the cleanest reviewer-facing path, start wit
 2. [ACTIVE_DOCS_INDEX.md](ACTIVE_DOCS_INDEX.md)
 3. [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)
 4. [../START_HERE.md](../START_HERE.md)
-5. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
-6. [REPO_MAP.md](REPO_MAP.md)
-7. [../src/README.md](../src/README.md)
-8. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
+5. [../tableau/README.md](../tableau/README.md)
+6. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
+7. [REPO_MAP.md](REPO_MAP.md)
+8. [../src/README.md](../src/README.md)
+9. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
 
-### Reproducing the model
+### Reproducing the model and Tableau exports
 
 1. [../START_HERE.md](../START_HERE.md)
 2. [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
@@ -35,12 +48,11 @@ Use this page as a quick index. For the cleanest reviewer-facing path, start wit
 4. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
 5. [REPO_MAP.md](REPO_MAP.md)
 
-Run the active V2 workflow with:
+Run the active V2 workflow and Tableau export validation with:
 
 ```bash
 make setup
-make run-v2
-make check-v2
+make full-v2-tableau
 make links
 ```
 
@@ -51,6 +63,8 @@ pip install -r requirements.txt
 pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 ### Understanding the technical method
@@ -64,7 +78,9 @@ python src/check_outputs_v2.py
 
 ## Active V2 generated outputs
 
-After a successful V2 run, open the clean package first:
+For public-facing visual review, start with Tableau.
+
+For technical reproducibility review, after a successful V2 run, open the clean package first:
 
 ```text
 ../data/outputs/deliverable_package_v2/README.md
@@ -82,6 +98,7 @@ Important direct V2 outputs:
 ../data/outputs/v2_port_sizing_scenario_summary.csv
 ../data/outputs/v2_baseline_comparison.md
 ../data/outputs/v2_workflow_success.json
+../data/outputs/tableau/
 ```
 
 ## Main planning and reporting docs
@@ -125,6 +142,7 @@ Checkpoint docs preserve project memory and auditability, but new reviewers shou
 ## Main folders
 
 - [../src/](../src/) — Python scripts
+- [../tableau/](../tableau/) — packaged Tableau workbook and Tableau documentation
 - [../data/inputs/](../data/inputs/) — active input files
 - [../data/config/](../data/config/) — config and check rules
 - [../data/source_extracts/](../data/source_extracts/) — source extracts and notes
@@ -133,10 +151,10 @@ Checkpoint docs preserve project memory and auditability, but new reviewers shou
 
 ## Shareable local package
 
-The active V2 workflow builds the package automatically through:
+The active V2 workflow builds the technical package automatically through:
 
 ```bash
-make run-v2
+make full-v2-tableau
 ```
 
 The V2 package is created at:
