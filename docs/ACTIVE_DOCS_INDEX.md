@@ -34,9 +34,7 @@ Static PNG charts are still generated for reproducibility, GitHub previews, and 
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
 make setup
-make run-v2
-make check-v2
-make tableau-exports
+make full-v2-tableau
 make links
 ```
 
@@ -44,6 +42,17 @@ Equivalent all-in review command:
 
 ```bash
 make review
+```
+
+Equivalent raw commands:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-gis.txt
+python src/run_v2.py
+python src/check_outputs_v2.py
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 ## Open outputs in the right order
@@ -72,7 +81,7 @@ data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 - [DATA_SOURCES.md](DATA_SOURCES.md)
 - [V2_ELECTRICAL_RISK_SCENARIO_METHOD.md](V2_ELECTRICAL_RISK_SCENARIO_METHOD.md)
 - [V2_RIGHT_SIZING_SCENARIO_METHOD.md](V2_RIGHT_SIZING_SCENARIO_METHOD.md)
-- [checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md)
+- [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
 
 ## Planning and reporting docs
 
