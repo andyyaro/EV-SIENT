@@ -2,9 +2,15 @@
 
 ## Purpose
 
-Use this checklist before adding a new candidate site to the model.
+Use this checklist before adding a new candidate site to the active V2 model.
 
 The goal is simple: avoid adding random locations that do not clearly fit the project.
+
+Active V2 input:
+
+```text
+data/inputs/real_sites_v2.csv
+```
 
 Companion checklist table:
 
@@ -64,14 +70,15 @@ This is not the final readiness score. It is only a quick pre-screen.
 
 ## When to add the site
 
-Add the site to the model when:
+Add the site to the V2 model when:
 
 ```text
 - the screen looks good,
 - the address and coordinates are known,
 - the site type is clear,
 - basic parking or access assumptions can be written down,
-- notes can explain what is confirmed and what is estimated.
+- notes can explain what is confirmed and what is estimated,
+- the V2 checker, Tableau checker, and baseline guardrails are updated if the official site count changes.
 ```
 
 ## When not to add the site yet
@@ -95,8 +102,24 @@ If a site passes the screen:
 2. Assign a new site_id.
 3. Fill the first-pass public data.
 4. Add notes for assumptions.
-5. Run python src/validate_site_data.py.
-6. Run python src/run_all.py.
+5. If adding it to the official V2 candidate set, update checker and baseline expectations.
+6. Run make full-v2-tableau.
+7. Review the V2 outputs, Tableau exports, and generated package.
+```
+
+## Current workflow command
+
+```bash
+make full-v2-tableau
+```
+
+Equivalent raw commands:
+
+```bash
+python src/run_v2.py
+python src/check_outputs_v2.py
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 ## Simple rule
