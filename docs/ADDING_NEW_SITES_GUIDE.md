@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide explains how to add new EV charging candidate sites without breaking the model.
+This guide explains how to add new EV charging candidate sites without breaking the model, Tableau exports, or V2 reproducibility checks.
 
 The active Phase 2 workflow is V2 on:
 
@@ -30,14 +30,39 @@ data/inputs/real_sites_v1.csv
 
 Use V1 only when reproducing the original stable baseline. Use V2 for current expansion-planning work.
 
+## Public visual artifact
+
+The main public-facing visual artifact is the Tableau workbook:
+
+```text
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
+tableau/README.md
+```
+
+When official V2 sites are added, Tableau-ready CSVs must also be regenerated and checked:
+
+```bash
+make tableau-exports
+make check-tableau
+```
+
+Generated Tableau CSVs live under:
+
+```text
+data/outputs/tableau/
+```
+
+They are generated local outputs and should not be manually edited.
+
 ## Important checker warning
 
-The V2 checker is intentionally strict. It expects the current 12-site V2 candidate set and the current V2 output/package guardrails.
+The V2 checker and Tableau checker are intentionally strict. They currently expect the 12-site V2 candidate set and the current V2 output/package/Tableau guardrails.
 
 If you add, remove, or rename official V2 sites in `data/inputs/real_sites_v2.csv`, update these before treating the run as stable:
 
 ```text
 src/check_outputs_v2.py
+src/check_tableau_exports.py
 data/baselines/v2_baseline_snapshot.json
 src/compare_v2_to_baseline.py
 ```
@@ -69,11 +94,12 @@ The example row uses `NEW001` only as a placeholder. Do not copy `NEW001` into t
 3. Fill in the best public data first.
 4. Label uncertain values clearly in notes.
 5. Add the new row to data/inputs/real_sites_v2.csv only when it is an official V2 expansion.
-6. Update V2 checker and baseline expectations before treating the result as a stable checkpoint.
+6. Update V2 checker, Tableau checker, and baseline expectations before treating the result as stable.
 7. Run the validator.
 8. Run the full V2 workflow.
-9. Review rankings, data confidence, action labels, data-quality report, right-sizing, and port-sizing scenario output.
-10. Only prioritize outreach for sites that rank well or have major uncertainty.
+9. Regenerate and validate Tableau exports.
+10. Review rankings, data confidence, action labels, data-quality report, right-sizing, port-sizing scenarios, executive summary, and Tableau workbook inputs.
+11. Only prioritize outreach for sites that rank well or have major uncertainty.
 ```
 
 ## Site ID format
@@ -242,8 +268,16 @@ For an official V2 expansion, run:
 
 ```bash
 python src/validate_site_data.py --input data/inputs/real_sites_v2.csv --output data/outputs/v2_data_quality_report.csv
+make full-v2-tableau
+```
+
+Equivalent raw commands:
+
+```bash
 python src/run_v2.py
 python src/check_outputs_v2.py
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 Then review:
@@ -253,5 +287,9 @@ data/outputs/v2_site_results.csv
 data/outputs/v2_right_sizing_scenarios.csv
 data/outputs/v2_port_sizing_scenario_summary.csv
 data/outputs/v2_executive_site_summary.csv
+data/outputs/tableau/
 data/outputs/deliverable_package_v2/README.md
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
 ```
+
+Only save and commit the packaged Tableau workbook if the official public visual artifact intentionally changes.
