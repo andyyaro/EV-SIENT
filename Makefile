@@ -14,9 +14,9 @@ help:
 	@echo "Run/check:"
 	@echo "  make run-v2            Run the full active V2 workflow"
 	@echo "  make check-v2          Check V2 outputs and package sync"
-	@echo "  make tableau-exports   Regenerate Tableau CSV inputs from V2 outputs"
+	@echo "  make tableau-exports   Clean and regenerate Tableau CSV inputs from V2 outputs"
 	@echo "  make full-v2           Run V2 workflow, then check outputs"
-	@echo "  make full-v2-tableau   Run/check V2, then regenerate Tableau CSV inputs"
+	@echo "  make full-v2-tableau   Run/check V2, then clean/regenerate Tableau CSV inputs"
 	@echo "  make links             Check Markdown links with Lychee"
 	@echo "  make health            Run check-v2 and links"
 	@echo "  make review            Run full-v2-tableau, links, and git status"
@@ -40,6 +40,8 @@ check-v2:
 	$(PYTHON) src/check_outputs_v2.py
 
 tableau-exports:
+	mkdir -p data/outputs/tableau
+	rm -f data/outputs/tableau/tableau_*.csv
 	$(PYTHON) src/build_tableau_exports.py
 
 full-v2: run-v2 check-v2
