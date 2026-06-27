@@ -16,7 +16,7 @@ The main V2 guide is:
 docs/V2_CURRENT_WORKFLOW_GUIDE.md
 ```
 
-This project is a planning-support model only. It does not replace required technical, utility, permitting, procurement, accessibility, Fire Marshal/AHJ, or stakeholder review.
+This project is a planning-support model only. It does not replace required technical, utility, permitting, procurement, accessibility, fire/AHJ, or stakeholder review.
 
 ## Current V2 status
 
@@ -48,6 +48,8 @@ workflow manifest
 hardened output checker requiring all 12 V2 sites
 hash-sync package validation
 Times New Roman chart typography
+QA-polished packaged Tableau workbook
+published Tableau Public workbook with visible worksheet tabs
 ```
 
 The current V2 workflow is validated locally with:
@@ -87,6 +89,7 @@ data/baselines/        Committed baseline outputs for comparison
 data/outputs/          Generated local outputs ignored by Git
 data/demo/             Generated synthetic demo outputs ignored by Git
 docs/                  Documentation and reporting
+tableau/               Packaged Tableau workbook and Tableau documentation
 ```
 
 ## Current V2 workflow
@@ -160,7 +163,7 @@ FFX003 — Pohick Regional Library
 FFX004 — Fairfax County Government Center
 PWC001 — PWC McCoart Government Center
 PWC002 — Neabsco-Potomac Commuter Garage
-PWC003 — Prince William County Public Safety Training Center
+PWC003 — Prince William County training-center site
 PWC004 — Chinn Park Regional Library
 PWC005 — Haymarket Gainesville Library
 PWC006 — Bull Run Library
@@ -182,7 +185,7 @@ PWC008 — Potomac Library
 9. PWC008 — Potomac Library — 40.1 — Tier 3
 10. PWC001 — PWC McCoart Government Center — 39.8 — Tier 3
 11. PWC005 — Haymarket Gainesville Library — 36.9 — Tier 3
-12. PWC003 — Prince William County Public Safety Training Center — 29.6 — special-use
+12. PWC003 — Prince William County training-center site — 29.6 — special-use
 ```
 
 ## Current strongest findings
@@ -243,7 +246,16 @@ v2_site_decision_map.png = full report GIS decision map
 v2_site_decision_map_readme.png = README-optimized GIS decision map with all 12 site callout tags
 v2_port_sizing_scenario_heatmap.png = port-sizing scenario stress-test heatmap
 docs/assets/charts/v2_site_decision_map_readme.png = committed README asset synced from generated output
+tableau/EV_Charging_Site_Readiness_Workbook.twbx = packaged interactive Tableau workbook
+tableau/README.md = Tableau workbook documentation and refresh notes
+src/build_tableau_exports.py = regenerates Tableau-ready CSV inputs
 ```
+
+Published Tableau Public workbook entry point:
+
+[EV Charging Site Readiness Workbook on Tableau Public](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
+
+Tableau Public opens the workbook through one starting worksheet URL. Use the visible sheet tabs on the Tableau Public page to navigate between the full set of workbook views.
 
 Generated Matplotlib charts use the shared Times New Roman chart style. Basemap tile labels cannot be restyled because they are baked into the background tile image.
 
@@ -256,12 +268,12 @@ Main unresolved items before any advancement:
 ```text
 electrical service rating
 spare electrical capacity
-emergency disconnect visibility
+equipment disconnect visibility
 visitor and employee counts
 operating hours
 parking count and likely charger placement
 ADA/accessibility layout review
-Fire Marshal / AHJ review where applicable
+fire/AHJ review where applicable
 stormwater or site civil constraints where applicable
 PWC002 garage-specific review
 PWC003 public, fleet-only, special-use, or removal decision
@@ -320,6 +332,8 @@ Strengthened output checker to require all 12 V2 site IDs.
 Hardened package and README asset hash-sync checks.
 Expanded baseline comparison to cover simulation, port-sizing scenarios, validation, executive, and package manifest layers.
 Added current V2 workflow guide and refreshed repo documentation.
+Expanded and QA-polished the packaged Tableau workbook.
+Published the Tableau Public workbook and documented the public entry point.
 ```
 
 ## Next likely technical improvements
@@ -334,4 +348,4 @@ Consider a small site-review data intake template for AHJ / ADA / utility follow
 
 A high readiness score does not mean a site is build-ready.
 
-The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, Fire Marshal/AHJ, permitting, procurement, and site review.
+The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, fire/AHJ, permitting, procurement, and site review.
