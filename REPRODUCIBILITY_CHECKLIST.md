@@ -28,16 +28,24 @@ Equivalent Makefile command:
 make full-v2
 ```
 
-Regenerate Tableau-ready CSV inputs after the model outputs exist:
+Regenerate and validate Tableau-ready CSV inputs after the model outputs exist:
 
 ```text
 python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 Equivalent Makefile command:
 
 ```text
+make full-v2-tableau
+```
+
+Tableau-only refresh/check commands:
+
+```text
 make tableau-exports
+make check-tableau
 ```
 
 Full review command:
@@ -46,10 +54,21 @@ Full review command:
 make review
 ```
 
-Expected checker result:
+Expected model checker result:
 
 ```text
 Status: PASSED
+```
+
+Expected Tableau checker result:
+
+```text
+TABLEAU EXPORT CHECK
+--------------------
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+Exact export set, required columns, row counts, numeric fields, and site coverage are valid.
 ```
 
 Expected workflow marker count:
