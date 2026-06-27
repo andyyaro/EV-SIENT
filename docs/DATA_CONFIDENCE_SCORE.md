@@ -12,12 +12,13 @@ data_confidence_score = how complete and source-supported the current input data
 
 The confidence score does not change the ranking.
 
-## Output columns
+## Active V2 output columns
 
-These columns are added to:
+These columns are included in:
 
 ```text
-data/outputs/site_results.csv
+data/outputs/v2_site_results.csv
+data/outputs/v2_executive_site_summary.csv
 ```
 
 ```text
@@ -34,21 +35,25 @@ data_confidence_reason
 0 to 49.9 = Low
 ```
 
-## Data confidence visual
+## Public visual layer
 
-The generated chart is:
-
-```text
-data/outputs/charts/data_confidence_chart.png
-```
-
-The committed preview used by GitHub Markdown should be synced from the generated chart to:
+The main public-facing visual artifact is the Tableau workbook documented in:
 
 ```text
-docs/assets/charts/data_confidence_chart.png
+tableau/README.md
 ```
 
-![Data confidence chart](assets/charts/data_confidence_chart.png)
+The workbook includes a data confidence and review issues view.
+
+Static data-confidence charts remain support outputs for reproducibility and technical package review.
+
+## Static support chart
+
+The generated V2 chart is:
+
+```text
+data/outputs/charts/v2_data_confidence_chart.png
+```
 
 The chart is intentionally simple:
 
@@ -57,7 +62,7 @@ one horizontal bar per candidate site
 site order follows model rank
 bar length = data confidence score
 label = confidence score and confidence level
-vertical guides = Medium and High thresholds
+threshold guides = Medium and High confidence levels
 ```
 
 The purpose is not to re-rank sites. The purpose is to show how careful we should be with each model result.
@@ -75,7 +80,7 @@ Low readiness + Low confidence = weak result until data improves
 
 ## What affects the score
 
-The score looks at simple project fields such as parking, hours, public access, service distance, trenching distance, estimated activity, and electrical placeholders.
+The score looks at project fields such as parking, hours, public access, service distance, trenching distance, estimated activity, source notes, and electrical placeholders.
 
 ## Current source-confidence interpretation
 
@@ -89,10 +94,12 @@ Manual estimates, planning estimates, planning proxies, placeholders, and unconf
 
 ```text
 1. Record stakeholder or official-source answers in data/source_extracts/stakeholder_response_tracker.csv.
-2. Update data/inputs/real_sites_v1.csv only when the answer has a source, date, and confidence level.
+2. Update data/inputs/real_sites_v2.csv only when the answer has a source, date, and confidence level.
 3. Update source extracts or notes when a value changes.
-4. Re-run python src/run_all.py.
-5. Review data/outputs/site_results.csv and data/outputs/action_matrix.md.
+4. Re-run python src/run_v2.py.
+5. Re-run python src/check_outputs_v2.py.
+6. Re-run python src/build_tableau_exports.py if the Tableau workbook needs refreshed data.
+7. Review data/outputs/v2_site_results.csv, data/outputs/v2_executive_site_summary.csv, and the Tableau workbook.
 ```
 
 ## Simple rule
