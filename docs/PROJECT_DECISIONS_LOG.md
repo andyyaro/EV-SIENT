@@ -7,19 +7,39 @@ This log keeps the major project decisions in one place.
 The active Phase 2 workflow is V2 on `v2-expansion-planning`.
 
 ```text
-Runner: src/run_v2.py
-Checker: src/check_outputs_v2.py
+Model runner: src/run_v2.py
+Model/package checker: src/check_outputs_v2.py
+Tableau export builder: src/build_tableau_exports.py
+Tableau export checker: src/check_tableau_exports.py
 Candidate sites: 12
 Workflow steps: 24
 Deliverable package payload: 35 files
+Tableau export payload: 15 CSV files
 ```
 
 Decision: preserve `main` as the stable V1 workflow and use `v2-expansion-planning` for active V2 prototype work.
 
+## Current public visual decision
+
+Decision: Tableau is the main public-facing visual artifact.
+
+```text
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
+tableau/README.md
+```
+
+Static PNG charts remain generated support artifacts for reproducibility, GitHub previews, and the technical deliverable package. They are not the primary public visual layer.
+
+Generated Tableau CSV inputs are local outputs and are ignored by Git by default:
+
+```text
+data/outputs/tableau/
+```
+
 ## Current expected recommendation interpretation
 
 ```text
-FFX002 — strongest current candidate
+FFX002 — strongest current public candidate
 FFX004 — second-ranked Tier 1 candidate
 PWC006 — strongest current Prince William County library candidate
 PWC002 — useful high-review garage candidate
@@ -109,6 +129,9 @@ Add V2 executive summary.
 Add V2 GIS decision maps.
 Add V2 deliverable-package hash sync.
 Add V2 port-sizing scenario analysis.
+Add Tableau workbook and Tableau Public publication.
+Add complete Tableau CSV export generation.
+Add Tableau export checker.
 ```
 
 ## Current V2 package decision
@@ -133,4 +156,4 @@ It checks site count, rankings, data-quality counts, profile top sites, electric
 
 ## Maintenance rule
 
-Whenever the project changes a source, assumption, formula, output interpretation, workflow, demo feature, or stakeholder-facing conclusion, update the relevant docs in `docs/`, `data/`, and the repository root.
+Whenever the project changes a source, assumption, formula, output interpretation, workflow, demo feature, Tableau artifact, or stakeholder-facing conclusion, update the relevant docs in `docs/`, `data/`, `tableau/`, and the repository root.
