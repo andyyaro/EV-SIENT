@@ -9,8 +9,8 @@ This file explains the main parts of the repo without making you read every file
 - [START_HERE.md](../START_HERE.md) — shortest project entry point
 - [REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — step-by-step local reproduction checklist
 - [README.md](../README.md) — project overview
+- [tableau/README.md](../tableau/README.md) — Tableau workbook, public link, and refresh instructions
 - [checkpoints/README.md](checkpoints/README.md) — checkpoint and history index
-- [checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md](checkpoints/V2_PORT_SIZING_SCENARIO_ANALYSIS_CHECKPOINT.md) — checkpoint for the port-sizing scenario layer
 
 ## Main folders
 
@@ -20,20 +20,21 @@ This file explains the main parts of the repo without making you read every file
 - [data/source_extracts/](../data/source_extracts/) — source extracts and source notes
 - [data/baselines/](../data/baselines/) — committed baseline snapshots
 - [data/outputs/](../data/outputs/) — generated local outputs ignored by Git
+- `data/outputs/tableau/` — generated Tableau CSV inputs ignored by Git
 - `data/demo/` — generated local-only synthetic demo outputs; this folder may not exist until demo mode is run
 - [docs/](../docs/) — active documentation and project notes
 - [docs/checkpoints/](checkpoints/) — checkpoint/history notes moved out of the active-docs path
+- [tableau/](../tableau/) — packaged Tableau workbook and Tableau documentation
 
 ## Active V2 workflow
 
-Run the active V2 workflow with:
+Run the active V2 workflow and Tableau export validation with:
 
 ```bash
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
 make setup
-make run-v2
-make check-v2
+make full-v2-tableau
 ```
 
 Equivalent raw commands:
@@ -43,6 +44,8 @@ pip install -r requirements.txt
 pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
 The V2 runner has 24 steps and generates the active Phase 2 prototype outputs and the clean package at:
@@ -57,6 +60,28 @@ A healthy V2 package reports:
 Copied files: 35/35
 Synced files: 35/35
 ```
+
+A healthy Tableau export check reports:
+
+```text
+TABLEAU EXPORT CHECK
+--------------------
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+Exact export set, required columns, row counts, numeric fields, and site coverage are valid.
+```
+
+## Public visual layer
+
+The main public-facing visual artifact is Tableau:
+
+```text
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
+tableau/README.md
+```
+
+Static PNG charts remain generated support outputs for reproducibility, GitHub previews, and the technical deliverable package.
 
 ## Stable V1 workflow
 
@@ -81,6 +106,8 @@ data/outputs/deliverable_package/
 |---|---|
 | [src/run_v2.py](../src/run_v2.py) | Runs the full active 24-step V2 workflow. |
 | [src/check_outputs_v2.py](../src/check_outputs_v2.py) | Checks V2 outputs, required files, scenario layer, package, manifest, baseline comparison, and all 12 candidate sites. |
+| [src/build_tableau_exports.py](../src/build_tableau_exports.py) | Regenerates the 15 Tableau-ready CSV inputs from current V2 outputs. |
+| [src/check_tableau_exports.py](../src/check_tableau_exports.py) | Validates the exact Tableau export file set, schemas, row counts, numeric fields, and 12-site coverage. |
 | [src/build_v2_deliverable_package.py](../src/build_v2_deliverable_package.py) | Builds the clean 35-file V2 deliverable package. |
 | [src/build_v2_executive_summary.py](../src/build_v2_executive_summary.py) | Builds the V2 executive site summary table and report. |
 | [src/run_electrical_risk_scenarios.py](../src/run_electrical_risk_scenarios.py) | Runs V2 electrical-feasibility scenario screening. |
@@ -154,7 +181,27 @@ data/outputs/v2_baseline_comparison.md
 data/outputs/v2_workflow_success.json
 ```
 
-Important V2 chart files include:
+Important Tableau generated outputs include:
+
+```text
+data/outputs/tableau/tableau_site_readiness.csv
+data/outputs/tableau/tableau_site_map.csv
+data/outputs/tableau/tableau_map_points.csv
+data/outputs/tableau/tableau_port_growth.csv
+data/outputs/tableau/tableau_review_burden.csv
+data/outputs/tableau/tableau_review_burden_map.csv
+data/outputs/tableau/tableau_profile_score_heatmap.csv
+data/outputs/tableau/tableau_profile_subscore_heatmap.csv
+data/outputs/tableau/tableau_profile_rank_stability.csv
+data/outputs/tableau/tableau_data_confidence.csv
+data/outputs/tableau/tableau_data_quality_issues.csv
+data/outputs/tableau/tableau_port_sizing_scenario_heatmap.csv
+data/outputs/tableau/tableau_port_utilization_simulation.csv
+data/outputs/tableau/tableau_action_recommendation_matrix.csv
+data/outputs/tableau/tableau_action_decision_quadrant_clean.csv
+```
+
+Important support chart files include:
 
 ```text
 data/outputs/charts/v2_polished_readiness_score_chart.png
@@ -213,77 +260,9 @@ See [DEMO_MODE_GUIDE.md](DEMO_MODE_GUIDE.md).
 
 1. [ACTIVE_DOCS_INDEX.md](ACTIVE_DOCS_INDEX.md)
 2. [V2_CURRENT_WORKFLOW_GUIDE.md](V2_CURRENT_WORKFLOW_GUIDE.md)
-3. `data/outputs/deliverable_package_v2/README.md`
-4. `data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md`
-5. `data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md`
-6. `data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md`
-7. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
-8. `data/outputs/deliverable_package_v2/reports/v2_profile_comparison.md`
-
-## What not to edit first
-
-Do not edit generated outputs directly:
-
-```text
-data/outputs/
-data/outputs/charts/
-data/outputs/deliverable_package/
-data/outputs/deliverable_package_v2/
-data/demo/
-```
-
-Regenerate V2 outputs with:
-
-```bash
-make run-v2
-make check-v2
-```
-
-Regenerate V1 outputs with:
-
-```bash
-python src/run_all.py
-python src/build_deliverable_package.py
-```
-
-<!-- TABLEAU_ARTIFACTS_START -->
-## Tableau visual artifact
-
-Tableau folder:
-
-- `tableau/EV_Charging_Site_Readiness_Workbook.twbx`
-- `tableau/README.md`
-
-Published Tableau Public entry point:
-
-- [EV Charging Site Readiness Workbook on Tableau Public](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
-
-The Tableau workbook is the main interactive visual artifact for the Phase 2 EV charging prototype. It contains the polished visual replacement for the earlier static/model-generated charts.
-
-Tableau Public opens the workbook through one starting worksheet URL. Use the visible sheet tabs on the Tableau Public page to navigate the full workbook.
-
-Supporting export script:
-
-- `src/build_tableau_exports.py`
-
-Generated Tableau CSV inputs are written to:
-
-- `data/outputs/tableau/`
-
-Those files are generated and ignored by Git unless the project intentionally decides to version them later.
-
-Key workbook visuals include:
-
-- EV Charging Site Readiness Ranking
-- Candidate EV Charging Site Map
-- Charging Port Growth by Planning Year
-- Review Burden by Site
-- Review Burden Map by Candidate Site
-- Profile Readiness by Scoring Profile
-- Site Subscores by Model Dimension
-- Profile Rank Stability by Site
-- Data Confidence and Review Issues by Site
-- Port Sizing Scenario Gaps
-- Port Utilization Simulation
-- Action Decision Quadrant
-<!-- TABLEAU_ARTIFACTS_END -->
+3. [../tableau/README.md](../tableau/README.md)
+4. `data/outputs/deliverable_package_v2/README.md`
+5. `data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md`
+6. `data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md`
+7. `data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md`
+8. `data/outputs/deliverable_package_v2/reports/v2_run_summary.md`
