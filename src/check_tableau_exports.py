@@ -113,6 +113,17 @@ def require_columns(df: pd.DataFrame, filename: str, columns: list[str]) -> None
         fail(f"{filename} contains unnamed index-like columns: {unnamed}")
 
 
+def check_exact_export_set() -> None:
+    actual = sorted(path.name for path in TABLEAU_DIR.glob("tableau_*.csv"))
+    expected = sorted(EXPECTED_EXPORTS)
+    missing = sorted(set(expected) - set(actual))
+    extra = sorted(set(actual) - set(expected))
+    if missing:
+        fail(f"Missing Tableau exports: {missing}")
+    if extra:
+        fail(f"Unexpected stale Tableau exports: {extra}")
+
+
 def load_expected_site_ids() -> list[str]:
     summary_path = OUTPUT_DIR / "v2_executive_site_summary.csv"
     if not summary_path.exists():
@@ -139,8 +150,16 @@ def check_row_counts(frames: dict[str, pd.DataFrame], site_count: int) -> None:
         fail("tableau_site_readiness.csv should have one row per site.")
     if len(frames["tableau_site_map.csv"]) != site_count:
         fail("tableau_site_map.csv should have one row per site.")
+    if len(frames["tableau_map_points.csv"]) != site_count:
+        fail("tableau_map_points.csv should have one row per site.")
     if len(frames["tableau_review_burden.csv"]) != site_count:
         fail("tableau_review_burden.csv should have one row per site.")
+    if len(frames["tableau_review_burden_map.csv"]) != site_count:
+        fail("tableau_review_burden_map.csv should have one row per site.")
+    if len(frames["tableau_data_confidence.csv"]) != site_count:
+        fail("tableau_data_confidence.csv should have one row per site.")
+    if len(frames["tableau_action_recommendation_matrix.csv"]) != site_count:
+        fail("tableau_action_recommendation_matrix.csv should have one row per site.")
     if len(frames["tableau_action_decision_quadrant_clean.csv"]) != site_count:
         fail("tableau_action_decision_quadrant_clean.csv should have one row per site.")
 
@@ -202,6 +221,7 @@ def main() -> None:
     if not TABLEAU_DIR.exists():
         fail(f"Missing Tableau export directory: {TABLEAU_DIR}")
 
+    check_exact_export_set()
     expected_site_ids = load_expected_site_ids()
     frames: dict[str, pd.DataFrame] = {}
 
@@ -229,6 +249,7 @@ def main() -> None:
     print("Status: PASSED")
     print(f"Checked exports: {len(EXPECTED_EXPORTS)}/{len(EXPECTED_EXPORTS)}")
     print(f"Candidate sites represented: {len(expected_site_ids)}/12")
+    print("Exact export set, required columns, row counts, numeric fields, and site coverage are valid.")
 
 
 if __name__ == "__main__":
