@@ -24,44 +24,38 @@ pip install -r requirements.txt
 pip install -r requirements-gis.txt
 ```
 
-## 3. Run the active V2 workflow
+## 3. Run the active V2 workflow and Tableau export validation
 
-Preferred commands:
+Preferred command:
 
 ```bash
-make run-v2
-make check-v2
+make full-v2-tableau
 ```
+
+This runs the V2 workflow, checks V2 outputs, regenerates Tableau-ready CSV inputs, and validates the Tableau export set.
 
 Equivalent raw commands:
 
 ```bash
 python src/run_v2.py
 python src/check_outputs_v2.py
-```
-
-Expected checker result:
-
-```text
-Status: PASSED
-Copied files: 35/35
-Synced files: 35/35
-```
-
-## 4. Regenerate and validate Tableau exports
-
-The Tableau workbook is the main public-facing visual artifact. After V2 outputs change, regenerate and validate Tableau CSV inputs:
-
-```bash
-make tableau-exports
-make check-tableau
-```
-
-Equivalent raw commands:
-
-```bash
 python src/build_tableau_exports.py
 python src/check_tableau_exports.py
+```
+
+Expected V2 checker result:
+
+```text
+V2 OUTPUT CHECK
+---------------
+Status: PASSED
+```
+
+Expected package result:
+
+```text
+Copied files: 35/35
+Synced files: 35/35
 ```
 
 Expected Tableau checker result:
@@ -83,7 +77,7 @@ data/outputs/tableau/
 
 These generated files are ignored by Git by default. Do not manually edit them; regenerate them from current model outputs.
 
-## 5. Refresh the Tableau workbook when needed
+## 4. Refresh the Tableau workbook when needed
 
 Use this when the model outputs or Tableau export logic have changed:
 
@@ -102,7 +96,7 @@ Public link and workbook notes are in:
 tableau/README.md
 ```
 
-## 6. Check Markdown links
+## 5. Check Markdown links
 
 Preferred command:
 
@@ -127,7 +121,7 @@ Expected result:
 0 Errors
 ```
 
-## 7. Run the short health check
+## 6. Run the short health check
 
 ```bash
 make health
@@ -135,7 +129,7 @@ make health
 
 This runs the V2 output checker, Tableau export checker, and Markdown link checker. It assumes current Tableau exports already exist.
 
-## 8. Run the full review check
+## 7. Run the full review check
 
 ```bash
 make review
@@ -143,7 +137,7 @@ make review
 
 This runs the V2 workflow, V2 checker, Tableau export generation, Tableau export checker, Markdown link check, and git status.
 
-## 9. Check Git status
+## 8. Check Git status
 
 ```bash
 make status
@@ -161,7 +155,7 @@ The committed README preview images under `docs/assets/charts/` should only chan
 
 The packaged Tableau workbook under `tableau/` should only change when you intentionally save a workbook update.
 
-## 10. Review the main outputs
+## 9. Review the main outputs
 
 Public visual review:
 
@@ -182,7 +176,7 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
 data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
-## 11. Do not commit local generated caches
+## 10. Do not commit local generated caches
 
 Do not commit local generated/downloaded helper folders unless there is a clear reason.
 
@@ -201,7 +195,7 @@ To remove local generated caches:
 make clean-local
 ```
 
-## 12. Before changing code structure
+## 11. Before changing code structure
 
 Before moving or renaming scripts, check:
 
@@ -222,7 +216,7 @@ START_HERE.md
 
 Moving scripts is more risky than adding navigation docs because imports, GitHub Actions, Tableau refresh steps, and reproducibility commands may depend on existing paths.
 
-## 13. Before merging to main later
+## 12. Before merging to main later
 
 Do not merge V2 into `main` until:
 
