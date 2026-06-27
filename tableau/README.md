@@ -80,23 +80,42 @@ Current Tableau export files include:
 - `tableau_action_recommendation_matrix.csv`
 - `tableau_action_decision_quadrant_clean.csv`
 
-## How to regenerate Tableau CSV inputs
+## How to regenerate and validate Tableau CSV inputs
 
-From the repo root:
+From the repo root, run the full V2 workflow plus Tableau export validation:
 
-`python src/build_tableau_exports.py`
+```bash
+make full-v2-tableau
+```
 
-If source model outputs are missing or stale, run:
+For Tableau-only refresh after current V2 outputs already exist:
 
-`make full-v2`
+```bash
+make tableau-exports
+make check-tableau
+```
 
-Then regenerate Tableau exports:
+Equivalent raw commands:
 
-`python src/build_tableau_exports.py`
+```bash
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
+```
+
+Expected Tableau checker result:
+
+```text
+TABLEAU EXPORT CHECK
+--------------------
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+Exact export set, required columns, row counts, numeric fields, and site coverage are valid.
+```
 
 ## How to refresh the workbook
 
-1. Regenerate Tableau CSV inputs.
+1. Run `make full-v2-tableau`.
 2. Open `tableau/EV_Charging_Site_Readiness_Workbook.twbx`.
 3. Refresh or repoint data sources if Tableau prompts for file locations.
 4. Review worksheet titles, legends, filters, and tooltips.
