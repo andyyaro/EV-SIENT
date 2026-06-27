@@ -44,6 +44,7 @@ jobs:
             data/outputs/v2_*.csv
             data/outputs/v2_*.md
             data/outputs/v2_*.json
+            data/outputs/tableau/**
             data/outputs/charts/v2_*.png
             data/outputs/charts/v2/*.png
             data/outputs/deliverable_package_v2/**
