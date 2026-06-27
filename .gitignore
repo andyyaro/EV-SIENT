@@ -57,3 +57,5 @@ b11001_inspection_output.txt
 # Temporary files
 *.tmp
 *.log
+data/outputs/tableau/
+tableau/.~*.twbr
