@@ -254,7 +254,13 @@ Tableau folder:
 - `tableau/EV_Charging_Site_Readiness_Workbook.twbx`
 - `tableau/README.md`
 
+Published Tableau Public entry point:
+
+- [EV Charging Site Readiness Workbook on Tableau Public](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
+
 The Tableau workbook is the main interactive visual artifact for the Phase 2 EV charging prototype. It contains the polished visual replacement for the earlier static/model-generated charts.
+
+Tableau Public opens the workbook through one starting worksheet URL. Use the visible sheet tabs on the Tableau Public page to navigate the full workbook.
 
 Supporting export script:
 
