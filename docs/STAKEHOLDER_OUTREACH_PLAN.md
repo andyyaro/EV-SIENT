@@ -4,9 +4,7 @@
 
 This document turns the model's remaining data gaps into a simple outreach workflow and clear stakeholder questions.
 
-It combines the earlier stakeholder data request pack and stakeholder contact plan into one document.
-
-The goal is to replace V1 assumptions and placeholders with confirmed or clearly estimated site, facility, parking, utility, accessibility, review, GIS, planning, or operations information.
+The goal is to replace early V2 assumptions and placeholders with confirmed or clearly estimated site, facility, parking, utility, accessibility, review, GIS, planning, or operations information.
 
 Companion files:
 
@@ -22,23 +20,33 @@ data/source_extracts/stakeholder_response_tracker.csv
 ## Sites covered
 
 ```text
+FFX001 — Fairfax City Hall or municipal building
+FFX002 — City of Fairfax Regional Library
+FFX003 — Pohick Regional Library
+FFX004 — Fairfax County Government Center
 PWC001 — PWC McCoart Government Center
 PWC002 — Neabsco-Potomac Commuter Garage
 PWC003 — Prince William County Public Safety Training Center
 PWC004 — Chinn Park Regional Library
-FFX001 — Fairfax City Hall or municipal building
-FFX002 — City of Fairfax Regional Library
+PWC005 — Haymarket Gainesville Library
+PWC006 — Bull Run Library
+PWC007 — Central Library
+PWC008 — Potomac Library
 ```
 
 ## Best order of outreach
 
+Start with the sites where better data would most improve planning decisions:
+
 ```text
-1. FFX002 — confirm the top candidate first.
-2. FFX001 — confirm the Tier 1 backup candidate.
-3. PWC002 — clarify garage-specific constraints.
-4. PWC004 — clarify future/reopened planning timeline.
-5. PWC003 — decide whether it is public, fleet/special-use, or removed from the public list.
-6. PWC001 — confirm whether assumptions should be upgraded or kept as lower priority.
+1. FFX002 — confirm the strongest current public candidate first.
+2. FFX004 — confirm the second-ranked Tier 1 candidate.
+3. PWC006 — confirm the strongest current Prince William County library candidate.
+4. PWC002 — clarify garage-specific constraints.
+5. PWC007 and PWC004 — refine promising Prince William library assumptions.
+6. FFX001 and FFX003 — refine Fairfax-area Tier 2 assumptions.
+7. PWC008, PWC001, and PWC005 — confirm whether these should stay monitor/small-pilot candidates.
+8. PWC003 — decide whether it is public, fleet/special-use, or removed from the public list.
 ```
 
 ## Contact groups to identify
@@ -49,8 +57,8 @@ parking or operations contact
 public works or sustainability contact
 library or municipal operations contact
 technical reviewer for electrical/site questions
-Fire Marshal / AHJ or safety reviewer
-ADA/accessibility reviewer
+safety or authority-review contact where applicable
+accessibility reviewer
 GIS or planning data contact
 ```
 
@@ -63,25 +71,26 @@ emergency_disconnect_visible
 likely_charger_area
 nearest_panel_or_transformer_location
 trenching_or_conduit_difficulty
-ada_accessible_route_confirmed
-fire_access_confirmed
+accessible_route_confirmed
+site_access_confirmed
 confirmed_public_charging_hours
 confirmed_visitor_or_parking_use
 public_access
 PWC002 garage-specific review
-PWC004 future/reopened timeline
 PWC003 public vs fleet/special-use decision
 ```
 
 ## Site-specific focus
 
 ```text
-PWC001 — confirm public visitor parking, likely charger area, electrical route, and site-use assumptions.
-PWC002 — keep as high-review because it is a garage candidate; confirm garage-specific access, routing, ventilation, and review constraints before advancement.
+FFX002 — confirm likely charger placement, practical charging hours, electrical capacity, accessibility route, and site operations.
+FFX004 — confirm public parking, likely charger placement, electrical route, and civic-site operations.
+PWC006 — confirm library parking, likely charger placement, electrical route, and public charging hours.
+PWC002 — keep as high-review; confirm garage-specific access, routing, ventilation, and review constraints before advancement.
 PWC003 — first decide whether it should be public, fleet-only, special-use, or removed from the public-candidate list.
-PWC004 — first confirm renovation/closure status and realistic future planning timeline; keep as future/reopened until that caveat is resolved.
-FFX001 — confirm municipal visitor/staff parking, likely charger area, electrical route, and public charging hours.
-FFX002 — parking count and facility hours already have official facility-page support, but confirm likely charger placement, practical charging hours, electrical capacity, ADA route, and site operations.
+PWC004 and PWC007 — confirm parking, practical charging hours, likely charger placement, and electrical route.
+PWC008 and PWC005 — confirm whether monitor/small-pilot status still makes sense after better site data.
+PWC001 — confirm whether assumptions should be upgraded or kept as lower priority.
 ```
 
 ## First email structure
@@ -109,19 +118,6 @@ Thank you,
 Andy Yaro
 Future City Fellowship
 George Mason University
-```
-
-## Site-specific add-on questions
-
-Use these when the site needs a more targeted question.
-
-```text
-FFX002: Can likely charger placement, practical charging hours, electrical capacity, ADA route, and operations support next-stage site screening?
-FFX001: Can municipal visitor/staff parking, likely charger placement, electrical route, and public charging hours be confirmed?
-PWC002: Are there garage-specific fire/AHJ, ventilation, emergency-response, conduit routing, access, or parking-operator constraints?
-PWC004: What is the realistic reopening or usable-planning timeline after renovation?
-PWC003: Should this site be treated as public charging, fleet/support charging, special-use only, or removed from the public candidate list?
-PWC001: Are visitor parking, likely charger area, electrical route, and site-use assumptions worth confirming now or should the site stay lower priority?
 ```
 
 ## Core stakeholder questions
@@ -182,7 +178,7 @@ Unknown
 
 ## Minimum evidence before changing the model
 
-Do not overwrite a V1 assumption unless the answer has enough traceability.
+Do not overwrite a V2 assumption unless the answer has enough traceability.
 
 Minimum information to record:
 
@@ -201,26 +197,26 @@ When stakeholder answers come back:
 
 ```text
 1. Update data/source_extracts/stakeholder_response_tracker.csv.
-2. Update data/inputs/real_sites_v1.csv if a model field changes.
+2. Update data/inputs/real_sites_v2.csv if a model field changes.
 3. Add a note in the input row explaining the source.
 4. Add or update a supporting source extract in data/source_extracts/ if the answer is structured.
 5. Update data/source_dataset_log.csv and data/dataset_metadata.csv if a new source is used.
-6. Re-run the full model workflow.
-7. Inspect data/outputs/results_interpretation.md, data/outputs/action_matrix.md, and the baseline comparison.
-8. Rebuild the deliverable package.
+6. Run make full-v2-tableau.
+7. Inspect data/outputs/v2_executive_site_summary.csv, data/outputs/tableau/, and data/outputs/deliverable_package_v2/README.md.
+8. Refresh the Tableau workbook only if the public visual artifact intentionally changes.
 ```
 
 Run commands:
 
 ```bash
-git pull --rebase origin main
-python src/run_all.py
-python src/build_deliverable_package.py
+git switch v2-expansion-planning
+git pull --rebase origin v2-expansion-planning
+make full-v2-tableau
 git status --short
 ```
 
 ## Simple rule
 
-Do not overwrite a V1 assumption unless the new value has a source, date, and confidence level recorded in the tracker.
+Do not overwrite a V2 assumption unless the new value has a source, date, and confidence level recorded in the tracker.
 
 If a value is estimated, label it as an estimate. If it is confirmed from a staff response, facility drawing, official page, or other source, label it as confirmed and record the source.
