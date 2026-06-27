@@ -232,3 +232,27 @@ git pull --rebase origin main
 python src/run_all.py
 python src/build_deliverable_package.py
 ```
+
+<!-- TABLEAU_OUTPUTS_START -->
+## Tableau generated outputs
+
+Tableau-ready CSV exports are generated under:
+
+`data/outputs/tableau/`
+
+These files are created by:
+
+`python src/build_tableau_exports.py`
+
+They are generated inputs for the packaged Tableau workbook and are ignored by Git by default.
+
+The committed Tableau artifact is:
+
+`tableau/EV_Charging_Site_Readiness_Workbook.twbx`
+
+The committed export logic is:
+
+`src/build_tableau_exports.py`
+
+Do not manually edit the generated Tableau CSVs. Regenerate them from the model outputs instead.
+<!-- TABLEAU_OUTPUTS_END -->

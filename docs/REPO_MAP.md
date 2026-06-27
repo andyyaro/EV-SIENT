@@ -245,3 +245,39 @@ Regenerate V1 outputs with:
 python src/run_all.py
 python src/build_deliverable_package.py
 ```
+
+<!-- TABLEAU_ARTIFACTS_START -->
+## Tableau visual artifact
+
+Tableau folder:
+
+- `tableau/EV_Charging_Site_Readiness_Workbook.twbx`
+- `tableau/README.md`
+
+The Tableau workbook is the main interactive visual artifact for the Phase 2 EV charging prototype. It contains the polished visual replacement for the earlier static/model-generated charts.
+
+Supporting export script:
+
+- `src/build_tableau_exports.py`
+
+Generated Tableau CSV inputs are written to:
+
+- `data/outputs/tableau/`
+
+Those files are generated and ignored by Git unless the project intentionally decides to version them later.
+
+Key workbook visuals include:
+
+- EV Charging Site Readiness Ranking
+- Candidate EV Charging Site Map
+- Charging Port Growth by Planning Year
+- Review Burden by Site
+- Review Burden Map by Candidate Site
+- Profile Readiness by Scoring Profile
+- Site Subscores by Model Dimension
+- Profile Rank Stability by Site
+- Data Confidence and Review Issues by Site
+- Port Sizing Scenario Gaps
+- Port Utilization Simulation
+- Action Decision Quadrant
+<!-- TABLEAU_ARTIFACTS_END -->
