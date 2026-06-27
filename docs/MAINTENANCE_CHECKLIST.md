@@ -48,18 +48,31 @@ Copied files: 35/35
 Synced files: 35/35
 ```
 
-## 4. Regenerate Tableau exports
+## 4. Regenerate and validate Tableau exports
 
-The Tableau workbook is the main public-facing visual artifact. After V2 outputs change, regenerate Tableau CSV inputs:
+The Tableau workbook is the main public-facing visual artifact. After V2 outputs change, regenerate and validate Tableau CSV inputs:
 
 ```bash
 make tableau-exports
+make check-tableau
 ```
 
-Equivalent raw command:
+Equivalent raw commands:
 
 ```bash
 python src/build_tableau_exports.py
+python src/check_tableau_exports.py
+```
+
+Expected Tableau checker result:
+
+```text
+TABLEAU EXPORT CHECK
+--------------------
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+Exact export set, required columns, row counts, numeric fields, and site coverage are valid.
 ```
 
 Generated Tableau CSVs live under:
@@ -120,7 +133,7 @@ Expected result:
 make health
 ```
 
-This runs the V2 output checker and Markdown link checker. It does not regenerate Tableau exports.
+This runs the V2 output checker, Tableau export checker, and Markdown link checker. It assumes current Tableau exports already exist.
 
 ## 8. Run the full review check
 
@@ -128,7 +141,7 @@ This runs the V2 output checker and Markdown link checker. It does not regenerat
 make review
 ```
 
-This runs the V2 workflow, V2 checker, Tableau export generation, Markdown link check, and git status.
+This runs the V2 workflow, V2 checker, Tableau export generation, Tableau export checker, Markdown link check, and git status.
 
 ## 9. Check Git status
 
@@ -196,6 +209,7 @@ Before moving or renaming scripts, check:
 src/run_v2.py
 src/check_outputs_v2.py
 src/build_tableau_exports.py
+src/check_tableau_exports.py
 .github/workflows/v2-model-check.yml
 .github/workflows/link-check.yml
 Makefile
@@ -215,6 +229,7 @@ Do not merge V2 into `main` until:
 ```text
 V2 model check passes locally
 Tableau exports regenerate from current outputs
+Tableau export checker passes locally
 Markdown link check passes locally
 GitHub Actions pass
 README images render
