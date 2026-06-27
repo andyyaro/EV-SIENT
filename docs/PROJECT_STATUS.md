@@ -16,7 +16,7 @@ The main V2 guide is:
 docs/V2_CURRENT_WORKFLOW_GUIDE.md
 ```
 
-This project is a planning-support model only. It does not replace required technical, utility, permitting, procurement, accessibility, fire/AHJ, or stakeholder review.
+This project is a planning-support model only. It does not replace required technical, utility, permitting, procurement, accessibility, Fire Marshal/AHJ, or stakeholder review.
 
 ## Current V2 status
 
@@ -163,7 +163,7 @@ FFX003 — Pohick Regional Library
 FFX004 — Fairfax County Government Center
 PWC001 — PWC McCoart Government Center
 PWC002 — Neabsco-Potomac Commuter Garage
-PWC003 — Prince William County training-center site
+PWC003 — Prince William County Public Safety Training Center
 PWC004 — Chinn Park Regional Library
 PWC005 — Haymarket Gainesville Library
 PWC006 — Bull Run Library
@@ -185,7 +185,7 @@ PWC008 — Potomac Library
 9. PWC008 — Potomac Library — 40.1 — Tier 3
 10. PWC001 — PWC McCoart Government Center — 39.8 — Tier 3
 11. PWC005 — Haymarket Gainesville Library — 36.9 — Tier 3
-12. PWC003 — Prince William County training-center site — 29.6 — special-use
+12. PWC003 — Prince William County Public Safety Training Center — 29.6 — special-use
 ```
 
 ## Current strongest findings
@@ -268,12 +268,12 @@ Main unresolved items before any advancement:
 ```text
 electrical service rating
 spare electrical capacity
-equipment disconnect visibility
+emergency disconnect visibility
 visitor and employee counts
 operating hours
 parking count and likely charger placement
 ADA/accessibility layout review
-fire/AHJ review where applicable
+Fire Marshal / AHJ review where applicable
 stormwater or site civil constraints where applicable
 PWC002 garage-specific review
 PWC003 public, fleet-only, special-use, or removal decision
@@ -348,4 +348,4 @@ Consider a small site-review data intake template for AHJ / ADA / utility follow
 
 A high readiness score does not mean a site is build-ready.
 
-The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, fire/AHJ, permitting, procurement, and site review.
+The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, Fire Marshal/AHJ, permitting, procurement, and site review.
