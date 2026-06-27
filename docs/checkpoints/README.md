@@ -26,6 +26,7 @@ docs/PROJECT_STATUS.md
 
 These checkpoint files now live in this folder:
 
+- [V1_DEMO_SCALABILITY_FREEZE_NOTES.md](V1_DEMO_SCALABILITY_FREEZE_NOTES.md)
 - [V2_README_VISUALS_REFRESH_CHECKPOINT.md](V2_README_VISUALS_REFRESH_CHECKPOINT.md)
 - [V2_SITE_MAP_VISUAL_CLEANUP_CHECKPOINT.md](V2_SITE_MAP_VISUAL_CLEANUP_CHECKPOINT.md)
 - [V2_SITE_DECISION_MAP_CHECKPOINT.md](V2_SITE_DECISION_MAP_CHECKPOINT.md)
@@ -53,6 +54,7 @@ docs/V2_*_CHECKPOINT.md
 docs/V2_*_RESULTS.md
 docs/V2_*_PENDING.md
 docs/V1_TO_V2_FEATURE_PARITY_AUDIT.md
+docs/V1_*_FREEZE_NOTES.md
 ```
 
 These files are useful for auditability and project memory, but they are not the first files a reviewer needs to read.
@@ -69,6 +71,7 @@ GIS/map and visual-cleanup checkpoints
 V1-to-V2 parity checkpoints
 public-data upgrade and batch checkpoints
 docs-and-workflow health checkpoints
+V1 freeze or demo-freeze notes
 ```
 
 ## Moving policy
