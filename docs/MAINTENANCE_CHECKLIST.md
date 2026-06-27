@@ -1,6 +1,6 @@
 # Maintenance Checklist
 
-Use this checklist before pushing major repo changes, handing the repo to a reviewer, or merging V2 work later.
+Use this checklist before pushing major repo changes, handing the repo to a reviewer, publishing Tableau updates, or merging V2 work later.
 
 ## 1. Pull the active branch
 
@@ -48,7 +48,48 @@ Copied files: 35/35
 Synced files: 35/35
 ```
 
-## 4. Check Markdown links
+## 4. Regenerate Tableau exports
+
+The Tableau workbook is the main public-facing visual artifact. After V2 outputs change, regenerate Tableau CSV inputs:
+
+```bash
+make tableau-exports
+```
+
+Equivalent raw command:
+
+```bash
+python src/build_tableau_exports.py
+```
+
+Generated Tableau CSVs live under:
+
+```text
+data/outputs/tableau/
+```
+
+These generated files are ignored by Git by default. Do not manually edit them; regenerate them from current model outputs.
+
+## 5. Refresh the Tableau workbook when needed
+
+Use this when the model outputs or Tableau export logic have changed:
+
+```text
+1. Run make full-v2-tableau.
+2. Open tableau/EV_Charging_Site_Readiness_Workbook.twbx.
+3. Refresh or repoint data sources if Tableau asks.
+4. Verify visible sheet tabs in Tableau Public after publishing.
+5. Save the packaged workbook.
+6. Commit the workbook only when the visual artifact intentionally changed.
+```
+
+Public link and workbook notes are in:
+
+```text
+tableau/README.md
+```
+
+## 6. Check Markdown links
 
 Preferred command:
 
@@ -73,15 +114,23 @@ Expected result:
 0 Errors
 ```
 
-## 5. Run the short health check
+## 7. Run the short health check
 
 ```bash
 make health
 ```
 
-This runs the V2 output checker and Markdown link checker.
+This runs the V2 output checker and Markdown link checker. It does not regenerate Tableau exports.
 
-## 6. Check Git status
+## 8. Run the full review check
+
+```bash
+make review
+```
+
+This runs the V2 workflow, V2 checker, Tableau export generation, Markdown link check, and git status.
+
+## 9. Check Git status
 
 ```bash
 make status
@@ -97,17 +146,21 @@ Generated files under `data/outputs/` should normally be ignored by Git.
 
 The committed README preview images under `docs/assets/charts/` should only change when you intentionally update the README visuals.
 
-## 7. Review the main outputs
+The packaged Tableau workbook under `tableau/` should only change when you intentionally save a workbook update.
 
-Open the clean package:
+## 10. Review the main outputs
+
+Public visual review:
+
+```text
+tableau/README.md
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
+```
+
+Technical package review:
 
 ```text
 data/outputs/deliverable_package_v2/README.md
-```
-
-Then inspect:
-
-```text
 data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
 data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
 data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
@@ -116,7 +169,7 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
 data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
-## 8. Do not commit local generated caches
+## 11. Do not commit local generated caches
 
 Do not commit local generated/downloaded helper folders unless there is a clear reason.
 
@@ -125,6 +178,7 @@ Examples to avoid:
 ```text
 data/source_extracts/gis/
 data/outputs/
+data/outputs/tableau/
 data/run_history/
 ```
 
@@ -134,33 +188,37 @@ To remove local generated caches:
 make clean-local
 ```
 
-## 9. Before changing code structure
+## 12. Before changing code structure
 
 Before moving or renaming scripts, check:
 
 ```text
 src/run_v2.py
 src/check_outputs_v2.py
+src/build_tableau_exports.py
 .github/workflows/v2-model-check.yml
 .github/workflows/link-check.yml
 Makefile
+tableau/README.md
 docs/REPO_MAP.md
 src/README.md
 README.md
 START_HERE.md
 ```
 
-Moving scripts is more risky than adding navigation docs because imports, GitHub Actions, and reproducibility commands may depend on existing paths.
+Moving scripts is more risky than adding navigation docs because imports, GitHub Actions, Tableau refresh steps, and reproducibility commands may depend on existing paths.
 
-## 10. Before merging to main later
+## 13. Before merging to main later
 
 Do not merge V2 into `main` until:
 
 ```text
 V2 model check passes locally
+Tableau exports regenerate from current outputs
 Markdown link check passes locally
 GitHub Actions pass
 README images render
+Tableau Public workbook tabs are visible
 reviewer guide and source index are current
 main-vs-V2 branch purpose is intentionally resolved
 ```
