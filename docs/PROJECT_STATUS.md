@@ -4,71 +4,91 @@
 
 Phase 2 prototype development for the Public EV Charging Site-Readiness and Right-Sizing Model.
 
-The active technical branch is:
+Active branch:
 
 ```text
 v2-expansion-planning
 ```
 
-The main V2 guide is:
+Main workflow guide:
 
 ```text
 docs/V2_CURRENT_WORKFLOW_GUIDE.md
 ```
 
-This project is a planning-support model only. It does not replace required technical, utility, permitting, procurement, accessibility, Fire Marshal/AHJ, or stakeholder review.
+Tableau workbook guide:
 
-## Current V2 status
+```text
+tableau/README.md
+```
 
-V2 is now a stable, reproducible planning-support workflow with:
+This is a planning-support prototype. It supports screening, prioritization, discussion, and follow-up review. It is not a final approval tool.
+
+## Current status summary
+
+V2 is now a stable, reproducible workflow with:
 
 ```text
 12 real candidate sites
-24-step reproducible workflow
-site-readiness ranking
-data-quality validation
-sensitivity analysis
-scoring-profile analysis
-readiness and confidence charts
-profile heatmap and rank-stability chart
-readiness map
-GIS decision map
-README GIS decision map with all 12 site callout tags
-electrical-risk scenario analysis
-right-sizing scenario analysis
-port-use simulation
-port-sizing scenario analysis
-right-sizing validation
-executive site summary with scenario-sensitivity fields
-interpretation report
-run summary
+24-step V2 model workflow
+V2 output checker
 expanded baseline comparison
-workflow manifest
 35-file clean deliverable package
-hardened output checker requiring all 12 V2 sites
-hash-sync package validation
-Times New Roman chart typography
+full Tableau CSV export builder
+Tableau export checker
 QA-polished packaged Tableau workbook
 published Tableau Public workbook with visible worksheet tabs
 ```
 
-The current V2 workflow is validated locally with:
+The main public visual artifact is the Tableau workbook. Static PNG charts remain support outputs for reproducibility, GitHub previews, and the technical package.
+
+## Current commands
+
+Run the full current workflow from the repo root:
+
+```bash
+git switch v2-expansion-planning
+git pull --rebase origin v2-expansion-planning
+make full-v2-tableau
+```
+
+Equivalent raw commands:
 
 ```bash
 python src/run_v2.py
 python src/check_outputs_v2.py
+python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
-Expected final checker result:
+For Tableau-only refresh after current V2 outputs already exist:
+
+```bash
+make tableau-exports
+make check-tableau
+```
+
+## Expected V2 check
 
 ```text
 V2 OUTPUT CHECK
 ---------------
 Status: PASSED
-All expected V2 outputs are present, all 12 V2 candidate sites are represented, the port-sizing scenario analysis is present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
+All expected V2 outputs are present, all 12 V2 candidate sites are represented, sensitivity outputs and the port-sizing scenario layer are present, the README decision-map asset is synced, baseline checks cover the new V2 layers, and the deliverable package is hash-synced with current source outputs.
 ```
 
-Expected deliverable package result:
+## Expected Tableau check
+
+```text
+TABLEAU EXPORT CHECK
+--------------------
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+Exact export set, required columns, row counts, numeric fields, and site coverage are valid.
+```
+
+## Expected package check
 
 ```text
 Status: complete
@@ -78,83 +98,7 @@ Copied files: 35/35
 Synced files: 35/35
 ```
 
-## Current repo structure
-
-```text
-src/                  Python scripts
-data/inputs/           Input datasets
-data/config/           Config files for scoring profiles, output checks, and output/package manifest
-data/source_extracts/  Small source extracts and source notes
-data/baselines/        Committed baseline outputs for comparison
-data/outputs/          Generated local outputs ignored by Git
-data/demo/             Generated synthetic demo outputs ignored by Git
-docs/                  Documentation and reporting
-tableau/               Packaged Tableau workbook and Tableau documentation
-```
-
-## Current V2 workflow
-
-Run from the repository root:
-
-```bash
-git switch v2-expansion-planning
-git pull --rebase origin v2-expansion-planning
-python src/run_v2.py
-python src/check_outputs_v2.py
-```
-
-`src/run_v2.py` currently runs:
-
-```text
-1. Run V2 site-readiness model
-2. Add V2 readiness-confidence action matrix
-3. Create V2 polished readiness score chart
-4. Create V2 data confidence chart
-5. Validate V2 site input data
-6. Run V2 sensitivity analysis
-7. Run V2 scoring-profile analysis
-8. Create V2 profile score heatmap
-9. Create V2 profile rank stability chart
-10. Create V2 readiness map
-11. Run V2 electrical-feasibility scenario analysis
-12. Run V2 right-sizing scenario analysis
-13. Run V2 port-use simulation
-14. Run V2 port-sizing scenario analysis
-15. Validate V2 right-sizing with simulation
-16. Build V2 executive site summary
-17. Create V2 GIS decision maps
-18. Generate V2 interpretation report
-19. Generate V2 run summary
-20. Compare V2 outputs to baseline
-21. Write V2 workflow completion manifest
-22. Build V2 deliverable package
-23. Compare V2 deliverable package manifest to baseline
-24. Rebuild V2 deliverable package with final baseline comparison
-```
-
-## V2 deliverable package
-
-The V2 workflow creates a clean local package at:
-
-```text
-data/outputs/deliverable_package_v2/
-```
-
-The package includes:
-
-```text
-README.md
-package_manifest.json
-inputs/
-reports/
-tables/
-charts/
-manifests/
-```
-
-The package builder performs a clean rebuild by default so stale copied files do not survive. The package manifest stores SHA-256 hashes and is only healthy when every copied file matches its current source output.
-
-## Current V2 candidate sites
+## Current candidate set
 
 ```text
 FFX001 — Fairfax City Hall or municipal building
@@ -188,30 +132,30 @@ PWC008 — Potomac Library
 12. PWC003 — Prince William County Public Safety Training Center — 29.6 — special-use
 ```
 
-## Current strongest findings
+## Current interpretation
 
 ```text
 FFX002 is the strongest current public candidate.
 FFX004 is the second-ranked Tier 1 candidate.
 PWC006 is the strongest current Prince William County library candidate.
-PWC002 remains useful but high-review because it is a garage candidate with fire/AHJ/electrical uncertainty.
+PWC002 remains useful but high-review because of garage and site-review uncertainty.
 PWC003 should not be treated as a general-public priority unless public access or use-case assumptions change.
 ```
 
-## Current V2 right-sizing interpretation
+## Current right-sizing interpretation
 
 ```text
 FFX002 — install 2 now; plan future-ready capacity of 8
 FFX004 — install 3 now; plan future-ready capacity of 8
 PWC006 — install 2 now; plan future-ready capacity of 4
 FFX001, PWC007, PWC004, FFX003 — starter install with expandable design
-PWC002 and PWC001 — electrical review before expansion
+PWC002 and PWC001 — review before expansion
 PWC008 — monitor due to nearby supply
 PWC005 — monitor or small pilot
 PWC003 — do not advance general-public buildout without use-case confirmation
 ```
 
-## Current V2 port-sizing scenario interpretation
+## Current scenario interpretation
 
 ```text
 The future-ready capacity plan is stable across the first five tested scenarios.
@@ -220,66 +164,25 @@ Only the combined-stress scenario creates one-port gaps.
 The combined-stress gaps affect PWC002 and PWC008.
 ```
 
-## Executive-summary scenario fields
-
-The executive summary now includes one site-level scenario sensitivity summary from the port-sizing scenario analysis.
+## Current Tableau status
 
 ```text
-scenario_max_min_ports_2050_high
-scenario_future_capacity_gap
-scenario_sensitivity_level
-scenario_stress_note
-```
-
-Expected interpretation:
-
-```text
-Most sites — robust
-PWC002 — combined_stress_sensitive
-PWC008 — combined_stress_sensitive
-```
-
-## Current V2 visual status
-
-```text
-v2_site_decision_map.png = full report GIS decision map
-v2_site_decision_map_readme.png = README-optimized GIS decision map with all 12 site callout tags
-v2_port_sizing_scenario_heatmap.png = port-sizing scenario stress-test heatmap
-docs/assets/charts/v2_site_decision_map_readme.png = committed README asset synced from generated output
 tableau/EV_Charging_Site_Readiness_Workbook.twbx = packaged interactive Tableau workbook
 tableau/README.md = Tableau workbook documentation and refresh notes
-src/build_tableau_exports.py = regenerates Tableau-ready CSV inputs
+src/build_tableau_exports.py = regenerates the 15 Tableau-ready CSV inputs
+src/check_tableau_exports.py = validates exact Tableau file set, schemas, row counts, numeric fields, and 12-site coverage
+data/outputs/tableau/ = generated local Tableau CSV inputs ignored by Git
 ```
 
-Published Tableau Public workbook entry point:
+## Current generated-package status
 
-[EV Charging Site Readiness Workbook on Tableau Public](https://public.tableau.com/views/EV_Charging_Site_Readiness_Workbook/Bar-EVChargingReadinessbySite)
-
-Tableau Public opens the workbook through one starting worksheet URL. Use the visible sheet tabs on the Tableau Public page to navigate between the full set of workbook views.
-
-Generated Matplotlib charts use the shared Times New Roman chart style. Basemap tile labels cannot be restyled because they are baked into the background tile image.
-
-## Current known review gaps
-
-The data-quality checker currently has no blocking errors, but several fields remain review items.
-
-Main unresolved items before any advancement:
+The V2 workflow creates a clean local package at:
 
 ```text
-electrical service rating
-spare electrical capacity
-emergency disconnect visibility
-visitor and employee counts
-operating hours
-parking count and likely charger placement
-ADA/accessibility layout review
-Fire Marshal / AHJ review where applicable
-stormwater or site civil constraints where applicable
-PWC002 garage-specific review
-PWC003 public, fleet-only, special-use, or removal decision
+data/outputs/deliverable_package_v2/
 ```
 
-These are planning-screen gaps, not workflow failures.
+The package contains selected reports, tables, charts, inputs, and manifests for technical review.
 
 ## Stable V1 status
 
@@ -296,56 +199,23 @@ python src/build_deliverable_package.py
 
 V1 remains useful as the stable baseline. V2 is the active Phase 2 development branch.
 
-## Demo scalability workflow
-
-The repo also has a synthetic demo workflow for checking larger candidate pools.
-
-Run from the repository root:
-
-```bash
-python src/run_demo.py --count 50 --seed 42 --top-n 15 --clean
-```
-
-Demo mode is not an official recommendation layer. It is for stress-testing scalability, visual readability, workflow robustness, and larger candidate-pool behavior.
-
-## Completed V2 work so far
+## Completed recent work
 
 ```text
 Expanded V2 candidate set to 12 sites.
-Added Batch 002 Prince William library candidates.
-Added reviewed public-data extracts.
-Added AFDC nearby charging supply counts.
-Added VDOT/traffic, ACS/equity, jobs, and amenities signals.
-Added electrical-risk scenario analysis.
-Added V2 right-sizing scenarios.
-Added port-use simulation.
-Added port-sizing scenario analysis.
-Integrated port simulation into the executive summary.
-Integrated port-sizing scenario fields into the executive summary.
-Added right-sizing validation layer.
-Added GIS decision map and README decision map.
-Added all 12 site callout tags to the README decision map.
-Set generated chart typography to Times New Roman.
-Added clean 35-file V2 deliverable package.
-Expanded package contents with profile, stability, GIS-map, simulation, port-sizing scenario, validation, and baseline outputs.
-Strengthened output checker to require all 12 V2 site IDs.
-Hardened package and README asset hash-sync checks.
-Expanded baseline comparison to cover simulation, port-sizing scenarios, validation, executive, and package manifest layers.
-Added current V2 workflow guide and refreshed repo documentation.
+Added scenario, simulation, validation, executive-summary, and package layers.
 Expanded and QA-polished the packaged Tableau workbook.
-Published the Tableau Public workbook and documented the public entry point.
+Published the Tableau Public workbook and documented the workbook entry point.
+Added full Tableau CSV export generation for all 15 workbook inputs.
+Added Tableau export checker for exact file set, schemas, row counts, numeric fields, and 12-site coverage.
+Wired Tableau export generation and checking into the Makefile workflow.
+Refreshed repo documentation so Tableau is the main public visual layer and static PNGs are support outputs.
 ```
 
 ## Next likely technical improvements
 
 ```text
-Continue replacing placeholder electrical/site-review assumptions with verified site data.
+Continue replacing placeholder site-review assumptions with verified site data.
 Add a concise scenario interpretation block to the stakeholder-facing package README.
-Consider a small site-review data intake template for AHJ / ADA / utility follow-up.
+Consider a small site-review data intake template for future follow-up.
 ```
-
-## Important limitation
-
-A high readiness score does not mean a site is build-ready.
-
-The model is for planning support only and still requires stakeholder, utility, engineering, ADA/accessibility, Fire Marshal/AHJ, permitting, procurement, and site review.
