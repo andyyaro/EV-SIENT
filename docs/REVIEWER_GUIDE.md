@@ -28,6 +28,7 @@ Local Tableau files:
 tableau/EV_Charging_Site_Readiness_Workbook.twbx
 tableau/README.md
 src/build_tableau_exports.py
+src/check_tableau_exports.py
 ```
 
 Static PNG charts are still generated for reproducibility, GitHub previews, and the technical deliverable package, but Tableau is the primary public visual layer.
@@ -54,9 +55,7 @@ From the repository root:
 git switch v2-expansion-planning
 git pull --rebase origin v2-expansion-planning
 make setup
-make run-v2
-make check-v2
-make tableau-exports
+make full-v2-tableau
 ```
 
 Equivalent all-in review command:
@@ -73,12 +72,20 @@ pip install -r requirements-gis.txt
 python src/run_v2.py
 python src/check_outputs_v2.py
 python src/build_tableau_exports.py
+python src/check_tableau_exports.py
 ```
 
-A healthy V2 check should report:
+A healthy current V2 workflow should report:
 
 ```text
+V2 OUTPUT CHECK
 Status: PASSED
+
+TABLEAU EXPORT CHECK
+Status: PASSED
+Checked exports: 15/15
+Candidate sites represented: 12/12
+
 Copied files: 35/35
 Synced files: 35/35
 ```
@@ -109,6 +116,7 @@ data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 | Public interactive workbook | `tableau/EV_Charging_Site_Readiness_Workbook.twbx` |
 | Tableau documentation | `tableau/README.md` |
 | Tableau CSV export builder | `src/build_tableau_exports.py` |
+| Tableau CSV export checker | `src/check_tableau_exports.py` |
 | Active workflow runner | `src/run_v2.py` |
 | Output checker | `src/check_outputs_v2.py` |
 | Main model | `src/ev_charger_model.py` |
@@ -120,21 +128,7 @@ data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 | Active input dataset | `data/inputs/real_sites_v2.csv` |
 | Scenario assumptions | `data/inputs/v2_port_sizing_scenarios.csv` |
 | Baseline snapshot | `data/baselines/v2_baseline_snapshot.json` |
-
-## What not to edit directly
-
-Do not manually edit generated outputs. Regenerate them instead.
-
-```text
-data/outputs/
-data/outputs/tableau/
-data/outputs/charts/
-data/outputs/deliverable_package/
-data/outputs/deliverable_package_v2/
-data/demo/
-```
-
-Do not move scripts until imports, workflows, docs, Tableau refresh instructions, and reproducibility commands are updated together.
+| Generated Tableau CSV folder | `data/outputs/tableau/` |
 
 ## Current interpretation to verify
 
@@ -156,9 +150,9 @@ Only the combined-stress scenario creates one-port gaps, affecting PWC002 and PW
 ## Reviewer checklist
 
 ```text
-make check-v2 passes
-make tableau-exports runs after current V2 outputs exist
+make full-v2-tableau passes
 make links passes
+Tableau export checker passes with 15/15 exports and 12/12 candidate sites
 Tableau Public tabs are visible
 README preview images render
 baseline comparison does not show unexpected failures
