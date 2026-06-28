@@ -267,7 +267,7 @@ def build_story(summary: pd.DataFrame, quality: pd.DataFrame, scenarios: pd.Data
     s = style()
     story: list[Any] = [
         Spacer(1, 0.85 * inch), P(TITLE, s, "title"), P(SUBTITLE, s, "sub"),
-        P("Future City Fellowship Phase 2 prototype", s, "sub"), P("Built by Andy Yaro, George Mason University", s, "sub"),
+        P("Future City Fellowship Phase 2 prototype", s, "sub"), P("George Mason University", s, "sub"),
         Spacer(1, 0.3 * inch), divider(), Spacer(1, 0.25 * inch), intro_table(s, generated),
         Spacer(1, 0.35 * inch), P(DISCLAIMER, s, "small"), PageBreak(),
     ]
