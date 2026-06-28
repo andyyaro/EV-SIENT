@@ -24,6 +24,7 @@ data/outputs/*.csv
 data/outputs/*.md
 data/outputs/*.json
 data/outputs/*.zip
+data/outputs/*.pdf
 data/outputs/charts/*.png
 data/outputs/charts/v2/*.png
 data/outputs/deliverable_package/
