@@ -42,6 +42,29 @@ published Tableau Public workbook with visible worksheet tabs
 
 The main public visual artifact is the Tableau workbook. Static PNG charts remain support outputs for reproducibility, GitHub previews, and the technical package.
 
+
+## Public website and assistant status
+
+The public Future City Fellowship GMU website is live at:
+
+```text
+https://futurecityfellowship.andyyaro.com
+```
+
+The public site includes a landing page, dashboard page, results page, methodology page, and AI Assistant page for approved users.
+
+The AI Assistant is intended to help users understand the project, model methodology, datasets, results, assumptions, limitations, and repository files. It includes user-facing model limitations information so users see the planning-support boundary before treating the tool as authoritative.
+
+Recent assistant-facing improvements include:
+
+```text
+first-time new-password sign-in flow fixed for newly invited users
+frontend message-length guard added for cleaner user experience
+model limitations information added to the assistant page
+```
+
+Private deployment and operations details should be maintained outside assistant-readable project docs unless they are explicitly redacted for public/project use.
+
 ## Current commands
 
 Run the full current workflow from the repo root:
@@ -210,6 +233,8 @@ Added full Tableau CSV export generation for all 15 workbook inputs.
 Added Tableau export checker for exact file set, schemas, row counts, numeric fields, and 12-site coverage.
 Wired Tableau export generation and checking into the Makefile workflow.
 Refreshed repo documentation so Tableau is the main public visual layer and static PNGs are support outputs.
+Added public-safe docs for model limitations, AI Assistant use, public website status, and project change history.
+Documented the public website and assistant status without adding private deployment details to assistant-readable docs.
 ```
 
 ## Next likely technical improvements

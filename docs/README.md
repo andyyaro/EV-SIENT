@@ -14,6 +14,18 @@ Use this page as a quick index. For the cleanest reviewer-facing path, start wit
 - [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md) — local reproduction checklist
 - [MAINTENANCE_CHECKLIST.md](MAINTENANCE_CHECKLIST.md) — checks before pushing or sharing
 - [PROJECT_STATUS.md](PROJECT_STATUS.md) — current project state
+- [PUBLIC_WEBSITE_STATUS.md](PUBLIC_WEBSITE_STATUS.md) — public website status and website/repo relationship
+- [AI_ASSISTANT_USER_GUIDE.md](AI_ASSISTANT_USER_GUIDE.md) — AI Assistant scope and safe-use guidance
+- [MODEL_LIMITATIONS.md](MODEL_LIMITATIONS.md) — model limitations
+- [CHANGELOG.md](CHANGELOG.md) — public-safe project change history
+
+
+## Public website and assistant docs
+
+- [PUBLIC_WEBSITE_STATUS.md](PUBLIC_WEBSITE_STATUS.md)
+- [AI_ASSISTANT_USER_GUIDE.md](AI_ASSISTANT_USER_GUIDE.md)
+- [MODEL_LIMITATIONS.md](MODEL_LIMITATIONS.md)
+- [CHANGELOG.md](CHANGELOG.md)
 
 ## Main public visual artifact
 
