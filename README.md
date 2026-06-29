@@ -6,6 +6,26 @@ This repository contains a Python planning-support prototype for comparing publi
 
 The model evaluates sites using demand, implementation feasibility, site review, equity, data confidence, electrical-risk screening, right-sizing, port-use simulation, port-sizing scenario analysis, Tableau-ready exports, and action recommendations.
 
+
+## Public website and AI Assistant
+
+Public website:
+
+```text
+https://futurecityfellowship.andyyaro.com
+```
+
+The public site presents the project through a landing page, dashboard, results page, methodology page, and an AI Assistant page for approved users.
+
+The repository remains the source of truth for model methodology, reproducible workflow, data documentation, Tableau exports, and project limitations. The website is the public presentation layer.
+
+Public-safe website and assistant docs:
+
+- [docs/PUBLIC_WEBSITE_STATUS.md](docs/PUBLIC_WEBSITE_STATUS.md) — public website status and website/repo relationship
+- [docs/AI_ASSISTANT_USER_GUIDE.md](docs/AI_ASSISTANT_USER_GUIDE.md) — user-facing assistant scope and safe-use guidance
+- [docs/MODEL_LIMITATIONS.md](docs/MODEL_LIMITATIONS.md) — planning, data, feasibility, review, and right-sizing limitations
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — public-safe project change history
+
 ## Current active branch
 
 ```text

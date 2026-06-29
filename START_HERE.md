@@ -19,6 +19,27 @@ Do the port recommendations remain stable under alternate demand and charging as
 
 The model is for early planning support only and does not replace official review, engineering review, utility review, permitting, procurement, or stakeholder confirmation.
 
+
+## Public site and AI Assistant
+
+Public site:
+
+```text
+https://futurecityfellowship.andyyaro.com
+```
+
+The public site presents the project through a landing page, dashboard, results page, methodology page, and AI Assistant page for approved users.
+
+The AI Assistant can help answer questions about model purpose, methodology, datasets, results, assumptions, limitations, and repository files. It should not be used for official engineering, utility, permitting, ADA, Fire Marshal/AHJ, stormwater, procurement, or construction decisions.
+
+Read:
+
+```text
+docs/PUBLIC_WEBSITE_STATUS.md
+docs/AI_ASSISTANT_USER_GUIDE.md
+docs/MODEL_LIMITATIONS.md
+```
+
 ## Current active workflow
 
 The active Phase 2 prototype is V2 on this branch:
@@ -32,6 +53,9 @@ Read these first:
 ```text
 docs/ACTIVE_DOCS_INDEX.md
 docs/REVIEWER_GUIDE.md
+docs/PUBLIC_WEBSITE_STATUS.md
+docs/AI_ASSISTANT_USER_GUIDE.md
+docs/MODEL_LIMITATIONS.md
 docs/V2_CURRENT_WORKFLOW_GUIDE.md
 docs/REPO_MAP.md
 src/README.md

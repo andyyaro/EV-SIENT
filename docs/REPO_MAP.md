@@ -26,6 +26,32 @@ This file explains the main parts of the repo without making you read every file
 - [docs/checkpoints/](checkpoints/) — checkpoint/history notes moved out of the active-docs path
 - [tableau/](../tableau/) — packaged Tableau workbook and Tableau documentation
 
+
+## Public website and user-facing assistant docs
+
+The public website is documented at:
+
+```text
+docs/PUBLIC_WEBSITE_STATUS.md
+```
+
+The assistant-readable branch should contain public-safe project context, not private deployment or operations internals.
+
+User-facing assistant docs:
+
+```text
+docs/AI_ASSISTANT_USER_GUIDE.md
+docs/MODEL_LIMITATIONS.md
+```
+
+These files help the AI Assistant answer project-scope and limitation questions without relying on private deployment documentation.
+
+## Website source files
+
+The inspected V2 branch is primarily the model/reproducibility source of truth. Deployed website HTML files may be maintained separately from this branch unless intentionally added later.
+
+Do not add private deployment notes, credentials, exact internal resource identifiers, or production-only operational files to this assistant-readable branch unless they are explicitly redacted and intended for project-facing use.
+
 ## Active V2 workflow
 
 Run the active V2 workflow and Tableau export validation with:

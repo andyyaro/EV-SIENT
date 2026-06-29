@@ -176,6 +176,22 @@ data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
 data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
+
+## Public website and assistant documentation checks
+
+Use these checks when updating project-facing website or assistant documentation:
+
+```text
+Confirm public website text and repo docs do not conflict.
+Confirm assistant limitations information stays consistent with docs/MODEL_LIMITATIONS.md.
+Confirm docs/AI_ASSISTANT_USER_GUIDE.md stays user-facing and does not describe private operations internals.
+Confirm docs/PUBLIC_WEBSITE_STATUS.md describes the website/repo relationship without exposing private deployment details.
+Confirm no credentials, API keys, tokens, passwords, or client secrets are committed.
+Confirm no private deployment handoff files are added to the assistant-readable branch unless deliberately redacted.
+Confirm no production-only operational files are mixed into the V2 model/docs branch by accident.
+Run make links after documentation updates.
+```
+
 ## 10. Do not commit local generated caches
 
 Do not commit local generated/downloaded helper folders unless there is a clear reason.

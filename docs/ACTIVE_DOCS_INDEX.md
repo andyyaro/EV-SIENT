@@ -28,6 +28,14 @@ Static PNG charts are still generated for reproducibility, GitHub previews, and 
 - [MAINTENANCE_CHECKLIST.md](MAINTENANCE_CHECKLIST.md) — checks before pushing or sharing
 - [PROJECT_STATUS.md](PROJECT_STATUS.md) — current project state
 
+
+## Public website and assistant docs
+
+- [PUBLIC_WEBSITE_STATUS.md](PUBLIC_WEBSITE_STATUS.md) — public website status and website/repository relationship
+- [AI_ASSISTANT_USER_GUIDE.md](AI_ASSISTANT_USER_GUIDE.md) — user-facing assistant scope and safe-use guidance
+- [MODEL_LIMITATIONS.md](MODEL_LIMITATIONS.md) — planning, data, feasibility, review, and right-sizing limitations
+- [CHANGELOG.md](CHANGELOG.md) — public-safe project change history
+
 ## Reproduce the active V2 workflow
 
 ```bash
