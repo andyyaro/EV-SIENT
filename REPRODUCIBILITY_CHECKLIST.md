@@ -68,7 +68,7 @@ Tableau Desktop or Tableau Public
 
 ---
 
-## 3. Check installed tools
+## 3. Check whether required tools are already installed
 
 ### macOS Terminal
 
@@ -97,13 +97,153 @@ pip --version
 
 On Windows, either `py` or `python` may work depending on how Python was installed.
 
-If `py --version` works, use `py -3` in the Windows commands below.
+If `py --version` works, use `py -3` when creating the virtual environment.
 
 If `python --version` works, you may use `python` instead.
 
 ---
 
-## 4. Sign in to GitHub from the terminal
+## 4. Install missing tools on macOS
+
+Skip this section if all required tools are already installed.
+
+### 4.1 Install Apple Command Line Tools
+
+This usually provides Git and basic developer tools:
+
+```bash
+xcode-select --install
+```
+
+After installation, reopen Terminal and check:
+
+```bash
+git --version
+make --version
+```
+
+### 4.2 Install Homebrew if missing
+
+Check if Homebrew exists:
+
+```bash
+brew --version
+```
+
+If `brew` is not found, install Homebrew:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+After installation, follow any “Next steps” printed by Homebrew so the `brew` command is available in your terminal.
+
+Then confirm:
+
+```bash
+brew --version
+```
+
+### 4.3 Install Git, GitHub CLI, and Python
+
+```bash
+brew install git
+brew install gh
+brew install python@3.11
+```
+
+Confirm:
+
+```bash
+git --version
+gh --version
+python3 --version
+pip3 --version
+```
+
+### 4.4 Optional macOS tools
+
+Install `lychee` for Markdown link checking:
+
+```bash
+brew install lychee
+```
+
+Confirm:
+
+```bash
+lychee --version
+```
+
+---
+
+## 5. Install missing tools on Windows
+
+Skip this section if all required tools are already installed.
+
+These commands assume you are using **Windows PowerShell**.
+
+### 5.1 Check whether winget is available
+
+```powershell
+winget --version
+```
+
+If `winget` is not found, install or update **App Installer** from the Microsoft Store, then reopen PowerShell.
+
+### 5.2 Install Git
+
+```powershell
+winget install --id Git.Git -e
+```
+
+Close and reopen PowerShell, then check:
+
+```powershell
+git --version
+```
+
+### 5.3 Install GitHub CLI
+
+```powershell
+winget install --id GitHub.cli -e
+```
+
+Close and reopen PowerShell, then check:
+
+```powershell
+gh --version
+```
+
+### 5.4 Install Python 3.11
+
+```powershell
+winget install --id Python.Python.3.11 -e
+```
+
+Close and reopen PowerShell, then check:
+
+```powershell
+py --version
+python --version
+pip --version
+```
+
+If `py --version` works but `python --version` does not, use `py -3` for virtual environment creation. After the virtual environment is activated, the `python` command should work inside the environment.
+
+### 5.5 Optional Windows tools
+
+For this project, `make` is optional on Windows because the raw Python commands are provided.
+
+If you want a Unix-like shell with Git support, install Git for Windows and use **Git Bash**.
+
+If you want `make` on Windows, use Git Bash, MSYS2, Chocolatey, or another developer environment. This checklist does not require `make` on Windows PowerShell.
+
+If you want to install `lychee`, use a package manager that supports it, or skip the Markdown link check locally. The model and Tableau checks are the required reproducibility checks.
+
+---
+
+## 6. Sign in to GitHub from the terminal
 
 This repository is private, so the terminal must be authenticated before cloning or pulling.
 
@@ -136,7 +276,7 @@ Do not paste personal access tokens, passwords, API keys, or credentials into pr
 
 ---
 
-## 5. Clone the repository
+## 7. Clone the repository
 
 ### macOS Terminal
 
@@ -194,7 +334,7 @@ https://github.com/andyyaro/Future-City-Fellowship-.git
 
 ---
 
-## 6. Switch to the active V2 branch
+## 8. Switch to the active V2 branch
 
 macOS Terminal or Windows PowerShell:
 
@@ -226,7 +366,7 @@ A clean repo shows no output.
 
 ---
 
-## 7. Create a virtual environment
+## 9. Create a virtual environment
 
 ### macOS Terminal
 
@@ -253,7 +393,13 @@ Create the virtual environment:
 py -3 -m venv .venv
 ```
 
-Activate it:
+If `py -3` does not work but `python` does, use:
+
+```powershell
+python -m venv .venv
+```
+
+Activate the environment:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -288,7 +434,7 @@ The path should include `.venv`.
 
 ---
 
-## 8. Install dependencies
+## 10. Install project dependencies
 
 The core model dependencies are in:
 
@@ -338,7 +484,7 @@ python -m pip install -r requirements-v2.txt
 
 ---
 
-## 9. Run the full active V2 workflow
+## 11. Run the full active V2 workflow
 
 The raw Python commands work on both macOS and Windows.
 
@@ -364,7 +510,7 @@ This sequence runs the model, checks outputs, regenerates Tableau-ready CSV file
 
 ---
 
-## 10. Optional Makefile commands
+## 12. Optional Makefile commands
 
 The Makefile is convenient on macOS and on Windows if using Git Bash or another Unix-like shell.
 
@@ -414,7 +560,7 @@ This avoids Windows shell differences with commands such as `rm`, `mkdir`, and `
 
 ---
 
-## 11. Expected successful model output
+## 13. Expected successful model output
 
 A healthy V2 model check should include:
 
@@ -441,7 +587,7 @@ The counts differ because the workflow marker tracks `v2_sensitivity_results.csv
 
 ---
 
-## 12. Expected successful Tableau export output
+## 14. Expected successful Tableau export output
 
 A healthy Tableau export check should include:
 
@@ -474,7 +620,7 @@ tableau/README.md
 
 ---
 
-## 13. Main outputs to inspect after reproduction
+## 15. Main outputs to inspect after reproduction
 
 After a successful run, inspect these outputs first:
 
@@ -509,7 +655,7 @@ data/outputs/deliverable_package_v2/reports/v2_run_summary.md
 
 ---
 
-## 14. Main V2 input files
+## 16. Main V2 input files
 
 The active V2 candidate-site dataset is:
 
@@ -534,7 +680,7 @@ data/source_dataset_log.csv
 
 ---
 
-## 15. Optional clean rebuild
+## 17. Optional clean rebuild
 
 ### macOS Terminal
 
@@ -584,7 +730,7 @@ git status --short
 
 ---
 
-## 16. Optional Markdown link check
+## 18. Optional Markdown link check
 
 The link checker uses `lychee`.
 
@@ -619,11 +765,13 @@ If `lychee` is not installed, skip this step for local model reproduction. The m
 
 ---
 
-## 17. Troubleshooting
+## 19. Troubleshooting
 
 ### Problem: `gh` command not found
 
-Install GitHub CLI, close and reopen the terminal, then check:
+Install GitHub CLI using the operating-system instructions above.
+
+Then check:
 
 ```bash
 gh --version
@@ -633,6 +781,37 @@ Then sign in:
 
 ```bash
 gh auth login
+```
+
+### Problem: `git` command not found
+
+Install Git using the operating-system instructions above.
+
+Then close and reopen the terminal and check:
+
+```bash
+git --version
+```
+
+### Problem: `python` or `py` command not found
+
+Install Python using the operating-system instructions above.
+
+Then close and reopen the terminal and check:
+
+macOS:
+
+```bash
+python3 --version
+pip3 --version
+```
+
+Windows:
+
+```powershell
+py --version
+python --version
+pip --version
 ```
 
 ### Problem: clone fails with authentication error
@@ -750,7 +929,7 @@ Do not run broad restore commands unless you are certain you want to discard loc
 
 ---
 
-## 18. Final reproducibility pass
+## 20. Final reproducibility pass
 
 A complete local reproduction should end with the following checks.
 
@@ -811,7 +990,7 @@ If `git status --short` shows changes after the run, review them before committi
 
 ---
 
-## 19. Public visual artifact
+## 21. Public visual artifact
 
 The main public-facing visual artifact is the Tableau workbook documented in:
 
@@ -835,7 +1014,7 @@ data/outputs/tableau/
 
 ---
 
-## 20. Reproducibility summary
+## 22. Reproducibility summary
 
 A successful local reproduction means:
 
