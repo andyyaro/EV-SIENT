@@ -1,1034 +1,278 @@
-# Reproducibility Checklist
+## Generated documents and artifacts from the model run
 
-This checklist explains how to reproduce the active V2 Future City Fellowship EV charging site-readiness and right-sizing workflow locally from a fresh laptop or a fresh clone.
-
-It covers both:
+When the V2 workflow is reproduced successfully, the model writes a set of generated outputs under:
 
 ```text
-macOS Terminal
-Windows PowerShell
+data/outputs/
 ```
 
-Use this checklist when you want to confirm that the repository can be cloned, installed, run, checked, and reviewed from the terminal.
+These outputs are not all the same type. Some are human-readable Markdown reports, some are CSV tables, some are JSON manifests, some are chart images, and some are Tableau-ready CSV exports.
 
-For project context, also read:
+### Human-readable Markdown reports
+
+These are the main generated documents to open and read after running the model:
 
 ```text
-START_HERE.md
-docs/ACTIVE_DOCS_INDEX.md
-docs/V2_CURRENT_WORKFLOW_GUIDE.md
-docs/REPO_MAP.md
-src/README.md
-tableau/README.md
+data/outputs/v2_executive_site_summary.md
+data/outputs/v2_results_interpretation.md
+data/outputs/v2_run_summary.md
+data/outputs/v2_action_matrix.md
+data/outputs/v2_profile_comparison.md
+data/outputs/v2_electrical_feasibility_report.md
+data/outputs/v2_right_sizing_report.md
+data/outputs/v2_port_utilization_simulation_report.md
+data/outputs/v2_port_sizing_scenario_report.md
+data/outputs/v2_right_sizing_validation_report.md
+data/outputs/v2_baseline_comparison.md
 ```
 
----
-
-## 1. Target branch
-
-The active V2 workflow lives on:
+What each report is for:
 
 ```text
-v2-expansion-planning
+v2_executive_site_summary.md
+High-level site summary for reviewing candidate sites, ranks, readiness, recommendation tiers, and planning notes.
+
+v2_results_interpretation.md
+Narrative interpretation of the model results and what the output patterns mean.
+
+v2_run_summary.md
+Summary of the completed run, including workflow status and key generated outputs.
+
+v2_action_matrix.md
+Action-oriented recommendation matrix for interpreting next steps by site.
+
+v2_profile_comparison.md
+Comparison of scenario/profile results and how site rankings change across scoring profiles.
+
+v2_electrical_feasibility_report.md
+Electrical feasibility and risk-screening narrative.
+
+v2_right_sizing_report.md
+Right-sizing report describing recommended charger/port planning implications.
+
+v2_port_utilization_simulation_report.md
+Report explaining simulated port utilization and operational pressure.
+
+v2_port_sizing_scenario_report.md
+Report summarizing port-sizing scenario results across different planning assumptions.
+
+v2_right_sizing_validation_report.md
+Validation report comparing right-sizing recommendations against utilization and scenario outputs.
+
+v2_baseline_comparison.md
+Markdown summary comparing current V2 outputs against the stored V2 baseline snapshot.
 ```
 
-Branch meaning:
+### Generated CSV tables
+
+These are the main generated table outputs:
 
 ```text
-main = stable V1 baseline workflow
-v2-expansion-planning = active V2 prototype workflow
+data/outputs/v2_site_results.csv
+data/outputs/v2_data_quality_report.csv
+data/outputs/v2_sensitivity_results.csv
+data/outputs/v2_sensitivity_summary.csv
+data/outputs/v2_profile_results.csv
+data/outputs/v2_profile_rank_summary.csv
+data/outputs/v2_electrical_scenario_results.csv
+data/outputs/v2_electrical_risk_summary.csv
+data/outputs/v2_right_sizing_scenarios.csv
+data/outputs/v2_port_utilization_simulation.csv
+data/outputs/v2_port_sizing_scenario_results.csv
+data/outputs/v2_port_sizing_scenario_summary.csv
+data/outputs/v2_right_sizing_validation.csv
+data/outputs/v2_executive_site_summary.csv
 ```
 
-The steps below assume you are reproducing the active V2 workflow.
-
----
-
-## 2. Required tools
-
-You need:
+What the most important CSV files are for:
 
 ```text
-Git
-GitHub CLI
-Python 3.10 or newer
-pip
+v2_site_results.csv
+Core model output table with site-level scores, rankings, and recommendation fields.
+
+v2_executive_site_summary.csv
+Clean executive summary table for review, reporting, and dashboard use.
+
+v2_data_quality_report.csv
+Data completeness and confidence checks by site and field.
+
+v2_sensitivity_results.csv
+Site results under different scoring-weight sensitivity cases.
+
+v2_sensitivity_summary.csv
+Summary of how stable or unstable each site is across sensitivity cases.
+
+v2_profile_results.csv
+Scenario/profile-level scoring results.
+
+v2_profile_rank_summary.csv
+Rank-stability summary across scoring profiles.
+
+v2_electrical_scenario_results.csv
+Electrical feasibility results under different electrical/capacity scenarios.
+
+v2_electrical_risk_summary.csv
+Summary of electrical risk indicators by site.
+
+v2_right_sizing_scenarios.csv
+Right-sizing output by site.
+
+v2_port_utilization_simulation.csv
+Simulated charger/port utilization results.
+
+v2_port_sizing_scenario_results.csv
+Detailed site-by-scenario port sizing results.
+
+v2_port_sizing_scenario_summary.csv
+Summary of the port-sizing scenario set.
+
+v2_right_sizing_validation.csv
+Validation table comparing right-sizing recommendations against utilization/scenario indicators.
 ```
 
-Python 3.11 is recommended.
+### Generated JSON manifests
 
-Optional but useful:
+These files are useful for automated checks and reproducibility tracking:
 
 ```text
-make
-lychee
-Tableau Desktop or Tableau Public
+data/outputs/v2_workflow_success.json
+data/outputs/v2_baseline_comparison.json
+data/outputs/v2_workflow_completion_manifest.json
+data/outputs/deliverable_package_v2/package_manifest.json
 ```
 
-`make` is convenient on macOS and Git Bash, but the raw Python commands are provided so the project can also be reproduced from Windows PowerShell.
-
----
-
-## 3. Check whether required tools are already installed
-
-### macOS Terminal
-
-```bash
-git --version
-gh --version
-python3 --version
-pip3 --version
-```
-
-Optional:
-
-```bash
-make --version
-```
-
-### Windows PowerShell
-
-```powershell
-git --version
-gh --version
-py --version
-python --version
-pip --version
-```
-
-On Windows, either `py` or `python` may work depending on how Python was installed.
-
-If `py --version` works, use `py -3` when creating the virtual environment.
-
-If `python --version` works, you may use `python` instead.
-
----
-
-## 4. Install missing tools on macOS
-
-Skip this section if all required tools are already installed.
-
-### 4.1 Install Apple Command Line Tools
-
-This usually provides Git and basic developer tools:
-
-```bash
-xcode-select --install
-```
-
-After installation, reopen Terminal and check:
-
-```bash
-git --version
-make --version
-```
-
-### 4.2 Install Homebrew if missing
-
-Check if Homebrew exists:
-
-```bash
-brew --version
-```
-
-If `brew` is not found, install Homebrew:
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-After installation, follow any “Next steps” printed by Homebrew so the `brew` command is available in your terminal.
-
-Then confirm:
-
-```bash
-brew --version
-```
-
-### 4.3 Install Git, GitHub CLI, and Python
-
-```bash
-brew install git
-brew install gh
-brew install python@3.11
-```
-
-Confirm:
-
-```bash
-git --version
-gh --version
-python3 --version
-pip3 --version
-```
-
-### 4.4 Optional macOS tools
-
-Install `lychee` for Markdown link checking:
-
-```bash
-brew install lychee
-```
-
-Confirm:
-
-```bash
-lychee --version
-```
-
----
-
-## 5. Install missing tools on Windows
-
-Skip this section if all required tools are already installed.
-
-These commands assume you are using **Windows PowerShell**.
-
-### 5.1 Check whether winget is available
-
-```powershell
-winget --version
-```
-
-If `winget` is not found, install or update **App Installer** from the Microsoft Store, then reopen PowerShell.
-
-### 5.2 Install Git
-
-```powershell
-winget install --id Git.Git -e
-```
-
-Close and reopen PowerShell, then check:
-
-```powershell
-git --version
-```
-
-### 5.3 Install GitHub CLI
-
-```powershell
-winget install --id GitHub.cli -e
-```
-
-Close and reopen PowerShell, then check:
-
-```powershell
-gh --version
-```
-
-### 5.4 Install Python 3.11
-
-```powershell
-winget install --id Python.Python.3.11 -e
-```
-
-Close and reopen PowerShell, then check:
-
-```powershell
-py --version
-python --version
-pip --version
-```
-
-If `py --version` works but `python --version` does not, use `py -3` for virtual environment creation. After the virtual environment is activated, the `python` command should work inside the environment.
-
-### 5.5 Optional Windows tools
-
-For this project, `make` is optional on Windows because the raw Python commands are provided.
-
-If you want a Unix-like shell with Git support, install Git for Windows and use **Git Bash**.
-
-If you want `make` on Windows, use Git Bash, MSYS2, Chocolatey, or another developer environment. This checklist does not require `make` on Windows PowerShell.
-
-If you want to install `lychee`, use a package manager that supports it, or skip the Markdown link check locally. The model and Tableau checks are the required reproducibility checks.
-
----
-
-## 6. Sign in to GitHub from the terminal
-
-This repository is private, so the terminal must be authenticated before cloning or pulling.
-
-This command is the same on macOS and Windows:
-
-```bash
-gh auth login
-```
-
-Recommended choices:
+What they are for:
 
 ```text
-GitHub.com
-HTTPS
-Authenticate Git with your GitHub credentials: Yes
-Login with a web browser
+v2_workflow_success.json
+Machine-readable success marker for the completed V2 workflow.
+
+v2_baseline_comparison.json
+Machine-readable comparison between the current run and the stored baseline snapshot.
+
+v2_workflow_completion_manifest.json
+Completion manifest listing run status and generated outputs.
+
+deliverable_package_v2/package_manifest.json
+Manifest for the clean deliverable package.
 ```
 
-GitHub CLI will show a one-time code. Copy the code, press Enter, and complete the browser login.
+### Generated chart images
 
-Verify login:
-
-```bash
-gh auth status
-```
-
-A healthy result should show that you are logged in and that Git operations are configured.
-
-Do not paste personal access tokens, passwords, API keys, or credentials into project files.
-
----
-
-## 7. Clone the repository
-
-### macOS Terminal
-
-Choose a working folder:
-
-```bash
-cd ~/Documents
-```
-
-Clone the repository:
-
-```bash
-git clone https://github.com/andyyaro/Future-City-Fellowship-.git
-```
-
-Enter the repo:
-
-```bash
-cd Future-City-Fellowship-
-```
-
-### Windows PowerShell
-
-Choose a working folder:
-
-```powershell
-cd "$HOME\Documents"
-```
-
-Clone the repository:
-
-```powershell
-git clone https://github.com/andyyaro/Future-City-Fellowship-.git
-```
-
-Enter the repo:
-
-```powershell
-cd Future-City-Fellowship-
-```
-
-### Confirm the remote
-
-macOS Terminal or Windows PowerShell:
-
-```bash
-git remote -v
-```
-
-Expected remote:
+The workflow also produces static chart/image outputs:
 
 ```text
-https://github.com/andyyaro/Future-City-Fellowship-.git
+data/outputs/charts/v2_readiness_score_chart.png
+data/outputs/charts/v2_polished_readiness_score_chart.png
+data/outputs/charts/v2_data_confidence_chart.png
+data/outputs/charts/v2_profile_score_heatmap.png
+data/outputs/charts/v2_profile_rank_stability_chart.png
+data/outputs/charts/v2_site_readiness_map.png
+data/outputs/charts/v2_site_decision_map.png
+data/outputs/charts/v2_site_decision_map_readme.png
+data/outputs/charts/v2_port_utilization_simulation.png
+data/outputs/charts/v2_port_sizing_scenario_heatmap.png
 ```
 
----
-
-## 8. Switch to the active V2 branch
-
-macOS Terminal or Windows PowerShell:
-
-```bash
-git fetch origin
-git switch v2-expansion-planning
-git pull --rebase origin v2-expansion-planning
-```
-
-Confirm the branch:
-
-```bash
-git branch --show-current
-```
-
-Expected output:
+A copy of the README decision-map image is also synced to:
 
 ```text
-v2-expansion-planning
+docs/assets/charts/v2_site_decision_map_readme.png
 ```
 
-Confirm the repo is clean:
+### Tableau-ready CSV exports
+
+After running:
 
 ```bash
-git status --short
-```
-
-A clean repo shows no output.
-
----
-
-## 9. Create a virtual environment
-
-### macOS Terminal
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-```
-
-Confirm the virtual environment is active:
-
-```bash
-which python
-python --version
-```
-
-The path should include `.venv`.
-
-### Windows PowerShell
-
-Create the virtual environment:
-
-```powershell
-py -3 -m venv .venv
-```
-
-If `py -3` does not work but `python` does, use:
-
-```powershell
-python -m venv .venv
-```
-
-Activate the environment:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-If PowerShell blocks activation, run this for the current terminal session:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-Then activate again:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-Upgrade pip:
-
-```powershell
-python -m pip install --upgrade pip
-```
-
-Confirm the virtual environment is active:
-
-```powershell
-where python
-python --version
-```
-
-The path should include `.venv`.
-
----
-
-## 10. Install project dependencies
-
-The core model dependencies are in:
-
-```text
-requirements.txt
-```
-
-Optional GIS/map dependencies are in:
-
-```text
-requirements-gis.txt
-```
-
-Optional public-data upgrade dependencies are in:
-
-```text
-requirements-v2.txt
-```
-
-For normal V2 reproduction, install core and GIS dependencies.
-
-### macOS Terminal
-
-```bash
-python -m pip install -r requirements.txt
-python -m pip install -r requirements-gis.txt
-```
-
-Optional V2 public-data helper dependencies:
-
-```bash
-python -m pip install -r requirements-v2.txt
-```
-
-### Windows PowerShell
-
-```powershell
-python -m pip install -r requirements.txt
-python -m pip install -r requirements-gis.txt
-```
-
-Optional V2 public-data helper dependencies:
-
-```powershell
-python -m pip install -r requirements-v2.txt
-```
-
----
-
-## 11. Run the full active V2 workflow
-
-The raw Python commands work on both macOS and Windows.
-
-### macOS Terminal
-
-```bash
-python src/run_v2.py
-python src/check_outputs_v2.py
 python src/build_tableau_exports.py
 python src/check_tableau_exports.py
 ```
 
-### Windows PowerShell
-
-```powershell
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-```
-
-This sequence runs the model, checks outputs, regenerates Tableau-ready CSV files, and validates the Tableau export folder.
-
----
-
-## 12. Optional Makefile commands
-
-The Makefile is convenient on macOS and on Windows if using Git Bash or another Unix-like shell.
-
-### macOS Terminal
-
-Full model and Tableau reproduction:
-
-```bash
-make full-v2-tableau
-```
-
-Full review:
-
-```bash
-make review
-```
-
-Show Git status:
-
-```bash
-make status
-```
-
-### Windows Git Bash
-
-If you are using Git Bash and `make` is installed:
-
-```bash
-make full-v2-tableau
-make review
-make status
-```
-
-### Windows PowerShell
-
-Use the raw Python commands instead of `make`:
-
-```powershell
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-git status --short
-```
-
-This avoids Windows shell differences with commands such as `rm`, `mkdir`, and `find`.
-
----
-
-## 13. Expected successful model output
-
-A healthy V2 model check should include:
-
-```text
-V2 OUTPUT CHECK
----------------
-Status: PASSED
-```
-
-Expected workflow marker count:
-
-```text
-Generated outputs: 36/36
-```
-
-Expected deliverable package result:
-
-```text
-Copied files: 35/35
-Synced files: 35/35
-```
-
-The counts differ because the workflow marker tracks `v2_sensitivity_results.csv`, while the clean deliverable package contains 35 selected review files.
-
----
-
-## 14. Expected successful Tableau export output
-
-A healthy Tableau export check should include:
-
-```text
-TABLEAU EXPORT CHECK
---------------------
-Status: PASSED
-Checked exports: 15/15
-Candidate sites represented: 12/12
-Exact export set, required columns, row counts, numeric fields, and site coverage are valid.
-```
-
-Tableau-ready CSV outputs are generated under:
+the Tableau-ready files are generated under:
 
 ```text
 data/outputs/tableau/
 ```
 
-The local packaged Tableau workbook is:
+Expected Tableau export files:
+
+```text
+data/outputs/tableau/tableau_site_readiness.csv
+data/outputs/tableau/tableau_site_map.csv
+data/outputs/tableau/tableau_map_points.csv
+data/outputs/tableau/tableau_port_growth.csv
+data/outputs/tableau/tableau_review_burden.csv
+data/outputs/tableau/tableau_review_burden_map.csv
+data/outputs/tableau/tableau_profile_score_heatmap.csv
+data/outputs/tableau/tableau_profile_subscore_heatmap.csv
+data/outputs/tableau/tableau_profile_rank_stability.csv
+data/outputs/tableau/tableau_data_confidence.csv
+data/outputs/tableau/tableau_data_quality_issues.csv
+data/outputs/tableau/tableau_port_sizing_scenario_heatmap.csv
+data/outputs/tableau/tableau_port_utilization_simulation.csv
+data/outputs/tableau/tableau_action_recommendation_matrix.csv
+data/outputs/tableau/tableau_action_decision_quadrant_clean.csv
+```
+
+These CSV files support the packaged Tableau workbook:
 
 ```text
 tableau/EV_Charging_Site_Readiness_Workbook.twbx
 ```
 
-The Tableau workflow is documented in:
+### Clean deliverable package
 
-```text
-tableau/README.md
-```
-
----
-
-## 15. Main outputs to inspect after reproduction
-
-After a successful run, inspect these outputs first:
-
-```text
-data/outputs/v2_executive_site_summary.csv
-data/outputs/v2_run_summary.md
-data/outputs/v2_interpretation_report.md
-data/outputs/v2_right_sizing_validation_report.md
-data/outputs/v2_port_sizing_scenario_report.md
-data/outputs/v2_workflow_completion_manifest.json
-```
-
-The clean technical review package is:
+The workflow also builds a cleaner review package under:
 
 ```text
 data/outputs/deliverable_package_v2/
 ```
 
-Important package files include:
+This package is meant to gather the most important reports, tables, charts, and manifests in a cleaner structure for review.
+
+Important folders inside the package:
+
+```text
+data/outputs/deliverable_package_v2/reports/
+data/outputs/deliverable_package_v2/tables/
+data/outputs/deliverable_package_v2/charts/
+data/outputs/deliverable_package_v2/inputs/
+data/outputs/deliverable_package_v2/manifests/
+```
+
+Important package-level files:
 
 ```text
 data/outputs/deliverable_package_v2/README.md
-data/outputs/deliverable_package_v2/reports/v2_executive_site_summary.md
-data/outputs/deliverable_package_v2/tables/v2_executive_site_summary.csv
-data/outputs/deliverable_package_v2/reports/v2_right_sizing_validation_report.md
-data/outputs/deliverable_package_v2/reports/v2_port_sizing_scenario_report.md
-data/outputs/deliverable_package_v2/tables/v2_port_sizing_scenario_summary.csv
-data/outputs/deliverable_package_v2/charts/v2_site_decision_map.png
-data/outputs/deliverable_package_v2/charts/v2_port_sizing_scenario_heatmap.png
-data/outputs/deliverable_package_v2/reports/v2_run_summary.md
+data/outputs/deliverable_package_v2/package_manifest.json
 ```
 
----
+The package should include copied/synced versions of the major reports, tables, and charts listed above.
 
-## 16. Main V2 input files
+### Quick review order after a successful run
 
-The active V2 candidate-site dataset is:
+For a fast manual QA review, open these first:
 
 ```text
-data/inputs/real_sites_v2.csv
+1. data/outputs/v2_run_summary.md
+2. data/outputs/v2_executive_site_summary.md
+3. data/outputs/v2_results_interpretation.md
+4. data/outputs/v2_right_sizing_validation_report.md
+5. data/outputs/v2_port_sizing_scenario_report.md
+6. data/outputs/v2_baseline_comparison.md
+7. data/outputs/deliverable_package_v2/README.md
+8. data/outputs/deliverable_package_v2/package_manifest.json
 ```
 
-The active port-sizing scenario assumptions file is:
-
-```text
-data/inputs/v2_port_sizing_scenarios.csv
-```
-
-Other assumption and metadata files are documented in:
-
-```text
-docs/DATA_SOURCES.md
-docs/DATA_DICTIONARY.md
-data/dataset_metadata.csv
-data/source_dataset_log.csv
-```
-
----
-
-## 17. Optional clean rebuild
-
-### macOS Terminal
-
-If using Make:
-
-```bash
-make clean-local
-make full-v2-tableau
-```
-
-If not using Make:
-
-```bash
-rm -rf data/source_extracts/gis/
-rm -rf data/run_history/
-find . -type d -name __pycache__ -prune -exec rm -rf {} +
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-```
-
-### Windows PowerShell
-
-Remove local generated caches:
-
-```powershell
-if (Test-Path data/source_extracts/gis) { Remove-Item -Recurse -Force data/source_extracts/gis }
-if (Test-Path data/run_history) { Remove-Item -Recurse -Force data/run_history }
-Get-ChildItem -Path . -Directory -Recurse -Filter __pycache__ | Remove-Item -Recurse -Force
-```
-
-Then rerun:
-
-```powershell
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-```
-
-Always check repo status before deleting or committing anything:
-
-```bash
-git status --short
-```
-
----
-
-## 18. Optional Markdown link check
-
-The link checker uses `lychee`.
-
-### macOS Terminal or Git Bash
-
-If `lychee` is installed:
-
-```bash
-make links
-```
-
-Or run directly:
-
-```bash
-lychee --verbose --no-progress \
-  --accept 200,204,206,301,302,303,307,308 \
-  --include-fragments \
-  --exclude-path data/outputs \
-  --exclude-path data/run_history \
-  './**/*.md'
-```
-
-### Windows PowerShell
-
-If `lychee` is installed, use:
-
-```powershell
-lychee --verbose --no-progress --accept 200,204,206,301,302,303,307,308 --include-fragments --exclude-path data/outputs --exclude-path data/run_history "./**/*.md"
-```
-
-If `lychee` is not installed, skip this step for local model reproduction. The model and Tableau output checks are the required technical reproduction checks.
-
----
-
-## 19. Troubleshooting
-
-### Problem: `gh` command not found
-
-Install GitHub CLI using the operating-system instructions above.
-
-Then check:
-
-```bash
-gh --version
-```
-
-Then sign in:
-
-```bash
-gh auth login
-```
-
-### Problem: `git` command not found
-
-Install Git using the operating-system instructions above.
-
-Then close and reopen the terminal and check:
-
-```bash
-git --version
-```
-
-### Problem: `python` or `py` command not found
-
-Install Python using the operating-system instructions above.
-
-Then close and reopen the terminal and check:
-
-macOS:
-
-```bash
-python3 --version
-pip3 --version
-```
-
-Windows:
-
-```powershell
-py --version
-python --version
-pip --version
-```
-
-### Problem: clone fails with authentication error
-
-Check login:
-
-```bash
-gh auth status
-```
-
-Then rerun:
-
-```bash
-gh auth login
-```
-
-Make sure your GitHub account has access to the private repository.
-
-### Problem: wrong branch
-
-Check:
-
-```bash
-git branch --show-current
-```
-
-Switch back to V2:
-
-```bash
-git switch v2-expansion-planning
-git pull --rebase origin v2-expansion-planning
-```
-
-### Problem: PowerShell blocks virtual environment activation
-
-Run:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-Then activate again:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-### Problem: dependencies fail to install
-
-Upgrade pip:
-
-```bash
-python -m pip install --upgrade pip
-```
-
-Then reinstall:
-
-```bash
-python -m pip install -r requirements.txt
-python -m pip install -r requirements-gis.txt
-```
-
-### Problem: `make` command not found
-
-Use the raw Python commands instead:
-
-```bash
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-```
-
-### Problem: output checker fails
-
-Run the model again from the repository root:
-
-```bash
-python src/run_v2.py
-python src/check_outputs_v2.py
-```
-
-Read the checker output carefully. It usually identifies the missing file, missing column, row-count issue, or package-sync issue.
-
-### Problem: Tableau export checker fails
-
-Regenerate Tableau exports:
-
-```bash
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-```
-
-### Problem: repo has unexpected modified files after running
-
-Check:
-
-```bash
-git status --short
-```
-
-Review file-level changes:
-
-```bash
-git diff --stat
-```
-
-To discard accidental local edits to a tracked file, use caution:
-
-```bash
-git restore path/to/file
-```
-
-Do not run broad restore commands unless you are certain you want to discard local work.
-
----
-
-## 20. Final reproducibility pass
-
-A complete local reproduction should end with the following checks.
-
-### macOS Terminal
-
-```bash
-git branch --show-current
-git status --short
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-git status --short
-```
-
-### Windows PowerShell
-
-```powershell
-git branch --show-current
-git status --short
-python src/run_v2.py
-python src/check_outputs_v2.py
-python src/build_tableau_exports.py
-python src/check_tableau_exports.py
-git status --short
-```
-
-Expected branch:
-
-```text
-v2-expansion-planning
-```
-
-Expected model result:
-
-```text
-V2 OUTPUT CHECK
-Status: PASSED
-```
-
-Expected Tableau result:
-
-```text
-TABLEAU EXPORT CHECK
-Status: PASSED
-Checked exports: 15/15
-Candidate sites represented: 12/12
-```
-
-Expected package result:
-
-```text
-Copied files: 35/35
-Synced files: 35/35
-```
-
-If `git status --short` shows changes after the run, review them before committing. Do not commit generated files unless the project intentionally requires those output changes to be versioned.
-
----
-
-## 21. Public visual artifact
-
-The main public-facing visual artifact is the Tableau workbook documented in:
-
-```text
-tableau/README.md
-```
-
-Static PNG charts remain reproducibility and technical package outputs. Tableau is the main public visual layer.
-
-Use the local packaged workbook here:
-
-```text
-tableau/EV_Charging_Site_Readiness_Workbook.twbx
-```
-
-and the generated Tableau CSV inputs here:
+Then review the Tableau export folder:
 
 ```text
 data/outputs/tableau/
 ```
 
----
-
-## 22. Reproducibility summary
-
-A successful local reproduction means:
+and open the packaged workbook if Tableau Desktop or Tableau Public is available:
 
 ```text
-GitHub authentication works
-The private repository clones successfully
-The v2-expansion-planning branch is checked out
-Python dependencies install in a virtual environment
-The V2 model workflow runs successfully
-The V2 output checker passes
-The Tableau export builder runs successfully
-The Tableau export checker passes
-The deliverable package is generated and synced
-The main review outputs can be opened locally
+tableau/EV_Charging_Site_Readiness_Workbook.twbx
 ```
-
-This confirms that the active V2 prototype can be reproduced locally from the repository on either macOS or Windows.
