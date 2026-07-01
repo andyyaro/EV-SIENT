@@ -288,6 +288,11 @@ def compare_executive(baseline: dict[str, Any], executive: pd.DataFrame, checks:
     add(checks, "executive_summary", "fail" if failures else "pass", "; ".join(failures[:12]) if failures else "Executive summary guardrails match baseline.")
 
 
+def normalize_manifest_path(value: Any) -> str:
+    """Normalize manifest path strings so Windows backslashes and POSIX slashes compare the same."""
+    return str(value).replace("\\", "/")
+
+
 def compare_package_manifest(baseline: dict[str, Any], manifest: dict[str, Any] | None, checks: list[dict[str, Any]]) -> None:
     if manifest is None:
         return
@@ -304,12 +309,12 @@ def compare_package_manifest(baseline: dict[str, Any], manifest: dict[str, Any] 
         failures.append("copied_count does not equal expected_count")
     if manifest.get("expected_count") != manifest.get("synced_count"):
         failures.append("synced_count does not equal expected_count")
-    required_destinations = set(expected.get("required_destinations", []))
-    copied_destinations = {str(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied")}
+    required_destinations = {normalize_manifest_path(path) for path in expected.get("required_destinations", [])}
+    copied_destinations = {normalize_manifest_path(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied")}
     missing = sorted(required_destinations - copied_destinations)
     if missing:
         failures.append(f"missing copied destinations: {missing}")
-    stale = sorted(str(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied") and item.get("in_sync") is not True)
+    stale = sorted(normalize_manifest_path(item.get("destination", "")) for item in manifest.get("files", []) if item.get("copied") and item.get("in_sync") is not True)
     if stale:
         failures.append(f"manifest has copied files not marked in_sync: {stale[:5]}")
     add(checks, "deliverable_package_manifest", "fail" if failures else "pass", "; ".join(failures[:12]) if failures else "Deliverable package manifest matches baseline and all copied files are synced.")

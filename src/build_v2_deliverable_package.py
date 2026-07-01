@@ -51,6 +51,11 @@ DEFAULT_PACKAGE_DIR = Path("data/outputs/deliverable_package_v2")
 SAFE_OUTPUT_ROOT = Path("data/outputs")
 
 
+def manifest_path(path: Path) -> str:
+    """Return a stable repo-relative path string for JSON manifests on macOS, Linux, and Windows."""
+    return path.as_posix()
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -63,8 +68,8 @@ def copy_file(source: Path, destination: Path) -> dict[str, object]:
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not source.exists() or source.stat().st_size == 0:
         return {
-            "source": str(source),
-            "destination": str(destination),
+            "source": manifest_path(source),
+            "destination": manifest_path(destination),
             "copied": False,
             "size_bytes": 0,
             "source_sha256": None,
@@ -75,8 +80,8 @@ def copy_file(source: Path, destination: Path) -> dict[str, object]:
     shutil.copy2(source, destination)
     destination_hash = sha256_file(destination)
     return {
-        "source": str(source),
-        "destination": str(destination),
+        "source": manifest_path(source),
+        "destination": manifest_path(destination),
         "copied": True,
         "size_bytes": destination.stat().st_size,
         "source_sha256": source_hash,
@@ -182,7 +187,7 @@ def build_package(package_dir: Path, clean: bool = True) -> dict[str, object]:
         "package": "v2_deliverable_package",
         "status": "complete" if not missing and not out_of_sync else "incomplete",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "package_dir": str(package_dir),
+        "package_dir": manifest_path(package_dir),
         "clean_rebuild": clean,
         "previous_package_removed": removed_existing_package,
         "expected_count": len(copied_records),
