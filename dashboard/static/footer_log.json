@@ -1,0 +1,63 @@
+[
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "legacy_v2 baseline scores",
+    "assumption": "0 of 12 sites have High data confidence",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/01_readiness_ranking.png"
+  },
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "2026 baseline",
+    "assumption": "pathway = conduit/panel capacity, not installed hardware",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/02_starter_vs_pathway.png"
+  },
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "V3 canonical horizons",
+    "assumption": "growth multipliers provisional (uncalibrated); trigger-gated activation",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/03_ports_three_horizons.png"
+  },
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "base escalation, 3% real discount",
+    "assumption": "screening-class benchmarks \u2014 not budgets or quotes",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/04_lifecycle_cost.png"
+  },
+  {
+    "source": "eGRID2023 Rev 2 SRVC 596.3 lb CO2e/MWh + contract energy",
+    "source_date": "factor data-year 2023, accessed 2026-07-19; refresh annually",
+    "scenario": "V3 canonical horizons",
+    "assumption": "9.5 kWh/session, 0.30 kWh/mi, 400 gCO2/mi displaced \u2014 benchmark assumptions",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/05_net_co2e.png"
+  },
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "base path",
+    "assumption": "fee frame ~$1k/port/yr from client operating evidence (screening)",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/06_avoided_evse.png"
+  },
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "2026 baseline, seeded discrete-event simulation (400 days)",
+    "assumption": "demand synthetic/uncalibrated \u2014 screening only",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/07_peak_wait.png"
+  },
+  {
+    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "scenario": "limitations panel",
+    "assumption": "",
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/08_limitations.png"
+  },
+  {
+    "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/09_site_map_offline.png",
+    "source": "TIGER 2024 cached + sites",
+    "source_date": "2026-06-24"
+  }
+]
