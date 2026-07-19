@@ -1,0 +1,22 @@
+{
+  "anchor_set_version": "anchors_v1_2026-07",
+  "created": "2026-07-19",
+  "status": "proposed_v3_baseline (adopted inside the implementation package; team ratification recorded in decision log)",
+  "method": "Fixed benchmark anchors per normalized field. Values are derived from the frozen 2026-07 12-site cohort ranges, rounded OUTWARD to stable planning bounds so that (a) every current site scores inside [0,1], (b) adding or removing candidate sites cannot change an existing site's score, and (c) anchors remain plausible for the region's site classes. Where a regional benchmark exists (EV share) the fixed benchmark is kept from the legacy model.",
+  "fallback_rule": "If a field has no anchor entry, scoring falls back to cohort min-max and the output carries anchor_fallback_fields listing them. Fallback use is a validation warning, not a silent default.",
+  "anchors": {
+    "nearby_households_1mi":  {"lo": 0,    "hi": 12000, "note": "cohort max 9866; suburban-library class ceiling"},
+    "nearby_jobs_1mi":        {"lo": 0,    "hi": 40000, "note": "cohort max 31611; government-center class ceiling"},
+    "aadt_nearest":           {"lo": 0,    "hi": 60000, "note": "cohort max 51000; arterial ceiling"},
+    "amenities_count_0_5mi":  {"lo": 0,    "hi": 8,     "note": "cohort max 6"},
+    "parking_spaces":         {"lo": 0,    "hi": 1500,  "note": "cohort max 1400 (garage)"},
+    "avg_dwell_min":          {"lo": 0,    "hi": 300,   "note": "cohort max 240"},
+    "existing_ports_total":   {"lo": 0,    "hi": 130,   "note": "cohort max 122 combined"},
+    "spare_capacity_kw":      {"lo": 0,    "hi": 200,   "note": "all cohort values 0 (unconfirmed); anchor allows future verified values without rescaling"},
+    "distance_to_service_ft": {"lo": 0,    "hi": 300,   "note": "cohort range 75-150"},
+    "trenching_ft":           {"lo": 0,    "hi": 250,   "note": "cohort range 50-125"},
+    "install_cost_est_usd":   {"lo": 0,    "hi": 100000, "note": "cohort max 63750 (derived field)"},
+    "equity_gap_index":       {"lo": 0,    "hi": 1.0,   "note": "index is already 0-1 constructed"},
+    "ev_share_local":         {"lo": 0,    "hi": 0.10,  "note": "legacy fixed benchmark EV_SHARE_HIGH_BENCHMARK retained"}
+  }
+}

@@ -1,0 +1,21 @@
+site_id,site_name,field_group,current_status,upgrade_path,priority,stakeholder_needed_later,notes
+FFX003,Pohick Regional Library,address_and_public_access,official_source,keep_source_note,low,no,Branch/facility source is strong enough for screening
+FFX003,Pohick Regional Library,coordinates,public_web_reference,replace_with_official_GIS_or_parcel_coordinate,medium,no,Good enough for screening but better GIS source should replace it before baseline
+FFX003,Pohick Regional Library,hours_and_parking,official_source,keep_source_note,low,no,Branch/facility source supports hours and parking values
+FFX003,Pohick Regional Library,nearby_EV_supply,public_dataset,refresh_from_latest_AFDC_download,medium,no,AFDC station data supports existing nearby charger counts
+FFX003,Pohick Regional Library,households_jobs_traffic,official_derived,keep_public_data_upgrade_outputs,high,no,"Upgraded 2026-06-25 with ACS households, LODES jobs, and nearest VDOT traffic segment. Traffic remains screening-level nearest-segment value, not final site-access validation."
+FFX003,Pohick Regional Library,amenities,open_gis_support_reviewed,keep_reviewed_osm_category_count,medium,no,"Upgraded 2026-06-25 with reviewed OSM/Overpass category count. Open-data support, not official local government inventory."
+FFX003,Pohick Regional Library,equity,official_derived,keep_ACS_based_equity_method,high,no,Upgraded 2026-06-25 with ACS-based equity index using centroid-in-buffer screening method.
+FFX003,Pohick Regional Library,EV_adoption,documented_proxy,replace_with_current_DMV_or_state_local_EV_registration_extract,medium,no,Kept as documented proxy because no current official locality EV registration extract was found.
+FFX003,Pohick Regional Library,visitors_and_employees,planning_assumption,replace_with_official_facility_usage_or_reasonable_public_proxy,medium,possible,May remain a screening proxy if branch-level usage is unavailable
+FFX003,Pohick Regional Library,electrical_and_site_layout,unconfirmed_placeholder,replace_with_facility_or_utility_review,later,yes,Do not treat as implementation-ready until confirmed
+FFX004,Fairfax County Government Center,address_and_public_access,public_web_reference,replace_with_official_county_facility_page_or_GIS,high,no,Should be upgraded because this is a county civic site
+FFX004,Fairfax County Government Center,coordinates,public_web_reference,replace_with_official_county_GIS_or_parcel_coordinate,high,no,Better coordinate source needed before baseline
+FFX004,Fairfax County Government Center,hours_and_parking,planning_assumption,replace_with_official_facility_hours_and_parking_inventory,high,no,Large planning assumption affects score and interpretation
+FFX004,Fairfax County Government Center,nearby_EV_supply,public_dataset,refresh_from_latest_AFDC_download,medium,no,AFDC station data supports large nearby charging supply
+FFX004,Fairfax County Government Center,households_jobs_traffic,official_derived,keep_public_data_upgrade_outputs,high,no,"Upgraded 2026-06-25 with ACS households, LODES jobs, and nearest VDOT traffic segment. Traffic remains screening-level nearest-segment value, not final site-access validation."
+FFX004,Fairfax County Government Center,amenities,open_gis_support_reviewed,keep_reviewed_osm_category_count,medium,no,"Upgraded 2026-06-25 with reviewed OSM/Overpass category count. Open-data support, not official local government inventory."
+FFX004,Fairfax County Government Center,equity,official_derived,keep_ACS_based_equity_method,high,no,Upgraded 2026-06-25 with ACS-based equity index using centroid-in-buffer screening method.
+FFX004,Fairfax County Government Center,EV_adoption,documented_proxy,replace_with_current_DMV_or_state_local_EV_registration_extract,medium,no,Kept as documented proxy because no current official locality EV registration extract was found.
+FFX004,Fairfax County Government Center,visitors_and_employees,planning_assumption,replace_with_official_facility_usage_or_workplace_jobs_proxy,medium,possible,LODES can help for screening even if exact staffing stays unknown
+FFX004,Fairfax County Government Center,electrical_and_site_layout,unconfirmed_placeholder,replace_with_facility_or_utility_review,later,yes,Do not treat as implementation-ready until confirmed

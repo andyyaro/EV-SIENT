@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: fcf-m2
+Version: 3.0.0
+Summary: Future City Fellowship Milestone 2 V3 planning-support model: site readiness, right-sizing, canonical cross-model contract, lifecycle economics, and emissions. Planning prototype only - not an engineering, permitting, or procurement tool.
+Requires-Python: >=3.11
+Requires-Dist: numpy>=1.26
+Requires-Dist: pandas>=2.1
+Requires-Dist: matplotlib>=3.8
+Requires-Dist: jsonschema>=4.20
+Provides-Extra: gis
+Requires-Dist: geopandas>=0.14; extra == "gis"
+Requires-Dist: contextily>=1.5; extra == "gis"
+Requires-Dist: xyzservices>=2024.0; extra == "gis"
+Provides-Extra: test
+Requires-Dist: pytest>=8.0; extra == "test"
+Requires-Dist: pytest-cov>=4.1; extra == "test"
+Provides-Extra: presentation
+Requires-Dist: pillow>=10.0; extra == "presentation"
+Requires-Dist: reportlab>=4.0; extra == "presentation"
