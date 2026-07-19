@@ -1,118 +1,152 @@
-# EV Charger Site-Readiness and Right-Sizing Prototype
+# Future City Fellowship — Safe, Code-Responsive EV Charging Planning
 
-![Model Pipeline Check](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/model-check.yml/badge.svg)
+Decision-support platform for planning safe, code-responsive public EV charging in
+**Fairfax City** and **Prince William County**, Virginia.
 
-This repository contains a Python planning-support prototype for comparing public EV charging candidate sites in Fairfax City and Prince William County.
+![tests](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/tests.yml/badge.svg)
+![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
+![matlab](https://img.shields.io/badge/MATLAB-R2025b%20(static%20checks%20only)-B08948)
 
-The model evaluates sites using demand, implementation feasibility, site review, equity, data confidence, and charger right-sizing signals. It supports early planning only; it is not a construction, procurement, or approval tool.
+![Staged pilots beat broad buildout at every horizon](docs/assets/readme/project-overview.png)
 
-## Start here
+## What this project is
 
-- Shortest reproduction guide: [START_HERE.md](START_HERE.md)
-- Step-by-step reproduction checklist: [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
-- Simple repo map: [docs/REPO_MAP.md](docs/REPO_MAP.md)
+Electrification in Northern Virginia is expanding faster than local readiness — code
+interpretation, responder training, siting practice, and emergency-access planning.
+This repository is a **planning-support prototype** built by a George Mason University
+Future City Fellowship team that screens 12 real public candidate sites, right-sizes
+charger deployments, and models outcomes at 10/20/30-year horizons (2036 / 2046 / 2056
+from a 2026 baseline).
 
-## Python version
+**The leading strategy it supports:** *staged, evidence-gated deployment* — start with
+25 charging ports at the strongest sites, pre-build expandable civil/electrical pathways
+for up to 48, and energize more only when observed utilization, wait, and reliability
+data clear predefined, equity-aware triggers. This is the direct answer to the client's
+own operating history (a 70-port garage installation that ended with 17 stations
+decommissioned, and a trenching-driven cost overrun).
 
-Use Python 3.10 or newer. Python 3.11 is the tested version used by the GitHub Actions workflow.
+> **What this is not.** This is not engineering approval, a permit or code determination,
+> a utility capacity confirmation, an official forecast, or a budget. Site *readiness*
+> is not construction *approval*: **0 of 12 sites have High data confidence, and
+> electrical capacity is a labeled placeholder at all 12 sites** pending utility and
+> facility verification.
 
-## Quick run
+## Headline results (canonical contract v1.0.0, screening values)
 
-From the repository root:
+| Horizon | Active ports (base → high path) | Staged plan NPC | Broad buildout NPC | Staged avoids | Net CO2e avoided |
+|---|---|---|---|---|---|
+| 2026 | 25 | — | — | — | ≈43 t/yr |
+| 2036 | 44 → 47 | $1.56M | $1.87M | **$0.31M** | ≈82–113 t/yr |
+| 2046 | 47 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130–195 t/yr |
+| 2056 | 47 → 48 (48-port pathway ceiling) | $3.01M | $3.41M | **$0.39M** | ≈173–260 t/yr |
+
+Costs are screening-class net present cost (3% real, base escalation) — never budgets.
+Emissions use the EPA eGRID2023 Rev 2 SRVC factor (596.3 lb CO2e/MWh, refreshed
+annually) with labeled displacement assumptions. Top-ranked site: **FFX002 — City of
+Fairfax Regional Library (58.8, Medium confidence)**.
+
+## How the system fits together
+
+```mermaid
+flowchart LR
+    A[12-site inputs<br/>data/inputs] --> B[Python model src/fcf_m2<br/>readiness · right-sizing · waits<br/>economics · emissions · triggers]
+    B --> C[Canonical data contract<br/>data/contract/v1<br/>site x horizon x case, validated]
+    C --> D[MATLAB site-load model<br/>matlab/]
+    C --> E[Excel workbook<br/>excel/]
+    C --> F[Static dashboard + Tableau patch<br/>dashboard/]
+    C --> G[Reports + presentation<br/>reports/ · presentation/]
+```
+
+Python is the single producer; MATLAB, Excel, Tableau, and every visual consume the
+same validated contract, so no two artifacts can disagree about a port count, a year,
+or whether capacity is a placeholder (`capacity_basis` travels with every row).
+
+## Two model modes
+
+| Mode | Purpose |
+|---|---|
+| `legacy_v2` | Bit-exact reproduction of the accepted V2 baseline (golden-tested: FFX002 58.8; 25 starter / 48 pathway ports) |
+| `milestone2_v3` | Canonical 2036/2046/2056 horizons, cohort-independent fixed-anchor scoring, typed data confidence, peak-window + discrete-event waits, lifecycle economics, emissions, equity-aware expansion triggers |
+
+V3 never silently replaces legacy numbers — see the
+[migration guide](docs/migration-from-v2.md).
+
+## Quick start
 
 ```bash
-git pull --rebase origin main && \
-python src/run_all.py && \
-python src/build_deliverable_package.py && \
-git status --short
+make setup          # venv + editable install with pinned test extras
+make test           # 80 tests incl. legacy golden tests (coverage gate 80%)
+make run-legacy     # reproduce the accepted V2 baseline (25/48)
+make run-v3         # full V3 run: scores, scenarios, economics, emissions, contract
+make validate       # validate the tracked canonical contract
+./scripts/verify.sh # every repository verification gate
 ```
 
-A successful run should show:
+Requirements: Python 3.11+ (verified on 3.12/3.14). MATLAB R2025b for the `matlab/`
+model (**not required** for anything above — and note that the MATLAB code has been
+statically checked but never executed; see
+[matlab/EXECUTION_STATUS.md](matlab/EXECUTION_STATUS.md)).
 
-```text
-Sanity check: PASSED
-Baseline comparison: COMPLETED
-Missing files: 0
-```
+## Repository map
 
-## Visual snapshot
-
-The readiness map gives the fastest visual overview of the candidate sites, their relative locations, and their ranked readiness result.
-
-![Candidate EV charging site readiness map](docs/assets/charts/site_readiness_map.png)
-
-The readiness score chart shows the current ranking directly.
-
-![Readiness score chart](docs/assets/charts/readiness_score_chart.png)
-
-The profile heatmap shows whether the same sites stay strong when different planning priorities are emphasized.
-
-![Scoring profile heatmap](docs/assets/charts/profile_score_heatmap.png)
-
-## Main outputs to review
-
-- [data/outputs/model_run_summary.md](data/outputs/model_run_summary.md)
-- [data/outputs/results_interpretation.md](data/outputs/results_interpretation.md)
-- [data/outputs/action_matrix.md](data/outputs/action_matrix.md)
-- [Readiness score visual](docs/assets/charts/readiness_score_chart.png)
-- [Data confidence visual](docs/assets/charts/data_confidence_chart.png)
-- [Profile rank stability visual](docs/assets/charts/profile_rank_stability_chart.png)
-- [Profile score heatmap visual](docs/assets/charts/profile_score_heatmap.png)
-- [Site readiness map visual](docs/assets/charts/site_readiness_map.png)
-
-## Main input and output files
-
-| File | Purpose |
+| Path | Contents |
 |---|---|
-| [data/inputs/real_sites_v1.csv](data/inputs/real_sites_v1.csv) | Main candidate-site input dataset. |
-| [data/outputs/site_results.csv](data/outputs/site_results.csv) | Main model result table. |
-| [data/outputs/deliverable_package/](data/outputs/deliverable_package/) | Shareable local package after generation. |
+| [`src/fcf_m2/`](src/README.md) | The Python model (scoring, right-sizing, waits, economics, emissions, confidence, triggers, contract) |
+| [`data/`](data/README.md) | Site inputs, scoring anchors, provenance, cached GIS boundaries, the canonical contract |
+| [`tests/`](tests/README.md) | 80-test suite incl. golden legacy fixtures and contract validation |
+| [`matlab/`](matlab/README.md) | Site-grid load-behavior model (session-based profiles, capacity guard, managed charging) |
+| [`excel/`](excel/README.md) | Updated grid-planning workbook with live reconciliation checks |
+| [`dashboard/`](dashboard/README.md) | Offline static dashboard (9 visuals) + Tableau patch package |
+| [`reports/`](reports/README.md) | Final Milestone 2 report, gap-closure status, risk register, briefs |
+| [`presentation/`](presentation/README.md) | Final deck, speaker notes, timing runbook, Q&A backup |
+| [`docs/`](docs/README.md) | Architecture, methodology, standards, operations, human-action packages |
+| [`scripts/`](scripts/README.md) | Verification harness and artifact builders |
 
-## Main workflow scripts
+## Key documents
 
-| File | Purpose |
-|---|---|
-| [src/run_all.py](src/run_all.py) | Run the full workflow. |
-| [src/ev_charger_model.py](src/ev_charger_model.py) | Main scoring and right-sizing model. |
-| [src/add_action_matrix.py](src/add_action_matrix.py) | Adds next-action labels. |
-| [src/check_outputs.py](src/check_outputs.py) | Checks generated outputs. |
-| [src/build_deliverable_package.py](src/build_deliverable_package.py) | Builds the shareable package. |
+- **[Final Milestone 2 report](reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md)** — the integrated project record
+- **[Presentation deck (PDF)](presentation/deck/Future_City_Fellowship_Milestone_2_Final.pdf)** + [speaker notes](presentation/deck/Future_City_Fellowship_Milestone_2_Speaker_Notes.md)
+- **[Gap-closure status](reports/milestone-2/Milestone_2_Gap_Closure_Status.md)** — all 52 fellowship criteria dispositioned
+- **[Standards application matrix](docs/standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)** — UL 2594 + UL 3600 highlighted; adopted-vs-latest editions
+- **[Proposed standard concept](docs/standards/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.md)** — fellowship design exercise, not a UL/ULSE proposal
+- **[Reproduction guide](docs/operations/reproduction-guide.md)** · **[Migration from V2](docs/migration-from-v2.md)** · **[Open human actions](docs/operations/open-human-actions.md)**
 
-See [docs/REPO_MAP.md](docs/REPO_MAP.md) for the full script and file map.
+## Verification
 
-## Core result fields
+`./scripts/verify.sh` runs every gate: the pytest suite with a coverage floor, legacy
+baseline reproduction, contract rule/schema/hash-chain validation, cross-model
+reconciliation against the MATLAB input, footer QA on every dashboard visual, secret
+and local-path scans, size limits, and Markdown link checks. CI runs the same gates on
+every push and pull request ([tests.yml](.github/workflows/tests.yml)).
 
-```text
-readiness_score = how promising the site looks
+## Standards and safety boundary
 
-data_confidence_score = how complete the current input data is
+Design intent is governed by **UL 2594** (EVSE safety) and **UL 3600** (circular-economy
+measurement), with UL 2231, **NEC Article 625 as adopted in Virginia (2020 NEC via the
+2021 USBC)**, the Virginia SFPC, and US Access Board EVSE guidance (rule at NPRM stage
+as of July 2026) as essential supporting requirements. Storage and DC-fast-charging
+standards are explicitly out of scope (no BESS or DCFC in the plan). All permit,
+disconnect-placement, access, and code-edition determinations rest with the local AHJ.
 
-action_label = what to do next
-```
+## Known limitations
 
-## Current planning interpretation
+1. Electrical capacity is a placeholder at 12/12 sites (`capacity_basis = placeholder`).
+2. Demand is synthetic and uncalibrated; growth multipliers are provisional conventions.
+3. Costs are screening-class benchmarks; emissions rest on labeled assumptions.
+4. MATLAB code is statically checked only — no execution has occurred (no license was available).
+5. The Tableau `.twbx` was not rebuilt/verified — the static dashboard is the guaranteed artifact; a complete [patch package](dashboard/tableau/TABLEAU_IMPLEMENTATION_BLOCKER.md) exists for a Tableau Desktop operator.
+6. Client, team-adoption, AHJ, utility, and funding steps remain open — see [open human actions](docs/operations/open-human-actions.md).
 
-```text
-FFX002 — stable top candidate
-FFX001 — stable second candidate
-PWC002 — high-review garage candidate
-PWC004 — promising with future/reopened timeline caveat
-PWC001 — lower-priority monitor candidate
-PWC003 — special-use / not general-public priority under current assumptions
-```
+## Project status
 
-## Documentation
+Milestone 2 package complete (July 2026); presentation 2026-07-21. Next phase: client
+follow-up, utility/facility data requests (which upgrade `capacity_basis` from
+placeholder), AHJ conversations, and pilot preparation.
 
-- [START_HERE.md](START_HERE.md)
-- [REPRODUCIBILITY_CHECKLIST.md](REPRODUCIBILITY_CHECKLIST.md)
-- [docs/REPO_MAP.md](docs/REPO_MAP.md)
-- [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md)
-- [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
-- [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
-- [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
+## Team
 
-The longer documentation and presentation files remain in [docs/](docs/).
+Anna · Laylas · Andy · Adama · Paula — George Mason University Future City Fellowship,
+in consultation with Prince William County's Office of Sustainability and Fire &
+Rescue interviewees.
 
-## Important limitation
-
-The prototype is useful for transparent early planning, but any real project decision must be checked with the appropriate site owner, technical reviewers, permitting offices, and procurement process.
+*License: not yet selected — all rights reserved by the team until a license is chosen.*

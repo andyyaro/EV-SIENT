@@ -1,0 +1,53 @@
+# MATLAB verification for the Milestone 2 V3 site-grid behavior model (ML-09).
+#
+# MANUAL TRIGGER ONLY: MATLAB batch licensing in CI requires the MLM_LICENSE_TOKEN
+# secret (see matlab-actions/setup-matlab docs). Until that secret is configured,
+# MATLAB code in this repo is statically checked only — no execution is claimed
+# anywhere (see matlab/EXECUTION_STATUS.md). The core pipeline needs base MATLAB
+# only; Simulink is optional and not exercised by the tests.
+
+name: matlab-manual
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run MATLAB unit tests + batch smoke run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up MATLAB R2025b
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: R2025b
+          products: MATLAB
+        env:
+          MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }}
+
+      - name: Run tests (matlab/tests against matlab/src)
+        uses: matlab-actions/run-tests@v2
+        with:
+          source-folder: matlab/src
+          select-by-folder: matlab/tests
+          test-results-junit: matlab/test-results/results.xml
+
+      - name: Batch smoke run (headless, base MATLAB)
+        uses: matlab-actions/run-command@v2
+        with:
+          command: >
+            cd matlab;
+            addpath('src');
+            outDir = run_all_scenarios();
+            disp(outDir);
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-results
+          path: |
+            matlab/test-results/
+            matlab/outputs/

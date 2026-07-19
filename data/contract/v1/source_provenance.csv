@@ -1,0 +1,85 @@
+site_id,field_group,source_class,verification_status,source_org,source_date,reviewer,assumption_type,unresolved_flag
+PWC001,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC001,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC001,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC001,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC001,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC001,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC001,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC002,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC002,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC002,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC002,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC002,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC002,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC002,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC003,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC003,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC003,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC003,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC003,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC003,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC003,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC004,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC004,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC004,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC004,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC004,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC004,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC004,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+FFX001,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+FFX001,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+FFX001,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+FFX001,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+FFX001,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+FFX001,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+FFX001,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+FFX002,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+FFX002,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+FFX002,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+FFX002,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+FFX002,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+FFX002,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+FFX002,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+FFX003,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+FFX003,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+FFX003,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+FFX003,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+FFX003,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+FFX003,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+FFX003,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+FFX004,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+FFX004,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+FFX004,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+FFX004,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+FFX004,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+FFX004,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+FFX004,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC005,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC005,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC005,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC005,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC005,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC005,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC005,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC006,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC006,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC006,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC006,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC006,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC006,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC006,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC007,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC007,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC007,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC007,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC007,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC007,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC007,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0
+PWC008,electrical_service,unconfirmed,spot_checked,facility (pending),2026-06-24,team_v2_snapshot,electrical capacity unverified,1
+PWC008,safety_review_fields,unconfirmed,spot_checked,team site assessment,2026-06-24,team_v2_snapshot,"site-visit screening, not AHJ determination",1
+PWC008,site_use_and_demand,derived_public_data,spot_checked,facility pages / ACS / LODES extracts,2026-06-24,team_v2_snapshot,public-data derivation,0
+PWC008,address_and_public_access,official_source,spot_checked,facility/branch official pages,2026-06-24,team_v2_snapshot,,0
+PWC008,coordinates,public_web_reference,spot_checked,public web mapping (replace with official GIS),2026-06-24,team_v2_snapshot,,0
+PWC008,parking_and_layout,planning_assumption,spot_checked,imagery/site visit count,2026-06-24,team_v2_snapshot,unverified count,0
+PWC008,equity_and_context,derived_public_data,spot_checked,ACS/LODES-derived equity index,2026-06-24,team_v2_snapshot,,0

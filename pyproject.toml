@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fcf-m2"
+version = "3.0.0"
+description = "Future City Fellowship Milestone 2 V3 planning-support model: site readiness, right-sizing, canonical cross-model contract, lifecycle economics, and emissions. Planning prototype only - not an engineering, permitting, or procurement tool."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "matplotlib>=3.8",
+    "jsonschema>=4.20",
+]
+
+[project.optional-dependencies]
+gis = ["geopandas>=0.14", "contextily>=1.5", "xyzservices>=2024.0"]
+test = ["pytest>=8.0", "pytest-cov>=4.1"]
+presentation = ["pillow>=10.0", "reportlab>=4.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

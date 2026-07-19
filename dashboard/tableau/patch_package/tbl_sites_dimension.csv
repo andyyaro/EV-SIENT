@@ -1,0 +1,13 @@
+site_id,site_name_display,site_name_safe,jurisdiction,lat,lon,site_type,public_access,garage_enclosed
+FFX004,Fairfax County Government Center,Fairfax_County_Government_Center,fairfax,38.85404,-77.35706,office,1.0,0.0
+FFX002,City of Fairfax Regional Library,City_of_Fairfax_Regional_Library,fairfax,38.847072,-77.30363,library,1.0,0.0
+PWC002,Neabsco-Potomac Commuter Garage,Neabsco_Potomac_Commuter_Garage,pwc,38.631185,-77.288802,garage,1.0,1.0
+PWC006,Bull Run Library,Bull_Run_Library,pwc,38.78694,-77.520529,library,1.0,0.0
+PWC007,Central Library,Central_Library,pwc,38.768783,-77.454823,library,1.0,0.0
+FFX001,Fairfax City Hall or municipal building,Fairfax_City_Hall_or_municipal_building,fairfax,38.840974,-77.308103,office,1.0,0.0
+PWC004,Chinn Park Regional Library,Chinn_Park_Regional_Library,pwc,38.67034,-77.333127,library,1.0,0.0
+PWC001,PWC McCoart Government Center,PWC_McCoart_Government_Center,pwc,38.679705,-77.352905,office,1.0,0.0
+FFX003,Pohick Regional Library,Pohick_Regional_Library,fairfax,38.7749268,-77.2680915,library,1.0,0.0
+PWC008,Potomac Library,Potomac_Library,pwc,38.632723,-77.2806337,library,1.0,0.0
+PWC005,Haymarket Gainesville Library,Haymarket_Gainesville_Library,pwc,38.836588,-77.632135,library,1.0,0.0
+PWC003,Prince William County Public Safety Training Center,Prince_William_County_Public_Safety_Training_Center,pwc,38.663726,-77.585658,public_safety,0.0,0.0

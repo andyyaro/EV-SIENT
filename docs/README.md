@@ -1,76 +1,36 @@
-# Documentation
+# `docs/` — documentation index
 
-This folder contains the longer project documentation.
+[← repository root](../README.md)
 
-## Start files
+## Start here
+- Root [README](../README.md) — project overview, quick start, limitations
+- [Reproduction guide](operations/reproduction-guide.md) — every verified command
+- [Migration from V2](migration-from-v2.md) — old vs new commands, paths, and results
 
-- [../START_HERE.md](../START_HERE.md)
-- [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
-- [REPO_MAP.md](REPO_MAP.md)
+## For model users
+- [Workflow steps](WORKFLOW_STEPS.md) (generated — regenerate with `make docs`)
+- [`src/` guide](../src/README.md) · [`data/` guide](../data/README.md) · [`tests/` guide](../tests/README.md)
+- [Current-facts source register](methodology/current-facts-source-register.md) — primary-source verification of every time-sensitive fact (2026-07-19)
 
-## Short reading path
+## For technical reviewers
+- [Repository migration plan](repository-migration-plan.md) — what was retained/replaced/archived and why
+- [Legacy baseline verification](operations/legacy-baseline/BASELINE_VERIFICATION.md) — the reproduced V2 baseline this repo is golden-tested against
+- [Technical integration architecture](architecture/TECHNICAL_INTEGRATION_ARCHITECTURE.md) (+ [diagram](assets/architecture/integration_architecture.png))
 
-1. [../START_HERE.md](../START_HERE.md)
-2. [../REPRODUCIBILITY_CHECKLIST.md](../REPRODUCIBILITY_CHECKLIST.md)
-3. [REPO_MAP.md](REPO_MAP.md)
-4. [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
-5. [DATA_SOURCES.md](DATA_SOURCES.md)
-6. [METHODOLOGY.md](METHODOLOGY.md)
-7. [PROJECT_STATUS.md](PROJECT_STATUS.md)
+## For standards / safety reviewers
+- [Standards application matrix](standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)
+- [Proposed standard concept](standards/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.md) — fellowship design exercise, not a UL/ULSE proposal
+- [Risk register](../reports/milestone-2/RISK_REGISTER.md)
 
-## Main generated outputs
+## For municipal stakeholders
+- [Economic & funding brief](../reports/milestone-2/ECONOMIC_AND_FUNDING_BRIEF.md)
+- [Environment & resilience](../reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md)
+- [Regulatory & stakeholder map](../reports/milestone-2/REGULATORY_STAKEHOLDER_MAP.md)
 
-For the latest model-run result, use:
+## For human-action owners
+- [Open human actions](operations/open-human-actions.md) — the ten things software cannot close
+- [Human-action packages](human-actions/README.md) — client meeting #2, team session, AHJ, utility data, public engagement, fellowship clarification (all drafts, nothing sent)
 
-- [data/outputs/model_run_summary.md](../data/outputs/model_run_summary.md)
-- [data/outputs/results_interpretation.md](../data/outputs/results_interpretation.md)
-- [data/outputs/action_matrix.md](../data/outputs/action_matrix.md)
-- [data/outputs/profile_comparison.md](../data/outputs/profile_comparison.md)
-- [data/outputs/baseline_comparison.md](../data/outputs/baseline_comparison.md)
-- [data/outputs/charts/readiness_score_chart.png](../data/outputs/charts/readiness_score_chart.png)
-- [data/outputs/charts/data_confidence_chart.png](../data/outputs/charts/data_confidence_chart.png)
-- [data/outputs/charts/profile_rank_stability_chart.png](../data/outputs/charts/profile_rank_stability_chart.png)
-- [data/outputs/charts/site_readiness_map.png](../data/outputs/charts/site_readiness_map.png)
-
-## Main planning/reporting docs
-
-- [PROJECT_STATUS.md](PROJECT_STATUS.md)
-- [MODEL_FINDINGS_BRIEF.md](MODEL_FINDINGS_BRIEF.md)
-- [MODEL_FINDINGS_REPORT.md](MODEL_FINDINGS_REPORT.md)
-- [PRESENTATION_OUTLINE.md](PRESENTATION_OUTLINE.md)
-- [RESULTS_INTERPRETATION.md](RESULTS_INTERPRETATION.md)
-- [READINESS_MAP_GUIDE.md](READINESS_MAP_GUIDE.md)
-- [DATA_CONFIDENCE_SCORE.md](DATA_CONFIDENCE_SCORE.md)
-- [RECOMMENDATION_TIERS.md](RECOMMENDATION_TIERS.md)
-- [SENSITIVITY_ANALYSIS.md](SENSITIVITY_ANALYSIS.md)
-
-## Expansion and stakeholder docs
-
-- [SITE_SCREENING_CHECKLIST.md](SITE_SCREENING_CHECKLIST.md)
-- [ADDING_NEW_SITES_GUIDE.md](ADDING_NEW_SITES_GUIDE.md)
-- [STAKEHOLDER_OUTREACH_PLAN.md](STAKEHOLDER_OUTREACH_PLAN.md)
-
-## Technical/source docs
-
-- [METHODOLOGY.md](METHODOLOGY.md)
-- [DATA_DICTIONARY.md](DATA_DICTIONARY.md)
-- [DATA_SOURCES.md](DATA_SOURCES.md)
-- [OSM_AMENITIES.md](OSM_AMENITIES.md)
-- [PROJECT_DECISIONS_LOG.md](PROJECT_DECISIONS_LOG.md)
-
-## Main folders
-
-- [src/](../src/)
-- [data/inputs/](../data/inputs/)
-- [data/config/](../data/config/)
-- [data/outputs/](../data/outputs/)
-
-## Shareable local package
-
-After running the full workflow, build the package with:
-
-```bash
-python src/build_deliverable_package.py
-```
-
-The package is created at [data/outputs/deliverable_package/](../data/outputs/deliverable_package/).
+## For maintainers
+- [Website/assistant patch package](operations/website-patch-package/README.md) — offline patch + deployment/rollback runbook (nothing deployed)
+- [`scripts/` guide](../scripts/README.md) · [CI workflows](../.github/workflows/)

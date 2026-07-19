@@ -1,0 +1,51 @@
+{
+  "contract_version": "1.0.0",
+  "model_version": "3.0.0",
+  "run_id": "milestone2_v3_20260719T052322Z",
+  "generated_utc": "2026-07-19T05:23:22.507266+00:00",
+  "producer": {
+    "package": "fcf_m2",
+    "module": "fcf_m2.contract"
+  },
+  "inputs": {
+    "real_sites_v2.csv": "582e0b375fe3a078972fe77ad602bd1837b26679e09bf1b9072ffed30678a748",
+    "legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv": "064b6fdc5afe41e9a5e3a1480206c06195ffcaa6077ae4f7f081932024e3597c",
+    "field_provenance_v1.csv": "9a07aa1e0dc4bca43e160459db7a0985bc99a08454fe51437481bb2f7af4d482",
+    "anchor_set_v1.json": "a0a3968b2861e78134c2376b0c577224ff8c9cf08febb68b6b16293a4b26fb2e",
+    "legacy_matlab_site_meta.csv": "1b4255976b75429beb5fbd23c90b40ae480c5557564bf12e262e4fbd9831ff5a"
+  },
+  "tables": {
+    "schema.json": "fb08b84ad2fd038ed82e3afacc251260b48bfebdfc4bc7621a5ef84e90cb0814",
+    "scenario_table.csv": "a40358883265eb25649c0047b62ad6fad21eaf4936205a25a3814771f2e86aef",
+    "site_table.csv": "0ed5e4ec7078f9cc9316827d48b86f4fab4b946b87a683b1f0f65977ee517790",
+    "source_provenance.csv": "2d346861cf6216fb9b1f5c4500f8fe30c65411204d9c18fd1bbfd047a0efd875",
+    "standards_register.csv": "943f5b8fd60349c0a2eb9104162e49d18a00a53dc2f4489e5e0e3f07fac327fc",
+    "assumptions.json": "0ef70e9b59727eb27ccc1358fe577610b116fc6f1a5b5c332a03cb61350e1289"
+  },
+  "grid_factor": {
+    "source": "EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e",
+    "value_lb_per_mwh": 596.3,
+    "vintage": "eGRID2023r2, accessed 2026-07-19"
+  },
+  "conventions": {
+    "baseline_year": 2026,
+    "horizons": [
+      2036,
+      2046,
+      2056
+    ],
+    "cases": [
+      "base",
+      "baseline",
+      "high",
+      "stress_combined"
+    ],
+    "discount_rate_real": 0.03
+  },
+  "consumer_rules": [
+    "Join on site_id only; site_name is display text.",
+    "MATLAB refuses feasibility claims when capacity_basis is not verified_utility/verified_facility.",
+    "Excel/Tableau/presentation quote contract values; no re-derivation.",
+    "Any schema change bumps contract_version; consumers assert the major version."
+  ]
+}
