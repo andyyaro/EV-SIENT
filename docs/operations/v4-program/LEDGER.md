@@ -430,6 +430,100 @@ On first run the harness **writes** the golden file and passes (l.45-53), so the
 to *collect that file as an artifact* — otherwise the one thing Phase 2 exists to produce is created inside
 the runner and thrown away.
 
+### FIND-MATLAB-08 (high, and it changes Phase 2) — a real `.slx` for this project already exists, publicly
+
+Found while checking `gh` scopes for the Phase 2 harness: the account already owns a **public** repository
+**`andyyaro/MATLAB-SIMULINK-`** (created 2026-07-09, last pushed the same day, 10 files). It contains:
+
+| File | Size | What it is |
+|---|---|---|
+| `site_grid_behavior_ev_charging.slx` | 100,077 B | **a real Simulink model**, authored in **MathWorks R2025b** (25.2.0.2998904) |
+| `site_grid_behavior_ev_charging.slxc` | 5,163 B | its compiled cache |
+| `build_and_run_site_grid_behavior_model.m` | 13,256 B | **byte-identical** to the private `matlab/legacy_archive/` copy |
+| `untitled.m` | 22,012 B | **differs** from the private copy (32,967 B) — the private one is later/larger |
+| `site_year_scenarios.csv` | 770 B | legacy scenario inputs |
+| `site_year_scenarios_from_andy_v2.csv` | 15,278 B | a larger scenario set |
+| two `.png` figures | ~560 KB | rendered outputs |
+| `README.md`, `README.txt` | | run instructions |
+
+**Provenance, confirmed by the project owner (2026-07-27):** this repository is the **predecessor** of the
+current model — the legacy work that V3 was built *from*. It is old and superseded. That is consistent with
+everything observed: its `build_and_run_site_grid_behavior_model.m` is byte-identical to the private
+`legacy_archive/` copy, its README uses the retired "Now / 2035 / 2050" convention, and `buildSimulinkModel.m`
+describes itself as reproducing "the same topology as the reviewed legacy model." It is **not** a second
+live MATLAB layer and must not be treated as one.
+
+**The masterprompt's premise "there is no `.slx` to import" is true of the private repository and false of
+the wider project.** A genuine, MathWorks-authored model of this system's direct ancestor is already public.
+Being superseded does not reduce its value as a **topology reference**, precisely because V3 was derived
+from it and reproduces it exactly (verified below). It does mean the `.slx` is evidence about the *legacy*
+model, not about V3's numerics — no V3 result may ever be attributed to it.
+
+**The V3 source reproduces it exactly.** Unpacked the `.slx` (it is a zip of XML) and compared its topology
+against `buildSimulinkModel.m` line by line:
+
+- **Blocks: 11 vs 11, same names, same types** — `Base Load`, `EV Request`, `Capacity Limit` (FromWorkspace);
+  `Total Unmanaged`, `Total Managed` (Sum); `Managed Logic Inputs`, `Main Scope Signals` (Mux);
+  `Managed EV Power` (SubSystem — how a MATLAB Function block is stored); `Live Scope: Load Behavior`
+  (Scope); `toWorkspace_unmanaged`, `toWorkspace_managed` (ToWorkspace).
+- **Connections: all 15 match**, port for port. Every `add_line` at `buildSimulinkModel.m:217-232` has an
+  exact counterpart in `system_root.xml`. Example: `Base Load` fans out to `Total Unmanaged/1`,
+  `Managed Logic Inputs/3`, `Total Managed/1`, `Main Scope Signals/1` — identical in both.
+- **The embedded function block matches.** `simulink/stateflow/chart_7.xml` contains
+  `available = max(u(2) - u(3), 0); y = min(u(1), available);` — the same computation the V3 source writes at
+  `buildSimulinkModel.m:189-190`, which adds comments and changes nothing else.
+
+**Why this matters:** Phase 2.5 requires the native block diagram to be "verified against the CI-built `.slx`
+when that exists." A real one exists **now**. The native renderer can be validated against MathWorks ground
+truth immediately, independent of whether the harness CI ever succeeds — which de-risks Gate 2 substantially.
+It also independently corroborates the V3 source's own claim to use "the same topology as the reviewed
+legacy model."
+
+**It also partly resolves FIND-MATLAB-07.** The legacy original *is* independently preserved — as a public
+byte-identical copy of `build_and_run_site_grid_behavior_model.m`, not on the archive branch that
+`EXECUTION_STATUS.md` cites. `untitled.m` differs, so that half of the claim remains uncorroborated.
+
+### FIND-EXPOSURE-01 (high) — site identity and some electrical inputs are **already public**
+
+This is the most important input to the Phase 2.2 exposure review, and it was not knowable from the private
+repo alone. `MATLAB-SIMULINK-` has been public since **2026-07-09** and already discloses:
+
+- the **`site_id` → real site name mapping**: `FFX002 = City_of_Fairfax_Regional_Library`,
+  `PWC002 = Neabsco_Commuter_Garage`, `FFX004 = Community_Center_Demo`
+- per-site **electrical planning inputs**: `spare_capacity_kW` (90 / 105 / 140), base load mean and peak,
+  ports, charger power, arrival windows, dwell
+- two figures whose **filenames name a real site** (`…City_of_Fairfax_Regional_Library…`)
+- the legacy horizon convention "Now / 2035 / 2050" in its README — a **fourth** convention in circulation
+
+What is **not** exposed there: readiness scores, rankings, tiers, cost conclusions, CO2e results, or any
+study finding. So the existing exposure is **inputs and identity, not findings**.
+
+**How this changes Phase 2.2, and how it must not.** The question "do the `site_id` values reveal client
+identity?" is already answered *yes, publicly*. But prior exposure is **not** a licence to publish more:
+the harness still publishes methodology and never findings, and the review still goes field by field. What
+changes is that the review must be written against reality — it cannot claim the harness would be the first
+disclosure of site identity, because it would not be.
+
+**Deliberately not acted on.** Changing or deleting a pre-existing public repository is an outward-facing,
+hard-to-reverse action on something this program did not create and was not asked to touch. It is recorded
+here and carried to `RESIDUAL_RISKS.md` as a decision for the team, with options (leave as is / add a
+clarifying README / make private), not taken unilaterally.
+
+The owner's note that it is old and superseded is a point *for* keeping it, not against: it is the historical
+record of what V3 was built from, and this project's whole discipline is about not losing provenance. The
+residual-risk entry should therefore frame the choice as "leave it public, but make its status legible" —
+a short README line saying it is the superseded predecessor of a later model and that its numbers are not
+current — rather than as a deletion question. Deleting it would destroy the only public evidence of the
+lineage that `legacy_archive/` and `buildSimulinkModel.m` both refer back to.
+
+### DEC candidate — how the program uses this repository
+
+**Use it as a read-only historical and topology reference. Never sync to it, never publish to it, never
+treat it as the harness.** The Phase 2.2 harness remains a **new** repository built by one-directional,
+hash-gated sync from the private source. Reasons: this one is hand-maintained and superseded, has no sync
+gate, and mixes legacy inputs with figures; adopting it would create exactly the two-diverging-MATLAB-layers
+failure Phase 2.2 exists to prevent.
+
 ### Other findings not yet acted on
 
 | # | Finding | Source | Confirmed? | Acted on? |
