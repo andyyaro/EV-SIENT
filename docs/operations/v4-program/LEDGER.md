@@ -20,7 +20,7 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 2 | Liberate the MATLAB layer | **in-progress** | **Harness live and MATLAB executing.** Tier 2 proven by execution. Runs 1-2 failed on portability defects, both fixed; run 3 in flight. `EXECUTION_STATUS.md` untouched until a run *passes*. |
 | 3 | Integrate the 3D explorer | **GREEN — verified** | Governing defect fixed in producer *and* consumer; viewer states its mode and all four caveats; keyboard-reachable; Cesium vendorable offline. |
 | 4 | Build V4 | not-started | |
-| 5 | NFC field layer | not-started | |
+| 5 | NFC field layer | **GREEN — verified on hardware** | One tag written, read back through iOS background NFC, live page confirmed. 12 landing pages + 12 capture forms deployed. Loop closes: tag → form → CSV → ingestion → capacity upgrade. |
 | 6 | Close the Tableau blocker | not-started | |
 | 7 | The platform | not-started | |
 | 8 | Deploy and ship | not-started | |
@@ -128,6 +128,43 @@ Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Cur
 | 3.12 | Keyboard accessibility of the site list | **verified** | Focusable, `role=button`, descriptive `aria-label`; Enter selects, `P` pins, arrows navigate. Right-click still pins. Gated. |
 | 3.13 | **Viewer read retired horizon fields** — found while fixing 3.12 | **verified** | `app.js` still named `ports_2035`/`ports_2050` in **six** render paths; under the canonical mode every one would have rendered blank. Horizon vocabulary now comes from the manifest. Gated. |
 | G3 | **Gate 3** | **GREEN** | Explorer fully integrated; horizon/data-source mismatch resolved end to end (producer *and* consumer); all new gates green in `verify.sh` **and** CI. **15 gates.** |
+
+### Phase 5 — NFC Field Layer
+
+| # | Task | State | Evidence |
+|---|---|---|---|
+| 5.1 | Hardware verified before designing | **verified** | NTAG215, ~504 user bytes. Largest payload **50 bytes (10%)**. iPhone 17 Pro → background NDEF read, no app for readers. |
+| 5.2 | Use case chosen and defended, alternatives recorded | **done** | Field capture closing the capacity gap. Public engagement **folded in** rather than rejected; explorer deep links, demo tags and AHJ tags recorded with why each lost. |
+| 5.3 | Generator, contract-derived and tested | **verified** | `src/fcf_m2/nfc.py`. Refuses **in code**: uncontrolled host, lookalike host, plaintext http, oversized payload. 22 tests. |
+| 5.4 | QR + printed-URL fallback for every destination | **verified** | 12 QR codes, each verified to encode its own URL; placement cards carry the URL in text. |
+| 5.5 | Security review | **done** | Locked-before-deployment, allowlist in code, no credential/identifier on any tag (asserted by test). |
+| 5.6 | Privacy review | **done** | No personal data on tags; landing pages set no cookie, run no analytics, have no form; capture form collects facility data + attribution only. |
+| 5.7 | **Runbook walked end-to-end on a physical tag** | **verified** | FFX002 written, read back with the writing app **closed**, live page confirmed. Logged in `TAG_VERIFICATION_LOG.md`. |
+| 5.8 | Placement card, verification checklist, pilot plan | **done** | Pilot states its **failure conditions in advance**, including that QR beating NFC 3:1 means a printed sign was the honest answer. |
+| 5.9 | Landing routes deployed | **verified** | 12 × `/t/<SITE_ID>` + 12 × `/f/<SITE_ID>`, all 200. |
+| 5.10 | Capture form feeds the V4 ingestion path | **verified** | The exact CSV the browser assembles drives the real ingestion and upgrades `placeholder → verified_facility`. Gated. |
+| G5 | **Gate 5** | **GREEN** | Design documented and defended; generator tested; **runbook walked on real hardware**; security and privacy reviews recorded. |
+
+**Deliberately not done, and stated rather than implied:** no facility manager has been asked
+for permission to place anything. Nothing in `docs/nfc/` presents placement as authorised.
+
+### Deployment record (Phase 8 work done early, to unblock Gate 5)
+
+| UTC | Action | Reversal |
+|---|---|---|
+| 2026-07-27 | Uploaded 12 landing pages to `s3://future-city-fellowship/t/` | `aws s3 rm --recursive s3://future-city-fellowship/t/` |
+| 2026-07-27 | Uploaded 12 capture forms to `.../f/` | `aws s3 rm --recursive s3://future-city-fellowship/f/` |
+| 2026-07-27 | Uploaded `errors/404.html` | `aws s3 rm s3://future-city-fellowship/errors/404.html` |
+| 2026-07-27 | **CloudFront `E1XZPHWHZV0OEO`: added 2 custom error responses** (403→404 page, 404→404 page) | config backed up at `/tmp/cfcfg/BACKUP_before_error_pages.json`; set `CustomErrorResponses.Quantity` back to 0 |
+
+**Nothing pre-existing was modified or deleted.** No `--delete` was used; the 16 original
+objects are untouched. **Incremental cost ≈ $0.00/month** — 75 KB of storage on the existing
+distribution and certificate; nothing new provisioned. Account run rate remains ~$0.40/month.
+
+**FIND-AWS-09 closed:** the distribution had zero custom error responses, so a missing path
+returned S3's raw `AccessDenied`. That is exactly what a mistyped tag URL showed during the
+hardware walkthrough. Both 403 and 404 now serve a real page **with a 404 status**, so the
+code tells the truth.
 
 ---
 
