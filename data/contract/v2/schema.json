@@ -1,0 +1,412 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FCF canonical scenario row (contract v2)",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "run_id",
+    "generated_at",
+    "site_id",
+    "site_name",
+    "jurisdiction",
+    "site_type",
+    "public_or_fleet",
+    "horizon_year",
+    "horizon_label",
+    "scenario_id",
+    "scenario_name",
+    "model_mode",
+    "ports_active",
+    "ports_pathway_capacity",
+    "evse_power_kw",
+    "sessions_per_day",
+    "energy_per_session_kwh",
+    "energy_required_kwh_day",
+    "charging_window_hr",
+    "average_dwell_hr",
+    "peak_factor",
+    "utilization",
+    "average_wait_minutes",
+    "peak_wait_minutes",
+    "base_load_kw",
+    "service_capacity_kw",
+    "spare_capacity_kw",
+    "capacity_basis",
+    "capacity_source",
+    "capacity_confidence",
+    "managed_charging_policy",
+    "energy_delivered_kwh",
+    "energy_curtailed_kwh",
+    "lifecycle_cost_nominal_usd",
+    "lifecycle_cost_npv_usd",
+    "avoided_overbuild_cost_usd",
+    "grid_factor_value",
+    "grid_factor_units",
+    "grid_factor_vintage",
+    "net_co2e_kg",
+    "data_confidence",
+    "equity_indicator",
+    "expansion_trigger_status",
+    "source_date",
+    "source_id",
+    "assumption_flag",
+    "notes",
+    "observed_months",
+    "observed_utilization",
+    "observed_uptime",
+    "observed_p90_wait_min",
+    "observed_source_system",
+    "capacity_observed_date",
+    "capacity_method",
+    "capacity_conflict",
+    "data_confidence_reason",
+    "trigger_outcome",
+    "trigger_rule_trace",
+    "trigger_equity_override"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "2.0.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^(FFX|PWC)[0-9]{3}$"
+    },
+    "site_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "jurisdiction": {
+      "enum": [
+        "fairfax",
+        "pwc"
+      ]
+    },
+    "site_type": {
+      "type": "string"
+    },
+    "public_or_fleet": {
+      "enum": [
+        "public",
+        "fleet",
+        "mixed"
+      ]
+    },
+    "horizon_year": {
+      "enum": [
+        2026,
+        2036,
+        2046,
+        2056
+      ]
+    },
+    "horizon_label": {
+      "enum": [
+        "baseline",
+        "plus10",
+        "plus20",
+        "plus30"
+      ]
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 5
+    },
+    "scenario_name": {
+      "type": "string"
+    },
+    "model_mode": {
+      "enum": [
+        "legacy_v2",
+        "milestone2_v3",
+        "v4"
+      ]
+    },
+    "ports_active": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "ports_pathway_capacity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "evse_power_kw": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 5000
+    },
+    "sessions_per_day": {
+      "type": "number",
+      "minimum": 0
+    },
+    "energy_per_session_kwh": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "energy_required_kwh_day": {
+      "type": "number",
+      "minimum": 0
+    },
+    "charging_window_hr": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24
+    },
+    "average_dwell_hr": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24
+    },
+    "peak_factor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "utilization": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 2
+    },
+    "average_wait_minutes": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "peak_wait_minutes": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "base_load_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 5000
+    },
+    "service_capacity_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 5000
+    },
+    "spare_capacity_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 5000
+    },
+    "capacity_basis": {
+      "enum": [
+        "verified_utility",
+        "verified_facility",
+        "engineering_estimate",
+        "planning_proxy",
+        "placeholder",
+        "unknown"
+      ]
+    },
+    "capacity_source": {
+      "type": "string",
+      "minLength": 3
+    },
+    "capacity_confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "none"
+      ]
+    },
+    "managed_charging_policy": {
+      "enum": [
+        "none",
+        "clamp",
+        "energy_aware"
+      ]
+    },
+    "energy_delivered_kwh": {
+      "type": "number",
+      "minimum": 0
+    },
+    "energy_curtailed_kwh": {
+      "type": "number",
+      "minimum": 0
+    },
+    "lifecycle_cost_nominal_usd": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "lifecycle_cost_npv_usd": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "avoided_overbuild_cost_usd": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "grid_factor_value": {
+      "const": 596.3
+    },
+    "grid_factor_units": {
+      "const": "lb CO2e/MWh"
+    },
+    "grid_factor_vintage": {
+      "type": "string",
+      "minLength": 5
+    },
+    "net_co2e_kg": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "data_confidence": {
+      "enum": [
+        "High",
+        "Medium",
+        "Low"
+      ]
+    },
+    "equity_indicator": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "expansion_trigger_status": {
+      "type": "string"
+    },
+    "source_date": {
+      "type": "string",
+      "minLength": 8
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "assumption_flag": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "observed_months": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "observed_utilization": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "observed_uptime": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "observed_p90_wait_min": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "observed_source_system": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "capacity_observed_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "capacity_method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "",
+        "comparable_site_proxy",
+        "engineering_calculation",
+        "facility_panel_schedule",
+        "facility_walkthrough",
+        "utility_load_study",
+        "utility_service_record"
+      ]
+    },
+    "capacity_conflict": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_confidence_reason": {
+      "type": "string",
+      "minLength": 20
+    },
+    "trigger_outcome": {
+      "type": "string",
+      "minLength": 4
+    },
+    "trigger_rule_trace": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "trigger_equity_override": {
+      "type": [
+        "boolean",
+        "string",
+        "null"
+      ]
+    }
+  }
+}

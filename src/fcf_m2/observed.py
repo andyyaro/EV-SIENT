@@ -350,6 +350,10 @@ class CapacityUpgrade:
     spare_capacity_kw: float | None
     capacity_source: str
     observed_date: date
+    #: The observation method that WON, carried separately from ``capacity_source`` so a
+    #: consumer can filter on it without parsing prose. ``capacity_source`` is a sentence
+    #: for a human; this is the controlled value from ``METHOD_TO_BASIS``.
+    method: str = ""
     conflicts: list[str] = field(default_factory=list)
 
     @property
@@ -409,6 +413,7 @@ def resolve_capacity(observations: list[CapacityObservation],
             spare_capacity_kw=chosen_spare,
             capacity_source=source,
             observed_date=strongest.observed_date,
+            method=strongest.method,
             conflicts=conflicts,
         )
     return upgrades

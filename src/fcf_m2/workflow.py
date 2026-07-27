@@ -466,13 +466,29 @@ def main(argv=None):
         cdir = Path(args.contract_dir)
         st = pd.read_csv(cdir / "scenario_table.csv")
         site = pd.read_csv(cdir / "site_table.csv")
-        problems = contract.validate_scenario_table(st, site) + contract.verify_hash_chain(cdir)
+
+        # One command, version-aware -- not one command per version. The version is read
+        # from the artifact rather than passed as a flag, so a v2 directory cannot be
+        # validated under v1's weaker rules by getting the flag wrong.
+        manifest = json.loads((cdir / "contract_manifest.json").read_text())
+        version = manifest.get("contract_version", config.SCHEMA_VERSION)
+        if version == config.SCHEMA_VERSION_V2:
+            from . import contract_v2
+            problems = contract_v2.validate_v2(st, site)
+        elif version == config.SCHEMA_VERSION:
+            problems = contract.validate_scenario_table(st, site)
+        else:
+            problems = [f"unknown contract_version {version!r}; known versions are "
+                        f"{', '.join(config.CONTRACT_VERSIONS)}"]
+
+        problems += contract.verify_hash_chain(cdir)
         schema = json.loads((cdir / "schema.json").read_text())
         problems += contract.validate_against_json_schema(st, schema)
         if problems:
             print("FAIL:\n- " + "\n- ".join(problems))
             sys.exit(1)
-        print("Contract valid: all rule checks, JSON Schema, and RT-10 hash chain PASS.")
+        print(f"Contract v{version} valid: all rule checks, JSON Schema, and RT-10 hash "
+              f"chain PASS.")
     elif args.cmd == "ingest-observations":
         sys.exit(_ingest_observations(args))
     elif args.cmd == "docs":

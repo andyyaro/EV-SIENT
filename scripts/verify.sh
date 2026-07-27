@@ -29,6 +29,15 @@ gate "python: legacy_v2 mode reproduces the accepted baseline (25 starter / 48 p
 gate "contract: tracked data/contract/v1 passes all rules + JSON Schema + RT-10 hash chain" \
   bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow validate-contract data/contract/v1"
 
+# v1 is frozen and v2 is additive. Both claims are load-bearing and neither is self-enforcing,
+# so both are gated: the script rebuilds v2 from v1 into a temp dir and refuses if a fresh
+# build differs from the tracked bytes or if any field shared with v1 changed value.
+gate "contract: v2 rebuilds byte-identically from the frozen v1 and every shared field is unchanged" \
+  bash -c "cd '$REPO' && '$PY' scripts/build_contract_v2.py --check"
+
+gate "contract: tracked data/contract/v2 passes v1 rules + v2 rules + JSON Schema + RT-10 hash chain" \
+  bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow validate-contract data/contract/v2"
+
 gate "cross-model: MATLAB canonical CSV reconciles with the contract (ports, horizons, capacity_basis)" \
   "$PY" - <<EOF
 import pandas as pd

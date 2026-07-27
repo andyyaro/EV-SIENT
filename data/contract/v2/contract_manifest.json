@@ -1,0 +1,62 @@
+{
+  "contract_version": "2.0.0",
+  "model_version": "4.0.0",
+  "supersedes": "1.0.0",
+  "run_id": "v2-from-milestone2_v3_20260719T052322Z",
+  "generated_utc": "2026-07-27T18:49:19.385594+00:00",
+  "producer": {
+    "package": "fcf_m2",
+    "module": "fcf_m2.contract_v2"
+  },
+  "inputs": {
+    "real_sites_v2.csv": "582e0b375fe3a078972fe77ad602bd1837b26679e09bf1b9072ffed30678a748",
+    "legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv": "064b6fdc5afe41e9a5e3a1480206c06195ffcaa6077ae4f7f081932024e3597c",
+    "field_provenance_v1.csv": "9a07aa1e0dc4bca43e160459db7a0985bc99a08454fe51437481bb2f7af4d482",
+    "anchor_set_v1.json": "a0a3968b2861e78134c2376b0c577224ff8c9cf08febb68b6b16293a4b26fb2e",
+    "legacy_matlab_site_meta.csv": "1b4255976b75429beb5fbd23c90b40ae480c5557564bf12e262e4fbd9831ff5a",
+    "contract/v1/contract_manifest.json": "0dc7bf37a2c9b057edacf282ddea294994bef7a9d2369b3fcc65a784676b8df8",
+    "contract/v1/scenario_table.csv": "a40358883265eb25649c0047b62ad6fad21eaf4936205a25a3814771f2e86aef"
+  },
+  "tables": {
+    "schema.json": "9e04dd42826834257614b6d78705e35f92f70dfd1d04ebc798d11480cf61a872",
+    "scenario_table.csv": "48d73e72f87ebe06458f7aacba7a72b8e653b4db1b226fb064afb20eb0ec2882",
+    "site_table.csv": "0ed5e4ec7078f9cc9316827d48b86f4fab4b946b87a683b1f0f65977ee517790",
+    "source_provenance.csv": "2d346861cf6216fb9b1f5c4500f8fe30c65411204d9c18fd1bbfd047a0efd875",
+    "standards_register.csv": "4e89a46a7ddd8937d93157b6904aa9b96ade08de5b8fcd5b5190755b7a08e458",
+    "assumptions.json": "747e7a583b54ccc1f81bf771651d4b9cfb87d6f1d6b83c605dc37eb4c62bf571"
+  },
+  "grid_factor": {
+    "source": "EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e",
+    "value_lb_per_mwh": 596.3,
+    "vintage": "eGRID2023r2, accessed 2026-07-19"
+  },
+  "conventions": {
+    "baseline_year": 2026,
+    "horizons": [
+      2036,
+      2046,
+      2056
+    ],
+    "cases": [
+      "base",
+      "baseline",
+      "high",
+      "stress_combined"
+    ],
+    "discount_rate_real": 0.03,
+    "horizon_label_change": "v1 used 'now' for the baseline year. v2 uses 'baseline': 'now' is time-relative text frozen into a dated artifact, and reads as false the moment the artifact is a year old."
+  },
+  "relationship_to_v1": [
+    "ADDITIVE. Every v1 field is present with identical semantics and identical values for the same run.",
+    "v1 is FROZEN. Nothing regenerates or edits it. Its manifest digest is pinned by a test.",
+    "A consumer written against v1 can read a v2 row and get the same answers.",
+    "v2 adds 12 fields carrying what the V4 field-data loop produces, which v1 had nowhere to put."
+  ],
+  "consumer_rules": [
+    "Join on site_id only; site_name is display text.",
+    "MATLAB refuses feasibility claims when capacity_basis is not verified_utility/verified_facility.",
+    "Excel/Tableau/presentation quote contract values; no re-derivation.",
+    "Any schema change bumps contract_version; consumers assert the major version.",
+    "An empty observed_* field means NOT OBSERVED. It never means zero."
+  ]
+}
