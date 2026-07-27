@@ -18,7 +18,7 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 0 | Ground truth | **GREEN — verified** | 229 files inventoried and independently verified; 3+1 trees reconciled; AWS mapped read-only; 200 findings registered. |
 | 1 | Repair the base | **GREEN — verified** | Was 8 PASS / 2 FAIL on a clean checkout; now 10 PASS / 0 FAIL locally **and in CI**. 10 repairs, each committed separately. |
 | 2 | Liberate the MATLAB layer | **in-progress** | Front-loaded per the program's exception. Exposure review, Octave tier evidence, and harness CI design running as `wf_c89b4289-b6c`. |
-| 3 | Integrate the 3D explorer | not-started | |
+| 3 | Integrate the 3D explorer | **core done — gate open** | Governing defect fixed and gated. Remaining: viewer UI must surface the active mode and the two missing disclaimers; Cesium vendoring for offline. |
 | 4 | Build V4 | not-started | |
 | 5 | NFC field layer | not-started | |
 | 6 | Close the Tableau blocker | not-started | |
@@ -109,6 +109,24 @@ Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Cur
 | `09_site_map_offline.png` is not byte-reproducible across machines | Real, but a **gate design constraint** rather than a repair. Recorded for Phase 3 so that a "committed artifacts match a fresh build" gate does not go flaky on this one file. |
 | Tableau `tbl_peak_waits.csv` columns are `0.0` on all 12 rows | **Phase 6** owns it. Building the specified worksheet would produce twelve zero-height bars, which is a finding to declare, not to paper over. |
 | `src/fcf_m2.egg-info/SOURCES.txt` is stale build metadata | Regenerated on every build; tracking it at all is the questionable choice. Left alone rather than churning a generated file for no functional gain. |
+
+### Phase 3 — Integrate the 3D Explorer
+
+| # | Task | State | Evidence |
+|---|---|---|---|
+| 3.1 | Explorer moved in as a first-class citizen | **verified** | ETL at `src/fcf3d/` beside `fcf_m2`; assets at `explorer/`; tests folded into the repo's pytest run. One dependency story, one Makefile, one `.gitignore`. |
+| 3.2 | **Horizon/data-source mismatch resolved** | **verified** | Dual-mode ETL. `milestone2_v3` (default) emits only 2026/2036/2046/2056; `legacy_v2` emits only now/2035/2050. Verified neither leaks the other's fields. |
+| 3.3 | Committed V3 fixtures | **verified** | The contract carries no readiness score, so V3 needed frozen fixtures mirroring how `legacy_v2` was already handled. Gated against a fresh build. |
+| 3.4 | Mirrored weights re-derived and **drift-gated** | **verified** | `fcf_m2.scoring` now owns named constants; the explorer **imports** them. 19 drivers + 6 invert flags checked. Extraction moved **no number** — proven byte-for-byte. |
+| 3.5 | Guard test actually runs | **verified** | Was 31 passed / 15 skipped by default; now **46 passed, 0 skipped**, plus 53 new. |
+| 3.6 | Built artifacts committed and drift-gated | **verified** | `explorer/web/data` + 12 GLBs committed; `.gitignore` note explains why. |
+| 3.7 | Cesium pinned | **verified** | 1.128, both refs. `scripts/check_cdn_pins.py` enforces pinning and the ≥1.124 floor; both failure modes mutation-tested. |
+| 3.8 | New gates in `verify.sh` **and** CI | **verified** | 4 added → **14 gates, all green locally and in CI**. |
+| 3.9 | `CLAUDE.md` constraints folded into repo docs | **done** | `docs/architecture/3d-explorer-constraints.md`, with an enforcement table naming the gate for each constraint. |
+| 3.10 | **Viewer UI: surface the active mode; add the 2 missing disclaimers** | **not-started** | L11 found the viewer never displays which mode is active, `manifest.json` is never read, and two of four required disclaimers are absent (0/12 High confidence; massing is not a design). The *data* now carries mode; the *UI* does not yet show it. |
+| 3.11 | Vendor Cesium for offline use | **not-started** | Pinned, not yet vendored. |
+| 3.12 | Keyboard accessibility of the site list | **not-started** | L11: the primary interaction is mouse-only. Phase 9 owns accessibility, but this is the explorer's own defect. |
+| G3 | **Gate 3** | **open** | 3.10–3.12 outstanding. |
 
 ---
 
