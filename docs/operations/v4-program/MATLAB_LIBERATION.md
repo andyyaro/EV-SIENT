@@ -225,11 +225,75 @@ empty identifier, for an unrelated reason.
 - **HIGH** that Tier 2 runs the real code end to end — executed, 120 rows, deterministic, twice.
 - **HIGH** that the fail-closed guard fires under Tier 2 — 16/16 with a negative control.
 - **HIGH** that Tier 1 is impossible — bypass reproduced directly, with and without the package.
-- **MODERATE** that the transformed sources are semantically faithful to the MATLAB originals. The rules are
-  mechanical and audited and the numerics matched an independent NumPy reference to every printed digit for
-  the scenario checked — but "moderate" is the honest word until real MATLAB output exists to compare against.
+- **~~MODERATE~~ → HIGH** that the transformed sources are semantically faithful to the MATLAB originals,
+  **on this input**. Superseded 2026-07-27 by the cross-validation below. The original wording is kept
+  because the upgrade is only meaningful next to what it replaced.
 
 That last line is the whole reason the harness CI matters.
+
+---
+
+## 3.7 The cross-validation, run
+
+Owed since 3.6 was written, and now possible for the first time: previously the Octave tier had run against
+the **real** canonical CSV while MATLAB ran the **synthetic** fixture, so there were never two runs of the
+same input to compare.
+
+**Reproduce it:** `python scripts/octave_crossvalidate.py --pkg-prefix <dir> --matlab-results
+matlab/outputs/run-30296650057/batch_results.csv`
+
+| | |
+|---|---|
+| Octave | GNU Octave 11.3.0 + `datatypes` 1.2.7 + the 15-rule transform + the 17-function shim |
+| MATLAB | MathWorks MATLAB 25.2.0.3177638 (R2025b) Update 5, CI run `30296650057` |
+| Input | `harness_scenarios_synthetic.csv`, the same file, same SHA-256, both engines |
+| Compared | **2 640 cells across 22 columns**, relative tolerance **1e-9** |
+
+### Numeric divergences: **zero**
+
+Not one cell of the 2 640 differs beyond 1e-9 relative. Every computed quantity — energy requested, peak
+unmanaged, the managed-strategy outputs, the economics columns, the guard fields — agrees between GNU
+Octave and MathWorks MATLAB. The transform is faithful on this input, and that is now measured rather than
+argued. All 15 transform rules fired; the transform treats a rule that fires **zero** times as a failure,
+because a rule that stops matching means the sources moved underneath it.
+
+Two columns are excluded by name and the exclusions are printed on every run: `run_id`, which embeds the
+wall-clock time, and `placeholder_banner`, compared separately so a wording change would be loud rather
+than absorbed. The banner text is byte-identical between the engines.
+
+### Behavioural divergence: **one, and it is loud**
+
+    run_all_scenarios.m:135
+    fprintf(fid, "input_csv: %s\n", string(csvName) + string(csvExt));
+
+    Octave: error: operator +: nonconformant arguments (op1 is 1x27, op2 is 1x4)
+    MATLAB: writes "input_csv: harness_scenarios_synthetic.csv"
+
+This is the `"abc " + "def"` failure mode catalogued in 3.4, reaching a pair the transform does not cover:
+R2 rewrites `literal + expr` and `expr + literal`, and this is `expr + expr`. Under Octave's shim both
+operands are char arrays, so `+` is numeric addition and the lengths (27 and 4) do not conform.
+
+**Severity: fatal_loud, and it lands after every number is computed.** `results.csv` is already written when
+it fires; only the manifest's `input_csv` line and `hashes.txt` are lost. It cannot corrupt a value.
+
+**Deliberately not fixed, and the reasoning is the point.** Extending the transform to cover
+`fcf_str(a) + fcf_str(b)` is a dozen lines. It is not being done because §3.4 records that rule R3 *created*
+a new silent defect — `struct("f", cellArray)` expanding into a struct array — while removing a loud one.
+Trading a loud failure in a provenance line for the risk of a silent one in a computed value is a bad trade
+in a repository whose entire premise is that a wrong number is worse than no number. The divergence is
+recorded here with its exact location, and `octave_crossvalidate.py` reports it on every run rather than
+tolerating it.
+
+### What this does and does not establish
+
+**Does:** the transformed sources compute the same numbers as the MATLAB originals on this input, to 1e-9.
+
+**Does not:** make Octave an equivalent engine. FIND-MATLAB-09 reproduced the fail-closed capacity guard
+**not firing** under Octave while it **does** fire under real MATLAB — verified in run `30296650057`, where
+all 120 rows carry `service_capacity_unknown` and both managed strategies report
+`skipped_no_capacity_defined`. No numeric comparison can surface a divergence of that kind, because both
+engines produce numbers and one of them should have refused. **GNU Octave remains a syntax and smoke tier
+that may never be used to make a feasibility statement.**
 
 ---
 
