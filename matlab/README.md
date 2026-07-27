@@ -10,13 +10,26 @@ research-phase MATLAB/Simulink improvement backlog (a pre-V3 research
 artifact, not tracked in this repository). The two legacy scripts are
 archived unchanged in `legacy_archive/` with a full migration note.
 
-> **EXECUTION STATUS - READ FIRST**: this repository was authored in an
-> environment with **no MATLAB installation** (2026-07-19). All code is
-> statically written and reviewed; **no simulation, test run, or figure in
-> this repo has been executed or generated**. `EXECUTION_STATUS.md` records
-> exactly what was and was not verified, and
-> `RUN_ON_LICENSED_MATLAB.md` gives the exact commands for the first
-> execution on a licensed machine.
+> **EXECUTION STATUS - READ FIRST**: this code has been **executed on licensed
+> MathWorks MATLAB** — R2025b Update 5, **49 passed / 0 failed / 0 incomplete**,
+> plus a 120-row batch that completed on every row (2026-07-27). It runs in a
+> public CI harness rather than here, because that harness must never carry
+> project data.
+>
+> Two things that follow, and neither is a footnote:
+>
+> 1. **Every run used a SYNTHETIC fixture.** No output describes a real facility.
+>    Real capacity is `placeholder` at 12/12 sites, so the fail-closed guard skips
+>    both managed-charging strategies on every row — which is the correct behaviour
+>    and also means those numerics are **not** validated against real capacity.
+> 2. **No Simulink model has been built.** Simulink is installed and licensed on the
+>    runner; the build was blocked by a defect in this repository's own availability
+>    guard, since fixed. Until a run reports otherwise, nothing may claim a built model.
+>
+> `EXECUTION_STATUS.md` carries the full run record — engine, release, commit, input
+> hash, what the five failed runs found, and what may and may not be claimed. The
+> superseded "no MATLAB available" banner is kept there verbatim rather than deleted.
+> `RUN_ON_LICENSED_MATLAB.md` gives the commands for running it yourself.
 
 ## Requirements
 
