@@ -143,7 +143,7 @@ disconnect-placement, access, and code-edition determinations rest with the loca
 1. Electrical capacity is a placeholder at 12/12 sites (`capacity_basis = placeholder`).
 2. Demand is synthetic and uncalibrated; growth multipliers are provisional conventions.
 3. Costs are screening-class benchmarks; emissions rest on labeled assumptions.
-4. MATLAB code **now runs on real MathWorks MATLAB** (R2025b Update 5, 49 tests passed / 0 failed, [`matlab/EXECUTION_STATUS.md`](matlab/EXECUTION_STATUS.md)) — but only against a **synthetic** fixture, because the public CI harness must never carry project data. The managed-charging numerics therefore remain unexercised against real capacity, since limitation 1 means no real capacity exists. The Simulink layer has still never been built.
+4. MATLAB code **now runs on real MathWorks MATLAB** (R2025b Update 5, 49 tests passed / 0 failed, [`matlab/EXECUTION_STATUS.md`](matlab/EXECUTION_STATUS.md)) — but only against a **synthetic** fixture, because the public CI harness must never carry project data. The managed-charging numerics therefore remain unexercised against real capacity, since limitation 1 means no real capacity exists. The Simulink model is now **built** ([run 30296650057](matlab/outputs/run-30296650057/)) but has never been **simulated**, and no number here derives from it.
 5. The Tableau `.twbx` was not rebuilt/verified — the static dashboard is the guaranteed artifact; a complete [patch package](dashboard/tableau/TABLEAU_IMPLEMENTATION_BLOCKER.md) exists for a Tableau Desktop operator.
 6. Client, team-adoption, AHJ, utility, and funding steps remain open — see [open human actions](docs/operations/open-human-actions.md).
 

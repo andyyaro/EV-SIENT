@@ -120,7 +120,7 @@ is claimed.
 | MATLAB parser acceptance of every file | **CLOSED** | All 9 `src/*.m` and 6 `tests/*.m` parsed and executed. Four genuine portability defects surfaced and were fixed at source — see "What the runs found". |
 | Numerical behavior of the energy-aware scheduler on 120 rows | **PARTIALLY CLOSED** | The 120-row batch completed with `run_status = ok` on every row. But `capacity_basis = placeholder` on all rows, so the guard skipped both managed strategies: `clamp: skipped_no_capacity_defined; energy_aware: skipped_no_capacity_defined`. The scheduler's numerics on *real capacity* remain unexercised, because no real capacity exists. |
 | Creation of the golden regression baseline | **CLOSED** | Written by run 6 and regenerated after the fixture correction. |
-| Simulink model build | **OPEN** | Simulink is installed and licensed on the runner (`ver` reports 25.2; a `new_system` probe creates a model). The build was blocked by a defect in this repository's own availability guard — see below. |
+| Simulink model build | **CLOSED** | Built in run `30296650057`. `site_grid_behavior_ev_charging_v3.slx` is a real Simulink package stamped `25.2.0.3177638 / R2025b / Update 5`, and its **11 root blocks match, name for name and type for type, the topology read from `buildSimulinkModel.m` by hand in Phase 0**. Built, **not simulated** — no result anywhere derives from it. |
 
 ## Run record
 
@@ -187,7 +187,19 @@ may not be used to make a feasibility statement.
 |---|---|---|
 | `30296162570` | Diagnose the Simulink refusal | Answered it — see below |
 | `30296566912` | Remove a real per-site value from the synthetic fixture | see `LEDGER.md` |
-| `30296650057` | Fix the Simulink availability guard | see `LEDGER.md` |
+| `30296650057` | Fix the Simulink availability guard | **success — Simulink model built.** 49 passed / 0 failed. Artifacts in `matlab/outputs/run-30296650057/`. |
+
+### Determinism, measured rather than assumed
+
+Run `30291108647` and run `30296650057` — different commits, separate runners, hours apart —
+were compared cell by cell across all 120 batch rows. **Exactly 3 rows differ, and they are
+exactly the 3 rows the fixture correction touched, in exactly the 2 columns that depend on
+`sessions_per_day`.** The other 117 rows are identical.
+
+The regression golden is **byte-identical** between the two runs, because the golden panel is
+built from `SYN001`/`SYN002` and the correction touched `SYN004`, `SYN008` and `SYN012`. An
+earlier note predicted the golden would be superseded by the fixture change; it was checked
+rather than assumed, and the prediction was wrong.
 
 ### The Simulink guard defect
 
@@ -220,4 +232,4 @@ the 120-row batch completes.
 fixture; that electrical feasibility has been shown anywhere — capacity is `placeholder` at
 12/12 real sites and the guard refuses on exactly that basis; that the managed-charging
 numerics are validated against real capacity — no real capacity exists to validate against;
-that a Simulink model has been built — as of this writing it has not.
+that a Simulink model has been **simulated** — it has been *built* (run `30296650057`) and never run, and no number anywhere derives from it.

@@ -22,9 +22,12 @@ archived unchanged in `legacy_archive/` with a full migration note.
 >    Real capacity is `placeholder` at 12/12 sites, so the fail-closed guard skips
 >    both managed-charging strategies on every row — which is the correct behaviour
 >    and also means those numerics are **not** validated against real capacity.
-> 2. **No Simulink model has been built.** Simulink is installed and licensed on the
->    runner; the build was blocked by a defect in this repository's own availability
->    guard, since fixed. Until a run reports otherwise, nothing may claim a built model.
+> 2. **The Simulink model is BUILT but never SIMULATED.** Run `30296650057` produced
+>    `site_grid_behavior_ev_charging_v3.slx`, whose 11 root blocks match the topology in
+>    `buildSimulinkModel.m` name for name. It has not been run, and no number in this
+>    repository derives from it — the layer is illustrative, as its own docstring says.
+>    Before that run the model had **never** been buildable: the availability guard tested
+>    `exist("new_system","file") ~= 2`, and `new_system` is a built-in, so it returns 0.
 >
 > `EXECUTION_STATUS.md` carries the full run record — engine, release, commit, input
 > hash, what the five failed runs found, and what may and may not be claimed. The
