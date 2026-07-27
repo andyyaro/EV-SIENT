@@ -571,11 +571,68 @@ hash-gated sync from the private source. Reasons: this one is hand-maintained an
 gate, and mixes legacy inputs with figures; adopting it would create exactly the two-diverging-MATLAB-layers
 failure Phase 2.2 exists to prevent.
 
+### Lane findings the lead re-checked first-hand (subagent doctrine: a finding is a lead until confirmed)
+
+Full register of all 200 in [`FINDINGS_REGISTER.md`](FINDINGS_REGISTER.md). These are the ones re-verified
+directly, because each changes a later phase's design. Where the lead's severity differs from the lane's,
+the difference and the reason are recorded — accepting a rating uncritically would defeat the doctrine.
+
+**FIND-V4-01 (high, and it blocks Phase 4 as specified) — the observed-data template cannot feed the
+trigger evaluation it exists to feed.** Raised by L05; confirmed by reading both files.
+
+`data/observed/observed_sessions_template.csv` offers exactly six fields:
+
+```
+site_id, date, sessions, energy_kwh, mean_dwell_min, facility_visitors_day
+```
+
+`triggers.evaluate()` consumes an `ObservedMetrics` of four values (`triggers.py:23-26`):
+
+| Required by the trigger policy | Derivable from the template? |
+|---|---|
+| `avg_utilization` (0-1) | **partly** — only if port count and open hours are joined in from the contract |
+| `p90_wait_min` | **no** — needs per-session arrival/start/end times; the template has one aggregate dwell mean per day |
+| `uptime` (0-1) | **no** — needs charger availability or fault records; nothing in the template touches it |
+| `equity_index_percentile` | yes — comes from the model, not from observations |
+
+And `assumptions.json` `trigger_policy` gates on all of them: `utilization_threshold` 0.4,
+`wait_threshold_min` 10.0, `reliability_uptime_min` 0.97, `min_observation_months` 6, plus the equity
+override. `triggers.py:53` refuses to proceed when uptime fails the gate — so the **one metric the policy
+checks first is the one the template cannot supply at all**.
+
+So Phase 4's headline loop — observations enter, confidence upgrades, re-score, re-evaluate triggers —
+cannot be built on this template as it stands. Phase 4 must extend the observed schema (per-charger id,
+session start/end timestamps rather than a daily dwell mean, and an availability/fault record), which is a
+design decision to log with alternatives, not a silent addition. Doing this *without* inventing data is
+still straightforward: the extended schema ships empty with labelled synthetic fixtures.
+
+**FIND-NUM-04 (medium — lane rated it high; the lead disagrees, with reasons) — the contract labels its own
+horizons `now` / `plus10` / `plus20` / `plus30`.** Confirmed: on rows whose `model_mode` is
+`milestone2_v3`, `horizon_label` takes exactly those four values for 2026/2036/2046/2056 respectively, and
+the 3D explorer surfaces `horizon_label` to readers (`build_sites.py:288`).
+
+Downgraded from the lane's **high** to **medium**, deliberately:
+
+- These are **not** the retired 2035/2050 convention. They are *relative* labels and they are *arithmetically
+  correct* against `baseline_year: 2026` — `plus10` really is 2036. Nothing here is superseded or wrong.
+- `horizon_year` sits in the same row carrying the absolute year, so no consumer is forced to rely on the label.
+
+But it is not nothing, which is why it is not `info`:
+
+- **`now` is time-relative text frozen into a dated artifact.** Read in 2036, "now" is simply false, and it
+  is the one horizon word the program explicitly names as prohibited phrasing. `baseline` would say the same
+  thing without decaying.
+- It surfaces to readers through the explorer, so it is reader-facing vocabulary, not an internal key.
+
+Phase 1 records it; changing a contract v1 value is **out of scope** because `data/contract/v1` becomes
+immutable at Phase 4 — the right home for the fix is the **contract v2** schema, with v1 left untouched and
+a note in the migration document.
+
 ### Other findings not yet acted on
 
-| # | Finding | Source | Confirmed? | Acted on? |
-|---|---|---|---|---|
-| — | *(lane findings land here as the fleet reports)* | | | |
+See [`FINDINGS_REGISTER.md`](FINDINGS_REGISTER.md) for all 200 with evidence. The register's `Confirmed`
+column tracks which have been re-checked by the lead; the remainder are carried into the phase that owns
+them and confirmed before any code changes on their account.
 
 ---
 
