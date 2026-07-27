@@ -250,7 +250,7 @@ copied, so the gate cannot be bypassed by going around it.
 Exercised in both directions on the live harness: `--check` correctly reported five divergences after a
 fix landed privately, `--push` resolved them, `--check` then reported all 17 files hash-identical.
 
-### 4.2 First run — **the code executed, and it failed, which is the valuable part**
+### 4.2 The runs — **the code executed, and it failed, which is the valuable part**
 
 `MathWorks MATLAB R2025b`, harness run **#1**. **35 passed, 14 failed, 11 incomplete.**
 
@@ -276,6 +276,52 @@ the divergence the sync exists to prevent.
 that moment nobody could say whether these files were even syntactically acceptable to the MATLAB parser —
 `EXECUTION_STATUS.md` records that not one line had ever been executed. They parse, and most of the suite
 passes.
+
+### 4.3 Runs #2 and #3 — a defect in the loader, and a wrong guess corrected
+
+Run #2 failed differently: **every required column reported missing**. That is not a content problem — it
+means `readtable` returned variable names bearing no relation to the header.
+
+I formed a hypothesis (the generator wrote CRLF where the Python producer writes LF) and **could not test it**:
+Octave has no `detectImportOptions`, so MATLAB's parsing cannot be reproduced locally. Rather than guess
+across CI round trips, run #3 shipped the LF fix *together with a diagnostic step* that printed what MATLAB
+itself sees.
+
+**The diagnostic showed the hypothesis was wrong**, which is precisely why it was worth adding:
+
+```
+has CR: 0                      <- line endings were NOT the cause
+detected 51 variables          <- should be 22
+VariableNamesLine: 2           <- should be 1
+table: 119 rows x 51 vars      <- should be 120 x 22
+```
+
+`detectImportOptions` **guessed the delimiter, and guessed wrong.** The first data row carries more spaces
+(50) than commas (21) because of its free-text columns, so MATLAB concluded the delimiter was whitespace,
+took line 2 as the header, and lost a row. `loadScenarios` then reported every required column missing —
+a confusing way to be told the file was never parsed as a CSV at all.
+
+**FIND-MATLAB-10 (high) — the loader did not say what it was loading.** `loadScenarios.m` specified no
+delimiter, no header line and no data-line range, relying entirely on detection for a file whose format is
+known exactly: the Python producer writes comma-separated data with a header on line 1. All three are now
+stated explicitly.
+
+**This is a latent defect in the model code, not a property of the synthetic fixture.** The canonical file
+carries 35 spaces against 21 commas on its first data row, so it is exposed to the same misdetection. It
+simply had never been executed against, by anything.
+
+### 4.4 What three runs bought
+
+| Run | Outcome | Defect found |
+|---|---|---|
+| #1 | 35 pass / 14 fail | Hardcoded canonical CSV path — the sources were not portable between the two trees |
+| #2 | 35 pass / 14 fail | Every column "missing" — surfaced the loader problem without explaining it |
+| #3 | 35 pass / 14 fail | **Diagnostic identified the cause**: delimiter auto-detection picking whitespace |
+
+Three real defects in three runs, none of which static review had caught in the months this code sat in the
+repository — and one of them (`plotScenario`'s fabricated provenance footer) was found by the adversarial
+exposure review rather than by execution. That is the argument for this phase, stated in outcomes rather
+than in principle.
 
 ## 5. Status
 
