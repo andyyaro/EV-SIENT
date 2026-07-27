@@ -184,3 +184,44 @@ class TestViewerShowsWhatItMustShow:
         import re
         for blob in (app_js, index_html):
             assert not re.search(r"eyJhbGciOi[A-Za-z0-9_\-]{20,}", blob), "a JWT-shaped token is committed"
+
+
+class TestViewerIsHorizonAgnostic:
+    """Fixing a producer without fixing its consumer only moves the defect.
+
+    The ETL was corrected to emit canonical horizons, but the viewer still named
+    ports_2035 and ports_2050 in six places, so under the canonical mode those six
+    would have rendered blank. The viewer now reads its horizon vocabulary from the
+    manifest, the same way the model reads horizons from its data.
+    """
+
+    def test_no_retired_horizon_field_in_any_render_path(self, app_js):
+        import re
+        # comment lines may discuss the old names; code must not use them
+        code = "\n".join(l for l in app_js.splitlines() if not l.strip().startswith("//"))
+        for retired in ("ports_2035", "ports_2050"):
+            assert retired not in code, f"the viewer still reads {retired}"
+
+    def test_viewer_derives_horizons_from_the_manifest(self, app_js):
+        assert "setHorizons" in app_js and "horizonState" in app_js
+        assert "manifest.horizons" in app_js
+
+    def test_viewer_has_a_horizon_lookup_helper(self, app_js):
+        assert "function portsAt(" in app_js
+
+
+class TestViewerKeyboardAccess:
+    """The site list is the primary interaction and was mouse-only."""
+
+    def test_list_items_are_focusable_and_labelled(self, app_js):
+        assert "li.tabIndex = 0" in app_js
+        assert "setAttribute('role', 'button')" in app_js
+        assert "aria-label" in app_js
+
+    def test_selection_and_pinning_are_reachable_by_keyboard(self, app_js):
+        assert "li.onkeydown" in app_js
+        assert "'Enter'" in app_js
+        assert "e.key === 'p'" in app_js, "pinning must not be right-click only"
+
+    def test_arrow_keys_move_between_sites(self, app_js):
+        assert "ArrowDown" in app_js and "ArrowUp" in app_js

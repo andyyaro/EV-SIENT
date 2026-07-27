@@ -83,6 +83,39 @@ function toast(msg, ms = 2600) {
 
 // ------------------------------------------------------------- data loading
 
+// Horizon vocabulary, read from the manifest rather than hard-coded. The viewer used to
+// name ports_2035 and ports_2050 directly in six places; when the ETL was corrected to
+// emit canonical horizons those six turned into blanks, because fixing a producer without
+// fixing its consumer only moves the defect. The horizons now come from the data, which is
+// the same ML-06 discipline the model applies to itself.
+const horizonState = { years: [], labels: {} };
+
+function setHorizons(manifest) {
+  const years = (manifest && Array.isArray(manifest.horizons)) ? manifest.horizons.slice() : [];
+  horizonState.years = years;
+  horizonState.labels = (manifest && manifest.horizon_labels) || {};
+}
+
+/** Active ports at a horizon, for whichever vocabulary this payload uses. */
+function portsAt(p, year, variant) {
+  const rs = p.right_sizing || {};
+  const suffix = variant === 'high' ? '_high' : '_base';
+  const fromRs = rs[`ports_${year}${suffix}`];
+  if (fromRs !== undefined && fromRs !== null) return fromRs;
+  const direct = variant === 'high' ? p[`ports_${year}_high`] : p[`ports_${year}`];
+  return direct;
+}
+
+/** First and last horizon, for the one-line summary in the site list. */
+function portsSpan(p) {
+  const ys = horizonState.years;
+  if (!ys.length) return null;
+  const first = portsAt(p, ys[0], 'base');
+  const last = portsAt(p, ys[ys.length - 1], 'base');
+  if (first === undefined && last === undefined) return null;
+  return { firstYear: ys[0], lastYear: ys[ys.length - 1], first, last };
+}
+
 async function loadManifest() {
   // The manifest states which model mode produced this payload, and its horizon
   // vocabulary. It shipped with the build from the beginning and nothing ever read it,
@@ -454,16 +487,43 @@ function renderList() {
 
     const mid = el('div');
     mid.appendChild(el('div', 's-name', esc(p.site_name)));
+    const span = portsSpan(p);
+    const portsText = span
+      ? `${int(span.first)}→${int(span.last)} ports (${esc(String(span.firstYear))}→${esc(String(span.lastYear))})`
+      : 'ports n/a';
     mid.appendChild(el('div', 's-meta',
-      `${esc(p.site_type)} · ${esc(p.city)} · ${p.ports_now}→${p.ports_2050} ports`));
+      `${esc(p.site_type)} · ${esc(p.city)} · ${portsText}`));
 
     const sc = el('div', 's-score', `${num(p.readiness_score, 1)}<small>SCORE</small>`);
     sc.style.color = colour;
 
     li.append(rank, mid, sc);
+
+    // The site list is the app's primary interaction and was mouse-only: not focusable,
+    // no key handling, and pinning was reachable solely by right-click. Anyone navigating
+    // by keyboard could not select a site at all, which put the whole explorer out of
+    // reach rather than merely making it awkward.
+    li.tabIndex = 0;
+    li.setAttribute('role', 'button');
+    li.setAttribute('aria-label',
+      `${p.site_name}, rank ${p.model_rank}, readiness ${num(p.readiness_score, 1)}. ` +
+      `${p.recommendation_tier}. Enter to select, P to pin for comparison.`);
+    if (p.site_id === state.selected) li.setAttribute('aria-current', 'true');
+
     li.onclick = () => select(p.site_id);
     li.oncontextmenu = (e) => { e.preventDefault(); togglePin(p.site_id); };
-    li.title = `${p.recommendation_tier}\nRight-click to pin for comparison`;
+    li.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(p.site_id); }
+      else if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePin(p.site_id); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const items = [...ol.querySelectorAll('li')];
+        const i = items.indexOf(li);
+        const next = items[e.key === 'ArrowDown' ? i + 1 : i - 1];
+        if (next) next.focus();
+      }
+    };
+    li.title = `${p.recommendation_tier}\nEnter to select · P to pin · right-click also pins`;
     ol.appendChild(li);
   }
 }
@@ -631,9 +691,16 @@ function renderPanel(p) {
     <div class="tab-body hidden" data-body="sizing">
       <h4 class="sec">Port trajectory</h4>
       <dl class="kv">
-        <dt>Install now</dt><dd>${int(p.ports_now)}</dd>
-        <dt>2035 (base / high)</dt><dd>${int(p.right_sizing?.ports_2035_base)} / ${int(p.right_sizing?.ports_2035_high)}</dd>
-        <dt>2050 (base / high)</dt><dd>${int(p.right_sizing?.ports_2050_base)} / ${int(p.right_sizing?.ports_2050_high)}</dd>
+        ${horizonState.years.map((y, i) => {
+          const label = horizonState.labels[y] || String(y);
+          const base = portsAt(p, y, 'base');
+          const high = portsAt(p, y, 'high');
+          const value = (high === undefined || high === null || high === base)
+            ? int(base)
+            : `${int(base)} / ${int(high)}`;
+          const suffix = (high === undefined || high === null || high === base) ? '' : ' (base / high)';
+          return `<dt>${esc(label)}${suffix}</dt><dd>${value}</dd>`;
+        }).join('')}
         <dt>Pathway capacity to build</dt><dd>${int(p.right_sizing?.future_ready_capacity)}</dd>
         <dt>Site capacity cap</dt><dd>${int(p.right_sizing?.site_capacity_cap)}</dd>
       </dl>
@@ -789,6 +856,16 @@ function renderTray() {
   $('#trayHint').textContent = `${state.pinned.length} of ${MAX_PINS} pinned`;
 }
 
+
+/** One comparison column per horizon in the active vocabulary. */
+function horizonColumns() {
+  if (!horizonState.years.length) return [['Ports', (p) => int(p.ports_now)]];
+  return horizonState.years.map((y) => [
+    `Ports ${horizonState.labels[y] || y} (base)`,
+    (p) => int(portsAt(p, y, 'base')),
+  ]);
+}
+
 const COMPARE_ROWS = [
   ['Model rank', (p) => '#' + p.model_rank],
   ['Readiness score', (p) => num(p.readiness_score, 1)],
@@ -801,9 +878,8 @@ const COMPARE_ROWS = [
   ['Data confidence', (p) => `${p.data_confidence_level} (${num(p.data_confidence_score, 0)})`, true],
   ['Electrical risk', (p) => p.electrical?.risk_level ?? '—', true],
   ['Worst-case rank change', (p) => int(p.electrical?.worst_case_rank_change)],
-  ['Ports now', (p) => int(p.ports_now)],
-  ['Ports 2035 (base)', (p) => int(p.right_sizing?.ports_2035_base)],
-  ['Ports 2050 (base)', (p) => int(p.right_sizing?.ports_2050_base)],
+  // Horizon columns are generated from the manifest's vocabulary, not named here.
+  ...horizonColumns(),
   ['Pathway capacity', (p) => int(p.right_sizing?.future_ready_capacity)],
   ['Sessions/day', (p) => num(p.expected_sessions_day, 2)],
   ['Utilisation', (p) => num((p.estimated_utilization ?? 0) * 100, 1) + '%'],
@@ -911,7 +987,9 @@ async function start(token) {
 
   const meta = data.metadata ?? {};
   const manifest = await loadManifest();
+  setHorizons(manifest);
   renderModeBadge(manifest);
+  renderList();   // re-render now that the horizon vocabulary is known
 
   // Standing caveats. Each one appears in the reports, and the viewer used to carry only
   // two of the four: the 0-of-12 confidence statement and the massing disclaimer were
