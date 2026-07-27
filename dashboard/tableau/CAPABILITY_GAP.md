@@ -57,14 +57,55 @@ this assessment exists to prevent.
 Tableau Public publishes with `showTabs: false` and the authoring server emits no
 tab-visibility setting, so a reader landing on the viz sees the dashboard and nothing else.
 
-**All seven worksheets are live and directly addressable** (verified, HTTP 200 each) at
-`https://public.tableau.com/app/profile/yiguedan.philippe.andy.yaro/viz/EV_Charging_Site_Readiness_M2_Canonical/<Sheet>`:
+**All seven worksheets are live and individually addressable.** Sheet names:
 
 `ReadinessbySite` · `StartervsPathwayPorts` · `PortsAcrossHorizons` · `PeakWaitsbySite` ·
 `LifecycleCostbyHorizon` · `NetCO2ebyHorizon` · `SiteMap`
 
-For presenting, prefer these over the dashboard: each sheet gets the full canvas, which also
-sidesteps the zone-sizing limitation above entirely.
+### The share links
+
+These are the **embed / share** form — what Tableau's own Share button produces. Use these in
+an `<iframe>`, a deck, or the project website. Every one was rendered and checked: all seven
+worksheets return a real chart (792×681), none blank.
+
+| Chart | Share link |
+|---|---|
+| Site readiness ranking | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Starter vs pathway ports | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/StartervsPathwayPorts?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Active ports by horizon | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PortsAcrossHorizons?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Queue wait, minutes | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PeakWaitsbySite?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Lifecycle cost NPV | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/LifecycleCostbyHorizon?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Net CO2e per year | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/NetCO2ebyHorizon?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Candidate sites map | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/SiteMap?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+| Milestone 2 Overview (dashboard) | <https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/Milestone2Overview?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link> |
+
+### Use the SHARE url, not the page url — they are not the same thing
+
+**Share / embed** — what Tableau's own Share button produces, and the form to use in an
+`<iframe>`, a deck, or anywhere the viz should render on its own:
+
+```
+https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/<Sheet>?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link
+```
+
+**Page** — the profile-app route, with profile chrome around it. Fine for a human clicking
+through, wrong for embedding:
+
+```
+https://public.tableau.com/app/profile/yiguedan.philippe.andy.yaro/viz/EV_Charging_Site_Readiness_M2_Canonical/<Sheet>
+```
+
+The `/views/` base is also what the static-image endpoint uses
+(`/views/<workbook>/<sheet>.png`), which is corroboration that it is the direct-render route.
+
+**A weak check, recorded as weak:** both forms return HTTP 200 and both return the same
+1 442-byte JavaScript shell, because Tableau Public is a single-page app. A status-code test
+proves the URL resolves and nothing more — it cannot tell you the viz rendered, and it cannot
+distinguish these two forms. Confirming a Tableau URL genuinely works means loading it in a
+browser or fetching the `.png` endpoint.
+
+For presenting, prefer individual sheets over the dashboard: each gets the full canvas, which
+also sidesteps the zone-sizing limitation above entirely.
 
 ## What was *not* a gap
 

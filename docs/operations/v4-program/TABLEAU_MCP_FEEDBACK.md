@@ -161,19 +161,30 @@ The generated `.twb` contains **no tab-visibility setting whatsoever** (grepped:
 `show-tabs`, no equivalent). Tableau Public therefore applies its default, `showTabs: false`,
 and a reader who opens the published URL sees only the default view.
 
-Every other worksheet is genuinely published — all seven of ours return HTTP 200 at
-`/viz/<workbook>/<SheetName>` — but there is **no navigation to them from the viz**. A caller
-who builds seven sheets and one dashboard reasonably expects seven reachable sheets, and gets
-one, silently.
+Every other worksheet is genuinely published and individually addressable, but there is **no
+navigation to them from the viz**. A caller who builds seven sheets and one dashboard
+reasonably expects seven reachable sheets, and gets one, silently.
+
+Two URL forms exist and they are **not** interchangeable — the distinction is undocumented
+and easy to get wrong:
+
+| Purpose | Form |
+|---|---|
+| Share / embed (what the Share button gives) | `/views/<workbook>/<Sheet>?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link` |
+| Profile page route | `/app/profile/<profile>/viz/<workbook>/<Sheet>` |
+
+Both return HTTP 200 and both return the same ~1.4 KB JavaScript shell, so a status-code
+check cannot tell them apart or confirm either renders.
 
 This interacts badly with issue 6: a chart squeezed into a dashboard zone renders narrow and
 cannot be fixed, while the same chart on its own tab renders full-size — but that tab is
 exactly what the reader cannot reach.
 
 **Suggested fix.** A workbook-level `"show_tabs": true` in the spec, or at minimum a line in
-`PUBLISHING_WORKFLOW.md` saying that published workbooks hide tabs by default and listing the
-per-sheet URL pattern as the workaround. The URL pattern is genuinely useful and is not
-documented anywhere.
+`PUBLISHING_WORKFLOW.md` saying that published workbooks hide tabs by default, plus **both**
+per-sheet URL forms and which is which. Better still, have `publish_to_tableau_public` return
+a `sheet_urls` map in its result — the server already resolves and verifies the workbook URL,
+so it is well placed to emit the share form for every sheet it just published.
 
 ---
 
