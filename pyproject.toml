@@ -18,6 +18,10 @@ dependencies = [
 gis = ["geopandas>=0.14", "contextily>=1.5", "xyzservices>=2024.0"]
 test = ["pytest>=8.0", "pytest-cov>=4.1"]
 presentation = ["pillow>=10.0", "reportlab>=4.0"]
+# scripts/md_to_docx.py regenerates the reports/milestone-2/*.docx from their Markdown
+# sources. It was previously undeclared, so the .docx could not be rebuilt from a
+# documented environment and had drifted from the Markdown it is generated from.
+reports = ["python-docx>=1.1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
