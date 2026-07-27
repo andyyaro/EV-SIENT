@@ -68,6 +68,13 @@ from fcf_m2.visuals import audit_footer_metadata
 p = audit_footer_metadata('dashboard/static/footer_log.json','dashboard/static')
 assert p == [], p\""
 
+# Gated on the .twb, NEVER the .twbx digest. Measured: two consecutive builds from a
+# byte-identical spec give an identical .twb and DIFFERENT .twbx digests, because the
+# embedded Hyper extracts carry non-deterministic engine state. A package-digest gate would
+# fail on every run and be deleted within a week, taking the real check with it.
+gate "tableau: workbook data matches the contract; .twb declares its sheets and caveats" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_tableau_workbook.py -q"
+
 gate "secrets: no keys/tokens/account IDs in tracked files" \
   bash -c "cd '$REPO' && '$PY' scripts/secret_scan.py"
 

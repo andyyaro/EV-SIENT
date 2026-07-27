@@ -36,3 +36,15 @@ release/
 # loads, reproducible on demand, and bundled at desktop-packaging time, so committing it
 # would add 20 MB to every clone of a planning-study repository for no determinism gain.
 explorer/web/vendor/
+
+# Tableau build products that are NOT byte-reproducible.
+#
+# Measured, not assumed: two consecutive builds from a byte-identical spec produce an
+# identical .twb and DIFFERENT .twbx digests, because the embedded Hyper extracts carry
+# non-deterministic engine state. Tracking them would put a new binary in every commit that
+# touches the workbook, and would tempt someone to gate on a digest that cannot hold.
+#
+# The .twb IS tracked and IS gated (tests/test_tableau_workbook.py), together with the sheet
+# CSVs and the spec -- which is everything needed to rebuild.
+dashboard/tableau/build/*.twbx
+dashboard/tableau/build/Data/

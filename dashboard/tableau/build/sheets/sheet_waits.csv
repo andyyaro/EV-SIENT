@@ -1,0 +1,25 @@
+site_id,site_name,model_rank,series,wait_min,model_mode
+FFX004,Fairfax County Government Center,1,Median wait (p50),0.0,milestone2_v3
+FFX002,City of Fairfax Regional Library,2,Median wait (p50),0.0,milestone2_v3
+PWC002,Neabsco-Potomac Commuter Garage,3,Median wait (p50),0.0,milestone2_v3
+PWC006,Bull Run Library,4,Median wait (p50),0.0,milestone2_v3
+PWC007,Central Library,5,Median wait (p50),0.0,milestone2_v3
+FFX001,Fairfax City Hall or municipal building,6,Median wait (p50),0.0,milestone2_v3
+PWC004,Chinn Park Regional Library,7,Median wait (p50),0.0,milestone2_v3
+PWC001,PWC McCoart Government Center,8,Median wait (p50),0.0,milestone2_v3
+FFX003,Pohick Regional Library,9,Median wait (p50),0.0,milestone2_v3
+PWC008,Potomac Library,10,Median wait (p50),0.0,milestone2_v3
+PWC005,Haymarket Gainesville Library,11,Median wait (p50),0.0,milestone2_v3
+PWC003,Prince William County Public Safety Training Center,12,Median wait (p50),0.0,milestone2_v3
+FFX004,Fairfax County Government Center,1,Peak wait (p90),0.0,milestone2_v3
+FFX002,City of Fairfax Regional Library,2,Peak wait (p90),0.0,milestone2_v3
+PWC002,Neabsco-Potomac Commuter Garage,3,Peak wait (p90),0.0,milestone2_v3
+PWC006,Bull Run Library,4,Peak wait (p90),0.0,milestone2_v3
+PWC007,Central Library,5,Peak wait (p90),0.0,milestone2_v3
+FFX001,Fairfax City Hall or municipal building,6,Peak wait (p90),0.0,milestone2_v3
+PWC004,Chinn Park Regional Library,7,Peak wait (p90),0.0,milestone2_v3
+PWC001,PWC McCoart Government Center,8,Peak wait (p90),0.0,milestone2_v3
+FFX003,Pohick Regional Library,9,Peak wait (p90),0.0,milestone2_v3
+PWC008,Potomac Library,10,Peak wait (p90),0.0,milestone2_v3
+PWC005,Haymarket Gainesville Library,11,Peak wait (p90),0.0,milestone2_v3
+PWC003,Prince William County Public Safety Training Center,12,Peak wait (p90),0.0,milestone2_v3

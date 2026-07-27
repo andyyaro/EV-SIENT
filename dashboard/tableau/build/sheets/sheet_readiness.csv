@@ -1,0 +1,13 @@
+site_id,site_name,jurisdiction,model_rank,readiness_score,recommendation_tier,data_confidence,model_mode
+FFX004,Fairfax County Government Center,fairfax,1,53.4,Tier 1 — advance to site screening,Low,milestone2_v3
+FFX002,City of Fairfax Regional Library,fairfax,2,51.8,Tier 1 — advance to site screening,Low,milestone2_v3
+PWC002,Neabsco-Potomac Commuter Garage,pwc,3,51.1,High-review candidate,Low,milestone2_v3
+PWC006,Bull Run Library,pwc,4,50.2,"Tier 2 — promising candidate, refine data",Low,milestone2_v3
+PWC007,Central Library,pwc,5,49.3,"Tier 2 — promising candidate, refine data",Low,milestone2_v3
+FFX001,Fairfax City Hall or municipal building,fairfax,6,48.7,"Tier 2 — promising candidate, refine data",Low,milestone2_v3
+PWC004,Chinn Park Regional Library,pwc,7,47.5,"Tier 2 — promising candidate, refine data",Low,milestone2_v3
+PWC001,PWC McCoart Government Center,pwc,8,45.4,"Tier 2 — promising candidate, refine data",Low,milestone2_v3
+FFX003,Pohick Regional Library,fairfax,9,44.9,Tier 3 — lower priority / monitor,Low,milestone2_v3
+PWC008,Potomac Library,pwc,10,41.8,Tier 3 — lower priority / monitor,Low,milestone2_v3
+PWC005,Haymarket Gainesville Library,pwc,11,39.0,Tier 3 — lower priority / monitor,Low,milestone2_v3
+PWC003,Prince William County Public Safety Training Center,pwc,12,32.8,Low public-priority / special-use,Low,milestone2_v3

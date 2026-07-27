@@ -1,0 +1,10 @@
+horizon_year,cost_case,lifecycle_cost_npv_usd,avoided_overbuild_cost_usd,estimate_class,model_mode
+2036,DEF,617403.0,0.0,screening_planning_estimate,milestone2_v3
+2036,OVB,1872578.0,0.0,screening_planning_estimate,milestone2_v3
+2036,STG,1560499.0,312079.0,screening_planning_estimate,milestone2_v3
+2046,DEF,617403.0,0.0,screening_planning_estimate,milestone2_v3
+2046,OVB,2635638.0,0.0,screening_planning_estimate,milestone2_v3
+2046,STG,2294469.0,341169.0,screening_planning_estimate,milestone2_v3
+2056,DEF,617403.0,0.0,screening_planning_estimate,milestone2_v3
+2056,OVB,3407606.0,0.0,screening_planning_estimate,milestone2_v3
+2056,STG,3014200.0,393406.0,screening_planning_estimate,milestone2_v3
