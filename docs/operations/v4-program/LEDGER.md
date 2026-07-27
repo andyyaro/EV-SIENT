@@ -241,6 +241,52 @@ base MATLAB without Simulink. The Simulink model exists only to visualize signal
 MATLAB Function block is explicitly an *"Illustrative clamp only — see managedCharging.m for the
 authoritative strategies"* (l.187-188). The native view must carry both statements.
 
+### 3D explorer findings (Phase 3 — verified first-hand by the lead, ahead of lane L10)
+
+**FIND-3D-01 (high) — the governing finding holds, and it is a *hybrid*, which is worse than described.**
+`fcf3d/build_sites.py` `SOURCES` (l.47-55) reads **both** conventions at once:
+
+- scoring detail ← `tests/fixture_legacy_v2_site_results.csv` (**legacy_v2**)
+- ports trajectory ← `tests/fixture_legacy_v2_right_sizing.csv` (**legacy_v2**)
+- electrical risk ← `data/inputs/legacy_v2_electrical_risk_summary_frozen_*.csv` (**legacy_v2**)
+- per-horizon scenarios ← `data/contract/v1/scenario_table.csv` (**milestone2_v3**)
+- plus three `dashboard/tableau/patch_package/` CSVs and `data/provenance/site_coordinate_sources.csv`
+
+and emits `ports_2035` / `ports_2050` (l.436-437) plus `ports_2035_base|high` / `ports_2050_base|high`
+(l.463-466), while `build_scenarios` (l.278-302) simultaneously emits V3 `horizon_year` values from the
+contract. A single feature therefore carries **both** horizon conventions side by side. The brief anticipated
+"superseded numbers under a V3 repository"; the reality is superseded *and* canonical numbers in the same
+payload, which is harder for a reader to detect.
+
+**FIND-3D-02 (high) — 15 of 46 explorer tests silently skip on any machine but the original author's.**
+`tests/test_pipeline.py` sets `REPO = os.environ.get("FCF_REPO", os.path.expanduser("~/fcf/Future-City-Fellowship--main-2"))`
+and gates 16 tests on `needs_repo = pytest.mark.skipif(not os.path.isdir(REPO), …)`. That path does not
+exist here. Observed directly:
+
+- without `FCF_REPO`: **31 passed, 15 skipped**
+- with `FCF_REPO` pointing at the real repo: **46 passed**
+
+The skipped set **includes `test_attribution_reproduces_model_score`** — the one test whose stated purpose is
+to stop "the map quietly telling planners a wrong story." A guard that defaults to not running is not a
+guard. Phase 3 fixes this by resolving the path from the integrated repo root, so no environment variable is
+needed.
+
+**FIND-3D-03 (info, and it is good news) — the mirrored weights are currently correct.** Re-derived line by
+line against `src/fcf_m2/scoring.py:140-175`. All four subscore weights (0.45 / 0.30 / 0.15 / 0.10) and all
+19 driver weights match exactly, each subscore's drivers summing to 1.00. The `invert` flags match the six
+terms the model wraps in `(1 - x)`. The one apparent mismatch — the explorer's `hours_open_n` against the
+model's inline `df["hours_open"].clip(0,24)/24` — is **deliberately** reconciled in
+`build_sites.py::prepare()` (l.318-323), which recreates the column with a comment saying exactly that.
+No drift exists today.
+
+**FIND-3D-04 (medium) — but there is nothing to drift-gate *against*.** The model holds these weights as
+**inline numeric literals inside the formula** (`scoring.py:171-174` and the subscore blocks); there is no
+`SUBSCORE_WEIGHTS` or `DRIVERS` constant in `fcf_m2.scoring` to import. The explorer's own
+`test_subscore_weights_sum_to_one` only checks its *own* dict sums to 1.0 — it never compares against the
+model. So today's agreement is a coincidence maintained by hand. Phase 3 should extract named constants in
+`scoring.py`, use them in the formula (changing no numbers), and have the explorer import them, turning a
+hand-maintained match into an enforced one.
+
 ### Other findings not yet acted on
 
 | # | Finding | Source | Confirmed? | Acted on? |
