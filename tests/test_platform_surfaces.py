@@ -19,6 +19,25 @@ BUNDLE = REPO / "site/platform"
 MANIFEST = BUNDLE / "surfaces.json"
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _bundle_assembled():
+    """Assemble the bundle if it is not already there.
+
+    The copied surfaces (explorer, dashboard, contract, nfc) are GENERATED and therefore
+    gitignored, so a clean checkout has the manifest but not the files it describes. Without
+    this the tests pass locally — where a previous build left the copies behind — and fail on
+    CI, which is exactly the shape of defect that had CI red for five commits earlier today.
+
+    Building rather than skipping: a test that quietly skips on CI is a test that does not
+    exist.
+    """
+    if not (BUNDLE / "explorer/index.html").is_file():
+        result = subprocess.run(
+            [sys.executable, str(REPO / "scripts/build_platform_surfaces.py")],
+            cwd=REPO, capture_output=True, text=True)
+        assert result.returncode == 0, result.stdout + result.stderr
+
+
 @pytest.fixture(scope="module")
 def surfaces() -> dict:
     return json.loads(MANIFEST.read_text())
