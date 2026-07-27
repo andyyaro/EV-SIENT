@@ -75,6 +75,12 @@ assert p == [], p\""
 # The platform's central promise: no number appears without its provenance available. This
 # also enforces STRICT JSON on the web-tier export -- numpy NaN wrote 281 bare `NaN` literals
 # that Python reads back happily and a browser rejects outright.
+# An operation IS the CLI command, not a second code path -- which is what makes Gate 7's
+# byte-equivalence a property of the design. Also enforces that the web tier lists every
+# capability with a stated reason where it cannot run one, rather than hiding it.
+gate "platform: operations match the CLI byte-for-byte; web tier states what it cannot do" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_operations.py -q"
+
 gate "platform: every displayed number resolves to its lineage; both tiers agree" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_provenance.py -q"
 
