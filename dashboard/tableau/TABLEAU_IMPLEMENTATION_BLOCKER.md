@@ -1,5 +1,20 @@
 # Tableau Implementation Blocker — and the complete workaround package
 
+**Status (2026-07-27): CLOSED, partially. A verified `.twbx` was produced, opened in Tableau
+Public, and published.** See [`CAPABILITY_GAP.md`](CAPABILITY_GAP.md) for the four residual
+blockers that remain genuinely open, and for a defect in this document's own build recipe.
+
+> **The recipe below is superseded in one important respect.** Its data source
+> `tbl_readiness_confidence.csv` carries `readiness_score` and `model_rank` **byte-equal to
+> `legacy_v2`** beside a v3 confidence column, with nothing declaring the mix. Following this
+> recipe by hand publishes the **wrong top-ranked site**. Read `CAPABILITY_GAP.md` first.
+>
+> Live: <https://public.tableau.com/app/profile/yiguedan.philippe.andy.yaro/viz/EV_Charging_Site_Readiness_M2_Canonical/Milestone2Overview>
+
+---
+
+## Superseded status, kept for the record
+
 **Status (2026-07-19): a verified `.twbx` presentation dashboard could NOT be produced in this environment.**
 
 ## Why this is blocked

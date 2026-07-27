@@ -15,13 +15,14 @@
         <relation connection="textscan.c0dbfsct50e21a2sbyx423pp0mxp" name="sheet_readiness.csv" table="[sheet_readiness#csv]" type="table">
           <columns character-set="UTF-8" header="yes" locale="en_US" separator=",">
             <column datatype="string" name="site_id" ordinal="0" />
-            <column datatype="string" name="site_name" ordinal="1" />
-            <column datatype="string" name="jurisdiction" ordinal="2" />
-            <column datatype="integer" name="model_rank" ordinal="3" />
-            <column datatype="real" name="readiness_score" ordinal="4" />
-            <column datatype="string" name="recommendation_tier" ordinal="5" />
-            <column datatype="string" name="data_confidence" ordinal="6" />
-            <column datatype="string" name="model_mode" ordinal="7" />
+            <column datatype="string" name="site_ranked" ordinal="1" />
+            <column datatype="string" name="site_name" ordinal="2" />
+            <column datatype="string" name="jurisdiction" ordinal="3" />
+            <column datatype="integer" name="model_rank" ordinal="4" />
+            <column datatype="real" name="readiness_score" ordinal="5" />
+            <column datatype="string" name="recommendation_tier" ordinal="6" />
+            <column datatype="string" name="data_confidence" ordinal="7" />
+            <column datatype="string" name="model_mode" ordinal="8" />
           </columns>
         </relation>
         <metadata-records>
@@ -41,12 +42,27 @@
             </attributes>
           </metadata-record>
           <metadata-record class="column">
+            <remote-name>site_ranked</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[site_ranked]</local-name>
+            <parent-name>[sheet_readiness.csv]</parent-name>
+            <remote-alias>site_ranked</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class="column">
             <remote-name>site_name</remote-name>
             <remote-type>129</remote-type>
             <local-name>[site_name]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>site_name</remote-alias>
-            <ordinal>1</ordinal>
+            <ordinal>2</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -61,7 +77,7 @@
             <local-name>[jurisdiction]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>jurisdiction</remote-alias>
-            <ordinal>2</ordinal>
+            <ordinal>3</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -76,7 +92,7 @@
             <local-name>[model_rank]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>model_rank</remote-alias>
-            <ordinal>3</ordinal>
+            <ordinal>4</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -91,7 +107,7 @@
             <local-name>[readiness_score]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>readiness_score</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -106,7 +122,7 @@
             <local-name>[recommendation_tier]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>recommendation_tier</remote-alias>
-            <ordinal>5</ordinal>
+            <ordinal>6</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -121,7 +137,7 @@
             <local-name>[data_confidence]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>data_confidence</remote-alias>
-            <ordinal>6</ordinal>
+            <ordinal>7</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -136,7 +152,7 @@
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_readiness.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>7</ordinal>
+            <ordinal>8</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -149,6 +165,7 @@
       </connection>
       <aliases enabled="yes" />
       <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+      <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
       <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
       <column datatype="string" name="[jurisdiction]" role="dimension" type="nominal" />
       <column datatype="integer" name="[model_rank]" role="measure" type="quantitative" />
@@ -174,12 +191,25 @@
               <contains-null>true</contains-null>
             </metadata-record>
             <metadata-record class="column">
+              <remote-name>site_ranked</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[site_ranked]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>site_ranked</remote-alias>
+              <ordinal>1</ordinal>
+              <family>sheet_readiness.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>12</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>site_name</remote-name>
               <remote-type>129</remote-type>
               <local-name>[site_name]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>site_name</remote-alias>
-              <ordinal>1</ordinal>
+              <ordinal>2</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -192,7 +222,7 @@
               <local-name>[jurisdiction]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>jurisdiction</remote-alias>
-              <ordinal>2</ordinal>
+              <ordinal>3</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -205,7 +235,7 @@
               <local-name>[model_rank]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_rank</remote-alias>
-              <ordinal>3</ordinal>
+              <ordinal>4</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -218,7 +248,7 @@
               <local-name>[readiness_score]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>readiness_score</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -231,7 +261,7 @@
               <local-name>[recommendation_tier]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>recommendation_tier</remote-alias>
-              <ordinal>5</ordinal>
+              <ordinal>6</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -244,7 +274,7 @@
               <local-name>[data_confidence]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>data_confidence</remote-alias>
-              <ordinal>6</ordinal>
+              <ordinal>7</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -257,7 +287,7 @@
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>7</ordinal>
+              <ordinal>8</ordinal>
               <family>sheet_readiness.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -279,11 +309,12 @@
         <relation connection="textscan.khz88xnwx5bpj6z4ohwedebq31so" name="sheet_ports.csv" table="[sheet_ports#csv]" type="table">
           <columns character-set="UTF-8" header="yes" locale="en_US" separator=",">
             <column datatype="string" name="site_id" ordinal="0" />
-            <column datatype="string" name="site_name" ordinal="1" />
-            <column datatype="integer" name="model_rank" ordinal="2" />
-            <column datatype="string" name="series" ordinal="3" />
-            <column datatype="integer" name="ports" ordinal="4" />
-            <column datatype="string" name="model_mode" ordinal="5" />
+            <column datatype="string" name="site_ranked" ordinal="1" />
+            <column datatype="string" name="site_name" ordinal="2" />
+            <column datatype="integer" name="model_rank" ordinal="3" />
+            <column datatype="string" name="series" ordinal="4" />
+            <column datatype="integer" name="ports" ordinal="5" />
+            <column datatype="string" name="model_mode" ordinal="6" />
           </columns>
         </relation>
         <metadata-records>
@@ -303,12 +334,27 @@
             </attributes>
           </metadata-record>
           <metadata-record class="column">
+            <remote-name>site_ranked</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[site_ranked]</local-name>
+            <parent-name>[sheet_ports.csv]</parent-name>
+            <remote-alias>site_ranked</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class="column">
             <remote-name>site_name</remote-name>
             <remote-type>129</remote-type>
             <local-name>[site_name]</local-name>
             <parent-name>[sheet_ports.csv]</parent-name>
             <remote-alias>site_name</remote-alias>
-            <ordinal>1</ordinal>
+            <ordinal>2</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -323,7 +369,7 @@
             <local-name>[model_rank]</local-name>
             <parent-name>[sheet_ports.csv]</parent-name>
             <remote-alias>model_rank</remote-alias>
-            <ordinal>2</ordinal>
+            <ordinal>3</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -338,7 +384,7 @@
             <local-name>[series]</local-name>
             <parent-name>[sheet_ports.csv]</parent-name>
             <remote-alias>series</remote-alias>
-            <ordinal>3</ordinal>
+            <ordinal>4</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -353,7 +399,7 @@
             <local-name>[ports]</local-name>
             <parent-name>[sheet_ports.csv]</parent-name>
             <remote-alias>ports</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -368,7 +414,7 @@
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_ports.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>5</ordinal>
+            <ordinal>6</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -381,6 +427,7 @@
       </connection>
       <aliases enabled="yes" />
       <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+      <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
       <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
       <column datatype="integer" name="[model_rank]" role="measure" type="quantitative" />
       <column datatype="string" name="[series]" role="dimension" type="nominal" />
@@ -404,12 +451,25 @@
               <contains-null>true</contains-null>
             </metadata-record>
             <metadata-record class="column">
+              <remote-name>site_ranked</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[site_ranked]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>site_ranked</remote-alias>
+              <ordinal>1</ordinal>
+              <family>sheet_ports.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>24</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>site_name</remote-name>
               <remote-type>129</remote-type>
               <local-name>[site_name]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>site_name</remote-alias>
-              <ordinal>1</ordinal>
+              <ordinal>2</ordinal>
               <family>sheet_ports.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -422,7 +482,7 @@
               <local-name>[model_rank]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_rank</remote-alias>
-              <ordinal>2</ordinal>
+              <ordinal>3</ordinal>
               <family>sheet_ports.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -435,7 +495,7 @@
               <local-name>[series]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>series</remote-alias>
-              <ordinal>3</ordinal>
+              <ordinal>4</ordinal>
               <family>sheet_ports.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -448,7 +508,7 @@
               <local-name>[ports]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>ports</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_ports.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -461,7 +521,7 @@
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>5</ordinal>
+              <ordinal>6</ordinal>
               <family>sheet_ports.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -486,7 +546,8 @@
             <column datatype="string" name="scenario_name" ordinal="1" />
             <column datatype="integer" name="ports_active" ordinal="2" />
             <column datatype="integer" name="pathway_capacity" ordinal="3" />
-            <column datatype="string" name="model_mode" ordinal="4" />
+            <column datatype="string" name="horizon" ordinal="4" />
+            <column datatype="string" name="model_mode" ordinal="5" />
           </columns>
         </relation>
         <metadata-records>
@@ -551,12 +612,27 @@
             </attributes>
           </metadata-record>
           <metadata-record class="column">
+            <remote-name>horizon</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[horizon]</local-name>
+            <parent-name>[sheet_horizons.csv]</parent-name>
+            <remote-alias>horizon</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class="column">
             <remote-name>model_mode</remote-name>
             <remote-type>129</remote-type>
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_horizons.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -572,6 +648,7 @@
       <column datatype="string" name="[scenario_name]" role="dimension" type="nominal" />
       <column datatype="integer" name="[ports_active]" role="measure" type="quantitative" />
       <column datatype="integer" name="[pathway_capacity]" role="measure" type="quantitative" />
+      <column datatype="string" name="[horizon]" role="dimension" type="nominal" />
       <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
       <extract count="-1" enabled="true" units="records">
         <connection access_mode="readonly" author-locale="en_US" class="hyper" dbname="Data/horizons/horizons.hyper" default-settings="hyper" schema="Extract" sslmode="" tablename="Extract" update-time="">
@@ -630,12 +707,25 @@
               <contains-null>true</contains-null>
             </metadata-record>
             <metadata-record class="column">
+              <remote-name>horizon</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[horizon]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>horizon</remote-alias>
+              <ordinal>4</ordinal>
+              <family>sheet_horizons.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>10</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>model_mode</remote-name>
               <remote-type>129</remote-type>
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_horizons.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -656,22 +746,38 @@
         </named-connections>
         <relation connection="textscan.e72w0guk22iiyvko4tvhrcm1c4fc" name="sheet_costs.csv" table="[sheet_costs#csv]" type="table">
           <columns character-set="UTF-8" header="yes" locale="en_US" separator=",">
-            <column datatype="integer" name="horizon_year" ordinal="0" />
-            <column datatype="string" name="cost_case" ordinal="1" />
-            <column datatype="real" name="lifecycle_cost_npv_usd" ordinal="2" />
-            <column datatype="real" name="avoided_overbuild_cost_usd" ordinal="3" />
-            <column datatype="string" name="estimate_class" ordinal="4" />
-            <column datatype="string" name="model_mode" ordinal="5" />
+            <column datatype="string" name="horizon" ordinal="0" />
+            <column datatype="integer" name="horizon_year" ordinal="1" />
+            <column datatype="string" name="cost_case" ordinal="2" />
+            <column datatype="real" name="lifecycle_cost_npv_usd" ordinal="3" />
+            <column datatype="real" name="avoided_overbuild_cost_usd" ordinal="4" />
+            <column datatype="string" name="estimate_class" ordinal="5" />
+            <column datatype="string" name="model_mode" ordinal="6" />
           </columns>
         </relation>
         <metadata-records>
+          <metadata-record class="column">
+            <remote-name>horizon</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[horizon]</local-name>
+            <parent-name>[sheet_costs.csv]</parent-name>
+            <remote-alias>horizon</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
           <metadata-record class="column">
             <remote-name>horizon_year</remote-name>
             <remote-type>20</remote-type>
             <local-name>[horizon_year]</local-name>
             <parent-name>[sheet_costs.csv]</parent-name>
             <remote-alias>horizon_year</remote-alias>
-            <ordinal>0</ordinal>
+            <ordinal>1</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -686,7 +792,7 @@
             <local-name>[cost_case]</local-name>
             <parent-name>[sheet_costs.csv]</parent-name>
             <remote-alias>cost_case</remote-alias>
-            <ordinal>1</ordinal>
+            <ordinal>2</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -701,7 +807,7 @@
             <local-name>[lifecycle_cost_npv_usd]</local-name>
             <parent-name>[sheet_costs.csv]</parent-name>
             <remote-alias>lifecycle_cost_npv_usd</remote-alias>
-            <ordinal>2</ordinal>
+            <ordinal>3</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -716,7 +822,7 @@
             <local-name>[avoided_overbuild_cost_usd]</local-name>
             <parent-name>[sheet_costs.csv]</parent-name>
             <remote-alias>avoided_overbuild_cost_usd</remote-alias>
-            <ordinal>3</ordinal>
+            <ordinal>4</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -731,7 +837,7 @@
             <local-name>[estimate_class]</local-name>
             <parent-name>[sheet_costs.csv]</parent-name>
             <remote-alias>estimate_class</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -746,7 +852,7 @@
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_costs.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>5</ordinal>
+            <ordinal>6</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -758,6 +864,7 @@
         </metadata-records>
       </connection>
       <aliases enabled="yes" />
+      <column datatype="string" name="[horizon]" role="dimension" type="nominal" />
       <column datatype="integer" name="[horizon_year]" role="measure" type="quantitative" />
       <column datatype="string" name="[cost_case]" role="dimension" type="nominal" />
       <column datatype="real" name="[lifecycle_cost_npv_usd]" role="measure" type="quantitative" />
@@ -769,12 +876,25 @@
           <relation name="Extract" table="[Extract].[Extract]" type="table" />
           <metadata-records>
             <metadata-record class="column">
+              <remote-name>horizon</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[horizon]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>horizon</remote-alias>
+              <ordinal>0</ordinal>
+              <family>sheet_costs.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>9</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>horizon_year</remote-name>
               <remote-type>20</remote-type>
               <local-name>[horizon_year]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>horizon_year</remote-alias>
-              <ordinal>0</ordinal>
+              <ordinal>1</ordinal>
               <family>sheet_costs.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -787,7 +907,7 @@
               <local-name>[cost_case]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>cost_case</remote-alias>
-              <ordinal>1</ordinal>
+              <ordinal>2</ordinal>
               <family>sheet_costs.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -800,7 +920,7 @@
               <local-name>[lifecycle_cost_npv_usd]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>lifecycle_cost_npv_usd</remote-alias>
-              <ordinal>2</ordinal>
+              <ordinal>3</ordinal>
               <family>sheet_costs.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -813,7 +933,7 @@
               <local-name>[avoided_overbuild_cost_usd]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>avoided_overbuild_cost_usd</remote-alias>
-              <ordinal>3</ordinal>
+              <ordinal>4</ordinal>
               <family>sheet_costs.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -826,7 +946,7 @@
               <local-name>[estimate_class]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>estimate_class</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_costs.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -839,7 +959,7 @@
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>5</ordinal>
+              <ordinal>6</ordinal>
               <family>sheet_costs.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -864,9 +984,10 @@
             <column datatype="string" name="scenario_name" ordinal="1" />
             <column datatype="real" name="net_co2e_kg" ordinal="2" />
             <column datatype="real" name="net_co2e_tonnes" ordinal="3" />
-            <column datatype="string" name="grid_factor_source" ordinal="4" />
-            <column datatype="string" name="grid_factor_vintage" ordinal="5" />
-            <column datatype="string" name="model_mode" ordinal="6" />
+            <column datatype="string" name="horizon" ordinal="4" />
+            <column datatype="string" name="grid_factor_source" ordinal="5" />
+            <column datatype="string" name="grid_factor_vintage" ordinal="6" />
+            <column datatype="string" name="model_mode" ordinal="7" />
           </columns>
         </relation>
         <metadata-records>
@@ -931,12 +1052,27 @@
             </attributes>
           </metadata-record>
           <metadata-record class="column">
+            <remote-name>horizon</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[horizon]</local-name>
+            <parent-name>[sheet_emissions.csv]</parent-name>
+            <remote-alias>horizon</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class="column">
             <remote-name>grid_factor_source</remote-name>
             <remote-type>129</remote-type>
             <local-name>[grid_factor_source]</local-name>
             <parent-name>[sheet_emissions.csv]</parent-name>
             <remote-alias>grid_factor_source</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -951,7 +1087,7 @@
             <local-name>[grid_factor_vintage]</local-name>
             <parent-name>[sheet_emissions.csv]</parent-name>
             <remote-alias>grid_factor_vintage</remote-alias>
-            <ordinal>5</ordinal>
+            <ordinal>6</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -966,7 +1102,7 @@
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_emissions.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>6</ordinal>
+            <ordinal>7</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -982,6 +1118,7 @@
       <column datatype="string" name="[scenario_name]" role="dimension" type="nominal" />
       <column datatype="real" name="[net_co2e_kg]" role="measure" type="quantitative" />
       <column datatype="real" name="[net_co2e_tonnes]" role="measure" type="quantitative" />
+      <column datatype="string" name="[horizon]" role="dimension" type="nominal" />
       <column datatype="string" name="[grid_factor_source]" role="dimension" type="nominal" />
       <column datatype="string" name="[grid_factor_vintage]" role="dimension" type="nominal" />
       <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
@@ -1042,12 +1179,25 @@
               <contains-null>true</contains-null>
             </metadata-record>
             <metadata-record class="column">
+              <remote-name>horizon</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[horizon]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>horizon</remote-alias>
+              <ordinal>4</ordinal>
+              <family>sheet_emissions.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>10</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>grid_factor_source</remote-name>
               <remote-type>129</remote-type>
               <local-name>[grid_factor_source]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>grid_factor_source</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_emissions.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1060,7 +1210,7 @@
               <local-name>[grid_factor_vintage]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>grid_factor_vintage</remote-alias>
-              <ordinal>5</ordinal>
+              <ordinal>6</ordinal>
               <family>sheet_emissions.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1073,7 +1223,7 @@
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>6</ordinal>
+              <ordinal>7</ordinal>
               <family>sheet_emissions.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1095,11 +1245,12 @@
         <relation connection="textscan.scczgy87qzs2eqwr36iizpd39lux" name="sheet_waits.csv" table="[sheet_waits#csv]" type="table">
           <columns character-set="UTF-8" header="yes" locale="en_US" separator=",">
             <column datatype="string" name="site_id" ordinal="0" />
-            <column datatype="string" name="site_name" ordinal="1" />
-            <column datatype="integer" name="model_rank" ordinal="2" />
-            <column datatype="string" name="series" ordinal="3" />
-            <column datatype="real" name="wait_min" ordinal="4" />
-            <column datatype="string" name="model_mode" ordinal="5" />
+            <column datatype="string" name="site_ranked" ordinal="1" />
+            <column datatype="string" name="site_name" ordinal="2" />
+            <column datatype="integer" name="model_rank" ordinal="3" />
+            <column datatype="string" name="series" ordinal="4" />
+            <column datatype="real" name="wait_min" ordinal="5" />
+            <column datatype="string" name="model_mode" ordinal="6" />
           </columns>
         </relation>
         <metadata-records>
@@ -1119,12 +1270,27 @@
             </attributes>
           </metadata-record>
           <metadata-record class="column">
+            <remote-name>site_ranked</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[site_ranked]</local-name>
+            <parent-name>[sheet_waits.csv]</parent-name>
+            <remote-alias>site_ranked</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class="column">
             <remote-name>site_name</remote-name>
             <remote-type>129</remote-type>
             <local-name>[site_name]</local-name>
             <parent-name>[sheet_waits.csv]</parent-name>
             <remote-alias>site_name</remote-alias>
-            <ordinal>1</ordinal>
+            <ordinal>2</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1139,7 +1305,7 @@
             <local-name>[model_rank]</local-name>
             <parent-name>[sheet_waits.csv]</parent-name>
             <remote-alias>model_rank</remote-alias>
-            <ordinal>2</ordinal>
+            <ordinal>3</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1154,7 +1320,7 @@
             <local-name>[series]</local-name>
             <parent-name>[sheet_waits.csv]</parent-name>
             <remote-alias>series</remote-alias>
-            <ordinal>3</ordinal>
+            <ordinal>4</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1169,7 +1335,7 @@
             <local-name>[wait_min]</local-name>
             <parent-name>[sheet_waits.csv]</parent-name>
             <remote-alias>wait_min</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1184,7 +1350,7 @@
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_waits.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>5</ordinal>
+            <ordinal>6</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1197,6 +1363,7 @@
       </connection>
       <aliases enabled="yes" />
       <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+      <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
       <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
       <column datatype="integer" name="[model_rank]" role="measure" type="quantitative" />
       <column datatype="string" name="[series]" role="dimension" type="nominal" />
@@ -1220,12 +1387,25 @@
               <contains-null>true</contains-null>
             </metadata-record>
             <metadata-record class="column">
+              <remote-name>site_ranked</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[site_ranked]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>site_ranked</remote-alias>
+              <ordinal>1</ordinal>
+              <family>sheet_waits.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>24</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>site_name</remote-name>
               <remote-type>129</remote-type>
               <local-name>[site_name]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>site_name</remote-alias>
-              <ordinal>1</ordinal>
+              <ordinal>2</ordinal>
               <family>sheet_waits.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1238,7 +1418,7 @@
               <local-name>[model_rank]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_rank</remote-alias>
-              <ordinal>2</ordinal>
+              <ordinal>3</ordinal>
               <family>sheet_waits.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -1251,7 +1431,7 @@
               <local-name>[series]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>series</remote-alias>
-              <ordinal>3</ordinal>
+              <ordinal>4</ordinal>
               <family>sheet_waits.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1264,7 +1444,7 @@
               <local-name>[wait_min]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>wait_min</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_waits.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -1277,7 +1457,7 @@
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>5</ordinal>
+              <ordinal>6</ordinal>
               <family>sheet_waits.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1299,17 +1479,18 @@
         <relation connection="textscan.x129qx0d3ag3500zcabyol8qamzn" name="sheet_map.csv" table="[sheet_map#csv]" type="table">
           <columns character-set="UTF-8" header="yes" locale="en_US" separator=",">
             <column datatype="string" name="site_id" ordinal="0" />
-            <column datatype="string" name="site_name" ordinal="1" />
-            <column datatype="string" name="jurisdiction" ordinal="2" />
-            <column datatype="real" name="lat" ordinal="3" />
-            <column datatype="real" name="lon" ordinal="4" />
-            <column datatype="integer" name="model_rank" ordinal="5" />
-            <column datatype="real" name="readiness_score" ordinal="6" />
-            <column datatype="string" name="recommendation_tier" ordinal="7" />
-            <column datatype="string" name="data_confidence" ordinal="8" />
-            <column datatype="integer" name="ports_pathway_capacity" ordinal="9" />
-            <column datatype="string" name="capacity_basis" ordinal="10" />
-            <column datatype="string" name="model_mode" ordinal="11" />
+            <column datatype="string" name="site_ranked" ordinal="1" />
+            <column datatype="string" name="site_name" ordinal="2" />
+            <column datatype="string" name="jurisdiction" ordinal="3" />
+            <column datatype="real" name="lat" ordinal="4" />
+            <column datatype="real" name="lon" ordinal="5" />
+            <column datatype="integer" name="model_rank" ordinal="6" />
+            <column datatype="real" name="readiness_score" ordinal="7" />
+            <column datatype="string" name="recommendation_tier" ordinal="8" />
+            <column datatype="string" name="data_confidence" ordinal="9" />
+            <column datatype="integer" name="ports_pathway_capacity" ordinal="10" />
+            <column datatype="string" name="capacity_basis" ordinal="11" />
+            <column datatype="string" name="model_mode" ordinal="12" />
           </columns>
         </relation>
         <metadata-records>
@@ -1329,12 +1510,27 @@
             </attributes>
           </metadata-record>
           <metadata-record class="column">
+            <remote-name>site_ranked</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[site_ranked]</local-name>
+            <parent-name>[sheet_map.csv]</parent-name>
+            <remote-alias>site_ranked</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype="string" name="DebugRemoteType">"129"</attribute>
+              <attribute datatype="string" name="DebugWrapperType">"0"</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class="column">
             <remote-name>site_name</remote-name>
             <remote-type>129</remote-type>
             <local-name>[site_name]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>site_name</remote-alias>
-            <ordinal>1</ordinal>
+            <ordinal>2</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1349,7 +1545,7 @@
             <local-name>[jurisdiction]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>jurisdiction</remote-alias>
-            <ordinal>2</ordinal>
+            <ordinal>3</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1364,7 +1560,7 @@
             <local-name>[lat]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>lat</remote-alias>
-            <ordinal>3</ordinal>
+            <ordinal>4</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1379,7 +1575,7 @@
             <local-name>[lon]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>lon</remote-alias>
-            <ordinal>4</ordinal>
+            <ordinal>5</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1394,7 +1590,7 @@
             <local-name>[model_rank]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>model_rank</remote-alias>
-            <ordinal>5</ordinal>
+            <ordinal>6</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1409,7 +1605,7 @@
             <local-name>[readiness_score]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>readiness_score</remote-alias>
-            <ordinal>6</ordinal>
+            <ordinal>7</ordinal>
             <local-type>real</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1424,7 +1620,7 @@
             <local-name>[recommendation_tier]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>recommendation_tier</remote-alias>
-            <ordinal>7</ordinal>
+            <ordinal>8</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1439,7 +1635,7 @@
             <local-name>[data_confidence]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>data_confidence</remote-alias>
-            <ordinal>8</ordinal>
+            <ordinal>9</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1454,7 +1650,7 @@
             <local-name>[ports_pathway_capacity]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>ports_pathway_capacity</remote-alias>
-            <ordinal>9</ordinal>
+            <ordinal>10</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -1469,7 +1665,7 @@
             <local-name>[capacity_basis]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>capacity_basis</remote-alias>
-            <ordinal>10</ordinal>
+            <ordinal>11</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1484,7 +1680,7 @@
             <local-name>[model_mode]</local-name>
             <parent-name>[sheet_map.csv]</parent-name>
             <remote-alias>model_mode</remote-alias>
-            <ordinal>11</ordinal>
+            <ordinal>12</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <contains-null>true</contains-null>
@@ -1497,6 +1693,7 @@
       </connection>
       <aliases enabled="yes" />
       <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+      <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
       <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
       <column datatype="string" name="[jurisdiction]" role="dimension" type="nominal" />
       <column datatype="real" name="[lat]" role="measure" type="quantitative" semantic-role="[Geographical].[Latitude]" aggregation="Avg" />
@@ -1526,12 +1723,25 @@
               <contains-null>true</contains-null>
             </metadata-record>
             <metadata-record class="column">
+              <remote-name>site_ranked</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[site_ranked]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>site_ranked</remote-alias>
+              <ordinal>1</ordinal>
+              <family>sheet_map.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>12</approx-count>
+              <contains-null>true</contains-null>
+            </metadata-record>
+            <metadata-record class="column">
               <remote-name>site_name</remote-name>
               <remote-type>129</remote-type>
               <local-name>[site_name]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>site_name</remote-alias>
-              <ordinal>1</ordinal>
+              <ordinal>2</ordinal>
               <family>sheet_map.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1544,7 +1754,7 @@
               <local-name>[jurisdiction]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>jurisdiction</remote-alias>
-              <ordinal>2</ordinal>
+              <ordinal>3</ordinal>
               <family>sheet_map.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1557,7 +1767,7 @@
               <local-name>[lat]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>lat</remote-alias>
-              <ordinal>3</ordinal>
+              <ordinal>4</ordinal>
               <family>sheet_map.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -1570,7 +1780,7 @@
               <local-name>[lon]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>lon</remote-alias>
-              <ordinal>4</ordinal>
+              <ordinal>5</ordinal>
               <family>sheet_map.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -1583,7 +1793,7 @@
               <local-name>[model_rank]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_rank</remote-alias>
-              <ordinal>5</ordinal>
+              <ordinal>6</ordinal>
               <family>sheet_map.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -1596,7 +1806,7 @@
               <local-name>[readiness_score]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>readiness_score</remote-alias>
-              <ordinal>6</ordinal>
+              <ordinal>7</ordinal>
               <family>sheet_map.csv</family>
               <local-type>real</local-type>
               <aggregation>Sum</aggregation>
@@ -1609,7 +1819,7 @@
               <local-name>[recommendation_tier]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>recommendation_tier</remote-alias>
-              <ordinal>7</ordinal>
+              <ordinal>8</ordinal>
               <family>sheet_map.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1622,7 +1832,7 @@
               <local-name>[data_confidence]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>data_confidence</remote-alias>
-              <ordinal>8</ordinal>
+              <ordinal>9</ordinal>
               <family>sheet_map.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1635,7 +1845,7 @@
               <local-name>[ports_pathway_capacity]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>ports_pathway_capacity</remote-alias>
-              <ordinal>9</ordinal>
+              <ordinal>10</ordinal>
               <family>sheet_map.csv</family>
               <local-type>integer</local-type>
               <aggregation>Sum</aggregation>
@@ -1648,7 +1858,7 @@
               <local-name>[capacity_basis]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>capacity_basis</remote-alias>
-              <ordinal>10</ordinal>
+              <ordinal>11</ordinal>
               <family>sheet_map.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1661,7 +1871,7 @@
               <local-name>[model_mode]</local-name>
               <parent-name>[Extract]</parent-name>
               <remote-alias>model_mode</remote-alias>
-              <ordinal>11</ordinal>
+              <ordinal>12</ordinal>
               <family>sheet_map.csv</family>
               <local-type>string</local-type>
               <aggregation>Count</aggregation>
@@ -1679,10 +1889,10 @@
       <layout-options>
         <title>
           <formatted-text>
-            <run bold="true" fontsize="15">Site readiness ranking</run>
+            <run bold="true" fontsize="15">Site readiness ranking - canonical milestone2_v3</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">Canonical milestone2_v3 scores. ALL 12 SITES ARE LOW CONFIDENCE - the colour legend has one value on purpose. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">All 12 sites are LOW data confidence; the colour legend has one value on purpose.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1692,17 +1902,19 @@
             <datasource caption="readiness" name="federated.m21eoyutt41n2qlhsvuu9xoldab3" />
           </datasources>
           <datasource-dependencies datasource="federated.m21eoyutt41n2qlhsvuu9xoldab3">
+            <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
             <column datatype="real" name="[readiness_score]" role="measure" type="quantitative" />
-            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
             <column datatype="string" name="[data_confidence]" role="dimension" type="nominal" />
             <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
             <column datatype="string" name="[recommendation_tier]" role="dimension" type="nominal" />
             <column datatype="string" name="[jurisdiction]" role="dimension" type="nominal" />
             <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
+            <column-instance column="[site_ranked]" derivation="None" name="[none:site_ranked:nk]" pivot="key" type="nominal" />
             <column-instance column="[readiness_score]" derivation="Sum" name="[sum:readiness_score:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[site_name]" derivation="None" name="[none:site_name:nk]" pivot="key" type="nominal" />
             <column-instance column="[data_confidence]" derivation="None" name="[none:data_confidence:nk]" pivot="key" type="nominal" />
             <column-instance column="[site_id]" derivation="Attribute" name="[attr:site_id:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_name]" derivation="Attribute" name="[attr:site_name:nk]" pivot="key" type="nominal" />
             <column-instance column="[recommendation_tier]" derivation="Attribute" name="[attr:recommendation_tier:nk]" pivot="key" type="nominal" />
             <column-instance column="[jurisdiction]" derivation="Attribute" name="[attr:jurisdiction:nk]" pivot="key" type="nominal" />
             <column-instance column="[model_mode]" derivation="Attribute" name="[attr:model_mode:nk]" pivot="key" type="nominal" />
@@ -1718,15 +1930,23 @@
             <mark class="Bar" />
             <encodings>
               <color column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[none:data_confidence:nk]" />
+              <text column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[sum:readiness_score:qk]" />
               <tooltip column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[attr:site_id:nk]" />
+              <tooltip column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[attr:site_name:nk]" />
               <tooltip column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[attr:recommendation_tier:nk]" />
               <tooltip column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[attr:jurisdiction:nk]" />
               <tooltip column="[federated.m21eoyutt41n2qlhsvuu9xoldab3].[attr:model_mode:nk]" />
             </encodings>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
           </pane>
         </panes>
-        <rows>[federated.m21eoyutt41n2qlhsvuu9xoldab3].[sum:readiness_score:qk]</rows>
-        <cols>[federated.m21eoyutt41n2qlhsvuu9xoldab3].[none:site_name:nk]</cols>
+        <rows>[federated.m21eoyutt41n2qlhsvuu9xoldab3].[none:site_ranked:nk]</rows>
+        <cols>[federated.m21eoyutt41n2qlhsvuu9xoldab3].[sum:readiness_score:qk]</cols>
       </table>
     </worksheet>
     <worksheet name="Starter vs Pathway Ports">
@@ -1736,7 +1956,7 @@
             <run bold="true" fontsize="15">Starter ports today vs pathway capacity to leave room for</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">GROUPED bars, not the bar-in-bar the build recipe specifies: the authoring server generates no dual axis. See CAPABILITY_GAP.md. Portfolio totals 25 starter / 48 pathway. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">Portfolio: 25 starter, 48 pathway. NOT additive - pathway is the ceiling. Grouped bars, not bar-in-bar - see CAPABILITY_GAP.md.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1746,15 +1966,17 @@
             <datasource caption="ports" name="federated.94iwiuhhr100c2ahocsene40ndtq" />
           </datasources>
           <datasource-dependencies datasource="federated.94iwiuhhr100c2ahocsene40ndtq">
-            <column datatype="integer" name="[ports]" role="measure" type="quantitative" />
-            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
             <column datatype="string" name="[series]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[ports]" role="measure" type="quantitative" />
             <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
             <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
-            <column-instance column="[ports]" derivation="Sum" name="[sum:ports:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[site_name]" derivation="None" name="[none:site_name:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_ranked]" derivation="None" name="[none:site_ranked:nk]" pivot="key" type="nominal" />
             <column-instance column="[series]" derivation="None" name="[none:series:nk]" pivot="key" type="nominal" />
+            <column-instance column="[ports]" derivation="Sum" name="[sum:ports:qk]" pivot="key" type="quantitative" />
             <column-instance column="[site_id]" derivation="Attribute" name="[attr:site_id:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_name]" derivation="Attribute" name="[attr:site_name:nk]" pivot="key" type="nominal" />
             <column-instance column="[model_mode]" derivation="Attribute" name="[attr:model_mode:nk]" pivot="key" type="nominal" />
           </datasource-dependencies>
           <aggregation value="true" />
@@ -1768,13 +1990,21 @@
             <mark class="Bar" />
             <encodings>
               <color column="[federated.94iwiuhhr100c2ahocsene40ndtq].[none:series:nk]" />
+              <text column="[federated.94iwiuhhr100c2ahocsene40ndtq].[sum:ports:qk]" />
               <tooltip column="[federated.94iwiuhhr100c2ahocsene40ndtq].[attr:site_id:nk]" />
+              <tooltip column="[federated.94iwiuhhr100c2ahocsene40ndtq].[attr:site_name:nk]" />
               <tooltip column="[federated.94iwiuhhr100c2ahocsene40ndtq].[attr:model_mode:nk]" />
             </encodings>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
           </pane>
         </panes>
-        <rows>[federated.94iwiuhhr100c2ahocsene40ndtq].[sum:ports:qk]</rows>
-        <cols>[federated.94iwiuhhr100c2ahocsene40ndtq].[none:site_name:nk] / [federated.94iwiuhhr100c2ahocsene40ndtq].[none:series:nk]</cols>
+        <rows>[federated.94iwiuhhr100c2ahocsene40ndtq].[none:site_ranked:nk] / [federated.94iwiuhhr100c2ahocsene40ndtq].[none:series:nk]</rows>
+        <cols>[federated.94iwiuhhr100c2ahocsene40ndtq].[sum:ports:qk]</cols>
       </table>
     </worksheet>
     <worksheet name="Ports Across Horizons">
@@ -1784,7 +2014,7 @@
             <run bold="true" fontsize="15">Active ports by planning horizon</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">Horizons are 2026 / 2036 / 2046 / 2056. NO REFERENCE LINE: the server generates none, so the 48-port pathway ceiling is carried in the tooltip as pathway_capacity instead. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">48-port pathway ceiling is in the tooltip - no reference line, see CAPABILITY_GAP.md.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1795,14 +2025,14 @@
           </datasources>
           <datasource-dependencies datasource="federated.ssrumng9o9jukzuvmrmxse59nkpr">
             <column datatype="integer" name="[ports_active]" role="measure" type="quantitative" />
-            <column datatype="integer" name="[horizon_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[horizon]" role="dimension" type="nominal" />
             <column datatype="string" name="[scenario_name]" role="dimension" type="nominal" />
             <column datatype="integer" name="[pathway_capacity]" role="measure" type="quantitative" />
             <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
             <column-instance column="[ports_active]" derivation="Sum" name="[sum:ports_active:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[horizon_year]" derivation="None" name="[none:horizon_year:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[horizon]" derivation="None" name="[none:horizon:nk]" pivot="key" type="nominal" />
             <column-instance column="[scenario_name]" derivation="None" name="[none:scenario_name:nk]" pivot="key" type="nominal" />
-            <column-instance column="[pathway_capacity]" derivation="None" name="[none:pathway_capacity:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[pathway_capacity]" derivation="Sum" name="[sum:pathway_capacity:qk]" pivot="key" type="quantitative" />
             <column-instance column="[model_mode]" derivation="Attribute" name="[attr:model_mode:nk]" pivot="key" type="nominal" />
           </datasource-dependencies>
           <aggregation value="true" />
@@ -1816,13 +2046,20 @@
             <mark class="Line" />
             <encodings>
               <color column="[federated.ssrumng9o9jukzuvmrmxse59nkpr].[none:scenario_name:nk]" />
-              <tooltip column="[federated.ssrumng9o9jukzuvmrmxse59nkpr].[none:pathway_capacity:qk]" />
+              <text column="[federated.ssrumng9o9jukzuvmrmxse59nkpr].[sum:ports_active:qk]" />
+              <tooltip column="[federated.ssrumng9o9jukzuvmrmxse59nkpr].[sum:pathway_capacity:qk]" />
               <tooltip column="[federated.ssrumng9o9jukzuvmrmxse59nkpr].[attr:model_mode:nk]" />
             </encodings>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
           </pane>
         </panes>
         <rows>[federated.ssrumng9o9jukzuvmrmxse59nkpr].[sum:ports_active:qk]</rows>
-        <cols>[federated.ssrumng9o9jukzuvmrmxse59nkpr].[none:horizon_year:qk]</cols>
+        <cols>[federated.ssrumng9o9jukzuvmrmxse59nkpr].[none:horizon:nk]</cols>
       </table>
     </worksheet>
     <worksheet name="Lifecycle Cost by Horizon">
@@ -1832,7 +2069,7 @@
             <run bold="true" fontsize="15">Lifecycle cost, net present value (base escalation)</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">Screening-class estimates for COMPARISON between options. Never a budget, never a quote, never a bid. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">Screening-class estimates for comparison only. Never a budget, quote or bid.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1843,15 +2080,15 @@
           </datasources>
           <datasource-dependencies datasource="federated.4mge7g8k1pp09p4kad2i7qpmgjlg">
             <column datatype="real" name="[lifecycle_cost_npv_usd]" role="measure" type="quantitative" />
-            <column datatype="integer" name="[horizon_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[horizon]" role="dimension" type="nominal" />
             <column datatype="string" name="[cost_case]" role="dimension" type="nominal" />
             <column datatype="real" name="[avoided_overbuild_cost_usd]" role="measure" type="quantitative" />
             <column datatype="string" name="[estimate_class]" role="dimension" type="nominal" />
             <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
             <column-instance column="[lifecycle_cost_npv_usd]" derivation="Sum" name="[sum:lifecycle_cost_npv_usd:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[horizon_year]" derivation="None" name="[none:horizon_year:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[horizon]" derivation="None" name="[none:horizon:nk]" pivot="key" type="nominal" />
             <column-instance column="[cost_case]" derivation="None" name="[none:cost_case:nk]" pivot="key" type="nominal" />
-            <column-instance column="[avoided_overbuild_cost_usd]" derivation="None" name="[none:avoided_overbuild_cost_usd:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[avoided_overbuild_cost_usd]" derivation="Sum" name="[sum:avoided_overbuild_cost_usd:qk]" pivot="key" type="quantitative" />
             <column-instance column="[estimate_class]" derivation="Attribute" name="[attr:estimate_class:nk]" pivot="key" type="nominal" />
             <column-instance column="[model_mode]" derivation="Attribute" name="[attr:model_mode:nk]" pivot="key" type="nominal" />
           </datasource-dependencies>
@@ -1866,14 +2103,14 @@
             <mark class="Bar" />
             <encodings>
               <color column="[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[none:cost_case:nk]" />
-              <tooltip column="[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[none:avoided_overbuild_cost_usd:qk]" />
+              <tooltip column="[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[sum:avoided_overbuild_cost_usd:qk]" />
               <tooltip column="[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[attr:estimate_class:nk]" />
               <tooltip column="[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[attr:model_mode:nk]" />
             </encodings>
           </pane>
         </panes>
         <rows>[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[sum:lifecycle_cost_npv_usd:qk]</rows>
-        <cols>[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[none:horizon_year:qk] / [federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[none:cost_case:nk]</cols>
+        <cols>[federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[none:horizon:nk] / [federated.4mge7g8k1pp09p4kad2i7qpmgjlg].[none:cost_case:nk]</cols>
       </table>
     </worksheet>
     <worksheet name="Net CO2e by Horizon">
@@ -1883,7 +2120,7 @@
             <run bold="true" fontsize="15">Net CO2e, tonnes per year</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">Grid factor: EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e, 596.3 lb CO2e/MWh, vintage eGRID2023r2, accessed 2026-07-19. Demand is modelled, not measured. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">596.3 lb CO2e/MWh, eGRID2023r2, accessed 2026-07-19, SRVC. Demand is modelled, not measured.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1894,13 +2131,13 @@
           </datasources>
           <datasource-dependencies datasource="federated.tvwvbk2jcv4i7ri8n3tsba2w9x3g">
             <column datatype="real" name="[net_co2e_tonnes]" role="measure" type="quantitative" />
-            <column datatype="integer" name="[horizon_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[horizon]" role="dimension" type="nominal" />
             <column datatype="string" name="[scenario_name]" role="dimension" type="nominal" />
             <column datatype="string" name="[grid_factor_source]" role="dimension" type="nominal" />
             <column datatype="string" name="[grid_factor_vintage]" role="dimension" type="nominal" />
             <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
             <column-instance column="[net_co2e_tonnes]" derivation="Sum" name="[sum:net_co2e_tonnes:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[horizon_year]" derivation="None" name="[none:horizon_year:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[horizon]" derivation="None" name="[none:horizon:nk]" pivot="key" type="nominal" />
             <column-instance column="[scenario_name]" derivation="None" name="[none:scenario_name:nk]" pivot="key" type="nominal" />
             <column-instance column="[grid_factor_source]" derivation="Attribute" name="[attr:grid_factor_source:nk]" pivot="key" type="nominal" />
             <column-instance column="[grid_factor_vintage]" derivation="Attribute" name="[attr:grid_factor_vintage:nk]" pivot="key" type="nominal" />
@@ -1924,17 +2161,17 @@
           </pane>
         </panes>
         <rows>[federated.tvwvbk2jcv4i7ri8n3tsba2w9x3g].[sum:net_co2e_tonnes:qk]</rows>
-        <cols>[federated.tvwvbk2jcv4i7ri8n3tsba2w9x3g].[none:horizon_year:qk]</cols>
+        <cols>[federated.tvwvbk2jcv4i7ri8n3tsba2w9x3g].[none:horizon:nk]</cols>
       </table>
     </worksheet>
     <worksheet name="Peak Waits by Site">
       <layout-options>
         <title>
           <formatted-text>
-            <run bold="true" fontsize="15">Median and peak queue wait, minutes</run>
+            <run bold="true" fontsize="15">Queue wait, minutes - mean simulated and peak-window Erlang</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">NO 10-MINUTE REFERENCE LINE: the server generates none. The 10-minute screening threshold is stated here in text instead. Waits are simulated from modelled demand, never observed. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">p50 and p90 are 0.0 at ALL 12 sites: utilisation is 6-20%, so a typical day has no queue. 10-minute screening threshold; no reference line generated.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1944,15 +2181,17 @@
             <datasource caption="waits" name="federated.vvdem3nquaqt11q8letkfuvjlzjj" />
           </datasources>
           <datasource-dependencies datasource="federated.vvdem3nquaqt11q8letkfuvjlzjj">
-            <column datatype="real" name="[wait_min]" role="measure" type="quantitative" />
-            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
             <column datatype="string" name="[series]" role="dimension" type="nominal" />
+            <column datatype="real" name="[wait_min]" role="measure" type="quantitative" />
             <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
             <column datatype="string" name="[model_mode]" role="dimension" type="nominal" />
-            <column-instance column="[wait_min]" derivation="Sum" name="[sum:wait_min:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[site_name]" derivation="None" name="[none:site_name:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_ranked]" derivation="None" name="[none:site_ranked:nk]" pivot="key" type="nominal" />
             <column-instance column="[series]" derivation="None" name="[none:series:nk]" pivot="key" type="nominal" />
+            <column-instance column="[wait_min]" derivation="Sum" name="[sum:wait_min:qk]" pivot="key" type="quantitative" />
             <column-instance column="[site_id]" derivation="Attribute" name="[attr:site_id:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_name]" derivation="Attribute" name="[attr:site_name:nk]" pivot="key" type="nominal" />
             <column-instance column="[model_mode]" derivation="Attribute" name="[attr:model_mode:nk]" pivot="key" type="nominal" />
           </datasource-dependencies>
           <aggregation value="true" />
@@ -1967,12 +2206,13 @@
             <encodings>
               <color column="[federated.vvdem3nquaqt11q8letkfuvjlzjj].[none:series:nk]" />
               <tooltip column="[federated.vvdem3nquaqt11q8letkfuvjlzjj].[attr:site_id:nk]" />
+              <tooltip column="[federated.vvdem3nquaqt11q8letkfuvjlzjj].[attr:site_name:nk]" />
               <tooltip column="[federated.vvdem3nquaqt11q8letkfuvjlzjj].[attr:model_mode:nk]" />
             </encodings>
           </pane>
         </panes>
-        <rows>[federated.vvdem3nquaqt11q8letkfuvjlzjj].[sum:wait_min:qk]</rows>
-        <cols>[federated.vvdem3nquaqt11q8letkfuvjlzjj].[none:site_name:nk] / [federated.vvdem3nquaqt11q8letkfuvjlzjj].[none:series:nk]</cols>
+        <rows>[federated.vvdem3nquaqt11q8letkfuvjlzjj].[none:site_ranked:nk] / [federated.vvdem3nquaqt11q8letkfuvjlzjj].[none:series:nk]</rows>
+        <cols>[federated.vvdem3nquaqt11q8letkfuvjlzjj].[sum:wait_min:qk]</cols>
       </table>
     </worksheet>
     <worksheet name="Site Map">
@@ -1982,7 +2222,7 @@
             <run bold="true" fontsize="15">Candidate sites, Northern Virginia</run>
             <run>
 </run>
-            <run fontcolor="#898989" fontsize="10">SYMBOL map, not a choropleth - the server generates no filled maps. Mark size is pathway capacity. Every site's capacity_basis is 'placeholder'. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run fontcolor="#898989" fontsize="10">Symbol map, not a choropleth. Mark size is pathway capacity; every capacity_basis is 'placeholder'.</run>
           </formatted-text>
         </title>
       </layout-options>
@@ -1999,8 +2239,9 @@
             <column datatype="real" name="[lon]" role="measure" type="quantitative" semantic-role="[Geographical].[Longitude]" aggregation="Avg" />
             <column datatype="string" name="[data_confidence]" role="dimension" type="nominal" />
             <column datatype="integer" name="[ports_pathway_capacity]" role="measure" type="quantitative" />
-            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_ranked]" role="dimension" type="nominal" />
             <column datatype="string" name="[site_id]" role="dimension" type="nominal" />
+            <column datatype="string" name="[site_name]" role="dimension" type="nominal" />
             <column datatype="string" name="[jurisdiction]" role="dimension" type="nominal" />
             <column datatype="string" name="[recommendation_tier]" role="dimension" type="nominal" />
             <column datatype="string" name="[capacity_basis]" role="dimension" type="nominal" />
@@ -2009,8 +2250,9 @@
             <column-instance column="[lon]" derivation="Avg" name="[avg:lon:qk]" pivot="key" type="quantitative" />
             <column-instance column="[data_confidence]" derivation="None" name="[none:data_confidence:nk]" pivot="key" type="nominal" />
             <column-instance column="[ports_pathway_capacity]" derivation="Sum" name="[sum:ports_pathway_capacity:qk]" pivot="key" type="quantitative" />
-            <column-instance column="[site_name]" derivation="None" name="[none:site_name:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_ranked]" derivation="None" name="[none:site_ranked:nk]" pivot="key" type="nominal" />
             <column-instance column="[site_id]" derivation="Attribute" name="[attr:site_id:nk]" pivot="key" type="nominal" />
+            <column-instance column="[site_name]" derivation="Attribute" name="[attr:site_name:nk]" pivot="key" type="nominal" />
             <column-instance column="[jurisdiction]" derivation="Attribute" name="[attr:jurisdiction:nk]" pivot="key" type="nominal" />
             <column-instance column="[recommendation_tier]" derivation="Attribute" name="[attr:recommendation_tier:nk]" pivot="key" type="nominal" />
             <column-instance column="[capacity_basis]" derivation="Attribute" name="[attr:capacity_basis:nk]" pivot="key" type="nominal" />
@@ -2028,8 +2270,9 @@
             <encodings>
               <color column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[none:data_confidence:nk]" />
               <size column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[sum:ports_pathway_capacity:qk]" />
-              <lod column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[none:site_name:nk]" />
+              <lod column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[none:site_ranked:nk]" />
               <tooltip column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[attr:site_id:nk]" />
+              <tooltip column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[attr:site_name:nk]" />
               <tooltip column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[attr:jurisdiction:nk]" />
               <tooltip column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[attr:recommendation_tier:nk]" />
               <tooltip column="[federated.ct9r5mdy0a7jvmtw7mufg9i4mqpc].[attr:capacity_basis:nk]" />
@@ -2047,12 +2290,12 @@
       <layout-options>
         <title>
           <formatted-text>
-            <run>EV Charging Site Readiness - Milestone 2 (canonical milestone2_v3). Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.</run>
+            <run>CAPACITY IS A PLACEHOLDER AT ALL 12 SITES - not evidence of electrical feasibility. Screening study; nothing approved or funded.</run>
           </formatted-text>
         </title>
       </layout-options>
       <style />
-      <size maxheight="900" maxwidth="1600" minheight="900" minwidth="1600" sizing-mode="fixed" />
+      <size maxheight="3400" maxwidth="1400" minheight="3400" minwidth="1400" sizing-mode="fixed" />
       <zones>
         <zone h="100000" id="1" type="layout-basic" w="100000" x="0" y="0">
           <zone h="100000" id="2" param="vert" type="layout-flow" w="100000" x="0" y="0">
@@ -2064,7 +2307,7 @@
                 <format attr="margin" value="4" />
               </zone-style>
             </zone>
-            <zone h="23500" id="4" name="Readiness by Site" w="100000" x="0" y="6000">
+            <zone h="13428" id="4" name="Readiness by Site" w="100000" x="0" y="6000">
               <zone-style>
                 <format attr="border-color" value="#000000" />
                 <format attr="border-style" value="none" />
@@ -2072,7 +2315,7 @@
                 <format attr="margin" value="4" />
               </zone-style>
             </zone>
-            <zone h="23500" id="5" name="Starter vs Pathway Ports" w="100000" x="0" y="29500">
+            <zone h="13428" id="5" name="Starter vs Pathway Ports" w="100000" x="0" y="19428">
               <zone-style>
                 <format attr="border-color" value="#000000" />
                 <format attr="border-style" value="none" />
@@ -2080,7 +2323,7 @@
                 <format attr="margin" value="4" />
               </zone-style>
             </zone>
-            <zone h="23500" id="6" name="Ports Across Horizons" w="100000" x="0" y="53000">
+            <zone h="13428" id="6" name="Ports Across Horizons" w="100000" x="0" y="32856">
               <zone-style>
                 <format attr="border-color" value="#000000" />
                 <format attr="border-style" value="none" />
@@ -2088,7 +2331,31 @@
                 <format attr="margin" value="4" />
               </zone-style>
             </zone>
-            <zone h="23500" id="7" name="Site Map" w="100000" x="0" y="76500">
+            <zone h="13428" id="7" name="Peak Waits by Site" w="100000" x="0" y="46284">
+              <zone-style>
+                <format attr="border-color" value="#000000" />
+                <format attr="border-style" value="none" />
+                <format attr="border-width" value="0" />
+                <format attr="margin" value="4" />
+              </zone-style>
+            </zone>
+            <zone h="13428" id="8" name="Lifecycle Cost by Horizon" w="100000" x="0" y="59712">
+              <zone-style>
+                <format attr="border-color" value="#000000" />
+                <format attr="border-style" value="none" />
+                <format attr="border-width" value="0" />
+                <format attr="margin" value="4" />
+              </zone-style>
+            </zone>
+            <zone h="13428" id="9" name="Net CO2e by Horizon" w="100000" x="0" y="73140">
+              <zone-style>
+                <format attr="border-color" value="#000000" />
+                <format attr="border-style" value="none" />
+                <format attr="border-width" value="0" />
+                <format attr="margin" value="4" />
+              </zone-style>
+            </zone>
+            <zone h="13432" id="10" name="Site Map" w="100000" x="0" y="86568">
               <zone-style>
                 <format attr="border-color" value="#000000" />
                 <format attr="border-style" value="none" />
@@ -2180,7 +2447,7 @@
         </edge>
       </cards>
       <viewpoint>
-        <zoom type="entire-view" />
+        <zoom type="fit-width" />
       </viewpoint>
     </window>
     <window class="worksheet" name="Lifecycle Cost by Horizon">
@@ -2205,7 +2472,7 @@
         </edge>
       </cards>
       <viewpoint>
-        <zoom type="entire-view" />
+        <zoom type="fit-width" />
       </viewpoint>
     </window>
     <window class="worksheet" name="Net CO2e by Horizon">
@@ -2230,7 +2497,7 @@
         </edge>
       </cards>
       <viewpoint>
-        <zoom type="entire-view" />
+        <zoom type="fit-width" />
       </viewpoint>
     </window>
     <window class="worksheet" name="Peak Waits by Site">
@@ -2288,6 +2555,9 @@
         <viewpoint name="Readiness by Site" />
         <viewpoint name="Starter vs Pathway Ports" />
         <viewpoint name="Ports Across Horizons" />
+        <viewpoint name="Peak Waits by Site" />
+        <viewpoint name="Lifecycle Cost by Horizon" />
+        <viewpoint name="Net CO2e by Horizon" />
         <viewpoint name="Site Map" />
       </viewpoints>
       <active id="-1" />

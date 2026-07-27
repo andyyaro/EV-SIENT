@@ -171,9 +171,15 @@ def test_the_twb_declares_every_worksheet_and_the_dashboard():
 def test_the_twb_carries_the_placeholder_caveat_on_every_sheet():
     """A screenshot separated from its workbook must still say what it is."""
     text = TWB.read_text(encoding="utf-8", errors="replace")
-    assert text.count("PLACEHOLDER at all 12 sites") >= 7, (
-        "not every worksheet carries the capacity caveat in its subtitle")
+    assert "CAPACITY IS A PLACEHOLDER AT ALL 12 SITES" in text
     assert "not evidence of electrical feasibility" in text
+    # Every sheet still states its own most important limitation, even though the full
+    # caveat now lives once in the dashboard title: repeating three sentences on seven
+    # sheets is what pushed the subtitles into overlapping their own titles on the
+    # published render.
+    for claim in ["LOW data confidence", "capacity_basis is 'placeholder'",
+                  "modelled, not measured", "Never a budget"]:
+        assert claim in text, f"a sheet lost its own limitation: {claim}"
 
 
 def test_the_twb_does_not_carry_the_retired_horizons():
@@ -185,11 +191,90 @@ def test_the_twb_does_not_carry_the_retired_horizons():
 def test_the_twb_names_its_substitutions_rather_than_hiding_them():
     """Every capability gap is declared in the sheet that is affected by it."""
     text = TWB.read_text(encoding="utf-8", errors="replace")
-    for declaration in ("GROUPED bars, not the bar-in-bar",
-                        "NO REFERENCE LINE",
-                        "NO 10-MINUTE REFERENCE LINE",
-                        "SYMBOL map, not a choropleth"):
+    for declaration in ("not bar-in-bar",
+                        "no reference line",
+                        "10-minute screening threshold",
+                        "not a choropleth"):
         assert declaration in text, f"the workbook does not declare: {declaration}"
+
+
+def test_horizons_are_a_DIMENSION_not_a_measure():
+    """The defect this pins: `horizon_year` is an integer, so type inference made it a
+    MEASURE. On the Columns shelf that is a continuous numeric axis -- which drew tick marks
+    at 2028, 2030, 2032 between the only four horizons that exist, and left one sheet
+    published as a title with no chart under it at all.
+
+    A year is a category here, not a quantity. There is no 2041 to interpolate to. The string
+    column `horizon` is what the time-series sheets plot against.
+    """
+    import json
+    spec = json.loads((BUILD / "workbook_spec.json").read_text())
+    by_name = {w["name"]: w for w in spec["worksheets"]}
+    for name in ["Ports Across Horizons", "Net CO2e by Horizon", "Lifecycle Cost by Horizon"]:
+        assert "horizon" in by_name[name]["columns"], (
+            f"{name} does not plot against the string `horizon` column; if it is back on "
+            f"`horizon_year` the axis is continuous again")
+
+    for sheet_name in ["horizons", "emissions", "costs"]:
+        frame = sheet(sheet_name)
+        assert "horizon" in frame.columns
+        # Every label must contain a LETTER. Writing str(2026) was not enough: the CSV holds
+        # a bare 2026, the reader infers integer, and it becomes a measure again -- which is
+        # what published two blank charts.
+        assert frame.horizon.map(lambda v: any(ch.isalpha() for ch in str(v))).all(), (
+            "a horizon label is purely numeric; it will be read back as a measure")
+        # ...and it must still lead with its own year, so the axis sorts chronologically.
+        assert all(str(v).startswith(str(int(y)))
+                   for v, y in zip(frame.horizon, frame.horizon_year))
+
+
+def test_site_labels_are_short_enough_to_render():
+    """Tableau truncated 34-character site names to '01 Fairfa..' on the axis. Anything past
+    ~30 characters is a fragment, not a label. The full name stays on the tooltip."""
+    for sheet_name in ["readiness", "ports", "waits", "map"]:
+        frame = sheet(sheet_name)
+        longest = max(len(x) for x in frame.site_ranked)
+        assert longest <= 32, f"sheet_{sheet_name} has a {longest}-character axis label"
+        assert "site_name" in frame.columns, "the full name must survive for the tooltip"
+
+
+def test_site_charts_are_horizontal_so_the_labels_have_room():
+    """A dimension on ROWS and a measure on COLUMNS is a horizontal bar, which gives each of
+    the twelve long site names a whole row instead of a truncated tick."""
+    import json
+    spec = json.loads((BUILD / "workbook_spec.json").read_text())
+    by_name = {w["name"]: w for w in spec["worksheets"]}
+    for name in ["Readiness by Site", "Starter vs Pathway Ports", "Peak Waits by Site"]:
+        w = by_name[name]
+        assert w["rows"][0] == "site_ranked", f"{name} is not a horizontal bar"
+        assert isinstance(w["columns"][0], dict), f"{name} has no measure on columns"
+
+
+def test_two_series_charts_are_grouped_not_stacked():
+    """`series` on colour ALONE makes Tableau stack the bars, and the published render showed
+    FFX004 as 3 + 8 = 11 ports -- a number that does not exist, because starter and pathway
+    are not additive. `series` must also be on rows, which nests and groups them."""
+    import json
+    spec = json.loads((BUILD / "workbook_spec.json").read_text())
+    by_name = {w["name"]: w for w in spec["worksheets"]}
+    for name in ["Starter vs Pathway Ports", "Peak Waits by Site"]:
+        assert by_name[name]["rows"] == ["site_ranked", "series"], (
+            f"{name} has series only on colour, so its bars stack into a false total")
+
+
+def test_no_chart_plots_a_constant_measure():
+    """One shipped: peak waits plotted p50 and p90, both 0.0 at all twelve sites, and it
+    published as axis labels with no bars. The build now refuses; this pins it."""
+    import importlib.util
+    spec_file = REPO / "scripts/build_tableau_workbook.py"
+    loader = importlib.util.spec_from_file_location("_fcf_tab", spec_file)
+    mod = importlib.util.module_from_spec(loader)
+    loader.loader.exec_module(mod)
+    frames = mod.build_sheet_data()
+    mod.refuse_uninformative_measures(frames)          # must not raise
+    for sheet_name, column in mod.PLOTTED_MEASURES:
+        assert frames[sheet_name][column].nunique(dropna=True) > 1, (
+            f"{sheet_name}.{column} is constant; a chart of it draws nothing")
 
 
 def test_the_build_manifest_records_what_was_produced():

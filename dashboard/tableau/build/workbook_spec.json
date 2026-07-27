@@ -2,43 +2,43 @@
   "spec_version": "0.1",
   "workbook": {
     "name": "EV_Charging_Site_Readiness_M2_Canonical",
-    "description": "Future City Fellowship - EV charging site readiness. Every value derives from the canonical data contract v1.0.0 in mode milestone2_v3. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted."
+    "description": "Future City Fellowship - EV charging site readiness. Every value derives from the canonical data contract v1.0.0 in mode milestone2_v3. CAPACITY IS A PLACEHOLDER AT ALL 12 SITES - not evidence of electrical feasibility. Screening study; nothing approved or funded."
   },
   "data_sources": [
     {
       "id": "readiness",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_readiness.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_readiness.csv"
     },
     {
       "id": "ports",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_ports.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_ports.csv"
     },
     {
       "id": "horizons",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_horizons.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_horizons.csv"
     },
     {
       "id": "costs",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_costs.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_costs.csv"
     },
     {
       "id": "emissions",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_emissions.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_emissions.csv"
     },
     {
       "id": "waits",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_waits.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_waits.csv"
     },
     {
       "id": "map",
       "type": "csv",
-      "path": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build/sheets/sheet_map.csv"
+      "path": "dashboard/tableau/build/sheets/sheet_map.csv"
     }
   ],
   "worksheets": [
@@ -47,23 +47,28 @@
       "template": "bar",
       "data_source": "readiness",
       "rows": [
+        "site_ranked"
+      ],
+      "columns": [
         {
           "field": "readiness_score",
           "aggregation": "Sum"
         }
       ],
-      "columns": [
-        "site_name"
-      ],
       "color": "data_confidence",
+      "label": {
+        "field": "readiness_score",
+        "aggregation": "Sum"
+      },
       "tooltips": [
         "site_id",
+        "site_name",
         "recommendation_tier",
         "jurisdiction",
         "model_mode"
       ],
-      "title": "Site readiness ranking",
-      "subtitle": "Canonical milestone2_v3 scores. ALL 12 SITES ARE LOW CONFIDENCE - the colour legend has one value on purpose. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
+      "title": "Site readiness ranking \u2014 canonical milestone2_v3",
+      "subtitle": "All 12 sites are LOW data confidence; the colour legend has one value on purpose.",
       "fit": "entire_view"
     },
     {
@@ -71,22 +76,27 @@
       "template": "bar",
       "data_source": "ports",
       "rows": [
+        "site_ranked",
+        "series"
+      ],
+      "columns": [
         {
           "field": "ports",
           "aggregation": "Sum"
         }
       ],
-      "columns": [
-        "site_name",
-        "series"
-      ],
       "color": "series",
+      "label": {
+        "field": "ports",
+        "aggregation": "Sum"
+      },
       "tooltips": [
         "site_id",
+        "site_name",
         "model_mode"
       ],
       "title": "Starter ports today vs pathway capacity to leave room for",
-      "subtitle": "GROUPED bars, not the bar-in-bar the build recipe specifies: the authoring server generates no dual axis. See CAPABILITY_GAP.md. Portfolio totals 25 starter / 48 pathway. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
+      "subtitle": "Portfolio: 25 starter, 48 pathway. NOT additive - pathway is the ceiling. Grouped bars, not bar-in-bar - see CAPABILITY_GAP.md.",
       "fit": "entire_view"
     },
     {
@@ -100,16 +110,23 @@
         }
       ],
       "columns": [
-        "horizon_year"
+        "horizon"
       ],
       "color": "scenario_name",
+      "label": {
+        "field": "ports_active",
+        "aggregation": "Sum"
+      },
       "tooltips": [
-        "pathway_capacity",
+        {
+          "field": "pathway_capacity",
+          "aggregation": "Sum"
+        },
         "model_mode"
       ],
       "title": "Active ports by planning horizon",
-      "subtitle": "Horizons are 2026 / 2036 / 2046 / 2056. NO REFERENCE LINE: the server generates none, so the 48-port pathway ceiling is carried in the tooltip as pathway_capacity instead. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
-      "fit": "entire_view"
+      "subtitle": "48-port pathway ceiling is in the tooltip \u2014 no reference line, see CAPABILITY_GAP.md.",
+      "fit": "fit_width"
     },
     {
       "name": "Lifecycle Cost by Horizon",
@@ -122,18 +139,21 @@
         }
       ],
       "columns": [
-        "horizon_year",
+        "horizon",
         "cost_case"
       ],
       "color": "cost_case",
       "tooltips": [
-        "avoided_overbuild_cost_usd",
+        {
+          "field": "avoided_overbuild_cost_usd",
+          "aggregation": "Sum"
+        },
         "estimate_class",
         "model_mode"
       ],
       "title": "Lifecycle cost, net present value (base escalation)",
-      "subtitle": "Screening-class estimates for COMPARISON between options. Never a budget, never a quote, never a bid. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
-      "fit": "entire_view"
+      "subtitle": "Screening-class estimates for comparison only. Never a budget, quote or bid.",
+      "fit": "fit_width"
     },
     {
       "name": "Net CO2e by Horizon",
@@ -146,7 +166,7 @@
         }
       ],
       "columns": [
-        "horizon_year"
+        "horizon"
       ],
       "color": "scenario_name",
       "tooltips": [
@@ -155,30 +175,31 @@
         "model_mode"
       ],
       "title": "Net CO2e, tonnes per year",
-      "subtitle": "Grid factor: EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e, 596.3 lb CO2e/MWh, vintage eGRID2023r2, accessed 2026-07-19. Demand is modelled, not measured. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
-      "fit": "entire_view"
+      "subtitle": "596.3 lb CO2e/MWh, eGRID2023r2, accessed 2026-07-19, SRVC. Demand is modelled, not measured.",
+      "fit": "fit_width"
     },
     {
       "name": "Peak Waits by Site",
       "template": "bar",
       "data_source": "waits",
       "rows": [
+        "site_ranked",
+        "series"
+      ],
+      "columns": [
         {
           "field": "wait_min",
           "aggregation": "Sum"
         }
       ],
-      "columns": [
-        "site_name",
-        "series"
-      ],
       "color": "series",
       "tooltips": [
         "site_id",
+        "site_name",
         "model_mode"
       ],
-      "title": "Median and peak queue wait, minutes",
-      "subtitle": "NO 10-MINUTE REFERENCE LINE: the server generates none. The 10-minute screening threshold is stated here in text instead. Waits are simulated from modelled demand, never observed. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
+      "title": "Queue wait, minutes - mean simulated and peak-window Erlang",
+      "subtitle": "p50 and p90 are 0.0 at ALL 12 sites: utilisation is 6-20%, so a typical day has no queue. 10-minute screening threshold; no reference line generated.",
       "fit": "entire_view"
     },
     {
@@ -193,38 +214,42 @@
         "aggregation": "Sum"
       },
       "detail": [
-        "site_name"
+        "site_ranked"
       ],
       "tooltips": [
         "site_id",
+        "site_name",
         "jurisdiction",
         "recommendation_tier",
         "capacity_basis",
         "model_mode"
       ],
       "title": "Candidate sites, Northern Virginia",
-      "subtitle": "SYMBOL map, not a choropleth - the server generates no filled maps. Mark size is pathway capacity. Every site's capacity_basis is 'placeholder'. Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
+      "subtitle": "Symbol map, not a choropleth. Mark size is pathway capacity; every capacity_basis is 'placeholder'.",
       "fit": "entire_view"
     }
   ],
   "dashboards": [
     {
       "name": "Milestone 2 Overview",
-      "title": "EV Charging Site Readiness - Milestone 2 (canonical milestone2_v3). Screening-class planning study. Capacity is a PLACEHOLDER at all 12 sites (capacity_basis=placeholder) - not evidence of electrical feasibility. Nothing here is approved, funded or permitted.",
+      "title": "CAPACITY IS A PLACEHOLDER AT ALL 12 SITES - not evidence of electrical feasibility. Screening study; nothing approved or funded.",
       "direction": "vertical",
       "sizing_mode": "fixed",
-      "width": 1600,
-      "height": 900,
+      "width": 1400,
+      "height": 3400,
       "worksheets": [
         "Readiness by Site",
         "Starter vs Pathway Ports",
         "Ports Across Horizons",
+        "Peak Waits by Site",
+        "Lifecycle Cost by Horizon",
+        "Net CO2e by Horizon",
         "Site Map"
       ]
     }
   ],
   "output": {
-    "directory": "/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo/dashboard/tableau/build",
+    "directory": "dashboard/tableau/build",
     "package_twbx": true
   }
 }

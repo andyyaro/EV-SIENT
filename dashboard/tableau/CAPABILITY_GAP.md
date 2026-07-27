@@ -32,8 +32,22 @@ does not claim them:
 2. **Reference lines** (recipe sheets 3 and 6) — two of them.
 3. **Dashboard filter cards, and scoping a filter to a subset of sheets** (recipe dashboard).
 4. **The 8-point story** (recipe story).
+5. **Dashboard zone sizing.** A chart with few categories renders as a narrow strip in a
+   full-width zone and the spec offers no control over it. `fit` looks like the lever and is
+   not: it compiles to the *worksheet window's* viewpoint (`<zoom type="fit-width"/>` inside
+   `<window class="worksheet">`), which governs the standalone tab view, not the dashboard.
+   Verified rather than assumed — switching `entire_view` → `fit_width` produced a
+   byte-identical dashboard render across three cache-busted fetches after a confirmed
+   publish. Our three horizon charts are affected; the four site charts are not, because
+   twelve row categories fill the zone naturally.
 
-None of the four changes a number. Each is a presentation affordance, and each is stated
+   **Deliberately not worked around.** The available workaround is to redraw the time series
+   as horizontal bars so they gain enough row categories to fill the width — which trades the
+   correct encoding for a time series in exchange for layout. That is the same bad trade as
+   dropping sheets from a dashboard to make it look tidier, which this project already made
+   once and had to undo.
+
+None of the five changes a number. Each is a presentation affordance, and each is stated
 rather than approximated — a reference line replaced by a tooltip is not a reference line,
 and calling it one would be the "silently substitute a symbol map for a choropleth" failure
 this assessment exists to prevent.

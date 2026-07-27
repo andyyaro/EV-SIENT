@@ -3,7 +3,7 @@
   "spec_version": "0.1",
   "twb": "EV_Charging_Site_Readiness_M2_Canonical.twb",
   "twbx": "EV_Charging_Site_Readiness_M2_Canonical.twbx",
-  "twbx_sha256": "f8ffa1af7bd6fa4ac3b870bb16f5624a434db6d15ca9b96c23543faa2f24aa6f",
+  "twbx_sha256": "898b4b494560684c858460d6e3eb9df4c42abb5897ffb6bc0ff935317b2ad47f",
   "entries": [
     "EV_Charging_Site_Readiness_M2_Canonical.twb",
     "Data/readiness/readiness.hyper",
@@ -25,37 +25,37 @@
     {
       "id": "readiness",
       "csv": "sheet_readiness.csv",
-      "fields": 8
+      "fields": 9
     },
     {
       "id": "ports",
       "csv": "sheet_ports.csv",
-      "fields": 6
+      "fields": 7
     },
     {
       "id": "horizons",
       "csv": "sheet_horizons.csv",
-      "fields": 5
+      "fields": 6
     },
     {
       "id": "costs",
       "csv": "sheet_costs.csv",
-      "fields": 6
+      "fields": 7
     },
     {
       "id": "emissions",
       "csv": "sheet_emissions.csv",
-      "fields": 7
+      "fields": 8
     },
     {
       "id": "waits",
       "csv": "sheet_waits.csv",
-      "fields": 6
+      "fields": 7
     },
     {
       "id": "map",
       "csv": "sheet_map.csv",
-      "fields": 12
+      "fields": 13
     }
   ],
   "worksheets": [

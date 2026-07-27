@@ -1,11 +1,11 @@
-horizon_year,scenario_name,net_co2e_kg,net_co2e_tonnes,grid_factor_source,grid_factor_vintage,model_mode
-2026,baseline,43364.7,43.365,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2036,base,82384.9,82.385,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2036,high,112745.5,112.746,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2036,stress_combined,129649.1,129.649,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2046,base,130089.4,130.089,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2046,high,195130.8,195.131,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2046,stress_combined,224401.4,224.401,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2056,base,173449.69999999998,173.45,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2056,high,260178.80000000002,260.179,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
-2056,stress_combined,299199.8,299.2,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+horizon_year,scenario_name,net_co2e_kg,net_co2e_tonnes,horizon,grid_factor_source,grid_factor_vintage,model_mode
+2026,baseline,43364.7,43.365,2026 baseline,"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2036,base,82384.9,82.385,2036 (+10y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2036,high,112745.5,112.746,2036 (+10y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2036,stress_combined,129649.1,129.649,2036 (+10y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2046,base,130089.4,130.089,2046 (+20y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2046,high,195130.8,195.131,2046 (+20y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2046,stress_combined,224401.4,224.401,2046 (+20y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2056,base,173449.69999999998,173.45,2056 (+30y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2056,high,260178.80000000002,260.179,2056 (+30y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3
+2056,stress_combined,299199.8,299.2,2056 (+30y),"EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e","eGRID2023r2, accessed 2026-07-19",milestone2_v3

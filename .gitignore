@@ -48,3 +48,6 @@ explorer/web/vendor/
 # CSVs and the spec -- which is everything needed to rebuild.
 dashboard/tableau/build/*.twbx
 dashboard/tableau/build/Data/
+# Machine-specific: the tracked workbook_spec.json holds relative paths; this variant has
+# base_dir baked in for whichever machine ran the build.
+dashboard/tableau/build/workbook_spec.build.json
