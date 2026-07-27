@@ -156,6 +156,22 @@ Tree 3 (`fcf-3d`, never in the repo) remains to be reconciled; that is Phase 3's
 | FIND-REPO-06 | med | **CI trigger references a merged feature branch.** `tests.yml` has `on: push: branches: [main, milestone2-v3-professional-release]`. Pushes to `v4-platform` will not trigger CI on push (only via `pull_request`). | **yes** | Phase 1 |
 | FIND-REPO-07 | info | Legacy right-sizing output is named `right_sizing_legacy_2035_2050.csv`. This is a **correctly labelled legacy-mode** artifact, not stale text — the horizon audit must not flag it. | **yes** | none needed |
 
+#### Horizon references confirmed **legitimate** (the audit must not "fix" these)
+
+The program treats surviving `2035` / `2050` / "10/20/30-year" as defects *unless correctly labelled legacy*.
+These were checked individually and are correct as they stand:
+
+| Location | Text | Why it is fine |
+|---|---|---|
+| `README.md:18` | "10/20/30-year horizons (2036 / 2046 / 2056 from a 2026 baseline)" | the shorthand is expanded to the canonical years in the same breath |
+| `README.md:68` | "`legacy_v2` … golden-tested: FFX002 58.8; 25 starter / 48 pathway" | explicitly scoped to the legacy mode |
+| `workflow.STEPS[3]` → `docs/WORKFLOW_STEPS.md` | "Starter vs pathway right-sizing (legacy 2035/2050 or V3 2026/2036/2046/2056)" | names both conventions and attributes each to its mode |
+| `data/outputs/**/right_sizing_legacy_2035_2050.csv` | filename | a legacy-mode output, correctly named |
+| `contract_manifest.json` | `baseline_year: 2026`, `horizons: [2036, 2046, 2056]` | the canonical four = baseline + three horizons; consistent, not a truncation |
+
+By contrast, the 3D explorer's `ports_2035` / `ports_2050` field names (FIND-3D-01) are **not** labelled by mode
+and sit beside V3 `horizon_year` values in the same payload. That is the real horizon defect.
+
 ### Octave capability probe (Phase 2 research, run early — evidence for the tier decision)
 
 Run against the **actually installed** `GNU Octave 11.3.0` (Homebrew, aarch64), stock with **no packages installed**.
@@ -303,6 +319,8 @@ against every document that states it. Confirmations matter as much as defects, 
 | eGRID factor | README, footer log, contract | `596.3 lb CO2e/MWh`, `eGRID2023r2, accessed 2026-07-19` | **matches**; `590.2` found **nowhere** in the repo or on the live site |
 | Legacy golden | README, tests | `25` starter / `48` pathway; FFX002 `58.8` | **matches**, and `README.md:68` labels it correctly as `legacy_v2` |
 | Contract shape | — | 120 rows, horizons `{2026, 2036, 2046, 2056}`, 12 site IDs `FFX001-004`+`PWC001-008` | **matches** |
+| RT-10 hash chain | `contract_manifest.json` | every SHA-256 recomputed by the lead: **5 inputs + 6 tables = 11/11 PASS, 0 FAIL** | **verified independently**, not just via `make validate` |
+| Generated-doc drift | `docs/WORKFLOW_STEPS.md` | regenerated with `make docs`; `diff` is empty; step count gate `Step count: **11**` matches `len(workflow.STEPS) == 11` | **no drift** |
 | Capacity placeholder | README limitation #1 | `capacity_basis = placeholder` on **120/120** rows | **matches** 12/12 sites |
 | 0 of 12 High confidence | README | `data_confidence` = `Low` on **120/120**; `data_confidence_level_v3` = `Low` for all 12 (score `33.8`) | **true, and understated** — 0 of 12 reach even *Medium*; all 12 are Low |
 
