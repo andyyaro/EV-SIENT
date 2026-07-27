@@ -117,11 +117,17 @@ statically checked but never executed; see
 
 ## Verification
 
-`./scripts/verify.sh` runs every gate: the pytest suite with a coverage floor, legacy
+`./scripts/verify.sh` runs all ten gates: the pytest suite with a coverage floor, legacy
 baseline reproduction, contract rule/schema/hash-chain validation, cross-model
-reconciliation against the MATLAB input, footer QA on every dashboard visual, secret
-and local-path scans, size limits, and Markdown link checks. CI runs the same gates on
-every push and pull request ([tests.yml](.github/workflows/tests.yml)).
+reconciliation against the MATLAB input, generated-docs drift, footer QA on every dashboard
+visual, secret and local-path scans, size limits, and Markdown link checks. It exits with the
+number of failures, so a red run is visible in the exit code, not just in the log.
+
+CI runs **the same gates**, on every push and every pull request
+([tests.yml](.github/workflows/tests.yml)) — literally the same, because CI invokes
+`verify.sh` rather than keeping a second list of steps in step with the first. There is one
+definition of what "green" means. Both the secret scan and the Markdown link check are shared
+modules (`scripts/secret_scan.py`, `scripts/check_internal_links.py`) for the same reason.
 
 ## Standards and safety boundary
 

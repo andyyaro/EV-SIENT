@@ -1,5 +1,56 @@
 # Changelog
 
+## Unreleased — V4 platform program, Phase 1: repair the base
+
+Defects found by a full audit of the repository and fixed before any new work was
+built on top. No model logic changed and no number moved except where a published
+figure disagreed with the contract, in which case the contract won.
+
+### Corrected numbers
+- **Active-port series** in `README.md`, the final report, the speaker notes, and the
+  website patch package said 25 / 44→47 / 47→48 / 47→48. The contract sums to
+  **25 / 35→44 / 44→48 / 44→48**; the value 47 was never a portfolio total at any
+  horizon. The cost and emissions columns in the same table rows were already correct.
+- **The headline site claim.** `README.md` named FFX002 top-ranked at 58.8 with
+  "Medium confidence" under a heading asserting canonical provenance. 58.8 is the
+  `legacy_v2` score; canonically FFX004 leads at 53.4 and FFX002 is second at 51.8.
+  No output produces "Medium" for any site — **all 12 are Low**.
+- **Avoided pathway ports** were published as "13–23"; the metric gives 23 at the 2026
+  baseline, 13 by 2036, and 4 by 2046 and 2056.
+- **MCDA arithmetic** (`docs/human-actions/team_alternatives_session/`): alternative G
+  published 37.0 against a computed 40.0 (rank unchanged), and the equity-crossover
+  disclosure read aloud before the weighting vote stated 2× the default equity weight
+  where the matrix puts it at ~2.5×.
+
+### Gates
+- `scripts/verify.sh` **failed on a clean checkout** (8 PASS / 2 FAIL). Both causes fixed;
+  it now reports 10 PASS / 0 FAIL.
+- **CI ran 6 of the 10 gates** and its push trigger covered only two branches. CI now
+  invokes `verify.sh` itself, so parity holds by construction, and triggers on all branches.
+- **The secret scan matched credential *names*, not values**, so it flagged CI's own
+  workflow file and any document discussing it. It now requires the value, is shared by both
+  gates, and additionally catches AWS account IDs, session tokens, Slack tokens, and SSH keys.
+- **The Markdown link checker linkified quoted link syntax**, disagreeing with lychee. It now
+  ignores code spans and fenced blocks.
+- New gates: published numbers traced to the contract, footer-log portability, MCDA arithmetic.
+
+### Generated artifacts
+- `dashboard/static/footer_log.json` carried nine absolute authoring-machine paths, and a
+  rebuild duplicated every entry. Fixed in the generator; 8 of 9 charts regenerate
+  byte-identical.
+- All four `reports/milestone-2/*.docx` and the client-facing PDF were stale against their
+  Markdown, carrying a pre-reorganisation directory layout. `python-docx` was undeclared, so
+  they could not be rebuilt; it is now a `[reports]` extra with a `make reports` target.
+- `requirements-lock.txt` was missing four transitive dependencies, including one required
+  only on the Python version CI pins.
+
+### Documentation accuracy
+- `contract.py` pointed at a contract directory that does not exist, and both its RT-coverage
+  claims were wrong in opposite directions. RT-06 is implemented nowhere; that is now stated.
+- `config.py` claimed every result-changing constant lives in it; several do not, and they
+  are now named.
+- `emissions.py` duplicated the network-fee constant instead of reading it from config.
+
 ## Milestone 2 V3 (2026-07-19)
 
 The full Milestone 2 publication of the EV-charging planning platform for
