@@ -168,10 +168,17 @@ class TestLandingPages:
     context on a phone, and it must not read as more certain than the data supports.
     """
 
+    def test_no_extension_bearing_files_remain(self):
+        """A .html twin beside an extensionless file is a second copy nothing serves."""
+        strays = [p.name for p in LANDING.iterdir() if p.suffix]
+        assert strays == [], f"extension-bearing strays would go unserved: {strays}"
+
     def test_every_tag_url_resolves_to_a_page(self, payloads):
         for p in payloads:
             slug = p.url.rsplit("/", 1)[-1]
-            assert (LANDING / f"{slug}.html").exists(), f"{p.site_id}: tag points at a 404"
+            # The file name matches the URL byte for byte, deliberately: a URL that has
+            # to be rewritten at the edge to find its own file is a URL with a moving part.
+            assert (LANDING / slug).exists(), f"{p.site_id}: tag points at a 404"
 
     @pytest.mark.parametrize("site_id", [
         "FFX001", "FFX002", "FFX003", "FFX004",
@@ -179,7 +186,7 @@ class TestLandingPages:
     def test_numbers_trace_to_the_contract(self, site_id, contract):
         _, scen = contract
         row = scen[(scen.site_id == site_id) & (scen.horizon_year == 2026)].iloc[0]
-        page = (LANDING / f"{site_id}.html").read_text()
+        page = (LANDING / site_id).read_text()
         assert f"<dd>{int(row.ports_active)}</dd>" in page
         assert f"<dd>up to {int(row.ports_pathway_capacity)}</dd>" in page
         assert f"<dd>{row.data_confidence}</dd>" in page
@@ -205,32 +212,32 @@ class TestLandingPages:
     ])
     def test_the_caveats_survive_the_plain_language(self, caveat):
         """Friendlier framing, identical epistemics. Warm copy must not soften a limit."""
-        text = self._rendered_text(LANDING / "FFX002.html")
+        text = self._rendered_text(LANDING / "FFX002")
         assert caveat in text, f"the landing page no longer says: {caveat}"
 
     def test_placeholder_capacity_is_stated_as_unconfirmed(self, contract):
         _, scen = contract
         for site_id in scen.site_id.unique():
             row = scen[(scen.site_id == site_id) & (scen.horizon_year == 2026)].iloc[0]
-            page = (LANDING / f"{site_id}.html").read_text()
+            page = (LANDING / site_id).read_text()
             if row.capacity_basis == "placeholder":
                 assert "No — placeholder" in page, f"{site_id} does not say capacity is unconfirmed"
 
     def test_no_page_claims_a_confidence_the_data_lacks(self, contract):
         _, scen = contract
         for site_id in scen.site_id.unique():
-            page = (LANDING / f"{site_id}.html").read_text()
+            page = (LANDING / site_id).read_text()
             assert "<dd>High</dd>" not in page, f"{site_id} claims High confidence"
 
     def test_pages_collect_nothing_personal(self):
         """A page reached by tapping a coin must not ask who you are."""
-        for path in sorted(LANDING.glob("*.html")):
+        for path in sorted(p for p in LANDING.iterdir() if p.is_file()):
             page = path.read_text().lower()
             for forbidden in ("<input", "<form", "cookie", "localstorage", "analytics.js"):
                 assert forbidden not in page, f"{path.name} contains {forbidden!r}"
 
     def test_pages_are_mobile_and_accessible(self):
-        for path in sorted(LANDING.glob("*.html")):
+        for path in sorted(p for p in LANDING.iterdir() if p.is_file()):
             page = path.read_text()
             assert 'name="viewport"' in page
             assert 'lang="en"' in page
@@ -242,8 +249,8 @@ class TestLandingPages:
     def test_pages_are_regenerated_not_hand_edited(self):
         """A page that drifts from the generator is a page nobody can regenerate."""
         import subprocess, sys
-        before = {p.name: p.read_text() for p in sorted(LANDING.glob("*.html"))}
+        before = {p.name: p.read_text() for p in sorted(LANDING.iterdir()) if p.is_file()}
         subprocess.run([sys.executable, str(ROOT / "scripts/build_nfc_landing.py")],
                        cwd=ROOT, capture_output=True, check=True)
-        after = {p.name: p.read_text() for p in sorted(LANDING.glob("*.html"))}
+        after = {p.name: p.read_text() for p in sorted(LANDING.iterdir()) if p.is_file()}
         assert before == after, "landing pages differ from a fresh build - were they hand-edited?"

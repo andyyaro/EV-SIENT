@@ -195,6 +195,8 @@ def main() -> int:
     scen = pd.read_csv(CONTRACT / "scenario_table.csv")
     OUT.mkdir(parents=True, exist_ok=True)
 
+    for stale in OUT.glob("*.html"):
+        stale.unlink()   # remove the extension-bearing generation
     written = []
     for site in sites.itertuples():
         rows = scen[(scen.site_id == site.site_id) & (scen.horizon_year == 2026)]
@@ -212,14 +214,22 @@ def main() -> int:
             confidence=confidence_answer(str(row.data_confidence)),
             capacity_answer=capacity_answer(str(row.capacity_basis)),
         )
-        target = OUT / f"{site.site_id}.html"
+        # Written WITHOUT a .html extension, matching the tag URL byte for byte.
+        #
+        # The first deployment used <SITE_ID>.html while the tags pointed at /t/<SITE_ID>.
+        # CloudFront asked for the extensionless key, S3 did not have it, and because the
+        # bucket blocks listing it answered AccessDenied rather than NoSuchKey -- so the
+        # tag opened a page reading "Access Denied" with no hint of why. A URL that has to
+        # be rewritten at the edge to find its own file is a URL with a moving part; a key
+        # named exactly like the URL has none.
+        target = OUT / site.site_id
         target.write_text(page)
         written.append(target)
 
     # The tag URLs must resolve to exactly these files. Assert it rather than assume it.
     payloads = {p.site_id: p.url for p in nfc.payloads_from_contract(CONTRACT)}
     for site_id, url in payloads.items():
-        expected = OUT / f"{url.rsplit('/', 1)[-1]}.html"
+        expected = OUT / url.rsplit("/", 1)[-1]
         if not expected.exists():
             raise SystemExit(f"{site_id}: tag points at {url} but {expected} was not built")
 
