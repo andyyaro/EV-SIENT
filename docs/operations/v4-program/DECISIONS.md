@@ -675,3 +675,81 @@ Three options exist and none is obviously right: ship an installer carrying a **
 input set (honest, and the model then computes nothing about real sites); ship a
 clone-and-run path only (what happens by default); or declassify the input file (a real
 decision with real consequences for twelve named buildings).
+
+---
+
+## DEC-016 — A public installer carries synthetic inputs; the real site data stays private
+
+**Date:** 2026-07-27 · **Phase:** 7/8 · **Resolves the open question in DEC-015**
+
+### Context
+
+DEC-015 raised it: a downloadable installer that can genuinely *run* the model must carry
+`data/inputs/real_sites_v2.csv` — facility-level electrical and occupancy data for twelve
+named public buildings — out of a repository that stays private.
+
+The project owner responded *"yeah declassify it"*, then *"let's use a most up-to-date one
+instead"*, then, when asked which was meant, *"do whatever you think is best, and it does not
+have to be now."*
+
+### The decision
+
+**The real input data stays private. A public installer ships a synthetic input set,
+unmistakably labelled.**
+
+### Reasoning
+
+The owner has the authority to publish this repository's contents and said so. The decision is
+still to hold, for three reasons:
+
+1. **The data is not only ours to publish.** It describes buildings owned by the City of
+   Fairfax and Prince William County, and this study is run *in consultation with* Prince
+   William County's Office of Sustainability. A facilities manager would reasonably expect to
+   be asked before their building's electrical service rating, spare capacity and occupancy
+   pattern were published. That conversation has not happened — it is not even on the open
+   human actions list.
+2. **It is the one action here with no undo.** Everything else this program has done is
+   revertible. Publishing twelve real facilities' electrical characteristics is not.
+3. **The instruction was ambiguous and the owner explicitly allowed deferral.** "Do whatever
+   you think is best, and it does not have to be now" is permission to choose the cautious
+   option, not pressure to act.
+
+**What is lost by holding: almost nothing.** A synthetic installer demonstrates the model end
+to end — every screen, every operation, the whole provenance panel. What it cannot do is make
+a claim about a real site, which is a claim the study cannot support anyway: capacity is a
+placeholder at all twelve.
+
+**The precedent already exists and works.** The public MATLAB harness runs on
+`harness_scenarios_synthetic.csv` for exactly this reason, and that decision has since caught
+a real leak (`sessions_per_day = 0.9`, which was PWC003's value) — evidence that the synthetic
+boundary is doing work rather than being ceremony.
+
+### What ships
+
+| Surface | Data | Status |
+|---|---|---|
+| Web tier (public) | contract **outputs** only — already public in the reports and on the site | ships |
+| Desktop tier, from a clone | the real inputs | works for anyone with repository access, which is the team |
+| Public installer | **synthetic inputs**, labelled | when built |
+| Real input file | — | **stays private** |
+
+### Left open, deliberately, for the owner
+
+Declassification remains available and nothing here forecloses it. If it is wanted, the
+sequence is: **ask the two jurisdictions' facilities contacts first**, then publish, then
+rebuild the installer against the real inputs. Recorded as an open human action rather than
+an assistant decision, because that is what it is.
+
+### Also decided: no Cesium ion token
+
+The owner offered one. **Declined**, for three reasons that all point the same way:
+
+- the master prompt requires the explorer work **with no Cesium account**, and Phase 3 already
+  achieved that;
+- a token in the web tier would be **visible in the deployed JavaScript** — a credential in a
+  public artifact, which the standing rule forbids outright;
+- ion usage above the free tier is a **recurring cost** against a $10/month ceiling.
+
+If ion terrain is wanted later, the clean route is a domain-restricted token injected at
+deploy time and never committed. That is a Phase 8 decision with its own entry, not something
+to wire in now.
