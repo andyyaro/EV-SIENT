@@ -34,6 +34,12 @@ function figHandle = plotScenario(out, varargin)
     addParameter(p, "SaveFigure", false, ...
         @(v) islogical(v) && isscalar(v));
     addParameter(p, "Visible", true, @(v) islogical(v) && isscalar(v));
+    % The footer must report the file this run ACTUALLY read. It used to
+    % hardcode the canonical adapter path, so a run against any other input --
+    % a synthetic harness fixture, for instance -- produced figures asserting a
+    % provenance that was not true. A figure that names a source it did not use
+    % is a fabricated citation, which is the one thing this project may never do.
+    addParameter(p, "SourceFile", "", @(v) ischar(v) || isstring(v));
     parse(p, varargin{:});
     opt = p.Results;
 
@@ -177,10 +183,16 @@ function figHandle = plotScenario(out, varargin)
     % ---------------------------------------------------------------
     stampUtc = string(datetime("now", "TimeZone", "UTC", ...
         "Format", "yyyy-MM-dd'T'HH:mm:ss'Z'"));
-    footer = sprintf("Source: data/canonical/matlab_scenarios.csv " + ...
-        "(auto-generated adapter) | scenario %s | capacity basis: %s " + ...
+    sourceLabel = string(opt.SourceFile);
+    if strlength(sourceLabel) == 0
+        sourceLabel = "source not recorded by caller";
+    else
+        [~, srcName, srcExt] = fileparts(char(sourceLabel));
+        sourceLabel = string(srcName) + string(srcExt);
+    end
+    footer = sprintf("Source: %s | scenario %s | capacity basis: %s " + ...
         "| generated %s | Milestone 2 V3 MATLAB model", ...
-        string(s.scenario_id), guard.capacity_basis, stampUtc);
+        sourceLabel, string(s.scenario_id), guard.capacity_basis, stampUtc);
     annotation(figHandle, "textbox", [0.02 0.001 0.96 0.028], ...
         "String", footer, "FitBoxToText", "off", ...
         "EdgeColor", "none", "FontSize", 8, ...

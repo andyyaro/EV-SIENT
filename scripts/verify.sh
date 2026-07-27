@@ -111,6 +111,9 @@ EOF
 gate "3d: viewer JS parses and every CDN reference is version-pinned" \
   bash -c "cd '$REPO' && { command -v node >/dev/null && node --check explorer/web/app.js || echo 'node absent - JS syntax check skipped'; } && '$PY' scripts/check_cdn_pins.py"
 
+gate "matlab: nothing destined for the PUBLIC harness carries site-identifying data" \
+  bash -c "cd '$REPO' && '$PY' scripts/check_harness_exposure.py"
+
 gate "links: markdown links resolve (lychee if installed, else internal-link check)" \
   bash -c "cd '$REPO' && if command -v lychee >/dev/null; then lychee --offline --no-progress README.md docs reports presentation dashboard excel matlab src tests scripts data 2>/dev/null; else '$PY' scripts/check_internal_links.py; fi"
 

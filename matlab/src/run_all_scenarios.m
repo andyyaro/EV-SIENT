@@ -98,7 +98,8 @@ function outDir = run_all_scenarios(varargin)
             m.run_error = "";
             if opt.SavePlots
                 plotScenario(out, "OutputFolder", outDir, ...
-                    "SaveFigure", true, "Visible", false);
+                    "SaveFigure", true, "Visible", false, ...
+                    "SourceFile", string(opt.CsvFile));
             end
         catch ME
             % A failed scenario is recorded, never silently dropped.
@@ -126,7 +127,11 @@ function outDir = run_all_scenarios(varargin)
     fprintf(fid, "run_id: %s\n", runId);
     fprintf(fid, "generated_utc: %s\n", stampUtc);
     fprintf(fid, "matlab_release: %s\n", version("-release"));
-    fprintf(fid, "input_csv: %s\n", string(opt.CsvFile));
+    % Record the input by NAME, not by absolute path: the manifest is an
+    % artifact that travels (CI upload, public harness), and a full path leaks
+    % the local filesystem layout of whoever ran it.
+    [~, csvName, csvExt] = fileparts(char(string(opt.CsvFile)));
+    fprintf(fid, "input_csv: %s\n", string(csvName) + string(csvExt));
     fprintf(fid, "scenario_rows: %d\n", nRows);
     fprintf(fid, "profile_mode: %s\n", string(opt.ProfileMode));
     fprintf(fid, "seed: %g\n", opt.Seed);
@@ -141,10 +146,15 @@ function outDir = run_all_scenarios(varargin)
     hashesFile = fullfile(outDir, "hashes.txt");
     fid = fopen(hashesFile, "w");
     assert(fid > 0, "Could not open hashes file for writing.");
+    % Hash by file NAME for the same reason as above. Note the input hash is a
+    % confirmation oracle -- anyone holding a candidate reconstruction of a
+    % private input can test it for an exact match -- so a public harness must
+    % hash only the fixture it actually shipped, never a private input.
+    [~, resName, resExt] = fileparts(char(string(resultsFile)));
     fprintf(fid, "%s  %s\n", localSha256(opt.CsvFile), ...
-        string(opt.CsvFile));
+        string(csvName) + string(csvExt));
     fprintf(fid, "%s  %s\n", localSha256(resultsFile), ...
-        string(resultsFile));
+        string(resName) + string(resExt));
     fclose(fid);
 
     fprintf("\nBatch complete. Results: %s\n", resultsFile);

@@ -32,7 +32,14 @@ end
 
 function testAllCanonicalHorizonsRun(testCase)
     % 2026 / 2036 / 2046 / 2056 all run end-to-end without any edits.
-    T = loadScenarios(testCase.TestData.csvFile, "SiteId", "FFX002");
+    %% Site ids are read FROM THE DATA, never hard-coded. The same discipline
+    %% ML-06 applies to horizons applies here: these sources are mirrored into a
+    %% PUBLIC harness repository, so naming a real facility id in a test would
+    %% publish client identity. Reading the id keeps the test valid against the
+    %% private canonical CSV and against a synthetic harness fixture alike.
+    allRows = loadScenarios(testCase.TestData.csvFile);
+    siteId = string(allRows.site_id(1));
+    T = loadScenarios(testCase.TestData.csvFile, "SiteId", siteId);
     horizons = unique(T.horizon_year);
     verifyEqual(testCase, sort(horizons(:)).', [2026 2036 2046 2056]);
 

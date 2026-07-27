@@ -101,14 +101,20 @@ end
 
 function panel = localComputePanel(testCase)
 %LOCALCOMPUTEPANEL Fixed scenario panel -> one summary row per scenario.
-%   Panel: FFX002 and PWC001 across every horizon in the data, first
-%   case per horizon in canonical order (deterministic composition).
-    T = loadScenarios(testCase.TestData.csvFile, ...
-        "SiteId", ["FFX002", "PWC001"]);
+%   Panel: the FIRST TWO site ids in sorted order, across every horizon in
+%   the data, first case per horizon in canonical order. Reading the ids from
+%   the data rather than naming them keeps the panel deterministic while
+%   letting the same test run against a synthetic public-harness fixture
+%   without publishing a real facility id.
+    allRows = loadScenarios(testCase.TestData.csvFile);
+    panelSites = unique(string(allRows.site_id));
+    panelSites = sort(panelSites);
+    panelSites = panelSites(1:min(2, numel(panelSites))).';
+    T = loadScenarios(testCase.TestData.csvFile, "SiteId", panelSites);
     horizons = unique(T.horizon_year);
 
     rows = {};
-    for site = ["FFX002", "PWC001"]
+    for site = panelSites
         for h = horizons(:).'
             sub = T(string(T.site_id) == site & ...
                 T.horizon_year == h, :);

@@ -50,10 +50,17 @@ function testHorizonsComeFromData(testCase)
 end
 
 function testFilterBySiteHorizonCase(testCase)
+    %% Site ids are read FROM THE DATA, never hard-coded. The same discipline
+    %% ML-06 applies to horizons applies here: these sources are mirrored into a
+    %% PUBLIC harness repository, so naming a real facility id in a test would
+    %% publish client identity. Reading the id keeps the test valid against the
+    %% private canonical CSV and against a synthetic harness fixture alike.
+    allRows = loadScenarios(testCase.TestData.csvFile);
+    siteId = string(allRows.site_id(1));
     T = loadScenarios(testCase.TestData.csvFile, ...
-        "SiteId", "FFX002", "HorizonYear", 2036, "Case", "high");
+        "SiteId", siteId, "HorizonYear", 2036, "Case", "high");
     verifyEqual(testCase, height(T), 1);
-    verifyEqual(testCase, string(T.site_id(1)), "FFX002");
+    verifyEqual(testCase, string(T.site_id(1)), siteId);
     verifyEqual(testCase, T.horizon_year(1), 2036);
     verifyEqual(testCase, string(T.case_label(1)), "high");
 end

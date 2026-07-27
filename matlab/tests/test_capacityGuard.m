@@ -89,7 +89,7 @@ end
 
 function testPlanningModeCarriesBanner(testCase)
     row = localGuardRow("placeholder");
-    row.spare_capacity_kW = 153.6;
+    row.spare_capacity_kW = 120.0;   % SYNTHETIC - never a real site value
     g = capacityGuard(row, "Mode", "planning_illustration");
     verifyFalse(testCase, g.is_verified);
     verifyGreaterThan(testCase, strlength(g.placeholder_banner), 0, ...
@@ -98,7 +98,7 @@ function testPlanningModeCarriesBanner(testCase)
         contains(g.placeholder_banner, "PLACEHOLDER", ...
             "IgnoreCase", true));
     % Legacy definition: mean base + spare.
-    verifyEqual(testCase, g.capacity_kW, 50 + 153.6, "RelTol", 1e-12);
+    verifyEqual(testCase, g.capacity_kW, 50 + 120.0, "RelTol", 1e-12);
 end
 
 function testUndefinedCapacityYieldsNaN(testCase)
@@ -124,7 +124,7 @@ end
 function testServiceCapacityPreferredOverLegacySum(testCase)
     row = localGuardRow("planning_proxy");
     row.service_capacity_kW = 300;
-    row.spare_capacity_kW = 153.6;
+    row.spare_capacity_kW = 120.0;   % SYNTHETIC - never a real site value
     g = capacityGuard(row, "Mode", "planning_illustration");
     verifyEqual(testCase, g.capacity_kW, 300, ...
         "service_capacity_kW must take precedence over base+spare.");
