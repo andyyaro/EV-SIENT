@@ -198,3 +198,90 @@ distribution, no new certificate, no new DNS record.
 **Rejected:** a dedicated short domain. It would read slightly better on a printed card and
 would cost a registration, a certificate and a distribution, for a project whose entire
 current run rate is about $0.40/month.
+
+---
+
+## DEC-008 — Contract v2 is derived from v1 by migration, not produced independently
+
+**Date:** 2026-07-27 · **Phase:** 4
+
+`data/contract/v2/` is built by reading the frozen `data/contract/v1/` and widening it.
+`scripts/build_contract_v2.py` and `fcf_m2.workflow` both call the one migration function in
+`src/fcf_m2/contract_v2.py`; neither reimplements it.
+
+**Reasoning:** "v2 is additive over v1" is the entire promise of the version, and derivation
+makes it true *by construction* rather than by discipline. Migration copies every v1 value
+across, so a v2 number drifting from its v1 counterpart is not something the code is able to
+express. The tests assert it anyway, because a guarantee nobody checks is a comment.
+
+It is also the same rule the owner set for Phase 6B — *do not build a second, parallel intake
+path* — applied one phase earlier. Two producers for two versions of the same contract is
+exactly how the horizon vocabulary ended up meaning three different things across Python,
+Excel and MATLAB before the V3 restructure.
+
+**Rejected:**
+
+| Alternative | Why it loses |
+|---|---|
+| **Emit v2 directly from `workflow.run`, independently of v1** | Two producers, two chances to diverge, and no mechanical proof of additivity — only a test that would have to enumerate all 48 fields correctly forever. |
+| **Regenerate v1 and v2 together from the model each run** | Requires regenerating v1, which is now immutable. The reason to freeze v1 is that published artifacts quote it. |
+| **A `version=` parameter on `contract.write_contract`** | One function branching on version reads tidier and is worse: v1's writer is frozen code that should not be edited to add a case for something that came after it. |
+
+**Consequence accepted, and stated:** if the model itself changes, v2 does not update from
+the model — it updates from whatever v1 it was derived from, and v1 is frozen. That is
+correct for a container change and wrong for a model change. When the V4 model genuinely
+produces different numbers, those go into a **new run** with its own contract directory and
+its own `model_version`, not into this v2. The v2 manifest records the SHA-256 of the exact
+v1 it came from, so "which v1?" stays answerable.
+
+---
+
+## DEC-009 — `horizon_label`'s `now` becomes `baseline` in v2, and stays `now` in v1 forever
+
+**Date:** 2026-07-27 · **Phase:** 4 · **Closes:** FIND-NUM-04
+
+**Reasoning:** `now` is time-relative text frozen into a dated artifact. Read in 2036, a row
+labelled `now` is simply false — and "now" is the one horizon word this program prohibits
+everywhere else, which made the contract the last place it survived.
+
+It could not be fixed in v1 because v1 is immutable, and that is not an obstacle to route
+around: an immutable contract plus an additive successor is *precisely* the mechanism for a
+correction that arrives after publication.
+
+**The cost, stated plainly rather than buried:** this is the one change in v2 that can break
+a consumer, and it breaks quietly. A filter on `horizon_label == "now"` matches nothing in
+v2, drops the baseline row, and raises no error — an empty result or a chart missing its
+first column. `docs/migration-from-v3.md` leads with it and recommends filtering on
+`horizon_year == 2026` instead, which did not change and never will.
+
+**Rejected:**
+
+| Alternative | Why it loses |
+|---|---|
+| **Leave `now` in v2 as well** | Carries a known-decaying label into the version that is supposed to be the good one, forever. |
+| **Carry both `horizon_label` and `horizon_label_v1`** | A permanent duplicate column to spare consumers a one-line change, and two fields that must never disagree. |
+| **Fix it in v1 and re-cut the hash chain** | Breaks the freeze, invalidates the pinned digest, and silently changes an artifact that published figures already quote. |
+
+---
+
+## DEC-010 — `model_version` stays `3.0.0` in contract v2
+
+**Date:** 2026-07-27 · **Phase:** 4 · **Supersedes:** the first written v2 manifest, which
+claimed `4.0.0` — caught during review and corrected before it left the branch.
+
+The v2 manifest reports `model_version: 3.0.0`.
+
+**Reasoning:** the contract version and the model version are different facts. v2 is a
+*container* change — it adds fields for observations that do not exist yet. The numbers
+inside it were produced by the V3 model, on rows that say `model_mode = milestone2_v3`.
+Migrating them into a wider container did not re-run anything.
+
+Stamping `4.0.0` on them would be a version claiming work that has not happened, which is the
+same defect as a placeholder capacity presented as verified — one layer up, and harder to
+notice, because nobody audits a version string.
+
+`MODEL_VERSION_V4 = "4.0.0"` exists in `config.py` and is deliberately unused by any emitted
+artifact. `test_v2_does_not_claim_model_version_4` fails if that changes.
+
+**Rejected:** *bump to 4.0.0 because the work is called Phase 4.* The phase number is a plan;
+the model version is a claim about output.

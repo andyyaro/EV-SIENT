@@ -46,6 +46,7 @@ import pandas as pd
 
 from . import config, contract
 from .config import (
+    MODEL_VERSION,
     MODEL_VERSION_V4,
     SCHEMA_VERSION,
     SCHEMA_VERSION_V2,
@@ -303,9 +304,18 @@ def validate_v2(scenario_v2: pd.DataFrame, site_table: pd.DataFrame) -> list[str
 
 def write_contract_v2(out_dir: str | Path, scenario_v2: pd.DataFrame, site_table: pd.DataFrame,
                       provenance: pd.DataFrame, standards_register: pd.DataFrame,
-                      assumptions: dict, run_id: str,
-                      inputs_hashed: dict[str, str]) -> Path:
-    """Write ``data/contract/v2/`` with its own hash chain. Never touches v1."""
+                      assumptions: dict, run_id: str, inputs_hashed: dict[str, str],
+                      model_version: str = MODEL_VERSION) -> Path:
+    """Write ``data/contract/v2/`` with its own hash chain. Never touches v1.
+
+    ``model_version`` defaults to ``MODEL_VERSION`` (3.0.0), **not** to ``MODEL_VERSION_V4``,
+    and the distinction is the whole point. The contract version and the model version are
+    different facts: v2 is a container change, and the numbers inside today's v2 were
+    produced by the V3 model, on rows that say ``model_mode = milestone2_v3``. Stamping
+    4.0.0 on them would be a version claiming work that has not happened -- the same defect
+    as a placeholder capacity presented as verified, one layer up. The bump happens when V4
+    is genuinely complete, which is the program's own rule.
+    """
     out = Path(out_dir)
     if out.resolve().name == "v1":
         raise contract.ContractValidationError(
@@ -332,7 +342,13 @@ def write_contract_v2(out_dir: str | Path, scenario_v2: pd.DataFrame, site_table
               "source_provenance.csv", "standards_register.csv", "assumptions.json"]
     manifest = {
         "contract_version": SCHEMA_VERSION_V2,
-        "model_version": MODEL_VERSION_V4,
+        "model_version": model_version,
+        "model_version_note": (
+            "The contract version and the model version are separate facts. Contract v2 is a "
+            "container change: it adds fields for observations. The numbers in it were "
+            "produced by model version "
+            f"{model_version}. Model version {MODEL_VERSION_V4} is reserved for when V4 is "
+            "genuinely complete and is not claimed by this artifact."),
         "supersedes": SCHEMA_VERSION,
         "run_id": run_id,
         "generated_utc": datetime.now(timezone.utc).isoformat(),

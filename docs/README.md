@@ -6,6 +6,7 @@
 - Root [README](../README.md) — project overview, quick start, limitations
 - [Reproduction guide](operations/reproduction-guide.md) — every verified command
 - [Migration from V2](migration-from-v2.md) — old vs new commands, paths, and results
+- [Migration from contract v1 to v2](migration-from-v3.md) — additive; the one change that can break a consumer is `horizon_label`
 
 ## For model users
 - [Workflow steps](WORKFLOW_STEPS.md) (generated — regenerate with `make docs`)

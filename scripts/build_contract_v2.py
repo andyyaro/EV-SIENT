@@ -99,7 +99,10 @@ def build(out_dir: Path) -> dict:
     contract_v2.write_contract_v2(
         out_dir, scenario_v2, site_table, provenance, standards, assumptions,
         run_id=f"v2-from-{v1_manifest.get('run_id', 'unknown-v1-run')}",
-        inputs_hashed=inputs_hashed)
+        inputs_hashed=inputs_hashed,
+        # Carried from v1, not restated. These rows were produced by the model version v1
+        # recorded, and migrating them into a wider container did not re-run the model.
+        model_version=v1_manifest["model_version"])
 
     return {
         "rows": len(scenario_v2),

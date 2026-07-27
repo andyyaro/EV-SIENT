@@ -1,5 +1,60 @@
 # Changelog
 
+## Unreleased — V4 platform program, Phase 4: contract v2
+
+Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
+[docs/migration-from-v3.md](docs/migration-from-v3.md).
+
+### Added
+- **12 fields** carrying what the V4 field-data loop produces: the measured values behind a
+  trigger decision and the decision's own rule trace, when and how a capacity was confirmed,
+  any unresolved conflict between sources, and **why** a site's data confidence is what it is.
+  v1 had nowhere to put any of it, because when v1 was written there was no way to observe
+  anything.
+- `scripts/build_contract_v2.py` — builds and `--check`s v2. Refuses to leave a non-additive
+  v2 on disk.
+- `observed.CapacityUpgrade.method` — a verified capacity now records *how* it was verified
+  as a controlled value, not only inside a prose source string.
+- Two gates in `verify.sh` (15 → 17): v2 rebuilds byte-identically from v1 with every shared
+  field unchanged, and the tracked v2 passes v1 rules + v2 rules + JSON Schema + RT-10.
+
+### Changed
+- **`horizon_label`: `now` → `baseline` in v2.** The one change that can break a consumer:
+  a filter on `horizon_label == "now"` silently matches nothing and drops the baseline row
+  without erroring. Filter on `horizon_year == 2026` instead. `now` is time-relative text
+  frozen into a dated artifact — read in 2036 it is simply false. **v1 keeps `now` forever.**
+- `validate-contract` is version-aware, reading the version from the artifact's manifest
+  rather than a flag, so a v2 directory cannot be checked under v1's weaker rules.
+
+### Frozen
+- **`data/contract/v1/` is immutable.** `tests/test_contract_v2.py` pins its manifest
+  SHA-256; anything that regenerates or edits v1 fails that test. The correct response is to
+  revert or route the change into v2 — never to update the constant.
+
+### Enforced, not documented
+- A row cannot carry an observed value while reporting `awaiting_observed_data`.
+- A `verified_*` capacity basis must name the date it was verified.
+- **An empty `observed_*` field means NOT OBSERVED. It never means zero.** Do not `fillna(0)`;
+  a defaulted uptime of 1.0 walks straight past the reliability gate.
+
+### Fixed (both would have fired the day real data arrived, not today)
+- The empty state was `""` in memory but `NaN` from disk, and `astype(str)` renders a missing
+  value as the **non-empty** string `"<NA>"`. The orphaned-observation rule would have fired
+  on all 120 correct rows. Empty is now `None` end to end and the emptiness test is NaN-aware.
+- A column of nothing but empty cells reads back from CSV as `float64`, so writing
+  `"2026-05-04"` into it raises instead of upcasting — the run receiving the project's first
+  real utility record would have been the run that crashed.
+
+### Unchanged
+- **Zero real observations.** Every `observed_*` field is empty, every row reports
+  `awaiting_observed_data`, capacity is `placeholder` at all twelve sites. Nothing in v2 is
+  more certain than anything in v1.
+- `model_version` stays **`3.0.0`**. The contract version and the model version are separate
+  facts; the bump to `4.0.0` waits until V4 is genuinely complete.
+- `legacy_v2` still reproduces 25 starter / 48 pathway. All published totals identical.
+
+---
+
 ## Unreleased — V4 platform program, Phase 1: repair the base
 
 Defects found by a full audit of the repository and fixed before any new work was

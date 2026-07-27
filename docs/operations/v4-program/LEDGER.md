@@ -17,9 +17,9 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 |---|---|---|---|
 | 0 | Ground truth | **GREEN — verified** | 229 files inventoried and independently verified; 3+1 trees reconciled; AWS mapped read-only; 200 findings registered. |
 | 1 | Repair the base | **GREEN — verified** | Was 8 PASS / 2 FAIL on a clean checkout; now 10 PASS / 0 FAIL locally **and in CI**. 10 repairs, each committed separately. |
-| 2 | Liberate the MATLAB layer | **in-progress** | **Harness live and MATLAB executing.** Tier 2 proven by execution. Runs 1-2 failed on portability defects, both fixed; run 3 in flight. `EXECUTION_STATUS.md` untouched until a run *passes*. |
+| 2 | Liberate the MATLAB layer | **in-progress** | **Harness live; MATLAB runs and now *passes*.** Tier 2 proven by execution. Runs 1-5 each failed on a real portability defect, all fixed at source. Remaining: pull artifacts back with provenance, update `EXECUTION_STATUS.md` (now legitimate — a run passes), Octave-vs-MATLAB cross-validation, native Simulink view. |
 | 3 | Integrate the 3D explorer | **GREEN — verified** | Governing defect fixed in producer *and* consumer; viewer states its mode and all four caveats; keyboard-reachable; Cesium vendorable offline. |
-| 4 | Build V4 | not-started | |
+| 4 | Build V4 | **in-progress** | Observed-data loop built and tested (`observed.py`, 37 tests). **Contract v2 shipped** at `data/contract/v2/`, additive over a now-frozen v1; `verify.sh` 15 → 17 gates. Remaining: MATLAB reconciliation against real MATLAB output. |
 | 5 | NFC field layer | **GREEN — verified on hardware** | One tag written, read back through iOS background NFC, live page confirmed. 12 landing pages + 12 capture forms deployed. Loop closes: tag → form → CSV → ingestion → capacity upgrade. |
 | 6 | Close the Tableau blocker | not-started | |
 | **6B** | **Data intake layer (portability)** | **not-started — NEW, added 2026-07-27** | Added by the project owner mid-program. Lets another jurisdiction bring its own data and get a run. Inserted here because **the platform must expose it**. |
@@ -129,6 +129,32 @@ Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Cur
 | 3.12 | Keyboard accessibility of the site list | **verified** | Focusable, `role=button`, descriptive `aria-label`; Enter selects, `P` pins, arrows navigate. Right-click still pins. Gated. |
 | 3.13 | **Viewer read retired horizon fields** — found while fixing 3.12 | **verified** | `app.js` still named `ports_2035`/`ports_2050` in **six** render paths; under the canonical mode every one would have rendered blank. Horizon vocabulary now comes from the manifest. Gated. |
 | G3 | **Gate 3** | **GREEN** | Explorer fully integrated; horizon/data-source mismatch resolved end to end (producer *and* consumer); all new gates green in `verify.sh` **and** CI. **15 gates.** |
+
+### Phase 4 — Build V4 (living planning system correctable by the field)
+
+| # | Task | State | Evidence |
+|---|---|---|---|
+| 4.1 | Observed-data ingestion that refuses unattributed records | **verified** | `src/fcf_m2/observed.py`. Fail-closed: raises on the first unusable row rather than half-ingesting. `tests/test_observed.py`, 37 tests. |
+| 4.2 | Observed templates extended so the trigger policy can actually be evaluated | **verified** | FIND-V4-01 closed. `observed_sessions_template.csv` gained `ports_in_service`, `port_hours_available/possible`, `sessions_delayed`, `wait_p90_min`, `observer`, `source_system`; `observed_capacity_template.csv` added. |
+| 4.3 | Capacity precedence + conflict handling | **verified** | `resolve_capacity`: `verified_utility` > `verified_facility` > `placeholder`. Disagreement keeps **both** values, uses the conservative one, and flags the conflict — never silently resolved. |
+| 4.4 | Read-only `ingest-observations` command | **verified** | Reports what observations *would* change. Never writes: received values enter the inputs and the model **re-runs**, never an edit in place. |
+| 4.5 | **Contract v2, additive over a frozen v1** | **verified** | `data/contract/v2/`, 120 rows × 60 fields (48 from v1 + 12 added). Own RT-10 hash chain, negative-controlled. `src/fcf_m2/contract_v2.py` is the single migration path; `scripts/build_contract_v2.py` and `fcf_m2.workflow` are both callers. |
+| 4.5a | Additivity proven value-by-value, not asserted | **verified** | Every shared field byte-equal to v1 across all 120 rows; checked in the builder **and** in `tests/test_contract_v2.py`. Only `contract_version` and `horizon_label` change, each with a stated reason. |
+| 4.5b | **v1 made immutable and gated** | **verified** | `tests/test_contract_v2.py` pins `data/contract/v1/contract_manifest.json` SHA-256 `0dc7bf37…`. Writing v2 content into a `v1/` directory is refused in code and leaves nothing behind. |
+| 4.5c | v2's own refusals enforced, not documented | **verified** | Four mutation tests: an observed value with no observation behind it; a `verified_*` basis with no date; the retired `now` vocabulary; a v1 version string. Each observed failing. |
+| 4.5d | Two latent defects found and fixed at source | **verified** | (a) empty was `""` in memory but `NaN` from disk, and `astype(str)` yields the **non-empty** `"<NA>"` — the orphaned-observation rule would have fired on all 120 correct rows; (b) an all-empty column reads back as `float64`, so writing a date into it **raises** — the run receiving the first real utility record would have been the run that crashed. Both would have fired the day real data arrived, not today. |
+| 4.5e | `model_version` **not** bumped to 4.0.0 | **verified** | Caught and corrected after first write: v2's manifest briefly claimed `4.0.0` on rows the **V3** model produced. Contract version and model version are separate facts; the bump waits until V4 is genuinely complete, per the program's own rule. `test_v2_does_not_claim_model_version_4`. |
+| 4.6 | `docs/migration-from-v3.md` + CHANGELOG | **done** | Leads with the one change that can break a consumer: `horizon_label == "now"` silently matches nothing in v2 and drops the baseline row without erroring. Indexed from both READMEs; link check passes. |
+| 4.7 | Two `verify.sh` gates for v2 | **verified** | 15 → **17 PASS / 0 FAIL**. `validate-contract` reads the version from the artifact's manifest rather than a flag, so a v2 directory cannot be checked under v1's weaker rules. |
+| 4.8 | MATLAB reconciliation against **real MATLAB** output | **pending** | Blocked behind Phase 2 remainder. The adapter still generates from v1. |
+| 4.9 | Confirm `legacy_v2` and `milestone2_v3` still reproduce | **verified** | `verify.sh` gate 2: 25 starter / 48 pathway exact. Full suite green. |
+| G4 | **Gate 4** | **not yet closed** | 4.8 outstanding. |
+
+**What contract v2 does not contain, stated rather than implied:** **zero real observations.**
+Every `observed_*` field is empty, every row reports `awaiting_observed_data`, and capacity is
+`placeholder` at all twelve sites — exactly as loudly as in v1. The plumbing exists and is
+exercised by tests; nobody has sent data. An empty `observed_*` field means **NOT OBSERVED**,
+never zero, and validation enforces that rather than documenting it.
 
 ### Phase 5 — NFC Field Layer
 
@@ -860,3 +886,12 @@ them and confirmed before any code changes on their account.
 | 2026-07-27T16:30Z | Phase 2 front-loaded: exposure review + Octave tier + harness CI design launched (`wf_c89b4289-b6c`). |
 | 2026-07-27T16:20-17:00Z | Phase 1: ten repairs committed separately. `verify.sh` goes 8/2 → **10/0**. Four published numbers corrected against the contract; four new gates added, each mutation-tested. |
 | 2026-07-27T17:05Z | Branch pushed. **CI green, run `30285417343`** — all ten gates observed passing in the log. **Gate 1 GREEN.** |
+| 2026-07-27T17:30Z | Phase 3: governing defect fixed in **producer and consumer** — fixing the ETL had left six viewer render paths still naming `ports_2035`/`ports_2050`. Viewer states its mode and all four caveats, keyboard-reachable. **Gate 3 GREEN.** |
+| 2026-07-27T18:00Z | **CDN gate caught passing vacuously**: moving the Cesium URL into an inline script made the checker report "0 checked, all pinned". Rewritten to read inline scripts and to **refuse to pass when nothing is found**. Second instance of text-vs-meaning matching. |
+| 2026-07-27T19:00Z | Phase 5: NFC generator, 12 landing pages, 12 capture forms, QR fallbacks, runbook. First deployment served **Access Denied** — tags point at `/t/FFX002` but the upload was `FFX002.html`, and a bucket that blocks listing answers 403 not 404. Fixed in the generator (extensionless keys) + CloudFront custom error responses. FIND-AWS-09 closed. |
+| 2026-07-27T19:30Z | **Tag written and read back on real hardware** (iPhone 17 Pro, writing app closed). Loop closes end to end: tag → capture form → CSV → ingestion → `placeholder → verified_facility`. **Gate 5 GREEN.** |
+| 2026-07-27T19:45Z | Capture-form test failed on the page's own privacy copy — the page says it "sets no cookie" and a substring search read that as evidence it does. **Third** occurrence of matching text rather than meaning; fixed to check actual usage. |
+| 2026-07-27T20:00Z | **NEW REQUIREMENT from the owner: Phase 6B, data intake layer.** Logged in `LEDGER.md` and `DECISIONS.md` (DEC-000) **before any implementation**, at the owner's explicit instruction. |
+| 2026-07-27T20:30Z | Phase 6B research fleet launched (`wf_d029c874-d32`) — five lanes, each followed by an adversarial challenge pass whose first duty is finding **invented sources**. Research only; implementation stays behind its gate. |
+| 2026-07-27T20:45Z | **Contract v2 shipped.** 120 rows × 60 fields; every shared field byte-equal to v1; RT-10 chain negative-controlled (tamper → detected, restore → pass). v1 immutable via a pinned manifest digest. Two latent defects fixed at source, both of which would have fired the day real data arrived. `verify.sh` 15 → **17 PASS / 0 FAIL**. Commit `2d3e593`. |
+| 2026-07-27T20:50Z | **Self-caught false claim:** v2's manifest first stamped `model_version: 4.0.0` on rows the **V3** model produced. Corrected to `3.0.0` and pinned by a test. A version claiming work that has not happened is the same defect as a placeholder capacity presented as verified, one layer up. |
