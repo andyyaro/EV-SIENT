@@ -45,6 +45,15 @@
     <label class="toggle"><input type="checkbox" id="toggleLabels" checked><span>Labels</span></label>
     <button class="ghost" id="btnReset" title="Fly back to the full portfolio">Overview</button>
   </div>
+
+  <!-- Which model mode produced these numbers. Populated from data/manifest.json at load.
+       The viewer previously never displayed this at all: it read the legacy_v2 fixtures
+       and said nothing about it, so a planner had no way to know whether the ports on
+       screen were current or superseded. A map that cannot say which numbers it is
+       showing cannot be trusted about any of them. -->
+  <div id="modeBadge" class="mode-badge" role="status" aria-live="polite">
+    <span class="mode-label">Loading mode…</span>
+  </div>
 </header>
 
 <!-- ------------------------------------------------------------- left rail -->

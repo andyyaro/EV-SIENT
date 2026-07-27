@@ -139,3 +139,48 @@ class TestCommittedArtifacts:
             lon, lat = feature["geometry"]["coordinates"][:2]
             assert -77.8 <= lon <= -77.0, f"{feature['properties']['site_id']} lon {lon}"
             assert 38.5 <= lat <= 39.1, f"{feature['properties']['site_id']} lat {lat}"
+
+
+@pytest.fixture(scope="module")
+def app_js() -> str:
+    return (ROOT / "explorer/web/app.js").read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def index_html() -> str:
+    return (ROOT / "explorer/web/index.html").read_text(encoding="utf-8")
+
+
+class TestViewerShowsWhatItMustShow:
+    """The viewer is the most persuasive surface here, so it carries the most caveats.
+
+    Before integration it displayed neither the active data mode nor two of the four
+    required disclaimers, and it never read manifest.json at all -- the strongest
+    provenance statement in the tree shipped with every build and was shown to nobody.
+    """
+
+    def test_viewer_reads_the_manifest(self, app_js):
+        assert "data/manifest.json" in app_js, "the viewer still ignores manifest.json"
+
+    def test_viewer_has_a_mode_badge(self, index_html, app_js):
+        assert 'id="modeBadge"' in index_html
+        assert "renderModeBadge" in app_js
+
+    def test_unknown_mode_is_stated_not_assumed(self, app_js):
+        """A missing manifest must read as unknown, never as canonical."""
+        assert "Data mode unknown" in app_js
+
+    @pytest.mark.parametrize("caveat", [
+        "Screening-class only",
+        "0 of 12 sites reach High data confidence",
+        "Electrical capacity is a labeled placeholder at 12 of 12 sites",
+        "The massing is not a design",
+    ])
+    def test_all_four_standing_caveats_are_present(self, app_js, caveat):
+        assert caveat in app_js, f"the viewer no longer states: {caveat}"
+
+    def test_no_cesium_ion_token_is_committed(self, app_js, index_html):
+        """The token is runtime-only, browser-only. A committed one is a security defect."""
+        import re
+        for blob in (app_js, index_html):
+            assert not re.search(r"eyJhbGciOi[A-Za-z0-9_\-]{20,}", blob), "a JWT-shaped token is committed"

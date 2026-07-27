@@ -83,6 +83,48 @@ function toast(msg, ms = 2600) {
 
 // ------------------------------------------------------------- data loading
 
+async function loadManifest() {
+  // The manifest states which model mode produced this payload, and its horizon
+  // vocabulary. It shipped with the build from the beginning and nothing ever read it,
+  // so the strongest provenance statement in the tree was never shown to anyone.
+  // Failure here is non-fatal: the viewer degrades to saying the mode is unknown, which
+  // is honest, rather than silently implying the numbers are canonical.
+  try {
+    const res = await fetch('data/manifest.json', { cache: 'no-cache' });
+    if (res.ok) return await res.json();
+  } catch { /* fall through */ }
+  return null;
+}
+
+function renderModeBadge(manifest) {
+  const el = document.getElementById('modeBadge');
+  if (!el) return;
+
+  if (!manifest || !manifest.mode) {
+    el.className = 'mode-badge is-legacy';
+    el.innerHTML =
+      '<span class="mode-label"><span class="mode-dot"></span>Data mode unknown</span>';
+    el.title = 'data/manifest.json could not be read, so this viewer cannot confirm ' +
+               'which model mode produced these numbers. Treat them as unverified.';
+    return;
+  }
+
+  const canonical = manifest.mode_is_canonical === true;
+  const horizons = Array.isArray(manifest.horizons) ? manifest.horizons.join(' · ') : '';
+  el.className = 'mode-badge ' + (canonical ? 'is-canonical' : 'is-legacy');
+  el.innerHTML =
+    `<span class="mode-label"><span class="mode-dot"></span>` +
+    `${canonical ? '' : 'SUPERSEDED — '}${esc(manifest.mode)}</span>` +
+    (horizons ? `<span style="opacity:.75;font-weight:500">${esc(horizons)}</span>` : '') +
+    ` <button class="mode-why" type="button" aria-label="What this mode means">what's this?</button>`;
+
+  const note = manifest.mode_note ||
+    'No description of this mode was recorded in the manifest.';
+  el.title = note;
+  const why = el.querySelector('.mode-why');
+  if (why) why.addEventListener('click', () => window.alert(note));
+}
+
 async function loadSites() {
   // Preferred: fetch the GeoJSON. Falls back to the inlined copy so the app
   // also runs straight off the filesystem with no web server.
@@ -868,9 +910,22 @@ async function start(token) {
   flyHome();
 
   const meta = data.metadata ?? {};
+  const manifest = await loadManifest();
+  renderModeBadge(manifest);
+
+  // Standing caveats. Each one appears in the reports, and the viewer used to carry only
+  // two of the four: the 0-of-12 confidence statement and the massing disclaimer were
+  // absent entirely. A 3D render is the most persuasive surface this project has, so it
+  // is the last place that should be quiet about what the data cannot support.
   $('#railFoot').innerHTML =
-    `${meta.site_count ?? state.sites.length} sites · schema ${esc(meta.schema_version ?? '—')}<br>` +
-    `<span style="color:var(--ink-3)">Planning prototype. Screening-class estimates only.</span>`;
+    `${meta.site_count ?? state.sites.length} sites · schema ${esc(meta.schema_version ?? '—')}` +
+    (manifest && manifest.mode ? ` · mode ${esc(manifest.mode)}` : '') + `<br>` +
+    `<ul class="standing-caveats">` +
+      `<li><strong>Screening-class only.</strong> Not an engineering, permitting, or procurement tool.</li>` +
+      `<li><strong>0 of 12 sites reach High data confidence.</strong></li>` +
+      `<li><strong>Electrical capacity is a labeled placeholder at 12 of 12 sites</strong>, pending utility and facility confirmation.</li>` +
+      `<li><strong>The massing is not a design.</strong> Volumes are illustrative placement studies, not proposed structures.</li>` +
+    `</ul>`;
 
   if (state.hasToken) setMode('terrain', { silent: true });
 }
