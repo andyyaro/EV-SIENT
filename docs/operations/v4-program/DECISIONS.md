@@ -598,3 +598,80 @@ speed at every decision point**, and this is the decision point where that rule 
 | **Audit only what changed since Phase 0** | Cheaper and wrong. The Phase 0 read is now old enough that inherited files have been edited by this program many times; "unchanged" is not a property anyone has verified. |
 | **Sample-audit the high-risk areas** | Sampling finds what you expect. Every defect listed above was in a place nobody was worried about. |
 | **Rely on the 23 verification gates** | The gates encode what was already thought of. Four of them have themselves been caught passing vacuously, which is precisely the failure a gate cannot self-detect. |
+
+---
+
+## DEC-015 — The platform is a Python-native local server, not a packaged native shell
+
+**Date:** 2026-07-27 · **Phase:** 7 · **Basis:**
+[`PHASE_7_PLATFORM_BRIEF.md`](PHASE_7_PLATFORM_BRIEF.md) — a 10-agent design panel: four
+independent architectures, each adversarially challenged, then synthesised.
+
+### The decision
+
+`python -m fcf_m2.server` serves the one bundle `site/platform/` on loopback and adds `/api/*`
+for execution. **The same directory, byte for byte, is deployed to S3 + CloudFront as the web
+tier.** No Rust, no Electron, no bundled Chromium, no second frontend.
+
+**Why:** it is the only architecture where *"one shell, two tiers"* is a property of the
+**deployment** rather than a promise a build flag has to keep. The two tiers are literally the
+same five files, and the tier is *detected* by asking whether `/api/operations` answers — not
+compiled in. Every other angle adds a layer whose only real job is to open a window onto a
+page that already exists, and each such layer is a place the tiers can drift.
+
+### Why the other three lost — the real trades, not strawmen
+
+**Tauri + Rust.** The strongest on size and genuinely correct that an embedded CPython can run
+the model with no user Python at all — the adversarial pass proved that end to end, with all
+seven contract files byte-identical. But after correction, **the Rust layer's entire remaining
+job is "spawn `fcf_m2.server` and open a WebView"** — the sidecar it spawns *is* the
+architecture chosen here. It costs a language nobody in this repo writes, a second
+cross-platform build matrix, ~180 MiB of embedded runtime, and it runs straight into the
+boundary problem below.
+
+**Electron.** Wins one real argument: the 3D surface is CesiumJS WebGL2, and Electron
+guarantees the desktop renderer is the same engine as the web tier's, where Tauri gives you
+WKWebView on macOS and WebView2 on Windows with no cross-browser harness in this repo to catch
+a divergence. It loses on ~279 MiB of bundled Chromium — about half the installed bundle — on
+a project whose entire tracked payload is **13.5 MiB**. Worse, it cannot auto-update within
+the $10/month ceiling (signing alone is ~$8.25/month), so a desktop user's browser ages
+indefinitely while the web tier's does not. Shipping a stale browser to make a planning study
+feel like an app is a security trade this project should not make.
+
+**Web-first progressive.** Architecturally almost identical to the winner, and its instincts
+about the capability probe and a deploy allowlist are adopted. It loses on one mechanism: it
+has the **public `https://` page fetch `http://127.0.0.1`**. That is mixed content, it is the
+shape a port-scanning ad script has, and it is what Private Network Access exists to restrict.
+Serving the identical files from the local server instead makes every request same-origin and
+costs nothing. **The idea survives; the direction of the arrow is reversed.**
+
+### What this validates, and what that says about sequencing
+
+Five Phase 7 components were built *while the panel ran*, deliberately chosen to be
+shell-independent: the provenance resolver, the operations registry, the web tier, the local
+server, and tier detection. The panel — which read the tree rather than the prompt, and
+corrected the prompt's claim that nothing was built — landed on the architecture those
+components already assume. **Building the shell-independent spine before choosing the shell
+was the right call**, and would still have been if the panel had chosen Tauri, because in that
+design the sidecar is this same server.
+
+### OPEN QUESTION FOR THE OWNER — not the assistant's to decide
+
+**A downloadable installer that can genuinely *run* the model must carry
+`data/inputs/real_sites_v2.csv`** — facility-level electrical and occupancy data for twelve
+named public buildings — **out of a repository that is private and stays private.**
+
+That is a declassification decision about real facilities in two jurisdictions, and it belongs
+to the project owner and the client, not to this program. Until it is answered:
+
+- The **web tier ships**. It serves only contract *outputs*, which are already public-facing
+  in the reports and on the site.
+- The **desktop tier runs from a clone** for anyone who has repository access. That covers the
+  team, which is who actually needs to execute anything.
+- **No public installer is built.** Recorded as a residual limitation rather than quietly
+  descoped.
+
+Three options exist and none is obviously right: ship an installer carrying a **synthetic**
+input set (honest, and the model then computes nothing about real sites); ship a
+clone-and-run path only (what happens by default); or declassify the input file (a real
+decision with real consequences for twelve named buildings).
