@@ -285,3 +285,66 @@ artifact. `test_v2_does_not_claim_model_version_4` fails if that changes.
 
 **Rejected:** *bump to 4.0.0 because the work is called Phase 4.* The phase number is a plan;
 the model version is a claim about output.
+
+---
+
+## DEC-011 — Missing data currently makes a site look better; one fix now, two deferred to 6B
+
+**Date:** 2026-07-27 · **Phase:** 4 → 6B · **Found by:** the Phase 6B research fleet
+(`wf_d029c874-d32`), **confirmed by execution before being acted on**, per the subagent
+doctrine that every finding is a lead until reproduced against the actual files.
+
+### The finding
+
+Three places where absent or malformed input scores **better** than measured input — the
+exact inverse of the principle the rest of this project enforces.
+
+| # | Where | Behaviour | Live today? |
+|---|---|---|---|
+| 1 | `right_sizing.site_capacity_cap` | `parking_spaces <= 0` → cap **6**. A real 40-space lot → cap **2**. Absence allows **3× the ports** of measurement. | No |
+| 2 | `scoring.INVERTED_DRIVERS` | `garage_enclosed`, `stormwater_risk` use `(1 - x)`; absent → `0.0` → term `1.0`, the **maximum**. A site with no stormwater assessment scores as though one was done and found no risk. | No |
+| 3 | `scoring.yesno_to_num` | Returned `float(value)` for **any** number, unclamped. `7` on `fire_access_ok` contributed 7× its rubric weight. And `0.5` → `0.5` while `"0.5"` → `0.0`, so whether a CSV cell parsed as text or number changed the score. | No |
+
+**None changes a published number.** All 12 real sites carry strictly `0`/`1` in every flag
+and a positive `parking_spaces`, verified and pinned by a test. Every path is dormant on the
+current inputs — and goes live the moment Phase 6B accepts a file nobody here prepared, which
+is precisely what 6B is for.
+
+### Decided: fix #3 now
+
+It has no design ambiguity. A flag outside `{0, 1}` is invalid input, and the function's own
+string branch has always been strictly binary — the numeric branch simply disagreed with it.
+`yesno_to_num` now **refuses**, naming the field and the value.
+
+**Refuses rather than clamps.** Clamping `7` to `1` would be a cleaner that silently improves
+data — the thing this project exists not to do — and it would bury whatever produced a `7`.
+
+### Deferred: #1 and #2 go to Phase 6B, pinned by tests meanwhile
+
+Both need a decision with a **visible consequence for real users**, and neither has a
+correct-by-inspection answer:
+
+- **#1:** the conservative neutral (cap 2 on absence) lowers port targets for any
+  jurisdiction that omits the column. That is a real cost imposed on a real user for a
+  missing field.
+- **#2:** the pessimistic neutral (`1`) asserts the *opposite* unverified claim — "this site
+  **is** enclosed", "this site **does** have stormwater risk" — manufactured from the same
+  absence. For `garage_enclosed` it also changes a user-visible review tier, which carries no
+  ledger entry explaining why.
+
+The honest alternative both share is to keep the permissive neutral and record the absence as
+**coverage loss** feeding the existing confidence rubric — the model still runs, it just says
+less, which is requirement 6B.4 in the owner's own words. That is the likely answer, and it
+is a 6B decision because it only works once the completeness-to-confidence path exists.
+
+`tests/test_absence_is_not_favourable.py` pins both as **known defects**. A test asserting a
+defect is not an endorsement of it; it is how the defect stays visible until it is resolved.
+Each carries an instruction: when it starts failing, that *is* the fix — update this entry and
+delete the test rather than adjusting it.
+
+**Rejected:** *fix all three now.* #1 and #2 would move scores for absent data under a design
+nobody has chosen yet, and picking one silently is the same failure as the defect itself.
+
+**Rejected:** *record them and write no test.* Three of this program's defects were found in
+code that had been read and reasoned about but not exercised. An unpinned known defect is a
+defect that gets rediscovered.

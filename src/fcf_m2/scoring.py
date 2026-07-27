@@ -101,11 +101,41 @@ NORMALIZE_COLS = [
 ]
 
 
-def yesno_to_num(value) -> float:
+class FlagValueError(ValueError):
+    """A yes/no field carried something that is neither yes nor no."""
+
+
+def yesno_to_num(value, field: str = "yes/no field") -> float:
+    """Map a yes/no field to 0.0 or 1.0. Refuses anything that is neither.
+
+    The numeric branch used to ``return float(value)`` for *any* int or float, unclamped.
+    Two consequences, both reproduced before this was changed:
+
+    * ``0.5``, ``7`` and ``-3`` passed straight through into a subscore whose weights assume
+      the term is 0 or 1. A value of 7 on ``fire_access_ok`` contributes seven times the
+      weight the rubric allocates to fire access.
+    * The same value answered differently depending on its type: ``0.5`` → ``0.5``, but the
+      string ``"0.5"`` → ``0.0``, because the string branch is strictly binary. Whether a
+      CSV cell parsed as text or as a number silently changed the score.
+
+    It refuses rather than clamping. Clamping 7 to 1 would be a cleaner that quietly improves
+    data — the thing this project exists not to do — and it would hide the upstream mistake
+    that produced a 7. All 12 current sites carry strictly 0/1 in every flag, so **no
+    published number moves**; this closes the door before Phase 6B opens it to data nobody
+    here prepared.
+    """
     if pd.isna(value):
         return 0.0
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
     if isinstance(value, (int, float)):
-        return float(value)
+        as_float = float(value)
+        if as_float in (0.0, 1.0):
+            return as_float
+        raise FlagValueError(
+            f"{field}: {value!r} is not a yes/no value. Expected 0 or 1. A flag outside "
+            f"that set is not clamped, because clamping would silently improve the data and "
+            f"hide whatever produced the value.")
     value = str(value).strip().lower()
     return 1.0 if value in {"1", "y", "yes", "true", "t"} else 0.0
 
@@ -179,7 +209,9 @@ def enrich_and_score(sites: pd.DataFrame, mode: str = MODE_LEGACY, anchor_set: d
     df = sites.copy()
 
     for col in YES_NO_FIELDS:
-        df[col] = df[col].apply(yesno_to_num).fillna(0)
+        # Field name passed through so a refusal says WHICH flag was wrong, not just that
+        # one was. "banana is not a yes/no value" is useless when there are seven flags.
+        df[col] = df[col].apply(lambda v, c=col: yesno_to_num(v, c)).fillna(0)
     for col in NUMERIC_FIELDS:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
