@@ -17,8 +17,8 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 |---|---|---|---|
 | 0 | Ground truth | **GREEN — verified** | 229 files inventoried and independently verified; 3+1 trees reconciled; AWS mapped read-only; 200 findings registered. |
 | 1 | Repair the base | **GREEN — verified** | Was 8 PASS / 2 FAIL on a clean checkout; now 10 PASS / 0 FAIL locally **and in CI**. 10 repairs, each committed separately. |
-| 2 | Liberate the MATLAB layer | **in-progress** | Front-loaded per the program's exception. Exposure review, Octave tier evidence, and harness CI design running as `wf_c89b4289-b6c`. |
-| 3 | Integrate the 3D explorer | **core done — gate open** | Governing defect fixed and gated. Remaining: viewer UI must surface the active mode and the two missing disclaimers; Cesium vendoring for offline. |
+| 2 | Liberate the MATLAB layer | **in-progress** | **Harness live and MATLAB executing.** Tier 2 proven by execution. Runs 1-2 failed on portability defects, both fixed; run 3 in flight. `EXECUTION_STATUS.md` untouched until a run *passes*. |
+| 3 | Integrate the 3D explorer | **near-complete** | Governing defect fixed and gated; viewer now states its mode and all four caveats. Remaining: vendor Cesium for offline; keyboard access for the site list. |
 | 4 | Build V4 | not-started | |
 | 5 | NFC field layer | not-started | |
 | 6 | Close the Tableau blocker | not-started | |
@@ -123,10 +123,10 @@ Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Cur
 | 3.7 | Cesium pinned | **verified** | 1.128, both refs. `scripts/check_cdn_pins.py` enforces pinning and the ≥1.124 floor; both failure modes mutation-tested. |
 | 3.8 | New gates in `verify.sh` **and** CI | **verified** | 4 added → **14 gates, all green locally and in CI**. |
 | 3.9 | `CLAUDE.md` constraints folded into repo docs | **done** | `docs/architecture/3d-explorer-constraints.md`, with an enforcement table naming the gate for each constraint. |
-| 3.10 | **Viewer UI: surface the active mode; add the 2 missing disclaimers** | **not-started** | L11 found the viewer never displays which mode is active, `manifest.json` is never read, and two of four required disclaimers are absent (0/12 High confidence; massing is not a design). The *data* now carries mode; the *UI* does not yet show it. |
+| 3.10 | Viewer UI: surface the active mode; add the 2 missing disclaimers | **verified** | Mode badge in the header, styled by state — canonical reads as chrome, legacy reads as a warning with a `SUPERSEDED` prefix. `manifest.json` is now read; a missing manifest reads as **unknown**, never as canonical. All four standing caveats in the rail footer. Gated by exact wording + mutation-tested. |
 | 3.11 | Vendor Cesium for offline use | **not-started** | Pinned, not yet vendored. |
 | 3.12 | Keyboard accessibility of the site list | **not-started** | L11: the primary interaction is mouse-only. Phase 9 owns accessibility, but this is the explorer's own defect. |
-| G3 | **Gate 3** | **open** | 3.10–3.12 outstanding. |
+| G3 | **Gate 3** | **open** | 3.11 (vendor Cesium) and 3.12 (keyboard access) outstanding. **15 verify.sh gates green** locally and in CI. |
 
 ---
 
