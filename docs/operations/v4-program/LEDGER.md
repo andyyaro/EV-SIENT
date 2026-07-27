@@ -15,8 +15,8 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 
 | Phase | Name | Gate status | Notes |
 |---|---|---|---|
-| 0 | Ground truth | **in-progress** | Ledger initialized. |
-| 1 | Repair the base | not-started | |
+| 0 | Ground truth | **GREEN — verified** | 229 files inventoried and independently verified; 3+1 trees reconciled; AWS mapped read-only; 200 findings registered. |
+| 1 | Repair the base | **in-progress** | Starts from a known-red baseline: `verify.sh` is 8 PASS / 2 FAIL on a clean checkout. |
 | 2 | Liberate the MATLAB layer | not-started | Front-loaded; runs in background once started. |
 | 3 | Integrate the 3D explorer | not-started | |
 | 4 | Build V4 | not-started | |
@@ -41,16 +41,45 @@ Legend: `not-started` / `in-progress` / `blocked` / `done` / `verified`
 | 0.1 | Workspace verification (three trees present, no cruft) | **verified** | 198/198/31 files; zero cruft; zero files >25 MB. See below. |
 | 0.1b | Build Python 3.12 venv matching CI | **verified** | `repo/venv` on CPython **3.12.6**. Built with `python3.12 -m venv` (not `uv venv` — that omits `pip`, which the Makefile's `setup` target requires). `make test`: **80 passed, 92% coverage**. |
 | 0.2 | Safety tag `pre-v4-program-20260727` pushed; branch `v4-platform` created | **verified** | Tag pushed to origin; branch created off `7626823`. |
-| 0.3 | Read every line of every file in all three trees | in-progress | 12-lane fleet running (`wf_0ac58ed8-c08`). `buildSimulinkModel.m`, `runScenario.m`, `loadScenarios.m` also read directly by the lead. |
-| 0.3b | `INVENTORY.md` written | not-started | Blocked on 0.3. |
-| 0.3c | `INVENTORY.md` independently verified by a separate agent | not-started | Coverage verifier is stage 2 of the same workflow. |
-| 0.4 | Three-tree reconciliation, file by file | **verified** | **Snapshot ≡ `origin/main`, byte-identical, 198/198.** See RECON-1. |
-| 0.4b | `RECONCILIATION.md` written | not-started | Tree 3 (`fcf-3d`) analysis pending lanes L10/L11. |
+| 0.3 | Read every line of every file in all three trees | **verified** | 12 lanes, **224 files read, 0 not fully read**, 13 agents, 0 errors (`wf_0ac58ed8-c08`). All 9 `matlab/src/*.m` also read line by line by the lead. **200 findings** → `FINDINGS_REGISTER.md`. |
+| 0.3b | `INVENTORY.md` written | **done** | 229 files (198 repo + 31 explorer); per-file detail in `inventory/` (12 lane docs, 860 KB). |
+| 0.3c | `INVENTORY.md` independently verified by a separate agent | **verified** | Independent verifier: **coverage COMPLETE, zero gaps; accuracy — zero errors in 20+ probes**. See below. |
+| 0.4 | Three-tree reconciliation, file by file | **verified** | **Snapshot ≡ `origin/main`, byte-identical, 198/198**, proven twice by different methods. See RECON-1. |
+| 0.4b | `RECONCILIATION.md` written | **done** | Includes the fourth tree discovered during discovery (`MATLAB-SIMULINK-`). |
 | 0.5 | AWS read-only discovery (both profiles) | **verified** | Both identities matched expected accounts. Nothing created, modified, or deleted. |
 | 0.5b | Website end-to-end mapping (domain → CF → S3 → objects) | **verified** | Full chain mapped; all 16 served objects listed. |
 | 0.5c | Read `docs/operations/website-patch-package/` in full | **verified** | README + PATCH_GUIDE + DEPLOYMENT_RUNBOOK read directly; `content/` covered by lane L07. |
 | 0.5d | `AWS_INVENTORY.md` written | **done** | Committed `31b1628`. |
-| G0 | **Gate 0** | in-progress | Awaiting INVENTORY.md + RECONCILIATION.md + independent verification. |
+| G0 | **Gate 0** | **GREEN** | All five conditions met and independently verified. See "Gate 0 — closed" below. |
+
+### Gate 0 — closed 2026-07-27
+
+| Condition | Evidence |
+|---|---|
+| Inventory complete | `INVENTORY.md` + 12 lane documents cover **229/229** files. 224 files read by lanes end to end, **zero** reported unread; the remaining 5 are the binaries L12 verified by opening rather than reading byte-level. |
+| Reconciliation complete | `RECONCILIATION.md`. Trees 1↔2 byte-identical 198/198 proven twice; tree 3 divergence characterised and its resolution decided with alternatives; a fourth tree found and reconciled. |
+| AWS inventory complete | `AWS_INVENTORY.md`. Both identities verified, live site mapped end to end, nine findings, costs itemised. **Nothing created, modified, or deleted.** |
+| **Independently verified** | A separate agent that did not produce the inventory checked it. Verdict: **"COVERAGE: COMPLETE… GAPS: ZERO"** and **"ACCURACY: NO ERRORS FOUND IN 20+ INDEPENDENT PROBES"**, including line-number citations, a SHA-256 against the manifest, all 12 GLB byte sizes, PNG pixel dimensions, GeoJSON feature ordering, and pytest function counts. Zero WRONG, zero UNVERIFIABLE. |
+| Ledger initialised | This file, created before any other work and committed at `95e91e0`. |
+| Safety tag pushed | `pre-v4-program-20260727` → `origin`, before any change. |
+
+**Two procedural carry-forwards the verifier raised, both accepted:**
+
+1. **Pin a commit before any further file counting.** The tree was being written to while the verifier
+   counted (`git ls-files` returned 200, then 214, then 215 during its run) because this program was
+   committing its own documents concurrently. Any future count must state the commit it was taken at.
+2. **L12's orphan findings must be judged against *pre-*Phase-0 references.** `docs/assets/readme/site-map.png`
+   and `three-horizons.png` were genuine orphans when L12 ran; they are now cited by `INVENTORY.md` and
+   `FINDINGS_REGISTER.md`. They remain orphans in any functional sense — no code and no reader-facing
+   document references them — and a later re-run must not "discover" that the orphan finding was wrong.
+
+**One honest note the verifier recorded about itself**, worth keeping because it is the doctrine working:
+it initially believed lane L05 was wrong about FFX002's confidence, having looked for a confidence column in
+`site_table.csv` where none exists. L05 was right — it had correctly located `data_confidence` in
+`scenario_table.csv` and correctly distinguished `electrical_risk_level = medium` from
+`data_confidence = Low`. The verifier corrected itself rather than filing a false finding. It also had to
+correct its own gap-detection method twice (naive path grep produced a false 47-file gap) before concluding
+the coverage was complete.
 
 ---
 
@@ -665,3 +694,9 @@ them and confirmed before any code changes on their account.
 | 2026-07-27T15:44Z | Gate suite run for diagnosis: `run-legacy` = 25/48 exact; `run-v3` = 120 rows, 0 High confidence, 12/12 placeholder; `validate` PASS incl. RT-10 hash chain; **`verify.sh` 8 PASS / 2 FAIL (exit 2)**. Seven repository findings recorded. |
 | 2026-07-27T15:47Z | `buildSimulinkModel.m`, `runScenario.m`, `loadScenarios.m` read line by line by the lead. Simulink topology extracted (11 blocks, 15 connections). |
 | 2026-07-27T15:49Z | Octave 11.3.0 probed empirically. Tier 1 ruled out with evidence; Tier 2 identified as reachable because the table type is confined to the loading boundary. |
+| 2026-07-27T15:55Z | All 9 `matlab/src/*.m` read line by line by the lead. Simulink topology extracted. FIND-MATLAB-02/03/04/05 recorded. |
+| 2026-07-27T16:00Z | Every headline number traced to the contract. Costs, CO2e, eGRID, goldens, contract shape all **match**; **ports** and the **FFX002 headline** do not (FIND-NUM-01/02). RT-10 chain independently recomputed: **11/11 PASS**. `WORKFLOW_STEPS.md`: no drift. |
+| 2026-07-27T16:05Z | Public predecessor repo `MATLAB-SIMULINK-` found. Its real `.slx` matches `buildSimulinkModel.m` exactly (11 blocks, 15 connections, identical function-block logic). Provenance confirmed by the project owner. FIND-MATLAB-08, FIND-EXPOSURE-01. |
+| 2026-07-27T16:12Z | Read fleet complete: 13 agents, 0 errors, 224 files, **200 findings**. `INVENTORY.md`, `RECONCILIATION.md`, `FINDINGS_REGISTER.md` written. |
+| 2026-07-27T16:20Z | **FIND-MATLAB-09 (critical)** reproduced: under Octave the fail-closed capacity guard does not fire. Tier 1 reclassified from unreachable to unsafe. |
+| 2026-07-27T16:25Z | Independent coverage verifier: **coverage COMPLETE, zero gaps; zero errors in 20+ probes**. **Gate 0 GREEN.** |
