@@ -30,3 +30,9 @@ release/
 # tests/test_explorer_drift.py gates them against a fresh build. The standalone project
 # ignored them, which was right for a scratch repo and wrong for a shipped one.
 # Nothing under explorer/web/ is ignored -- this note exists so nobody re-adds it.
+
+# Vendored third-party browser assets, fetched by scripts/vendor_cesium.sh.
+# Build/Cesium is 20 MB across 375 files. It is pinned to the same release index.html
+# loads, reproducible on demand, and bundled at desktop-packaging time, so committing it
+# would add 20 MB to every clone of a planning-study repository for no determinism gain.
+explorer/web/vendor/

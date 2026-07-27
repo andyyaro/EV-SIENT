@@ -1,6 +1,6 @@
 PY ?= venv/bin/python
 
-.PHONY: setup test run-legacy run-v3 validate dashboard docs reports explorer explorer-legacy explorer-serve verify
+.PHONY: setup test run-legacy run-v3 validate dashboard docs reports explorer explorer-legacy explorer-serve explorer-vendor verify
 
 setup:
 	python3 -m venv venv && venv/bin/pip install -e ".[test]" -c requirements-lock.txt
@@ -46,6 +46,10 @@ explorer:
 
 explorer-legacy:
 	$(PY) -m fcf3d.build_sites --repo . --mode legacy_v2 --out explorer/web/data-legacy_v2
+
+## explorer-vendor — fetch CesiumJS locally so the viewer runs with no network
+explorer-vendor:
+	./scripts/vendor_cesium.sh
 
 explorer-serve: explorer
 	@echo "  3D explorer -> http://localhost:$(PORT)"

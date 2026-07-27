@@ -21,7 +21,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 HTML = sorted((REPO / "explorer/web").glob("*.html"))
 
+# CDN URLs appear both as src/href attributes and as string literals inside the inline
+# loader that chooses between the vendored copy and the CDN. Scanning attributes alone
+# made this gate report "0 checked" the moment the URL moved into a script -- a gate that
+# silently stops checking is worse than no gate, because it still reports green.
 ATTR = re.compile(r"""(?:src|href)\s*=\s*["']([^"']+)["']""", re.I)
+URL_ANY = re.compile(r"""["']((?:https?:)?//[^"'\s]+)["']""")
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
 CDN_HOSTS = ("unpkg.com", "cdn.jsdelivr.net", "cdnjs.cloudflare.com", "cesium.com")
 PINNED = re.compile(r"@\d+\.\d+|/releases/\d+\.\d+|/\d+\.\d+\.\d+/")
 CESIUM_VERSION = re.compile(r"cesium@(\d+)\.(\d+)")
@@ -32,8 +38,11 @@ def main() -> int:
     problems: list[str] = []
     checked = 0
     for path in HTML:
-        text = path.read_text(encoding="utf-8")
-        for url in ATTR.findall(text):
+        raw = path.read_text(encoding="utf-8")
+        # Comments may quote an unpinned URL while explaining why it was pinned.
+        text = HTML_COMMENT.sub("", raw)
+        urls = set(ATTR.findall(text)) | set(URL_ANY.findall(text))
+        for url in sorted(urls):
             if not url.lower().startswith(("http://", "https://")):
                 continue
             if not any(host in url for host in CDN_HOSTS):
@@ -49,11 +58,24 @@ def main() -> int:
                     f"{rel}: CesiumJS pinned to {m.group(1)}.{m.group(2)}, below the "
                     f"{CESIUM_MIN[0]}.{CESIUM_MIN[1]} required by Google Photorealistic 3D Tiles -> {url}")
 
+    # A gate that finds nothing to check must not report success. If the viewer references
+    # neither a pinned CDN build nor a vendored one, it cannot load Cesium at all, and
+    # "0 checked, all pinned" would be a green light for a broken page.
+    loader_present = any(
+        ("cesium@" in HTML_COMMENT.sub("", p.read_text(encoding="utf-8")))
+        or ("vendor/Cesium/" in HTML_COMMENT.sub("", p.read_text(encoding="utf-8")))
+        for p in HTML)
+    if not loader_present:
+        problems.append(
+            "no CesiumJS source referenced at all (neither a pinned CDN build nor "
+            "vendor/Cesium/) - the viewer cannot load Cesium")
+
     if problems:
         print("CDN PIN PROBLEMS:")
         print("\n".join(f"  {p}" for p in problems))
         return 1
-    print(f"CDN references OK ({checked} checked across {len(HTML)} page(s), all version-pinned)")
+    print(f"CDN references OK ({checked} checked across {len(HTML)} page(s), all version-pinned; "
+          f"a Cesium source is referenced)")
     return 0
 
 

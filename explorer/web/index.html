@@ -18,7 +18,32 @@
   The viewer works offline without this CDN in Flat mode; see explorer/README.md for
   vendoring instructions if a fully offline demo is needed.
 -->
-<link href="https://unpkg.com/cesium@1.128/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<!--
+  Loader: prefer a vendored copy (make explorer-vendor) so the viewer runs with no network
+  at all; fall back to the pinned CDN so a clean checkout works with no build step. Both
+  paths are the same pinned release, checked by scripts/check_cdn_pins.py.
+-->
+<script>
+(function () {
+  var VENDOR = 'vendor/Cesium/', CDN = 'https://unpkg.com/cesium@1.128/Build/Cesium/';
+  function add(tag, attrs) {
+    var e = document.createElement(tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    document.head.appendChild(e);
+    return e;
+  }
+  var probe = new XMLHttpRequest();
+  var base = CDN, offline = false;
+  try {
+    probe.open('HEAD', VENDOR + 'Cesium.js', false);
+    probe.send(null);
+    if (probe.status >= 200 && probe.status < 400) { base = VENDOR; offline = true; }
+  } catch (e) { /* no vendored copy: use the CDN */ }
+  window.__FCF_CESIUM_SOURCE__ = offline ? 'vendored (offline capable)' : 'CDN (pinned 1.128)';
+  add('link', { href: base + 'Widgets/widgets.css', rel: 'stylesheet' });
+  document.write('<script src="' + base + 'Cesium.js"><\/script>');
+})();
+</script>
 <link href="style.css" rel="stylesheet">
 </head>
 <body>
@@ -130,7 +155,6 @@
 
 <div id="toast" class="hidden"></div>
 
-<script src="https://unpkg.com/cesium@1.128/Build/Cesium/Cesium.js"></script>
 <script src="app.js" type="module"></script>
 </body>
 </html>
