@@ -25,6 +25,12 @@ OUT = REPO / "dashboard/static"
 OUT.mkdir(parents=True, exist_ok=True)
 LOG = OUT / "footer_log.json"
 
+# The footer log is rebuilt, not extended. visuals.save() appends to whatever is
+# already on disk, so leaving a previous run's file in place would duplicate every
+# entry on each build (9 charts -> 18 entries -> 27 ...). Clearing it here keeps a
+# rebuild idempotent, which is what the drift gate assumes.
+LOG.unlink(missing_ok=True)
+
 scen = pd.read_csv(REPO / "data/contract/v1/scenario_table.csv")
 sites_dim = pd.read_csv(REPO / "data/contract/v1/site_table.csv")
 v3run = REPO / "data/outputs/v3_run"  # produce with: make run-v3
@@ -50,7 +56,7 @@ def c1_ranking():
         ax.text(s + 0.5, y, cl, va="center", fontsize=7, color=BLACK)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "legacy_v2 baseline scores",
                    "0 of 12 sites have High data confidence")
-    visuals.save(fig, OUT / "01_readiness_ranking.png", LOG)
+    visuals.save(fig, OUT / "01_readiness_ranking.png", LOG, relative_to=REPO)
 
 
 def c2_ports():
@@ -66,7 +72,7 @@ def c2_ports():
     ax.legend(loc="lower right", frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "2026 baseline",
                    "pathway = conduit/panel capacity, not installed hardware")
-    visuals.save(fig, OUT / "02_starter_vs_pathway.png", LOG)
+    visuals.save(fig, OUT / "02_starter_vs_pathway.png", LOG, relative_to=REPO)
 
 
 def c3_three_horizons():
@@ -87,7 +93,7 @@ def c3_three_horizons():
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "V3 canonical horizons",
                    "growth multipliers provisional (uncalibrated); trigger-gated activation")
-    visuals.save(fig, OUT / "03_ports_three_horizons.png", LOG)
+    visuals.save(fig, OUT / "03_ports_three_horizons.png", LOG, relative_to=REPO)
 
 
 def c4_costs():
@@ -111,7 +117,7 @@ def c4_costs():
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "base escalation, 3% real discount",
                    "screening-class benchmarks — not budgets or quotes")
-    visuals.save(fig, OUT / "04_lifecycle_cost.png", LOG)
+    visuals.save(fig, OUT / "04_lifecycle_cost.png", LOG, relative_to=REPO)
 
 
 def c5_co2e():
@@ -132,7 +138,7 @@ def c5_co2e():
                    "factor data-year 2023, accessed 2026-07-19; refresh annually",
                    "V3 canonical horizons",
                    "9.5 kWh/session, 0.30 kWh/mi, 400 gCO2/mi displaced — benchmark assumptions")
-    visuals.save(fig, OUT / "05_net_co2e.png", LOG)
+    visuals.save(fig, OUT / "05_net_co2e.png", LOG, relative_to=REPO)
 
 
 def c6_avoided_evse():
@@ -152,7 +158,7 @@ def c6_avoided_evse():
     ax.set_title("Resource management — hardware we deliberately do not install yet", fontsize=12)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "base path",
                    "fee frame ~$1k/port/yr from client operating evidence (screening)")
-    visuals.save(fig, OUT / "06_avoided_evse.png", LOG)
+    visuals.save(fig, OUT / "06_avoided_evse.png", LOG, relative_to=REPO)
 
 
 def c7_peak_wait():
@@ -170,7 +176,7 @@ def c7_peak_wait():
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "2026 baseline, seeded discrete-event simulation (400 days)",
                    "demand synthetic/uncalibrated — screening only")
-    visuals.save(fig, OUT / "07_peak_wait.png", LOG)
+    visuals.save(fig, OUT / "07_peak_wait.png", LOG, relative_to=REPO)
 
 
 def c8_limitations():
@@ -198,7 +204,7 @@ def c8_limitations():
                 color=DARK_GREEN if is_hdr else BLACK, transform=ax.transAxes)
         y -= 0.075
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "limitations panel", None)
-    visuals.save(fig, OUT / "08_limitations.png", LOG)
+    visuals.save(fig, OUT / "08_limitations.png", LOG, relative_to=REPO)
 
 
 def c9_map():
@@ -210,7 +216,8 @@ def c9_map():
     # register in footer log (gis_offline stamps its own footer)
     import json
     existing = json.loads(LOG.read_text()) if LOG.exists() else []
-    existing.append({"file": str(out), "source": "TIGER 2024 cached + sites", "source_date": "2026-06-24"})
+    existing.append({"file": visuals.log_path_for(out, REPO),
+                     "source": "TIGER 2024 cached + sites", "source_date": "2026-06-24"})
     LOG.write_text(json.dumps(existing, indent=2))
 
 

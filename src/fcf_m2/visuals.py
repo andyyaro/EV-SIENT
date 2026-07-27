@@ -53,13 +53,32 @@ def footer(fig, source: str, source_date: str, scenario: str,
                         "scenario": scenario, "assumption": assumption or ""})
 
 
-def save(fig, path: str | Path, log_path: str | Path | None = None) -> Path:
+def log_path_for(path: str | Path, relative_to: str | Path | None = None) -> str:
+    """Portable path for the footer log.
+
+    The footer log is a tracked artifact, so it must never record the absolute
+    path of whichever machine built it: that leaks a local directory layout and
+    trips the repository's no-absolute-paths hygiene gate. Paths are recorded
+    relative to ``relative_to`` (the repo root) when they sit underneath it, and
+    otherwise fall back to the bare filename — never an absolute path.
+    """
+    path = Path(path)
+    if relative_to is not None:
+        try:
+            return Path(path).resolve().relative_to(Path(relative_to).resolve()).as_posix()
+        except ValueError:
+            pass  # outside the repo; fall through to the filename
+    return path.name
+
+
+def save(fig, path: str | Path, log_path: str | Path | None = None,
+         relative_to: str | Path | None = None) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=200, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close(fig)
     entry = dict(_FOOTER_LOG[-1]) if _FOOTER_LOG else {}
-    entry["file"] = str(path)
+    entry["file"] = log_path_for(path, relative_to)
     if log_path:
         log_path = Path(log_path)
         existing = json.loads(log_path.read_text()) if log_path.exists() else []
