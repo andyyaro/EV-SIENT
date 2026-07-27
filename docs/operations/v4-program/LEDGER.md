@@ -26,7 +26,7 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 7 | The platform | not-started | Must surface intake as a first-class surface. |
 | 8 | Deploy and ship | not-started | |
 | 9 | Make it human | not-started | |
-| 10 | Verify and land | not-started | |
+| 10 | Verify and land | not-started | **SCOPE EXPANDED 2026-07-27 by the owner (DEC-014):** a line-by-line audit of **every file in every folder**, in addition to everything already planned. Now **403 tracked files / ~78 700 lines** vs the 198 Phase 0 read — roughly half has never been audited, only written. |
 
 Legend: `not-started` / `in-progress` / `blocked` / `done` / `verified`
 
@@ -925,3 +925,5 @@ them and confirmed before any code changes on their account.
 | 2026-07-28T00:45Z | **FIND-CI-01 (process, high) — CI was RED for five consecutive commits while I reported gates green.** Owner caught it. I ran `verify.sh` locally and watched the *MATLAB harness* CI, and never checked this repository's own CI after a push. **Local green is not evidence; CI is the check that runs on a clean checkout.** From here: `gh run list` after every push. |
 | 2026-07-28T00:45Z | Root cause A: the Tableau build read `data/outputs/`, which is **gitignored** — present on a machine that has run the model, absent everywhere else. **This is the Phase 1 defect** (`verify.sh` green locally, broken on a clean clone) **reintroduced four phases later.** Fixed with `ensure_v3_run()`; verified by deleting `data/outputs/v3_run` and running the full suite from that state. |
 | 2026-07-28T00:45Z | Root cause B, and the worse one: **`matlab/outputs/*` is gitignored, so the MATLAB artifacts were never committed** — `git add -A` silently honoured it and a commit message asserted "Artifacts committed unmodified under `matlab/outputs/run-30291108647/`" which was **false**. Only `.gitkeep` was tracked. `.gitignore` now excepts `matlab/outputs/run-*/` (received CI evidence, not regenerable output); all 18 files, 488 KB, genuinely tracked. **A commit message claiming work that did not happen is the failure this program exists to prevent.** |
+| 2026-07-28T01:10Z | **NEW REQUIREMENT from the owner (DEC-014): Phase 10 gains a full line-by-line audit of every file in every folder**, in addition to what was already planned. Logged before any work began, per the pattern set for Phase 6B. |
+| 2026-07-28T01:10Z | Scale measured rather than estimated: **403 tracked files, ~78 700 text lines**, against the **198** files Phase 0 read. **Roughly half the repository has never been audited — it was written, which is a different activity with different failure modes.** This program has already produced a false commit-message claim, five red CI runs reported as green, two blank published charts called verified, and one constant holding two values in two halves of one model. Every one was found by looking at the thing rather than at the report of it. |

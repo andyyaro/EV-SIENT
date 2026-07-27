@@ -496,3 +496,87 @@ and a test asserts those declarations are present, so a screenshot separated fro
 repository still says what it is.
 
 **An honest partial close, which the master prompt prefers to a fake complete one.**
+
+---
+
+## DEC-014 — Phase 10 gains a full line-by-line audit of the entire repository
+
+**Date:** 2026-07-27 · **Raised by:** the project owner, mid-program · **Status:** logged before
+any work began · **Phase:** 10, in addition to everything already planned there
+
+### The requirement, in the owner's words
+
+> *"Phase 10 should be a very meticulous audit of every single line in every single file in
+> every single folder to make sure we are getting the full picture and are not missing
+> anything — in addition to what was planned for phase 10."*
+
+### Why this is not a repeat of Phase 0
+
+Phase 0 read every line of the **inherited** repository: 229 files, twelve lanes, 224 files
+read end to end, 200 findings. That read is what made the rest of the program possible.
+
+It is also now **out of date by more than half the repository**. Measured, not estimated:
+
+| | Phase 0 baseline | Now |
+|---|---|---|
+| Tracked files | 198 | **403** |
+| Text lines | — | **~78 700** |
+
+So the Phase 0 read covered code this program did not write, and roughly half of what exists
+today has never been read end to end by anyone — it was *written*, which is a different thing.
+Writing a file and auditing it are different activities with different failure modes, and this
+program has already demonstrated the difference:
+
+- A commit message claimed MATLAB artifacts were committed. They were not — `.gitignore`
+  silently swallowed them, and nobody noticed for four commits.
+- CI was red for five consecutive commits while the ledger recorded gates green.
+- Two Tableau sheets published as title-only, blank, and were called verified.
+- `charger_efficiency` held two different values in two halves of one model for the entire
+  life of the project.
+
+Every one of those was found by looking at the thing itself rather than at the report of it.
+An audit that reads what was actually written, rather than what the commit messages say was
+written, is the mechanism that catches the next one.
+
+### What the audit must cover, beyond re-reading
+
+The reading is the method, not the goal. What it is looking *for*:
+
+1. **Claims versus reality.** Every assertion in a README, a docstring, a commit message, a
+   ledger entry or a decision record, checked against the code and the artifacts. This program
+   has already produced at least one false commit-message claim; the audit assumes there are
+   more.
+2. **Dead and orphaned code.** Anything unreachable, unused, or superseded — including
+   constants, gates and tests that no longer check what their name says.
+3. **Gates that pass vacuously.** Four have already been caught (secret scan, link checker,
+   CDN pin, capture-form test) plus the harness exposure gate that could not see CSVs. Every
+   gate gets a deliberate mutation test or an explicit note saying why it cannot have one.
+4. **Numbers appearing anywhere that do not trace to the contract.** Reports, presentation,
+   docs, website copy, figure captions.
+5. **Anything gitignored that is load-bearing**, and anything tracked that should not be.
+6. **Every stated limitation still true**, and every limitation that exists but is not stated.
+7. **Secrets, credentials, account identifiers** in anything tracked or shipped.
+8. **Files nobody has looked at since they were generated** — the artifacts most likely to
+   have quietly drifted.
+
+### How it will run
+
+By fan-out, in non-overlapping lanes with an independent coverage verifier, the way Phase 0
+did — that pattern found 200 findings and its verifier reported zero gaps across 20+ probes.
+Findings go to `FINDINGS_REGISTER.md` with the same `Confirmed` discipline: **every subagent
+finding is a lead, not a fact, until it is reproduced against the actual file**.
+
+### Cost, accepted deliberately
+
+This is the most expensive single item in the program and it is worth it. The alternative is
+landing a body of work whose own author has read roughly half of it, on a project whose
+central claim is that every number can be traced. **There is no deadline; thoroughness beats
+speed at every decision point**, and this is the decision point where that rule matters most.
+
+### Rejected
+
+| Alternative | Why it loses |
+|---|---|
+| **Audit only what changed since Phase 0** | Cheaper and wrong. The Phase 0 read is now old enough that inherited files have been edited by this program many times; "unchanged" is not a property anyone has verified. |
+| **Sample-audit the high-risk areas** | Sampling finds what you expect. Every defect listed above was in a place nobody was worried about. |
+| **Rely on the 23 verification gates** | The gates encode what was already thought of. Four of them have themselves been caught passing vacuously, which is precisely the failure a gate cannot self-detect. |
