@@ -53,8 +53,8 @@ from fcf_m2.visuals import audit_footer_metadata
 p = audit_footer_metadata('dashboard/static/footer_log.json','dashboard/static')
 assert p == [], p\""
 
-gate "secrets: no keys/tokens/private material in tracked files" \
-  bash -c "cd '$REPO' && ! git grep -nIiE 'AKIA[0-9A-Z]{16}|aws_secret_access_key|BEGIN [A-Z ]*PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}' -- . ':!scripts/verify.sh'"
+gate "secrets: no keys/tokens/account IDs in tracked files" \
+  bash -c "cd '$REPO' && '$PY' scripts/secret_scan.py"
 
 gate "hygiene: no local absolute paths in code/config" \
   bash -c "cd '$REPO' && ! git grep -nI '/Users/andyyaro' -- '*.py' '*.sh' '*.toml' '*.yml' '*.json' ':!scripts/verify.sh'"
