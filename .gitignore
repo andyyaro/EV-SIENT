@@ -24,3 +24,9 @@ Thumbs.db
 # local release bundles
 release/
 *.zip
+
+# The 3D explorer's built web payload and GLB models are COMMITTED deliverables, not
+# scratch output: the web tier must serve from a clean checkout with no build step, and
+# tests/test_explorer_drift.py gates them against a fresh build. The standalone project
+# ignored them, which was right for a scratch repo and wrong for a shipped one.
+# Nothing under explorer/web/ is ignored -- this note exists so nobody re-adds it.

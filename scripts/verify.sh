@@ -62,6 +62,55 @@ gate "hygiene: no local absolute paths in code/config" \
 gate "hygiene: no tracked file over 25 MB" \
   bash -c "cd '$REPO' && [ -z \"\$(git ls-files -z | xargs -0 -I{} find {} -size +25M 2>/dev/null)\" ]"
 
+gate "3d: explorer suite passes (attribution reproduces the model score in BOTH modes)" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_explorer_pipeline.py tests/test_explorer_drift.py -q"
+
+gate "3d: sites.geojson is strict-valid RFC 7946 with the 12 expected sites in Northern Virginia" \
+  "$PY" - <<EOF
+import json
+from pathlib import Path
+repo = Path("$REPO")
+fc = json.loads((repo / "explorer/web/data/sites.geojson").read_text())
+assert fc["type"] == "FeatureCollection", fc.get("type")
+feats = fc["features"]
+assert len(feats) == 12, len(feats)
+ids = sorted(f["properties"]["site_id"] for f in feats)
+expected = sorted([f"FFX{n:03d}" for n in range(1, 5)] + [f"PWC{n:03d}" for n in range(1, 9)])
+assert ids == expected, ids
+for f in feats:
+    assert f["type"] == "Feature" and f["geometry"]["type"] == "Point"
+    lon, lat = f["geometry"]["coordinates"][:2]
+    assert -77.8 <= lon <= -77.0 and 38.5 <= lat <= 39.1, (f["properties"]["site_id"], lon, lat)
+blob = json.dumps(fc)
+for retired in ("ports_2035", "ports_2050"):
+    assert retired not in blob, f"committed payload carries the retired field {retired}"
+man = json.loads((repo / "explorer/web/data/manifest.json").read_text())
+assert man["mode"] == "milestone2_v3" and man["mode_is_canonical"] is True, man["mode"]
+print("3D payload OK: 12 sites, RFC 7946, canonical horizons only")
+EOF
+
+gate "3d: all 12 GLB models are well-formed glTF 2.0" \
+  "$PY" - <<EOF
+import json, struct
+from pathlib import Path
+d = Path("$REPO") / "explorer/web/models"
+globs = sorted(d.glob("*.glb"))
+assert len(globs) == 12, f"expected 12 GLB models, found {len(globs)}"
+for p in globs:
+    raw = p.read_bytes()
+    magic, version, length = struct.unpack_from("<4sII", raw, 0)
+    assert magic == b"glTF", (p.name, magic)
+    assert version == 2, (p.name, version)
+    assert length == len(raw), (p.name, length, len(raw))
+    clen, ctype = struct.unpack_from("<II", raw, 12)
+    assert ctype == 0x4E4F534A, (p.name, hex(ctype))
+    json.loads(raw[20:20 + clen].decode("utf-8"))
+print(f"all {len(globs)} GLB models are well-formed glTF 2.0")
+EOF
+
+gate "3d: viewer JS parses and every CDN reference is version-pinned" \
+  bash -c "cd '$REPO' && { command -v node >/dev/null && node --check explorer/web/app.js || echo 'node absent - JS syntax check skipped'; } && '$PY' scripts/check_cdn_pins.py"
+
 gate "links: markdown links resolve (lychee if installed, else internal-link check)" \
   bash -c "cd '$REPO' && if command -v lychee >/dev/null; then lychee --offline --no-progress README.md docs reports presentation dashboard excel matlab src tests scripts data 2>/dev/null; else '$PY' scripts/check_internal_links.py; fi"
 

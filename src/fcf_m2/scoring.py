@@ -25,6 +25,61 @@ from .queueing import choose_ports
 
 EV_SHARE_HIGH_BENCHMARK = 0.10
 
+# --- Scoring weights -----------------------------------------------------------
+# These were inline numeric literals inside the formula below, which meant the 3D
+# explorer's driver attribution mirrored them by hand: the two agreed only because
+# somebody kept them in step. Naming them here makes this module the single source,
+# so fcf3d.build_sites imports them and a drift gate can prove they still match.
+# The values are unchanged -- this is a refactor, not a re-weighting.
+
+SUBSCORE_WEIGHTS: dict[str, float] = {
+    "demand_subscore": 0.45,
+    "feasibility_subscore": 0.30,
+    "safety_subscore": 0.15,
+    "equity_subscore": 0.10,
+}
+
+# Per-driver weights within each subscore. Each block sums to 1.00.
+# "invert" marks the terms the formula wraps in (1 - x): lower raw is better.
+DEMAND_WEIGHTS: dict[str, float] = {
+    "nearby_households_1mi_n": 0.18,
+    "nearby_jobs_1mi_n": 0.18,
+    "aadt_nearest_n": 0.13,
+    "amenities_count_0_5mi_n": 0.11,
+    "parking_spaces_n": 0.10,
+    "hours_open_n": 0.08,
+    "avg_dwell_min_n": 0.07,
+    "ev_share_local_n": 0.08,
+    "existing_ports_total_n": 0.07,
+}
+FEASIBILITY_WEIGHTS: dict[str, float] = {
+    "spare_capacity_kw_n": 0.35,
+    "distance_to_service_ft_n": 0.25,
+    "install_cost_est_usd_n": 0.25,
+    "trenching_ft_n": 0.15,
+}
+SAFETY_WEIGHTS: dict[str, float] = {
+    "ada_layout_possible": 0.35,
+    "fire_access_ok": 0.35,
+    "garage_enclosed": 0.15,
+    "emergency_disconnect_visible": 0.10,
+    "stormwater_risk": 0.05,
+}
+EQUITY_WEIGHTS: dict[str, float] = {"equity_gap_index_n": 1.00}
+
+DRIVER_WEIGHTS: dict[str, dict[str, float]] = {
+    "demand_subscore": DEMAND_WEIGHTS,
+    "feasibility_subscore": FEASIBILITY_WEIGHTS,
+    "safety_subscore": SAFETY_WEIGHTS,
+    "equity_subscore": EQUITY_WEIGHTS,
+}
+
+# Terms the formula applies as (1 - x).
+INVERTED_DRIVERS: frozenset[str] = frozenset({
+    "existing_ports_total_n", "distance_to_service_ft_n", "install_cost_est_usd_n",
+    "trenching_ft_n", "garage_enclosed", "stormwater_risk",
+})
+
 YES_NO_FIELDS = [
     "public_access", "ada_layout_possible", "fire_access_ok", "garage_enclosed",
     "emergency_disconnect_visible", "stormwater_risk", "battery_storage_flag",
@@ -137,41 +192,42 @@ def enrich_and_score(sites: pd.DataFrame, mode: str = MODE_LEGACY, anchor_set: d
     df, fallback_fields = normalize_fields(df, mode, anchor_set)
     df["ev_share_local_n"] = bounded_signal(df["ev_share_local"], EV_SHARE_HIGH_BENCHMARK)
 
+    # hours_open has no persisted _n column; the formula normalises it inline.
+    # fcf3d.build_sites reconstructs the same term, so keep the two in step.
+    df["hours_open_n"] = df["hours_open"].clip(lower=0, upper=24) / 24
     df["demand_subscore"] = 100 * (
-        0.18 * df["nearby_households_1mi_n"]
-        + 0.18 * df["nearby_jobs_1mi_n"]
-        + 0.13 * df["aadt_nearest_n"]
-        + 0.11 * df["amenities_count_0_5mi_n"]
-        + 0.10 * df["parking_spaces_n"]
-        + 0.08 * df["hours_open"].clip(lower=0, upper=24) / 24
-        + 0.07 * df["avg_dwell_min_n"]
-        + 0.08 * df["ev_share_local_n"]
-        + 0.07 * (1 - df["existing_ports_total_n"])
+        DEMAND_WEIGHTS["nearby_households_1mi_n"] * df["nearby_households_1mi_n"]
+        + DEMAND_WEIGHTS["nearby_jobs_1mi_n"] * df["nearby_jobs_1mi_n"]
+        + DEMAND_WEIGHTS["aadt_nearest_n"] * df["aadt_nearest_n"]
+        + DEMAND_WEIGHTS["amenities_count_0_5mi_n"] * df["amenities_count_0_5mi_n"]
+        + DEMAND_WEIGHTS["parking_spaces_n"] * df["parking_spaces_n"]
+        + DEMAND_WEIGHTS["hours_open_n"] * df["hours_open_n"]
+        + DEMAND_WEIGHTS["avg_dwell_min_n"] * df["avg_dwell_min_n"]
+        + DEMAND_WEIGHTS["ev_share_local_n"] * df["ev_share_local_n"]
+        + DEMAND_WEIGHTS["existing_ports_total_n"] * (1 - df["existing_ports_total_n"])
     )
     df["demand_subscore"] = df["demand_subscore"] * df["readiness_access_adjustment"]
 
     df["feasibility_subscore"] = 100 * (
-        0.35 * df["spare_capacity_kw_n"]
-        + 0.25 * (1 - df["distance_to_service_ft_n"])
-        + 0.25 * (1 - df["install_cost_est_usd_n"])
-        + 0.15 * (1 - df["trenching_ft_n"])
+        FEASIBILITY_WEIGHTS["spare_capacity_kw_n"] * df["spare_capacity_kw_n"]
+        + FEASIBILITY_WEIGHTS["distance_to_service_ft_n"] * (1 - df["distance_to_service_ft_n"])
+        + FEASIBILITY_WEIGHTS["install_cost_est_usd_n"] * (1 - df["install_cost_est_usd_n"])
+        + FEASIBILITY_WEIGHTS["trenching_ft_n"] * (1 - df["trenching_ft_n"])
     )
 
     df["safety_subscore"] = 100 * (
-        0.35 * df["ada_layout_possible"]
-        + 0.35 * df["fire_access_ok"]
-        + 0.15 * (1 - df["garage_enclosed"])
-        + 0.10 * df["emergency_disconnect_visible"]
-        + 0.05 * (1 - df["stormwater_risk"])
+        SAFETY_WEIGHTS["ada_layout_possible"] * df["ada_layout_possible"]
+        + SAFETY_WEIGHTS["fire_access_ok"] * df["fire_access_ok"]
+        + SAFETY_WEIGHTS["garage_enclosed"] * (1 - df["garage_enclosed"])
+        + SAFETY_WEIGHTS["emergency_disconnect_visible"] * df["emergency_disconnect_visible"]
+        + SAFETY_WEIGHTS["stormwater_risk"] * (1 - df["stormwater_risk"])
     )
 
-    df["equity_subscore"] = 100 * df["equity_gap_index_n"]
+    df["equity_subscore"] = 100 * (
+        EQUITY_WEIGHTS["equity_gap_index_n"] * df["equity_gap_index_n"])
 
-    df["readiness_score"] = (
-        0.45 * df["demand_subscore"]
-        + 0.30 * df["feasibility_subscore"]
-        + 0.15 * df["safety_subscore"]
-        + 0.10 * df["equity_subscore"]
+    df["readiness_score"] = sum(
+        weight * df[subscore] for subscore, weight in SUBSCORE_WEIGHTS.items()
     ).round(1)
 
     df["expected_sessions_day"] = expected_sessions(df)

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChargeReady NOVA — 3D Site Explorer</title>
+
+<!--
+  CesiumJS, PINNED to 1.128.
+
+  This used to read `unpkg.com/cesium/...` with no version, directly under a comment
+  telling the reader to pin it -- so every page load silently took whatever "latest"
+  happened to be, and a viewer built against one Cesium could render against another.
+
+  1.128 is chosen because Google Photorealistic 3D Tiles require >= 1.124. Do not lower
+  the pin below 1.124 without also removing the Photoreal basemap option.
+
+  The viewer works offline without this CDN in Flat mode; see explorer/README.md for
+  vendoring instructions if a fully offline demo is needed.
+-->
+<link href="https://unpkg.com/cesium@1.128/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="cesiumContainer"></div>
+
+<!-- ---------------------------------------------------------------- header -->
+<header id="topbar">
+  <div class="brand">
+    <span class="mark"></span>
+    <div>
+      <h1>ChargeReady NOVA</h1>
+      <p>Public EV Charging Site-Readiness &amp; Right-Sizing — 3D Explorer</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" id="basemapSeg" role="group" aria-label="Base map mode">
+      <button data-mode="photoreal" title="Google Photorealistic 3D Tiles (requires Cesium ion token)">Photoreal</button>
+      <button data-mode="terrain" class="active" title="World terrain + OSM building footprints">Terrain</button>
+      <button data-mode="flat" title="No token required">Flat</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="toggleBuilds" checked><span>Proposed builds</span></label>
+    <label class="toggle"><input type="checkbox" id="toggleLabels" checked><span>Labels</span></label>
+    <button class="ghost" id="btnReset" title="Fly back to the full portfolio">Overview</button>
+  </div>
+</header>
+
+<!-- ------------------------------------------------------------- left rail -->
+<aside id="rail">
+  <div class="rail-head">
+    <h2>Candidate sites <span class="count" id="siteCount">—</span></h2>
+    <div class="filters">
+      <select id="filterJurisdiction" aria-label="Filter by jurisdiction">
+        <option value="">All jurisdictions</option>
+        <option value="fairfax">Fairfax</option>
+        <option value="prince_william">Prince William</option>
+      </select>
+      <select id="sortBy" aria-label="Sort sites">
+        <option value="model_rank">By model rank</option>
+        <option value="readiness_score">By readiness score</option>
+        <option value="demand_subscore">By demand</option>
+        <option value="feasibility_subscore">By feasibility</option>
+        <option value="equity_subscore">By equity</option>
+        <option value="ports_2050">By 2050 port need</option>
+      </select>
+    </div>
+  </div>
+  <ol id="siteList"></ol>
+  <footer class="rail-foot" id="railFoot"></footer>
+</aside>
+
+<!-- ------------------------------------------------------------ detail panel -->
+<section id="panel" class="hidden" aria-live="polite">
+  <button class="close" id="panelClose" aria-label="Close">×</button>
+  <div id="panelBody"></div>
+</section>
+
+<!-- ---------------------------------------------------------- compare tray -->
+<div id="tray" class="hidden">
+  <div class="tray-head">
+    <strong>Compare</strong>
+    <span id="trayHint">Pin up to 4 sites</span>
+    <div class="spacer"></div>
+    <button class="ghost" id="btnCompare">Open comparison</button>
+    <button class="ghost" id="btnClearTray">Clear</button>
+  </div>
+  <div id="trayChips"></div>
+</div>
+
+<!-- --------------------------------------------------------- compare modal -->
+<div id="modal" class="hidden">
+  <div class="modal-card">
+    <button class="close" id="modalClose" aria-label="Close">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ------------------------------------------------------------- token gate -->
+<div id="tokenGate" class="hidden">
+  <div class="gate-card">
+    <h3>Cesium ion token</h3>
+    <p>
+      Real terrain, OSM buildings, and Google Photorealistic 3D Tiles all stream
+      through Cesium ion. Paste a token to unlock them — it is kept in this
+      browser only and never sent anywhere but Cesium.
+    </p>
+    <input type="password" id="tokenInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." autocomplete="off">
+    <div class="gate-actions">
+      <button id="tokenSave">Use token</button>
+      <button class="ghost" id="tokenSkip">Continue without</button>
+    </div>
+    <p class="fine">
+      Free tokens: <span class="mono">cesium.com/ion</span> → Access Tokens.
+      Without one the map still works in <em>Flat</em> mode with OpenStreetMap
+      imagery — every site, score, and proposed build is fully usable.
+    </p>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script src="https://unpkg.com/cesium@1.128/Build/Cesium/Cesium.js"></script>
+<script src="app.js" type="module"></script>
+</body>
+</html>
