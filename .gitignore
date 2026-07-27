@@ -58,3 +58,7 @@ dashboard/tableau/build/Data/
 # Machine-specific: the tracked workbook_spec.json holds relative paths; this variant has
 # base_dir baked in for whichever machine ran the build.
 dashboard/tableau/build/workbook_spec.build.json
+
+# The provenance export is a generated artifact rebuilt from the contract. It is TRACKED,
+# deliberately -- the web tier serves it and a reviewer must be able to diff what changed
+# about a number's lineage. Listed here only to say so.

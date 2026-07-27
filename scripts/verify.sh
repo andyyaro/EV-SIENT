@@ -72,6 +72,12 @@ assert p == [], p\""
 # byte-identical spec give an identical .twb and DIFFERENT .twbx digests, because the
 # embedded Hyper extracts carry non-deterministic engine state. A package-digest gate would
 # fail on every run and be deleted within a week, taking the real check with it.
+# The platform's central promise: no number appears without its provenance available. This
+# also enforces STRICT JSON on the web-tier export -- numpy NaN wrote 281 bare `NaN` literals
+# that Python reads back happily and a browser rejects outright.
+gate "platform: every displayed number resolves to its lineage; both tiers agree" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_provenance.py -q"
+
 gate "tableau: workbook data matches the contract; .twb declares its sheets and caveats" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_tableau_workbook.py -q"
 
