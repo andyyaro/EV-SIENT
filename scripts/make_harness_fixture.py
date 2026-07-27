@@ -115,8 +115,12 @@ def write(path: Path, seed: int = 20260727) -> Path:
     import csv
     path.parent.mkdir(parents=True, exist_ok=True)
     data = rows(seed)
+    # newline="" is required by the csv module, but csv.writer then defaults to a CRLF
+    # line terminator. The Python producer that writes the real canonical CSV emits LF, and
+    # a fixture that differs from the real file in its line endings is a fixture that can
+    # fail where the real file passes -- which is the one thing a harness fixture must not do.
     with open(path, "w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=COLUMNS)
+        writer = csv.DictWriter(fh, fieldnames=COLUMNS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(data)
     return path
