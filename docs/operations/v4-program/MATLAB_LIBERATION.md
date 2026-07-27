@@ -231,17 +231,65 @@ That last line is the whole reason the harness CI matters.
 
 ---
 
-## 4. Status
+## 4. The harness repository, and the first real MATLAB execution
+
+**`https://github.com/andyyaro/fcf-matlab-ci` — public, created 2026-07-27.** Nine model sources, six
+test files, one synthetic fixture, a CI workflow, a README, and a `.gitignore`. No licence, matching
+upstream. Created only after §2 was written down and every leak in it was closed.
+
+### 4.1 One-directional sync
+
+`scripts/sync_matlab_harness.py`. `--check` fails if any published file differs from its private source
+**and** fails if the harness holds a file the sync does not publish, because an extra file is how a
+hand-edit arrives. `--push` copies private → public and writes `SYNC_MANIFEST.json` with the source commit
+and a SHA-256 per file. There is **no reverse mode**. Every file passes the exposure gate before it can be
+copied, so the gate cannot be bypassed by going around it.
+
+Exercised in both directions on the live harness: `--check` correctly reported five divergences after a
+fix landed privately, `--push` resolved them, `--check` then reported all 17 files hash-identical.
+
+### 4.2 First run — **the code executed, and it failed, which is the valuable part**
+
+`MathWorks MATLAB R2025b`, harness run **#1**. **35 passed, 14 failed, 11 incomplete.**
+
+Every one of the 14 failures had a single cause, and none reached any model logic:
+
+```
+Error using loadScenarios (line 50)
+Canonical scenario CSV not found:
+  /home/runner/work/fcf-matlab-ci/fcf-matlab-ci/data/canonical/matlab_scenarios.csv
+```
+
+The sources hard-coded the canonical adapter path. That file exists privately, where the Python producer
+generates it, and deliberately does not exist in the harness, which carries a synthetic fixture. So the
+sources were not portable between the two trees — a defect that could only ever have been found by running
+them somewhere other than where they were written.
+
+**Fixed upstream, not in the harness.** `matlab/src/resolveScenarioCsv.m` checks `$FCF_SCENARIO_CSV`, then
+the canonical CSV, then the harness fixture. The real file wins when both exist, so the private repository
+can never silently test against synthetic data. Patching the harness copy instead would have been exactly
+the divergence the sync exists to prevent.
+
+**What run #1 established, which was not known before:** 35 tests passed on real MathWorks MATLAB. Until
+that moment nobody could say whether these files were even syntactically acceptable to the MATLAB parser —
+`EXECUTION_STATUS.md` records that not one line had ever been executed. They parse, and most of the suite
+passes.
+
+## 5. Status
 
 | Item | State |
 |---|---|
-| Exposure review, field by field | **done**, and overturned by adversarial review, and re-done |
-| Leaks found and fixed at source | **done** — 5 fixes, verified |
-| Automated leak gate | **done** — `scripts/check_harness_exposure.py`, mutation-tested |
-| Runtime tier chosen with evidence | **done** — Tier 2, by execution |
+| Exposure review, field by field | **done** — and overturned by adversarial review, and re-done |
+| Leaks found and fixed at source | **done** — 5 fixes, each verified |
+| Automated leak gate | **done** — mutation-tested; a `verify.sh` gate |
+| Public harness repository | **live** — `andyyaro/fcf-matlab-ci` |
+| One-directional hash-gated sync | **done** — exercised in both directions |
+| Runtime tier chosen with evidence | **done** — Tier 2, by execution, 120/120 rows |
 | Fail-closed guard proof | **done** — 16/16 with a negative control |
-| Public harness repository created | **not yet** |
-| Real MathWorks MATLAB executed | **NO** |
-| `regression_golden.csv` generated | **NO** — and `EXECUTION_STATUS.md` still says so |
-| `.slx` built by CI | **NO** — though a topologically identical one exists publicly, see `RECONCILIATION.md` §3 |
-| Python/MATLAB cross-validation | **not started** — blocked on a real MATLAB run |
+| **Real MathWorks MATLAB executed** | **YES** — run #1, 35 passed / 14 failed / 11 incomplete |
+| First-run defect found and fixed | **done** — non-portable CSV path |
+| CI run fully green | **not yet** — run #2 in flight after the fix |
+| `regression_golden.csv` generated | **not yet** — needs a green `test_regression` |
+| `.slx` built by CI | **not yet** |
+| `EXECUTION_STATUS.md` updated | **NO — deliberately.** It gets its run record when a run *passes*, not when one merely happens. |
+| Python/MATLAB cross-validation | **not started** — needs the golden file |
