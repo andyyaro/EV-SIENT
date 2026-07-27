@@ -225,10 +225,57 @@ name claims MATLAB — exactly the engine conflation the program forbids. Must b
 can be excluded from the Octave runtime path and left to the harness CI's real MATLAB, which is where the
 committed figures should come from anyway.
 
-**Working conclusion (to be proven in Phase 2, not assumed):** Tier 2 — Octave plus a thin, tested
-compatibility shim — is the realistic target, and the shim's centre of gravity is a `string` class, not
-table emulation. `capacityGuard.m` and `makeSessionProfiles.m` both already accept *either* a one-row table
-*or* a struct (`localRowToStruct`), which is a deliberate seam the shim can use.
+**FIND-MATLAB-09 (CRITICAL) — under Octave the fail-closed capacity guard silently fails to fire.**
+Raised by lane L03, then reproduced directly by the lead. This is the most consequential finding of Phase 0.
+
+`capacityGuard.m:53-55` builds its controlled vocabulary as a bracketed string-array literal. In MATLAB that
+is a 1×6 `string` array. In Octave it is **one 1×85 `char` row**:
+
+```
+class(allowedBases) = char
+size                = 1x85
+value               = "verified_utilityverified_facilityengineering_estimateplanning_proxyplaceholderunknown"
+numel               = 85          (MATLAB: 6)
+```
+
+Consequently `ismember(basis, ["verified_utility","verified_facility"])` at line 84 returns a **1×11 logical
+vector** — one element per character of `"placeholder"` — instead of scalar `false`:
+
+```
+ismember returns class=logical size=1x11
+  0  1  1  1  1  0  0  1  1  1  1
+```
+
+Feeding that into the fail-closed gate at line 89, `if mode == "feasibility" && ~isVerified`, and running it:
+
+```
+RESULT: gate DID NOT FIRE   <-- silent safety failure
+```
+
+**Read plainly: an unmodified Octave run would emit a feasibility claim from placeholder capacity, which is
+exactly what this guard exists to make impossible, and it would do so without any error or warning.** All 12
+sites are `capacity_basis = placeholder`, so this is not a corner case — it is every row.
+
+Three consequences that bind Phase 2:
+
+1. **Tier 1 is not merely unreachable, it is unsafe to attempt.** "It ran and produced numbers" would be the
+   worst possible outcome here, because the numbers would be wrong in the specific direction the project's
+   honesty discipline is built to prevent.
+2. **A function-level shim cannot fix this.** `["a", "b"]` is *syntax*, not a call — there is no function to
+   override. Overloading `horzcat` on a `string` class does not help either, because a double-quoted literal
+   in Octave is already `char` before any user code sees it. The realistic Tier-2 route is a **deterministic,
+   tested, auditable build-time source transformation** (bracketed string-array literals → `cellstr`; `+`
+   concatenation → `strcat`/`sprintf`) whose output is diffed against the source. Verified that the cellstr
+   form behaves correctly: `ismember("placeholder", {"verified_utility","verified_facility"})` → scalar `0`.
+3. **Whatever tier is chosen, it ships with a test that proves the fail-closed guard fires.** Any Octave
+   result is otherwise untrustworthy regardless of how the numbers look.
+
+**Working conclusion (to be proven in Phase 2, not assumed):** Tier 2 remains the target, but its centre of
+gravity is now clear — a source-transformation step plus `string`/`table` support, not a thin function shim.
+`capacityGuard.m` and `makeSessionProfiles.m` both already accept *either* a one-row table *or* a struct
+(`localRowToStruct`), which is a deliberate seam the transformation can use. If the transformation cannot be
+made provably faithful, Tier 3 with permanent visible labelling is the honest answer, and this finding is the
+evidence for saying so.
 
 **Lead not yet chased:** Octave's own error text points at an Octave Packages `datatypes` package providing
 `string`, `datetime`, and `table`. If it is real and sufficient, it could shrink or remove the shim. Must be
