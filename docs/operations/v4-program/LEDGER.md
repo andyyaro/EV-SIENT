@@ -18,7 +18,7 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 0 | Ground truth | **GREEN — verified** | 229 files inventoried and independently verified; 3+1 trees reconciled; AWS mapped read-only; 200 findings registered. |
 | 1 | Repair the base | **GREEN — verified** | Was 8 PASS / 2 FAIL on a clean checkout; now 10 PASS / 0 FAIL locally **and in CI**. 10 repairs, each committed separately. |
 | 2 | Liberate the MATLAB layer | **in-progress** | **Harness live and MATLAB executing.** Tier 2 proven by execution. Runs 1-2 failed on portability defects, both fixed; run 3 in flight. `EXECUTION_STATUS.md` untouched until a run *passes*. |
-| 3 | Integrate the 3D explorer | **near-complete** | Governing defect fixed and gated; viewer now states its mode and all four caveats. Remaining: vendor Cesium for offline; keyboard access for the site list. |
+| 3 | Integrate the 3D explorer | **GREEN — verified** | Governing defect fixed in producer *and* consumer; viewer states its mode and all four caveats; keyboard-reachable; Cesium vendorable offline. |
 | 4 | Build V4 | not-started | |
 | 5 | NFC field layer | not-started | |
 | 6 | Close the Tableau blocker | not-started | |
@@ -124,9 +124,10 @@ Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Cur
 | 3.8 | New gates in `verify.sh` **and** CI | **verified** | 4 added → **14 gates, all green locally and in CI**. |
 | 3.9 | `CLAUDE.md` constraints folded into repo docs | **done** | `docs/architecture/3d-explorer-constraints.md`, with an enforcement table naming the gate for each constraint. |
 | 3.10 | Viewer UI: surface the active mode; add the 2 missing disclaimers | **verified** | Mode badge in the header, styled by state — canonical reads as chrome, legacy reads as a warning with a `SUPERSEDED` prefix. `manifest.json` is now read; a missing manifest reads as **unknown**, never as canonical. All four standing caveats in the rail footer. Gated by exact wording + mutation-tested. |
-| 3.11 | Vendor Cesium for offline use | **not-started** | Pinned, not yet vendored. |
-| 3.12 | Keyboard accessibility of the site list | **not-started** | L11: the primary interaction is mouse-only. Phase 9 owns accessibility, but this is the explorer's own defect. |
-| G3 | **Gate 3** | **open** | 3.11 (vendor Cesium) and 3.12 (keyboard access) outstanding. **15 verify.sh gates green** locally and in CI. |
+| 3.11 | Vendor Cesium for offline use | **verified** | `scripts/vendor_cesium.sh` + `make explorer-vendor`, gitignored. The viewer probes for the vendored copy and falls back to the pinned CDN. See DEC-002. |
+| 3.12 | Keyboard accessibility of the site list | **verified** | Focusable, `role=button`, descriptive `aria-label`; Enter selects, `P` pins, arrows navigate. Right-click still pins. Gated. |
+| 3.13 | **Viewer read retired horizon fields** — found while fixing 3.12 | **verified** | `app.js` still named `ports_2035`/`ports_2050` in **six** render paths; under the canonical mode every one would have rendered blank. Horizon vocabulary now comes from the manifest. Gated. |
+| G3 | **Gate 3** | **GREEN** | Explorer fully integrated; horizon/data-source mismatch resolved end to end (producer *and* consumer); all new gates green in `verify.sh` **and** CI. **15 gates.** |
 
 ---
 
@@ -180,6 +181,7 @@ Recorded 2026-07-27T15:30Z. Every line here was observed by command, not assumed
 
 | # | Decision | Alternatives rejected | Reasoning | Phase |
 |---|---|---|---|---|
+| DEC-002 | **Fetch CesiumJS on demand into a gitignored directory** rather than committing it. | (a) Commit `Build/Cesium` — rejected: 20 MB across 375 files added to every clone, for a pinned third-party redistributable that is reproducible on demand and re-bundled at desktop-packaging time. (b) CDN only — rejected: the viewer must work with no network. (c) Commit a minified subset — rejected: a hand-pruned Cesium is neither upstream nor reproducible, and would diverge silently from the CDN build. | The viewer probes for the vendored copy and falls back to the pinned CDN, so both a clean checkout and an offline one work. The fetch script refuses to run if its version disagrees with the pin in `index.html`, because a vendored copy that differs from the online one would make the viewer behave differently offline and online. | 3 |
 | DEC-001 | Create `LEDGER.md` at `docs/operations/v4-program/LEDGER.md` inside the **repo clone** (tracked), not in the workspace parent. | (a) Untracked scratch file — rejected: masterprompt names the tracked path explicitly and requires frequent commits. (b) Workspace root — rejected: same reason, and it would not survive a clean clone. | The masterprompt specifies the path and requires it be committed often; it is a program deliverable. | 0 |
 
 ---
