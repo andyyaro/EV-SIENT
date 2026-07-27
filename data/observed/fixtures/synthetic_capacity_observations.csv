@@ -1,0 +1,5 @@
+site_id,observed_date,method,service_capacity_kw,spare_capacity_kw,measured_peak_kw,source_org,source_document,observer,verification_status,notes
+SYN001,2026-09-01,facility_panel_schedule,400,,,SYNTHETIC facility,SYNTHETIC panel schedule A,SYNTHETIC reviewer,reviewed,SYNTHETIC FIXTURE - fabricated for testing. Not an observation of any real facility. Site ids SYN* are not project sites.
+SYN002,2026-09-02,facility_walkthrough,500,120,310,SYNTHETIC facility,SYNTHETIC walkthrough note,SYNTHETIC reviewer,spot_checked,SYNTHETIC FIXTURE - fabricated for testing. Not an observation of any real facility. Site ids SYN* are not project sites.
+SYN002,2026-09-10,utility_service_record,450,90,,SYNTHETIC utility,SYNTHETIC service record 77,SYNTHETIC engineer,reviewed,SYNTHETIC FIXTURE - fabricated for testing. Not an observation of any real facility. Site ids SYN* are not project sites.
+SYN003,2026-09-03,comparable_site_proxy,300,,,SYNTHETIC planning,SYNTHETIC proxy note,SYNTHETIC planner,unreviewed,SYNTHETIC FIXTURE - fabricated for testing. Not an observation of any real facility. Site ids SYN* are not project sites.
