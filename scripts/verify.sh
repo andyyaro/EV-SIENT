@@ -184,6 +184,13 @@ gate "3d: viewer JS parses and every CDN reference is version-pinned" \
 gate "matlab: nothing destined for the PUBLIC harness carries site-identifying data" \
   bash -c "cd '$REPO' && '$PY' scripts/check_harness_exposure.py"
 
+# The edge authoriser is the only thing standing between an anonymous request and the study's
+# full lineage, so its tests run here rather than only in the deploy path. They exercise the
+# REAL handler with REAL RSA keys — only the network is stubbed — so a regression in token
+# verification fails the repository gates, not just a deployment nobody re-ran.
+gate "edge-auth: only a verified id_token for the granted account reaches the origin" \
+  bash -c "cd '$REPO' && if command -v node >/dev/null; then node --test 'tests/edge_auth/*.test.mjs'; else echo 'node absent - edge auth tests SKIPPED (deploy path still runs them)'; fi"
+
 gate "links: markdown links resolve (lychee if installed, else internal-link check)" \
   bash -c "cd '$REPO' && if command -v lychee >/dev/null; then lychee --offline --no-progress README.md docs reports presentation dashboard excel matlab src tests scripts data 2>/dev/null; else '$PY' scripts/check_internal_links.py; fi"
 

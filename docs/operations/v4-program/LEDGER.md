@@ -24,7 +24,7 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 6 | Close the Tableau blocker | **GREEN — honest partial close** | Live workbook audited and found wrong on 3 counts; corrected workbook rebuilt from the canonical contract, **published and verified from the live artifact**. All 7 sheets render (792×681, none blank). **5 residual blockers named**, not approximated. `.twb` drift gate + embed-form gate. |
 | **6B** | **Data intake layer (portability)** | **not-started — NEW, added 2026-07-27** | Added by the project owner mid-program. Lets another jurisdiction bring its own data and get a run. Inserted here because **the platform must expose it**. |
 | 7 | The platform | **in-progress** | Architecture decided (DEC-015). **Six components built, gated and render-verified**; 6 platform gates. Remaining: Simulink surface, field-data entry, reports download, desktop launcher, artifact byte-equivalence. See RESUME HERE. |
-| 8 | Deploy and ship | not-started | |
+| 8 | Deploy and ship | **in-progress — gate live and verified shut** | Platform deployed behind a **Cognito sign-in enforced at the edge** (DEC-017), granting `redacted-3@example.org`. **32/32 live assertions pass**: 8 gated assets redirect to Cognito, 6 alternative path spellings fail to evade, **all 12 NFC tags still public**, 6 pre-existing pages untouched. Bundle isolated in its own bucket so the boundary is structural, not path-pattern-dependent. Incremental cost **< $0.01/month**. **NOT yet verified: that the gate _opens_** — needs one sign-in by the owner. |
 | 9 | Make it human | not-started | |
 | 10 | Verify and land | not-started | **SCOPE EXPANDED 2026-07-27 by the owner (DEC-014):** a line-by-line audit of **every file in every folder**, in addition to everything already planned. Now **403 tracked files / ~78 700 lines** vs the 198 Phase 0 read — roughly half has never been audited, only written. |
 
@@ -32,10 +32,42 @@ Legend: `not-started` / `in-progress` / `blocked` / `done` / `verified`
 
 ---
 
-## RESUME HERE — state as of 2026-07-28T02:10Z
+## RESUME HERE — state as of 2026-07-28
 
-**Branch `v4-platform`, HEAD `8010d0d`, working tree clean, pushed. CI green. `verify.sh`
-26 PASS / 0 FAIL.**
+**Branch `v4-platform`. `verify.sh` 29 gates. Node edge-auth suite: 46 pass.**
+
+### Phase 8 — the platform is DEPLOYED and the gate is verified shut
+
+Live at `https://futurecityfellowship.andyyaro.com/platform/`, behind a Cognito sign-in
+enforced in a **Lambda@Edge viewer-request** function (DEC-017). Granted account:
+`redacted-3@example.org` — which already existed and was already `CONFIRMED`, so no
+credential was created, reset, or handled.
+
+**Verified against the live site — `python scripts/verify_deployment.py`, 32/32:**
+
+| What | Result |
+|---|---|
+| 8 gated assets, incl. `provenance_v1.json` and the real `site_table.csv` | all **302 → Cognito**, zero bytes served |
+| 6 alternative path spellings (`/%70latform/…`, `//`, `/./`, `/../`, case) | none evade the gate |
+| **All 12 NFC tag pages** `/t/FFX001`–`/t/PWC008` | **still HTTP 200, public, no account** |
+| 6 pre-existing pages (`/`, assistant, dashboard, results, methodology) | untouched, byte counts unchanged |
+| Main bucket contents under `platform/` | **0 objects** — the isolation is real |
+| Direct S3 GET of the gated bucket | **403** |
+
+**Why a second bucket.** CloudFront normalises percent-encoding — *measured*:
+`/%61ssistant.html` returns the same 70 378 bytes as `/assistant.html`. If path-pattern
+matching runs before that normalisation, `/%70latform/…` would miss the gated behaviour
+entirely. Rather than depend on the order of two internal steps, the bundle lives in a bucket
+the default behaviour's origin cannot see, so an evading request gets 404 from a bucket with
+nothing in it. Behavioural guarantee → structural one.
+
+**Cost:** S3 25.27 MB ≈ $0.0006/mo, Lambda@Edge ≈ $0.001/mo at this traffic, Cognito free
+below 50 000 MAU. Incremental total **< $0.01/month** against the $10 ceiling.
+
+**NOT VERIFIED — and not counted as done:** that the gate *opens* for
+`redacted-3@example.org`. That needs a sign-in with a password the assistant does not have
+and should not have. **Open human action: one sign-in by the owner.** Everything else about
+the gate is observed, not assumed.
 
 ### Where Phase 7 actually is
 
