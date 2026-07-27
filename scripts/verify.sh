@@ -83,6 +83,11 @@ assert p == [], p\""
 # behaviour is tested harder than the features.
 # Never conflate engines; surface divergences rather than hiding them. Every figure in the
 # record is read out of a committed CI artifact, so this also fails if those go missing.
+# DEC-016: the real site inputs never reach the public bundle. By construction, not by
+# convention -- a convention is something a later change breaches without noticing.
+gate "platform: public bundle matches its manifest and excludes the real site inputs" \
+  bash -c "cd '$REPO' && '$PY' scripts/build_platform_surfaces.py >/dev/null && '$PY' -m pytest tests/test_platform_surfaces.py -q"
+
 gate "platform: engines are distinguishable and every divergence is surfaced" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_engine_record.py -q"
 

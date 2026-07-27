@@ -62,3 +62,11 @@ dashboard/tableau/build/workbook_spec.build.json
 # The provenance export is a generated artifact rebuilt from the contract. It is TRACKED,
 # deliberately -- the web tier serves it and a reviewer must be able to diff what changed
 # about a number's lineage. Listed here only to say so.
+
+# Copied into the public bundle by scripts/build_platform_surfaces.py from an explicit
+# allowlist. Generated, so not tracked -- but surfaces.json IS tracked, because a reviewer
+# must be able to see what the bundle claims to contain.
+site/platform/explorer/
+site/platform/dashboard/
+site/platform/contract/
+site/platform/nfc/

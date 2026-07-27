@@ -1,0 +1,101 @@
+{
+  "schema": "fcf-surfaces/1",
+  "surfaces": [
+    {
+      "id": "explorer",
+      "title": "3D site explorer",
+      "href": "explorer/index.html",
+      "detail": "All 12 sites in 3D with 12 building models. Works with no Cesium account and no token \u2014 it falls back to a flat basemap rather than requiring a credential.",
+      "count": 12,
+      "available_on_web": true
+    },
+    {
+      "id": "dashboard",
+      "title": "Static dashboard",
+      "href": "dashboard/",
+      "detail": "9 contract-derived charts, each stamped in its footer with the run and source it came from. Openable offline.",
+      "items": [
+        "01_readiness_ranking.png",
+        "02_starter_vs_pathway.png",
+        "03_ports_three_horizons.png",
+        "04_lifecycle_cost.png",
+        "05_net_co2e.png",
+        "06_avoided_evse.png",
+        "07_peak_wait.png",
+        "08_limitations.png",
+        "09_site_map_offline.png"
+      ],
+      "count": 9,
+      "available_on_web": true
+    },
+    {
+      "id": "tableau",
+      "title": "Tableau workbook",
+      "detail": "Seven sheets plus a dashboard, published and verified against the canonical contract. Individual sheets render better than the dashboard \u2014 three charts are narrow inside a dashboard zone, which the authoring spec offers no way to control.",
+      "links": [
+        {
+          "label": "Site readiness ranking",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        },
+        {
+          "label": "Starter vs pathway ports",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/StartervsPathwayPorts?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        },
+        {
+          "label": "Active ports by horizon",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PortsAcrossHorizons?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        },
+        {
+          "label": "Queue wait, minutes",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PeakWaitsbySite?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        },
+        {
+          "label": "Lifecycle cost NPV",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/LifecycleCostbyHorizon?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        },
+        {
+          "label": "Net CO2e per year",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/NetCO2ebyHorizon?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        },
+        {
+          "label": "Candidate sites map",
+          "href": "https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/SiteMap?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+        }
+      ],
+      "count": 7,
+      "available_on_web": true
+    },
+    {
+      "id": "contract",
+      "title": "The canonical data contract",
+      "detail": "Download the contract itself \u2014 every table, the schema, the assumptions and the manifest with its SHA-256 hash chain. This is the thing every number on every surface comes from.",
+      "links": [
+        {
+          "label": "v1 (frozen)",
+          "href": "contract/v1/"
+        },
+        {
+          "label": "v2 (additive)",
+          "href": "contract/v2/"
+        }
+      ],
+      "count": 16,
+      "available_on_web": true
+    },
+    {
+      "id": "nfc",
+      "title": "NFC field layer",
+      "href": "nfc/",
+      "detail": "Tag payloads for all 12 sites with 12 QR fallbacks, the writing runbook and the placement cards. Writing a physical tag is done with a phone.",
+      "count": 12,
+      "available_on_web": true
+    }
+  ],
+  "deploy_note": "Everything above is copied into the public bundle from an explicit allowlist. The real site input data is never copied \u2014 not by convention, by construction. See DEC-016.",
+  "never_deployed": [
+    "data/inputs",
+    "data/provenance",
+    "data/outputs",
+    "matlab/data/canonical"
+  ]
+}

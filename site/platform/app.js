@@ -16,7 +16,7 @@
 "use strict";
 
 const STATE = {
-  prov: null, ops: null, engines: null, horizon: null, scenario: null,
+  prov: null, ops: null, engines: null, surfaces: null, horizon: null, scenario: null,
   // Which tier this page is running in, DETECTED rather than configured.
   //
   // One file serves both. Asking the server settles it: a desktop session answers
@@ -328,6 +328,47 @@ function renderOperations() {
   }
 }
 
+function renderSurfaces() {
+  if (!STATE.surfaces) return;
+  $("#surf-note").textContent = STATE.surfaces.deploy_note;
+  const list = $("#surfaces");
+  list.replaceChildren();
+  for (const s of STATE.surfaces.surfaces) {
+    const li = document.createElement("li");
+    const head = document.createElement("div");
+    head.className = "op-head";
+    const h3 = document.createElement("h3");
+    h3.textContent = s.title;
+    const pill = document.createElement("span");
+    pill.className = "pill pill-ok";
+    pill.textContent = `${s.count} item${s.count === 1 ? "" : "s"}`;
+    head.append(h3, pill);
+    li.append(head);
+
+    const detail = document.createElement("p");
+    detail.textContent = s.detail;
+    li.append(detail);
+
+    if (s.href) {
+      const a = document.createElement("a");
+      a.className = "run";
+      a.href = s.href;
+      a.textContent = "Open";
+      li.append(a);
+    }
+    for (const link of s.links || []) {
+      const a = document.createElement("a");
+      a.className = "linkchip";
+      a.href = link.href;
+      a.textContent = link.label;
+      // External Tableau links open in a new tab; internal downloads do not.
+      if (link.href.startsWith("http")) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+      li.append(a);
+    }
+    list.append(li);
+  }
+}
+
 function renderEngines() {
   if (!STATE.engines) return;
   const e = STATE.engines;
@@ -490,14 +531,16 @@ async function runOperation(id, button, output) {
 
 async function main() {
   try {
-    const [prov, staticOps, engines, detected] = await Promise.all([
+    const [prov, staticOps, engines, surfaces, detected] = await Promise.all([
       loadJSON("provenance_v1.json"),
       loadJSON("operations.json"),
       loadJSON("engines.json"),
+      loadJSON("surfaces.json"),
       detectTier(),
     ]);
     STATE.prov = prov;
     STATE.engines = engines;
+    STATE.surfaces = surfaces;
     STATE.tier = detected.tier;
     // The desktop tier's list comes from the running server; the web tier's from the
     // generated file. Both are rendered by the same code from the same registry.
@@ -507,6 +550,7 @@ async function main() {
     renderControls();
     renderSites();
     renderOperations();
+    renderSurfaces();
     renderEngines();
 
     // Deep-link a provenance panel: ?number=FFX004|2036|base|ports_active

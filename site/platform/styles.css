@@ -242,3 +242,12 @@ th { font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color:
 h3.sub { font-size: 1.02rem; margin: 1.7rem 0 .4rem; color: var(--green); }
 .engines li { align-items: flex-start; }
 .engines .pv-caveat { margin-top: .45rem; }
+
+a.run { display: inline-block; text-decoration: none; }
+.linkchip {
+  display: inline-block; font-size: .82rem; margin: .5rem .4rem 0 0;
+  padding: .28rem .6rem; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--green); text-decoration: none;
+}
+.linkchip:hover { background: var(--warn-bg); }
+.linkchip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }

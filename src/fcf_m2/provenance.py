@@ -85,7 +85,15 @@ CAVEATS: dict[str, list[str]] = {
     "spare_capacity_kw": ["capacity_placeholder"],
     "capacity_basis": ["capacity_placeholder"],
     "capacity_confidence": ["capacity_placeholder"],
-    "base_load_kw": ["capacity_placeholder"],
+    # base_load_kw gets its OWN caveat, not the capacity one.
+    #
+    # It is the only populated electrical field in the contract -- 120/120, while
+    # service_capacity_kw and spare_capacity_kw are honestly null -- so it is the one an
+    # unwary reader would take for a measurement. It is not: its source file's own provenance
+    # column reads "base loads and spare capacity are UNVERIFIED planning proxies".
+    # Showing it the capacity caveat would answer a question nobody asked while leaving the
+    # one that matters unanswered.
+    "base_load_kw": ["base_load_proxy", "capacity_placeholder"],
     "sessions_per_day": ["demand_modelled"],
     "energy_required_kwh_day": ["demand_modelled"],
     "utilization": ["demand_modelled"],
@@ -103,6 +111,11 @@ CAVEATS: dict[str, list[str]] = {
 
 #: The caveat texts. One definition, so a caveat cannot drift between surfaces.
 CAVEAT_TEXT: dict[str, str] = {
+    "base_load_proxy": (
+        "Base load is an UNVERIFIED PLANNING PROXY, not a measured value. Nobody has metered "
+        "this building. It is the only populated electrical field in the contract, which makes "
+        "it the easiest one to mistake for a measurement -- its source is a hand-adapted "
+        "planning placeholder carried over from the legacy adapter."),
     "capacity_placeholder": (
         "Electrical capacity is a PLACEHOLDER at all 12 sites. Nobody has confirmed the "
         "service could support chargers. This is not evidence of electrical feasibility, and "
