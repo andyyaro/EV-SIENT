@@ -75,6 +75,12 @@ assert p == [], p\""
 gate "tableau: workbook data matches the contract; .twb declares its sheets and caveats" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_tableau_workbook.py -q"
 
+# Two Tableau URL forms exist and are not interchangeable. Both return 200 and the same
+# ~1.4 KB JS shell, so nothing about a status check catches the wrong one -- and an embed
+# built on the page form fails looking like a rendering problem rather than a bad URL.
+gate "tableau: embeds use the /views/ share form, never the profile page form" \
+  bash -c "cd '$REPO' && '$PY' scripts/check_tableau_embeds.py"
+
 gate "secrets: no keys/tokens/account IDs in tracked files" \
   bash -c "cd '$REPO' && '$PY' scripts/secret_scan.py"
 
