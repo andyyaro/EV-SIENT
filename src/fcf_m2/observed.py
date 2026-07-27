@@ -249,8 +249,9 @@ def read_session_observations(path: str | Path) -> list[SessionObservation]:
     if missing:
         raise ObservationError(
             f"{path}: missing required column(s): {', '.join(missing)}. "
-            f"The six-column template in data/observed/ predates the trigger policy and "
-            f"cannot supply uptime or p90 wait; see docs/migration-from-v3.md.")
+            f"The six-column template that shipped with V3 predates the trigger policy and "
+            f"cannot supply uptime or p90 wait. See data/observed/README.md for what each "
+            f"added column is and why the policy needs it.")
 
     out: list[SessionObservation] = []
     for _, row in frame.iterrows():

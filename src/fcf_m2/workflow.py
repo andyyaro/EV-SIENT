@@ -347,6 +347,87 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None) -> dict:
     return result
 
 
+def _ingest_observations(args) -> int:
+    """Report what a set of observations would change. Deliberately read-only.
+
+    This command **never writes**. Rule 2 of the data-flow document is that received values
+    enter the site inputs and the model *re-runs*, generating a new run_id -- scenario rows
+    are never edited in place. A command that quietly mutated the contract would be the
+    hand-edit that rule exists to prevent, so this one shows the consequence and stops.
+    """
+    from . import observed, triggers
+
+    if not args.capacity and not args.sessions:
+        print("Nothing to ingest. Pass --capacity and/or --sessions.\n"
+              "Templates: data/observed/observed_capacity_template.csv,\n"
+              "           data/observed/observed_sessions_template.csv")
+        return 2
+
+    exit_code = 0
+
+    if args.capacity:
+        try:
+            records = observed.read_capacity_observations(args.capacity)
+        except observed.ObservationError as err:
+            # Plain language, not a stack trace: the person holding this file is a
+            # facility manager or a fellowship member, not a Python developer.
+            print(f"CAPACITY FILE REJECTED\n  {err}")
+            return 1
+        upgrades = observed.resolve_capacity(records)
+        print(f"CAPACITY — {len(records)} observation(s) across {len(upgrades)} site(s)\n")
+        for site_id, upgrade in upgrades.items():
+            arrow = "->" if upgrade.upgraded else "unchanged,"
+            print(f"  {site_id}: {upgrade.previous_basis} {arrow} {upgrade.new_basis}")
+            if upgrade.service_capacity_kw is not None:
+                print(f"      service capacity: {upgrade.service_capacity_kw:g} kW")
+            if upgrade.spare_capacity_kw is not None:
+                print(f"      spare capacity:   {upgrade.spare_capacity_kw:g} kW")
+            print(f"      provenance: {upgrade.capacity_source}")
+            for conflict in upgrade.conflicts:
+                print(f"      !! CONFLICT, needs a human: {conflict}")
+                exit_code = max(exit_code, 3)
+            print()
+
+    if args.sessions:
+        try:
+            rows = observed.read_session_observations(args.sessions)
+        except observed.ObservationError as err:
+            print(f"SESSION FILE REJECTED\n  {err}")
+            return 1
+        summaries = observed.summarise_sessions(rows)
+        print(f"SESSIONS — {len(rows)} site-day(s) across {len(summaries)} site(s)\n")
+        for site_id, summary in summaries.items():
+            print(f"  {site_id}: {summary.days_observed} days "
+                  f"({summary.months_observed} months observed)")
+            if not summary.sufficient_for_triggers:
+                # Named, never defaulted. A defaulted uptime of 1.0 would walk straight
+                # past the reliability gate that exists to catch exactly that.
+                print(f"      cannot evaluate triggers - missing: "
+                      f"{', '.join(summary.missing_for_triggers)}")
+                print()
+                continue
+            metrics = triggers.ObservedMetrics(
+                site_id=site_id, months_observed=summary.months_observed,
+                avg_utilization=summary.avg_utilization, p90_wait_min=summary.p90_wait_min,
+                uptime=summary.uptime, equity_index_percentile=0.5)
+            decision = triggers.evaluate(metrics, args.ports_active, args.ports_pathway,
+                                         site_id=site_id)
+            print(f"      utilisation {summary.avg_utilization:.0%} · "
+                  f"uptime {summary.uptime:.1%} · p90 wait {summary.p90_wait_min:g} min")
+            print(f"      -> {decision.outcome}")
+            for line in decision.rule_trace:
+                print(f"         {line}")
+            print()
+        print("  (equity percentile defaults to 0.5 here; the model supplies the real value "
+              "during a run)")
+
+    print("\nNOTHING WAS WRITTEN. This command reports only.")
+    print("To apply these, put the values into the site inputs and re-run the model "
+          "(make run-v3), which generates a new run_id. Scenario rows are never edited "
+          "in place - see docs/human-actions/utility_facility_data/04_DATA_FLOW_INTO_MODEL.md")
+    return exit_code
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="FCF M2 V3 workflow")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -357,6 +438,23 @@ def main(argv=None):
     p_val = sub.add_parser("validate-contract")
     p_val.add_argument("contract_dir")
     sub.add_parser("docs")
+
+    # The V4 loop needs a way in from the command line. Without one, a capacity
+    # confirmation returned by a facility manager has nowhere to go except a person
+    # editing a contract row by hand -- which is exactly what
+    # docs/human-actions/utility_facility_data/04_DATA_FLOW_INTO_MODEL.md forbids.
+    p_obs = sub.add_parser(
+        "ingest-observations",
+        help="Read field observations, report what they would change. Writes nothing.")
+    p_obs.add_argument("--capacity", default=None,
+                       help="CSV of capacity confirmations (observed_capacity_template.csv shape)")
+    p_obs.add_argument("--sessions", default=None,
+                       help="CSV of charger operating data (observed_sessions_template.csv shape)")
+    p_obs.add_argument("--ports-active", type=int, default=4,
+                       help="ports currently energised, for trigger evaluation")
+    p_obs.add_argument("--ports-pathway", type=int, default=8,
+                       help="pathway capacity, for trigger evaluation")
+
     args = parser.parse_args(argv)
 
     if args.cmd == "run":
@@ -375,6 +473,8 @@ def main(argv=None):
             print("FAIL:\n- " + "\n- ".join(problems))
             sys.exit(1)
         print("Contract valid: all rule checks, JSON Schema, and RT-10 hash chain PASS.")
+    elif args.cmd == "ingest-observations":
+        sys.exit(_ingest_observations(args))
     elif args.cmd == "docs":
         docs = generate_docs()
         (ROOT / "docs/WORKFLOW_STEPS.md").write_text(docs)
