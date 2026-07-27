@@ -85,6 +85,12 @@ assert p == [], p\""
 # record is read out of a committed CI artifact, so this also fails if those go missing.
 # DEC-016: the real site inputs never reach the public bundle. By construction, not by
 # convention -- a convention is something a later change breaches without noticing.
+# Gate 7: platform output byte-identical to CLI output. Proven over PRODUCED FILES, not
+# just stdout -- if the two paths ever wrote different bytes the disagreement would surface
+# as an inexplicable number rather than as an error.
+gate "platform: generated artifacts are byte-identical via the platform and via the CLI" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_cli_platform_equivalence.py -q"
+
 gate "platform: public bundle matches its manifest and excludes the real site inputs" \
   bash -c "cd '$REPO' && '$PY' scripts/build_platform_surfaces.py >/dev/null && '$PY' -m pytest tests/test_platform_surfaces.py -q"
 
