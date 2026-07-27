@@ -753,3 +753,145 @@ The owner offered one. **Declined**, for three reasons that all point the same w
 If ion terrain is wanted later, the clean route is a domain-restricted token injected at
 deploy time and never committed. That is a Phase 8 decision with its own entry, not something
 to wire in now.
+
+---
+
+## DEC-017 — The web platform is gated at the edge, not in the browser
+
+**Date:** 2026-07-27 · **Phase:** 8 · **Requested by the owner, approved before implementation**
+
+### Context
+
+The owner asked for the deployed platform to sit behind a Cognito sign-in, granting access to
+an existing user, `redacted-3@example.org`, and asked whether it could be done without
+them at the machine. Both were answered before any work started; the owner replied
+*"good i approve"*.
+
+Reconnaissance established four facts that shaped the design, each verified rather than
+assumed:
+
+1. **The user already exists and is `CONFIRMED`** in pool `us-east-1_mKrwfQTkg`. Its password
+   is already set. No credential has to be created, reset, or handled — which is fortunate,
+   because handling one is forbidden.
+2. **The Cognito hosted-UI domain is already `ACTIVE`** (`us-east-1mkrwfqtkg`), and a **public
+   app client with no secret** already uses the authorisation-code flow on this very site.
+3. **The distribution serving the platform also serves the NFC layer.** `E1XZPHWHZV0OEO` has
+   exactly one origin, *zero* extra cache behaviours, and the alias
+   `futurecityfellowship.andyyaro.com`. `/t/FFX001`–`/t/PWC008` live on its default behaviour.
+4. **The site's existing client-side sign-in is correct for what it protects, and is not a
+   model for this.** An anonymous `GET /assistant.html` does return HTTP 200 and all 70 378
+   bytes — but the prose in those bytes is 1 677 characters of login form, no site data, and
+   the asset it guards is an API (`POST .../chat`) which answers an unauthenticated call with
+   **HTTP 401**. A publicly served login page in front of a server-enforced API is the normal,
+   correct shape.
+
+   *(Recorded because the first version of this entry claimed the opposite. The initial
+   measurement failed to strip `<style>` blocks and counted 26 400 characters of CSS as
+   leaked prose, and the API was asserted to be unprotected without being called. Both were
+   wrong; the API was then called and returned 401. The error is left visible here rather than
+   quietly deleted, because a decision log that hides its own corrections is worth less than
+   one that shows them.)*
+
+5. **The granted user has no `email_verified` attribute at all** — `admin-get-user` returns
+   only `email` and `sub`. This matters more than it looks: the textbook identity check is
+   `email_verified === true`, and requiring it here would have produced a gate that could
+   never open for the one account it exists to admit. The failure would have been invisible
+   from this side, because verifying it requires signing in as that user. The allowlist
+   therefore matches on **`sub`** — immutable, and the tightest possible identifier for
+   "that user specifically" — *and* on `email`, with `email_verified` deliberately not
+   required. See the authoriser's own comment for the same reasoning at the point of use.
+
+### The decision
+
+**Authentication runs in a Lambda@Edge viewer-request function attached to a new
+`/platform/*` cache behaviour. The default behaviour is not touched.**
+
+Three properties follow, and each is the reason for a constraint the owner did not ask for:
+
+- **The NFC layer stays public.** A reader taps a coin in a car park and gets a page, with no
+  account and no app — that is the whole point of Phase 5 (DEC-006). Gating the distribution
+  would have broken all twelve tags. Auth is therefore scoped to one path pattern, and the
+  verification step checks the tags still answer, not merely that the gate closed.
+- **The gate is real, and it has to be, because this asset has no server behind it.** This is
+  where the platform differs in kind from `assistant.html`. That page can gate in the browser
+  because the thing worth protecting is an API that enforces auth itself; the page is just a
+  door, and doors are meant to be visible. The platform is the opposite: it is a **static
+  bundle**, so the bytes *are* the asset and there is no server-side chokepoint to enforce
+  anything. A client-side gate over static files cannot protect them — it can only hide what
+  CloudFront has already handed over. Enforcement therefore has to move to the edge.
+  Viewer-request runs on every request *before* the cache is consulted, so an unauthenticated
+  caller never reaches a byte, cached or not.
+- **No secret exists anywhere.** The app client is **public and uses PKCE**, so there is no
+  client secret to store; the session cookie holds the Cognito `id_token`, verified on each
+  request against the pool's **public** JWKS. Nothing needs SSM, and nothing needs the
+  environment variables Lambda@Edge does not support. The standing rule — never embed a
+  credential in the app, installer, frontend, or any release artifact — is satisfied by
+  construction rather than by care.
+
+### Alternatives rejected
+
+| Option | Why not |
+|---|---|
+| Client-side Cognito, as `assistant.html` does | Right shape for that page, wrong shape here. It works there because an API enforces auth server-side; the platform is static, so there is nothing behind the page to enforce anything, and hiding delivered bytes with JavaScript is not access control. |
+| Application Load Balancer with built-in OIDC | ~**$16/month** at on-demand rates for the ALB alone. Exceeds the entire $10/month ceiling for one feature. |
+| CloudFront Function instead of Lambda@Edge | Cannot perform RS256 verification or the token exchange — no network calls, restricted runtime. It would have to trust the cookie, which is not verification. |
+| CloudFront signed cookies / signed URLs | Real gating, but unrelated to Cognito; the owner asked for a Cognito sign-in by that user specifically. |
+| Gate the whole distribution | Breaks all twelve NFC tags. Not a trade-off — a regression. |
+
+### The scope change this represents, stated plainly
+
+The master prompt describes the web tier as *the primary distribution, zero friction*. A
+sign-in is friction, and this is a deliberate departure made at the owner's request. What is
+**not** changed: the NFC field layer, which was always the zero-friction surface and remains
+open to anyone with a phone.
+
+### Cost
+
+Cognito is free below 50 000 monthly actives. Lambda@Edge is $0.60 per million requests plus
+$0.00005001/GB-s; for a private page with one user this rounds to **under $0.05/month**.
+Aggregate incremental cost stays inside the $10/month ceiling.
+
+### What could not be verified, and why
+
+**That the gate opens for `redacted-3@example.org`.** Confirming it requires signing in as
+that user, and that password is neither available to nor appropriate for the assistant to
+hold. What *is* verified: an anonymous request is refused, and the NFC tags still answer.
+The remaining check is one sign-in by the owner, recorded as an open human action.
+
+### What the adversarial review changed, and the one it changed most
+
+Six independent attack lenses were run against the authoriser before it was deployed, each
+finding then put to two refuters. Eight claims came back. Treated as leads, not facts — every
+one was checked against the file by hand. Four survived that check and were fixed; the rest
+were either already fixed or not exploitable.
+
+| Claim | Verdict | Outcome |
+|---|---|---|
+| Reflected XSS via Cognito's `error` parameter | **Real** | Already found and fixed while writing the tests, independently — two lenses converged on it. Escaping is now centralised in `escapeHtml` so no call site has to remember. |
+| Percent-encoded path evades the cache behaviour | **Real risk, unresolvable by inspection** | See below — the architecture changed. |
+| Sibling-subdomain cookie shadowing → permanent lockout | **Real** | Cookies now carry the `__Host-` prefix, which a browser only accepts from the exact host. |
+| Authorization-code injection via a forgeable PKCE stash | **Real, same root cause** | Closed by the same `__Host-` change: the stash can no longer be planted by another subdomain. |
+| Forced sign-out via `<img src=…/logout>` | **Real, low impact** | Sign-out now requires `Sec-Fetch-Dest: document`, so a subresource cannot clear the session. |
+
+**The one that changed the design.** A cache behaviour is chosen by matching the path against
+`/platform*`, and CloudFront normalises percent-encoding — *measured on the live distribution,
+not assumed*: `/%61ssistant.html` returns the same 70 378 bytes as `/assistant.html`. If
+pattern matching happens **before** normalisation, `/%70latform/index.html` would miss the
+gated behaviour and be served by the default one, with no authentication at all. Which of
+those two internal steps runs first is not something inspection can settle.
+
+So the design stopped depending on the answer. **The platform bundle now lives in its own
+bucket**, reachable only through the gated behaviour. A request that evades the path pattern
+falls to the default behaviour, whose origin is the main bucket — which contains no platform
+content, and returns 404. The guarantee moves from behavioural to structural, the same move
+this program already made when it decided an operation *is* a CLI command rather than merely
+matches one.
+
+Incremental cost of the second bucket at 25 MB: roughly **$0.0006/month**.
+
+*Honest note on the review itself: the workflow reported "0 findings" because a bug in the
+orchestration script passed promises where it should have passed functions, so every
+refutation threw and the results were discarded. The empty result was not a clean bill of
+health, and was not reported as one — the agents' raw output was read from the run journal
+instead. A green result whose plumbing failed is indistinguishable from a real one unless the
+plumbing is checked.*
