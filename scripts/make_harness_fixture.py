@@ -31,11 +31,54 @@ Deterministic: a fixed seed, so the fixture is reproducible and diffable.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import random
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = REPO / "matlab/data/harness/harness_scenarios_synthetic.csv"
+
+
+def _identifying_values() -> dict[str, dict[float, str]]:
+    """``{column: {value: the one real site it resolves to}}``, from the exposure gate.
+
+    Imported from ``check_harness_exposure`` rather than restated, so the generator and the
+    gate cannot drift into disagreeing about what counts as identifying. One definition.
+    """
+    path = REPO / "scripts/check_harness_exposure.py"
+    spec = importlib.util.spec_from_file_location("_fcf_exposure", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.identifying_values()
+
+
+def avoid_real(column: str, value: float, identifying: dict[str, dict[float, str]],
+               step: float = 0.01, decimals: int = 2) -> float:
+    """Nudge a generated value off any real value that pins a single site.
+
+    Synthesising from a random draw does not guarantee the result differs from real data --
+    it only makes collision unlikely, and unlikely happened. The published fixture carried
+    ``sessions_per_day = 0.9``, which is **PWC003's value and nobody else's**, so a public
+    file contained a real per-site figure. The exposure gate could not see it: its rule
+    wants a value and its column name on one line, which a CSV can never satisfy.
+
+    The one-sentence explanation this owes the reader: *if a generated number happens to
+    equal a real number that identifies a single site, add one cent-sized step until it
+    does not.* The nudge is at most a few hundredths, so the fixture's structure, ranges and
+    branch coverage are untouched, and it is deterministic, so the file stays diffable.
+    """
+    column_map = identifying.get(column)
+    if not column_map:
+        return value
+    guarded = round(float(value), decimals)
+    for _ in range(100):
+        if guarded not in column_map:
+            return guarded
+        guarded = round(guarded + step, decimals)
+    raise SystemExit(
+        f"could not find a non-identifying value near {value} for column {column!r}; "
+        f"this needs a human, not a wider search")
+
 
 COLUMNS = [
     "scenario_id", "site_id", "site_name", "horizon_year", "case", "ports",
@@ -73,6 +116,7 @@ CAPACITY_SOURCE = "synthetic fixture; capacity deliberately undefined to exercis
 
 def rows(seed: int = 20260727) -> list[dict]:
     rng = random.Random(seed)
+    identifying = _identifying_values()
     out: list[dict] = []
     for n in range(1, 13):
         site_id = f"SYN{n:03d}"
@@ -89,8 +133,10 @@ def rows(seed: int = 20260727) -> list[dict]:
         #
         # The panel sites therefore carry the heaviest loads, so the clamp and
         # energy-aware branches actually bind and the golden discriminates.
-        base_mean = round(BASE_LOAD_MEAN_KW[n - 1], 1)
-        base_peak = round(base_mean * rng.uniform(1.3, 1.6), 1)
+        base_mean = avoid_real("base_load_mean_kW", BASE_LOAD_MEAN_KW[n - 1],
+                               identifying, step=0.1, decimals=1)
+        base_peak = avoid_real("base_load_peak_kW", base_mean * rng.uniform(1.3, 1.6),
+                               identifying, step=0.1, decimals=1)
         # Every fourth site is deliberately low-demand so sessions_per_day < 1 and the
         # single-session branch is exercised, as it is by 12 rows of the real file.
         low_demand = (n % 4 == 0)
@@ -99,7 +145,8 @@ def rows(seed: int = 20260727) -> list[dict]:
                 growth = {2026: 1.0, 2036: 1.9, 2046: 2.8, 2056: 3.4}[horizon]
                 case_mult = {"baseline": 1.0, "base": 1.0, "high": 1.35, "stress_combined": 1.55}[case]
                 base_sessions = 0.35 if low_demand else rng.uniform(1.1, 3.2)
-                sessions = round(base_sessions * growth * case_mult, 2)
+                sessions = avoid_real("sessions_per_day",
+                                      base_sessions * growth * case_mult, identifying)
                 ports = min(8, max(2, 2 * round((sessions * dwell / 6) + 0.5)))
                 out.append({
                     "scenario_id": f"{site_id}_{horizon}_{case}",
