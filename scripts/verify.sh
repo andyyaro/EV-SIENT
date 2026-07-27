@@ -78,6 +78,9 @@ assert p == [], p\""
 # An operation IS the CLI command, not a second code path -- which is what makes Gate 7's
 # byte-equivalence a property of the design. Also enforces that the web tier lists every
 # capability with a stated reason where it cannot run one, rather than hiding it.
+gate "platform: web tier is wired to what exists, computes nothing, keeps its caveats" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_platform_web.py -q && '$PY' scripts/build_platform_web.py --check"
+
 gate "platform: operations match the CLI byte-for-byte; web tier states what it cannot do" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_operations.py -q"
 

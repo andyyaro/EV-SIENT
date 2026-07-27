@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EV Charging Site Readiness — Future City Fellowship</title>
+<meta name="description" content="A screening-class planning study of twelve candidate public EV charging sites in Northern Virginia. Every number shows where it came from.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">George Mason University · Future City Fellowship</p>
+    <h1>EV charging site readiness</h1>
+    <p class="lede">
+      Twelve candidate sites in Northern Virginia, screened for whether public charging could
+      make sense — and if so, how much to start with.
+    </p>
+  </div>
+</header>
+
+<!--
+  The banner is not decoration and is not dismissible. It states the study's headline
+  limitation before any number is visible, because a reader who scrolls straight to a table
+  and leaves has still been told the most important thing.
+-->
+<div class="banner" role="note">
+  <div class="wrap">
+    <strong>Nothing here is approved, funded or permitted.</strong>
+    Electrical capacity is a <strong>placeholder at all twelve sites</strong> — nobody has
+    confirmed the service could support chargers. Demand is modelled, not measured. Costs are
+    screening estimates for comparison, never budgets or quotes.
+  </div>
+</div>
+
+<main id="main" class="wrap">
+
+  <section aria-labelledby="how-h">
+    <h2 id="how-h">How to read this</h2>
+    <p class="prose">
+      <strong>Every number on this page is clickable.</strong> Click one and you get its
+      lineage: which model run produced it, in which mode, from which contract version, backed
+      by which source, at what confidence, and which caveats apply to it specifically. If a
+      number cannot be explained, it is not shown — this page has no "unknown".
+    </p>
+    <p class="prose muted" id="run-line">Loading the canonical contract…</p>
+  </section>
+
+  <section aria-labelledby="sites-h">
+    <h2 id="sites-h">Sites</h2>
+    <div class="controls">
+      <label for="horizon">Horizon
+        <select id="horizon"></select>
+      </label>
+      <label for="scenario">Case
+        <select id="scenario"></select>
+      </label>
+    </div>
+    <div class="tablewrap">
+      <table id="sites">
+        <caption class="sr-only">Candidate sites with readiness, ports and capacity basis. Every value is clickable for its provenance.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Site</th>
+            <th scope="col" class="num">Starter ports</th>
+            <th scope="col" class="num">Pathway capacity</th>
+            <th scope="col">Capacity basis</th>
+            <th scope="col">Data confidence</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="ops-h">
+    <h2 id="ops-h">What this platform can do</h2>
+    <p class="prose">
+      This is the <strong>web tier</strong>. It shows results and cannot run anything. The list
+      below is complete — capabilities that need the desktop application are shown with the
+      reason, rather than hidden.
+    </p>
+    <ul id="operations" class="ops"></ul>
+  </section>
+
+  <section aria-labelledby="engines-h">
+    <h2 id="engines-h">Which engine produced what</h2>
+    <p class="prose">
+      Four things can compute in this project and they are never treated as interchangeable.
+    </p>
+    <ul class="engines">
+      <li><span class="badge badge-python">Python</span>
+        <span>The single producer. <strong>Every number on this page.</strong></span></li>
+      <li><span class="badge badge-matlab">MathWorks MATLAB</span>
+        <span>Has executed the model — 49 tests, a 120-row batch — but only against a
+          <strong>synthetic fixture</strong>. It has never seen these twelve sites.</span></li>
+      <li><span class="badge badge-octave">GNU Octave</span>
+        <span><strong>Not MATLAB.</strong> A syntax and smoke tier. The fail-closed capacity
+          guard does not fire under it, so it may never make a feasibility statement.</span></li>
+      <li><span class="badge badge-simulink">Simulink</span>
+        <span>A block diagram built from the model source. Built, never simulated; no number
+          derives from it.</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="field-h">
+    <h2 id="field-h">Field data</h2>
+    <div class="empty" id="field-state">
+      <p><strong>No field observations have been received.</strong></p>
+      <p class="muted">
+        The loop that ingests them is built and tested: a utility load study or a month of
+        charger logs would upgrade a site's capacity from <code>placeholder</code> to
+        <code>verified</code>, raise its data confidence, and make its expansion trigger
+        evaluable. Until something arrives, this stays empty — which is the honest state, not
+        an omission.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<!-- The provenance panel. Hidden until a number is clicked. -->
+<aside id="panel" class="panel" hidden aria-labelledby="panel-h" role="dialog" aria-modal="false">
+  <div class="panel-head">
+    <h2 id="panel-h">Where this number comes from</h2>
+    <button id="panel-close" type="button" aria-label="Close provenance panel">×</button>
+  </div>
+  <div id="panel-body"></div>
+</aside>
+<div id="scrim" class="scrim" hidden></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>
+      Screening-class planning study. Not an engineering design, not a utility confirmation,
+      not a fire or accessibility review, and not a commitment by any government body.
+    </p>
+    <p class="muted" id="foot-provenance"></p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
