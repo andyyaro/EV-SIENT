@@ -147,3 +147,103 @@ class TestPayloadsFromContract:
         assert list(frame.columns) == [
             "site_id", "site_name", "url", "ndef_bytes", "bytes_free", "ndef_hex"]
         assert len(frame) == 12
+
+
+# --------------------------------------------------------------- the landing pages
+
+LANDING = ROOT / "site/nfc-landing"
+
+
+@pytest.fixture(scope="module")
+def contract():
+    import pandas as pd
+    return (pd.read_csv(ROOT / "data/contract/v1/site_table.csv"),
+            pd.read_csv(ROOT / "data/contract/v1/scenario_table.csv"))
+
+
+class TestLandingPages:
+    """The page a stranger reaches by tapping a coin in a car park.
+
+    Two obligations, both met rather than traded: it must be readable by someone with no
+    context on a phone, and it must not read as more certain than the data supports.
+    """
+
+    def test_every_tag_url_resolves_to_a_page(self, payloads):
+        for p in payloads:
+            slug = p.url.rsplit("/", 1)[-1]
+            assert (LANDING / f"{slug}.html").exists(), f"{p.site_id}: tag points at a 404"
+
+    @pytest.mark.parametrize("site_id", [
+        "FFX001", "FFX002", "FFX003", "FFX004",
+        "PWC001", "PWC002", "PWC003", "PWC004", "PWC005", "PWC006", "PWC007", "PWC008"])
+    def test_numbers_trace_to_the_contract(self, site_id, contract):
+        _, scen = contract
+        row = scen[(scen.site_id == site_id) & (scen.horizon_year == 2026)].iloc[0]
+        page = (LANDING / f"{site_id}.html").read_text()
+        assert f"<dd>{int(row.ports_active)}</dd>" in page
+        assert f"<dd>up to {int(row.ports_pathway_capacity)}</dd>" in page
+        assert f"<dd>{row.data_confidence}</dd>" in page
+
+    @staticmethod
+    def _rendered_text(path: Path) -> str:
+        """Visible text, with tags removed - a caveat split by <strong> is still said."""
+        import html as html_mod
+        import re
+        raw = path.read_text()
+        raw = re.sub(r"(?s)<(script|style).*?</\1>", "", raw)
+        text = html_mod.unescape(re.sub(r"<[^>]+>", " ", raw))
+        return re.sub(r"\s+", " ", text)
+
+    @pytest.mark.parametrize("caveat", [
+        "Nothing is being built here",
+        "No charger has been approved, funded",
+        "placeholder",
+        "all twelve",
+        "cannot approve, permit, or fund anything",
+        "modelled, not measured",
+        "never budgets or quotes",
+    ])
+    def test_the_caveats_survive_the_plain_language(self, caveat):
+        """Friendlier framing, identical epistemics. Warm copy must not soften a limit."""
+        text = self._rendered_text(LANDING / "FFX002.html")
+        assert caveat in text, f"the landing page no longer says: {caveat}"
+
+    def test_placeholder_capacity_is_stated_as_unconfirmed(self, contract):
+        _, scen = contract
+        for site_id in scen.site_id.unique():
+            row = scen[(scen.site_id == site_id) & (scen.horizon_year == 2026)].iloc[0]
+            page = (LANDING / f"{site_id}.html").read_text()
+            if row.capacity_basis == "placeholder":
+                assert "No — placeholder" in page, f"{site_id} does not say capacity is unconfirmed"
+
+    def test_no_page_claims_a_confidence_the_data_lacks(self, contract):
+        _, scen = contract
+        for site_id in scen.site_id.unique():
+            page = (LANDING / f"{site_id}.html").read_text()
+            assert "<dd>High</dd>" not in page, f"{site_id} claims High confidence"
+
+    def test_pages_collect_nothing_personal(self):
+        """A page reached by tapping a coin must not ask who you are."""
+        for path in sorted(LANDING.glob("*.html")):
+            page = path.read_text().lower()
+            for forbidden in ("<input", "<form", "cookie", "localstorage", "analytics.js"):
+                assert forbidden not in page, f"{path.name} contains {forbidden!r}"
+
+    def test_pages_are_mobile_and_accessible(self):
+        for path in sorted(LANDING.glob("*.html")):
+            page = path.read_text()
+            assert 'name="viewport"' in page
+            assert 'lang="en"' in page
+            assert page.count("<h1") == 1, f"{path.name} should have exactly one h1"
+            assert "prefers-reduced-motion" in page
+            assert "focus-visible" in page
+            assert "prefers-color-scheme" in page
+
+    def test_pages_are_regenerated_not_hand_edited(self):
+        """A page that drifts from the generator is a page nobody can regenerate."""
+        import subprocess, sys
+        before = {p.name: p.read_text() for p in sorted(LANDING.glob("*.html"))}
+        subprocess.run([sys.executable, str(ROOT / "scripts/build_nfc_landing.py")],
+                       cwd=ROOT, capture_output=True, check=True)
+        after = {p.name: p.read_text() for p in sorted(LANDING.glob("*.html"))}
+        assert before == after, "landing pages differ from a fresh build - were they hand-edited?"

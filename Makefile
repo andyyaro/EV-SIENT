@@ -57,9 +57,10 @@ explorer-serve: explorer
 
 PORT ?= 8080
 
-## nfc — regenerate tag payloads, QR fallbacks and placement cards from the contract
+## nfc — regenerate tag payloads, QR fallbacks, placement cards and landing pages
 nfc:
 	$(PY) scripts/build_nfc_tags.py
+	$(PY) scripts/build_nfc_landing.py
 
 verify:
 	./scripts/verify.sh
