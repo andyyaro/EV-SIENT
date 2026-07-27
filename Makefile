@@ -61,6 +61,7 @@ PORT ?= 8080
 nfc:
 	$(PY) scripts/build_nfc_tags.py
 	$(PY) scripts/build_nfc_landing.py
+	$(PY) scripts/build_capture_form.py
 
 verify:
 	./scripts/verify.sh

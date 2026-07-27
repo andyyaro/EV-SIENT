@@ -254,3 +254,98 @@ class TestLandingPages:
                        cwd=ROOT, capture_output=True, check=True)
         after = {p.name: p.read_text() for p in sorted(LANDING.iterdir()) if p.is_file()}
         assert before == after, "landing pages differ from a fresh build - were they hand-edited?"
+
+
+CAPTURE = ROOT / "site/nfc-capture"
+
+
+class TestCaptureForm:
+    """The form that turns a site visit into a capacity confirmation.
+
+    This is the mechanism that closes limitation #1, so the property that matters is that a
+    row it produces actually ingests -- a form whose output the model rejects would be a
+    dead end that looks like a feature.
+    """
+
+    def test_one_form_per_site(self):
+        assert len([p for p in CAPTURE.iterdir() if p.is_file()]) == 12
+
+    def test_every_landing_page_links_to_a_form_that_exists(self, payloads):
+        for p in payloads:
+            page = (LANDING / p.site_id).read_text()
+            assert f'href="/f/{p.site_id}"' in page
+            assert (CAPTURE / p.site_id).exists(), f"{p.site_id} links to a form that is missing"
+
+    def test_form_columns_match_the_ingestion_schema_exactly(self):
+        """If these drift, a submitted row stops ingesting and nobody finds out."""
+        from fcf_m2 import observed
+        page = (CAPTURE / "FFX002").read_text()
+        for column in observed.CAPACITY_COLUMNS:
+            assert f'"{column}"' in page, f"the form does not emit {column}"
+
+    def test_a_row_the_form_produces_ingests_and_upgrades(self):
+        """End to end: the exact CSV the browser assembles, through the real ingestion."""
+        import csv, io, tempfile, os
+        from fcf_m2 import observed
+        row = {
+            "site_id": "FFX002", "observed_date": "2026-09-15",
+            "method": "facility_panel_schedule", "service_capacity_kw": "400",
+            "spare_capacity_kw": "120", "measured_peak_kw": "280",
+            "source_org": "Test Facilities", "source_document": "panel schedule PS-3",
+            "observer": "Test Manager", "verification_status": "reviewed",
+            "notes": "spare breaker positions: 6",
+        }
+        buf = io.StringIO()
+        writer = csv.DictWriter(buf, fieldnames=observed.CAPACITY_COLUMNS, lineterminator="\n")
+        writer.writeheader(); writer.writerow(row)
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as fh:
+            fh.write(buf.getvalue()); path = fh.name
+        try:
+            obs = observed.read_capacity_observations(path)
+            assert len(obs) == 1
+            assert obs[0].implied_basis == "verified_facility"
+            upgrade = observed.resolve_capacity(obs, current_basis="placeholder")["FFX002"]
+            assert upgrade.upgraded
+            assert upgrade.new_basis == "verified_facility"
+        finally:
+            os.unlink(path)
+
+    def test_the_form_posts_nowhere(self):
+        """No endpoint means no public write path into the model, and nothing to breach.
+
+        Checks for actual *use*, not for the words. The page's own privacy copy says it
+        "sets no cookie", and a substring search for "cookie" reads that as evidence it
+        does -- the same text-versus-meaning trap as the secret scan and the link checker.
+        """
+        import re
+        forbidden = {
+            "form submission": re.compile(r"<form[^>]*\baction\s*=", re.I),
+            "POST method": re.compile(r"\bmethod\s*=\s*[\"\']post", re.I),
+            "fetch call": re.compile(r"\bfetch\s*\("),
+            "XHR": re.compile(r"\bXMLHttpRequest\b"),
+            "cookie write": re.compile(r"document\s*\.\s*cookie"),
+            "local storage": re.compile(r"\b(?:local|session)Storage\s*\."),
+            "beacon": re.compile(r"navigator\s*\.\s*sendBeacon"),
+        }
+        for path in sorted(p for p in CAPTURE.iterdir() if p.is_file()):
+            page = path.read_text()
+            for label, pattern in forbidden.items():
+                assert not pattern.search(page), f"{path.name} performs a {label}"
+
+    def test_the_form_explains_why_it_asks_who_you_are(self):
+        page = (CAPTURE / "FFX002").read_text()
+        assert "cannot be used to upgrade" in page
+        assert "only person-shaped information collected" in page
+
+    def test_the_form_is_not_indexed(self):
+        """A per-site data-entry page should not turn up in a search result."""
+        for path in sorted(p for p in CAPTURE.iterdir() if p.is_file()):
+            assert 'name="robots" content="noindex"' in path.read_text()
+
+    def test_forms_are_regenerated_not_hand_edited(self):
+        import subprocess, sys
+        before = {p.name: p.read_text() for p in sorted(CAPTURE.iterdir()) if p.is_file()}
+        subprocess.run([sys.executable, str(ROOT / "scripts/build_capture_form.py")],
+                       cwd=ROOT, capture_output=True, check=True)
+        after = {p.name: p.read_text() for p in sorted(CAPTURE.iterdir()) if p.is_file()}
+        assert before == after, "capture forms differ from a fresh build - hand-edited?"

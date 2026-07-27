@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Facility information — Neabsco-Potomac Commuter Garage | Future City Fellowship</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --ink:#1a1a1a; --ink-2:#4a4a4a; --green:#1B4332; --sand:#F5F0E6;
+           --gold:#B08948; --line:#d8d2c4; --field:#fff; }
+  *{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--sand);color:var(--ink);
+    font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .wrap{max-width:34rem;margin:0 auto;padding:1.25rem 1.1rem 3rem}
+  h1{font-size:1.45rem;color:var(--green);margin:0 0 .2rem;line-height:1.25}
+  .where{color:var(--ink-2);margin:0 0 1.2rem}
+  .note{background:var(--field);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:4px;padding:.9rem 1rem;margin:0 0 1.4rem;font-size:.92rem}
+  .note p:first-child{margin-top:0} .note p:last-child{margin-bottom:0}
+  fieldset{border:1px solid var(--line);border-radius:4px;margin:0 0 1.2rem;padding:.9rem 1rem;
+    background:var(--field)}
+  legend{font-weight:700;color:var(--green);padding:0 .4rem;font-size:.95rem}
+  label{display:block;margin:.85rem 0 .2rem;font-weight:600;font-size:.93rem}
+  .hint{font-weight:400;color:var(--ink-2);font-size:.85rem;display:block;margin-top:.1rem}
+  input,select,textarea{width:100%;padding:.6rem .65rem;font:inherit;font-size:16px;
+    border:1px solid var(--line);border-radius:4px;background:var(--sand);color:var(--ink)}
+  textarea{min-height:4.5rem;resize:vertical}
+  input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{
+    outline:3px solid var(--gold);outline-offset:1px}
+  .req{color:#8a1f1f}
+  button{display:block;width:100%;padding:.85rem 1rem;font:inherit;font-weight:700;
+    border-radius:4px;border:1px solid var(--green);background:var(--green);color:#fff;
+    margin:.55rem 0;cursor:pointer}
+  button.secondary{background:transparent;color:var(--green)}
+  #out{white-space:pre-wrap;word-break:break-all;font-family:ui-monospace,Menlo,monospace;
+    font-size:.78rem;background:var(--field);border:1px solid var(--line);border-radius:4px;
+    padding:.7rem;margin-top:.8rem}
+  footer{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);
+    font-size:.8rem;color:var(--ink-2)}
+  a{color:var(--green)}
+  @media (prefers-color-scheme:dark){
+    :root{--ink:#ececec;--ink-2:#b4b4b4;--sand:#16191a;--line:#33383a;--green:#7fbf9a;--field:#1e2224}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <h1>Facility information</h1>
+  <p class="where">Neabsco-Potomac Commuter Garage · site reference <code>PWC002</code></p>
+
+  <div class="note">
+    <p><strong>What this is for.</strong> Our study currently uses a <em>placeholder</em> for
+       the electrical capacity at this site, because nobody has confirmed it. That is the
+       single biggest gap in the work. Anything you can tell us below replaces a guess with
+       a fact.</p>
+    <p><strong>Nothing is submitted anywhere.</strong> This page has no server. Filling it in
+       builds a small text record on your phone that you can email or save. A person reads it
+       before anything reaches the model.</p>
+    <p><strong>Partial is genuinely useful.</strong> One confirmed number beats none. Skip
+       anything you do not know — leave it blank rather than estimating.</p>
+  </div>
+
+  <form id="f" novalidate>
+  <fieldset>
+    <legend>Who is reporting this</legend>
+    <p class="hint" style="margin:.2rem 0 0">Required, and required for a reason: a value with
+       no source cannot be used to upgrade anything, so an unattributed record is refused by
+       the model. This is the only person-shaped information collected.</p>
+
+    <label for="observer">Your name <span class="req">*</span></label>
+    <input id="observer" name="observer" autocomplete="name">
+
+    <label for="org">Your organisation <span class="req">*</span></label>
+    <input id="org" name="org" autocomplete="organization">
+
+    <label for="doc">What is this based on? <span class="req">*</span>
+      <span class="hint">e.g. "panel schedule PS-3, dated 2024" or "walkthrough with building engineer"</span></label>
+    <input id="doc" name="doc">
+
+    <label for="method">How was it established? <span class="req">*</span></label>
+    <select id="method" name="method">
+      <option value="">Choose…</option>
+      <option value="utility_service_record">Utility service record</option>
+      <option value="utility_load_study">Utility load study</option>
+      <option value="facility_panel_schedule">Facility panel schedule or drawings</option>
+      <option value="facility_walkthrough">Walkthrough with building staff</option>
+      <option value="engineering_calculation">Engineering calculation</option>
+      <option value="comparable_site_proxy">Estimate from a comparable site</option>
+    </select>
+    <p class="hint">This decides how much weight the value carries. A walkthrough and a
+       utility record are not treated as equally certain.</p>
+
+    <label for="date">Date observed <span class="req">*</span></label>
+    <input id="date" name="date" type="date">
+  </fieldset>
+
+  <fieldset>
+    <legend>Electrical</legend>
+    <label for="service">Main service rating, kW
+      <span class="hint">If you have volts and amps instead, put them in the notes and we will convert.</span></label>
+    <input id="service" name="service" type="number" inputmode="decimal" step="any" min="0">
+
+    <label for="spare">Spare capacity, kW <span class="hint">Headroom on the panel that could serve the parking area.</span></label>
+    <input id="spare" name="spare" type="number" inputmode="decimal" step="any" min="0">
+
+    <label for="peak">Measured peak demand, kW <span class="hint">From a load study or 12 months of bills, if available.</span></label>
+    <input id="peak" name="peak" type="number" inputmode="decimal" step="any" min="0">
+
+    <label for="breakers">Spare breaker positions</label>
+    <input id="breakers" name="breakers" type="number" inputmode="numeric" min="0">
+
+    <label for="distance">Distance from the electrical room to the candidate parking, feet
+      <span class="hint">This drives trenching cost, which was the client's own cost-overrun driver.</span></label>
+    <input id="distance" name="distance" type="number" inputmode="numeric" min="0">
+  </fieldset>
+
+  <fieldset>
+    <legend>Facility</legend>
+    <label for="parking">Total parking spaces</label>
+    <input id="parking" name="parking" type="number" inputmode="numeric" min="0">
+
+    <label for="ada">Existing ADA spaces</label>
+    <input id="ada" name="ada" type="number" inputmode="numeric" min="0">
+
+    <label for="works">Planned shutdowns, renovations or repaving in the next 24 months
+      <span class="hint">Repaving matters: it is the cheapest moment to lay conduit.</span></label>
+    <textarea id="works" name="works"></textarea>
+
+    <label for="notes">Anything else — constraints, drainage, easements, fleet vehicles</label>
+    <textarea id="notes" name="notes"></textarea>
+  </fieldset>
+
+  <button type="button" id="build">Build the record</button>
+  <button type="button" id="mail" class="secondary">Build and open an email</button>
+  </form>
+
+  <div id="out" hidden aria-live="polite"></div>
+
+  <footer>
+    <p><strong>Privacy.</strong> This page stores nothing, sets no cookie, and sends nothing
+       anywhere by itself. Your name and organisation are collected only so a value can be
+       attributed to a source — the model refuses records without one. See the
+       <a href="/privacy.html">privacy notice</a>.</p>
+    <p>Screening-class planning study. Providing information here does not commit you, your
+       facility, or any government to anything.</p>
+  </footer>
+
+<script>
+(function () {
+  var SITE_ID = "PWC002";
+  var COLUMNS = ["site_id", "observed_date", "method", "service_capacity_kw", "spare_capacity_kw", "measured_peak_kw", "source_org", "source_document", "observer", "verification_status", "notes"];
+  var $ = function (id) { return document.getElementById(id); };
+
+  function csvCell(v) {
+    v = (v === undefined || v === null) ? "" : String(v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+
+  function collect() {
+    var missing = [];
+    ["observer", "org", "doc", "method", "date"].forEach(function (k) {
+      if (!$(k).value.trim()) missing.push(k);
+    });
+    if (!$("service").value.trim() && !$("spare").value.trim()) {
+      missing.push("a service or spare capacity figure");
+    }
+    if (missing.length) return { error: missing };
+
+    var extra = [];
+    if ($("breakers").value) extra.push("spare breaker positions: " + $("breakers").value);
+    if ($("distance").value) extra.push("distance to parking (ft): " + $("distance").value);
+    if ($("parking").value) extra.push("total parking spaces: " + $("parking").value);
+    if ($("ada").value) extra.push("existing ADA spaces: " + $("ada").value);
+    if ($("works").value.trim()) extra.push("planned works: " + $("works").value.trim());
+    if ($("notes").value.trim()) extra.push("notes: " + $("notes").value.trim());
+
+    var row = {
+      site_id: SITE_ID,
+      observed_date: $("date").value,
+      method: $("method").value,
+      service_capacity_kw: $("service").value,
+      spare_capacity_kw: $("spare").value,
+      measured_peak_kw: $("peak").value,
+      source_org: $("org").value.trim(),
+      source_document: $("doc").value.trim(),
+      observer: $("observer").value.trim(),
+      verification_status: "reviewed",
+      notes: extra.join(" | ")
+    };
+    var csv = COLUMNS.join(",") + "\n" +
+              COLUMNS.map(function (c) { return csvCell(row[c]); }).join(",") + "\n";
+    return { csv: csv };
+  }
+
+  function show(text) { var o = $("out"); o.hidden = false; o.textContent = text; }
+
+  function build() {
+    var r = collect();
+    if (r.error) {
+      show("Not yet — these are still needed:\n  " + r.error.join("\n  "));
+      return null;
+    }
+    show(r.csv + "\nCopy this, or use the email button. A person reviews it before it "
+         + "reaches the model.");
+    return r.csv;
+  }
+
+  $("build").addEventListener("click", build);
+  $("mail").addEventListener("click", function () {
+    var csv = build();
+    if (!csv) return;
+    window.location.href = "mailto:?subject=" +
+      encodeURIComponent("Facility information for " + SITE_ID) +
+      "&body=" + encodeURIComponent(
+        "Facility information for site " + SITE_ID + ".\n\n" + csv);
+  });
+})();
+</script>
+</main>
+</body>
+</html>
