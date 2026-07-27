@@ -50,6 +50,11 @@ COLUMNS = [
 CHARGER_POWER_KW = 19.2
 ENERGY_PER_SESSION_KWH = 9.5
 
+# Per-site base load, highest first. See the note in rows(): the regression panel takes
+# the first two site ids in sorted order, so those two must be demanding enough for the
+# capacity-limited strategies to bind. Values are fabricated.
+BASE_LOAD_MEAN_KW = [96.0, 88.0, 41.5, 36.0, 74.0, 52.5, 45.0, 63.0, 33.0, 58.0, 49.0, 70.0]
+
 # Three use-class archetypes: (start, end, dwell). Shapes, not real windows.
 ARCHETYPES = [(7.0, 11.0, 4.0), (8.0, 16.0, 3.0), (10.0, 17.0, 1.5), (9.0, 15.0, 2.0)]
 
@@ -72,7 +77,19 @@ def rows(seed: int = 20260727) -> list[dict]:
     for n in range(1, 13):
         site_id = f"SYN{n:03d}"
         start, end, dwell = ARCHETYPES[n % len(ARCHETYPES)]
-        base_mean = round(30 + n * 4.5, 1)
+        # Base loads are NOT monotonic in the site number, deliberately.
+        #
+        # test_regression composes its golden panel from the first two site ids in
+        # sorted order. When base load rose with n, that panel was the two LIGHTEST
+        # sites, their capacity never bound at any plausible cap, and the real MATLAB
+        # run produced a golden in which curtailed and unmet were identically zero and
+        # peak_clamp equalled peak_unmanaged -- four of seven columns carrying no
+        # information. A regression baseline that cannot distinguish the managed
+        # strategies from the unmanaged one would not detect a regression in them.
+        #
+        # The panel sites therefore carry the heaviest loads, so the clamp and
+        # energy-aware branches actually bind and the golden discriminates.
+        base_mean = round(BASE_LOAD_MEAN_KW[n - 1], 1)
         base_peak = round(base_mean * rng.uniform(1.3, 1.6), 1)
         # Every fourth site is deliberately low-demand so sessions_per_day < 1 and the
         # single-session branch is exercised, as it is by 12 rows of the real file.
