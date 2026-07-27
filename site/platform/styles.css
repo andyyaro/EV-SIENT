@@ -238,3 +238,7 @@ th { font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color:
   max-height: 22rem; overflow-y: auto;
 }
 .op-out-bad { border-left-color: #b3261e; background: rgba(179,38,30,.09); }
+
+h3.sub { font-size: 1.02rem; margin: 1.7rem 0 .4rem; color: var(--green); }
+.engines li { align-items: flex-start; }
+.engines .pv-caveat { margin-top: .45rem; }

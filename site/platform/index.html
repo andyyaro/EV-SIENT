@@ -88,22 +88,19 @@
 
   <section aria-labelledby="engines-h">
     <h2 id="engines-h">Which engine produced what</h2>
-    <p class="prose">
-      Four things can compute in this project and they are never treated as interchangeable.
+    <p class="prose" id="engines-headline"></p>
+    <ul id="engines" class="engines"></ul>
+
+    <h3 class="sub" id="guard-h">The fail-closed capacity guard</h3>
+    <div id="guard" class="empty"></div>
+
+    <h3 class="sub" id="div-h">Divergences between engines</h3>
+    <p class="prose muted">
+      Surfaced, not hidden — including the ones deliberately left unfixed, with the reason.
     </p>
-    <ul class="engines">
-      <li><span class="badge badge-python">Python</span>
-        <span>The single producer. <strong>Every number on this page.</strong></span></li>
-      <li><span class="badge badge-matlab">MathWorks MATLAB</span>
-        <span>Has executed the model — 49 tests, a 120-row batch — but only against a
-          <strong>synthetic fixture</strong>. It has never seen these twelve sites.</span></li>
-      <li><span class="badge badge-octave">GNU Octave</span>
-        <span><strong>Not MATLAB.</strong> A syntax and smoke tier. The fail-closed capacity
-          guard does not fire under it, so it may never make a feasibility statement.</span></li>
-      <li><span class="badge badge-simulink">Simulink</span>
-        <span>A block diagram built from the model source. Built, never simulated; no number
-          derives from it.</span></li>
-    </ul>
+    <ul id="divergences" class="ops"></ul>
+
+    <p class="prose muted" id="cannot-show"></p>
   </section>
 
   <section aria-labelledby="field-h">

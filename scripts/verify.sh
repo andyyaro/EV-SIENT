@@ -81,6 +81,11 @@ assert p == [], p\""
 # A local server that can execute commands is reachable by ANY page in your browser --
 # loopback is not a boundary against that. The token is what closes it, so the token
 # behaviour is tested harder than the features.
+# Never conflate engines; surface divergences rather than hiding them. Every figure in the
+# record is read out of a committed CI artifact, so this also fails if those go missing.
+gate "platform: engines are distinguishable and every divergence is surfaced" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_engine_record.py -q"
+
 gate "platform: local server binds loopback, requires a token, runs only declared operations" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_server.py -q"
 

@@ -16,7 +16,7 @@
 "use strict";
 
 const STATE = {
-  prov: null, ops: null, horizon: null, scenario: null,
+  prov: null, ops: null, engines: null, horizon: null, scenario: null,
   // Which tier this page is running in, DETECTED rather than configured.
   //
   // One file serves both. Asking the server settles it: a desktop session answers
@@ -328,6 +328,92 @@ function renderOperations() {
   }
 }
 
+function renderEngines() {
+  if (!STATE.engines) return;
+  const e = STATE.engines;
+  $("#engines-headline").textContent = e.headline;
+
+  const list = $("#engines");
+  list.replaceChildren();
+  for (const eng of e.engines) {
+    const li = document.createElement("li");
+    const badge = document.createElement("span");
+    badge.className = `badge badge-${eng.id}`;
+    badge.textContent = eng.name;
+
+    const body = document.createElement("span");
+    const status = document.createElement("strong");
+    status.textContent = eng.status;
+    const detail = document.createElement("span");
+    detail.textContent = ` — ${eng.detail}`;
+    body.append(status, detail);
+
+    // The single most misreadable fact about this project, stated on every engine.
+    if (!eng.ran_on_real_sites) {
+      const warn = document.createElement("span");
+      warn.className = "flag";
+      warn.textContent = "never ran on the real sites";
+      body.append(" ", warn);
+    }
+    if (eng.warning) {
+      const w = document.createElement("p");
+      w.className = "pv-caveat";
+      w.textContent = eng.warning;
+      body.append(w);
+    }
+    li.append(badge, body);
+    list.append(li);
+  }
+
+  const g = e.guard_evidence;
+  const guard = $("#guard");
+  guard.replaceChildren();
+  const gp = document.createElement("p");
+  gp.innerHTML = `<strong>${g.title}.</strong> ${g.why_it_matters}`;
+  const gs = document.createElement("p");
+  gs.className = "muted";
+  gs.textContent =
+    `From ${g.from_run}: ${g.run_status_ok}/${g.rows} rows completed; capacity basis ` +
+    `${g.capacity_basis.join(", ")}; service check ${g.service_check.join(", ")}; ` +
+    `${g.strategies_skipped} rows had both managed-charging strategies skipped; ` +
+    `peak clamp is null on every row` +
+    (g.peak_clamp_all_null ? " (no number was invented to fill the gap)." : ".");
+  guard.append(gp, gs);
+
+  const dl = $("#divergences");
+  dl.replaceChildren();
+  for (const d of e.divergences) {
+    const li = document.createElement("li");
+    const head = document.createElement("div");
+    head.className = "op-head";
+    const h3 = document.createElement("h3");
+    h3.textContent = d.between;
+    const pill = document.createElement("span");
+    pill.className = d.severity === "none" ? "pill pill-ok" : "pill pill-no";
+    pill.textContent = d.severity;
+    head.append(h3, pill);
+    li.append(head);
+
+    const finding = document.createElement("p");
+    finding.textContent = d.finding;
+    li.append(finding);
+
+    for (const [label, key] of [["Deliberately unfixed", "deliberately_unfixed"],
+                                ["How it was found", "how_found"],
+                                ["Why it survived", "why_it_survived"]]) {
+      if (d[key]) {
+        const p2 = document.createElement("p");
+        p2.className = "why";
+        p2.textContent = `${label}: ${d[key]}`;
+        li.append(p2);
+      }
+    }
+    dl.append(li);
+  }
+
+  $("#cannot-show").textContent = `What cannot be shown: ${e.what_cannot_be_shown}`;
+}
+
 function renderControls() {
   const keys = Object.keys(STATE.prov.entries);
   const horizons = [...new Set(keys.map((k) => k.split("|")[1]))].sort();
@@ -404,12 +490,14 @@ async function runOperation(id, button, output) {
 
 async function main() {
   try {
-    const [prov, staticOps, detected] = await Promise.all([
+    const [prov, staticOps, engines, detected] = await Promise.all([
       loadJSON("provenance_v1.json"),
       loadJSON("operations.json"),
+      loadJSON("engines.json"),
       detectTier(),
     ]);
     STATE.prov = prov;
+    STATE.engines = engines;
     STATE.tier = detected.tier;
     // The desktop tier's list comes from the running server; the web tier's from the
     // generated file. Both are rendered by the same code from the same registry.
@@ -419,6 +507,7 @@ async function main() {
     renderControls();
     renderSites();
     renderOperations();
+    renderEngines();
 
     // Deep-link a provenance panel: ?number=FFX004|2036|base|ports_active
     //
