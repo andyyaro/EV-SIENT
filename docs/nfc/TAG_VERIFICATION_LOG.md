@@ -17,25 +17,29 @@ Fill a row in **as you finish each tag**, not afterwards from memory.
 | **Locked** | permanently read-only — **irreversible** |
 | **Placed** | physically installed, with the facility manager's documented permission |
 
-A tag may be Written and Verified but not Locked; that is a safe intermediate state. A tag
-must never be Placed before it is Locked.
+**Locked is required for deployment, not for testing.** A bench tag — used for a demo, a
+rehearsal, or verifying the pipeline — should stay *unlocked* so it can be re-pointed when a
+URL changes. Written + Verified + not Locked is a complete and correct state for such a tag,
+and the Purpose column records which kind it is.
+
+A tag must never be **Placed** before it is **Locked**.
 
 ## Log
 
-| # | site_id | Date | Written by | Written | Verified | Locked | Tag UID (last 4) | Placed | Notes |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 2 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 3 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 4 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 5 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 6 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 7 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 8 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 9 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 10 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 11 | | | | ☐ | ☐ | ☐ | | ☐ | |
-| 12 | | | | ☐ | ☐ | ☐ | | ☐ | |
+| # | site_id | Purpose | Date | Written by | Written | Verified | Locked | Tag UID (last 4) | Placed | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | FFX002 | bench | 2026-07-27 | Andy | ☑ | ☑ | ☐ *(bench — deliberately unlocked)* | | ☐ | First end-to-end walkthrough of the runbook. Write, background read and page load all confirmed. |
+| 2 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 3 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 4 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 5 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 6 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 7 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 8 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 9 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 10 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 11 | | | | | ☐ | ☐ | ☐ | | ☐ | |
+| 12 | | | | | ☐ | ☐ | ☐ | | ☐ | |
 
 ## Dead or discarded tags
 

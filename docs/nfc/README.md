@@ -1,7 +1,11 @@
 # The NFC field layer
 
-**Status: built and tested. No tag has been written. No tag has been placed, and no
-permission to place one has been sought.**
+**Status: built, tested, and walked end to end on real hardware.**
+
+One physical tag (FFX002) has been written, read back through iOS background NFC with the
+writing app closed, and confirmed to open the correct live page. It is deliberately left
+**unlocked** as a bench tag. **No tag has been placed, and no permission to place one has
+been sought.**
 
 ## The hardware, verified before designing
 
@@ -62,6 +66,18 @@ Controls, and where each is enforced:
 | **https only** | same, refused at generation |
 | **No credential, identifier, or access grant** on any tag | `tests/test_nfc.py` asserts no payload contains token, auth, user, email, session or bearer strings |
 | Payloads derived from the contract | `payloads_from_contract` — a tag can never point at a site id the contract does not contain |
+
+### Decision: lock tags that are deployed, not tags that are tested
+
+Locking defends against one thing: a stranger rewriting a tag that carries the project's
+implicit endorsement. That threat exists only once a tag is somewhere a stranger can reach
+it. A bench tag — used for a demo, a rehearsal, or verifying the pipeline — is not exposed
+to it, and locking one throws away the ability to re-point it when a URL changes for no
+security gain. With 50 coins and 12 sites, spares are free.
+
+So: **lock at the point of deployment, not at the point of writing.** Written and verified
+but deliberately unlocked is a complete, correct state for a bench tag, and the verification
+log records which kind each tag is.
 
 ### Decision: lock, not password-protect
 

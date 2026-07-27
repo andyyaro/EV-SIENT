@@ -88,9 +88,26 @@ wrote the tag, or you are checking your own homework.
 This is a real read through the operating system, not a readback through the app that just
 wrote it. If it does not match, rewrite it. **Do not proceed to lock.**
 
-### 6. Lock — irreversible
+### 6. Lock — irreversible, and only for tags that are going out
 
-Only after step 5 has passed on this specific coin.
+**Locking is not always the right answer. Decide which kind of tag this is first.**
+
+| This tag is... | Lock it? |
+|---|---|
+| **Going out** — placed at a site, in public, where strangers can reach it | **Yes.** This is the whole reason locking exists. |
+| **A bench tag** — testing, a demo, a walkthrough rehearsal, something that lives in a drawer | **No.** Leave it writable. |
+
+The threat locking defends against is a stranger rewriting a tag that carries the project's
+implicit endorsement — redirecting it to a phishing page under apparent county authority.
+That threat only exists once a tag is somewhere a stranger can reach it. A tag on your desk
+is not exposed to it, and locking one costs you the ability to re-point it when a URL
+changes. There are 50 coins and 12 sites; spares are free, so there is no reason to lock one
+you might want to reuse.
+
+**If this is a bench tag, stop here.** Skip to step 7 and log it as verified but not locked —
+that is a complete, correct outcome, not a job half done.
+
+**If this tag is going out**, and only after step 5 has passed on this specific coin:
 
 1. Reopen NFC Tools → **Other** tab → **Lock tag**.
 2. Read the warning it shows you. It is telling the truth.
@@ -118,6 +135,7 @@ An unlogged tag is an unknown tag.
 | What happened | What to do |
 |---|---|
 | Wrote the wrong URL, **not yet locked** | Just write again. Writing overwrites; there is nothing to undo. |
+| Need to change the URL on a **locked** tag | Not possible. That is the trade locking makes. Use a fresh coin — which is why bench tags stay unlocked. |
 | Wrote the wrong URL, **already locked** | The tag is unusable. Mark it, bin it, use a new one. Do not deploy it. |
 | Tag will not write, others do | Dead tag. Label it and set it aside. |
 | Banner does not appear on tap | NFC background reading is off, or the phone is in Low Power Mode, or it is not an iPhone XS or later. Check Low Power Mode first. |
@@ -127,7 +145,7 @@ An unlogged tag is an unknown tag.
 
 ## Doing all twelve
 
-Write, verify and lock **one tag completely** before starting the next. Batching the writes
+Write, verify and (for tags going out) lock **one tag completely** before starting the next. Batching the writes
 and verifying later is how a mislabelled tag gets locked — and one mislabelled locked tag
 means one site's visitors get another site's information, which is worse than no tag.
 
