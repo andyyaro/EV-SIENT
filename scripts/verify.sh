@@ -78,6 +78,12 @@ assert p == [], p\""
 # An operation IS the CLI command, not a second code path -- which is what makes Gate 7's
 # byte-equivalence a property of the design. Also enforces that the web tier lists every
 # capability with a stated reason where it cannot run one, rather than hiding it.
+# A local server that can execute commands is reachable by ANY page in your browser --
+# loopback is not a boundary against that. The token is what closes it, so the token
+# behaviour is tested harder than the features.
+gate "platform: local server binds loopback, requires a token, runs only declared operations" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_server.py -q"
+
 gate "platform: web tier is wired to what exists, computes nothing, keeps its caveats" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_platform_web.py -q && '$PY' scripts/build_platform_web.py --check"
 

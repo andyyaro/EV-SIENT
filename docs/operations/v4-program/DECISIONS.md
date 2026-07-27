@@ -551,6 +551,24 @@ The reading is the method, not the goal. What it is looking *for*:
 3. **Gates that pass vacuously.** Four have already been caught (secret scan, link checker,
    CDN pin, capture-form test) plus the harness exposure gate that could not see CSVs. Every
    gate gets a deliberate mutation test or an explicit note saying why it cannot have one.
+
+   **The specific recurring shape: a check that matches TEXT where it should match STRUCTURE.**
+   Six instances so far, three of them in checks written during this program and two in my own
+   tests within an hour of each other:
+
+   | # | The check | What it matched instead |
+   |---|---|---|
+   | 1 | secret scanner | credential *names*, not values — flagged CI's own regex |
+   | 2 | link checker | URLs inside fenced code blocks |
+   | 3 | capture-form test | the page's own sentence "sets no cookie" as evidence it does |
+   | 4 | CDN pin gate | nothing at all — passed with "0 checked, all pinned" |
+   | 5 | harness exposure gate | code lines only; structurally could not see a CSV column |
+   | 6 | banner test | the HTML comment *explaining* the banner is not dismissible |
+   | 7 | stdlib test | the docstring sentence "No FastAPI, no Flask, no uvicorn" |
+
+   The audit must look for this shape specifically: any check that does `substring in
+   source_text` where the property is about structure, usage, or behaviour. The fix is always
+   the same — parse it (AST, XML, CSV columns) or exercise it, never grep it.
 4. **Numbers appearing anywhere that do not trace to the contract.** Reports, presentation,
    docs, website copy, figure captions.
 5. **Anything gitignored that is load-bearing**, and anything tracked that should not be.
