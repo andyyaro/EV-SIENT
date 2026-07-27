@@ -79,6 +79,18 @@ def test_horizons_are_canonical_not_the_retired_vocabulary():
         assert not (present & {2035, 2050}), f"sheet_{name} carries a retired horizon"
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _canonical_run_present():
+    """`data/outputs/` is gitignored, so a clean checkout has no canonical run. Generate it
+    rather than skipping: a test that quietly skips on CI is a test that does not exist."""
+    import importlib.util
+    loader = importlib.util.spec_from_file_location(
+        "_fcf_tab_fixture", REPO / "scripts/build_tableau_workbook.py")
+    mod = importlib.util.module_from_spec(loader)
+    loader.loader.exec_module(mod)
+    mod.ensure_v3_run()
+
+
 def test_readiness_is_canonical_v3_not_legacy():
     """The single most consequential check in this file.
 

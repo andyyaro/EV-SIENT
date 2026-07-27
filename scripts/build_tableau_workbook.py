@@ -30,6 +30,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import shutil
 import sys
 import tempfile
@@ -116,8 +118,44 @@ def ranked_label(rank, name: str) -> str:
     return f"{int(rank):02d} {short_site(name)}"
 
 
+#: The two files this needs out of a canonical run. Both live under `data/outputs/`, which is
+#: GITIGNORED -- so they exist on a machine that has run the model and nowhere else.
+V3_RUN_REQUIRED = ("site_results_milestone2_v3.csv", "data_confidence_v3.csv")
+
+
+def ensure_v3_run() -> None:
+    """Generate the canonical run if it is not already on disk.
+
+    `data/outputs/` is gitignored, deliberately -- it is regenerable model output, not source.
+    But this script read from it, so it worked on a laptop that had run the model and failed
+    on a clean checkout. CI caught it; the local run never could, because the files were
+    always sitting there.
+
+    That is the same defect Phase 1 existed to fix (`verify.sh` passing locally and failing on
+    a clean clone), reintroduced. Generating the run on demand makes the build self-sufficient
+    anywhere, which is what "reproducible" has to mean.
+    """
+    missing = [n for n in V3_RUN_REQUIRED if not (V3_RUN / n).is_file()]
+    if not missing:
+        return
+    print(f"canonical run outputs missing ({', '.join(missing)}); generating them")
+    result = subprocess.run(
+        [sys.executable, "-m", "fcf_m2.workflow", "run",
+         "--mode", config.MODE_V3, "--out", str(V3_RUN)],
+        cwd=REPO, capture_output=True, text=True,
+        env={**os.environ, "PYTHONPATH": str(REPO / "src")})
+    if result.returncode != 0:
+        sys.stderr.write(result.stdout[-2000:] + result.stderr[-2000:])
+        raise SystemExit("could not generate the canonical milestone2_v3 run")
+    still_missing = [n for n in V3_RUN_REQUIRED if not (V3_RUN / n).is_file()]
+    if still_missing:
+        raise SystemExit(f"the run completed but did not produce {still_missing}")
+    print(f"  generated {V3_RUN.relative_to(REPO)}/")
+
+
 def _canonical_sites() -> pd.DataFrame:
     """Canonical readiness + confidence. Explicitly the milestone2_v3 run, not legacy."""
+    ensure_v3_run()
     scored = pd.read_csv(V3_RUN / "site_results_milestone2_v3.csv")
     conf = pd.read_csv(V3_RUN / "data_confidence_v3.csv")
     sites = pd.read_csv(CONTRACT / "site_table.csv")
