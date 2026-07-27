@@ -17,8 +17,10 @@ machine with no MATLAB licence.
 - `matlab/outputs/` is empty by design.
 - `.github/workflows/matlab-manual.yml` is a definition that has never run anywhere.
 
-**None of that has changed yet.** No MathWorks MATLAB has run. `EXECUTION_STATUS.md` is untouched and
-stays untouched until a genuine licensed run happens.
+**That was the starting position. It is no longer entirely true — see §4.2:** real MathWorks MATLAB R2025b
+has now executed this code. What has *not* changed is the record: `EXECUTION_STATUS.md` is untouched and
+stays untouched until a run **passes**. A run that happened and failed is not a run record; it is a finding,
+and it is written up in §4.2 rather than smuggled into a status document as progress.
 
 ---
 
