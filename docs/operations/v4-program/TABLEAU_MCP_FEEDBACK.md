@@ -155,6 +155,28 @@ for any published-to-Public workbook.
 
 ---
 
+## 6b. No way to publish with sheet tabs visible
+
+The generated `.twb` contains **no tab-visibility setting whatsoever** (grepped: no
+`show-tabs`, no equivalent). Tableau Public therefore applies its default, `showTabs: false`,
+and a reader who opens the published URL sees only the default view.
+
+Every other worksheet is genuinely published — all seven of ours return HTTP 200 at
+`/viz/<workbook>/<SheetName>` — but there is **no navigation to them from the viz**. A caller
+who builds seven sheets and one dashboard reasonably expects seven reachable sheets, and gets
+one, silently.
+
+This interacts badly with issue 6: a chart squeezed into a dashboard zone renders narrow and
+cannot be fixed, while the same chart on its own tab renders full-size — but that tab is
+exactly what the reader cannot reach.
+
+**Suggested fix.** A workbook-level `"show_tabs": true` in the spec, or at minimum a line in
+`PUBLISHING_WORKFLOW.md` saying that published workbooks hide tabs by default and listing the
+per-sheet URL pattern as the workaround. The URL pattern is genuinely useful and is not
+documented anywhere.
+
+---
+
 ## 7. Title and subtitle render with no separation
 
 Published output reads `Active ports by planning horizon48-port pathway ceiling is in the

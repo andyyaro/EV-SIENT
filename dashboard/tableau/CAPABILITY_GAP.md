@@ -52,6 +52,20 @@ rather than approximated — a reference line replaced by a tooltip is not a ref
 and calling it one would be the "silently substitute a symbol map for a choropleth" failure
 this assessment exists to prevent.
 
+## Every sheet is published; only the dashboard is navigable
+
+Tableau Public publishes with `showTabs: false` and the authoring server emits no
+tab-visibility setting, so a reader landing on the viz sees the dashboard and nothing else.
+
+**All seven worksheets are live and directly addressable** (verified, HTTP 200 each) at
+`https://public.tableau.com/app/profile/yiguedan.philippe.andy.yaro/viz/EV_Charging_Site_Readiness_M2_Canonical/<Sheet>`:
+
+`ReadinessbySite` · `StartervsPathwayPorts` · `PortsAcrossHorizons` · `PeakWaitsbySite` ·
+`LifecycleCostbyHorizon` · `NetCO2ebyHorizon` · `SiteMap`
+
+For presenting, prefer these over the dashboard: each sheet gets the full canvas, which also
+sidesteps the zone-sizing limitation above entirely.
+
 ## What was *not* a gap
 
 The recipe asks for a **symbol** map, not a choropleth. That is fortunate — filled maps are
