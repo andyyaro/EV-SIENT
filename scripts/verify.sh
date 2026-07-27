@@ -38,6 +38,12 @@ gate "contract: v2 rebuilds byte-identically from the frozen v1 and every shared
 gate "contract: tracked data/contract/v2 passes v1 rules + v2 rules + JSON Schema + RT-10 hash chain" \
   bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow validate-contract data/contract/v2"
 
+# A physical assumption may not hold two values in two halves of one model. charger
+# efficiency was 0.92 in Python and 0.93 in three MATLAB files, and survived because it is
+# not a contract field -- so there was nothing to reconcile it against.
+gate "cross-model: shared physical constants agree between Python and MATLAB" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_cross_model_constants.py -q"
+
 gate "cross-model: MATLAB canonical CSV reconciles with the contract (ports, horizons, capacity_basis)" \
   "$PY" - <<EOF
 import pandas as pd
