@@ -168,7 +168,9 @@ Recorded 2026-07-27T15:30Z. Every line here was observed by command, not assumed
 
 | Date (UTC) | Tool / package | Version | Why | Required for a fresh machine? |
 |---|---|---|---|---|
-| — | *(none yet)* | | | |
+| 2026-07-27 | `python-docx` (+ `lxml`) into `repo/venv` | 1.2.0 / 6.1.1 | `scripts/md_to_docx.py` needs it to regenerate the report DOCX; previously undeclared, which is why those artifacts had drifted | **Only for `make reports`.** Declared as the `[reports]` extra and pinned in `requirements-lock.txt`. |
+| 2026-07-27 | Octave `datatypes`, via `pkg install "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.7/datatypes-1.2.7.tar.gz"` | 1.2.7 | supplies `table`/`datetime` for the Phase 2 Tier-2 Octave runtime. **Compiles 9 C++ sources**, so it needs `mkoctfile` and a toolchain; ~20 s | **Only for the in-app Octave runtime.** Not needed for any Python gate, the test suite, or CI. Its `string` class is deliberately *not* relied on — see `MATLAB_LIBERATION.md` §3.2. |
+| 2026-07-27 | `pyyaml`, `pypdf` — **installed then uninstalled** | — | one-off validation of workflow YAML and PDF text extraction | **No.** Removed so `repo/venv` still matches `requirements-lock.txt` exactly. |
 
 ---
 
