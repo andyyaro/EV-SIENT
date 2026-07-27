@@ -348,3 +348,79 @@ nobody has chosen yet, and picking one silently is the same failure as the defec
 **Rejected:** *record them and write no test.* Three of this program's defects were found in
 code that had been read and reasoned about but not exercised. An unpinned known defect is a
 defect that gets rediscovered.
+
+---
+
+## DEC-012 — Charger efficiency: MATLAB follows Python, and the reconciliation that found it
+
+**Date:** 2026-07-27 · **Phase:** 4 (task 4.8) · **Closes:** FIND-XMODEL-01
+
+### The finding
+
+`src/fcf_m2/config.py` has always declared `CHARGER_EFFICIENCY = 0.92`. Three MATLAB
+functions — `makeSessionProfiles`, `electricalEconomics`, `runScenario` — defaulted
+`ChargerEfficiency` to **0.93**. One physical assumption, two values, one model. Every MATLAB
+energy figure came out `1/0.93` of the contract's rather than `1/0.92`: about **1.1 % high**.
+
+### How it was found, because the method is the transferable part
+
+Phase 4's task 4.8 is "MATLAB reconciliation against real MATLAB outputs". The reconciliation
+was done rather than assumed: the pipeline was run on the **canonical** data and compared
+against the contract field by field.
+
+Identity reconciled perfectly — 120/120 on `scenario_id`, `site_id`, `horizon_year` and
+`capacity_basis`. Energy did not. The gap was then **measured instead of explained away**: the
+implied efficiency came out **0.9300** across all 120 rows (min 0.929141, max 0.930425, the
+spread being the contract's two-decimal rounding). That is not a semantic difference between
+delivered and grid energy. It is a disagreement about a constant.
+
+### Why it survived this long
+
+**Charger efficiency is not a contract field.** The canonical contract is precisely the
+mechanism that prevents this class of drift — one number, one place, consumers quote and never
+re-derive — and this quantity lived outside it. There was nothing to reconcile it against.
+The drift was hiding in the one place the anti-drift mechanism does not reach.
+
+### Decided
+
+Python is the single producer (`data/contract/v1/README.md`), so **MATLAB follows it**: 0.93 →
+0.92 in all three files. **No published number moves** — MATLAB output has never been
+published, and Python's 0.92, from which every published emissions figure derives, is
+unchanged.
+
+`tests/test_cross_model_constants.py` parses the MATLAB sources for every numeric
+`addParameter` default and compares the shared ones against `config.py`. `verify.sh` 17 → 18.
+Mutation-tested: reverting any single file to 0.93 fails it.
+
+**Three files, not one.** Two were found by grep; the third only by re-running the sweep after
+fixing the first two. Finding one and stopping would have left two — and the two left would
+have been the ones nobody looked at again.
+
+### Rejected
+
+| Alternative | Why it loses |
+|---|---|
+| **Change Python to 0.93** | Python is the single producer and every published emissions figure derives from its value. Moving it to match a downstream consumer inverts the contract's direction of authority and would change published numbers to fix a consumer's default. |
+| **Add `charger_efficiency` to the contract so MATLAB reads it** | Better, and still the right destination — but contract v1 is frozen, so it belongs in v2 and then in the adapter CSV. Aligning the constants is the correct step now; carrying it in the contract is the durable fix and is recorded as open. |
+| **Treat it as delivered-versus-grid semantics and document the ratio** | Tempting, and false. The ratio measured 0.9300, not a modelling difference. Documenting a disagreement as a convention is how a defect becomes permanent. |
+
+### Left open, deliberately
+
+`charger_efficiency` should become a **contract field** so MATLAB consumes it rather than
+defaulting to a private copy — the same reasoning that put `grid_factor_value` in the contract.
+Until then the test is the only thing holding the two in step, and a test is a weaker guarantee
+than a value that exists once.
+
+### The other half of task 4.8, stated plainly
+
+**The reconciliation used GNU Octave, not MathWorks MATLAB, and that limitation is real.**
+Real MATLAB runs only in the public harness, which must never carry the canonical data — so
+real MATLAB has never seen the real sites and cannot until someone runs it on a licensed
+machine with access to this repository.
+
+What makes the Octave result usable as evidence, and only this far: Octave and real MATLAB
+were cross-validated on a **structurally identical** fixture (same 22 columns, same order,
+same vocabularies, same shape) at **2 640 cells, zero numeric divergence, 1e-9 tolerance**
+(`MATLAB_LIBERATION.md` §3.7). So the 0.93 measurement reflects the model's arithmetic rather
+than an Octave artefact. **It is not a MathWorks MATLAB result and nothing may present it as
+one.**
