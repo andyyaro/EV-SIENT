@@ -32,7 +32,7 @@ All paths below are repo-relative unless stated. Every file assigned to this lan
 - **Role:** one-page guide to the verification suite.
 - **Kind:** authored
 - **Reads:** n/a
-- **Written by / read by:** linked from the repo root README via `[← repository root](../README.md)` (line 3, resolves).
+- **Written by / read by:** linked from the repo root README via `[← repository root](../../../../README.md)` (line 3, resolves).
 - **Key contents:**
   - Line 5: "80 pytest tests; CI enforces a coverage floor of 80% (actual ≈92%)." — **verified accurate**: 78 `def test_` functions, one of which is `@pytest.mark.parametrize` with 3 cases → 80 collected; measured coverage 92.15 %.
   - Per-file coverage table (lines 7-12) naming: bit-exact legacy reproduction, cohort invariance, demand-calibration refusal, DES determinism/percentiles, typed confidence, "staged < overbuild at every horizon", emissions vintage, trigger policy incl. equity override, contract rule/schema/hash-chain with deliberate corruption, cross-model reconciliation, offline GIS, chart-footer QA, doc-drift.

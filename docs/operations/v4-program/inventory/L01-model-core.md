@@ -371,7 +371,7 @@ machinery at all.
 - **Role:** Navigation and one-line responsibility table for the `fcf_m2` package.
 - **Kind:** authored
 - **Reads:** n/a
-- **Written by / read by:** Linked from the repo root README (`[← repository root](../README.md)`, L3); links out to `../README.md`, `../tests/README.md`, `../scripts/README.md`, `../scripts/verify.sh`. **All four link targets exist** (verified).
+- **Written by / read by:** Linked from the repo root README (`[← repository root](../../../../README.md)`, L3); links out to `../README.md`, `../tests/README.md`, `../scripts/README.md`, `../scripts/verify.sh`. **All four link targets exist** (verified).
 - **Key contents:** A 15-row module table (L8-24) covering `config, scoring, queueing, peak_wait, right_sizing, demand, confidence, economics, emissions, standards, triggers, contract, matlab_adapter, visuals/gis_offline, workflow`; run command `python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run` (L26); statement that outputs land in `data/outputs/` (gitignored — confirmed in `.gitignore`); and a closing "Limitations that ship with the code: demand uncalibrated, capacity placeholder at all sites, screening-class costs".
 - **Notes:** Line 14 says right_sizing covers "legacy 2035/2050 and canonical 2026/2036/2046/2056" — **a correct, explicitly-labelled legacy reference**, not a horizon violation. Accurate against the code as read; no stale claims found. `__init__.py` is (correctly) not listed.
 
