@@ -424,3 +424,75 @@ same vocabularies, same shape) at **2 640 cells, zero numeric divergence, 1e-9 t
 (`MATLAB_LIBERATION.md` §3.7). So the 0.93 measurement reflects the model's arithmetic rather
 than an Octave artefact. **It is not a MathWorks MATLAB result and nothing may present it as
 one.**
+
+---
+
+## DEC-013 — The live Tableau workbook is wrong; publish a corrected one under a NEW name
+
+**Date:** 2026-07-27 · **Phase:** 6 · **Decided by:** the project owner, asked directly
+because the action is irreversible and outward-facing
+
+### What the audit found
+
+Phase 6.4 exists because *auditing the repository's own files never catches a stale published
+viz*. It didn't. `EV_Charging_Site_Readiness_Workbook` — **1 097 views**, the project's
+most-seen artifact — was downloaded, unpacked, and its Hyper extracts read directly. Three
+superseded claims, each checked against the canonical run rather than inferred:
+
+| # | Live on Tableau Public | Canonical | Severity |
+|---|---|---|---|
+| 1 | Horizons **2035 / 2050** | 2026 / 2036 / 2046 / 2056 | Retired V2 vocabulary |
+| 2 | Data confidence **8 Medium, 4 Low** | **12 Low** | **Worst.** Overstates confidence to every viewer |
+| 3 | Readiness from **legacy_v2** — FFX002 first at 58.8 | FFX004 first at 53.4 | **The top-ranked site is different** |
+
+Starter and pathway totals (25 / 48) do reconcile.
+
+**#2 is the one that matters most.** Everything else in this program is arranged so that
+uncertainty is visible; a public artifact quietly upgrading eight sites to *Medium* undoes
+that for the audience that never reads the repository.
+
+### The decision
+
+**Publish the corrected workbook under a new name. Do not overwrite.**
+
+`EV_Charging_Site_Readiness_M2_Canonical` is published fresh; the 1 097-view workbook and its
+URL are left exactly as they are, for the owner to hide or delete from the Tableau UI.
+
+**Reasoning:** Tableau Public replaces a same-named workbook **irreversibly, with no version
+history**. Overwriting would destroy the only remaining copy of what has actually been on
+public display — the record of the defect — and reset a view count that is real evidence of
+reach. A new name costs one manual cleanup step and keeps every option open.
+
+**Accepted cost, stated:** for a period, two workbooks on the same profile disagree in
+public. That is a worse steady state than one correct workbook and a better one than an
+irreversible action taken on the assistant's judgement.
+
+**Rejected:**
+
+| Alternative | Why it loses |
+|---|---|
+| **Overwrite in place** | Irreversible, no version history, destroys the evidence and the view count. Keeps the URL working, which is the only real argument for it. |
+| **Publish nothing** | Leaves a public artifact overstating data confidence. The corrected workbook exists and is verified; withholding it protects nobody. |
+| **Owner deletes the old one first, then publish** | Cleanest end state. Not chosen because it blocks on a manual step; remains available afterwards. |
+
+### The patch package carries the same defect
+
+`patch_package/tbl_readiness_confidence.csv` has `readiness_score` and `model_rank`
+**byte-equal to `legacy_v2`** with a v3 confidence column beside them, and nothing declaring
+the mix. Anyone following the documented build recipe by hand would republish the wrong
+ranking under a v3 heading.
+
+**Left in place rather than edited.** It is what a Tableau Desktop operator was handed, and
+rewriting it now would erase the evidence that the recipe itself needs correcting.
+`CAPABILITY_GAP.md` carries the warning where an operator will read it before starting.
+
+### Residual blockers, not closed
+
+Four, all presentation affordances, none affecting a number: **bar-in-bar**, **two reference
+lines**, **dashboard filter scoping**, and the **8-point story**. Each needs Tableau Desktop
+or hand-authored XML. Where a substitute shipped, the affected sheet's own subtitle names it
+— "GROUPED bars, not the bar-in-bar", "NO REFERENCE LINE", "SYMBOL map, not a choropleth" —
+and a test asserts those declarations are present, so a screenshot separated from this
+repository still says what it is.
+
+**An honest partial close, which the master prompt prefers to a fake complete one.**
