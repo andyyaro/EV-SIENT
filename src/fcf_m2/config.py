@@ -7,8 +7,12 @@ Two explicit model modes:
 - ``milestone2_v3``  — canonical 2026 baseline + 2036/2046/2056 horizons, fixed-anchor
                        scoring, structured confidence, economics and emissions layers.
 
-Every result-changing constant lives here with its provenance label. Nothing in this
-file asserts external approval: multipliers are provisional planning conventions
+Most result-changing constants live here with their provenance labels, and new ones
+belong here. Some still sit in the module that uses them -- the scoring subscore weights
+in ``scoring.py``, the confidence field weights and thresholds in ``confidence.py``, the
+base-load growth rate in ``workflow.py``, the demand calibration guards in ``demand.py``.
+Those are named rather than hidden, because a docstring claiming completeness it does not
+have is how a reader stops looking. Nothing in this file asserts external approval: multipliers are provisional planning conventions
 pending calibration, and cost/emission inputs are screening benchmarks.
 """
 

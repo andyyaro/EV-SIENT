@@ -1,7 +1,7 @@
 """Canonical cross-model data contract v1 (hybrid CSV + JSON manifest).
 
 Python is the single producer; MATLAB, Excel, Tableau, static visuals, and the
-presentation are consumers. Contract layout (data_contract/v1/):
+presentation are consumers. Contract layout (data/contract/v1/):
 
     schema.json             — JSON Schema for scenario_table.csv rows
     scenario_table.csv      — site x horizon x case (long format, all required fields)
@@ -12,10 +12,10 @@ presentation are consumers. Contract layout (data_contract/v1/):
     contract_manifest.json  — schema version, input/table hashes, generation stamp
     README.md               — consumer rules
 
-Validation implements the research reconciliation tests RT-01..RT-10 (where
-applicable pre-MATLAB) and the master-prompt acceptance rules: invalid units,
-missing provenance, unsupported horizons, and placeholder capacity presented as
-verified all FAIL validation.
+Validation implements the research reconciliation tests RT-01..RT-05 and RT-07..RT-10
+(RT-06 is not implemented -- see ``validate_scenario_table``) plus the acceptance rules:
+invalid units, missing provenance, unsupported horizons, and placeholder capacity
+presented as verified all FAIL validation.
 """
 
 from __future__ import annotations
@@ -137,7 +137,13 @@ class ContractValidationError(Exception):
 
 def validate_scenario_table(df: pd.DataFrame, site_table: pd.DataFrame,
                             expect_legacy_totals: bool = True) -> list[str]:
-    """Rule-based validation implementing RT-01..RT-07, RT-09 and master-prompt rules.
+    """Rule-based validation implementing RT-01..RT-05, RT-07..RT-09 and master-prompt rules.
+
+    RT-06 is **not implemented here** and never has been. The previous docstring claimed
+    RT-01..RT-07 (implying RT-06 was covered) while omitting RT-08 (which is). Stating the
+    gap is the point: a validator that overstates its own coverage is worse than one with a
+    known hole, because nobody goes looking for the hole. RT-10, the manifest hash chain,
+    lives in ``verify_hash_chain``.
 
     Returns list of problems (empty = valid). Raise via validate_or_raise().
     """
