@@ -16,8 +16,8 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | Phase | Name | Gate status | Notes |
 |---|---|---|---|
 | 0 | Ground truth | **GREEN — verified** | 229 files inventoried and independently verified; 3+1 trees reconciled; AWS mapped read-only; 200 findings registered. |
-| 1 | Repair the base | **in-progress** | Starts from a known-red baseline: `verify.sh` is 8 PASS / 2 FAIL on a clean checkout. |
-| 2 | Liberate the MATLAB layer | not-started | Front-loaded; runs in background once started. |
+| 1 | Repair the base | **GREEN — verified** | Was 8 PASS / 2 FAIL on a clean checkout; now 10 PASS / 0 FAIL locally **and in CI**. 10 repairs, each committed separately. |
+| 2 | Liberate the MATLAB layer | **in-progress** | Front-loaded per the program's exception. Exposure review, Octave tier evidence, and harness CI design running as `wf_c89b4289-b6c`. |
 | 3 | Integrate the 3D explorer | not-started | |
 | 4 | Build V4 | not-started | |
 | 5 | NFC field layer | not-started | |
@@ -80,6 +80,35 @@ it initially believed lane L05 was wrong about FFX002's confidence, having looke
 `data_confidence = Low`. The verifier corrected itself rather than filing a false finding. It also had to
 correct its own gap-detection method twice (naive path grep produced a false 47-file gap) before concluding
 the coverage was complete.
+
+### Phase 1 — Repair the Base
+
+Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Current state:
+**10 PASS / 0 FAIL, exit 0**, and CI runs the same ten gates.
+
+| # | Repair | Commit | State | Evidence |
+|---|---|---|---|---|
+| 1.1 | Footer log logged absolute authoring-machine paths; a rebuild duplicated every entry | `e5164fb` | **verified** | Fixed in the generator, not the artifact. 8 of 9 PNGs regenerate byte-identical. Hygiene gate passes. |
+| 1.2 | Link checker linkified quoted link syntax, disagreeing with lychee | `f4fae26` | **verified** | Masks code spans and fenced blocks; 8 unit cases; offsets preserved. Fixed the 12 broken links it then found in the Phase 0 docs. |
+| 1.3 | Secret gate matched credential *names*, so it flagged CI's own workflow | `024dab7` | **verified** | Value-matching patterns, shared by both gates, extended to AWS account IDs. **32 tests, both directions.** |
+| 1.4 | CI ran 6 of 10 gates; push trigger covered 2 branches; installed without the lock | `d4373b4` | **verified** | CI now invokes `verify.sh`. Lock completed with 4 missing transitive pins; a fresh 3.12 env now matches it exactly. |
+| 1.5 | Port series and headline site claim wrong in 4 documents | `162ce9c` | **verified** | Recomputed from the contract. New gate `test_published_numbers.py`, mutation-tested on 3 regression classes. |
+| 1.6 | All 4 `.docx` and the client PDF stale against their Markdown | `fa1baf3` | **verified** | Measured with a real PDF extractor before and after. `python-docx` declared; `make reports` added. |
+| 1.7 | Three wrong docstring claims; a duplicated config constant | `c43e9b1` | **verified** | Full pipeline re-run: every numeric output byte-identical. |
+| 1.8 | Two MCDA arithmetic errors in the matrix the team is asked to adopt | `f945749` | **verified** | G published 37.0 vs computed 40.0 (rank unchanged); crossover 2× → ~2.5×. New gate parses the published table. |
+| 1.9 | README CI claim + CHANGELOG | `c95affd` | **verified** | The claim is now true, so it was made precise rather than weakened. |
+| 1.10 | Deprecated Node 20 action versions | `4b5e1f8` | **verified** | checkout v4→v7, setup-python v5→v6. Run is now annotation-free. |
+| G1 | **Gate 1** | — | **GREEN** | **`verify.sh`: 10 PASS / 0 FAIL, exit 0** on a clean checkout. **CI green on the pushed branch**, run `30285417343`, all ten gates observed passing in the log on Python 3.12.13. Every repair committed separately with its reasoning. |
+
+**Repairs deliberately NOT made, with reasons:**
+
+| Finding | Why not fixed in Phase 1 |
+|---|---|
+| `horizon_label` = `now`/`plus10`/`plus20`/`plus30` (FIND-NUM-04) | `data/contract/v1` becomes **immutable** at Phase 4. Changing a contract v1 value now would break the hash chain and the frozen baseline. The fix belongs in the **contract v2** schema, noted in the migration document. |
+| 35% of `feasibility_subscore` weights `spare_capacity_kw`, which is `0` at all 12 sites, so that weight contributes nothing | This is a **model-design observation, not a defect**. "Fixing" it would move every readiness score and break the `legacy_v2` golden, which the repository treats as a permanent obligation. It is an honest limitation to surface in Phase 9, and it is a direct consequence of limitation #1 (capacity unconfirmed at 12/12) — the moment real capacity data arrives via the Phase 4 loop, this weight starts doing work. |
+| `09_site_map_offline.png` is not byte-reproducible across machines | Real, but a **gate design constraint** rather than a repair. Recorded for Phase 3 so that a "committed artifacts match a fresh build" gate does not go flaky on this one file. |
+| Tableau `tbl_peak_waits.csv` columns are `0.0` on all 12 rows | **Phase 6** owns it. Building the specified worksheet would produce twelve zero-height bars, which is a finding to declare, not to paper over. |
+| `src/fcf_m2.egg-info/SOURCES.txt` is stale build metadata | Regenerated on every build; tracking it at all is the questionable choice. Left alone rather than churning a generated file for no functional gain. |
 
 ---
 
@@ -700,3 +729,6 @@ them and confirmed before any code changes on their account.
 | 2026-07-27T16:12Z | Read fleet complete: 13 agents, 0 errors, 224 files, **200 findings**. `INVENTORY.md`, `RECONCILIATION.md`, `FINDINGS_REGISTER.md` written. |
 | 2026-07-27T16:20Z | **FIND-MATLAB-09 (critical)** reproduced: under Octave the fail-closed capacity guard does not fire. Tier 1 reclassified from unreachable to unsafe. |
 | 2026-07-27T16:25Z | Independent coverage verifier: **coverage COMPLETE, zero gaps; zero errors in 20+ probes**. **Gate 0 GREEN.** |
+| 2026-07-27T16:30Z | Phase 2 front-loaded: exposure review + Octave tier + harness CI design launched (`wf_c89b4289-b6c`). |
+| 2026-07-27T16:20-17:00Z | Phase 1: ten repairs committed separately. `verify.sh` goes 8/2 → **10/0**. Four published numbers corrected against the contract; four new gates added, each mutation-tested. |
+| 2026-07-27T17:05Z | Branch pushed. **CI green, run `30285417343`** — all ten gates observed passing in the log. **Gate 1 GREEN.** |
