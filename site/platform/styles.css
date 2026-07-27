@@ -206,3 +206,35 @@ th { font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color:
   border-top: 1px solid var(--line); font-size: .87rem; color: var(--ink-2);
 }
 .foot p { margin: 0 0 .5rem; max-width: 46rem; }
+
+/* ---------------------------------------------------------------- tier + run controls */
+
+/* One page, two tiers. Which one you are in is stated, never implied: a reader who cannot
+ * run something should know whether that is the page's limit or their own. */
+.tier {
+  display: inline-block; font-size: .86rem; font-weight: 600;
+  padding: .35rem .7rem; border-radius: 4px; margin: .2rem 0 .8rem;
+}
+.tier-web { background: rgba(127,127,127,.12); color: var(--ink-2); border: 1px solid var(--line); }
+.tier-desktop { background: rgba(27,67,50,.12); color: var(--green); border: 1px solid var(--green); }
+
+.run {
+  font: inherit; font-size: .88rem; font-weight: 600; margin-top: .7rem;
+  padding: .4rem .9rem; border-radius: 4px; cursor: pointer;
+  background: var(--green); color: #fff; border: 1px solid var(--green);
+}
+.run:hover:not(:disabled) { filter: brightness(1.15); }
+.run:disabled { opacity: .55; cursor: progress; }
+.run:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Output is shown verbatim, including failures. A green tick hiding a non-zero exit code
+ * would make this a worse witness than the terminal it replaces. */
+.op-out {
+  margin: .7rem 0 0; padding: .6rem .7rem; border-radius: 4px;
+  background: rgba(127,127,127,.08); border-left: 3px solid var(--green);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .78rem; line-height: 1.45;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 22rem; overflow-y: auto;
+}
+.op-out-bad { border-left-color: #b3261e; background: rgba(179,38,30,.09); }

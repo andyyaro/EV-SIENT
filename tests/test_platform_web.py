@@ -134,6 +134,49 @@ def test_there_is_no_unknown_fallback_for_an_unexplained_number(js):
     assert "no resolvable provenance" in js
 
 
+# ------------------------------------------------------------------ one file, two tiers
+
+def test_the_tier_is_detected_not_configured(js):
+    """One file serves both tiers. A build-time flag would mean two builds, and two builds
+    drift — which is exactly what the single-contract architecture exists to prevent."""
+    assert "async function detectTier" in js
+    assert "/api/operations" in js
+    # No hardcoded tier constant that a build step would have to set.
+    assert 'TIER = "desktop"' not in js and "IS_DESKTOP = true" not in js
+
+
+def test_a_missing_api_means_web_tier_not_an_error(js):
+    """The deployed static site has no /api. A failed request there is a definite ANSWER,
+    not a fault worth showing a reader."""
+    detect = js.split("async function detectTier")[1].split("async function")[0]
+    assert "catch" in detect, "detectTier must treat a failed probe as 'web tier'"
+    assert 'tier: "both"' in detect
+
+
+def test_run_controls_appear_only_when_the_tier_can_actually_run(js):
+    assert 'op.available && STATE.tier === "desktop"' in js, (
+        "Run buttons must be gated on BOTH availability and the detected tier")
+
+
+def test_operation_output_shows_failures_not_just_successes(js):
+    """A green tick hiding a non-zero exit code would make this a worse witness than the
+    terminal it replaces."""
+    run = js.split("async function runOperation")[1].split("async function main")[0]
+    assert "FAILED" in run and "returncode" in run
+    assert "stderr" in run, "stderr must be shown, not swallowed"
+
+
+def test_the_token_is_never_written_into_a_tracked_file(js):
+    """The session token lives in the URL at runtime. If it were baked into a file it would
+    be a credential in a shipped artifact."""
+    assert "token" in js, "the JS must read a token"
+    for path in [HTML, JS, CSS]:
+        text = path.read_text()
+        assert "X-Platform-Token: " not in text
+        assert not re.search(r'token\s*=\s*"[A-Za-z0-9_-]{16,}"', text), (
+            f"{path.name} contains what looks like a literal token")
+
+
 # ------------------------------------------------------------------ the generated data
 
 @pytest.fixture(scope="module")

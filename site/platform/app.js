@@ -15,7 +15,15 @@
 
 "use strict";
 
-const STATE = { prov: null, ops: null, horizon: null, scenario: null };
+const STATE = {
+  prov: null, ops: null, horizon: null, scenario: null,
+  // Which tier this page is running in, DETECTED rather than configured.
+  //
+  // One file serves both. Asking the server settles it: a desktop session answers
+  // /api/operations, the deployed static site 404s. A build-time flag would mean two
+  // builds, and two builds drift.
+  tier: "both", token: null,
+};
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -265,6 +273,13 @@ function renderSites() {
 }
 
 function renderOperations() {
+  const banner = $("#tier-note");
+  if (banner) {
+    banner.textContent = STATE.tier === "desktop"
+      ? "You are running the DESKTOP tier. Everything below executes locally on this machine."
+      : "You are viewing the WEB tier. It shows results and cannot execute anything.";
+    banner.className = STATE.tier === "desktop" ? "tier tier-desktop" : "tier tier-web";
+  }
   const list = $("#operations");
   list.replaceChildren();
   for (const op of STATE.ops.operations) {
@@ -296,6 +311,18 @@ function renderOperations() {
       const cav = document.createElement("p");
       cav.textContent = op.caveat;
       li.append(cav);
+    }
+
+    if (op.available && STATE.tier === "desktop") {
+      const run = document.createElement("button");
+      run.type = "button";
+      run.className = "run";
+      run.textContent = "Run";
+      const out = document.createElement("pre");
+      out.className = "op-out";
+      out.hidden = true;
+      run.addEventListener("click", () => runOperation(op.id, run, out));
+      li.append(run, out);
     }
     list.append(li);
   }
@@ -334,14 +361,59 @@ function renderRunLine() {
 
 /* ------------------------------------------------------------------ boot */
 
+/* Ask the server which tier we are in. The static deployment has no /api, so a failed
+ * request is a definite answer, not an error worth surfacing. */
+async function detectTier() {
+  STATE.token = new URLSearchParams(location.search).get("token");
+  if (!STATE.token) return { tier: "both", ops: null };
+  try {
+    const res = await fetch(`/api/operations?token=${encodeURIComponent(STATE.token)}`,
+                            { cache: "no-store" });
+    if (!res.ok) return { tier: "both", ops: null };
+    const ops = await res.json();
+    return { tier: "desktop", ops };
+  } catch {
+    return { tier: "both", ops: null };
+  }
+}
+
+async function runOperation(id, button, output) {
+  button.disabled = true;
+  const original = button.textContent;
+  button.textContent = "Running…";
+  output.hidden = false;
+  output.textContent = "Running. This executes the same command the CLI runs.";
+  try {
+    const res = await fetch(`/api/run/${encodeURIComponent(id)}?token=${encodeURIComponent(STATE.token)}`,
+                            { method: "POST" });
+    const body = await res.json();
+    // Show what actually happened, including failure. A green tick that hides a non-zero
+    // exit code would make this platform a worse witness than the terminal it replaces.
+    const status = body.ok ? "finished, exit 0" : `FAILED, exit ${body.returncode}`;
+    output.textContent = `${status}\n\n${(body.stdout || "").trim()}` +
+      ((body.stderr || "").trim() ? `\n\n[stderr]\n${body.stderr.trim()}` : "");
+    output.className = body.ok ? "op-out" : "op-out op-out-bad";
+  } catch (err) {
+    output.className = "op-out op-out-bad";
+    output.textContent = `Could not reach the local server: ${err.message}`;
+  } finally {
+    button.disabled = false;
+    button.textContent = original;
+  }
+}
+
 async function main() {
   try {
-    const [prov, ops] = await Promise.all([
+    const [prov, staticOps, detected] = await Promise.all([
       loadJSON("provenance_v1.json"),
       loadJSON("operations.json"),
+      detectTier(),
     ]);
     STATE.prov = prov;
-    STATE.ops = ops;
+    STATE.tier = detected.tier;
+    // The desktop tier's list comes from the running server; the web tier's from the
+    // generated file. Both are rendered by the same code from the same registry.
+    STATE.ops = detected.ops || staticOps;
 
     renderRunLine();
     renderControls();
