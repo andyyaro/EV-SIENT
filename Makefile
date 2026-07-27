@@ -1,6 +1,6 @@
 PY ?= venv/bin/python
 
-.PHONY: setup test run-legacy run-v3 validate dashboard docs reports explorer explorer-legacy explorer-serve explorer-vendor verify
+.PHONY: setup test run-legacy run-v3 validate dashboard docs reports explorer explorer-legacy explorer-serve explorer-vendor nfc verify
 
 setup:
 	python3 -m venv venv && venv/bin/pip install -e ".[test]" -c requirements-lock.txt
@@ -56,6 +56,10 @@ explorer-serve: explorer
 	@cd explorer/web && $(PY) -m http.server $(PORT)
 
 PORT ?= 8080
+
+## nfc — regenerate tag payloads, QR fallbacks and placement cards from the contract
+nfc:
+	$(PY) scripts/build_nfc_tags.py
 
 verify:
 	./scripts/verify.sh

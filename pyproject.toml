@@ -27,6 +27,9 @@ reports = ["python-docx>=1.1"]
 # previously a separate tree with its own requirements.txt and its own bootstrap venv;
 # it is now one dependency story, one test story, one Makefile.
 explorer = []
+# QR fallbacks for the NFC layer. Every tag destination must also be reachable by QR and
+# by a typed URL -- NFC is a convenience layer, never the only door.
+nfc = ["segno>=1.6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
