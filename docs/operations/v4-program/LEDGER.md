@@ -287,6 +287,87 @@ model. So today's agreement is a coincidence maintained by hand. Phase 3 should 
 `scoring.py`, use them in the formula (changing no numbers), and have the explorer import them, turning a
 hand-maintained match into an enforced one.
 
+### Numeric-consistency findings (Phase 1 — traced by the lead against the contract)
+
+Method: recompute each headline number from `data/contract/v1/` and the fresh run outputs, then compare
+against every document that states it. Confirmations matter as much as defects, so both are recorded.
+
+**Verified as tracing exactly to the contract** (no action needed):
+
+| Claim | Documents | Contract value | Result |
+|---|---|---|---|
+| Portfolio NPC, staged | README, Final Report, patch package | 2036 `$1,560,499` · 2046 `$2,294,469` · 2056 `$3,014,200` | **matches** $1.56M / $2.29M / $3.01M |
+| Portfolio NPC, broad buildout | same | 2036 `$1,872,578` · 2046 `$2,635,638` · 2056 `$3,407,606` | **matches** $1.87M / $2.64M / $3.41M |
+| Staged avoids | same | `$312,079` · `$341,169` · `$393,406` | **matches** $0.31M / $0.34M / $0.39M |
+| Net CO2e avoided | same | 2026 `43.4` t · 2036 `82.4→112.7` · 2046 `130.1→195.1` · 2056 `173.4→260.2` | **matches** ≈43 / ≈82–113 / ≈130–195 / ≈173–260 t/yr |
+| eGRID factor | README, footer log, contract | `596.3 lb CO2e/MWh`, `eGRID2023r2, accessed 2026-07-19` | **matches**; `590.2` found **nowhere** in the repo or on the live site |
+| Legacy golden | README, tests | `25` starter / `48` pathway; FFX002 `58.8` | **matches**, and `README.md:68` labels it correctly as `legacy_v2` |
+| Contract shape | — | 120 rows, horizons `{2026, 2036, 2046, 2056}`, 12 site IDs `FFX001-004`+`PWC001-008` | **matches** |
+| Capacity placeholder | README limitation #1 | `capacity_basis = placeholder` on **120/120** rows | **matches** 12/12 sites |
+| 0 of 12 High confidence | README | `data_confidence` = `Low` on **120/120**; `data_confidence_level_v3` = `Low` for all 12 (score `33.8`) | **true, and understated** — 0 of 12 reach even *Medium*; all 12 are Low |
+
+**FIND-NUM-01 (high) — the active-port counts do not trace to the contract, in four documents.**
+Every other column in the same tables does.
+
+| Horizon | Documents claim (base → high) | Contract actually says | |
+|---|---|---|---|
+| 2026 | 25 | 25 | ok |
+| 2036 | **44 → 47** | **35 → 44** | **wrong** |
+| 2046 | **47 → 48** | **44 → 48** | **wrong** |
+| 2056 | **47 → 48** | **44 → 48** | **wrong** |
+
+The value **47 does not occur anywhere** in the contract as a portfolio total — the only portfolio totals
+are `{25, 35, 44, 48}`, and site-level `ports_active` only ever takes `{2, 3, 4, 6, 8}`.
+
+What makes this diagnosable rather than ambiguous: the **CO2e cell in the same table row** is also labelled
+"base → high" and *does* match base→high exactly (2036 → 82.4/112.7 t). So the row is unambiguously meant to
+be base→high, and the ports cell in that row disagrees with its own row. The most consistent explanation is
+that port counts were revised at some point and the cost and emissions columns were regenerated while the
+ports column was not.
+
+Affected, all carrying the same wrong figures:
+1. `README.md:39-41`
+2. `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:38-40`
+3. `presentation/deck/Future_City_Fellowship_Milestone_2_Speaker_Notes.md:74` — *"active ports 25 → 44 → 47 → 47 on the base path; 25 → 47 → 48 → 48 on the high path"*
+4. `docs/operations/website-patch-package/content/results_2036_2046_2056.md:7-12` — which asserts *"All values from canonical contract v1.0.0"* directly above the wrong table
+
+Plus the `.docx` / `.pdf` / `.pptx` renderings derived from (2) and (3), to be confirmed by lane L12.
+Consequence worth stating plainly: item (4) is the file that would have **published** these numbers to the
+public website. That the patch package was never applied (FIND-AWS-02) accidentally prevented it.
+
+Also flagged for the Phase 1 detailed trace, not yet resolved: the same patch-package file claims the staged
+plan *"avoids energizing 13–23 pathway ports"*. Against the contract, `48 − ports_active` gives
+`13 / 4 / 4 / 0 / 4 / 0` across the base and high paths — `13` appears, `23` does not.
+
+**FIND-NUM-02 (high) — README's headline site claim is untraceable and self-contradicting.**
+`README.md:45-46`, under the heading *"Headline results (canonical contract v1.0.0, screening values)"*:
+
+> Top-ranked site: **FFX002 — City of Fairfax Regional Library (58.8, Medium confidence)**.
+
+Three problems in one sentence, under a heading that claims canonical provenance:
+
+1. **`58.8` is the `legacy_v2` score.** The canonical `milestone2_v3` score for FFX002 is **51.8**.
+2. **FFX002 is not the top-ranked site under the canonical mode.** V3 ranks **FFX004 first at 53.4**;
+   FFX002 is second. FFX002 is top-ranked only in `legacy_v2`.
+3. **"Medium confidence" traces to nothing.** `data_confidence_level_v3` is `Low` for all 12 sites,
+   `data_confidence` is `Low` on all 120 contract rows, and `capacity_confidence` is `none` on all 120.
+   No output in the repository produces "Medium" for FFX002. It also **contradicts the limitation box 15
+   lines above it** in the same README, which says 0 of 12 sites have High data confidence — the true
+   position is weaker still.
+
+This is the honesty-critical case the program's standing orders name: a caveat quietly upgraded into a
+better-evidenced-sounding claim. `README.md:68` shows the project's own correct idiom — it labels the same
+58.8 explicitly as the `legacy_v2` golden — so the fix is to apply that discipline at line 45.
+
+**FIND-NUM-03 (medium) — the live site publishes the legacy top-ranked site as the current headline.**
+`results.html` states *"Top overall candidate FFX002 · City of Fairfax Regional Library"*. That matches
+`legacy_v2`, not the canonical V3 ranking (FFX004). Compounds FIND-AWS-01/02/03. Phase 8.
+
+**FIND-REPO-08 (medium) — README overstates CI.** `README.md:119-120` says *"CI runs the same gates on
+every push and pull request."* Neither half holds: CI runs 6 of `verify.sh`'s 10 gates (FIND-REPO-04), and
+`on: push` is restricted to `main` and `milestone2-v3-professional-release` (FIND-REPO-06). Phase 1 should
+make the statement true by converging the gates, rather than weakening the sentence.
+
 ### Other findings not yet acted on
 
 | # | Finding | Source | Confirmed? | Acted on? |
