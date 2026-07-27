@@ -113,13 +113,31 @@ def test_the_page_states_the_placeholder_caveat_before_any_number(html):
     assert ".banner" not in js, "app.js manipulates the banner; it must be static"
 
 
-def test_the_page_names_all_four_engines_and_does_not_conflate_them(html):
-    """Python, MathWorks MATLAB, GNU Octave and Simulink must be distinguishable on screen."""
-    for badge in ["badge-python", "badge-matlab", "badge-octave", "badge-simulink"]:
-        assert badge in html, f"missing engine badge: {badge}"
-    assert "Not MATLAB" in html, "the page must say Octave is not MATLAB"
-    assert "synthetic fixture" in html.lower()
-    assert "never seen these twelve sites" in html
+def test_the_page_names_all_four_engines_and_does_not_conflate_them(js):
+    """Python, MathWorks MATLAB, GNU Octave and Simulink must be distinguishable on screen.
+
+    The engines section is RENDERED from engines.json rather than written into the HTML, so
+    the record and the page cannot drift. This checks the three places the property actually
+    lives now: the data, the badge the renderer applies, and four distinct CSS rules.
+    """
+    record = json.loads((WEB / "engines.json").read_text())
+    ids = [e["id"] for e in record["engines"]]
+    assert ids == ["python", "matlab", "octave", "simulink"]
+
+    # The renderer gives each engine its own badge class, derived from the id.
+    assert "badge badge-${eng.id}" in js, "engines must be badged per engine id"
+
+    # Four VISUALLY distinct rules -- one shared style would conflate them on screen.
+    css = CSS.read_text()
+    rules = {i: css.split(f".badge-{i}")[1].split("}")[0] for i in ids if f".badge-{i}" in css}
+    assert set(rules) == set(ids), f"missing badge styles for {set(ids) - set(rules)}"
+    assert len(set(rules.values())) == 4, "two engines share a badge style; they must differ"
+
+    # And the substance, in the data.
+    text = json.dumps(record)
+    assert "NOT MATLAB" in text
+    assert "synthetic" in text.lower()
+    assert "never seen the twelve real sites" in text
 
 
 def test_the_field_data_section_says_it_is_empty_and_why(html):
