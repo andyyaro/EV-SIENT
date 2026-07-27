@@ -6,7 +6,7 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 - **Program start (UTC):** 2026-07-27T15:30:20Z
 - **Working directory:** `~/Downloads/Future-City-Fellowship-MapUpdate/`
 - **Repo clone:** `repo/` — remote `https://github.com/andyyaro/Future-City-Fellowship-` (private, stays private)
-- **Integration branch:** `v4-platform` (not yet created — Phase 0.2)
+- **Integration branch:** `v4-platform` — created off `7626823`; safety tag `pre-v4-program-20260727` pushed
 - **Ledger created:** Phase 0, before any other work, per standing orders.
 
 ---
@@ -175,17 +175,55 @@ whole pipeline (`run_all_scenarios` → `loadScenarios` → `runScenario`) and i
 `detectImportOptions` (l.59), `setvartype` (l.68), `readtable` (l.71), `renamevars` (l.75),
 `T.Properties.VariableNames` (l.74/89), `height(T)` (l.135), `T(keep,:)` (l.150), and
 `T.Properties.Description`/`.UserData` (l.160-166). Every one of those is absent from stock Octave 11.3.0.
-Unmodified `.m` sources cannot run.
+Unmodified `.m` sources cannot run. **Tier 1 is ruled out.**
 
-**Tier 2 looks genuinely reachable, and the reason is architectural:** `runScenario.m` consumes a
-`scenarioRow` **struct**, not a table — it uses `s.scenario_id` and `isfield(s, …)` (l.127-132, l.178-185).
-The table type is therefore confined to the loading boundary. A shim that reimplements `loadScenarios`
-to return a struct array should let the rest of the pipeline run on real `.m` sources. To be proven in
-Phase 2, not assumed.
+**FIND-MATLAB-02 (high) — the `string` type is the real blocker, not `table`.** In Octave a double-quoted
+literal is `char`, so `+` is *numeric addition*, not concatenation. Verified directly:
+`"abc " + "def"` → `error: operator +: nonconformant arguments (op1 is 1x4, op2 is 1x3)`.
+
+This is not confined to error paths. `capacityGuard.m:111-112` builds `capacityDef` with `+` on a **normal**
+execution path, and comparisons like `profiles.mode == "legacy_gaussian"` (`managedCharging.m:121`) compare
+strings of *different lengths*, which under `char` is an error rather than `false`. A Tier-2 shim therefore
+needs a genuine `string` class with overloaded `plus`, `eq`, and `strlength` — not merely function stubs.
+This is the single largest piece of shim work and it must be settled before the tier is fixed.
+
+**FIND-MATLAB-03 (medium, and it *helps*) — `table` is used only as a struct-of-arrays.** Corrects an
+earlier reading that put `table` solely at the loading boundary: `makeSessionProfiles.m` also builds the
+`sessions` table on the normal path (l.154-161, l.295-302). But every downstream operation on it is
+struct-of-arrays shaped — `sessions.max_power_kW(k)`, `sessions.arrival_hr <= tNow`, `height(sessions)`, and
+column *addition* by plain assignment (`managedCharging.m:294-299`, `perVehicle.requested_kWh = …`). All of
+those work unchanged on an Octave struct with vector fields. No `varfun`, `rowfun`, `join`, or
+`T.Properties` access occurs downstream. So the `table` shim can be small: a `table(...)` constructor
+honouring `'VariableNames'`, `height`, `istable`, `table2struct`, `struct2table`, `writetable`.
+
+**FIND-MATLAB-04 (medium) — `run_all_scenarios.m` hashes via Java, which this Octave cannot do.**
+`localSha256` (l.186-198) uses `java.security.MessageDigest`. Probed directly: `usejava("jvm")` returns
+**0** on this install (built with the Java feature, but no JRE resolves at runtime). The shim needs a
+pure-Octave SHA-256 or a `shasum` shell-out. Also `version("-release")` (l.128) returns Octave's own
+version, so the manifest's `matlab_release:` line would silently record an Octave string in a field whose
+name claims MATLAB — exactly the engine conflation the program forbids. Must be handled explicitly.
+
+**FIND-MATLAB-05 (low) — `plotScenario.m` is the least portable file and the least load-bearing.** It needs
+`tiledlayout`, `nexttile`, `subtitle`, `xticks`, `xtickangle`, `categorical`, `reordercats`,
+`exportgraphics`, `strlength`, and `datetime`. Figures are presentation artifacts, not numbers, so this file
+can be excluded from the Octave runtime path and left to the harness CI's real MATLAB, which is where the
+committed figures should come from anyway.
+
+**Working conclusion (to be proven in Phase 2, not assumed):** Tier 2 — Octave plus a thin, tested
+compatibility shim — is the realistic target, and the shim's centre of gravity is a `string` class, not
+table emulation. `capacityGuard.m` and `makeSessionProfiles.m` both already accept *either* a one-row table
+*or* a struct (`localRowToStruct`), which is a deliberate seam the shim can use.
 
 **Lead not yet chased:** Octave's own error text points at an Octave Packages `datatypes` package providing
 `string`, `datetime`, and `table`. If it is real and sufficient, it could shrink or remove the shim. Must be
 evaluated in Phase 2 before the tier is fixed — and any install recorded in the installs table above.
+
+> **Coverage note.** All **9** files in `matlab/src/` have now been read line by line by the lead, not
+> skimmed and not delegated: `buildSimulinkModel.m`, `runScenario.m`, `loadScenarios.m`, `capacityGuard.m`,
+> `makeSessionProfiles.m`, `managedCharging.m`, `electricalEconomics.m`, `run_all_scenarios.m`,
+> `plotScenario.m`. Lane L03 covers the same files independently; its findings are cross-checked against
+> this reading rather than substituted for it. The 6 `matlab/tests/*.m` files and the 2 `legacy_archive`
+> `.m` files are lane L04's, and still owed a lead read before Gate 2.
 
 ### Simulink topology (extracted directly from `buildSimulinkModel.m` — feeds Phases 2.5 and 7.2)
 
