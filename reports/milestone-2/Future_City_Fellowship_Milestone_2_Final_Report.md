@@ -35,9 +35,9 @@ Phase 1 identified a local-readiness problem: electrification is expanding faste
 | Horizon | Active ports (base→high) | Staged NPC | Broad NPC | Staged avoids | Net CO2e avoided (base→high) |
 |---|---|---|---|---|---|
 | 2026 | 25 | — | — | — | ≈43 t/yr |
-| 2036 | 44 → 47 | $1.56M | $1.87M | **$0.31M** | ≈82 → 113 t/yr |
-| 2046 | 47 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130 → 195 t/yr |
-| 2056 | 47 → 48 (pathway ceiling 48) | $3.01M | $3.41M | **$0.39M** | ≈173 → 260 t/yr |
+| 2036 | 35 → 44 | $1.56M | $1.87M | **$0.31M** | ≈82 → 113 t/yr |
+| 2046 | 44 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130 → 195 t/yr |
+| 2056 | 44 → 48 (pathway ceiling 48) | $3.01M | $3.41M | **$0.39M** | ≈173 → 260 t/yr |
 
 ---
 

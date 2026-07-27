@@ -71,7 +71,7 @@
 
 ## Slide 10 — Beat 8: Two aspects × three horizons, one table (Adama, ~0:55)
 
-- Aspect 1 (demand/ports): active ports 25 → 44 → 47 → 47 on the base path; 25 → 47 → 48 → 48 on the high path — both inside the 48-port pathway.
+- Aspect 1 (demand/ports): active ports 25 → 35 → 44 → 44 on the base path; 25 → 44 → 48 → 48 on the high path — both inside the 48-port pathway.
 - Aspect 2 (lifecycle cost): staged NPC $1.56M / $2.29M / $3.01M vs broad $1.87M / $2.64M / $3.41M — staging avoids $0.31M / $0.34M / $0.39M at each horizon.
 - Carry-through: net avoided CO2e grows from ≈43 t/yr now to ≈173–260 t/yr by 2056 (base/high).
 - One message: staging tracks demand and stays cheaper at every horizon.

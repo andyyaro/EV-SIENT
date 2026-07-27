@@ -36,14 +36,18 @@ decommissioned, and a trenching-driven cost overrun).
 | Horizon | Active ports (base → high path) | Staged plan NPC | Broad buildout NPC | Staged avoids | Net CO2e avoided |
 |---|---|---|---|---|---|
 | 2026 | 25 | — | — | — | ≈43 t/yr |
-| 2036 | 44 → 47 | $1.56M | $1.87M | **$0.31M** | ≈82–113 t/yr |
-| 2046 | 47 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130–195 t/yr |
-| 2056 | 47 → 48 (48-port pathway ceiling) | $3.01M | $3.41M | **$0.39M** | ≈173–260 t/yr |
+| 2036 | 35 → 44 | $1.56M | $1.87M | **$0.31M** | ≈82–113 t/yr |
+| 2046 | 44 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130–195 t/yr |
+| 2056 | 44 → 48 (48-port pathway ceiling) | $3.01M | $3.41M | **$0.39M** | ≈173–260 t/yr |
 
 Costs are screening-class net present cost (3% real, base escalation) — never budgets.
 Emissions use the EPA eGRID2023 Rev 2 SRVC factor (596.3 lb CO2e/MWh, refreshed
-annually) with labeled displacement assumptions. Top-ranked site: **FFX002 — City of
-Fairfax Regional Library (58.8, Medium confidence)**.
+annually) with labeled displacement assumptions.
+
+Top-ranked site under the canonical `milestone2_v3` mode: **FFX004 (53.4)**, with
+**FFX002 — City of Fairfax Regional Library** second at **51.8**. FFX002 ranks first under
+`legacy_v2` at 58.8; the two modes are not interchangeable, so the mode is always named.
+Data confidence is **Low at all 12 sites** — no site reaches Medium, let alone High.
 
 ## How the system fits together
 
