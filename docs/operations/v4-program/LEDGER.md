@@ -64,10 +64,18 @@ nothing in it. Behavioural guarantee → structural one.
 **Cost:** S3 25.27 MB ≈ $0.0006/mo, Lambda@Edge ≈ $0.001/mo at this traffic, Cognito free
 below 50 000 MAU. Incremental total **< $0.01/month** against the $10 ceiling.
 
-**NOT VERIFIED — and not counted as done:** that the gate *opens* for
-`redacted-3@example.org`. That needs a sign-in with a password the assistant does not have
-and should not have. **Open human action: one sign-in by the owner.** Everything else about
-the gate is observed, not assumed.
+**NOT VERIFIED — two things, listed separately on purpose:**
+
+1. **That the gate opens** for `redacted-3@example.org`. Needs a password the assistant
+   does not have and should not have.
+2. **That the content behind the gate loads.** A distinct claim, and the easier one to let
+   hide inside the first. Everything past the redirect is unexercised — the origin access
+   control, the gated bucket's policy, and the URI rewrite from `/platform/` to
+   `/platform/index.html`. Each mirrors the main bucket's working configuration, but
+   *configured like a working one* is not *observed working*.
+
+Both resolve together on the owner's first sign-in. **Open human action.** Everything else
+about the gate is observed, not assumed.
 
 ### Where Phase 7 actually is
 

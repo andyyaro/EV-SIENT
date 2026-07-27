@@ -158,8 +158,20 @@ def main() -> int:
             print(f"    - {label}")
     print("""
   NOT VERIFIED BY THIS SCRIPT — and not counted as done:
-    That the gate OPENS for redacted-3@example.org. That needs a sign-in with a
-    password the assistant does not have and should not have. Open human action.
+
+    1. That the gate OPENS for redacted-3@example.org. Needs a sign-in with a
+       password the assistant does not have and should not have.
+
+    2. That the content behind the gate actually LOADS. This is a separate claim and
+       is deliberately listed separately rather than folded into the first, because
+       everything past the redirect is unexercised: the origin access control, the
+       gated bucket's policy, and the URI rewrite that turns /platform/ into
+       /platform/index.html. Each is configured the way the working main bucket is
+       configured, but configured-like-a-working-one is not the same as observed
+       working. Reaching it requires passing the gate, so it cannot be checked from
+       this side without weakening the gate — which would defeat the point.
+
+    Both resolve together the first time the owner signs in. Open human action.
 """)
 
     if args.json:
