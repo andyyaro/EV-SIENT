@@ -22,7 +22,8 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 4 | Build V4 | not-started | |
 | 5 | NFC field layer | **GREEN — verified on hardware** | One tag written, read back through iOS background NFC, live page confirmed. 12 landing pages + 12 capture forms deployed. Loop closes: tag → form → CSV → ingestion → capacity upgrade. |
 | 6 | Close the Tableau blocker | not-started | |
-| 7 | The platform | not-started | |
+| **6B** | **Data intake layer (portability)** | **not-started — NEW, added 2026-07-27** | Added by the project owner mid-program. Lets another jurisdiction bring its own data and get a run. Inserted here because **the platform must expose it**. |
+| 7 | The platform | not-started | Must surface intake as a first-class surface. |
 | 8 | Deploy and ship | not-started | |
 | 9 | Make it human | not-started | |
 | 10 | Verify and land | not-started | |
@@ -148,6 +149,71 @@ Starting state: **`verify.sh` 8 PASS / 2 FAIL, exit 2** on a clean checkout. Cur
 **Deliberately not done, and stated rather than implied:** no facility manager has been asked
 for permission to place anything. Nothing in `docs/nfc/` presents placement as authorised.
 
+### Phase 6B — Data Intake Layer (portability)
+
+**Added by the project owner on 2026-07-27, mid-program, and logged before any work began.**
+Inserted after Phase 6 (Tableau) and before Phase 7 (the platform), because the platform
+must expose it.
+
+**The problem it solves, in the owner's framing:** the model currently assumes *our*
+datasets, *our* column names, *our* units, *our* CRS, *our* site IDs, already cleaned. That
+makes it a Northern Virginia study rather than a product.
+
+#### Required
+
+| # | Requirement |
+|---|---|
+| 6B.1 | A documented, **versioned INPUT schema** — required vs optional fields, units, CRS, ID conventions, accepted value ranges. **Distinct from the output contract**, and versioned the same way. |
+| 6B.2 | An **adapter/mapping stage**: arbitrary column names → schema fields, unit conversion, type coercion, CRS reprojection, ID normalisation. **Mappings are proposed and shown, never silently applied.** |
+| 6B.3 | A **validation stage** reporting problems in plain language *before any run* — what is wrong, which row, what to do about it. **Never a stack trace.** |
+| 6B.4 | **Completeness assessment feeding the EXISTING data-confidence system.** Missing or weak inputs produce a lower confidence rating **with a stated reason**. The model still runs; it just says less. |
+| 6B.5 | **Documented default fallbacks** (e.g. a public equity index), always labelled as defaults with their source, **never presented as the user's data**. |
+| 6B.6 | A **blank template** plus **one fully worked example dataset**. |
+
+**Extend the V4 observed-data ingestion machinery. Do NOT build a second, parallel intake
+path.**
+
+#### HARD CONSTRAINT
+
+> **Cleaning must never silently improve data quality.** Every imputation, inferred mapping,
+> unit conversion, dropped row, and default substitution is **recorded with its reason and
+> surfaced in provenance**. If a transformation cannot be explained to the user in one
+> sentence, **it does not ship**.
+
+#### Platform obligation
+
+Intake is a **first-class surface**: load data, see the proposed mapping, see what failed
+validation and why, **see the resulting confidence before committing to a run**.
+
+#### Amendment (same day)
+
+- **No licensed third-party software.** No Alteryx, no MATLAB, no Tableau, no paid ETL tool.
+  Anything required to get a user's data into the model is **Python in the project's own
+  package, testable under pytest, runnable in CI, and free.**
+- **The column-mapping step must be VISUAL in the platform**: show the user's detected
+  columns beside the schema fields, propose a mapping, let them correct it, **show what each
+  correction changes**. A hand-written config file is the **fallback for automation, never
+  the primary path**.
+
+#### Gate 6B
+
+A **deliberately messy third-party-shaped fixture** — wrong column names, mixed units,
+missing fields, different CRS — runs **end to end** and produces a **correctly-degraded
+confidence rating**, with **every transformation traceable**.
+
+#### Notes recorded at logging time, before any implementation
+
+- The existing confidence system (`src/fcf_m2/confidence.py`) already derives confidence
+  **only from typed provenance fields**, with the rubric `High ≥ 75`, `Medium ≥ 50`, else
+  `Low`. 6B.4 therefore extends an existing mechanism rather than inventing a second one —
+  which is also what "do not build a parallel path" requires.
+- The V4 machinery to extend is `src/fcf_m2/observed.py`, whose ingestion already **refuses
+  unattributed records** and **names missing metrics rather than defaulting them**. The hard
+  constraint above is the same principle applied to a wider surface.
+- CRS reprojection is the one requirement with a likely dependency question: doing it
+  properly generally means `pyproj`. It is free and open-source, so it satisfies the
+  amendment, but it is a new dependency and will be logged as a decision when reached.
+
 ### Deployment record (Phase 8 work done early, to unblock Gate 5)
 
 | UTC | Action | Reversal |
@@ -216,8 +282,11 @@ Recorded 2026-07-27T15:30Z. Every line here was observed by command, not assumed
 
 *Every judgment call, the alternatives rejected, and why. Mirrored into `DECISIONS.md` at landing.*
 
+*Full reasoning for every entry lives in [`DECISIONS.md`](DECISIONS.md). This table is the index.*
+
 | # | Decision | Alternatives rejected | Reasoning | Phase |
 |---|---|---|---|---|
+| DEC-000 | **Phase 6B — build a data intake layer so the model is portable.** Logged before any implementation, at the owner's instruction. | A second parallel intake path; best-effort silent cleaning; rejecting anything not matching the schema; a config file as the primary mapping path; a paid ETL tool. | The model assumes our columns, units, CRS and IDs, which makes it a study rather than a product. Extends `observed.py` and `confidence.py` rather than duplicating them. Sits before Phase 7 because the platform must expose intake as a first-class surface. | 6B |
 | DEC-002 | **Fetch CesiumJS on demand into a gitignored directory** rather than committing it. | (a) Commit `Build/Cesium` — rejected: 20 MB across 375 files added to every clone, for a pinned third-party redistributable that is reproducible on demand and re-bundled at desktop-packaging time. (b) CDN only — rejected: the viewer must work with no network. (c) Commit a minified subset — rejected: a hand-pruned Cesium is neither upstream nor reproducible, and would diverge silently from the CDN build. | The viewer probes for the vendored copy and falls back to the pinned CDN, so both a clean checkout and an offline one work. The fetch script refuses to run if its version disagrees with the pin in `index.html`, because a vendored copy that differs from the online one would make the viewer behave differently offline and online. | 3 |
 | DEC-001 | Create `LEDGER.md` at `docs/operations/v4-program/LEDGER.md` inside the **repo clone** (tracked), not in the workspace parent. | (a) Untracked scratch file — rejected: masterprompt names the tracked path explicitly and requires frequent commits. (b) Workspace root — rejected: same reason, and it would not survive a clean clone. | The masterprompt specifies the path and requires it be committed often; it is a program deliverable. | 0 |
 
@@ -760,8 +829,8 @@ them and confirmed before any code changes on their account.
 | Ledger | `docs/operations/v4-program/LEDGER.md` | this file |
 | Inventory | `docs/operations/v4-program/INVENTORY.md` | not yet written |
 | Reconciliation | `docs/operations/v4-program/RECONCILIATION.md` | not yet written |
-| Decisions | `docs/operations/v4-program/DECISIONS.md` | not yet written |
-| MATLAB liberation | `docs/operations/v4-program/MATLAB_LIBERATION.md` | not yet written |
+| Decisions | `docs/operations/v4-program/DECISIONS.md` | **written** — DEC-000..DEC-007 |
+| MATLAB liberation | `docs/operations/v4-program/MATLAB_LIBERATION.md` | **written** |
 | AWS inventory | `docs/operations/v4-program/AWS_INVENTORY.md` | not yet written |
 | Deployment | `docs/operations/v4-program/DEPLOYMENT.md` | not yet written |
 | Verification | `docs/operations/v4-program/VERIFICATION.md` | not yet written |
