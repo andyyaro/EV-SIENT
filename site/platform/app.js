@@ -16,7 +16,7 @@
 "use strict";
 
 const STATE = {
-  prov: null, ops: null, engines: null, surfaces: null, horizon: null, scenario: null,
+  prov: null, ops: null, engines: null, surfaces: null, simulink: null, horizon: null, scenario: null,
   // Which tier this page is running in, DETECTED rather than configured.
   //
   // One file serves both. Asking the server settles it: a desktop session answers
@@ -369,6 +369,56 @@ function renderSurfaces() {
   }
 }
 
+function renderSimulink() {
+  if (!STATE.simulink) return;
+  const s = STATE.simulink;
+  const box = $("#simulink");
+  box.replaceChildren();
+
+  // The status leads. A block diagram is exactly the kind of artifact a reader assumes
+  // produced something, so what it did NOT do goes first.
+  const status = document.createElement("p");
+  status.innerHTML = `<strong>${s.status}.</strong> ${s.status_detail}`;
+  box.append(status);
+
+  const meta = document.createElement("p");
+  meta.className = "muted";
+  meta.textContent = `${s.model} — built by MathWorks MATLAB ${s.built_by}, from ${s.from_run}.`;
+  box.append(meta);
+
+  const h = document.createElement("p");
+  h.className = "muted";
+  h.textContent = `${s.root.block_count} blocks at the top level, ` +
+    `${Object.keys(s.subsystems).length} subsystem. Read from the .slx itself.`;
+  box.append(h);
+
+  const table = document.createElement("table");
+  table.innerHTML = "<thead><tr><th scope='col'>Block</th><th scope='col'>Type</th></tr></thead>";
+  const tbody = document.createElement("tbody");
+  for (const b of s.root.blocks) {
+    const tr = document.createElement("tr");
+    const name = document.createElement("th");
+    name.scope = "row";
+    name.textContent = b.name;
+    const type = document.createElement("td");
+    type.textContent = b.type;
+    tr.append(name, type);
+    tbody.append(tr);
+  }
+  table.append(tbody);
+  const wrap = document.createElement("div");
+  wrap.className = "tablewrap";
+  wrap.append(table);
+  box.append(wrap);
+
+  for (const note of [s.topology_note, s.connections_note]) {
+    const p2 = document.createElement("p");
+    p2.className = "pv-rule";
+    p2.textContent = note;
+    box.append(p2);
+  }
+}
+
 function renderEngines() {
   if (!STATE.engines) return;
   const e = STATE.engines;
@@ -531,16 +581,18 @@ async function runOperation(id, button, output) {
 
 async function main() {
   try {
-    const [prov, staticOps, engines, surfaces, detected] = await Promise.all([
+    const [prov, staticOps, engines, surfaces, simulink, detected] = await Promise.all([
       loadJSON("provenance_v1.json"),
       loadJSON("operations.json"),
       loadJSON("engines.json"),
       loadJSON("surfaces.json"),
+      loadJSON("simulink.json"),
       detectTier(),
     ]);
     STATE.prov = prov;
     STATE.engines = engines;
     STATE.surfaces = surfaces;
+    STATE.simulink = simulink;
     STATE.tier = detected.tier;
     // The desktop tier's list comes from the running server; the web tier's from the
     // generated file. Both are rendered by the same code from the same registry.
@@ -552,6 +604,7 @@ async function main() {
     renderOperations();
     renderSurfaces();
     renderEngines();
+    renderSimulink();
 
     // Deep-link a provenance panel: ?number=FFX004|2036|base|ports_active
     //

@@ -1,0 +1,89 @@
+{
+  "schema": "fcf-simulink/1",
+  "model": "site_grid_behavior_ev_charging_v3",
+  "from_run": "run-30296650057",
+  "built_by": "25.2.0.3177638 R2025b Update 5",
+  "status": "BUILT, NEVER SIMULATED",
+  "status_detail": "This diagram was generated from the model source and opened once by real MathWorks MATLAB. It has never been run. No number anywhere in this project derives from it \u2014 every metric comes from the base pipeline, which needs no Simulink at all.",
+  "root": {
+    "blocks": [
+      {
+        "type": "FromWorkspace",
+        "name": "Base Load"
+      },
+      {
+        "type": "FromWorkspace",
+        "name": "Capacity Limit"
+      },
+      {
+        "type": "FromWorkspace",
+        "name": "EV Request"
+      },
+      {
+        "type": "Scope",
+        "name": "Live Scope: Load Behavior"
+      },
+      {
+        "type": "Mux",
+        "name": "Main Scope Signals"
+      },
+      {
+        "type": "SubSystem",
+        "name": "Managed EV Power"
+      },
+      {
+        "type": "Mux",
+        "name": "Managed Logic Inputs"
+      },
+      {
+        "type": "Sum",
+        "name": "Total Managed"
+      },
+      {
+        "type": "Sum",
+        "name": "Total Unmanaged"
+      },
+      {
+        "type": "ToWorkspace",
+        "name": "toWorkspace_managed"
+      },
+      {
+        "type": "ToWorkspace",
+        "name": "toWorkspace_unmanaged"
+      }
+    ],
+    "block_count": 11,
+    "line_elements": 8,
+    "branch_elements": 12
+  },
+  "subsystems": {
+    "system_6.xml": {
+      "block_count": 5,
+      "blocks": [
+        {
+          "type": "Inport",
+          "name": "u"
+        },
+        {
+          "type": "Demux",
+          "name": "Demux"
+        },
+        {
+          "type": "S-Function",
+          "name": "SFunction"
+        },
+        {
+          "type": "Terminator",
+          "name": "Terminator"
+        },
+        {
+          "type": "Outport",
+          "name": "y"
+        }
+      ],
+      "line_elements": 4
+    }
+  },
+  "topology_note": "Block names and types are read from the .slx itself and match, one for one, the topology read out of buildSimulinkModel.m by hand during Phase 0 \u2014 the source read confirmed by the artifact.",
+  "connections_note": "Connection counts are NOT claimed equal to the source. buildSimulinkModel.m calls add_line 15 times; the saved file encodes fan-out as branches, so the counts differ by construction. Asserting they match without checking the graph would be a claim beyond the evidence."
+}

@@ -88,6 +88,11 @@ assert p == [], p\""
 # Gate 7: platform output byte-identical to CLI output. Proven over PRODUCED FILES, not
 # just stdout -- if the two paths ever wrote different bytes the disagreement would surface
 # as an inexplicable number rather than as an error.
+# A block diagram is the kind of artifact a reader assumes produced something. This one did
+# not -- built once, never simulated -- and the view must say so alongside the topology.
+gate "platform: Simulink view matches the real .slx and states it was never simulated" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_simulink_view.py -q"
+
 gate "platform: generated artifacts are byte-identical via the platform and via the CLI" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_cli_platform_equivalence.py -q"
 
