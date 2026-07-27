@@ -368,6 +368,50 @@ every push and pull request."* Neither half holds: CI runs 6 of `verify.sh`'s 10
 `on: push` is restricted to `main` and `milestone2-v3-professional-release` (FIND-REPO-06). Phase 1 should
 make the statement true by converging the gates, rather than weakening the sentence.
 
+### `EXECUTION_STATUS.md` provenance claims — checked, because Phase 2 depends on this file
+
+The document's core claim is **confirmed and must be preserved**: no MATLAB has executed, `outputs/` is empty
+by design, `tests/golden/regression_golden.csv` does not exist, and `.github/workflows/matlab-manual.yml`
+has never run. Verified against the tree. Nothing here may be updated until a genuine run happens.
+
+Its "static checks performed" section makes two *verifiable* provenance claims. Both were checked.
+
+**FIND-MATLAB-06 (medium) — `matlab_scenarios.csv` cannot be byte-identical across runs, so the claim as
+worded can never hold again.** Item 7 says the tracked `matlab/data/canonical/matlab_scenarios.csv` is
+"byte-identical" to the producer output at `data/outputs/v3_run/matlab_scenarios.csv`. Regenerated it with
+`make run-v3` and compared:
+
+- headers identical; shapes identical (120 × 22); **21 of 22 columns bit-identical across all 120 rows**
+- the only difference is `source_note`, which embeds the producing run id:
+  tracked `…run milestone2_v3_20260719T052322Z…` vs fresh `…run milestone2_v3_20260727T154305Z…`
+
+So the *data* claim is true and the *byte* claim is not, and cannot be — the artifact stamps a timestamp
+into every row. This is the same trap the program flags for the Tableau `.twbx` in Phase 6: **a drift gate
+on this file would fail on every run for no real reason.** Phase 1/3 must either compare modulo `run_id` or
+move the run id to a sidecar manifest. Recording it now so nobody later "fixes" a spurious red gate by
+weakening the comparison.
+
+**FIND-MATLAB-07 (medium) — the legacy-archive provenance claim is unverifiable as written.** The same item
+says both `matlab/legacy_archive/*.m` files are "byte-identical to the original legacy scripts (preserved in
+the pre-V3 archive branch `archive/pre-milestone2-v3-20260719`)". That branch holds 100 files and **zero
+`.m` files** — `git ls-tree` finds neither `untitled.m` nor
+`build_and_run_site_grid_behavior_model.m` on it. Searched every remote ref: the two files exist only on
+`main` and `milestone2-v3-professional-release`.
+
+The claim is not necessarily *false* — the originals may simply have come from the author's machine rather
+than that branch — but it names a source that cannot corroborate it. Phase 2 should correct the citation to
+whatever can actually be checked, or state plainly that the originals are not independently preserved. This
+matters because `legacy_archive/` is the only record of what the V3 rewrite replaced.
+
+**Useful for Phase 2.3 — what the golden file will actually contain.** Read from `test_regression.m`
+directly: the panel is sites `FFX002` and `PWC001` × every horizon in the data (4), taking the first case
+per horizon in `scenario_id` sort order → **8 rows**; fixed `Seed = 42`, `AssumedSiteCapacity_kW = 200`,
+`RelTol = 1e-6`; columns `energy_requested_kWh`, `peak_unmanaged_kW`, `peak_clamp_kW`,
+`curtailed_clamp_kWh`, `peak_energy_aware_kW`, `unmet_energy_aware_kWh`, `deferred_energy_aware_kWh`.
+On first run the harness **writes** the golden file and passes (l.45-53), so the CI workflow must be built
+to *collect that file as an artifact* — otherwise the one thing Phase 2 exists to produce is created inside
+the runner and thrown away.
+
 ### Other findings not yet acted on
 
 | # | Finding | Source | Confirmed? | Acted on? |
