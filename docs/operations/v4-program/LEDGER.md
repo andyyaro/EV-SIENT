@@ -23,12 +23,67 @@ Nothing is `done` until it is `verified` — observed working, not assumed worki
 | 5 | NFC field layer | **GREEN — verified on hardware** | One tag written, read back through iOS background NFC, live page confirmed. 12 landing pages + 12 capture forms deployed. Loop closes: tag → form → CSV → ingestion → capacity upgrade. |
 | 6 | Close the Tableau blocker | **GREEN — honest partial close** | Live workbook audited and found wrong on 3 counts; corrected workbook rebuilt from the canonical contract, **published and verified from the live artifact**. All 7 sheets render (792×681, none blank). **5 residual blockers named**, not approximated. `.twb` drift gate + embed-form gate. |
 | **6B** | **Data intake layer (portability)** | **not-started — NEW, added 2026-07-27** | Added by the project owner mid-program. Lets another jurisdiction bring its own data and get a run. Inserted here because **the platform must expose it**. |
-| 7 | The platform | **in-progress** | **Architecture decided (DEC-015): Python-native local server + the same bundle deployed.** Five shell-independent components built and gated: provenance resolver, operations registry, web tier, local server, tier detection. 5 platform gates. **Open question for the owner: a runnable public installer would have to carry real facility data.** |
+| 7 | The platform | **in-progress** | Architecture decided (DEC-015). **Six components built, gated and render-verified**; 6 platform gates. Remaining: Simulink surface, field-data entry, reports download, desktop launcher, artifact byte-equivalence. See RESUME HERE. |
 | 8 | Deploy and ship | not-started | |
 | 9 | Make it human | not-started | |
 | 10 | Verify and land | not-started | **SCOPE EXPANDED 2026-07-27 by the owner (DEC-014):** a line-by-line audit of **every file in every folder**, in addition to everything already planned. Now **403 tracked files / ~78 700 lines** vs the 198 Phase 0 read — roughly half has never been audited, only written. |
 
 Legend: `not-started` / `in-progress` / `blocked` / `done` / `verified`
+
+---
+
+## RESUME HERE — state as of 2026-07-28T02:10Z
+
+**Branch `v4-platform`, HEAD `8010d0d`, working tree clean, pushed. CI green. `verify.sh`
+26 PASS / 0 FAIL.**
+
+### Where Phase 7 actually is
+
+Architecture **decided** (DEC-015): Python-native local server serving one bundle, that same
+bundle deployed as the web tier. **Built, gated and rendered-verified:**
+
+| Component | File | Gate |
+|---|---|---|
+| Provenance resolver — 3 720 cells resolve, refuses what it cannot explain | `src/fcf_m2/provenance.py` | ✓ |
+| Operations registry — an operation IS the CLI command | `src/fcf_m2/operations.py` | ✓ |
+| Local server — loopback, token, stdlib only | `src/fcf_m2/server.py` | ✓ |
+| Web tier + provenance panel + tier detection | `site/platform/` | ✓ |
+| Engine record — divergences surfaced | `scripts/build_engine_record.py` | ✓ |
+| Surfaces manifest + deploy allowlist | `scripts/build_platform_surfaces.py` | ✓ |
+
+### Phase 7 — what is NOT built yet
+
+1. **Simulink view in the platform** — the `.slx` is committed (`matlab/outputs/run-30296650057/`)
+   but no surface renders its topology.
+2. **Field-data entry screens** — the V4 loop is CLI-only; the platform shows the empty state
+   honestly but offers no way to enter an observation.
+3. **Reports/workbook download surface** — reports exist in `reports/milestone-2/` and are not
+   yet offered.
+4. **A desktop launcher** — today it is `python -m fcf_m2.server`. Per DEC-016 any public
+   installer ships **synthetic** inputs.
+5. **CLI/platform byte-equivalence gate over GENERATED ARTIFACTS** — currently proven for one
+   read-only operation's stdout, not for produced files.
+
+### Standing corrections to my own process, earned the hard way
+
+- **Check CI after every push.** It was red for five commits while I reported green.
+- **Never chain a commit behind a piped `verify.sh`** — `| tail` returns tail's exit code. Capture
+  `$?` explicitly. I pushed 2 failing gates this way.
+- **Verify the way the consumer will.** Render the page / fetch the published artifact. Reading
+  the source is not verification — that is how two blank Tableau charts shipped.
+- **Understand the whole image before cropping it.** A crop of an error page looks like a blank
+  feature.
+- **Seven text-vs-meaning failures so far** (tabulated in DEC-014). Parse or exercise; never grep.
+
+### Next actions, in order
+
+1. Finish Phase 7 items 1–5 above.
+2. Phase 8 deploy — the bundle is ready; `site/platform/` is the deploy root.
+3. Phase 6B (intake) — design brief already saved at `PHASE_6B_DESIGN_BRIEF.md`; **its external
+   sources are all `[UNVERIFIED]` and must be checked before anything ships**.
+4. Phase 9, then Phase 10 — which now includes the **full line-by-line audit (DEC-014)**.
+
+---
 
 ---
 
