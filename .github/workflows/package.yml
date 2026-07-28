@@ -61,10 +61,33 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install with the locked dependency set
+      - name: Install with the locked dependency set, into an ISOLATED environment
+        # A hosted runner's Python is not empty. macOS carries `certifi`; Windows carries
+        # argcomplete, click, colorama, pipx, platformdirs, tzdata and userpath. Installing on
+        # top of that meant every step below ran against packages the release artifact does not
+        # ship — and `build_licence_manifest.py`, which enumerates the interpreter, would have
+        # ATTRIBUTED them. Measured on both runners; it is what turned this job red the first
+        # two times it ever ran.
+        #
+        # A venv makes the environment equal to the lock's runtime closure on every platform,
+        # which is the only thing that makes the generated manifest reproducible. The path is
+        # exported through $GITHUB_PATH so later steps' plain `python` is this one, and
+        # converted with cygpath on Windows because the runner cannot follow an MSYS path.
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install -e . -c requirements-lock.txt
+          set -e
+          python -m venv .venv
+          if [ -d "$PWD/.venv/Scripts" ]; then VBIN="$PWD/.venv/Scripts"; else VBIN="$PWD/.venv/bin"; fi
+          "$VBIN/python" -m pip install --upgrade pip
+          "$VBIN/python" -m pip install -e . -c requirements-lock.txt
+          if command -v cygpath >/dev/null; then VBIN="$(cygpath -w "$VBIN")"; fi
+          echo "$VBIN" >> "$GITHUB_PATH"
+
+      - name: Confirm the isolated environment is the one later steps will use
+        shell: bash
+        run: |
+          echo "python -> $(command -v python)"
+          python -c "import sys; assert '.venv' in sys.prefix, sys.prefix; print(sys.prefix)"
 
       - name: Determine the version from the tag
         # Stamped from the repository, not from pyproject's static 3.0.0. A manual dispatch has
