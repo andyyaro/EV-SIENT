@@ -75,10 +75,11 @@ forecasts.
 observed. Two different wait figures exist and they are easy to confuse:
 
 - The **queueing estimates** carried in the data contract cover a very wide range. At FFX002
-  they fall to 0.00 from 2036 onward — though not at the 2026 starter build, where they are
-  0.80 (average) and 1.31 (peak). Elsewhere they climb steeply: the average wait reaches about
-  69 minutes and the peak about 215, both at PWC002. The peak column is also **blank on five
-  rows** — all PWC002, at 2046 and 2056 — where the modelled queue never clears and no finite
+  they are effectively nil — 0.00 on most rows, and never above 1.31 minutes on any of them,
+  including the 2026 starter build where they are 0.80 (average) and 1.31 (peak). Elsewhere
+  they climb steeply, and the two maxima are at **different sites**: the average wait reaches
+  about 69 minutes (PWC008, 2056) and the peak about 215 (PWC002, 2046). The peak column is
+  also **blank on five rows** — all PWC002, at 2046 and 2056 — where the modelled queue never clears and no finite
   wait exists. A blank there means *unbounded*, not *unknown*, and it is the model's real worst
   case.
 - A separate **discrete-event simulation** of the 2026 starter build reports median and

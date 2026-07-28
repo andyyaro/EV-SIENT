@@ -140,14 +140,16 @@ CAVEAT_TEXT: dict[str, str] = {
         # 5 rows": true of the peak column, false of the average column, which tops out at
         # 68.72 and has no blanks at all. The columns are now named separately.
         "Waits are SIMULATED from modelled demand and have never been observed -- no charging "
-        "has happened at any of these sites. These are Erlang-C queueing estimates. They fall "
-        "to 0.00 at one site from 2036 onward and rise steeply elsewhere as fixed port counts "
-        "meet growing modelled demand: the AVERAGE wait reaches about 69 minutes, the PEAK "
-        "about 215. The peak column is additionally BLANK on 5 rows, where the modelled queue "
-        "never clears and no finite wait exists -- blank there means unbounded, not unknown, "
-        "and it is the model's true worst case. A separate discrete-event run reports p50 and "
-        "p90 waits of 0.0 at all 12 sites at the 2026 starter build; that is a different "
-        "statistic from a different table, and it is not this number."),
+        "has happened at any of these sites. These are Erlang-C queueing estimates spanning a "
+        "very wide range: effectively nil at one site, which never exceeds 1.31 minutes on any "
+        "row and is 0.00 on most of them, and rising steeply elsewhere as fixed port counts "
+        "meet growing modelled demand -- the AVERAGE wait reaches about 69 minutes and the "
+        "PEAK about 215, at two DIFFERENT sites. The peak column is additionally BLANK on 5 "
+        "rows, where the modelled queue never clears and no finite wait exists -- blank there "
+        "means unbounded, not unknown, and it is the model's true worst case. A separate "
+        "discrete-event run reports p50 and p90 waits of 0.0 at all 12 sites at the 2026 "
+        "starter build; that is a different statistic from a different table, and it is not "
+        "this number."),
     "screening_only": (
         "A screening-class planning output for comparing sites. It cannot approve, permit or "
         "fund anything, and it is not an engineering design."),
