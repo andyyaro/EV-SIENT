@@ -283,6 +283,16 @@ gate "browser: caveats are VISIBLE, the form refuses visibly, and the explorer a
 gate "edge-auth: only a verified id_token for the granted account reaches the origin" \
   bash -c "cd '$REPO' && if command -v node >/dev/null; then node --test 'tests/edge_auth/*.test.mjs'; else echo 'node absent - edge auth tests SKIPPED (deploy path still runs them)'; fi"
 
+# The fail-closed capacity guard is the single safety property this whole project rests on:
+# it is what stops a feasibility claim being emitted from placeholder capacity. It is tested
+# from Python, but until now nothing exercised it in the OCTAVE tier -- and `guardproof.m`
+# could not even pass as documented, because it put untransformed MATLAB sources on the path.
+# Skips loudly where Octave is absent (CI has none), like the browser gate.
+gate "octave: the fail-closed capacity guard refuses every non-verified basis" \
+  bash -c "cd '$REPO' && if command -v octave >/dev/null; then \
+    octave --no-gui matlab/octave/guardproof.m; \
+  else echo 'octave absent - guard proof SKIPPED (runs where Octave is installed)'; fi"
+
 gate "links: markdown links resolve (lychee if installed, else internal-link check)" \
   bash -c "cd '$REPO' && if command -v lychee >/dev/null; then lychee --offline --no-progress README.md docs reports presentation dashboard excel matlab src tests scripts data 2>/dev/null; else '$PY' scripts/check_internal_links.py; fi"
 
