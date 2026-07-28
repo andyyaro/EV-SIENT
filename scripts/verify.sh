@@ -227,6 +227,15 @@ gate "supply chain: the hashed requirements match the lock and every pin carries
 gate "packaging: tags-only, time-bounded, and never claims notarization" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_packaging_workflow.py -q"
 
+# DEC-000's gate: a deliberately messy third-party-shaped file runs end to end and produces a
+# CORRECTLY-DEGRADED confidence rating, with every transformation traceable. Correctly-degraded
+# means neither easy answer -- not a refusal, and not a confident number. The load-bearing
+# assertion is that guessed third-party data never outranks the real study: it once scored 58.5
+# (Medium) against the real data's 33.8 (Low), because accepting a column mapping was wrongly
+# treated as confirming the data behind it.
+gate "intake: a messy third-party file degrades confidence rather than being cleaned up" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_intake.py -q"
+
 # A public installer ships invented inputs (DEC-016). This gate checks the synthetic set is
 # usable, honest, and NOT a disguised copy — including the subtle failure, where a fixture
 # produced by perturbing real values preserves the rank order and re-identifies sites anyway.

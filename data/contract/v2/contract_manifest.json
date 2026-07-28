@@ -4,7 +4,7 @@
   "model_version_note": "The contract version and the model version are separate facts. Contract v2 is a container change: it adds fields for observations. The numbers in it were produced by model version 3.0.0. Model version 4.0.0 is reserved for when V4 is genuinely complete and is not claimed by this artifact.",
   "supersedes": "1.0.0",
   "run_id": "v2-from-milestone2_v3_20260719T052322Z",
-  "generated_utc": "2026-07-27T18:52:18.156058+00:00",
+  "generated_utc": "2026-07-28T06:34:49.605270+00:00",
   "producer": {
     "package": "fcf_m2",
     "module": "fcf_m2.contract_v2"

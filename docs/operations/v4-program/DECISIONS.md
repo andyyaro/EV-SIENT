@@ -1253,3 +1253,88 @@ model runs from a clean extraction: `starter_total_2026: 24`, `pathway_total: 42
 honestly labelled — and the contract it writes declares `synthetic_inputs: true` and
 `legacy_totals_checked: false` in its own manifest, so a directory that travels cannot be
 quoted as the study's numbers.
+
+---
+
+## DEC-021 — Intake: the two ways a cleaner lies, and what stops each
+
+**Date:** 2026-07-28 · **Phase:** 6B · **Implements DEC-000**
+
+### What was blocking
+
+`workflow._load_inputs` is five bare `pd.read_csv` calls, and `scoring.enrich_and_score` indexes
+27 columns directly — so a file missing one raises `KeyError: 'aadt_nearest'`, measured. Column
+names, units and coordinate frame are those of one Northern Virginia study. That is what makes
+this a study rather than a product.
+
+### The design in one line
+
+Intake **proposes**; a human sees every finding **before** anything runs; `apply()` materialises
+only an accepted proposal and refuses one carrying a refusal. Separating the two is the whole
+point — a user who cannot see what a mapping decided before it runs is being asked to trust a
+black box with the provenance of every number downstream.
+
+### The two ways a cleaner lies
+
+**1. It fills gaps.** The tempting behaviour is to substitute a regional average for a missing
+traffic count. The run then succeeds, the site gets a demand score, and *nothing downstream can
+distinguish that score from one built on real data*. The file's apparent quality rose; its
+actual quality did not. So an absent field **stays absent**, is scored as an absence, lowers
+confidence, and reaches provenance as `source_class = missing` — never omitted, because a field
+left out of the provenance table scores as though it was never expected, which makes an
+incomplete file look exactly as trustworthy as a complete one.
+
+**2. It guesses.** A column matched below the confidence floor is reported **unmapped**, not
+mapped hopefully. An absence is scored and visible; a wrong mapping is a wrong number with no
+trace.
+
+### Two refusals, deliberately not solved
+
+**Projected coordinates are refused, not reprojected.** Doing it properly means `pyproj`; doing
+it by hand would move every site by an amount nobody could check, and is a transformation that
+cannot be explained in one sentence. Adding the dependency is its own decision (DEC-000's open
+question), not something to smuggle in here.
+
+**Duplicate or absent site identifiers are refused.** Two different places scored as one site is
+not a degraded answer, it is a wrong one.
+
+### The mistake this phase made, which is the mistake it exists to prevent
+
+Acceptance was first built to upgrade `source_class` from `unconfirmed` to
+`public_web_reference`. Measured consequence:
+
+| | score | level |
+|---|---|---|
+| messy third-party file, mapping accepted | **58.5** | **Medium** |
+| the real Northern Virginia study | **33.8** | Low |
+
+**Guessed data outranked measured data.** The error was conflating two different things:
+accepting a proposal confirms *that `staff` means `employees_day`*, and says nothing whatever
+about whether that staff count is accurate or where it came from. `accept()` now clears the
+**mapping** uncertainty only — `verification_status` becomes `reviewed`, `unresolved_flag`
+clears for mapped fields — and `source_class` does not move, because intake has no knowledge of
+the jurisdiction's own provenance and inventing one would be exactly the silent improvement
+DEC-000 forbids. A jurisdiction wanting a higher rating must supply provenance for its own
+figures; there is no path to one through this function.
+
+Ordering is now ingested **0.0** → accepted **18.0** → real study **33.8**, and a test fails if
+guessed data ever outranks measured data again.
+
+### A second bug, and why the correct answer was the dangerous part
+
+Provenance was first grouped using `provenance.FIELD_GROUP_FOR_COLUMN`, which is keyed on the
+*contract output* columns and knows **3 of the 32 input fields**. The other 29 defaulted into
+`site_use_and_demand`, which then inherited `missing` from the one genuinely absent field and
+scored 0, while four other groups scored 0 for containing no fields at all.
+
+The overall verdict came out **"Low"** — which is correct. It was correct **by accident**, and
+an accidentally-correct answer is worse than a wrong one because nothing prompts anyone to look
+again. Intake now has its own input-field map, and a test asserts every canonical field is
+grouped.
+
+### Gate
+
+`verify.sh` gate 38. A deliberately messy fixture — 31 non-canonical column names, hours where
+the model wants minutes, metres where it wants feet, one field absent — runs end to end and
+produces a correctly-degraded rating. Correctly-degraded means neither easy answer: **not a
+refusal, and not a confident number.**
