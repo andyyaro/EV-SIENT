@@ -916,7 +916,7 @@ function horizonColumns() {
 // empty and the comparison tray permanently fell back to a single "Ports" row reading
 // p.ports_now. The per-horizon columns the manifest exists to supply never appeared.
 const compareRows = () => [
-  ['Model rank', (p) => '#' + p.model_rank],
+  ['Model rank', (p) => '#' + p.model_rank, false, 'lower'],
   ['Readiness score', (p) => num(p.readiness_score, 1)],
   ['Recommendation tier', (p) => p.recommendation_tier, true],
   ['Recommended action', (p) => p.action_label, true],
@@ -926,14 +926,14 @@ const compareRows = () => [
   ['Equity', (p) => num(p.subscores.equity_subscore, 1)],
   ['Data confidence', (p) => `${p.data_confidence_level} (${num(p.data_confidence_score, 0)})`, true],
   ['Electrical risk', (p) => p.electrical?.risk_level ?? '—', true],
-  ['Worst-case rank change', (p) => int(p.electrical?.worst_case_rank_change)],
+  ['Worst-case rank change', (p) => int(p.electrical?.worst_case_rank_change), false, 'lower'],
   // Horizon columns are generated from the manifest's vocabulary, not named here.
   ...horizonColumns(),
   ['Pathway capacity', (p) => int(p.right_sizing?.future_ready_capacity)],
   ['Sessions/day', (p) => num(p.expected_sessions_day, 2)],
   ['Utilisation', (p) => num((p.estimated_utilization ?? 0) * 100, 1) + '%'],
-  ['Mean wait (min)', (p) => num(p.mean_wait_min, 2)],
-  ['Install cost (screening)', (p) => usd(p.install_cost_est_usd)],
+  ['Mean wait (min)', (p) => num(p.mean_wait_min, 2), false, 'lower'],
+  ['Install cost (screening)', (p) => usd(p.install_cost_est_usd), false, 'lower'],
   ['Parking spaces', (p) => int(p.parking_spaces)],
   ['Top strength', (p) => p.strengths?.[0]?.driver ?? '—', true],
   ['Largest constraint', (p) => p.constraints?.find((c) => c.points_forgone)?.driver ?? '—', true],
@@ -944,18 +944,23 @@ function openCompare() {
   const sites = state.pinned.map((id) => state.byId.get(id).properties);
 
   const head = sites.map((p) => `<th style="color:${TIER_COLOR[p.tier_key]}">${esc(p.site_name)}</th>`).join('');
-  const body = compareRows().map(([label, fn, isText]) => {
+  const body = compareRows().map(([label, fn, isText, direction]) => {
     const vals = sites.map((p) => fn(p));
-    // highlight the best numeric value in the row
-    const nums = vals.map((v) => parseFloat(String(v).replace(/[^0-9.\-]/g, '')));
-    const best = isText ? -1 : nums.indexOf(Math.max(...nums.filter((n) => !Number.isNaN(n))));
-    return `<tr><th>${esc(label)}</th>${vals.map((v, i) =>
+    // Highlight the BEST value, which is not always the largest. This used to be a bare
+    // Math.max, so on rank, cost, wait and worst-case-rank-change -- every row where a lower
+    // number is the better outcome -- the table visually endorsed the WORST option. The
+    // README described it as "the best value in each numeric row"; it was the highest.
+    const nums = vals.map((v) => parseFloat(String(v).replace(/[^0-9.-]/g, '')));
+    const better = direction === 'lower' ? Math.min : Math.max;
+    const finite = nums.filter((n) => !Number.isNaN(n));
+    const best = isText || !finite.length ? -1 : nums.indexOf(better(...finite));
+    return `<tr><th scope="row">${esc(label)}</th>${vals.map((v, i) =>
       `<td class="${isText ? 'txt' : ''}"${i === best && !isText ? ' style="color:var(--accent);font-weight:600"' : ''}>${esc(v)}</td>`).join('')}</tr>`;
   }).join('');
 
   $('#modalBody').innerHTML = `
     <h3>Side-by-side comparison</h3>
-    <p class="sub-t">${sites.length} candidate sites · green marks the highest value in each numeric row</p>
+    <p class="sub-t">${sites.length} candidate sites · green marks the best value in each numeric row — the lowest where lower is better</p>
     <table class="grid"><thead><tr><th>Metric</th>${head}</tr></thead><tbody>${body}</tbody></table>
     <p class="sub-t" style="margin-top:18px">
       Screening-class planning estimates. Electrical service capacity is

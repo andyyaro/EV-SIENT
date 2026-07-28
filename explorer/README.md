@@ -43,22 +43,33 @@ does the other's job.
 
 ## What's here
 
+> **Corrected 2026-07-28.** This tree described the explorer's *standalone* repository, before
+> integration. `fcf3d/` and the tests are no longer here: the ETL moved to `src/fcf3d/` at the
+> repository root and the tests to the root `tests/`. Only `blender/` and `web/` are actually
+> under `explorer/`. `tests/test_pipeline.py` does not exist anywhere.
+
 ```
-fcf3d/
-  build_sites.py     model CSVs  → web/data/sites.geojson
-  geometry.py        parametric infrastructure massing (zero dependencies)
-  glb.py             glTF 2.0 writer — the pipeline runs without Blender
-  build_models.py    CLI; routes to glb.py or to Blender
-blender/
-  build_assets.py    headless bpy asset factory (production fidelity)
-web/
-  index.html         CesiumJS viewer
-  app.js             globe, markers, panels, comparison, placement editor
-  style.css
-  data/              generated
-  models/            generated — one GLB per site
-tests/
-  test_pipeline.py   46 tests
+<repo root>/
+  src/fcf3d/
+    build_sites.py     model CSVs  → explorer/web/data/sites.geojson
+    geometry.py        parametric infrastructure massing (zero dependencies)
+    glb.py             glTF 2.0 writer — the pipeline runs without Blender
+    build_models.py    CLI; routes to glb.py or to Blender (the --blender route
+                       is NOT wired up here — see "Blender assets" below)
+  tests/
+    test_explorer_pipeline.py    the ETL and the payload
+    test_explorer_drift.py       committed artifacts vs a fresh build
+
+explorer/                        <- this directory
+  blender/
+    build_assets.py    headless bpy asset factory (not invoked by any make target)
+  web/
+    index.html         CesiumJS viewer
+    app.js             globe, markers, panels, comparison, placement editor
+    style.css
+    data/              generated
+    models/            generated — one GLB per site
+    vendor/            optional local CesiumJS (gitignored; `make explorer-vendor`)
 ```
 
 ### Data pipeline
@@ -78,7 +89,10 @@ contributions:
 > Earned: equity gap index +6.60 pts, distance to electrical service +5.62 pts, install cost +5.53 pts.
 > Forgone: spare electrical capacity −10.50 pts, jobs within 1 mi −4.92 pts, households within 1 mi −4.75 pts.
 
-Those numbers sum back to 51.8 exactly, for all 12 sites. (This example previously
+Those numbers sum back to 51.8 for this site. Across the twelve, the reconstruction agrees
+with the published score at 10 of 12; at FFX001 and PWC008 it differs by 0.1, which is rounding
+in the parts rather than a disagreement about the total, and the viewer now says so instead of
+printing a tick. (This example previously
 quoted 58.8 and rank #1 — those are `legacy_v2` figures, and the shipped viewer
 data is `milestone2_v3`. A worked example that does not match the artifact it
 documents is a defect, not a rounding.)
@@ -110,8 +124,10 @@ They cannot drift, because there is only one geometry definition.
   credentials at all and still gives you every site, score, and proposed build.
 - **Click any pin** for a five-tab panel: Overview, Score (with the driver
   decomposition), Right-sizing, Risk & gaps, Place.
-- **Pin up to four sites** and open a side-by-side table across 22 metrics,
-  with the best value in each numeric row highlighted.
+- **Pin up to four sites** and open a side-by-side table, with the best value in each
+  numeric row highlighted — the *lowest* on rows where lower is better (rank, install cost,
+  mean wait, worst-case rank change), the highest elsewhere. *(Until 2026-07-28 this was a
+  bare `Math.max`, so on those four rows the table highlighted the worst option.)*
 - **Placement editor.** Nudge heading, east/north offset, and height until the
   massing sits on the parking area you'd actually use, then copy the placement
   JSON back into `sites.geojson` to make it permanent.
