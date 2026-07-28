@@ -73,11 +73,13 @@ annually) with labeled displacement assumptions.
 
 Top-ranked site under the canonical `milestone2_v3` mode: **FFX004 (53.4)**, with
 **FFX002 — City of Fairfax Regional Library** second at **51.8**. FFX002 ranks first under
-`legacy_v2` at 58.8; the two modes are not interchangeable, so the mode is named wherever a
-rank appears — with **two disclosed exceptions**, both tracked as open actions: the superseded
-public Tableau workbook (limitation 5 below), and this project's own `results.html`, whose
-rotating gallery publishes `legacy_v2` scores. The gallery now states which mode produced them
-(FIND-NUM-03); whether to re-baseline its headline recommendation is the owner's call.
+`legacy_v2` at 58.8; the two modes are not interchangeable, so **anything generated from the
+contract names its mode**. Three artifacts predate that rule and still carry `legacy_v2` ranks:
+the superseded public Tableau workbook (limitation 5 below, queued for removal); this project's
+own `results.html` rotating gallery, which now states the mode on the page (FIND-NUM-03,
+open action 8c); and the **dated Milestone 2 deck and speaker notes**, which name no mode at
+all. The deck is deliberately left alone — it is a record of what was presented on 2026-07-21,
+and editing a dated deliverable to match a later model would misrepresent what was said.
 Data confidence is **Low at all 12 sites** — no site reaches Medium, let alone High.
 
 ## How the system fits together

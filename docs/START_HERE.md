@@ -64,11 +64,12 @@ confidence floor.
 
 Every number resolves to the run that produced it and the source behind it. Two model modes
 exist, and every surface this repository builds names which one it used. Standards scope,
-adopted code editions, and the [Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ) boundary are stated explicitly. **Two caveats**, both
-tracked as open actions: an older **Tableau workbook is still public** carrying superseded
-`legacy_v2` ranks and overstated confidence, and this project's own results page publishes
-`legacy_v2` scores in its rotating gallery — now labelled as such, though the ranking itself
-has not been re-baselined.
+adopted code editions, and the [Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ) boundary are stated explicitly. Anything generated from
+the contract names its mode. **Three older artifacts do not**: a superseded Tableau workbook
+still public with `legacy_v2` ranks and that mode's own Medium/Low confidence labels; this
+project's results page, whose rotating gallery publishes `legacy_v2` scores and now says so;
+and the dated Milestone 2 deck, left unedited because it records what was actually
+presented.
 
 → [Methodology](methodology/) · [Standards matrix](standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)
 → [Migration from V2](migration-from-v2.md) — why two modes exist and what moved
@@ -109,9 +110,10 @@ conventions rather than forecasts.
 Two model modes exist. `legacy_v2` reproduces an earlier accepted baseline exactly, and
 `milestone2_v3` is the current canonical model. They disagree about the top site — FFX002 under
 the old mode, FFX004 under the current one — so every surface built from this repository
-**names the mode** wherever a rank appears. They are not interchangeable. Two public surfaces
-still show `legacy_v2` ranks — the superseded Tableau workbook, queued for removal, and this
-project's own results gallery, which now says so on the page. Both are open actions.
+**names the mode** wherever a rank appears. They are not interchangeable. Three older
+artifacts still show `legacy_v2` ranks: the superseded Tableau workbook (queued for removal),
+this project's own results gallery (now labelled on the page), and the dated Milestone 2 deck
+(left as the record of what was presented).
 
 **Why is the data confidence low everywhere?**
 Because it is scored from where the data actually came from, not from how good the answer

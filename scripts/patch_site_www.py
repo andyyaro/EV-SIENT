@@ -112,6 +112,56 @@ MODE_NOTE = """
 """
 
 
+#: Every place `results.html` called `legacy_v2` output "current" or "latest".
+#:
+#: The scores are frozen at the owner's request; these are not scores. A currency claim that
+#: the page's own mode note directly negates is a contradiction, not a preserved deliverable.
+#:
+#: The "Results Explorer" line is a different problem: it asserted the provenance AND the
+#: completeness of a THIRD-PARTY Framer iframe -- content outside this repository, outside
+#: version control, and outside all 39 gates. We cannot verify what it serves, so we no longer
+#: claim what it contains.
+CURRENCY_CORRECTIONS = [
+    ("The current model identifies which candidate sites appear strongest",
+     "This page's rankings come from the <code>legacy_v2</code> baseline. They identify which "
+     "candidate sites appear strongest under that mode"),
+    ("An auto-rotating 3D gallery of the highest-priority planning signals from the "
+     "latest model run.",
+     "An auto-rotating 3D gallery of the highest-priority planning signals from the "
+     "<code>legacy_v2</code> baseline run."),
+    ('"description": "Best current planning signal. Score: 58.8.',
+     '"description": "Strongest site under the legacy_v2 baseline; FFX004 leads under the '
+     'current model. Score: 58.8.'),
+    # A fifth instance, in the detail panel's static fallback markup rather than the JS data.
+    # Found only because the count after the first four corrections was 1, not 0 -- the fix
+    # was verified by counting rather than by assuming the list was complete.
+    ('<p class="detail-description" id="detailDescription">Best current planning signal.',
+     '<p class="detail-description" id="detailDescription">Strongest site under the legacy_v2 '
+     'baseline; FFX004 leads under the current model.'),
+    ("The full planning analysis from the latest model run is available below as a generated "
+     "report.",
+     "A generated planning report is embedded below from an external host. Its contents are "
+     "not verified by this repository; the authoritative copy is the one in "
+     "<code>reports/</code>."),
+]
+
+
+#: `methodology.html` calls V2-baseline figures "current" and "latest" three times. The 38
+#: REVIEW / 12 INFO counts and the 15 Tableau exports are the V2 workflow's output, per
+#: Final_Report.md:22 ("the full 25-step V2 workflow re-run"). No rank or score appears here,
+#: so it is not a mode-naming exception -- it is the same currency claim, one page over, on a
+#: live public surface.
+METHODOLOGY_CORRECTIONS = [
+    ("<h3>Current Model Run Summary</h3>",
+     "<h3>Baseline Model Run Summary (<code>legacy_v2</code>)</h3>"),
+    ("The latest execution of the planning-support prototype yielded the following outputs",
+     "The <code>legacy_v2</code> baseline run of the planning-support prototype yielded the "
+     "following outputs"),
+    ("The latest model run has zero blocking validation errors.",
+     "That baseline run has zero blocking validation errors."),
+]
+
+
 def read(page: str) -> str:
     return (WWW / page).read_text()
 
@@ -257,13 +307,18 @@ def main() -> int:
             gallery = '<section class="section top-signals-section">'
             if gallery in text:
                 text = text.replace(gallery, MODE_NOTE.strip() + "\n  " + gallery, 1)
-            # The gallery described itself as showing "the latest model run". It shows the
-            # earlier baseline, which is the opposite of latest.
-            text = text.replace(
-                "An auto-rotating 3D gallery of the highest-priority planning signals from the "
-                "latest model run.",
-                "An auto-rotating 3D gallery of the highest-priority planning signals from the "
-                "<code>legacy_v2</code> baseline run.")
+
+        if page == "methodology.html":
+            for stale, fixed in METHODOLOGY_CORRECTIONS:
+                text = text.replace(stale, fixed)
+        if page == "results.html":
+            # NOT guarded by a marker. These are corrections to prose that already exists, so
+            # a marker guard would skip them on every page that has been patched before --
+            # which is the insert-only trap this file has now fallen into three times. Plain
+            # string replacement is idempotent: once the stale text is gone there is nothing
+            # left to match.
+            for stale, fixed in CURRENCY_CORRECTIONS:
+                text = text.replace(stale, fixed)
         if page == "results.html" and MODE_MARKER in text:
             text = replace_block(text, "fcf-mode-note", MODE_NOTE)
         if page == "results.html" and CAVEAT_MARKER in text:
