@@ -629,7 +629,7 @@
         <div class="edge-fade" aria-hidden="true"></div>
 
         <div class="bottom-info">
-          <div class="latin" id="latinText">FFX002 · City of Fairfax Regional Library</div>
+          <div class="latin" id="latinText">FFX004 · Fairfax County Government Center</div>
           <button class="view-button" id="openBtn" type="button">View signal</button>
         </div>
 
@@ -1025,12 +1025,29 @@
 
       openBtn.addEventListener("click", openDetail); closeBtn.addEventListener("click", closeDetail);
       overlay.addEventListener("click", (event) => { if (event.target === overlay) closeDetail(); });
+      // Scoped to the gallery. This was a WINDOW-level handler that called preventDefault()
+      // on Space and Enter unconditionally, so anywhere on the page Space stopped scrolling
+      // and Enter opened the gallery detail instead of activating whatever the reader had
+      // focused. Escape stays global, because dismissing an open overlay from anywhere is the
+      // behaviour a reader expects.
+      const galleryHasFocus = () =>
+        gallery.contains(document.activeElement) || document.activeElement === document.body;
+
       window.addEventListener("keydown", (event) => {
         if (event.key === "Escape") { closeDetail(); return; }
         if (gallery.classList.contains("is-open")) return;
+        const arrow = event.key === "ArrowRight" || event.key === "ArrowLeft";
+        const activate = event.key === "Enter" || event.key === " ";
+        if (!(arrow || activate)) return;
+        // Never steal a key from a control, a link, or a text field.
+        const el = document.activeElement;
+        const interactive = el && el !== document.body &&
+          (el.matches("a, button, input, select, textarea, [tabindex]") || el.isContentEditable);
+        if (interactive && !gallery.contains(el)) return;
+        if (activate && !galleryHasFocus()) return;
         if (event.key === "ArrowRight") { event.preventDefault(); pauseAuto(CONFIG.wheelResumeDelay); setIndex(activeIndex + 1); }
         if (event.key === "ArrowLeft") { event.preventDefault(); pauseAuto(CONFIG.wheelResumeDelay); setIndex(activeIndex - 1); }
-        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openDetail(); }
+        if (activate) { event.preventDefault(); openDetail(); }
       });
 
       if ("IntersectionObserver" in window) {

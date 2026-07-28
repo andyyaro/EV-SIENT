@@ -58,6 +58,8 @@
   {
     "file": "dashboard/static/09_site_map_offline.png",
     "source": "TIGER 2024 cached + sites",
-    "source_date": "2026-06-24"
+    "source_date": "2026-06-24",
+    "scenario": "legacy_v2 baseline ranks (dark markers = legacy top 3)",
+    "assumption": "canonical milestone2_v3 top three differ: FFX004, FFX002, PWC002"
   }
 ]

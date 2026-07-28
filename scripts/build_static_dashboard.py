@@ -177,7 +177,14 @@ def c7_peak_wait():
     ax.text(len(df) - 0.5, 10.3, "10-min service target", fontsize=8, color="#8C2F1B", ha="right")
     ax.set_xticks(x, df["site_id"])
     ax.set_ylabel("Wait (minutes)")
-    ax.set_title("Current demand is low — even peak-window waits sit under the target", fontsize=12)
+    # The two plotted series are 0.0 at all twelve sites, so this renders as an empty panel.
+    # The old title -- "even peak-window waits sit under the target" -- asserted a conclusion
+    # from a chart showing nothing, which reads as a rendering failure rather than a result.
+    # Say what the zero MEANS instead, and label it on the axes.
+    ax.set_title("Simulated waits are 0.0 at every site at the 2026 starter build", fontsize=12)
+    ax.text(0.5, 0.55, "Both series are exactly 0.0 — no bars to draw.\n"
+                       "At 2-3 ports and 6-20% utilisation the queue never forms.",
+            transform=ax.transAxes, ha="center", va="center", fontsize=10, color="#4a4a4a")
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "2026 baseline, seeded discrete-event simulation (400 days)",
                    "demand synthetic/uncalibrated — screening only")
@@ -196,7 +203,8 @@ def c8_limitations():
         ("• Costs are screening-class benchmarks — not budgets, quotes, or engineering estimates", False),
         ("• No site is approved: electrical, ADA, fire, stormwater, and AHJ gates all remain", False),
         ("• Client Meeting #2 follow-up is prepared but not yet held — nothing implies endorsement", False),
-        ("• No MATLAB simulation results are claimed (no licensed execution available)", False),
+        ("• MATLAB ran 49/49 on a SYNTHETIC fixture only — never on these twelve sites; "
+         "Simulink was built, never simulated", False),
         ("", False),
         ("Why we show this slide", True),
         ("Honest uncertainty is the evidence discipline that makes the staged,", False),
@@ -213,6 +221,10 @@ def c8_limitations():
 
 
 def c9_map():
+    # legacy_scores is the LEGACY_V2 ranking. The dark "top 3" markers therefore highlighted
+    # FFX002/FFX004/PWC006, while the canonical milestone2_v3 top three are FFX004/FFX002/
+    # PWC002. The map is kept on the legacy series for consistency with the other legacy
+    # panels, and the footer now names the mode so the markers are not read as canonical.
     s = legacy_scores[["site_id", "site_name", "lat", "lon", "model_rank"]].copy()
     import os
     os.environ["FCF_OFFLINE"] = "1"
@@ -222,7 +234,12 @@ def c9_map():
     import json
     existing = json.loads(LOG.read_text()) if LOG.exists() else []
     existing.append({"file": visuals.log_path_for(out, REPO),
-                     "source": "TIGER 2024 cached + sites", "source_date": "2026-06-24"})
+                     "source": "TIGER 2024 cached + sites", "source_date": "2026-06-24",
+                     # Named, because the dark markers are the LEGACY top three. Without this
+                     # the map's own log entry carried no mode at all while every other panel
+                     # declared one.
+                     "scenario": "legacy_v2 baseline ranks (dark markers = legacy top 3)",
+                     "assumption": "canonical milestone2_v3 top three differ: FFX004, FFX002, PWC002"})
     LOG.write_text(json.dumps(existing, indent=2))
 
 
