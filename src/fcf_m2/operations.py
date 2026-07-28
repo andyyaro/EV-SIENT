@@ -163,7 +163,9 @@ OPERATIONS: list[Operation] = [
         command=["{py}", "-m", "fcf_m2.workflow", "ingest-observations",
                  "--capacity", "data/observed/observed_capacity_template.csv",
                  "--sessions", "data/observed/observed_sessions_template.csv"],
-        caveat=("**No real field observations have been received.** This runs against the two "
+        # Plain prose: the caveat is rendered with textContent (app.js:325), so Markdown bold
+        # would show as literal asterisks. It was the only `**` in the whole registry.
+        caveat=("No real field observations have been received. This runs against the two "
                 "shipped TEMPLATE files, so what it shows is the template's own EXAMPLE row -- "
                 "site EXAMPLE001, explicitly marked 'not a real site' -- demonstrating the "
                 "upgrade path a genuine observation would take. Nothing in the contract "

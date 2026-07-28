@@ -104,7 +104,25 @@ def build(allow_missing: bool = False) -> dict:
                            "installation comes from here, via the canonical data contract."),
                 "ran_on_real_sites": False,
             }],
-            "guard_evidence": [],
+            # An OBJECT, not an empty list. The first version of this fallback emitted `[]`
+            # and renderEngines() does `g.capacity_basis.join(", ")` with no guard, so the
+            # public install threw a TypeError during boot -- and because renderEngines() runs
+            # before initFieldEntry() and the deep-link handler, everything after it was dead
+            # too. The comment above says the keys are load-bearing; this one was not honoured.
+            "guard_evidence": {
+                "title": "The fail-closed capacity guard is not demonstrated in this install",
+                "why_it_matters": ("The guard refuses to emit a feasibility claim from "
+                                   "placeholder capacity. No MATLAB run artifact ships here, "
+                                   "so this installation carries no evidence of it firing -- "
+                                   "which is not the same as evidence that it does not."),
+                "from_run": "no run artifact in this installation",
+                "rows": 0,
+                "run_status_ok": 0,
+                "capacity_basis": [],
+                "service_check": [],
+                "strategies_skipped": 0,
+                "peak_clamp_all_null": False,
+            },
             "divergences": [],
             "what_cannot_be_shown": ("MATLAB and Simulink run artifacts are not distributed with this "
                             "package: they record executions against the study's real sites. "

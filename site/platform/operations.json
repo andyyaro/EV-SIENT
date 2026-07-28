@@ -53,7 +53,7 @@
       "available": false,
       "unavailable_reason": "Reads observation files from your machine. The web tier has no access to your files and cannot run the ingestion.",
       "unavailable_because": "tier",
-      "caveat": "**No real field observations have been received.** This runs against the two shipped TEMPLATE files, so what it shows is the template's own EXAMPLE row -- site EXAMPLE001, explicitly marked 'not a real site' -- demonstrating the upgrade path a genuine observation would take. Nothing in the contract changes, and no real site's capacity moves off placeholder.",
+      "caveat": "No real field observations have been received. This runs against the two shipped TEMPLATE files, so what it shows is the template's own EXAMPLE row -- site EXAMPLE001, explicitly marked 'not a real site' -- demonstrating the upgrade path a genuine observation would take. Nothing in the contract changes, and no real site's capacity moves off placeholder.",
       "produces": []
     },
     {

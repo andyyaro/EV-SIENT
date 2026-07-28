@@ -283,6 +283,14 @@ def validate_v2(scenario_v2: pd.DataFrame, site_table: pd.DataFrame) -> list[str
     # generally and was enforced on one field; observed_utilization, observed_p90_wait_min
     # and observed_months could all be set on an "awaiting" row and validate clean. Measured
     # before fixing: setting all three on row 0 of the shipped v2 returned no problems.
+    # Guarded. Widening this check to every observed_* column hoisted `claims_none` out of
+    # the `if "observed_uptime" in columns` test it used to sit inside, so a v2-labelled table
+    # MISSING the added fields stopped being reported ("v2 is missing added field(s): ...")
+    # and started dying with an AttributeError before it could report anything -- reached
+    # through the validate-contract platform operation, which would show a traceback instead
+    # of a readable FAIL. Widening a check must not narrow the inputs it survives.
+    if "trigger_outcome" not in scenario_v2.columns:
+        return problems
     claims_none = scenario_v2.trigger_outcome.astype(str).str.startswith("awaiting")
     for column in (c for c in V2_ADDED_FIELDS if c.startswith("observed_")):
         if column not in scenario_v2.columns:

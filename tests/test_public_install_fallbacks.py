@@ -83,10 +83,13 @@ def test_the_empty_engine_record_has_the_shape_the_renderer_reads():
     empty = build_fallback("build_engine_record.py", ENGINES, hide=MATLAB_RUNS)
 
     missing = leaf_keys(real) - leaf_keys(empty)
-    # `guard_evidence` and `divergences` are legitimately empty lists in the fallback, so their
-    # child keys cannot exist. Compare only what a non-empty structure must still provide.
-    missing = {k for k in missing
-               if not k.startswith(("guard_evidence.", "divergences."))}
+    # ONLY `divergences` is exempt -- it is a genuine list, and an empty list has no children.
+    #
+    # `guard_evidence` used to be exempt too, on the assumption that it was also an empty
+    # list. It is an OBJECT, and renderEngines() dereferences `guard_evidence.capacity_basis`
+    # and calls .join() on it. So this exemption was hiding precisely the field that made the
+    # public install throw. An exemption is a claim about the data, and this one was false.
+    missing = {k for k in missing if not k.startswith("divergences.")}
     assert not missing, (
         f"the public-install engine record omits {sorted(missing)}, which the platform "
         f"renders — a recipient sees 'undefined' where the honest empty state should be")

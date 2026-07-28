@@ -368,6 +368,13 @@ def _ingest_observations(args) -> int:
     if args.capacity:
         try:
             records = observed.read_capacity_observations(args.capacity)
+        except FileNotFoundError:
+            # A missing file is a normal condition, not a crash. The declared platform
+            # operation points at the shipped templates, so a bundle that omits them would
+            # otherwise surface a raw traceback in the UI instead of a sentence.
+            print(f"NO CAPACITY FILE\n  {args.capacity} does not exist in this installation.\n"
+                  f"  Nothing was ingested and nothing changed.")
+            return 0
         except observed.ObservationError as err:
             # Plain language, not a stack trace: the person holding this file is a
             # facility manager or a fellowship member, not a Python developer.
@@ -476,7 +483,21 @@ def main(argv=None):
             from . import contract_v2
             problems = contract_v2.validate_v2(st, site)
         elif version == config.SCHEMA_VERSION:
-            problems = contract.validate_scenario_table(st, site)
+            # RT-04 asserts the real study's accepted totals (25 starter / 48 pathway). A run
+            # on SYNTHETIC inputs cannot reproduce them and must not be tuned until it does --
+            # `run_is_synthetic()` exists for exactly this, and `write_contract()` already
+            # consults it. This command did not, so `validate-contract` failed on every
+            # synthetic contract, including the public bundle whose own REPRODUCTION.txt
+            # instructs the recipient to run it.
+            synthetic = False
+            prov_path = cdir / "source_provenance.csv"
+            if prov_path.is_file():
+                synthetic = contract.run_is_synthetic(pd.read_csv(prov_path))
+            problems = contract.validate_scenario_table(
+                st, site, expect_legacy_totals=not synthetic)
+            if synthetic:
+                print("note: this contract declares SYNTHETIC inputs, so the real study's "
+                      "25/48 golden totals are not asserted against it.")
         else:
             problems = [f"unknown contract_version {version!r}; known versions are "
                         f"{', '.join(config.CONTRACT_VERSIONS)}"]

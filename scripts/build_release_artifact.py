@@ -38,7 +38,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-INCLUDE = ["src", "tests", "scripts", "data/inputs", "data/anchors", "data/provenance",
+INCLUDE = ["src", "tests", "scripts", "data/inputs", "data/anchors", "data/observed", "data/provenance",
            "data/cache/boundaries", "docs", "pyproject.toml", "requirements-lock.txt",
            "README.md", "Makefile"]
 OUTPUTS = ["data/outputs/v3_run", "data/outputs/legacy_check"]
@@ -63,7 +63,7 @@ PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facil
 #: verified to contain zero real identifiers; five scripts do contain them and are excluded
 #: by the allowlist below rather than by hoping.
 PUBLIC_INCLUDE = [
-    "src", "data/anchors", "pyproject.toml", "requirements-lock.txt",
+    "src", "data/anchors", "data/observed", "pyproject.toml", "requirements-lock.txt",
     # The platform's hand-written sources. Each was checked for real identifiers before being
     # added; app.js carried one, in a comment showing a deep-link example, and now uses the
     # synthetic id space. The GENERATED surfaces (provenance_v1.json, the contract copies, the

@@ -8,7 +8,10 @@ the model says to reserve.
 
     python -m fcf3d.build_models --sites web/data/sites.geojson --out web/models
 
-Use --blender /path/to/blender to route through blender/build_assets.py
+--blender IS NOT WIRED UP IN THIS REPOSITORY. It builds a script path that does not
+exist (src/blender/build_assets.py) and refuses with that message; the real script is
+at explorer/blender/build_assets.py. The procedural route below is what produces the
+twelve committed GLB models, and it is gated
 instead, which produces the higher-fidelity presentation assets.
 """
 
