@@ -94,8 +94,19 @@ def main() -> int:
             problems.append(f"{page}: states 596.3 lb CO2e/MWh but the contract now has {factors}")
         if "placeholder at all twelve" in text and bases != {"placeholder"}:
             problems.append(f"{page}: claims placeholder everywhere but contract has {bases}")
+        # Kept as a trap: the weaker "0 of 12 reach High" phrasing was replaced everywhere
+        # because it lets a reader infer eleven sites might be Medium. If it ever comes back,
+        # this still checks it against the contract.
         if "0 of 12" in text and highs:
             problems.append(f"{page}: claims 0 of 12 at High confidence but {len(highs)} rows are High")
+        # The phrasing that actually ships. Without this the stronger claim was ungated while
+        # the guard above quietly protected a string no page contains any more.
+        if "none reaches even Medium" in text:
+            above_low = sorted({r["data_confidence"] for r in rows} - {"Low"})
+            if above_low:
+                problems.append(
+                    f"{page}: claims no site reaches Medium, but the contract has "
+                    f"{above_low} confidence rows")
 
 
     # --- Tableau embeds -------------------------------------------------------------

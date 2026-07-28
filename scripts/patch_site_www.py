@@ -126,15 +126,20 @@ def insert_before_body_close(text: str, block: str) -> str:
     return text + block
 
 
-def replace_disclaimer(text: str, block: str) -> str:
-    """Swap an existing `fcf-authority` aside for the canonical one, in place.
+def replace_block(text: str, css_class: str, block: str) -> str:
+    """Swap an existing generated `<aside class="...">` for the canonical one, in place.
 
-    Matches the whole `<aside class="fcf-authority" ...>...</aside>` element non-greedily.
-    These asides never nest, so a non-greedy match to the first `</aside>` is exact rather
-    than merely usually-right. If the element cannot be found the text is returned unchanged
-    and the caller's own check reports the page, which is better than a partial rewrite.
+    EVERY generated block needs this, not just one. The disclaimer was given a replace path
+    first and the capacity caveat was left insert-only -- so editing `CAPACITY_CAVEAT`'s text
+    changed the source and **nothing on any page**, which is the identical defect one block
+    over, and it survived a full gate run because the marker was still present.
+
+    Matches the element non-greedily. These asides never nest, so a non-greedy match to the
+    first `</aside>` is exact rather than merely usually-right. If the element is absent the
+    text is returned unchanged and the caller's own check reports the page, which is better
+    than a partial rewrite.
     """
-    pattern = re.compile(r'<aside class="fcf-authority".*?</aside>', re.S)
+    pattern = re.compile(r'<aside class="' + re.escape(css_class) + r'".*?</aside>', re.S)
     if not pattern.search(text):
         return text
     return pattern.sub(lambda _m: block.strip(), text, count=1)
@@ -244,7 +249,7 @@ def main() -> int:
             # patch package sat unapplied for three weeks (Phase 8.3): the check asked
             # "is there a disclaimer?" rather than "is it the current one?", so amending
             # the text here would have silently changed nothing on any existing page.
-            text = replace_disclaimer(text, AUTHORITY_DISCLAIMER)
+            text = replace_block(text, "fcf-authority", AUTHORITY_DISCLAIMER)
         if VINTAGE_MARKER not in text:
             text = insert_before_body_close(text, VINTAGE_FOOTER)
         if page == "results.html" and MODE_MARKER not in text:
@@ -259,6 +264,10 @@ def main() -> int:
                 "latest model run.",
                 "An auto-rotating 3D gallery of the highest-priority planning signals from the "
                 "<code>legacy_v2</code> baseline run.")
+        if page == "results.html" and MODE_MARKER in text:
+            text = replace_block(text, "fcf-mode-note", MODE_NOTE)
+        if page == "results.html" and CAVEAT_MARKER in text:
+            text = replace_block(text, "fcf-capacity-caveat", CAPACITY_CAVEAT)
         if page == "results.html" and CAVEAT_MARKER not in text:
             # Immediately after the disclaimer, so it is above the rankings rather than
             # below them.
