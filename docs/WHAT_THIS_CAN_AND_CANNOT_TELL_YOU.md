@@ -74,10 +74,13 @@ forecasts.
 **How long anyone will wait.** Waits are simulated from modelled demand and have never been
 observed. Two different wait figures exist and they are easy to confuse:
 
-- The **queueing estimate** carried in the data contract spans the whole range. It is exactly
-  0.0 at FFX002, rises to about 215 minutes at PWC002 in 2046, and is **blank on five rows** —
-  all PWC002, at 2046 and 2056 — where the modelled queue never clears and no finite wait
-  exists. A blank there means *unbounded*, not *unknown*, and it is the model's real worst case.
+- The **queueing estimates** carried in the data contract cover a very wide range. At FFX002
+  they fall to 0.00 from 2036 onward — though not at the 2026 starter build, where they are
+  0.80 (average) and 1.31 (peak). Elsewhere they climb steeply: the average wait reaches about
+  69 minutes and the peak about 215, both at PWC002. The peak column is also **blank on five
+  rows** — all PWC002, at 2046 and 2056 — where the modelled queue never clears and no finite
+  wait exists. A blank there means *unbounded*, not *unknown*, and it is the model's real worst
+  case.
 - A separate **discrete-event simulation** of the 2026 starter build reports median and
   90th-percentile waits of 0.0 at all twelve sites, at 6–20% utilisation.
 
@@ -100,8 +103,8 @@ observed in operation, so **no trigger has ever been evaluated against real data
 
 **The MATLAB and Simulink views.** The MATLAB suite has genuinely been executed — 49 tests
 passed on licensed MathWorks R2025b — but **only against a synthetic fixture, never against
-these twelve sites**. No output anywhere in this project describes a real facility, and the
-managed-charging numerics have never met real capacity, because no real capacity exists to meet.
+these twelve sites**. No *MATLAB* output describes a real facility, and the managed-charging
+numerics have never met real capacity, because no real capacity exists to meet.
 The Simulink model has never been simulated at all, which the view states on its face.
 
 **One scoring weight does nothing.** 35% of the feasibility sub-score is weighted on spare

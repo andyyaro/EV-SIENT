@@ -1,7 +1,7 @@
 # Future City Fellowship — Safe, Code-Responsive EV Charging Planning
 
 Decision-support platform for planning safe, code-responsive public EV charging in
-**Fairfax City** and **Prince William County**, Virginia.
+**Fairfax City**, **Fairfax County** and **Prince William County**, Virginia.
 
 ![tests](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/tests.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
@@ -73,7 +73,10 @@ annually) with labeled displacement assumptions.
 
 Top-ranked site under the canonical `milestone2_v3` mode: **FFX004 (53.4)**, with
 **FFX002 — City of Fairfax Regional Library** second at **51.8**. FFX002 ranks first under
-`legacy_v2` at 58.8; the two modes are not interchangeable, so the mode is always named.
+`legacy_v2` at 58.8; the two modes are not interchangeable, so every surface built from this
+repository names the mode wherever a rank appears. The exception is the superseded public
+workbook in limitation 5 below, which carries `legacy_v2` ranks without saying so — which is
+why its removal is an open action.
 Data confidence is **Low at all 12 sites** — no site reaches Medium, let alone High.
 
 ## How the system fits together

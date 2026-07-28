@@ -135,13 +135,19 @@ CAVEAT_TEXT: dict[str, str] = {
         # forbids real facility identifiers -- the release gate caught a draft that named two.
         # The reader always knows which site they are looking at, because the caveat is
         # attached to that row.
+        # This caveat is attached to BOTH average_wait_minutes and peak_wait_minutes, so every
+        # sentence must be true of both. A draft said "it ... reaches 215 minutes ... blank on
+        # 5 rows": true of the peak column, false of the average column, which tops out at
+        # 68.72 and has no blanks at all. The columns are now named separately.
         "Waits are SIMULATED from modelled demand and have never been observed -- no charging "
-        "has happened at any of these sites. This is an Erlang-C queueing estimate and it "
-        "spans the full range: exactly 0.0 at one site, up to about 215 minutes at another in "
-        "2046, and BLANK on 5 rows where the modelled queue never clears, so no finite wait "
-        "exists. A blank here means unbounded, not unknown. A separate discrete-event run "
-        "reports p50 and p90 waits of 0.0 at all 12 sites at the 2026 starter build -- that "
-        "is a different statistic from a different table, and it is not this number."),
+        "has happened at any of these sites. These are Erlang-C queueing estimates. They fall "
+        "to 0.00 at one site from 2036 onward and rise steeply elsewhere as fixed port counts "
+        "meet growing modelled demand: the AVERAGE wait reaches about 69 minutes, the PEAK "
+        "about 215. The peak column is additionally BLANK on 5 rows, where the modelled queue "
+        "never clears and no finite wait exists -- blank there means unbounded, not unknown, "
+        "and it is the model's true worst case. A separate discrete-event run reports p50 and "
+        "p90 waits of 0.0 at all 12 sites at the 2026 starter build; that is a different "
+        "statistic from a different table, and it is not this number."),
     "screening_only": (
         "A screening-class planning output for comparing sites. It cannot approve, permit or "
         "fund anything, and it is not an engineering design."),
