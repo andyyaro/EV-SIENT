@@ -50,6 +50,10 @@ DEPLOY_COPY = [
     ("data/contract/v1", "contract/v1"),
     ("data/contract/v2", "contract/v2"),
     ("docs/nfc", "nfc"),
+    # The written deliverables. Added in Phase 7: they existed in the repository and were the
+    # one thing the study produced that the platform did not offer, so a reader could see every
+    # number and not the document that explains them.
+    ("reports/milestone-2", "reports"),
 ]
 
 #: Never copied, whatever else changes. Stated so the exclusion is a rule, not an oversight.
@@ -73,12 +77,73 @@ def copy_surfaces() -> dict[str, int]:
     return counts
 
 
+
+#: Directories the manifest links to. S3 has no directory listing, so each needs a real
+#: index.html or the link is a 404 for every reader on the web tier.
+#:
+#: This was broken for five surfaces and invisible locally, which is the part worth
+#: remembering: Python's ``http.server`` *generates* a directory listing on the fly, so the
+#: desktop tier rendered a working page for a path that does not exist in S3 at all. The
+#: local server was more capable than production and hid the defect. `check_surface_links.py`
+#: now fails if any manifest href has no file behind it.
+def write_directory_indexes(surfaces: dict) -> list[str]:
+    written = []
+    hrefs = []
+    for surface in surfaces["surfaces"]:
+        if surface.get("href"):
+            hrefs.append(surface["href"])
+        for link in surface.get("links", []):
+            hrefs.append(link["href"])
+
+    for href in hrefs:
+        if not href.endswith("/") or href.startswith("http"):
+            continue
+        directory = OUT / href.rstrip("/")
+        if not directory.is_dir():
+            continue
+        index = directory / "index.html"
+        files = sorted(p for p in directory.rglob("*") if p.is_file() and p.name != "index.html")
+        rows = "\n".join(
+            f'    <li><a href="{p.relative_to(directory)}">{p.relative_to(directory)}</a>'
+            f' <span class="sz">{p.stat().st_size:,} bytes</span></li>'
+            for p in files)
+        title = href.rstrip("/").replace("/", " / ")
+        index.write_text(f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title} — Future City Fellowship</title>
+<style>
+body{{margin:0;background:#F5F0E6;color:#1a1a1a;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}}
+.w{{max-width:52rem;margin:0 auto;padding:2.5rem 1.15rem}}
+h1{{color:#1B4332;font-size:1.3rem;margin:0 0 .3rem}}
+p{{color:#4a4a4a;font-size:.92rem;margin:0 0 1.2rem}}
+ul{{list-style:none;padding:0;margin:0}}
+li{{padding:.45rem 0;border-bottom:1px solid #d8d2c4;display:flex;justify-content:space-between;gap:1rem}}
+a{{color:#1B4332}}.sz{{color:#8a8f96;font-size:.82rem;white-space:nowrap}}
+.back{{display:inline-block;margin-top:1.4rem;font-size:.9rem}}
+@media(prefers-color-scheme:dark){{body{{background:#16191a;color:#ececec}}h1{{color:#7fbf9a}}
+p{{color:#b4b4b4}}li{{border-color:#33383a}}a{{color:#7fbf9a}}}}
+</style></head><body><div class="w">
+<h1>{title}</h1>
+<p>{len(files)} file{"" if len(files) == 1 else "s"}. Listed because this is a plain directory
+of the study's own artifacts — nothing here is generated on request.</p>
+<ul>
+{rows}
+</ul>
+<a class="back" href="../index.html">← back to the platform</a>
+</div></body></html>
+""")
+        written.append(str(index.relative_to(OUT)))
+    return written
+
+
 def build() -> dict:
     counts = copy_surfaces()
 
     charts = sorted(p.name for p in (OUT / "dashboard").glob("*.png"))
     models = sorted(p.name for p in (OUT / "explorer/models").glob("*.glb"))
     qr = sorted(p.name for p in (OUT / "nfc/qr").glob("*.svg"))
+    reports = sorted(p.name for p in (OUT / "reports").iterdir() if p.is_file())
 
     return {
         "schema": "fcf-surfaces/1",
@@ -133,6 +198,19 @@ def build() -> dict:
                 "available_on_web": True,
             },
             {
+                "id": "reports",
+                "title": "Written reports",
+                "href": "reports/",
+                "detail": (
+                    f"{len(reports)} documents: the Milestone 2 final report, the risk "
+                    f"register, the standards application matrix, the economic and funding "
+                    f"brief, and the environment and resilience note. These are the study's "
+                    f"prose — they say what the numbers on this page are for."),
+                "items": reports,
+                "count": len(reports),
+                "available_on_web": True,
+            },
+            {
                 "id": "nfc",
                 "title": "NFC field layer",
                 "href": "nfc/",
@@ -154,10 +232,12 @@ def build() -> dict:
 
 def main() -> int:
     payload = build()
+    indexes = write_directory_indexes(payload)
     MANIFEST.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
     print(f"wrote {MANIFEST.relative_to(REPO)}")
     for s in payload["surfaces"]:
         print(f"  {s['id']:12} {s['count']:>3} items  {s['title']}")
+    print(f"  directory indexes: {len(indexes)} written ({', '.join(indexes)})")
     print(f"  never deployed: {', '.join(payload['never_deployed'])}")
     return 0
 

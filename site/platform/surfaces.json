@@ -83,6 +83,28 @@
       "available_on_web": true
     },
     {
+      "id": "reports",
+      "title": "Written reports",
+      "href": "reports/",
+      "detail": "12 documents: the Milestone 2 final report, the risk register, the standards application matrix, the economic and funding brief, and the environment and resilience note. These are the study's prose \u2014 they say what the numbers on this page are for.",
+      "items": [
+        "ECONOMIC_AND_FUNDING_BRIEF.md",
+        "ENVIRONMENT_AND_RESILIENCE.md",
+        "FINAL_STANDARDS_APPLICATION_MATRIX.docx",
+        "Future_City_Fellowship_Milestone_2_Final_Report.docx",
+        "Future_City_Fellowship_Milestone_2_Final_Report.md",
+        "Future_City_Fellowship_Milestone_2_Final_Report.pdf",
+        "Milestone_2_Gap_Closure_Status.docx",
+        "Milestone_2_Gap_Closure_Status.md",
+        "PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.docx",
+        "REGULATORY_STAKEHOLDER_MAP.md",
+        "RISK_REGISTER.csv",
+        "RISK_REGISTER.md"
+      ],
+      "count": 12,
+      "available_on_web": true
+    },
+    {
       "id": "nfc",
       "title": "NFC field layer",
       "href": "nfc/",

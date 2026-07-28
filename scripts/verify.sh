@@ -192,6 +192,14 @@ gate "matlab: nothing destined for the PUBLIC harness carries site-identifying d
 gate "field-entry: the browser's rules never accept what the model rejects" \
   bash -c "cd '$REPO' && '$PY' scripts/build_field_schema.py >/dev/null && '$PY' -m pytest tests/test_field_schema_parity.py -q"
 
+# Every link the platform offers must resolve to a real file, resolved the way S3 resolves it
+# (a trailing slash means index.html, nothing is generated on demand). Five surfaces linked to
+# directories that do not exist as objects; it passed locally because Python's http.server
+# generates directory listings and S3 does not. The local server was more capable than
+# production and hid the defect.
+gate "platform: every surface link resolves to a file that exists in the bundle" \
+  bash -c "cd '$REPO' && '$PY' scripts/check_surface_links.py"
+
 # Drives the entry form in a real headless Chrome — the only check that sees what a person
 # sees. It exists because this program has twice shipped a feature that passed every test and
 # was unusable: two blank Tableau sheets, and a sign-in page that did not exist. Both times the
