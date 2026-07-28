@@ -33,6 +33,11 @@ SHOULD_MATCH = [
     ("aws_account_id_in_arn", "arn:aws:s3:us-east-1:210987654321:bucket/x"),
     ("aws_account_id_assigned", "account_id = 123456789012"),
     ("aws_account_id_assigned", 'AWS_ACCOUNT_ID: "210987654321"'),
+    # Added after the live account number was found committed in this very file, inside the
+    # list of strings the gate is asserted to IGNORE. Prose is how an account id actually
+    # leaks: nobody writes `account_id =` in a README.
+    ("aws_account_id_in_prose", "AWS account 210987654321 owns the bucket"),
+    ("aws_account_id_in_prose", "account: 123456789012"),
     ("private_key_block", "-----BEGIN PRIVATE KEY-----"),
     ("private_key_block", "-----BEGIN RSA PRIVATE KEY-----"),
     ("github_token", "ghp_" + "A" * 36),
@@ -48,7 +53,11 @@ SHOULD_NOT_MATCH = [
     "Never commit an aws_secret_access_key.",
     "grep -E 'AKIA[0-9A-Z]{16}|aws_secret_access_key'",   # a scan pattern, quoted
     "See the aws_access_key_id documentation.",
-    "AWS account <AWS_ACCOUNT_ID> is referenced in prose",     # 12 digits, no ARN/assignment
+    # NOTE: this list previously held the string "AWS account <the real 12-digit account id>"
+    # as an example of an acceptable non-match. That committed the live account number to the
+    # repository and asserted that the gate must ignore it. Both were wrong. The prose form is
+    # now a MATCH case below, and no real account id appears in this file.
+    "The run produced 999999999999 widgets",              # 12 digits, no AWS context
     "The run produced 123456789012 rows",
     "arn:aws:iam::<ACCOUNT_FC>:role/Example",     # documented placeholder
     "BEGIN PRIVATE KEY (as a phrase in a sentence)",

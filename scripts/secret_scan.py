@@ -51,6 +51,18 @@ PATTERNS: dict[str, tuple[re.Pattern, str]] = {
         re.compile(r"(?i)\b(?:aws_)?account[_-]?id\s*[:=]\s*[\"']?\d{12}\b"),
         "AWS account id assigned to a variable",
     ),
+    # The gap this closes: an account id written as PROSE matched nothing. The gate caught it
+    # inside an ARN and caught `account_id = 123456789012`, but not the same id written as ordinary prose.
+    # The repository's own test for this scanner used the REAL account id as its example of an
+    # acceptable, non-matching string -- so the live account number was committed, and the gate
+    # was explicitly asserted not to notice.
+    #
+    # Deliberately narrow: it requires the word `account` within a few characters of the
+    # digits, so ordinary 12-digit numbers (row counts, timestamps, run ids) do not trip it.
+    "aws_account_id_in_prose": (
+        re.compile(r"(?i)\baccount\b[^0-9\n]{0,12}\b\d{12}\b"),
+        "AWS account id written in prose",
+    ),
     "private_key_block": (
         re.compile(r"-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----"),
         "PEM private key block",
@@ -73,9 +85,29 @@ PATTERNS: dict[str, tuple[re.Pattern, str]] = {
     ),
 }
 
-# Files this scanner must not flag for containing its own pattern definitions.
-# Deliberately tiny: only the scanner and its test. Everything else is scanned.
+# These two files legitimately contain strings that LOOK like secrets: the pattern
+# definitions, and the fixtures that prove each pattern fires. They used to be skipped
+# entirely -- and that is exactly where a real secret hid.
+#
+# `tests/test_secret_scan.py` carried the project's live 12-digit AWS account id for the whole
+# program, inside the list of strings the gate is asserted to IGNORE, and no scan ever looked
+# at it. The two files most likely to hold example credentials were the two files never
+# scanned. Then, while fixing that, the same id was re-introduced into a comment in THIS file
+# and again went unseen.
+#
+# So they are scanned like everything else, and only these documented, non-existent example
+# values are permitted. Anything that matches a pattern and is not on this list is a finding,
+# in these files as in any other.
 SELF = {"scripts/secret_scan.py", "tests/test_secret_scan.py"}
+
+#: Publicly documented placeholders. AWS uses these in its own examples; none is a real
+#: credential or a real account. Adding to this list is a deliberate act.
+SELF_ALLOWED_EXAMPLES = {
+    "AKIAIOSFODNN7EXAMPLE", "ASIAY34FZKBOKMUTVV7A", "AROAEXAMPLE7EXAMPLE99",
+    "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "abcdefghijklmnopqrstuvwxyz0123456789ABCD",
+    "123456789012", "210987654321", "999999999999",
+}
 
 BINARY_SUFFIXES = {
     ".png", ".jpg", ".jpeg", ".gif", ".pdf", ".pptx", ".docx", ".xlsx", ".glb",
@@ -93,7 +125,7 @@ def scan() -> list[str]:
     """Return one human-readable finding per match. Empty means clean."""
     findings: list[str] = []
     for rel in tracked_files():
-        if rel in SELF or Path(rel).suffix.lower() in BINARY_SUFFIXES:
+        if Path(rel).suffix.lower() in BINARY_SUFFIXES:
             continue
         path = REPO / rel
         if not path.is_file():
@@ -102,11 +134,29 @@ def scan() -> list[str]:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue  # binary or unreadable; nothing text-like to leak
+        is_self = rel in SELF
         for lineno, line in enumerate(text.splitlines(), 1):
             for name, (pattern, description) in PATTERNS.items():
-                if pattern.search(line):
-                    findings.append(f"{rel}:{lineno}: {name} ({description})")
+                match = pattern.search(line)
+                if not match:
+                    continue
+                # The scanner and its test are scanned like everything else. A match there is
+                # forgiven ONLY when every credential-shaped token on the line is a documented
+                # example. Skipping these two files wholesale is what let a live account id sit
+                # in the test fixtures for the length of the program.
+                if is_self and _only_documented_examples(line):
+                    continue
+                findings.append(f"{rel}:{lineno}: {name} ({description})")
     return findings
+
+
+def _only_documented_examples(line: str) -> bool:
+    """True when every secret-shaped token on this line is a known public placeholder."""
+    tokens = re.findall(r"[A-Za-z0-9/+=]{12,}", line)
+    suspicious = [tok for tok in tokens if re.fullmatch(r"\d{12}", tok)
+                  or re.match(r"(?:AKIA|ASIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ABIA|ACCA)", tok)
+                  or len(tok) >= 40]
+    return all(tok in SELF_ALLOWED_EXAMPLES for tok in suspicious)
 
 
 if __name__ == "__main__":
