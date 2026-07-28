@@ -49,7 +49,21 @@ def run_pure_python(sites: list[dict], out_dir: str) -> list[tuple[str, str, int
 
 
 def run_blender(blender: str, sites_path: str, out_dir: str) -> int:
+    # BROKEN PATH, now disclosed instead of silently invoking Blender against a missing file.
+    # This resolves to src/blender/build_assets.py, which does not exist: fcf3d moved into
+    # src/ during integration and the sibling blender/ directory stayed behind at
+    # explorer/blender/. Unlike the CLI defaults, this is derived from __file__, so no working
+    # directory makes it resolve.
+    #
+    # Left pointing at the historical location and reported loudly rather than retargeted,
+    # because silently repointing it would claim a route that has never been exercised here.
+    # The twelve committed GLB models come from the PROCEDURAL route, which works and is gated.
     script = os.path.join(os.path.dirname(os.path.dirname(__file__)), "blender", "build_assets.py")
+    if not os.path.isfile(script):
+        raise SystemExit(
+            f"the --blender route is not wired up in this repository: {script} does not exist. "
+            f"The script lives at explorer/blender/build_assets.py. The procedural route (the "
+            f"default) is what produces the twelve committed GLB models.")
     cmd = [
         blender, "--background", "--factory-startup", "--python", script,
         "--", "--sites", sites_path, "--out", out_dir,

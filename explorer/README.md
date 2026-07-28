@@ -7,7 +7,7 @@ comparison, and proposed charging infrastructure placed on the actual parking
 lots.
 
 ```bash
-make setup && make all FCF_REPO=/path/to/repo && make serve
+make setup && make explorer && make explorer-serve
 ```
 
 ---
@@ -122,30 +122,32 @@ They cannot drift, because there is only one geometry definition.
 
 ## Setup
 
+> **Corrected 2026-07-28.** This section previously named `make all`, `make serve`,
+> `make candidates`, `make doctor`, `make models-blender` and an `FCF_REPO` variable.
+> **None of them exist in this repository's Makefile** — they are from the explorer's original
+> standalone repo, before it was integrated here, and `FCF_REPO` is unnecessary now that the
+> explorer lives inside the model repository. The real targets are below.
+
 ```bash
-make setup                                                  # creates venv/, installs deps
-make all FCF_REPO=$HOME/Downloads/Future-City-Fellowship    # point at your model repo
-make serve
+make setup            # creates venv/, installs deps
+make explorer         # build the viewer payload in the canonical milestone2_v3 mode
+make explorer-serve   # build, then serve it on http://127.0.0.1:8080
 ```
 
-Not sure where your checkout is? `make candidates` lists every
-Future-City-Fellowship folder under your home directory and marks the ones that
-actually contain the model outputs.
+Two further targets exist: `make explorer-legacy` builds the payload in `legacy_v2` mode, and
+`make explorer-vendor` downloads CesiumJS locally so the viewer runs with no CDN.
+All of them run from the **repository root**, not from `explorer/`.
 
 `make setup` builds a local `venv/` and the Makefile picks it up automatically
 from then on — no `pip install` into system Python, which recent macOS and
-Homebrew Pythons refuse anyway. Export the repo path once to stop repeating it:
+Homebrew Pythons refuse anyway.
 
-```bash
-export FCF_REPO=~/Downloads/Future-City-Fellowship
-```
+There is nothing to point at any more. The old `make candidates`, `make doctor` and the
+`FCF_REPO` variable existed because the explorer used to live in its own repository and had to
+be told where the model was. It now lives **inside** the model repository, so the paths are
+just relative and those helpers are gone.
 
-`make doctor` checks the interpreter, the repo path, and whether that path
-really holds the model outputs before anything else runs. A leading `~/` in
-`FCF_REPO` is expanded by the Makefile itself — zsh leaves tildes alone after
-`=` in command arguments, which would otherwise fail confusingly.
-
-Open <http://localhost:8080>.
+`make explorer-serve` builds and serves. Open <http://localhost:8080>.
 
 ### Cesium ion token (optional but worth it)
 
@@ -161,11 +163,19 @@ credit widget in place, so don't remove it.
 Without a token the viewer runs in *Flat* mode on OpenStreetMap imagery. Every
 score, comparison, and proposed build still works.
 
-### Blender assets (optional)
+### Blender assets (optional — NOT WIRED UP IN THIS REPOSITORY)
 
-```bash
-make models-blender BLENDER=/Applications/Blender.app/Contents/MacOS/Blender
-```
+> **Corrected 2026-07-28.** This section documented `make models-blender`, which **this
+> repository's Makefile does not define**. The underlying `--blender` route in
+> `src/fcf3d/build_models.py` is also broken: it builds the script path
+> `src/blender/build_assets.py`, and that file does not exist — the ETL moved into `src/`
+> during integration and the sibling `blender/` directory did not follow it. The real script
+> is still at `explorer/blender/build_assets.py`.
+>
+> The twelve GLB models shipped with the viewer are produced by the **procedural** route, which
+> works and is gated (`3d: all 12 GLB models are well-formed glTF 2.0`). The higher-fidelity
+> Blender route is a documented intention, not a working path. The notes below are kept because
+> they are the design record for anyone who wires it up.
 
 Or interactively, with the official MCP server
 (<https://www.blender.org/lab/mcp-server/>, Blender 5.1+): install the add-on,

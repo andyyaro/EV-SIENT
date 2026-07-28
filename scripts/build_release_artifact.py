@@ -16,9 +16,13 @@ private and that any public installer ships a synthetic set instead. Nothing abo
 "release artifact" signals which of those two things this produces, so the guard below makes
 the distinction explicit rather than relying on whoever runs it next remembering DEC-016.
 
-**There is currently no synthetic counterpart to real_sites_v2.csv**, so the public installer
-DEC-016 describes cannot be built yet. ``--public`` therefore refuses rather than quietly
-producing an artifact that cannot run.
+The synthetic counterpart now exists (DEC-020): four files under ``data/synthetic/`` are
+substituted for the real inputs, and ``--public`` builds a complete, runnable artifact. It
+still refuses — loudly, deleting the archive — if the finished bundle is found to contain any
+real facility identifier, which is a check on the OUTPUT rather than a refusal to try.
+
+*(This paragraph previously said no synthetic set existed and that ``--public`` refused
+outright. Both were true when written and both were false for weeks afterwards.)*
 """
 
 from __future__ import annotations

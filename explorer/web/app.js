@@ -911,7 +911,11 @@ function horizonColumns() {
   ]);
 }
 
-const COMPARE_ROWS = [
+// A FUNCTION, not a const. As a const, the `...horizonColumns()` spread below ran at module
+// evaluation -- before setHorizons() had read the manifest -- so horizonState.years was always
+// empty and the comparison tray permanently fell back to a single "Ports" row reading
+// p.ports_now. The per-horizon columns the manifest exists to supply never appeared.
+const compareRows = () => [
   ['Model rank', (p) => '#' + p.model_rank],
   ['Readiness score', (p) => num(p.readiness_score, 1)],
   ['Recommendation tier', (p) => p.recommendation_tier, true],
@@ -940,7 +944,7 @@ function openCompare() {
   const sites = state.pinned.map((id) => state.byId.get(id).properties);
 
   const head = sites.map((p) => `<th style="color:${TIER_COLOR[p.tier_key]}">${esc(p.site_name)}</th>`).join('');
-  const body = COMPARE_ROWS.map(([label, fn, isText]) => {
+  const body = compareRows().map(([label, fn, isText]) => {
     const vals = sites.map((p) => fn(p));
     // highlight the best numeric value in the row
     const nums = vals.map((v) => parseFloat(String(v).replace(/[^0-9.\-]/g, '')));
