@@ -110,9 +110,9 @@ conventions rather than forecasts.
 **Why does one site rank first in one place and second in another?**
 Two model modes exist. `legacy_v2` reproduces an earlier accepted baseline exactly, and
 `milestone2_v3` is the current canonical model. They disagree about the top site — FFX002 under
-the old mode, FFX004 under the current one — so every surface built from this repository
-**names the mode** wherever a rank appears. They are not interchangeable. Three older
-artifacts still show `legacy_v2` ranks: the superseded Tableau workbook (queued for removal),
+the old mode, FFX004 under the current one — so anything generated from the contract
+**names the mode** wherever a rank appears. They are not interchangeable. **Four** older
+artifacts predate that rule and still show `legacy_v2` ranks: the superseded Tableau workbook (queued for removal),
 this project's own results gallery (now labelled on the page), a 2026-06-28 planning-report PDF
 that prints the full twelve-site legacy ranking (now labelled where it is linked), and the
 dated Milestone 2 deck (left as the record of what was presented).
