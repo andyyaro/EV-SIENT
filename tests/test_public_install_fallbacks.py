@@ -66,7 +66,13 @@ MATLAB_RUNS = REPO / "matlab/outputs"
 
 
 def leaf_keys(node, prefix=""):
-    """Every key path in a payload, so a nested field cannot be missed."""
+    """Key paths in a payload, so a nested field is not missed.
+
+    Lists are sampled at element 0 only: these payloads are homogeneous arrays (every engine
+    row has the same shape), so the first element is representative. A key present ONLY in a
+    later element would be missed -- stated because the previous docstring claimed "every key
+    path", which is stronger than what this does.
+    """
     out = set()
     if isinstance(node, dict):
         for k, v in node.items():

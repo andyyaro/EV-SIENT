@@ -198,6 +198,9 @@ h4.sec:first-child { margin-top: 0; }
 .sub .lab { display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 3px; }
 .sub .lab b { font-family: var(--mono); font-weight: 600; }
 .sub .wt { color: var(--ink-3); font-family: var(--mono); font-size: 10px; }
+/* The mode annotations on the Risk tab live inside <dt> in a .kv list, not inside .sub,
+   so they inherited no styling at all and read as part of the label. */
+.kv .wt { color: var(--ink-3); font-family: var(--mono); font-size: 10px; }
 
 ul.drivers { list-style: none; margin: 0; padding: 0; }
 ul.drivers li {

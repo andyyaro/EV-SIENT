@@ -30,7 +30,6 @@ const BASE = process.env.WWW_URL || "http://127.0.0.1:8877";
 const PAGES = ["index.html", "results.html", "methodology.html", "dashboard.html"];
 
 const skip = await skipReason(`${BASE}/index.html`);
-const available = !skip;
 
 /** What a reader actually meets at the centre of the named element. */
 const inspect = (chrome, selector) => chrome.eval(`(() => {

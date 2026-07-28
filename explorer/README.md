@@ -225,7 +225,7 @@ handle the tiling.
 
 ### Ideas that fit the existing shape
 
-- Time slider driving `ports_active` across the 2026 → 2036 → 2050 horizons,
+- Time slider driving `ports_active` across the 2026 → 2036 → 2046 → 2056 horizons,
   animating the pathway stalls energising.
 - Utility service-drop lines drawn from each site to its nearest feeder once
   Dominion confirms capacity, colour-coded by the electrical risk level

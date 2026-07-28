@@ -765,10 +765,16 @@ function renderPanel(p) {
           ${p.electrical.risk_reason.map(esc).join('<br>')}
         </p>
         <p class="callout">These ranks come from the frozen <code>legacy_v2</code> electrical
-        risk file, which has no <code>milestone2_v3</code> counterpart. <strong>They are a
-        different ordering from the readiness rank on the Score tab</strong> — this site is
-        electrical rank ${int(p.electrical.rank_expected)} and readiness rank
-        ${int(p.model_rank)}. Neither is a feasibility finding: capacity is an unverified
+        risk file, which has no <code>milestone2_v3</code> counterpart. <strong>It is a
+        different ordering from the readiness rank on the Score tab</strong> — ${
+          // The two orderings differ overall, but they COINCIDE at two sites (PWC007 and
+          // PWC003). A flat "this site is electrical rank X and readiness rank Y" then read
+          // as a contradiction: "a different ordering ... rank 5 and rank 5".
+          p.electrical.rank_expected === p.model_rank
+            ? `here they happen to agree, both rank ${int(p.model_rank)}`
+            : `this site is electrical rank ${int(p.electrical.rank_expected)} and readiness ` +
+              `rank ${int(p.model_rank)}`
+        }. Neither is a feasibility finding: capacity is an unverified
         placeholder at all twelve sites.</p>
         <dl class="kv" style="margin-top:11px">
           <dt>Electrical rank — optimistic <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_optimistic)}</dd>

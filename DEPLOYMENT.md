@@ -205,6 +205,6 @@ them.
   non-editable install and the packaging build, **and for nothing else**.
 - ~~`verify-all` will not run on Windows~~ **CLOSED as a disclosure, not as a capability.** The
   operation now declares that it cannot run on a stock Windows machine and names WSL and Git
-  Bash as the alternatives (`operations.py:256`). It still does not run there.
+  Bash as the alternatives (`operations.py`, the `verify-all` operation's `unavailable_reason`). It still does not run there. *(This cited a line number that had already drifted to a different statement — line numbers in prose go stale on the next edit, so it names the thing instead.)*
 - **No release version scheme.** *Still open.* `pyproject` pins a static `3.0.0` and the
   existing git tags are milestone markers, not versions.

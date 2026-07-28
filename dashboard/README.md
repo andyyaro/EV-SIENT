@@ -24,8 +24,6 @@ canonical contract. It was verified by downloading the *published* package and r
 Hyper extracts — FFX004 rank 1 at 53.4, all 12 sites Low confidence, horizons
 2026/2036/2046/2056, totals 25/48.
 
-**Four presentation features remain unbuildable** and are named rather than approximated in
-[CAPABILITY_GAP.md](tableau/CAPABILITY_GAP.md): bar-in-bar, two reference lines, dashboard
-filter scoping, and the 8-point story. The original blocker note is preserved at
+**Four kinds of presentation feature remain unbuildable** — **five rows** in the gap table, because the two reference lines are separate sheets — and each is named rather than approximated in [CAPABILITY_GAP.md](tableau/CAPABILITY_GAP.md): bar-in-bar, a reference line at y=48, a reference line at 10 min, dashboard filter scoping, and the 8-point story. The original blocker note is preserved at
 [TABLEAU_IMPLEMENTATION_BLOCKER.md](tableau/TABLEAU_IMPLEMENTATION_BLOCKER.md) as the record of
 why the package existed.
