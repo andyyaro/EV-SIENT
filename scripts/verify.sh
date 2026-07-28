@@ -270,8 +270,8 @@ gate "website: public pages carry their caveats and embed only the canonical wor
 gate "browser: caveats are VISIBLE, the form refuses visibly, and the explorer asks nothing of a reader" \
   bash -c "cd '$REPO' && if ! command -v node >/dev/null; then echo 'node absent - browser test SKIPPED'; exit 0; fi; \
     '$PY' -m fcf_m2.server --port 8799 >/tmp/fcf_gate_server.log 2>&1 & SRV=\$!; \
-    ( cd '$REPO/site/www' && '$PY' -m http.server 8877 --bind 127.0.0.1 >/tmp/fcf_gate_www.log 2>&1 ) & WWW=\$!; \
-    trap 'kill \$SRV \$WWW 2>/dev/null; pkill -f \"http.server 8877\" 2>/dev/null' EXIT; \
+    '$PY' -m http.server 8877 --bind 127.0.0.1 --directory '$REPO/site/www' >/tmp/fcf_gate_www.log 2>&1 & WWW=\$!; \
+    trap 'kill \$SRV \$WWW 2>/dev/null; true' EXIT; \
     for i in \$(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8799/index.html && break; sleep 0.5; done; \
     for i in \$(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8877/index.html && break; sleep 0.5; done; \
     node --test 'tests/browser/*.test.mjs'"
