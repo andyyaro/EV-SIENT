@@ -150,3 +150,55 @@ def test_the_platform_never_reimplements_the_model():
 def test_an_unknown_operation_is_refused():
     with pytest.raises(KeyError, match="unknown operation"):
         ops.run("drop-database")
+
+
+# ---------------------------------------------------------------- platform availability
+
+def test_a_platform_restriction_must_state_its_reason():
+    """Same rule the tier check already enforces, applied to the axis it was missing.
+
+    An operation that is unavailable without an explanation is indistinguishable from a broken
+    button, and the registry's own docstring says so. That rule was enforced for tiers and not
+    for platforms, so `verify-all` — declared as `bash scripts/verify.sh` — would simply fail
+    on Windows with no explanation offered anywhere.
+    """
+    import dataclasses
+    with pytest.raises(ValueError, match="no stated reason"):
+        dataclasses.replace(ops.OPERATIONS_BY_ID["verify-all"],
+                            platforms=("darwin",), platform_reason="")
+
+
+def test_verify_all_is_declared_unrunnable_on_windows():
+    op = ops.OPERATIONS_BY_ID["verify-all"]
+    assert op.command[0] == "bash", "if this stops being a bash script the restriction can go"
+    assert "win32" not in op.platforms
+    assert ops.runs_here(op, "darwin") is True
+    assert ops.runs_here(op, "linux") is True
+    assert ops.runs_here(op, "win32") is False
+
+
+def test_windows_gets_the_platform_reason_not_the_tier_reason():
+    """Reporting the tier reason on Windows would tell someone to install the desktop app in
+    order to run something the desktop app cannot run for them there either."""
+    entry = next(e for e in ops.for_tier(ops.TIER_DESKTOP, platform="win32")
+                 if e["id"] == "verify-all")
+    assert entry["available"] is False
+    assert entry["unavailable_because"] == "platform"
+    assert "bash" in entry["unavailable_reason"]
+    assert "WSL" in entry["unavailable_reason"] or "CI" in entry["unavailable_reason"], (
+        "an unavailable capability should say what the reader can do instead")
+
+
+def test_unrestricted_operations_run_everywhere():
+    for op in ops.OPERATIONS:
+        if op.platforms:
+            continue
+        for platform in ("darwin", "linux", "win32"):
+            assert ops.runs_here(op, platform) is True, op.id
+
+
+def test_the_whole_list_is_still_returned_on_every_platform():
+    """Hiding a capability is how a product quietly becomes less honest than its docs."""
+    for platform in ("darwin", "linux", "win32"):
+        listed = ops.for_tier(ops.TIER_DESKTOP, platform=platform)
+        assert len(listed) == len(ops.OPERATIONS), platform

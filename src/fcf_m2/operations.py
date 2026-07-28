@@ -56,8 +56,23 @@ class Operation:
     desktop_reason: str = ""
     #: Stated limitation shown beside the control, if any.
     caveat: str = ""
+    #: Platforms this operation can actually run on. Empty means "anywhere".
+    #:
+    #: `verify-all` is declared as `bash scripts/verify.sh` and will not run on a stock Windows
+    #: machine. Left undeclared, the platform would offer a button that simply fails there —
+    #: and this registry's own rule is that an unavailable capability states WHY rather than
+    #: appearing broken. The rule was being applied to tiers and not to platforms.
+    platforms: tuple[str, ...] = ()
+    #: Why it cannot run elsewhere. Required whenever `platforms` is set, for the same reason
+    #: `desktop_reason` is required for desktop-only operations.
+    platform_reason: str = ""
 
     def __post_init__(self) -> None:
+        if self.platforms and not self.platform_reason:
+            raise ValueError(
+                f"operation {self.id!r} restricts platforms with no stated reason; a control "
+                f"that is unavailable without explanation is indistinguishable from a broken "
+                f"one")
         if self.tier == TIER_DESKTOP and not self.desktop_reason:
             raise ValueError(
                 f"operation {self.id!r} is desktop-only with no stated reason. The web tier "
@@ -215,6 +230,11 @@ OPERATIONS: list[Operation] = [
         desktop_reason=(
             "Executes the full test suite and model runs on your machine. The web tier serves "
             "the result of the last CI run instead."),
+        platforms=("darwin", "linux"),
+        platform_reason=(
+            "The gate suite is a bash script, so it does not run on a stock Windows machine. "
+            "Windows users can run the same gates under WSL or Git Bash, or read the result of "
+            "the last CI run — CI runs this exact script, so the answer is the same one."),
         command=["bash", "scripts/verify.sh"],
     ),
 ]
@@ -222,7 +242,21 @@ OPERATIONS: list[Operation] = [
 OPERATIONS_BY_ID: dict[str, Operation] = {op.id: op for op in OPERATIONS}
 
 
-def for_tier(tier: str) -> list[dict]:
+def runs_here(op: "Operation", platform: str | None = None) -> bool:
+    """Whether this operation can run on the current platform.
+
+    Separate from the tier question. A desktop-tier operation is unavailable *in a browser*;
+    a platform-restricted one is unavailable *on this machine*. Conflating them would tell a
+    Windows user to install the desktop app in order to run something the desktop app cannot
+    run for them either.
+    """
+    if not op.platforms:
+        return True
+    current = platform or sys.platform
+    return any(current.startswith(name) for name in op.platforms)
+
+
+def for_tier(tier: str, platform: str | None = None) -> list[dict]:
     """What a tier shows, including what it CANNOT do and why.
 
     The web tier gets the whole list, not a filtered one. Hiding a capability is how a product
@@ -233,13 +267,26 @@ def for_tier(tier: str) -> list[dict]:
         raise ValueError(f"unknown tier {tier!r}")
     out = []
     for op in OPERATIONS:
-        available = tier == TIER_DESKTOP or op.tier == TIER_BOTH
+        tier_ok = tier == TIER_DESKTOP or op.tier == TIER_BOTH
+        platform_ok = runs_here(op, platform)
+        available = tier_ok and platform_ok
+        # The tier reason and the platform reason are different facts, and the platform one is
+        # reported first when both apply: telling a Windows user to install the desktop app
+        # would be useless advice for an operation the desktop app cannot run there either.
+        if not platform_ok:
+            reason = op.platform_reason
+        elif not tier_ok:
+            reason = op.desktop_reason
+        else:
+            reason = ""
         out.append({
             "id": op.id,
             "label": op.label,
             "description": op.description,
             "available": available,
-            "unavailable_reason": "" if available else op.desktop_reason,
+            "unavailable_reason": reason,
+            "unavailable_because": ("platform" if not platform_ok
+                                    else "tier" if not tier_ok else ""),
             "caveat": op.caveat,
             "produces": list(op.produces),
         })

@@ -8,6 +8,7 @@
       "description": "Re-checks the frozen v1 contract against every rule, its JSON Schema, and its SHA-256 hash chain. Proves the numbers on screen match the file they came from.",
       "available": true,
       "unavailable_reason": "",
+      "unavailable_because": "",
       "caveat": "",
       "produces": []
     },
@@ -17,6 +18,7 @@
       "description": "Same checks for contract v2, which adds the fields the field-data loop produces. v2 is additive: every v1 value survives unchanged.",
       "available": true,
       "unavailable_reason": "",
+      "unavailable_because": "",
       "caveat": "",
       "produces": []
     },
@@ -26,6 +28,7 @@
       "description": "Runs the full Python model in canonical mode and regenerates the contract: demand, right-sizing, waits, economics, emissions, confidence and triggers.",
       "available": false,
       "unavailable_reason": "Running the model executes Python on your machine. The web tier serves precomputed results and cannot execute anything.",
+      "unavailable_because": "tier",
       "caveat": "",
       "produces": [
         "data/outputs/v3_run/run_summary.json"
@@ -37,6 +40,7 @@
       "description": "Reproduces the accepted V2 baseline exactly: 25 starter ports, 48 pathway. Kept runnable so the older published figures stay checkable.",
       "available": false,
       "unavailable_reason": "Running the model executes Python on your machine. The web tier serves precomputed results and cannot execute anything.",
+      "unavailable_because": "tier",
       "caveat": "Legacy mode uses the retired 2035/2050 horizons and cohort-relative scoring.",
       "produces": [
         "data/outputs/legacy_check/run_summary.json"
@@ -48,6 +52,7 @@
       "description": "Reads observed capacity and session records and reports what they WOULD change \u2014 which sites upgrade from placeholder capacity, which triggers become evaluable. It never writes: received values enter the inputs and the model re-runs.",
       "available": false,
       "unavailable_reason": "Reads observation files from your machine. The web tier has no access to your files and cannot run the ingestion.",
+      "unavailable_because": "tier",
       "caveat": "No field observations have been received. Today this reports nothing to change, which is the correct answer.",
       "produces": []
     },
@@ -57,6 +62,7 @@
       "description": "Widens the frozen v1 contract into v2. Every shared field is copied across unchanged, so 'additive' holds by construction rather than by promise.",
       "available": false,
       "unavailable_reason": "Writes files into the repository. The web tier is served as static\n                        files and has nowhere to write.",
+      "unavailable_because": "tier",
       "caveat": "",
       "produces": [
         "data/contract/v2/contract_manifest.json"
@@ -68,6 +74,7 @@
       "description": "Rebuilds the nine contract-derived charts, each stamped with the run and source it came from.",
       "available": false,
       "unavailable_reason": "Renders and writes image files. The web tier serves the images from\n                        the last desktop run instead.",
+      "unavailable_because": "tier",
       "caveat": "",
       "produces": [
         "dashboard/static/footer_log.json"
@@ -79,6 +86,7 @@
       "description": "Rebuilds the seven Tableau sheet tables and the workbook spec from the canonical contract. Publishing to Tableau Public remains a manual, deliberate step.",
       "available": false,
       "unavailable_reason": "Writes data files, and publishing drives the Tableau Public desktop\n                        application with real keystrokes. Neither is possible in a browser.",
+      "unavailable_because": "tier",
       "caveat": "Building the .twbx and publishing need Tableau Public installed and a signed-in session. Four presentation features remain unbuildable \u2014 see dashboard/tableau/CAPABILITY_GAP.md.",
       "produces": [
         "dashboard/tableau/build/workbook_spec.json"
@@ -90,6 +98,7 @@
       "description": "Produces the NDEF payload for each site tag, a QR code carrying the same URL, and the placement cards. Writing a physical tag is done with a phone.",
       "available": false,
       "unavailable_reason": "Writes payload, QR and placement-card files to disk. The web tier\n                        offers the already-generated payloads for download instead.",
+      "unavailable_because": "tier",
       "caveat": "",
       "produces": [
         "docs/nfc/tag_payloads.csv"
@@ -101,6 +110,7 @@
       "description": "Rewrites the workflow step documentation from the executable manifest, so the docs cannot drift from what the code actually does.",
       "available": false,
       "unavailable_reason": "Rewrites tracked documentation files in the repository, which a\n                        browser cannot do.",
+      "unavailable_because": "tier",
       "caveat": "",
       "produces": [
         "docs/WORKFLOW_STEPS.md"
@@ -112,6 +122,7 @@
       "description": "Runs the whole gate suite \u2014 contract rules, hash chains, cross-model constants, published-number checks, secret scan, explorer validity, Tableau and provenance. This is the check CI runs.",
       "available": false,
       "unavailable_reason": "Executes the full test suite and model runs on your machine. The web tier serves the result of the last CI run instead.",
+      "unavailable_because": "tier",
       "caveat": "",
       "produces": []
     }
