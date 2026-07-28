@@ -934,16 +934,36 @@ as broken.
 ### Access widened to a second account, and why the first one alone was not workable
 
 The granted account `redacted-3@example.org` is `CONFIRMED` and enabled, so it has a
-password — set on 2026-07-09, thirty-nine seconds after the account was created. But the owner
-reported never receiving a sign-in email, which surfaced a second problem behind the first:
+password. The owner reported never receiving a sign-in email and asked whether the email might
+simply have been sent earlier, when the account was first added. **CloudTrail settles it, and
+the answer is neither "sent earlier" nor the mechanism first inferred here:**
 
-**No email was ever sent, and none could have been.** The assistant did not create the account
-and deliberately did not touch its credential, so there was no invitation to send. More
-importantly, the account carried **no `email_verified` attribute**, and this pool's recovery
-mechanisms are `verified_email` then `verified_phone_number`. *"Forgot your password?" could
-not have delivered either.* The missing attribute had already been noticed while building the
-allowlist and designed around for **authorisation**; what was missed is that the same gap also
-breaks **recovery**. One fact, two consequences, only one of them followed through.
+| Evidence | Finding |
+|---|---|
+| `AdminCreateUser`, 2026-07-09T23:38:48Z | **`messageAction: SUPPRESS`** — the invitation email was explicitly suppressed. Cognito has never sent mail to this address. |
+| `AdminSetUserPassword` | **No events.** The password was not set by an admin call. |
+| `RespondToAuthChallenge` ×3, same day | The `NEW_PASSWORD_REQUIRED` challenge was completed in a browser ~50 s after creation — whoever set the account up held the temporary password out of band, which is precisely why they suppressed the email. |
+
+So the credential exists and was chosen by whoever performed that setup. **No email was ever
+sent, and none could have been**: the assistant did not create the account and deliberately did
+not touch its credential.
+
+*(An earlier version of this entry said the password was set "thirty-nine seconds" after
+creation and implied an admin-set. Both were wrong — the gap is ~50 seconds and it was a
+browser challenge response. The numbers were read off two timestamps rather than checked
+against the audit log, which was available the whole time.)*
+
+**The second problem, which the first was hiding.** The account carried **no `email_verified`
+attribute**, and this pool's recovery mechanisms are `verified_email` then
+`verified_phone_number`. *"Forgot your password?" could not have delivered either.* The
+missing attribute had already been noticed while building the allowlist and designed around
+for **authorisation**; what was missed is that the same gap also breaks **recovery**. One
+fact, two consequences, only one of them followed through.
+
+**Still unproven: that the mailbox receives anything.** Because delivery was suppressed at
+creation and never attempted since, `redacted-3@example.org` has never been sent a message
+by this pool. Setting `email_verified` makes Cognito *willing* to send a reset there; it is not
+evidence that anything arrives.
 
 At the owner's direction, both routes were opened:
 
