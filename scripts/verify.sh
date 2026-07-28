@@ -262,7 +262,7 @@ gate "website: public pages carry their caveats and embed only the canonical wor
 # was unusable: two blank Tableau sheets, and a sign-in page that did not exist. Both times the
 # check verified the step under our control rather than the outcome the reader experiences.
 # Skips loudly (not silently) when Chrome is absent, so CI without a browser stays green.
-gate "field-entry: the form refuses and accepts VISIBLY in a real browser" \
+gate "browser: the form refuses VISIBLY, and the explorer's first screen asks nothing of a reader" \
   bash -c "cd '$REPO' && if ! command -v node >/dev/null; then echo 'node absent - browser test SKIPPED'; exit 0; fi; \
     '$PY' -m fcf_m2.server --port 8799 >/tmp/fcf_gate_server.log 2>&1 & SRV=\$!; \
     trap 'kill \$SRV 2>/dev/null' EXIT; \

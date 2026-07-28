@@ -132,23 +132,34 @@
 </div>
 
 <!-- ------------------------------------------------------------- token gate -->
-<div id="tokenGate" class="hidden">
+<div id="tokenGate" class="hidden" role="dialog" aria-modal="true"
+     aria-labelledby="tokenGateTitle" aria-describedby="tokenGateIntro">
   <div class="gate-card">
-    <h3>Cesium ion token</h3>
-    <p>
-      Real terrain, OSM buildings, and Google Photorealistic 3D Tiles all stream
-      through Cesium ion. Paste a token to unlock them — it is kept in this
-      browser only and never sent anywhere but Cesium.
+    <h3 id="tokenGateTitle">You can skip this</h3>
+    <p id="tokenGateIntro">
+      Every site, every score, and every proposed build works without doing
+      anything here. Just continue.
     </p>
-    <input type="password" id="tokenInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." autocomplete="off">
     <div class="gate-actions">
-      <button id="tokenSave">Use token</button>
-      <button class="ghost" id="tokenSkip">Continue without</button>
+      <button id="tokenSkip">Continue to the map</button>
     </div>
+    <hr>
     <p class="fine">
-      Free tokens: <span class="mono">cesium.com/ion</span> → Access Tokens.
-      Without one the map still works in <em>Flat</em> mode with OpenStreetMap
-      imagery — every site, score, and proposed build is fully usable.
+      <strong>Optional:</strong> a free Cesium ion key adds 3D terrain, building
+      shapes, and photorealistic tiles. Get one at
+      <span class="mono">cesium.com/ion</span> → Access Tokens. It is stored in
+      this browser only and is sent to nobody except Cesium.
+    </p>
+    <label class="fine" for="tokenInput">Cesium ion access token</label>
+    <input type="password" id="tokenInput" autocomplete="off"
+           placeholder="paste your token here"
+           aria-describedby="tokenGateFine">
+    <div class="gate-actions">
+      <button class="ghost" id="tokenSave">Use this token</button>
+    </div>
+    <p class="fine" id="tokenGateFine">
+      Without a token the map opens in <em>Flat</em> mode with OpenStreetMap
+      imagery. Nothing about the study is hidden in either mode.
     </p>
   </div>
 </div>

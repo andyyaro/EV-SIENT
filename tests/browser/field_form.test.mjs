@@ -10,152 +10,29 @@
  * the page still claims "no field observations have been received" after you have typed one
  * in. Those are the failures a user would hit first, and only a browser can see them.
  *
- * Zero dependencies, deliberately
- * -------------------------------
- * Chrome is driven over the DevTools Protocol using node's built-in `WebSocket` (Node 22+).
- * No puppeteer, no playwright, no jsdom. This repository keeps its test dependencies to what
- * ships with the runtime, and a browser harness is not a good reason to break that.
- *
- * Skips rather than fails when Chrome or the server is absent, so CI without a browser stays
- * green — the skip is loud in the output.
+ * The Chrome-over-DevTools-Protocol client lives in `./chrome_harness.mjs` — zero
+ * dependencies, and shared so two browser suites cannot drift apart. Skips rather than fails
+ * when Chrome or the server is absent, so CI without a browser stays green; the skip is loud.
  */
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
-import { mkdtempSync, rmSync, existsSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 
-const CHROME_CANDIDATES = [
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  "/Applications/Chromium.app/Contents/MacOS/Chromium",
-  "/usr/bin/google-chrome",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-];
+import { launch, skipReason } from "./chrome_harness.mjs";
 
 const PAGE = process.env.PLATFORM_URL || "http://127.0.0.1:8799/index.html";
 
-const chromePath = CHROME_CANDIDATES.find((p) => existsSync(p));
-
-async function serverIsUp() {
-  try {
-    const res = await fetch(PAGE, { signal: AbortSignal.timeout(3000) });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-const available = chromePath && (await serverIsUp());
-const skip = !available
-  ? `SKIPPED: ${!chromePath ? "no Chrome binary found" : `nothing serving ${PAGE}`}`
-  : false;
-
-// ---------------------------------------------------------------- a tiny CDP client
-
-class Chrome {
-  constructor(proc, socket, profileDir) {
-    this.proc = proc;
-    this.socket = socket;
-    this.profileDir = profileDir;
-    this.nextId = 1;
-    this.pending = new Map();
-    socket.addEventListener("message", (event) => {
-      const message = JSON.parse(event.data);
-      if (message.id && this.pending.has(message.id)) {
-        const { resolve, reject } = this.pending.get(message.id);
-        this.pending.delete(message.id);
-        message.error ? reject(new Error(JSON.stringify(message.error))) : resolve(message.result);
-      }
-    });
-  }
-
-  send(method, params = {}) {
-    const id = this.nextId++;
-    this.socket.send(JSON.stringify({ id, method, params }));
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-      setTimeout(() => {
-        if (this.pending.delete(id)) reject(new Error(`${method} timed out`));
-      }, 20000);
-    });
-  }
-
-  /** Evaluate an expression in the page and return its value. */
-  async eval(expression) {
-    const result = await this.send("Runtime.evaluate", {
-      expression, returnByValue: true, awaitPromise: true,
-    });
-    if (result.exceptionDetails) {
-      throw new Error(`page threw: ${result.exceptionDetails.text} ` +
-        `${result.exceptionDetails.exception?.description || ""}`);
-    }
-    return result.result.value;
-  }
-
-  async close() {
-    try { this.socket.close(); } catch { /* already gone */ }
-    this.proc.kill("SIGTERM");
-    try { rmSync(this.profileDir, { recursive: true, force: true }); } catch { /* best effort */ }
-  }
-}
-
-async function launch(url) {
-  const profileDir = mkdtempSync(join(tmpdir(), "fcf-chrome-"));
-  const proc = spawn(chromePath, [
-    "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
-    "--remote-debugging-port=0", `--user-data-dir=${profileDir}`, url,
-  ], { stdio: ["ignore", "pipe", "pipe"] });
-
-  // Chrome prints the DevTools websocket URL to stderr once it is listening.
-  const wsUrl = await new Promise((resolve, reject) => {
-    let buffer = "";
-    const timer = setTimeout(() => reject(new Error("Chrome never announced a DevTools port")), 20000);
-    proc.stderr.on("data", (chunk) => {
-      buffer += chunk.toString();
-      const match = buffer.match(/ws:\/\/[^\s]+/);
-      if (match) { clearTimeout(timer); resolve(match[0]); }
-    });
-    proc.on("exit", (code) => { clearTimeout(timer); reject(new Error(`Chrome exited ${code}`)); });
-  });
-
-  // Attach to the page target rather than the browser endpoint.
-  const base = wsUrl.replace(/^ws:\/\//, "http://").replace(/\/devtools\/browser\/.*$/, "");
-  let pageWs = null;
-  for (let attempt = 0; attempt < 40 && !pageWs; attempt++) {
-    const targets = await fetch(`${base}/json/list`).then((r) => r.json()).catch(() => []);
-    const page = targets.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
-    if (page) pageWs = page.webSocketDebuggerUrl;
-    else await new Promise((r) => setTimeout(r, 250));
-  }
-  if (!pageWs) throw new Error("no page target appeared");
-
-  const socket = new WebSocket(pageWs);
-  await new Promise((resolve, reject) => {
-    socket.addEventListener("open", resolve, { once: true });
-    socket.addEventListener("error", reject, { once: true });
-  });
-
-  const chrome = new Chrome(proc, socket, profileDir);
-  await chrome.send("Runtime.enable");
-
-  // Wait for the app to finish building the form, rather than sleeping and hoping.
-  for (let attempt = 0; attempt < 60; attempt++) {
-    const ready = await chrome.eval(`!!document.querySelector("#f-site_id")`).catch(() => false);
-    if (ready) return chrome;
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  await chrome.close();
-  throw new Error("the entry form never rendered");
-}
+const skip = await skipReason(PAGE);
+const available = !skip;
 
 // ---------------------------------------------------------------- the tests
 
 let chrome;
 
-test.before(async () => { if (available) chrome = await launch(PAGE); });
+test.before(async () => {
+  if (available) chrome = await launch(PAGE, '!!document.querySelector("#f-site_id")',
+                                     "the entry form never rendered");
+});
 test.after(async () => { if (chrome) await chrome.close(); });
 
 /** Fill the visible form and press Add. Returns what the page shows afterwards. */
