@@ -29,8 +29,10 @@ erode it:
   reword, or soften it in any README, report, visual, or caption.
 - **Screening values are not budgets.** Costs are screening-class net present
   cost; never present them as budgets, bids, or forecasts.
-- MATLAB code is statically checked but has never been executed — do not
-  claim otherwise until `matlab/EXECUTION_STATUS.md` records a licensed run.
+- MATLAB has been executed on licensed MathWorks R2025b Update 5 (**49 passed / 0 failed**)
+  against a **synthetic fixture only**. No MATLAB output describes a real facility, and the
+  Simulink model was **built, never simulated** — do not claim more than
+  `matlab/EXECUTION_STATUS.md` records.
 
 ## Golden-test rule
 
