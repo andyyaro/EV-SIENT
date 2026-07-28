@@ -1,8 +1,27 @@
+% Guard proof: capacityGuard must refuse every non-verified capacity basis.
+%
+% Paths are resolved RELATIVE to this file. They were absolute when this was committed --
+% baked into one session's temporary scratchpad, so the script could not run on any other
+% machine, or on this one once that directory was cleaned up. The repository's hygiene gate
+% did not catch it: the gate searched five source extensions for one home-directory prefix,
+% and this is a .m file that carried a different prefix entirely. Its name promised more
+% than it checked; the gate has since been widened on both axes.
+%
+% Run with:  octave --no-gui matlab/octave/guardproof.m
 more off;
-pkg prefix /private/tmp/claude-501/-Users-andyyaro-Downloads-Future-City-Fellowship-MapUpdate/58698286-df36-4eee-8bc9-ff23a24df505/scratchpad/phase2/octave/pkg/prefix /private/tmp/claude-501/-Users-andyyaro-Downloads-Future-City-Fellowship-MapUpdate/58698286-df36-4eee-8bc9-ff23a24df505/scratchpad/phase2/octave/pkg/arch
-pkg local_list /private/tmp/claude-501/-Users-andyyaro-Downloads-Future-City-Fellowship-MapUpdate/58698286-df36-4eee-8bc9-ff23a24df505/scratchpad/phase2/octave/pkg/octave_packages
-pkg load datatypes
-addpath('/private/tmp/claude-501/-Users-andyyaro-Downloads-Future-City-Fellowship-MapUpdate/58698286-df36-4eee-8bc9-ff23a24df505/scratchpad/phase2/octave/shim'); addpath('/private/tmp/claude-501/-Users-andyyaro-Downloads-Future-City-Fellowship-MapUpdate/58698286-df36-4eee-8bc9-ff23a24df505/scratchpad/phase2/octave/xform/src');
+
+here = fileparts(mfilename("fullpath"));
+addpath(fullfile(here, "shim"));
+addpath(fullfile(here, "..", "src"));
+
+% Octave's `datatypes` package supplies struct helpers the shim relies on. Loaded only if
+% present, so the script still runs where it is unavailable and says what it could not load.
+try
+  pkg load datatypes;
+catch
+  printf("note: Octave package 'datatypes' not loaded; shim fallbacks will be used\n");
+end
+
 fail = 0;
 function row = mkrow(basis)
   row = struct(); row.scenario_id = "T"; row.site_id = "S";

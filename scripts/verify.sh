@@ -126,8 +126,14 @@ gate "tableau: embeds use the /views/ share form, never the profile page form" \
 gate "secrets: no keys/tokens/account IDs in tracked files" \
   bash -c "cd '$REPO' && '$PY' scripts/secret_scan.py"
 
-gate "hygiene: no local absolute paths in code/config" \
-  bash -c "cd '$REPO' && ! git grep -nI '/Users/andyyaro' -- '*.py' '*.sh' '*.toml' '*.yml' '*.json' ':!scripts/verify.sh'"
+# Widened on BOTH axes after a tracked .m file was found hardcoding one session's temporary
+# scratchpad directory. The gate searched five extensions for a single home-directory prefix;
+# the offending file was a sixth extension carrying a different prefix, so it passed a check
+# whose name claims "no local absolute paths in code/config". A gate that names a class and
+# tests one member of it is worse than one with a stated hole, because nobody looks for the
+# hole.
+gate "hygiene: no machine-specific absolute paths in tracked source" \
+  bash -c "cd '$REPO' && ! git grep -nIE '(/Users/[a-z]+|/home/[a-z]+|/private/tmp/claude|/tmp/claude-[0-9])' -- '*.py' '*.sh' '*.m' '*.toml' '*.yml' '*.yaml' '*.json' '*.js' '*.mjs' ':!scripts/verify.sh'"
 
 gate "hygiene: no tracked file over 25 MB" \
   bash -c "cd '$REPO' && [ -z \"\$(git ls-files -z | xargs -0 -I{} find {} -size +25M 2>/dev/null)\" ]"
