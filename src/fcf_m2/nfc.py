@@ -100,12 +100,20 @@ def encode_ndef(url: str) -> bytes:
     """
     code, remainder = encode_uri_payload(url)
     payload = bytes([code]) + remainder
-    if len(payload) > 254:
-        # A longer payload needs the 3-byte TLV length form and clears SR in the header.
-        # No project URL comes near this, so rather than ship an untested branch we refuse.
+    # The bound is on the RECORD, not the payload. The record is
+    # `bytes([0xD1, 0x01, len(payload), 0x55]) + payload` -- four header bytes -- and the
+    # single-byte NDEF TLV length form tops out at 254. So the real limit is a payload of
+    # 250. Guarding at `payload > 254` let payloads of 251-254 through, producing records of
+    # 255-258 that the single-byte form cannot express: exactly the untested long-form branch
+    # the refusal exists to avoid. Off by the four header bytes.
+    RECORD_HEADER_BYTES = 4
+    MAX_SINGLE_BYTE_TLV = 254
+    if len(payload) + RECORD_HEADER_BYTES > MAX_SINGLE_BYTE_TLV:
         raise TagError(
-            f"URI payload is {len(payload)} bytes, which needs the long TLV form this "
-            f"encoder does not implement. Shorten the URL.")
+            f"URI payload is {len(payload)} bytes, making a "
+            f"{len(payload) + RECORD_HEADER_BYTES}-byte record, which needs the long TLV form "
+            f"this encoder does not implement (single-byte form maxes at "
+            f"{MAX_SINGLE_BYTE_TLV}). Shorten the URL.")
     record = bytes([0xD1, 0x01, len(payload), 0x55]) + payload
     return bytes([0x03, len(record)]) + record + bytes([0xFE])
 

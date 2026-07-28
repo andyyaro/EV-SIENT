@@ -16,6 +16,7 @@ observations are too short to satisfy the minimum observation window.
 from __future__ import annotations
 
 import csv
+import math
 import random
 from datetime import date, timedelta
 from pathlib import Path
@@ -81,7 +82,16 @@ def session_rows(seed: int = 20260727) -> list[dict]:
                 ports_in_service=ports,
                 port_hours_available=available,
                 port_hours_possible=possible,
-                sessions_delayed=int(max(0, rng.gauss(sessions * 0.2, 1))),
+                # Clamped to `sessions`. Drawn from an unrelated gaussian it exceeded the
+                # session count on 13 of 880 rows -- a site-day with 0.96 sessions and 1
+                # delayed. A fixture that cannot happen teaches the reader the wrong shape,
+                # and any validator written against it inherits the impossibility.
+                # FLOORED, not rounded. `sessions` is a fractional daily average and
+                # `sessions_delayed` is an integer count, so rounding still produced
+                # delayed=1 against sessions=0.96. Flooring guarantees
+                # delayed <= floor(sessions) <= sessions for every row.
+                sessions_delayed=int(min(math.floor(sessions),
+                                         max(0, rng.gauss(sessions * 0.2, 1)))),
                 wait_p90_min=round(max(0.0, rng.gauss(wait, wait * 0.2)), 1),
                 observer="SYNTHETIC reviewer",
                 source_system="SYNTHETIC network export",
