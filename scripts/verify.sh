@@ -184,6 +184,14 @@ gate "3d: viewer JS parses and every CDN reference is version-pinned" \
 gate "matlab: nothing destined for the PUBLIC harness carries site-identifying data" \
   bash -c "cd '$REPO' && '$PY' scripts/check_harness_exposure.py"
 
+# The field-entry form must never accept an observation the model will refuse — otherwise a
+# field worker is told a record was saved when it was not. The schema is generated from
+# observed.py and this gate runs the same candidate rows through the browser validator and the
+# real CSV readers. It has already earned its place: it found blank attribution surviving as
+# the string "nan", which let an unattributed row claim verified_utility.
+gate "field-entry: the browser's rules never accept what the model rejects" \
+  bash -c "cd '$REPO' && '$PY' scripts/build_field_schema.py >/dev/null && '$PY' -m pytest tests/test_field_schema_parity.py -q"
+
 # The edge authoriser is the only thing standing between an anonymous request and the study's
 # full lineage, so its tests run here rather than only in the deploy path. They exercise the
 # REAL handler with REAL RSA keys — only the network is stubbed — so a regression in token

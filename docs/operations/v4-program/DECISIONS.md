@@ -991,3 +991,79 @@ else's* origin moved — drowns. Now exempted, with the platform origin still as
 at the isolated bucket. **Lambda version 2 was published while this fired, and CloudFront was
 never updated to use it**, so for a few minutes the newly published code was live nowhere. The
 failure was safe, which is the point, but it was not free.
+
+---
+
+## DEC-018 — Blank attribution was silently accepted as the string "nan"
+
+**Date:** 2026-07-27 · **Phase:** 7 · **Severity: the V4 loop's central guarantee, defeated
+since it was written**
+
+### What was wrong
+
+`CapacityObservation.__post_init__` refuses an observation whose `source_document` or
+`observer` is blank. The comment above it is explicit about why: *"An unattributed observation
+cannot upgrade anything, so it is refused at the door rather than accepted and quietly ignored
+later."*
+
+**That refusal never fired.** pandas reads a blank CSV cell as `NaN`, and
+`read_capacity_observations` did `str(row["source_document"]).strip()` — so `NaN` reached the
+check as the four-character string `'nan'`. Non-empty. Check passes.
+
+The consequence, reproduced before the fix:
+
+```
+implied_basis   = 'verified_utility'      <- the strongest basis available
+capacity_source = 'verified_utility via utility_load_study: nan (Dominion Energy),
+                   recorded by nan on 2026-07-01'
+```
+
+A row naming **no document and no observer** was accepted, and claimed the strongest possible
+provenance. `capacity_basis` becoming `verified_utility` is exactly the condition the
+fail-closed capacity guard tests for before it will emit a feasibility claim. So the guard —
+this project's most-cited safeguard — could have been satisfied by a blank spreadsheet cell.
+
+Nothing had ever been observed to fail, because nothing had ever submitted a blank cell: the
+only capacity data in the repository is a hand-made fixture with every field populated.
+
+### How it was found
+
+**By a disagreement, not by looking for it.** A parity test was written to check that the new
+browser entry form never accepts what the model rejects. It reported the opposite of the
+expected failure: the *form* refused the blank row and the *model* took it. The test was built
+to catch a permissive form and instead caught a permissive model.
+
+This is the argument for cross-checking two independent implementations of the same rule. A
+test written against `observed.py` alone would have encoded the same assumption the code makes
+— that a blank cell arrives blank — and passed.
+
+### The fix
+
+`_as_text()` at the CSV boundary: a missing, `NaN`, or whitespace-only cell becomes `""`,
+never `"nan"`. Applied to **every** text column in both readers, not only the two that were
+checked — `source_org` had the same hole and would have printed `nan` inside the provenance
+string that travels into the contract, which reads as a fabricated source.
+
+Two further refusals were added while in there, both the same class of defect:
+
+- **A capacity observation with no `site_id` is refused.** Unchecked it did not error —
+  `resolve_capacity` groups by `site_id`, so it created a phantom site keyed on the empty
+  string whose confirmed capacity belonged to nowhere.
+- **Same for session observations.**
+
+### Gates
+
+- `tests/test_observed.py` — six regression tests, including one asserting that **no** text
+  field can arrive as `'nan'`, so the general form of the bug is closed rather than the two
+  instances that were noticed.
+- `verify.sh` gate 30 — the form/model parity check that found it.
+
+### What this says about the other refusals in this codebase
+
+This program has repeatedly relied on the argument *"the code refuses it, therefore it cannot
+happen."* This is a case where the refusal existed, was correct, was well-commented, was
+covered by tests that constructed the dataclass **directly** — and was unreachable through the
+path real data actually takes. **A guard is only as good as the boundary conversion in front
+of it**, and the tests were aimed at the guard rather than at the boundary. That belongs in the
+Phase 10 audit's brief: for every refusal, ask what the value looks like when it *arrives*, not
+what it looks like in the test that constructs it.

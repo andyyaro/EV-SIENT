@@ -113,6 +113,13 @@ class CapacityObservation:
     notes: str = ""
 
     def __post_init__(self) -> None:
+        if not str(self.site_id).strip():
+            # An observation that names no site cannot be attributed to one. Left unchecked it
+            # does not fail — `resolve_capacity` groups by site_id, so it quietly creates a
+            # phantom site keyed on the empty string, whose "confirmed" capacity belongs to
+            # nowhere. Refused for the same reason as a missing source document.
+            raise ObservationError(
+                "a capacity observation with no site_id cannot be attributed to a site.")
         if self.method not in METHOD_TO_BASIS:
             raise ObservationError(
                 f"{self.site_id}: unknown method {self.method!r}. "
@@ -169,6 +176,10 @@ class SessionObservation:
     source_system: str = ""
 
     def __post_init__(self) -> None:
+        if not str(self.site_id).strip():
+            raise ObservationError(
+                f"a session observation for {self.date} names no site_id, so it cannot be "
+                f"attributed to a site.")
         if self.ports_in_service <= 0:
             raise ObservationError(f"{self.site_id} {self.date}: ports_in_service must be > 0.")
         if self.port_hours_possible <= 0:
@@ -205,6 +216,37 @@ def _optional_float(row: pd.Series, name: str) -> float | None:
     return float(value)
 
 
+def _as_text(row: pd.Series, name: str, default: str = "") -> str:
+    """Read a text cell, treating a missing/blank cell as empty — never as the word "nan".
+
+    This exists because of a defect that defeated the project's central provenance guarantee
+    for as long as the V4 loop has existed.
+
+    ``CapacityObservation.__post_init__`` refuses an observation whose ``source_document`` or
+    ``observer`` is blank, because an unattributed record must not be able to upgrade a site's
+    ``capacity_basis``. That refusal is correct and it **never fired**: pandas reads a blank CSV
+    cell as ``NaN``, and the readers did ``str(row[name]).strip()``, so ``NaN`` arrived at the
+    check as the four-character string ``'nan'``. Non-empty. Check passes.
+
+    The consequence was not cosmetic. A row with no attribution at all was accepted, reported
+    ``implied_basis == 'verified_utility'`` — the strongest basis available — and produced the
+    provenance string ``"verified_utility via utility_load_study: nan (...), recorded by nan
+    on 2026-07-01"``. That is precisely the state the fail-closed capacity guard exists to
+    prevent: a feasibility claim resting on evidence nobody supplied.
+
+    Found by ``tests/test_field_schema_parity.py`` while checking a *browser form* against the
+    model — the form refused the blank row, the model accepted it, and the disagreement was the
+    signal. Nothing was looking for this.
+    """
+    value = row.get(name, default)
+    if value is None:
+        return default
+    if isinstance(value, float) and math.isnan(value):
+        return default
+    text = str(value).strip()
+    return text if text else default
+
+
 def _as_date(value) -> date:
     if isinstance(value, date) and not isinstance(value, datetime):
         return value
@@ -227,17 +269,17 @@ def read_capacity_observations(path: str | Path) -> list[CapacityObservation]:
     out: list[CapacityObservation] = []
     for index, row in frame.iterrows():
         out.append(CapacityObservation(
-            site_id=str(row["site_id"]).strip(),
+            site_id=_as_text(row, "site_id"),
             observed_date=_as_date(row["observed_date"]),
-            method=str(row["method"]).strip(),
-            source_org=str(row["source_org"]).strip(),
-            source_document=str(row["source_document"]).strip(),
-            observer=str(row["observer"]).strip(),
-            verification_status=str(row.get("verification_status", "reviewed")).strip(),
+            method=_as_text(row, "method"),
+            source_org=_as_text(row, "source_org"),
+            source_document=_as_text(row, "source_document"),
+            observer=_as_text(row, "observer"),
+            verification_status=_as_text(row, "verification_status", "reviewed"),
             service_capacity_kw=_optional_float(row, "service_capacity_kw"),
             spare_capacity_kw=_optional_float(row, "spare_capacity_kw"),
             measured_peak_kw=_optional_float(row, "measured_peak_kw"),
-            notes=str(row.get("notes", "") or ""),
+            notes=_as_text(row, "notes"),
         ))
     return out
 
@@ -256,7 +298,7 @@ def read_session_observations(path: str | Path) -> list[SessionObservation]:
     out: list[SessionObservation] = []
     for _, row in frame.iterrows():
         out.append(SessionObservation(
-            site_id=str(row["site_id"]).strip(),
+            site_id=_as_text(row, "site_id"),
             date=_as_date(row["date"]),
             sessions=float(row["sessions"]),
             energy_kwh=float(row["energy_kwh"]),
@@ -267,8 +309,8 @@ def read_session_observations(path: str | Path) -> list[SessionObservation]:
             facility_visitors_day=_optional_float(row, "facility_visitors_day"),
             sessions_delayed=int(row.get("sessions_delayed", 0) or 0),
             wait_p90_min=_optional_float(row, "wait_p90_min"),
-            observer=str(row.get("observer", "") or ""),
-            source_system=str(row.get("source_system", "") or ""),
+            observer=_as_text(row, "observer"),
+            source_system=_as_text(row, "source_system"),
         ))
     return out
 

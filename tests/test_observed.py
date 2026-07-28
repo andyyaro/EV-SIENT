@@ -279,3 +279,73 @@ class TestTriggerLoop:
     def test_absent_observations_yield_awaiting_not_a_guess(self):
         decision = triggers.evaluate(None, ports_active=4, ports_pathway=8, site_id="SYN001")
         assert decision.outcome == "awaiting_observed_data"
+
+
+# ============================================================ blank cells are not attribution
+
+def _write_csv(tmp_path, columns, row):
+    path = tmp_path / "obs.csv"
+    path.write_text(",".join(columns) + "\n"
+                    + ",".join(f'"{row.get(c, "")}"' for c in columns) + "\n")
+    return path
+
+
+CAPACITY_ROW = dict(
+    site_id="FFX001", observed_date="2026-07-01", method="utility_load_study",
+    service_capacity_kw="400", spare_capacity_kw="120", measured_peak_kw="180",
+    source_org="Dominion Energy", source_document="Load study LS-2026-114",
+    observer="A. Yaro", verification_status="reviewed", notes="")
+
+
+@pytest.mark.parametrize("blanked", ["source_document", "observer"])
+def test_a_blank_attribution_cell_is_refused_not_read_as_the_word_nan(tmp_path, blanked):
+    """Regression. This defect was live for the whole life of the V4 loop.
+
+    `__post_init__` refuses an observation whose source_document or observer is blank, because
+    an unattributed record must not upgrade a site's capacity_basis. The refusal never fired:
+    pandas reads a blank cell as NaN and the reader did `str(NaN).strip()`, delivering the
+    four-character string 'nan' — non-empty, so the check passed.
+
+    The result was not cosmetic. The row was accepted, reported implied_basis
+    'verified_utility' (the strongest available), and produced the provenance string
+    "... : nan (Dominion Energy), recorded by nan on 2026-07-01". That is the exact state the
+    fail-closed capacity guard exists to prevent.
+    """
+    row = dict(CAPACITY_ROW, **{blanked: ""})
+    path = _write_csv(tmp_path, observed.CAPACITY_COLUMNS, row)
+    with pytest.raises(observed.ObservationError, match="provenance"):
+        observed.read_capacity_observations(str(path))
+
+
+@pytest.mark.parametrize("blanked", ["source_document", "observer"])
+def test_a_whitespace_only_attribution_cell_is_also_refused(tmp_path, blanked):
+    """Spaces are not attribution either, and are what a real spreadsheet actually produces."""
+    row = dict(CAPACITY_ROW, **{blanked: "   "})
+    path = _write_csv(tmp_path, observed.CAPACITY_COLUMNS, row)
+    with pytest.raises(observed.ObservationError, match="provenance"):
+        observed.read_capacity_observations(str(path))
+
+
+def test_no_text_field_can_ever_arrive_as_the_string_nan(tmp_path):
+    """The general form of the bug, not just the two fields that were checked.
+
+    A blank cell in ANY text column must arrive as empty, never as 'nan'. Left unfixed,
+    source_org would print 'nan' inside the provenance string that travels into the contract —
+    a fabricated-looking source on a row that is otherwise legitimate.
+    """
+    row = dict(CAPACITY_ROW, source_org="", notes="")
+    path = _write_csv(tmp_path, observed.CAPACITY_COLUMNS, row)
+    observation = observed.read_capacity_observations(str(path))[0]
+    for field_name in ("site_id", "method", "source_org", "source_document", "observer", "notes"):
+        assert getattr(observation, field_name) != "nan", (
+            f"{field_name} arrived as the literal string 'nan'")
+    assert "nan" not in observation.capacity_source.split(), (
+        f"the provenance string contains a bare 'nan': {observation.capacity_source!r}")
+
+
+def test_an_observation_with_no_site_id_is_refused(tmp_path):
+    """Unchecked this does not fail — resolve_capacity groups by site_id, so it creates a
+    phantom site keyed on the empty string whose confirmed capacity belongs to nowhere."""
+    path = _write_csv(tmp_path, observed.CAPACITY_COLUMNS, dict(CAPACITY_ROW, site_id=""))
+    with pytest.raises(observed.ObservationError, match="site_id"):
+        observed.read_capacity_observations(str(path))
