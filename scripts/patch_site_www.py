@@ -138,11 +138,31 @@ CURRENCY_CORRECTIONS = [
     ('<p class="detail-description" id="detailDescription">Best current planning signal.',
      '<p class="detail-description" id="detailDescription">Strongest site under the legacy_v2 '
      'baseline; FFX004 leads under the current model.'),
+    # First attempt at this line replaced an unverifiable claim about a third-party host with
+    # a CHECKABLE AND FALSE one: it called `reports/` "the authoritative copy". That file is
+    # `site/www/reports/Public_EV_Charging_Planning_Report.pdf` -- generated 2026-06-28, page 3
+    # headed "Current Site Ranking", carrying all twelve `legacy_v2` scores and naming no mode.
+    # So the sentence sent a reader from a mode note saying "not the current model" to a
+    # document calling the same numbers "the current readiness score". The defect was
+    # relocated, not removed.
+    # A revised correction must also match its OWN previous output, or it silently does
+    # nothing on any page already patched with the earlier wording. This entry exists purely
+    # because the line below was corrected once and then corrected again.
+    ("A generated planning report is embedded below from an external host. Its contents are "
+     "not verified by this repository; the authoritative copy is the one in "
+     "<code>reports/</code>.",
+     "A planning report is embedded below from an external host; this repository cannot verify "
+     "what that host serves. The copy tracked here was generated <strong>2026-06-28 from the "
+     "<code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site "
+     "Ranking&rdquo; but carries the same superseded scores as the gallery above, and names no "
+     "model mode. Treat it as a dated artifact, not as current model output."),
     ("The full planning analysis from the latest model run is available below as a generated "
      "report.",
-     "A generated planning report is embedded below from an external host. Its contents are "
-     "not verified by this repository; the authoritative copy is the one in "
-     "<code>reports/</code>."),
+     "A planning report is embedded below from an external host; this repository cannot verify "
+     "what that host serves. The copy tracked here was generated <strong>2026-06-28 from the "
+     "<code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site "
+     "Ranking&rdquo; but carries the same superseded scores as the gallery above, and names no "
+     "model mode. Treat it as a dated artifact, not as current model output."),
 ]
 
 

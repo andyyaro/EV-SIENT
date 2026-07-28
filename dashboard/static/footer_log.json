@@ -3,7 +3,7 @@
     "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
     "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
     "scenario": "legacy_v2 baseline scores",
-    "assumption": "0 of 12 sites have High data confidence",
+    "assumption": "all 12 sites score Low data confidence; none reaches Medium",
     "file": "dashboard/static/01_readiness_ranking.png"
   },
   {

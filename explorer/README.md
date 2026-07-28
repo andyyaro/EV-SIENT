@@ -74,11 +74,14 @@ economics, coordinate provenance, and the outstanding data gaps.
 `fcf_m2/scoring.py`, so every site's score decomposes into per-driver point
 contributions:
 
-> City of Fairfax Regional Library ranks #1 at 58.8.
-> Earned: equity gap index +8.11 pts, short service run +7.50 pts, install cost +7.50 pts.
-> Forgone: spare electrical capacity −10.50 pts, adjacent traffic −4.52 pts, jobs within 1 mi −4.08 pts.
+> City of Fairfax Regional Library ranks #2 at 51.8.
+> Earned: equity gap index +6.60 pts, distance to electrical service +5.62 pts, install cost +5.53 pts.
+> Forgone: spare electrical capacity −10.50 pts, jobs within 1 mi −4.92 pts, households within 1 mi −4.75 pts.
 
-Those numbers sum back to 58.8 exactly, for all 12 sites.
+Those numbers sum back to 51.8 exactly, for all 12 sites. (This example previously
+quoted 58.8 and rank #1 — those are `legacy_v2` figures, and the shipped viewer
+data is `milestone2_v3`. A worked example that does not match the artifact it
+documents is a defect, not a rounding.)
 `test_attribution_reproduces_model_score` fails the build if anyone reweights
 the model without updating the map — so the viewer can never quietly tell
 planners a story the model never told.

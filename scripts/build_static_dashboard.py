@@ -55,7 +55,7 @@ def c1_ranking():
     for y, (s, cl) in enumerate(zip(df["readiness_score"], df["data_confidence_level_v3"])):
         ax.text(s + 0.5, y, cl, va="center", fontsize=7, color=BLACK)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "legacy_v2 baseline scores",
-                   "0 of 12 sites have High data confidence")
+                   "all 12 sites score Low data confidence; none reaches Medium")
     visuals.save(fig, OUT / "01_readiness_ranking.png", LOG, relative_to=REPO)
 
 
@@ -185,7 +185,7 @@ def c8_limitations():
     fig.set_facecolor(BEIGE)
     lines = [
         ("What this analysis is NOT", True),
-        ("• 0 of 12 sites have High data confidence — every electrical value awaits confirmation", False),
+        ("• All 12 sites score Low data confidence, none reaching Medium — every electrical value awaits confirmation", False),
         ("• Capacity is a PLACEHOLDER at 12/12 sites (no utility/facility verification yet)", False),
         ("• Demand model is synthetic and uncalibrated; growth multipliers are provisional", False),
         ("• Costs are screening-class benchmarks — not budgets, quotes, or engineering estimates", False),
