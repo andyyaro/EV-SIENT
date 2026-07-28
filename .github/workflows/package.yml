@@ -22,11 +22,13 @@ name: package
 #
 # What is NOT claimed
 # -------------------
-# **Nothing here is notarized.** There is no Apple Developer account. Ad-hoc signing is applied
-# where it costs nothing, and it does **not** satisfy Gatekeeper — measured on macOS 26.5.1,
-# `spctl -a -t exec` rejects an ad-hoc-signed binary with exit 3. The friction that causes is
-# documented in docs/INSTALL.md rather than papered over, and this workflow does not print
-# anything suggesting the artifacts are trusted by the OS.
+# **Nothing here is notarized, and nothing here is signed.** There is no Apple Developer
+# account. There was an ad-hoc signing step; it was removed once measurement showed the `zip`
+# on the following line destroyed its output — see the note above the repackage step. Neither
+# state satisfies Gatekeeper: measured on macOS 26.5.1, `spctl -a -t exec` exits 3 on the
+# ad-hoc-signed file and on the unsigned one alike. The friction that causes is documented in
+# docs/INSTALL.md rather than papered over, and this workflow does not print anything
+# suggesting the artifacts are trusted by the OS.
 
 on:
   push:
@@ -224,6 +226,18 @@ jobs:
           name: fcf-platform-${{ matrix.platform }}
           path: out/*
           if-no-files-found: error
+          # Actions artifact storage is an ACCOUNT-level quota, and hitting it does not
+          # degrade gracefully: "Artifact storage quota has been hit. Unable to upload any new
+          # artifacts", which failed this step on both runners after every build step had
+          # passed. At the time, 440 artifacts were held, 3.01 GB, almost all of them ~14 MB
+          # copies of one output set uploaded on every run of an older branch's workflow and
+          # kept for the 90-day default.
+          #
+          # These are a staging area, not the archive: on a tag the release job downloads them
+          # and attaches them to the Release, which is where they live permanently. Two weeks
+          # is long enough to download a build by hand and short enough that a build nobody
+          # asked for stops costing anything.
+          retention-days: 14
 
   release:
     name: Attach to the release
