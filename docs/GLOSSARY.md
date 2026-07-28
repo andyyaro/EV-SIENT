@@ -91,7 +91,7 @@ everywhere.
 ### Right-sizing
 
 Choosing how many charging ports to install now, rather than as many as will fit. The direct
-answer to installing 70 ports and decommissioning 17 of them.
+answer to installing 70 ports and later taking 17 of them offline.
 
 ### Screening-class
 

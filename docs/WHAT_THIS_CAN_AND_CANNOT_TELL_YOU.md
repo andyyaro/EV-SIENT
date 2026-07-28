@@ -34,7 +34,7 @@ cost. Because the scoring uses **fixed anchors** rather than ranking sites again
 a site's score doesn't move when another site is added or removed.
 
 **Roughly how much overbuilding costs.** This is the project's actual argument: a real
-installation put in 70 ports and later decommissioned 17 of them. Comparing a right-sized
+installation put in 70 ports and later took 17 of them offline. Comparing a right-sized
 build against an overbuilt one is what the model is genuinely for.
 
 **Where the pathway argument is strongest.** Conduit and trenching are cheap while the ground

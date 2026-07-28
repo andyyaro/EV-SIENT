@@ -9,6 +9,33 @@ Decision-support platform for planning safe, code-responsive public EV charging 
 
 ![Staged pilots beat broad buildout at every horizon](docs/assets/readme/project-overview.png)
 
+## Start here
+
+A commuter garage in Prince William County has 70 EV charging ports. Seventeen were later taken
+offline — they cost roughly $1,000 per station per year to keep, and not enough people were
+using them. At a different county site, a ten-port installation ran over budget because the
+trenching turned out to be longer than anyone planned for.
+
+Those two things pull in opposite directions. Build too much and you pay to run chargers
+nobody uses. Build too little, and adding more later means digging up ground you already
+paid to close.
+
+**This project is about the middle.** Install fewer ports than you think you need, but put the
+conduit and electrical pathway in for more while the ground is already open — then energise the
+rest only when real usage data says to. For these twelve sites that means **25 ports now, a
+pathway built for 48**.
+
+That's the whole idea. Everything below is the evidence for it, and the honest accounting of
+what we don't know.
+
+> **The most important thing we don't know:** nobody has confirmed that any of these twelve
+> sites has the electrical capacity to support chargers. Not one. That figure is a labelled
+> placeholder everywhere, and the software **refuses** to make a feasibility claim from it.
+
+**New here?** → **[Start here](docs/START_HERE.md)** — a five-minute orientation with a
+reader map and an honest FAQ · [What this can and can't tell
+you](docs/WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md) · [Glossary](docs/GLOSSARY.md)
+
 ## What this project is
 
 Electrification in Northern Virginia is expanding faster than local readiness — code
@@ -22,14 +49,14 @@ from a 2026 baseline).
 25 charging ports at the strongest sites, pre-build expandable civil/electrical pathways
 for up to 48, and energize more only when observed utilization, wait, and reliability
 data clear predefined, equity-aware triggers. This is the direct answer to the client's
-own operating history (a 70-port garage installation that ended with 17 stations
-decommissioned, and a trenching-driven cost overrun).
+own operating history described above: the Neabsco-Potomac garage (70 ports, 17 later
+taken offline) and the McCoart trenching cost escalation.
 
 > **What this is not.** This is not engineering approval, a permit or code determination,
 > a utility capacity confirmation, an official forecast, or a budget. Site *readiness*
-> is not construction *approval*: **0 of 12 sites have High data confidence, and
-> electrical capacity is a labeled placeholder at all 12 sites** pending utility and
-> facility verification.
+> is not construction *approval*: **all 12 sites score Low data confidence — none reaches
+> even Medium — and electrical capacity is a labeled placeholder at all 12 sites** pending
+> utility and facility verification.
 
 ## Headline results (canonical contract v1.0.0, screening values)
 
@@ -54,16 +81,24 @@ Data confidence is **Low at all 12 sites** — no site reaches Medium, let alone
 ```mermaid
 flowchart LR
     A[12-site inputs<br/>data/inputs] --> B[Python model src/fcf_m2<br/>readiness · right-sizing · waits<br/>economics · emissions · triggers]
-    B --> C[Canonical data contract<br/>data/contract/v1<br/>site x horizon x case, validated]
+    B --> C[Canonical data contract<br/>data/contract/v1 frozen · v2 additive<br/>site x horizon x case, hash-chained]
     C --> D[MATLAB site-load model<br/>matlab/]
     C --> E[Excel workbook<br/>excel/]
-    C --> F[Static dashboard + Tableau patch<br/>dashboard/]
+    C --> F[Static dashboard + Tableau<br/>dashboard/]
     C --> G[Reports + presentation<br/>reports/ · presentation/]
+    C --> H[Platform — two tiers<br/>site/platform/]
+    C --> I[3D explorer<br/>explorer/]
+    H --> J[NFC field layer<br/>tag → form → CSV]
+    J -.corrections.-> A
 ```
 
-Python is the single producer; MATLAB, Excel, Tableau, and every visual consume the
-same validated contract, so no two artifacts can disagree about a port count, a year,
-or whether capacity is a placeholder (`capacity_basis` travels with every row).
+Python is the single producer; MATLAB, Excel, Tableau, the platform, the 3D explorer and every
+visual consume the same validated contract, so no two artifacts can disagree about a port
+count, a year, or whether capacity is a placeholder (`capacity_basis` travels with every row).
+
+The dotted arrow is the point of the whole design: an NFC tag on a bollard leads to a form that
+feeds observations back into the inputs, so the study can be corrected by someone standing at
+the site rather than only by whoever holds the spreadsheet.
 
 ## Two model modes
 
@@ -87,9 +122,10 @@ make validate       # validate the tracked canonical contract
 ```
 
 Requirements: Python 3.11+ (verified on 3.12/3.14). MATLAB R2025b for the `matlab/`
-model (**not required** for anything above — and note that the MATLAB code has been
-statically checked but never executed; see
-[matlab/EXECUTION_STATUS.md](matlab/EXECUTION_STATUS.md)).
+model (**not required** for anything above). The MATLAB suite has been executed on licensed
+MathWorks R2025b Update 5 — **49 passed / 0 failed** — but only against a *synthetic* fixture,
+never against real site data; see
+[matlab/EXECUTION_STATUS.md](matlab/EXECUTION_STATUS.md).
 
 ## Repository map
 
@@ -97,7 +133,7 @@ statically checked but never executed; see
 |---|---|
 | [`src/fcf_m2/`](src/README.md) | The Python model (scoring, right-sizing, waits, economics, emissions, confidence, triggers, contract) |
 | [`data/`](data/README.md) | Site inputs, scoring anchors, provenance, cached GIS boundaries, the canonical contract |
-| [`tests/`](tests/README.md) | 80-test suite incl. golden legacy fixtures and contract validation |
+| [`tests/`](tests/README.md) | 652-test suite incl. golden legacy fixtures and contract validation |
 | [`matlab/`](matlab/README.md) | Site-grid load-behavior model (session-based profiles, capacity guard, managed charging) |
 | [`excel/`](excel/README.md) | Updated grid-planning workbook with live reconciliation checks |
 | [`dashboard/`](dashboard/README.md) | Offline static dashboard (9 visuals) + Tableau patch package |
@@ -105,6 +141,9 @@ statically checked but never executed; see
 | [`presentation/`](presentation/README.md) | Final deck, speaker notes, timing runbook, Q&A backup |
 | [`docs/`](docs/README.md) | Architecture, methodology, standards, operations, human-action packages |
 | [`scripts/`](scripts/README.md) | Verification harness and artifact builders |
+| `site/` | The deployed surfaces: the public website (`site/www/`) and the platform bundle (`site/platform/`) |
+| `explorer/` | The 3D site explorer — Cesium viewer, 12 building models, its own ETL |
+| `infra/` | The Lambda@Edge authoriser that gates `/platform/` behind Cognito sign-in |
 
 ## Key documents
 
@@ -117,11 +156,15 @@ statically checked but never executed; see
 
 ## Verification
 
-`./scripts/verify.sh` runs all ten gates: the pytest suite with a coverage floor, legacy
-baseline reproduction, contract rule/schema/hash-chain validation, cross-model
-reconciliation against the MATLAB input, generated-docs drift, footer QA on every dashboard
-visual, secret and local-path scans, size limits, and Markdown link checks. It exits with the
-number of failures, so a red run is visible in the exit code, not just in the log.
+`./scripts/verify.sh` runs all **39** gates: the pytest suite with a coverage floor, legacy
+baseline reproduction, contract rule/schema/hash-chain validation, cross-model reconciliation
+against the MATLAB input, generated-docs drift, footer QA on every dashboard visual, secret and
+local-path scans, size limits, Markdown link checks, the 3D explorer and its CDN pins, the
+Tableau workbook and embed forms, the platform's two tiers and their provenance, field-entry
+parity in a real browser, the Cognito edge gate, supply-chain digests, packaging constraints,
+intake degradation, and a clone-safety check that catches files present here but missing from a
+fresh clone. It exits with the number of failures, so a red run is visible in the exit code, not
+just in the log.
 
 CI runs **the same gates**, on every push and every pull request
 ([tests.yml](.github/workflows/tests.yml)) — literally the same, because CI invokes
@@ -149,9 +192,18 @@ disconnect-placement, access, and code-edition determinations rest with the loca
 
 ## Project status
 
-Milestone 2 package complete (July 2026); presentation 2026-07-21. Next phase: client
-follow-up, utility/facility data requests (which upgrade `capacity_basis` from
-placeholder), AHJ conversations, and pilot preparation.
+Milestone 2 package complete (July 2026); presentation 2026-07-21.
+
+Since then the project has become a running system rather than a document set: the model is
+served through a **platform** with two capability tiers, deployed at
+`futurecityfellowship.andyyaro.com` with `/platform/` behind Cognito sign-in; a **3D explorer**
+and a **static dashboard** read the same contract; **NFC tags** on site let someone standing in
+the parking lot send a correction back into the model; and an **intake layer** lets another
+jurisdiction bring its own data file without that file quietly scoring better than it should.
+
+None of this changes the epistemics. Capacity is still a placeholder at all twelve sites, and
+the next real step is unchanged: client follow-up, utility and facility data requests (which
+upgrade `capacity_basis` from placeholder), AHJ conversations, and pilot preparation.
 
 ## Team
 
