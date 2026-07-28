@@ -8,11 +8,38 @@
 % than it checked; the gate has since been widened on both axes.
 %
 % Run with:  octave --no-gui matlab/octave/guardproof.m
+%
+% THE TRANSFORM IS NOT OPTIONAL, and this script used to skip it. It added
+% `matlab/src` -- the UNTRANSFORMED MATLAB sources -- directly to the path, and the
+% documented one-line invocation above therefore could not pass. Measured: every G1-G3
+% check reported FAIL because Octave raises those errors with an EMPTY identifier from
+% untransformed source, so `capacityGuard:notVerified` never matched, and G4 died outright
+% inside inputParser validation. Against a transformed tree the same script reports
+% 0 failures. The guard was fine; the invocation was not.
+%
+% So the transform now runs here, into a temporary directory, and THAT is what goes on the
+% path. The one-liner above is true again.
 more off;
 
 here = fileparts(mfilename("fullpath"));
 addpath(fullfile(here, "shim"));
-addpath(fullfile(here, "..", "src"));
+
+repo = fullfile(here, "..", "..");
+xf = fullfile(tempdir(), sprintf("fcf_octave_src_%d", getpid()));
+mkdir(xf); mkdir(fullfile(xf, "src")); mkdir(fullfile(xf, "tests"));
+
+py = fullfile(repo, "venv", "bin", "python");
+if ~exist(py, "file"); py = "python3"; end
+cmd = sprintf('"%s" "%s" "%s" "%s"', py, fullfile(here, "transform.py"), ...
+              fullfile(repo, "matlab"), xf);
+[rc, out] = system(cmd);
+if rc != 0
+  printf("FATAL: MATLAB->Octave transform failed (exit %d). This proof cannot run against\n", rc);
+  printf("       untransformed sources -- see the note at the top of this file.\n%s\n", out);
+  exit(2);
+end
+addpath(fullfile(xf, "src"));
+printf("(transformed sources into %s)\n", xf);
 
 % Octave's `datatypes` package supplies struct helpers the shim relies on. Loaded only if
 % present, so the script still runs where it is unavailable and says what it could not load.
