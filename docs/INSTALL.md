@@ -52,11 +52,23 @@ what the current one does.
 Apple's Gatekeeper allows apps from identified developers — meaning a paid Apple Developer
 account and a notarization step where Apple scans the artifact. **This project has neither.**
 
-The artifact *is* ad-hoc signed, and it is worth being precise about what that achieves:
-**nothing, as far as Gatekeeper is concerned.** Measured on this macOS version, `spctl -a -t
-exec` rejects an ad-hoc-signed binary with exit code 3, exactly as it rejects an unsigned one.
-Ad-hoc signing gives the file a stable identity for other purposes; it does not make macOS
-trust it, and this guide will not imply otherwise.
+**The artifact you download carries no signature at all.** This guide previously said it was
+ad-hoc signed. It is not, and the correction is worth stating precisely because the earlier
+sentence was a claim about the artifact rather than a measurement of it.
+
+The packaging job did run `codesign -s -`, but ad-hoc signing a *shell script* stores the
+signature in extended attributes rather than inside the file, and the very next step — `zip` —
+discards extended attributes. Measured on macOS 26.5.1 by building the release artifact and
+extracting it the way a recipient does: the staging file carries
+`com.apple.cs.CodeDirectory`/`CodeRequirements`/`CodeSignature`; after `zip` and `unzip` it
+carries none of them and `codesign -dv` reports *"code object is not signed at all"*. The
+signing step destroyed its own output one line later, so no release ever shipped a signed file.
+
+**None of that changes what you experience**, which is the reason it went unnoticed. `spctl -a
+-t exec` exits **3** on both — on the signed staging file and on the unsigned extracted one.
+Ad-hoc signing was never going to make macOS trust this, so the step has been removed rather
+than repaired: keeping it would have meant preserving a signature that buys nothing and only
+survives if you happen to extract with `ditto` instead of double-clicking.
 
 Since macOS Sequoia, Apple removed the old Control-click → Open shortcut that used to bypass
 this. The System Settings path above is the current route, and there is no engineering that

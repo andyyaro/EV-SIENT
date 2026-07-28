@@ -130,8 +130,10 @@ explorer and dashboard sub-surfaces, and tier detection have not been exercised 
 - **Tableau workbook** — downloaded the *published* `.twbx` and read its Hyper extracts:
   FFX004 rank 1 @ 53.4, all 12 Low, horizons 2026/2036/2046/2056, totals 25/48.
 - **Static dashboard** — every chart footer-logged; regenerated and diffed.
-- **Public installer** — extracted from a clean directory and run end to end: 0.2 MB, 44 files,
-  free of all 36 real identifiers, 6/6 endpoints serving.
+- **Public installer** — extracted from a clean directory and run end to end, free of all 36
+  real identifiers, endpoints serving. The file count moves as the bundle grows, so it is
+  recorded per run rather than asserted: **44 files** on 2026-07-28 at first build, **65** in
+  the full packaged artifact of §10.
 - **Stamped planning report** — 9 pages (1 cover + 8 originals); the 8 originals verified
   **unaltered** by text-extraction diff of all 437 lines.
 - **Explorer gallery** — the published `specimens` array parsed as JSON and each score compared
@@ -145,8 +147,8 @@ explorer and dashboard sub-surfaces, and tier detection have not been exercised 
 |---|---|---|
 | Real MATLAB against the real sites | The public harness must never carry facility data | `EXECUTION_STATUS.md` |
 | Simulink numerics | The model was **built**, never **simulated** | Simulink view states it on its face |
-| Windows install | No Windows machine; CI builds the artifact only | `docs/INSTALL.md` |
-| Notarization | Ad-hoc signature achieves nothing for Gatekeeper (`spctl` exit 3, measured) | `docs/INSTALL.md` |
+| Windows install | No Windows machine. The CI packaging job has also never run: `package.yml` lives on this branch only and `workflow_dispatch` needs it on the default branch | `docs/INSTALL.md`, §10 below |
+| Notarization | No Apple Developer account. **Nothing is signed either** — the signing step was removed once measurement showed `zip` destroyed its output. `spctl -a -t exec` exits 3 regardless | `docs/INSTALL.md`, §10 below |
 | Editable dev install integrity | pip cannot hash an editable requirement — measured, not assumed | `add_lock_hashes.py` |
 | Content of two Framer-hosted iframes | Third-party hosted, outside version control and every gate | `RESIDUAL_RISKS.md` |
 | ~~A real fresh-clone walkthrough~~ | **DONE 2026-07-28 — see §9 below.** | — |
@@ -189,7 +191,7 @@ exists to test, and the first point in this program at which it could honestly b
 Static pages serve without a token by design; the token gates API calls, which
 `tests/test_server.py` covers separately.
 
-### A false commit message, corrected
+### A false commit message, corrected — §9
 
 The commit that first reported this result — `9fb343f` — said "Recorded as VERIFICATION.md
 section 9". **It was not.** The edit that would have written this section raised an
@@ -199,3 +201,61 @@ only the ledger line. The message asserted work that had not happened.
 That is the specific failure this program exists to prevent, and it was found by checking the
 commit rather than trusting it. The history is left standing and this section is the
 correction; §9 now exists, written after the claim rather than before it.
+
+---
+
+## 10. The macOS packaging job, run by hand — 2026-07-28
+
+This was recorded as "blocked until a tag exists". That was wrong about the blocker. A tag
+gates the *release*, not the build, and every step of the macOS job is a Python script or a
+shell fragment that runs anywhere. What is genuinely blocked is the **CI** side:
+`workflow_dispatch` needs the workflow on the default branch, `package.yml` exists only on
+`v4-platform`, and `gh workflow list` does not show `package` — so the packaging job has
+**never executed on a runner**, and the first tagged release would be its first run.
+
+So the job was reproduced locally, step for step, from a lock-built interpreter.
+
+| Workflow step | Observed |
+|---|---|
+| `build_synthetic_inputs.py` | 4 files rebuilt; tracked outputs unchanged |
+| `build_release_artifact.py --public` | 0.2 MB, 60 files, **"no real facility identifier appears in the archive (36 searched)"**, 4 inputs substituted |
+| `build_licence_manifest.py` | 28 dependencies, 5 components, 0 unresolved |
+| staging + run script + `THIRD_PARTY_LICENCES.md` | 65 files |
+| repackage + `shasum -a 256` | `fcf-platform-untagged-3cbd768-macos.zip`, 207 491 bytes, digest written |
+| credential scan (the workflow's own script, verbatim) | **"no credential pattern in any built archive"** |
+
+Then the part that matters — installing it as a recipient. Extracted to an empty directory,
+`python3` pointed at a throwaway interpreter so nothing on this machine was mutated, and
+`./run-platform.command` run unmodified.
+
+| Check | Observed |
+|---|---|
+| Dependency install | succeeded on **Python 3.14.6**, 18 packages, editable wheel built |
+| Launcher | bound `127.0.0.1`, printed a tokenised URL |
+| `index.html`, `provenance_v1.json`, `operations.json`, `engines.json`, `simulink.json` | **200**, 5/5 |
+| `engines.json` shape | `guard_evidence` is an **object**, `ran_on_real_sites` **false** |
+| Rendered page, headless Chrome | 12 756 characters, **zero** `undefined` / `[object Object]` / `NaN` |
+| Rendered honest empty state | says the capacity guard *"is not demonstrated in this install"* and that this *"is not the same as evidence that it does not"* fire |
+
+This is the first time the `--allow-missing` empty state has been seen in a real installation
+rather than asserted by a test.
+
+### What the walkthrough found
+
+**Nothing has ever been signed.** The job ad-hoc signed `run-platform.command` and then
+archived it with `zip`. Ad-hoc signing a shell script writes the signature to extended
+attributes rather than into the file, and `zip` discards them — measured: the staging file
+carries `com.apple.cs.CodeDirectory`, `CodeRequirements` and `CodeSignature`; after zip+unzip
+it carries none and `codesign -dv` reports *"code object is not signed at all"*. The step
+destroyed its own output one line later, and `docs/INSTALL.md` said *"The artifact **is** ad-hoc
+signed"*, which was false for every build.
+
+The recipient's experience is unchanged — `spctl -a -t exec` exits **3** on the signed staging
+file and on the unsigned extracted one alike, which is why it went unnoticed. The step is
+removed rather than repaired, the guide is corrected, and a test now fails if a signing step
+returns without an xattr-preserving archiving step.
+
+**And a licence manifest that described the wrong software.** See the commit; the short version
+is that the generator enumerated whatever interpreter ran it, and the vendored Cognito SDK's
+attribution had been added by hand to the generated file, so the first release build would have
+deleted it.

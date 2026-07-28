@@ -88,6 +88,81 @@ def test_the_release_notes_state_the_data_is_synthetic(text):
         "the signing limitation must be stated as an absence, not merely mentioned")
 
 
+def test_a_signing_step_must_survive_the_archiving_step(text):
+    """A signing step that the next step undoes is worse than no signing step.
+
+    The workflow ad-hoc signed `run-platform.command` and then archived it with `zip`. Ad-hoc
+    signing a shell script writes the signature to extended attributes rather than into the
+    file, and `zip` discards extended attributes — so the step destroyed its own output one
+    line later and every build produced an unsigned artifact while the workflow read as though
+    it did not. Measured by running these steps by hand on macOS 26.5.1: the staging file
+    carried `com.apple.cs.CodeDirectory`, `CodeRequirements` and `CodeSignature`; after
+    zip+unzip it carried none and `codesign -dv` reported "code object is not signed at all".
+
+    Nothing here forbids signing. It requires that a signing step be packaged in a way that
+    keeps the signature — `ditto -c -k`, which preserves extended attributes — so the workflow
+    cannot silently go back to claiming something it does not do.
+    """
+    # Comment lines are stripped first. The block explaining WHY there is no signing step
+    # names `codesign` several times, and matching the word rather than the command is the
+    # same text-versus-meaning error this repository keeps finding — including, on the first
+    # run of this test, here.
+    runnable = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
+    if not any("codesign" in line for line in runnable):
+        return
+    archiving = [line for line in runnable
+                 if re.search(r"\b(zip|ditto)\b", line) and "unzip" not in line]
+    assert any("ditto -c -k" in line for line in archiving), (
+        "the workflow signs the run script and then archives with plain `zip`, which discards "
+        "the extended attributes the signature lives in. Either archive with `ditto -c -k` or "
+        "drop the signing step — do not ship a build that appears to sign and does not.")
+
+
+def test_no_shipped_document_claims_the_artifact_is_signed(text):
+    """The install guide said "The artifact *is* ad-hoc signed". It was not, and had not been
+    for as long as the signing step and the `zip` step had coexisted.
+
+    A claim about the artifact must track what the workflow actually produces, so this reads
+    the workflow to decide what the documents are allowed to say.
+    """
+    runnable = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
+    signs = any("codesign" in line for line in runnable) and "ditto -c -k" in text
+    if signs:
+        return
+
+    for name in ("docs/INSTALL.md", "README.md", "DEPLOYMENT.md"):
+        doc = REPO / name
+        if not doc.is_file():
+            continue
+        # Scoped to the SENTENCE, not to a window of nearby lines. A window is too generous:
+        # the first version of this test passed the false sentence "The artifact *is* ad-hoc
+        # signed" because an unrelated paragraph two lines later happened to contain the words
+        # "used to". Sentences are split on a period FOLLOWED BY WHITESPACE, which leaves
+        # dotted identifiers like com.apple.cs.CodeDirectory intact.
+        prose = " ".join(doc.read_text().splitlines())
+        for sentence in re.split(r"(?<=[.!?])\s+", prose):
+            if not re.search(r"\b(is|are|was|were)\b[^.]{0,40}\bsigned\b", sentence, re.I):
+                continue
+            assert re.search(r"\b(not|no|never|nothing|previously|used to)\b", sentence,
+                             re.I), (
+                f"{name} states the artifact is signed; the packaging workflow produces an "
+                f"unsigned artifact: {sentence.strip()[:160]}")
+
+
+def test_the_install_guide_states_the_measured_gatekeeper_outcome():
+    """The number a reader needs is what actually happens, not what ought to. `spctl -a -t exec`
+    exits 3 on this artifact — measured on both the signed staging file and the unsigned
+    extracted one, which is why removing the signing step changed nothing for a recipient."""
+    guide = REPO / "docs/INSTALL.md"
+    if not guide.is_file():
+        pytest.skip("install guide absent")
+    body = guide.read_text()
+    assert "spctl" in body, "the guide must name the command whose result it reports"
+    assert re.search(r"\bexit(s|ed)?\b[^.\n]{0,30}\b3\b", body, re.I), (
+        "the guide must state the measured exit status rather than describing the outcome "
+        "loosely")
+
+
 def test_the_install_guide_never_advises_disabling_gatekeeper():
     """Explicitly forbidden: that advice makes every future download less safe to open one
     file, and it is not necessary."""
