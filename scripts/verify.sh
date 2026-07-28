@@ -262,11 +262,18 @@ gate "website: public pages carry their caveats and embed only the canonical wor
 # was unusable: two blank Tableau sheets, and a sign-in page that did not exist. Both times the
 # check verified the step under our control rather than the outcome the reader experiences.
 # Skips loudly (not silently) when Chrome is absent, so CI without a browser stays green.
-gate "browser: the form refuses VISIBLY, and the explorer's first screen asks nothing of a reader" \
+# Two servers, because the three browser suites cover two different things: the platform
+# bundle (form + explorer) and the PUBLIC WEBSITE. The website half exists because
+# check_site_www.py asserted the capacity caveat was present on index.html -- and it was, in
+# the markup, underneath a full-viewport iframe that painted straight over it. A string check
+# cannot see that; a layout engine can.
+gate "browser: caveats are VISIBLE, the form refuses visibly, and the explorer asks nothing of a reader" \
   bash -c "cd '$REPO' && if ! command -v node >/dev/null; then echo 'node absent - browser test SKIPPED'; exit 0; fi; \
     '$PY' -m fcf_m2.server --port 8799 >/tmp/fcf_gate_server.log 2>&1 & SRV=\$!; \
-    trap 'kill \$SRV 2>/dev/null' EXIT; \
+    ( cd '$REPO/site/www' && '$PY' -m http.server 8877 --bind 127.0.0.1 >/tmp/fcf_gate_www.log 2>&1 ) & WWW=\$!; \
+    trap 'kill \$SRV \$WWW 2>/dev/null; pkill -f \"http.server 8877\" 2>/dev/null' EXIT; \
     for i in \$(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8799/index.html && break; sleep 0.5; done; \
+    for i in \$(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8877/index.html && break; sleep 0.5; done; \
     node --test 'tests/browser/*.test.mjs'"
 
 # The edge authoriser is the only thing standing between an anonymous request and the study's

@@ -21,13 +21,37 @@
     body {
       width: 100%;
       height: 100%;
-      overflow: hidden;         /* clips the 48px of extra iframe height at the bottom */
       background: #f7f3ea;
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    /* The disclaimer and the vintage footer must be READABLE, not merely present.
+       Previously the iframe was position:absolute at top:0 over the full viewport, so it
+       painted straight over the disclaimer -- document.elementFromPoint at the disclaimer's
+       centre returned the IFRAME -- while body{overflow:hidden} made the footer unreachable
+       by scrolling. The page therefore carried the study's headline limitation in its markup
+       and showed a reader neither of them. A column layout gives each band its own space. */
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;         /* the page itself does not scroll; the iframe does */
+    }
+
+    .fcf-authority,
+    .fcf-vintage {
+      flex: 0 0 auto;           /* never compressed away by the iframe */
+    }
+
+    .landing-wrap {
+      flex: 1 1 auto;
+      position: relative;
+      overflow: hidden;         /* clips the 48px of extra iframe height at the bottom */
+      min-height: 0;            /* without this a flex item refuses to shrink below content */
+    }
+
     .landing-frame {
-      position: absolute;       /* sits inside the overflow:hidden body crop context */
+      position: absolute;       /* sits inside the .landing-wrap crop context */
       top: 0;
       left: 0;
       width: 100%;
@@ -52,13 +76,15 @@
   nobody has confirmed the service could support chargers.
 </aside>
 
-  <iframe
-    class="landing-frame"
-    src="https://zany-storm-638468.framer.app/"
-    title="Future City GMU Landing Page"
-    allow="fullscreen; clipboard-write"
-    loading="eager"
-  ></iframe>
+  <div class="landing-wrap">
+    <iframe
+      class="landing-frame"
+      src="https://zany-storm-638468.framer.app/"
+      title="Future City GMU Landing Page"
+      allow="fullscreen; clipboard-write"
+      loading="eager"
+    ></iframe>
+  </div>
 
 <footer class="fcf-vintage" style="font-size:.75rem;color:#4b4b4b;background:#f7f3ea;border-top:1px solid #d8cdb6;padding:.7rem 1.15rem;line-height:1.5;">
   Data: canonical contract v1.0.0 (generated 2026-07-19) · site inputs 2026-06-24 ·
