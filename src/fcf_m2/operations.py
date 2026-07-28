@@ -218,6 +218,27 @@ OPERATIONS: list[Operation] = [
         produces=["docs/WORKFLOW_STEPS.md"],
     ),
 
+    # ---------------------------------------------------------------- intake
+    Operation(
+        id="intake-review",
+        label="Review a jurisdiction's own data file",
+        description=(
+            "Reads a supplied CSV and reports what intake WOULD do with it: which columns it "
+            "would map and which of those are guesses from a name, which fields are absent, "
+            "which unit conversions it would apply, and the data confidence the file would "
+            "produce — all before anything is changed or any run starts."),
+        tier=TIER_DESKTOP,
+        desktop_reason=(
+            "Reads a file from your machine. The web tier has no access to your filesystem, "
+            "and uploading planning data to a server this project does not run would be a "
+            "worse answer than not offering the button."),
+        command=["{py}", "scripts/intake_review.py"],
+        caveat=(
+            "A proposal, never a run. Nothing is written, no model executes, and the contract "
+            "is untouched. A mapping guessed from a column name is reported as a guess, and an "
+            "absent field stays absent rather than being filled with a default."),
+    ),
+
     # ---------------------------------------------------------------- verify
     Operation(
         id="verify-all",
