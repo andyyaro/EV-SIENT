@@ -289,9 +289,15 @@ function renderOperations() {
     head.className = "op-head";
     const h3 = document.createElement("h3");
     h3.textContent = op.label;
+    // The pill says where you are, not merely what the operation supports. `available` means
+    // "this operation can run in the desktop tier" -- so on the WEB tier it was rendering a
+    // green "available here" beside a banner stating that this page computes nothing, and no
+    // Run button appeared. Green plus no button reads as broken, not as by-design.
+    const runnableHere = op.available && STATE.tier === "desktop";
     const pill = document.createElement("span");
-    pill.className = `pill ${op.available ? "pill-ok" : "pill-no"}`;
-    pill.textContent = op.available ? "available here" : "desktop app";
+    pill.className = `pill ${runnableHere ? "pill-ok" : "pill-no"}`;
+    pill.textContent = runnableHere ? "available here"
+      : op.available ? "runs in the desktop app" : "desktop app";
     head.append(h3, pill);
     li.append(head);
 
@@ -301,6 +307,13 @@ function renderOperations() {
 
     // The reason is shown, never omitted. An unexplained disabled control is
     // indistinguishable from a broken one.
+    if (op.available && STATE.tier !== "desktop") {
+      const why = document.createElement("p");
+      why.className = "why";
+      why.textContent = "This page shows what the model produced; it does not run it. "
+        + "Open the desktop app to run this operation.";
+      li.append(why);
+    }
     if (!op.available && op.unavailable_reason) {
       const why = document.createElement("p");
       why.className = "why";
@@ -507,25 +520,43 @@ function renderEngines() {
 
 function renderControls() {
   const keys = Object.keys(STATE.prov.entries);
-  const horizons = [...new Set(keys.map((k) => k.split("|")[1]))].sort();
-  const scenarios = [...new Set(keys.map((k) => k.split("|")[2]))].sort();
+
+  // Scenarios PER HORIZON, not a flat union of both. Built as two independent unique sets,
+  // the controls offered 4 horizons x 4 scenarios = 16 combinations while the contract holds
+  // only 10: 2026 has `baseline` alone, and 2036/2046/2056 have base/high/stress_combined.
+  // Six selections therefore produced an empty table with no explanation.
+  const byHorizon = new Map();
+  for (const key of keys) {
+    const [, horizon, scenario] = key.split("|");
+    if (!byHorizon.has(horizon)) byHorizon.set(horizon, new Set());
+    byHorizon.get(horizon).add(scenario);
+  }
+  const horizons = [...byHorizon.keys()].sort();
 
   const hSel = $("#horizon"), sSel = $("#scenario");
   hSel.replaceChildren(...horizons.map((h) => new Option(h, h)));
-  sSel.replaceChildren(...scenarios.map((s) => new Option(s, s)));
 
   STATE.horizon = horizons.includes("2026") ? "2026" : horizons[0];
-  STATE.scenario = scenarios.includes("baseline") ? "baseline" : scenarios[0];
   hSel.value = STATE.horizon;
-  sSel.value = STATE.scenario;
 
-  const rerender = () => {
+  const fillScenarios = () => {
+    const available = [...(byHorizon.get(hSel.value) || [])].sort();
+    const keep = available.includes(STATE.scenario) ? STATE.scenario : available[0];
+    sSel.replaceChildren(...available.map((s) => new Option(s, s)));
+    STATE.scenario = keep;
+    sSel.value = keep;
+  };
+  fillScenarios();
+
+  hSel.addEventListener("change", () => {
     STATE.horizon = hSel.value;
+    fillScenarios();          // a horizon change can invalidate the chosen scenario
+    renderSites();
+  });
+  sSel.addEventListener("change", () => {
     STATE.scenario = sSel.value;
     renderSites();
-  };
-  hSel.addEventListener("change", rerender);
-  sSel.addEventListener("change", rerender);
+  });
 }
 
 function renderRunLine() {
