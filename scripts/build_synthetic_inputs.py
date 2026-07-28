@@ -381,7 +381,7 @@ def main() -> int:
         "## Honesty markers\n\n"
         "Site ids are `SYN001`–`SYN012`. The county does not exist. The coordinate grid is\n"
         "not Northern Virginia, so a site map drawn from this data cannot be mistaken for the\n"
-        "real candidates. Every field group is recorded with `source_class = synthetic`, so a\n"
+        "real candidates. Every field group is recorded with `source_class = synthetic_model` (the value the model\nactually recognises -- this said `synthetic`, which is not in SOURCE_CLASS_SCORES and\nwould score as unknown), so a\n"
         "reader who follows any number to its provenance is told it was invented.\n\n"
         "Regenerate with `python scripts/build_synthetic_inputs.py` (seeded, reproducible).\n")
 

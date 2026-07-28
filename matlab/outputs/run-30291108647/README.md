@@ -51,7 +51,7 @@ panel is built from `SYN001` and `SYN002`, and the three corrected cells are in 
 `SYN008` and `SYN012`. The change never touched the panel.
 
 **The same check produced a determinism result worth more than the correction.** Comparing
-this run's 120-row batch against run `30296650057`'s, run on a different commit days apart:
+this run's 120-row batch against run `30296650057`'s, run on a different commit **1 h 12 min later the same day** (this said "days apart"; the sibling documents say "hours apart"):
 **exactly 3 rows differ, and they are exactly the 3 rows the fixture change touched, in
 exactly the 2 columns that depend on `sessions_per_day`.** The other 117 rows are identical
 cell for cell. Two independent CI runs on real MATLAB agree completely on unchanged input.

@@ -124,7 +124,12 @@ which is the entire point.
 ### 7. Log it
 
 Add a row to `docs/nfc/TAG_VERIFICATION_LOG.md`: site id, date, who wrote it, verified yes,
-locked yes, and the last 4 characters of the tag's UID if NFC Tools shows it.
+**locked yes *or* no — record what you actually did**, and the last 4 characters of the tag's
+UID if NFC Tools shows it.
+
+*(This said "locked yes" unconditionally, which contradicts step 6 nineteen lines above: bench
+tags are deliberately left UNLOCKED and routed here to be logged. A log that records every tag
+as locked cannot be used to find the unlocked ones.)*
 
 An unlogged tag is an unknown tag.
 

@@ -33,7 +33,9 @@ rather than the twelve real facilities' data, and `workflow.py` cannot run witho
 
 Site ids are `SYN001`–`SYN012`. The county does not exist. The coordinate grid is
 not Northern Virginia, so a site map drawn from this data cannot be mistaken for the
-real candidates. Every field group is recorded with `source_class = synthetic`, so a
+real candidates. Every field group is recorded with `source_class = synthetic_model` (the value the model
+actually recognises -- this said `synthetic`, which is not in SOURCE_CLASS_SCORES and
+would score as unknown), so a
 reader who follows any number to its provenance is told it was invented.
 
 Regenerate with `python scripts/build_synthetic_inputs.py` (seeded, reproducible).

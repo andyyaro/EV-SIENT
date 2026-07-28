@@ -1,6 +1,6 @@
 # Open Human Actions (nothing below can be closed by software)
 
-Ordered by priority. Every action has a complete, ready-to-use package; none has been
+Ordered by priority. Every action has a complete, ready-to-use package. **Rows struck through\nand marked DONE have been executed** — the rest have not. *(This sentence used to say none had\nbeen executed, above a table with completed rows in it.)* No remaining action has been
 executed — no email was sent, no meeting held, no data received.
 
 | # | Action | Who | Package | Closes | Acceptance evidence |
