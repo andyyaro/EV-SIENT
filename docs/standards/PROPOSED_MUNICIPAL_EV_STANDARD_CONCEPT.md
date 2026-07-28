@@ -3,7 +3,7 @@
 > **Label required on every use:** This is a **Future City Fellowship design exercise, not an official UL/ULSE proposal.** It has no regulatory force. Every provisional parameter marked **TBV** requires validation by ULSE, the manufacturer, the adopted code, or the local AHJ before any real-world use.
 
 **Project:** Future City Fellowship — Milestone 2 (Fairfax City + Prince William County, VA) · **Date:** 2026-07-19
-**Basis:** Report 06 §4 (merged MCDA concept C2+C1); appendix `PROPOSED_STANDARD_RESEARCH_SPECIFICATION.md`; fellowship requirement for one proposed standard with tests (EX01, IM-09).
+**Basis:** Report 06 §4 (merged MCDA concept C2+C1); appendix `PROPOSED_STANDARD_RESEARCH_SPECIFICATION.md` (**cited but never produced — no such file exists in this repository or its history; noted 2026-07-28 rather than the citation being quietly deleted, because a reader following it deserves to know it leads nowhere**); fellowship requirement for one proposed standard with tests (EX01, IM-09).
 **Integrity rule:** No numeric safety limit is invented in this document. Sourced parameters cite the adopted code by name and edition; everything else is marked **TBV by ULSE/AHJ/manufacturer/adopted code**.
 
 ---

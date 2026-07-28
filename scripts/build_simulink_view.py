@@ -122,14 +122,26 @@ def main() -> int:
     slx = find_slx(allow_missing=allow_missing)
     if slx is None:
         print("no committed .slx in this installation — emitting an empty Simulink view")
+        # Same defect as the engine record: this emitted model_available/headline/note/blocks
+        # while renderSimulink() reads model/status/status_detail/built_by/from_run/inner, so
+        # the "honest empty state" rendered as undefined. The keys now match the real payload.
+        #
+        # The old note also said the model was "built once against the study's REAL SITES".
+        # It was not: it was extracted from the model source and opened once. No Simulink
+        # artifact anywhere describes a real facility.
         OUT.write_text(json.dumps({
             "schema": "fcf-simulink/1",
-            "model_available": False,
-            "headline": "No Simulink model is distributed with this installation.",
-            "note": ("The block diagram records a model built once against the study's real "
-                     "sites and NEVER SIMULATED. It is not shipped here, and nothing in this "
-                     "installation depends on it."),
-            "blocks": [],
+            "model": "not distributed with this installation",
+            "from_run": None,
+            "built_by": None,
+            "status": "NOT DISTRIBUTED",
+            "status_detail": ("No Simulink model ships with this installation. The diagram in "
+                              "the full repository was generated from the model source and "
+                              "opened once by MathWorks MATLAB; it has never been simulated, "
+                              "and no number in this project derives from it."),
+            "root": {"blocks": [], "block_count": 0, "line_elements": 0, "branch_elements": 0},
+            "subsystems": {},
+            "topology_note": "No topology is available because no model is distributed here.",
         }, indent=2) + "\n")
         return 0
 

@@ -85,19 +85,28 @@ def build(allow_missing: bool = False) -> dict:
         # pretend it does not exist. The platform's engine surface then shows an honest empty
         # state instead of the launcher dying three steps into a first run.
         print(f"no committed MATLAB run artifacts under {RUNS} — emitting an empty record")
+        # The KEYS here are load-bearing. This fallback used to emit engine/badge/role/executed
+        # while site/platform/app.js reads id/name/status/detail/ran_on_real_sites -- so on a
+        # public install the engine list rendered "undefined" in every field, which is the
+        # opposite of the honest empty state this branch exists to provide. The shape must
+        # match `engines.json` exactly; renderEngines() has no fallbacks.
         return {
             "schema": "fcf-engines/1",
             "matlab_runs_available": False,
             "headline": ("No MATLAB or Simulink execution is recorded in this installation. "
                          "Every value here was produced by the Python package."),
             "engines": [{
-                "engine": "Python (fcf_m2)",
-                "badge": "python",
-                "role": "produced every number in this installation",
-                "executed": True,
+                "id": "python",
+                "name": "Python (fcf_m2)",
+                "role": "The single producer",
+                "status": "produced every number in this installation",
+                "detail": ("The only scorer. Every value on every surface of this "
+                           "installation comes from here, via the canonical data contract."),
+                "ran_on_real_sites": False,
             }],
+            "guard_evidence": [],
             "divergences": [],
-            "cannot_show": ("MATLAB and Simulink run artifacts are not distributed with this "
+            "what_cannot_be_shown": ("MATLAB and Simulink run artifacts are not distributed with this "
                             "package: they record executions against the study's real sites. "
                             "This is an absence, not a failure, and no result here depends on "
                             "them."),
