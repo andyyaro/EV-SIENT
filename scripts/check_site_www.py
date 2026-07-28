@@ -145,6 +145,38 @@ def main() -> int:
                     f"{above_low} confidence rows")
 
 
+    # --- The carousel must still carry every published sheet -------------------------
+    #
+    # `retarget_tableau_embeds.py` selected slides to delete by POSITION and then renumbered
+    # the survivors, so on an already-retargeted deck it ate a different slide each run. It
+    # walked dashboard.html from 7 canonical sheets down to 4, deleting "Cost and Emissions"
+    # and "Waiting Times", and every gate stayed green throughout.
+    #
+    # The checks below it were all SELF-CONSISTENT: the slide counter matched the slide count
+    # because both were read from the damaged page. Nothing compared the deck to the workbook
+    # it is supposed to present. This does.
+    manifest = REPO / "dashboard/tableau/build/EV_Charging_Site_Readiness_M2_Canonical.manifest.json"
+    dash = WWW / "dashboard.html"
+    if manifest.is_file() and dash.is_file():
+        import json as _json
+        published = {w["name"].replace(" ", "") for w in
+                     _json.loads(manifest.read_text()).get("worksheets", [])}
+        # Scoped to the CAROUSEL ARTICLES, not the whole page. Mutation-testing this check
+        # found the hole: deleting the "Waiting Times" slide still left PeakWaitsbySite
+        # referenced elsewhere in the document, so a page-wide search reported full coverage
+        # of a deck that had just lost a slide. The claim being checked is about what the
+        # carousel SHOWS, so only what is inside a slide counts.
+        dash_text = dash.read_text()
+        articles = "".join(re.findall(
+            r'<article class="exploreSlide" data-slide="\d+">.*?</article>', dash_text, re.S))
+        embedded = set(re.findall(r"M2_Canonical/([A-Za-z0-9]+)", articles))
+        missing = sorted(published - embedded)
+        if missing:
+            problems.append(
+                f"dashboard.html: the carousel no longer embeds {len(missing)} published "
+                f"sheet(s): {missing}. The workbook publishes {len(published)}; the page "
+                f"shows {len(embedded & published)}.")
+
     # --- Tableau embeds -------------------------------------------------------------
     # The original workbook was audited, found wrong (DEC-013), republished under a new name,
     # and the original deleted — but nothing re-pointed the website, so every embed resolved to

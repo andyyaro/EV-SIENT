@@ -51,9 +51,14 @@ def c1_ranking():
     colors = [DARK_GREEN if r <= 3 else MID_GREEN for r in df["model_rank"]]
     ax.barh(df["site_id"] + "  " + df["site_name"].str.slice(0, 34), df["readiness_score"], color=colors)
     ax.set_xlabel("Readiness score (accepted V2 baseline, model of record)")
-    ax.set_title("Site readiness ranking — FFX002 leads at 58.8 (Medium confidence)", fontsize=12)
+    # The title used to read "(Medium confidence)". That is the LEGACY mode's confidence label
+    # for FFX002, printed above bars annotated with the CANONICAL v3 level -- so a single image
+    # said Medium in its title, Low on all twelve bars, and "none reaches Medium" in its own
+    # footer. Three mutually exclusive statements in one picture. The confidence claim is
+    # removed from the title; it is shown per bar and stated in the footer, both from v3.
+    ax.set_title("Site readiness ranking — FFX002 leads at 58.8 (legacy_v2 baseline)", fontsize=12)
     for y, (s, cl) in enumerate(zip(df["readiness_score"], df["data_confidence_level_v3"])):
-        ax.text(s + 0.5, y, cl, va="center", fontsize=7, color=BLACK)
+        ax.text(s + 0.5, y, f"{cl} (v3)", va="center", fontsize=7, color=BLACK)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "legacy_v2 baseline scores",
                    "all 12 sites score Low data confidence; none reaches Medium")
     visuals.save(fig, OUT / "01_readiness_ranking.png", LOG, relative_to=REPO)

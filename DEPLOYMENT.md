@@ -20,10 +20,12 @@ access rules.
 | everything else | `future-city-fellowship` (private, OAC) | **anyone, no account** |
 
 The second row is the one to be careful about. `/t/FFX001` … `/t/PWC008` are the **NFC landing
-pages** — a reader taps a physical coin in a car park and gets a page, with no app and no
-account. Twelve tags are already in the field. **Any change that gates the default cache
-behaviour breaks all of them**, and they are not something that can be un-deployed from a car
-park.
+pages** — the twelve pages a reader would reach by tapping a physical coin in a car park, with
+no app and no account. **All twelve pages are live and public; no physical tag has been placed
+at any site, and no placement permission has been sought** (`docs/nfc/README.md`,
+`docs/nfc/PILOT_PLAN.md`). One bench tag was written and read back through iOS background NFC.
+**Any change that gates the default cache behaviour breaks all twelve pages** — and once tags
+are placed they are not something that can be un-deployed from a car park.
 
 ### Why the platform has its own bucket
 
@@ -185,14 +187,24 @@ them.
 
 ## 7. Open items
 
-- **No synthetic site-input set exists.** DEC-016 requires a public installer to ship synthetic
-  inputs rather than `real_sites_v2.csv`. There is no synthetic counterpart, so the public
-  installer cannot currently be built at all. `build_release_artifact.py --public` refuses and
-  says so.
-- **`vendor_cesium.sh` fetches 20 MB from npm with a pinned version but no checksum**, and
-  `requirements-lock.txt` carries **zero `--hash` lines**. Until both are fixed, "reproducible
-  build from a clean checkout" is not a claim this project can make truthfully.
-- **The `verify-all` operation is declared as `bash scripts/verify.sh`** and will not run on a
-  stock Windows machine — a packaging-visible defect independent of which packaging tool wins.
-- **No release version scheme.** `pyproject` pins a static `3.0.0` and the existing git tags are
-  milestone markers, not versions.
+> **Corrected 2026-07-28.** Every item in this section except the last had been closed and the
+> section never updated — it claimed the synthetic set did not exist, that the public installer
+> could not be built at all, that Cesium was fetched without a checksum, and that nothing
+> carried `--hash` lines. All four were false when read. Found by the DEC-014 line-by-line
+> audit. The closures are recorded below rather than the section being silently deleted.
+
+- ~~No synthetic site-input set exists~~ **CLOSED (DEC-020).** Four synthetic files are tracked
+  under `data/synthetic/`, and `build_release_artifact.py --public` builds a complete artifact
+  by substituting them for the real inputs. Verified by running it.
+- ~~`vendor_cesium.sh` has no checksum~~ **CLOSED.** It verifies a pinned **SHA-512** against the
+  downloaded tarball (`vendor_cesium.sh:64`).
+- ~~`requirements-lock.txt` carries zero `--hash` lines~~ **CLOSED, with a stated limit.**
+  `requirements-hashed.txt` carries **839 digests across 27 pins**. The lock itself still has
+  none, deliberately: it is used as a *constraints* file for an editable install, and pip
+  refuses hashes on an editable requirement. So "reproducible build" is truthful for the clean
+  non-editable install and the packaging build, **and for nothing else**.
+- ~~`verify-all` will not run on Windows~~ **CLOSED as a disclosure, not as a capability.** The
+  operation now declares that it cannot run on a stock Windows machine and names WSL and Git
+  Bash as the alternatives (`operations.py:256`). It still does not run there.
+- **No release version scheme.** *Still open.* `pyproject` pins a static `3.0.0` and the
+  existing git tags are milestone markers, not versions.

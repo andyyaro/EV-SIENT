@@ -700,7 +700,20 @@ function renderPanel(p) {
       <h4 class="sec">What each category contributed</h4>
       ${subscoreBlock(p)}
       <p style="font-size:11px;color:var(--ink-3);font-family:var(--mono)">
-        these add up to ${num(p.score_reconstructed, 1)} — the readiness score ✓
+        ${(() => {
+          // This used to print "these add up to X — the readiness score ✓" unconditionally.
+          // The reconstruction sums subscores that are themselves rounded, so at FFX001
+          // (48.8 vs 48.7) and PWC008 (41.9 vs 41.8) the number beside the tick was NOT the
+          // score at the top of the same panel. A tick asserting an equality that fails at
+          // 2 of 12 sites is worse than no tick.
+          const recon = p.score_reconstructed, score = p.readiness_score;
+          if (recon == null) return `readiness score ${num(score, 1)}`;
+          return Math.abs(recon - score) < 0.05
+            ? `these add up to ${num(recon, 1)} — the readiness score ✓`
+            : `these add up to ${num(recon, 1)}; the readiness score is ${num(score, 1)} ` +
+              `— the ${num(Math.abs(recon - score), 1)} gap is rounding in the parts, not a ` +
+              `disagreement about the total`;
+        })()}
       </p>
 
       <h4 class="sec">What helped — points this site earned</h4>
@@ -751,10 +764,16 @@ function renderPanel(p) {
         <p class="callout ${p.electrical.risk_level === 'high' ? 'risk' : 'warn'}">
           ${p.electrical.risk_reason.map(esc).join('<br>')}
         </p>
+        <p class="callout">These ranks come from the frozen <code>legacy_v2</code> electrical
+        risk file, which has no <code>milestone2_v3</code> counterpart. <strong>They are a
+        different ordering from the readiness rank on the Score tab</strong> — this site is
+        electrical rank ${int(p.electrical.rank_expected)} and readiness rank
+        ${int(p.model_rank)}. Neither is a feasibility finding: capacity is an unverified
+        placeholder at all twelve sites.</p>
         <dl class="kv" style="margin-top:11px">
-          <dt>Rank — optimistic</dt><dd>${int(p.electrical.rank_optimistic)}</dd>
-          <dt>Rank — expected</dt><dd>${int(p.electrical.rank_expected)}</dd>
-          <dt>Rank — conservative</dt><dd>${int(p.electrical.rank_conservative)}</dd>
+          <dt>Electrical rank — optimistic <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_optimistic)}</dd>
+          <dt>Electrical rank — expected <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_expected)}</dd>
+          <dt>Electrical rank — conservative <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_conservative)}</dd>
           <dt>Worst-case rank change</dt><dd>${int(p.electrical.worst_case_rank_change)}</dd>
         </dl>` : ''}
 

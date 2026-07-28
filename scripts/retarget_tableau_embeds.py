@@ -181,11 +181,28 @@ def rebuild_deck(text: str) -> str:
 
 def retarget(text: str) -> str:
     # 1. Remove whole slides whose subject has no canonical counterpart.
+    #
+    # THE GUARD IS THE IMPORTANT PART, and it was missing. This step selects slides by
+    # POSITION, and step 7 renumbers the survivors 1..N -- so on a deck that had already been
+    # retargeted, a different slide occupied position 4 and was eaten. Run repeatedly, the
+    # script walked the deck down 7 -> 5 -> 4 -> 3 and then went quiet, because with three
+    # slides left there is no position 4 to match. That is why it LOOKED idempotent when
+    # measured afterwards: it had already reached its fixed point by destroying the deck.
+    #
+    # Measured cost: `Cost and Emissions` and `Waiting Times` were deleted from
+    # site/www/dashboard.html between 8e3cfb3 and a858ec7, taking LifecycleCostbyHorizon,
+    # NetCO2ebyHorizon and PeakWaitsbySite off the public site. The owner noticed the carousel
+    # had shrunk; no gate did.
+    #
+    # A slide that no longer references OLD_WORKBOOK has already been processed. Requiring that
+    # reference makes the step a no-op on its own output, which is what idempotent means.
     for num in DELETE_SLIDES:
         pattern = re.compile(
             r'\n?<!--\s*Slide[^>]*?-->\s*<article class="exploreSlide" data-slide="' + num + r'">.*?</article>',
             re.S)
-        text = pattern.sub("", text, count=1)
+        match = pattern.search(text)
+        if match and OLD_WORKBOOK in match.group(0):
+            text = text[:match.start()] + text[match.end():]
 
     # 2. Remove orphaned chips inside surviving slides.
     for sheet in DELETE_CHIP_SHEETS:
