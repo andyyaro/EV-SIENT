@@ -232,4 +232,5 @@ with no Free Tier and no credits, per the program's cost rule.**
 
 | UTC | Change |
 |---|---|
+| 2026-07-28 | **The "after" row this table promised in Phase 8 was never appended, and Phase 8 closed GREEN without it.** The after-state is recorded instead in `/DEPLOYMENT.md` §1 ("What is live") and verified in `VERIFICATION.md` §5, both written after the deploy. Noted here rather than back-filling a row from memory. |
 | 2026-07-27 | Created from Phase 0.5 read-only discovery. **No AWS resource was created, modified, or deleted.** "After" state to be appended in Phase 8. |

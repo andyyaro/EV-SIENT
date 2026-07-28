@@ -40,8 +40,12 @@ release/
 
 # Vendored third-party browser assets, fetched by scripts/vendor_cesium.sh.
 # Build/Cesium is 20 MB across 375 files. It is pinned to the same release index.html
-# loads, reproducible on demand, and bundled at desktop-packaging time, so committing it
-# would add 20 MB to every clone of a planning-study repository for no determinism gain.
+# loads and reproducible on demand, so committing it would add 20 MB to every clone of a
+# planning-study repository for no determinism gain.
+#
+# It is NOT "bundled at desktop-packaging time" -- this comment used to say that, and no
+# packaging step vendors it. `make explorer-vendor` is a manual, opt-in step; without it the
+# viewer falls back to the pinned CDN, which is the documented behaviour.
 explorer/web/vendor/
 
 # Tableau build products that are NOT byte-reproducible.

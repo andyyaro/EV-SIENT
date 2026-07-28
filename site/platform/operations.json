@@ -87,7 +87,7 @@
       "available": false,
       "unavailable_reason": "Writes data files, and publishing drives the Tableau Public desktop\n                        application with real keystrokes. Neither is possible in a browser.",
       "unavailable_because": "tier",
-      "caveat": "Building the .twbx and publishing need Tableau Public installed and a signed-in session. Four presentation features remain unbuildable \u2014 see dashboard/tableau/CAPABILITY_GAP.md.",
+      "caveat": "Building the .twbx and publishing need Tableau Public installed and a signed-in session. Four kinds of presentation feature remain unbuildable, five rows in the gap table (the two reference lines are separate sheets) \u2014 see dashboard/tableau/CAPABILITY_GAP.md.",
       "produces": [
         "dashboard/tableau/build/workbook_spec.json"
       ]

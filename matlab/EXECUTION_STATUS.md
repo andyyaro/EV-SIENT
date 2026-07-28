@@ -117,7 +117,7 @@ is claimed.
 
 | Gap | Status | Evidence |
 |---|---|---|
-| MATLAB parser acceptance of every file | **CLOSED** | All 9 `src/*.m` and 6 `tests/*.m` parsed and executed. Four genuine portability defects surfaced and were fixed at source — see "What the runs found". |
+| MATLAB parser acceptance of every file | **CLOSED** | All `src/*.m` and `tests/*.m` parsed and executed. Four genuine portability defects surfaced and were fixed at source — see "What the runs found". |
 | Numerical behavior of the energy-aware scheduler on 120 rows | **PARTIALLY CLOSED** | The 120-row batch completed with `run_status = ok` on every row. But `capacity_basis = placeholder` on all rows, so the guard skipped both managed strategies: `clamp: skipped_no_capacity_defined; energy_aware: skipped_no_capacity_defined`. The scheduler's numerics on *real capacity* remain unexercised, because no real capacity exists. |
 | Creation of the golden regression baseline | **CLOSED** | Written by run 6 and regenerated after the fixture correction. |
 | Simulink model build | **CLOSED** | Built in run `30296650057`. `site_grid_behavior_ev_charging_v3.slx` is a real Simulink package stamped `25.2.0.3177638 / R2025b / Update 5`, and its **11 root blocks match, name for name and type for type, the topology read from `buildSimulinkModel.m` by hand in Phase 0**. Built, **not simulated** — no result anywhere derives from it. |

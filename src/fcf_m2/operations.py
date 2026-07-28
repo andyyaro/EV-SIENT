@@ -206,7 +206,8 @@ OPERATIONS: list[Operation] = [
         command=["{py}", "scripts/build_tableau_workbook.py"],
         produces=["dashboard/tableau/build/workbook_spec.json"],
         caveat=("Building the .twbx and publishing need Tableau Public installed and a "
-                "signed-in session. Four presentation features remain unbuildable — see "
+                "signed-in session. Four kinds of presentation feature remain unbuildable, five rows in "
+                "the gap table (the two reference lines are separate sheets) — see "
                 "dashboard/tableau/CAPABILITY_GAP.md."),
     ),
     Operation(
