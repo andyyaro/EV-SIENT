@@ -129,6 +129,7 @@ Release limitations (read before use):
 - Expansion-trigger policy is proposed configuration, not adopted municipal policy.
 """
 
+#: Written into the INTERNAL archive, which carries tests/.
 REPRO = """\
 Reproduction (fresh environment):
   python3 -m venv venv && venv/bin/pip install -e .[test] -c requirements-lock.txt
@@ -136,6 +137,19 @@ Reproduction (fresh environment):
   venv/bin/python -m fcf_m2.workflow run --mode legacy_v2   --out data/outputs/legacy_check
   venv/bin/python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run
   venv/bin/python -m fcf_m2.workflow validate-contract data/outputs/v3_run/contract
+"""
+
+#: Written into the PUBLIC archive, which does NOT carry tests/. The internal text above was
+#: being written into every archive unconditionally, so a public recipient was told to run
+#: `pytest tests/` against a bundle with no tests directory -- their first instruction failed.
+REPRO_PUBLIC = """\
+Reproduction (fresh environment):
+  python3 -m venv venv && venv/bin/pip install -e . -c requirements-lock.txt
+  venv/bin/python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run
+  venv/bin/python -m fcf_m2.workflow validate-contract data/outputs/v3_run/contract
+
+This public bundle ships SYNTHETIC site inputs (DEC-020) and no test suite, so the
+numbers it produces describe invented sites and cannot be compared with the study.
 """
 
 
@@ -240,7 +254,7 @@ def main(out_dir: str | None = None, public: bool = False) -> Path:
             z.write(p, target)
         z.writestr("RELEASE_MANIFEST.json", json.dumps(manifest, indent=2))
         z.writestr("LIMITATIONS.txt", LIMITATIONS)
-        z.writestr("REPRODUCTION.txt", REPRO)
+        z.writestr("REPRODUCTION.txt", REPRO_PUBLIC if public else REPRO)
 
     if public:
         assert_no_real_identifiers(zpath)

@@ -178,7 +178,18 @@ def scan(paths: list[Path]) -> list[str]:
     for path in paths:
         try:
             text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+        except UnicodeDecodeError:
+            # A file this gate cannot READ is a file it cannot CLEAR. Skipping it silently
+            # meant an undecodable candidate was counted as checked and reported clean -- the
+            # one outcome a publication gate must never produce. Binary artifacts are the
+            # normal case here (figures, .mat, .slx), so this is reported rather than fatal,
+            # but it is reported.
+            problems.append(
+                f"{path}: could not be decoded as UTF-8, so its contents were NOT checked "
+                f"for site-identifying data. Exclude it explicitly or confirm it by hand.")
+            continue
+        except OSError as exc:
+            problems.append(f"{path}: unreadable ({exc}); not checked")
             continue
         # A path outside the repository is the normal case for this gate, not an error:
         # the question it answers is "may this file be published?", and a candidate is often
