@@ -54,8 +54,24 @@ def _load():
 blm = _load()
 
 
-def locked_names() -> set[str]:
-    return {name for name, _ in blm.locked_requirements(LOCK.read_text())}
+def locked_names(applicable_only: bool = False) -> set[str]:
+    """Names pinned in the lock.
+
+    With ``applicable_only``, drops pins whose environment marker does not hold here — the lock
+    carries `typing-extensions` only below Python 3.13 and `tzdata` only on Windows, and a
+    manifest generated on macOS correctly contains neither.
+    """
+    from packaging.markers import Marker
+    out = set()
+    for name, marker in blm.locked_requirements(LOCK.read_text()):
+        if applicable_only and marker:
+            try:
+                if not Marker(marker).evaluate():
+                    continue
+            except Exception:
+                pass
+        out.add(name)
+    return out
 
 
 # --------------------------------------------------------------------------------------------
@@ -90,14 +106,14 @@ def test_names_are_normalised_so_underscores_and_hyphens_are_one_package():
 # --------------------------------------------------------------------------------------------
 
 def test_a_declared_runtime_dependency_that_is_absent_is_reported_missing():
-    installed = locked_names() - {"pandas"}
+    installed = locked_names(applicable_only=True) - {"pandas"}
     missing, unexpected = blm.check_environment(LOCK.read_text(), installed)
     assert "pandas" in missing, "this is not the project's environment and nothing objected"
     assert unexpected == []
 
 
 def test_a_package_that_is_not_locked_is_reported_unexpected():
-    installed = locked_names() | {"playwright"}
+    installed = locked_names(applicable_only=True) | {"playwright"}
     missing, unexpected = blm.check_environment(LOCK.read_text(), installed)
     assert missing == []
     assert unexpected == ["playwright"], (
@@ -106,7 +122,7 @@ def test_a_package_that_is_not_locked_is_reported_unexpected():
 
 def test_pip_and_its_siblings_are_not_treated_as_unexpected():
     """pip has always been in this manifest and is present in every environment pip builds."""
-    installed = locked_names() | {"pip", "setuptools", "wheel"}
+    installed = locked_names(applicable_only=True) | {"pip", "setuptools", "wheel"}
     missing, unexpected = blm.check_environment(LOCK.read_text(), installed)
     assert (missing, unexpected) == ([], [])
 
@@ -162,10 +178,14 @@ def test_an_unparseable_marker_is_still_permitted_rather_than_dropped():
 def test_the_committed_manifest_covers_every_locked_dependency():
     payload = json.loads(MANIFEST_JSON.read_text())
     listed = {blm.normalise(e["name"]) for e in payload["python_dependencies"]}
-    unlisted = locked_names() - listed
+    # Marker-aware: `tzdata` is pinned for Windows only and `typing-extensions` below 3.13.
+    # A manifest generated where those markers do not hold correctly omits them, and demanding
+    # otherwise would be asserting that the manifest describes a platform it was not built on.
+    unlisted = locked_names(applicable_only=True) - listed
     assert not unlisted, (
-        f"{sorted(unlisted)} are pinned in requirements-lock.txt and absent from the committed "
-        f"licence manifest — the artifact ships them unattributed")
+        f"{sorted(unlisted)} are pinned in requirements-lock.txt, apply on this platform, and "
+        f"are absent from the committed licence manifest — the artifact ships them "
+        f"unattributed")
 
 
 @pytest.mark.skipif(not MANIFEST_JSON.is_file(), reason="manifest not generated yet")
