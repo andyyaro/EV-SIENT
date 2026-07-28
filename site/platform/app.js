@@ -483,7 +483,7 @@ function renderEngines() {
     `From ${g.from_run}: ${g.run_status_ok}/${g.rows} rows completed; capacity basis ` +
     `${g.capacity_basis.join(", ")}; service check ${g.service_check.join(", ")}; ` +
     `${g.strategies_skipped} rows had both managed-charging strategies skipped; ` +
-    `peak clamp is null on every row` +
+    `peak clamp ${g.peak_clamp_all_null ? "is null on every row" : "is not null on every row"}` +
     (g.peak_clamp_all_null ? " (no number was invented to fill the gap)." : ".");
   guard.append(gp, gs);
 
@@ -641,7 +641,12 @@ async function main() {
     renderSimulink();
     await initFieldEntry();
 
-    // Deep-link a provenance panel: ?number=SYN004|2036|base|ports_active
+    // Deep-link a provenance panel: ?number=<SITE_ID>|2036|base|ports_active
+    // Site ids differ between installations -- the study contract and the public synthetic
+    // set use different ones -- so this is a placeholder rather than a literal. It named
+    // SYN004, which exists only in the synthetic MATLAB harness, so pasting it into the
+    // study platform produced an empty panel; and a real site id cannot go here at all,
+    // because this file ships inside the public installer (DEC-016).
     //
     // A shareable link to a number's lineage is the useful form of "show your working" --
     // you can send someone the provenance rather than the claim. It also means the panel

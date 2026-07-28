@@ -1,6 +1,8 @@
 """Generate the web tier's data files from the canonical contract.
 
-The web tier computes nothing. It reads exactly two generated files, and this writes both:
+The web tier computes nothing. It reads six generated JSON files; this writes two of them
+(the rest come from build_platform_surfaces.py, build_field_schema.py,
+build_engine_record.py and build_simulink_view.py). The two written here:
 
 * ``provenance_v1.json`` -- every displayed number's lineage
   (:func:`fcf_m2.provenance.export_all`)

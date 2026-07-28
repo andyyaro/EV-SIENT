@@ -20,7 +20,9 @@ repository at all** — they existed only as S3 objects. They are now under `sit
 is a reviewable diff instead of a hand-edit of production.
 
 Every factual claim inserted here was checked against `data/contract/v1/` before use: the grid
-factor (596.3 lb CO2e/MWh, eGRID2023r2, accessed 2026-07-19), "0 of 12 at High confidence",
+factor (596.3 lb CO2e/MWh, eGRID2023r2, accessed 2026-07-19), "all 12 sites score Low data
+confidence -- none reaches even Medium" (this said "0 of 12 at High confidence" until the
+weaker phrasing was replaced everywhere),
 "placeholder everywhere", and the contract version and generation date. A footer asserting a
 number the contract disagrees with would manufacture the divergence this phase exists to
 remove.

@@ -20,7 +20,11 @@ set -euo pipefail
 VERSION="${CESIUM_VERSION:-1.128.0}"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$REPO/explorer/web/vendor"
-PINNED=$(grep -o 'cesium@[0-9]\+\.[0-9]\+' "$REPO/explorer/web/index.html" | head -1 | cut -d@ -f2)
+# `|| true` is load-bearing under `set -euo pipefail`: if the grep finds no pin the whole
+# pipeline fails and the script dies HERE, so the `[ -n "$PINNED" ]` guard below could
+# never observe an empty value -- an unpinned index.html would abort with no explanation
+# instead of reaching the message written for exactly that case.
+PINNED=$(grep -o 'cesium@[0-9]\+\.[0-9]\+' "$REPO/explorer/web/index.html" | head -1 | cut -d@ -f2 || true)
 
 if [ -n "$PINNED" ] && [[ "$VERSION" != "$PINNED"* ]]; then
   echo "REFUSING: index.html pins cesium@$PINNED but this script would fetch $VERSION." >&2

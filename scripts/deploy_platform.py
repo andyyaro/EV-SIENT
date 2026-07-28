@@ -32,7 +32,10 @@ the path pattern lands on the main bucket, which simply has no platform content 
 a 404. The guarantee stops being behavioural and becomes structural — the same reasoning that
 makes an operation *be* a CLI command rather than merely match one.
 
-Nothing here writes a credential, an account id, or an ARN into a tracked file. Account ids are
+Nothing here writes a credential into a tracked file, and the one tracked file it DOES write --
+`docs/operations/v4-program/cloudfront-config-before-platform.json` -- has its account id
+redacted before it is saved (verified: the tracked copy contains `<ACCOUNT>`, never digits).
+Account ids are
 computed at runtime and redacted from this script's output.
 
 Usage
@@ -362,6 +365,14 @@ def assert_safe_change(before: dict, after: dict) -> None:
             "  break every physical tag in the field. Nothing has been sent.")
 
     # The default behaviour must stay exactly as found, and must never carry an auth function.
+    #
+    # NOTE: the first of these two checks is SUBSUMED by the comparison above --
+    # `DefaultCacheBehavior` is not in MAY_CHANGE, so any change to it already raises there,
+    # with a different message. It is kept as a named guard rather than deleted, because a
+    # deploy path is the wrong place to remove a safety check for tidiness; but it must not
+    # be counted as independent coverage. The SECOND check is genuinely independent: it fires
+    # on a Lambda association that was present BEFORE and after, which the equality test
+    # cannot see.
     if before["DefaultCacheBehavior"] != after["DefaultCacheBehavior"]:
         raise SystemExit("REFUSING TO DEPLOY: the default cache behaviour changed.")
     if after["DefaultCacheBehavior"].get("LambdaFunctionAssociations", {}).get("Quantity", 0):
