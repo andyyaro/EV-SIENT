@@ -5,7 +5,7 @@ latest edition, and open AHJ questions. Conditional standards (DCFC, BESS) are
 emitted with applicability='conditional_out_of_scope' and are excluded from
 active-scope views — they must never be shown as active when no DCFC/BESS exists.
 
-Editions verified 2026-07-19 (see research/CURRENT_FACTS_SOURCE_REGISTER.md).
+Editions verified 2026-07-19 (see docs/methodology/current-facts-source-register.md).
 """
 
 from __future__ import annotations

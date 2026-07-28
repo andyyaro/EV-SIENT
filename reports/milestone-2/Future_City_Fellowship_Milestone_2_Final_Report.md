@@ -35,9 +35,9 @@ Phase 1 identified a local-readiness problem: electrification is expanding faste
 | Horizon | Active ports (base→high) | Staged NPC | Broad NPC | Staged avoids | Net CO2e avoided (base→high) |
 |---|---|---|---|---|---|
 | 2026 | 25 | — | — | — | ≈43 t/yr |
-| 2036 | 44 → 47 | $1.56M | $1.87M | **$0.31M** | ≈82 → 113 t/yr |
-| 2046 | 47 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130 → 195 t/yr |
-| 2056 | 47 → 48 (pathway ceiling 48) | $3.01M | $3.41M | **$0.39M** | ≈173 → 260 t/yr |
+| 2036 | 35 → 44 | $1.56M | $1.87M | **$0.31M** | ≈82 → 113 t/yr |
+| 2046 | 44 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130 → 195 t/yr |
+| 2056 | 44 → 48 (pathway ceiling 48) | $3.01M | $3.41M | **$0.39M** | ≈173 → 260 t/yr |
 
 ---
 
@@ -75,7 +75,20 @@ Seven genuinely distinct alternatives were developed and scored in a provisional
 | A — Broad immediate buildout (the Neabsco pattern) | 41 |
 | G — Defer / do nothing (comparator) | 37 |
 
-Sensitivity: the ranking survives ±5pp on every criterion; the one honest crossover is equity-dominant weighting (~2× default), where F overtakes B — neutralized by presenting staged pilots as the hybrid's first stage. **These scores are researched provisional values; the team session package (`docs/human-actions/team_alternatives_session/`) exists precisely so the team can amend and adopt them honestly. No team adoption is claimed.**
+Sensitivity: the ranking survives ±5pp on every criterion; the one honest crossover is equity-dominant weighting (~2× default), where F overtakes B — neutralized by presenting staged pilots as the hybrid's first stage.
+
+> **CORRECTION, 2026-07-28.** Two figures in this section were superseded on 2026-07-27 and this
+> dated report was never amended. It is kept as written, because it records what was presented;
+> the corrections are stated here rather than substituted silently.
+>
+> * **Alternative G scores 40.0, not 37.** Recomputed from the same matrix and weights;
+>   G's rank is unchanged.
+> * **The equity crossover is at ~2.5× the default weight, not ~2×.** At 2× default equity, F
+>   does **not** overtake B.
+>
+> Both are pinned by `tests/test_mcda_arithmetic.py`, which parses the canonical matrix and
+> fails if either figure moves. The canonical source is
+> `docs/human-actions/team_alternatives_session/02_PROVISIONAL_MCDA.md`. **These scores are researched provisional values; the team session package (`docs/human-actions/team_alternatives_session/`) exists precisely so the team can amend and adopt them honestly. No team adoption is claimed.**
 
 ## 5. Two aspects at 2036 / 2046 / 2056
 

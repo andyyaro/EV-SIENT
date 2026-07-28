@@ -12,8 +12,7 @@ function setupOnce(testCase)
     thisDir = fileparts(mfilename("fullpath"));
     repoRoot = fileparts(thisDir);
     addpath(fullfile(repoRoot, "src"));
-    testCase.TestData.csvFile = fullfile(repoRoot, "data", ...
-        "canonical", "matlab_scenarios.csv");
+    testCase.TestData.csvFile = resolveScenarioCsv();
     testCase.TestData.tmpDir = tempname;
     mkdir(testCase.TestData.tmpDir);
 end
@@ -50,10 +49,17 @@ function testHorizonsComeFromData(testCase)
 end
 
 function testFilterBySiteHorizonCase(testCase)
+    %% Site ids are read FROM THE DATA, never hard-coded. The same discipline
+    %% ML-06 applies to horizons applies here: these sources are mirrored into a
+    %% PUBLIC harness repository, so naming a real facility id in a test would
+    %% publish client identity. Reading the id keeps the test valid against the
+    %% private canonical CSV and against a synthetic harness fixture alike.
+    allRows = loadScenarios(testCase.TestData.csvFile);
+    siteId = string(allRows.site_id(1));
     T = loadScenarios(testCase.TestData.csvFile, ...
-        "SiteId", "FFX002", "HorizonYear", 2036, "Case", "high");
+        "SiteId", siteId, "HorizonYear", 2036, "Case", "high");
     verifyEqual(testCase, height(T), 1);
-    verifyEqual(testCase, string(T.site_id(1)), "FFX002");
+    verifyEqual(testCase, string(T.site_id(1)), siteId);
     verifyEqual(testCase, T.horizon_year(1), 2036);
     verifyEqual(testCase, string(T.case_label(1)), "high");
 end
@@ -75,8 +81,7 @@ end
 function testMissingColumnErrors(testCase)
     % Drop capacity_basis entirely -> hard error on required columns.
     T = readtable(testCase.TestData.csvFile, ...
-        detectImportOptions(testCase.TestData.csvFile, ...
-            "TextType", "string", "VariableNamingRule", "preserve"));
+        scenarioImportOptions(testCase.TestData.csvFile));
     T = removevars(T, "capacity_basis");
     badCsv = fullfile(testCase.TestData.tmpDir, "missing_col.csv");
     writetable(T, badCsv);
@@ -86,8 +91,7 @@ end
 
 function testEmptyCapacityBasisErrors(testCase)
     % Blank a single capacity_basis value -> fail-closed load error.
-    opts = detectImportOptions(testCase.TestData.csvFile, ...
-        "TextType", "string", "VariableNamingRule", "preserve");
+    opts = scenarioImportOptions(testCase.TestData.csvFile);
     T = readtable(testCase.TestData.csvFile, opts);
     T.capacity_basis(3) = "";
     badCsv = fullfile(testCase.TestData.tmpDir, "blank_basis.csv");
@@ -97,8 +101,7 @@ function testEmptyCapacityBasisErrors(testCase)
 end
 
 function testBadArrivalWindowErrors(testCase)
-    opts = detectImportOptions(testCase.TestData.csvFile, ...
-        "TextType", "string", "VariableNamingRule", "preserve");
+    opts = scenarioImportOptions(testCase.TestData.csvFile);
     T = readtable(testCase.TestData.csvFile, opts);
     T.arrival_end_hr(1) = T.arrival_start_hr(1);  % zero-width window
     badCsv = fullfile(testCase.TestData.tmpDir, "bad_window.csv");

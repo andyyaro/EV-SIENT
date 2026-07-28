@@ -1,0 +1,25 @@
+site_id,site_ranked,site_name,model_rank,series,wait_min,model_mode
+FFX004,01 Fairfax County Government…,Fairfax County Government Center,1,"Mean wait, simulated",0.6374649637364814,milestone2_v3
+FFX002,02 City of Fairfax Regional…,City of Fairfax Regional Library,2,"Mean wait, simulated",0.5043479736590092,milestone2_v3
+PWC002,03 Neabsco-Potomac Commuter…,Neabsco-Potomac Commuter Garage,3,"Mean wait, simulated",8.019859822658686,milestone2_v3
+PWC006,04 Bull Run Library,Bull Run Library,4,"Mean wait, simulated",0.4858143097471108,milestone2_v3
+PWC007,05 Central Library,Central Library,5,"Mean wait, simulated",0.515607563690578,milestone2_v3
+FFX001,06 Fairfax City Hall or…,Fairfax City Hall or municipal building,6,"Mean wait, simulated",0.345613820814415,milestone2_v3
+PWC004,07 Chinn Park Regional…,Chinn Park Regional Library,7,"Mean wait, simulated",0.4666079215832178,milestone2_v3
+PWC001,08 PWC McCoart Government…,PWC McCoart Government Center,8,"Mean wait, simulated",1.1543957785298042,milestone2_v3
+FFX003,09 Pohick Regional Library,Pohick Regional Library,9,"Mean wait, simulated",0.0689007422368978,milestone2_v3
+PWC008,10 Potomac Library,Potomac Library,10,"Mean wait, simulated",0.5493238391731892,milestone2_v3
+PWC005,11 Haymarket Gainesville…,Haymarket Gainesville Library,11,"Mean wait, simulated",0.1573711002733049,milestone2_v3
+PWC003,12 Prince William County…,Prince William County Public Safety Training Center,12,"Mean wait, simulated",0.7848859144714752,milestone2_v3
+FFX004,01 Fairfax County Government…,Fairfax County Government Center,1,"Peak-window wait, Erlang",1.399795394143819,milestone2_v3
+FFX002,02 City of Fairfax Regional…,City of Fairfax Regional Library,2,"Peak-window wait, Erlang",1.3059366743634209,milestone2_v3
+PWC002,03 Neabsco-Potomac Commuter…,Neabsco-Potomac Commuter Garage,3,"Peak-window wait, Erlang",42.365285650098855,milestone2_v3
+PWC006,04 Bull Run Library,Bull Run Library,4,"Peak-window wait, Erlang",1.064024524961434,milestone2_v3
+PWC007,05 Central Library,Central Library,5,"Peak-window wait, Erlang",0.9004555217300385,milestone2_v3
+FFX001,06 Fairfax City Hall or…,Fairfax City Hall or municipal building,6,"Peak-window wait, Erlang",1.3283882582650897,milestone2_v3
+PWC004,07 Chinn Park Regional…,Chinn Park Regional Library,7,"Peak-window wait, Erlang",0.6758476558578971,milestone2_v3
+PWC001,08 PWC McCoart Government…,PWC McCoart Government Center,8,"Peak-window wait, Erlang",2.1420184700321165,milestone2_v3
+FFX003,09 Pohick Regional Library,Pohick Regional Library,9,"Peak-window wait, Erlang",0.5457545299042034,milestone2_v3
+PWC008,10 Potomac Library,Potomac Library,10,"Peak-window wait, Erlang",0.8299329299769124,milestone2_v3
+PWC005,11 Haymarket Gainesville…,Haymarket Gainesville Library,11,"Peak-window wait, Erlang",0.3814053412144326,milestone2_v3
+PWC003,12 Prince William County…,Prince William County Public Safety Training Center,12,"Peak-window wait, Erlang",0.6917813080469409,milestone2_v3

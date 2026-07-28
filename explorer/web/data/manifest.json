@@ -1,0 +1,34 @@
+{
+ "schema_version": "fcf3d/1.0.0",
+ "generated_at": "2026-07-27T17:31:42.939727+00:00",
+ "mode": "milestone2_v3",
+ "mode_note": "milestone2_v3 \u2014 the repository's canonical mode: 2026 baseline with 2036/2046/2056 horizons, cohort-independent fixed-anchor scoring, and typed data confidence.",
+ "mode_is_canonical": true,
+ "horizons": [
+  "2026",
+  "2036",
+  "2046",
+  "2056"
+ ],
+ "horizon_labels": {
+  "2026": "2026 baseline",
+  "2036": "2036",
+  "2046": "2046",
+  "2056": "2056"
+ },
+ "site_count": 12,
+ "score_min": 32.8,
+ "score_max": 53.4,
+ "sources": {
+  "results": "fixture_milestone2_v3_site_results.csv",
+  "right_sizing": "fixture_milestone2_v3_right_sizing.csv",
+  "peak_waits": "tbl_peak_waits.csv",
+  "avoided_evse": "tbl_avoided_evse.csv",
+  "scenarios": "scenario_table.csv",
+  "coord_sources": "site_coordinate_sources.csv",
+  "readiness_conf": "tbl_readiness_confidence.csv",
+  "electrical": "legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv"
+ },
+ "disclaimer": "Planning prototype only. Screening-class estimates; not an engineering, permitting, or procurement tool. Electrical service capacity is unconfirmed for all sites pending utility/facility review. 0 of 12 sites reach High data confidence. Massing is illustrative, not a design.",
+ "warnings": []
+}

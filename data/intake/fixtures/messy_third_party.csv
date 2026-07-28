@@ -1,0 +1,4 @@
+Facility_ID,Name,Type,Latitude,Longitude,staff,footfall,stalls,operating_hours,dwell_hr,households_1mi,jobs_1mi,amenities,ev_pct,l2_ports,dcfc_ports,equity_index,service_distance_m,trench_length_m,cost_per_ft,upgrade_cost,service_amps,spare_capacity,publicly_accessible,ada,fire_access,enclosed,disconnect_visible,stormwater,battery,fleet
+LIB-01,Riverside Library,library,41.8781,-87.6298,14,420,88,9,1.5,5200,8100,9,0.022,2,0,0.61,46,46,150,72000,0,0,1,1,1,0,0,0,0,0
+LIB-02,Eastgate Branch,library,41.9100,-87.6800,11,310,64,8,1.5,4100,6200,7,0.019,0,0,0.55,61,61,150,81000,0,0,1,1,1,0,0,0,0,0
+OFF-01,County Annex,office,41.8500,-87.7000,180,240,260,8.5,3,3300,15400,5,0.026,4,1,0.38,95,95,150,128000,0,0,1,1,1,0,0,0,0,0

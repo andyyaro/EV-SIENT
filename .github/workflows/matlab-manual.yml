@@ -1,10 +1,16 @@
 # MATLAB verification for the Milestone 2 V3 site-grid behavior model (ML-09).
 #
 # MANUAL TRIGGER ONLY: MATLAB batch licensing in CI requires the MLM_LICENSE_TOKEN
-# secret (see matlab-actions/setup-matlab docs). Until that secret is configured,
-# MATLAB code in this repo is statically checked only — no execution is claimed
-# anywhere (see matlab/EXECUTION_STATUS.md). The core pipeline needs base MATLAB
-# only; Simulink is optional and not exercised by the tests.
+# secret (see matlab-actions/setup-matlab docs).
+#
+# The suite HAS since been executed on licensed MathWorks R2025b Update 5 -- 49 passed /
+# 0 failed -- in a separate harness repository, against a SYNTHETIC fixture. Run artifacts
+# are committed under matlab/outputs/. See matlab/EXECUTION_STATUS.md for the record.
+# (This header previously said "no execution is claimed anywhere", which stopped being true
+# on 2026-07-27 and was never updated.)
+#
+# The core pipeline needs base MATLAB only; Simulink is optional and not exercised by the
+# tests -- the .slx was built, never simulated.
 
 name: matlab-manual
 

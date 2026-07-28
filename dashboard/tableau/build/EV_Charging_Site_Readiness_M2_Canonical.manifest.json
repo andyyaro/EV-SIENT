@@ -1,0 +1,91 @@
+{
+  "workbook_name": "EV_Charging_Site_Readiness_M2_Canonical",
+  "spec_version": "0.1",
+  "twb": "EV_Charging_Site_Readiness_M2_Canonical.twb",
+  "twbx": "EV_Charging_Site_Readiness_M2_Canonical.twbx",
+  "twbx_sha256": "898b4b494560684c858460d6e3eb9df4c42abb5897ffb6bc0ff935317b2ad47f",
+  "entries": [
+    "EV_Charging_Site_Readiness_M2_Canonical.twb",
+    "Data/readiness/readiness.hyper",
+    "Data/readiness/sheet_readiness.csv",
+    "Data/ports/ports.hyper",
+    "Data/ports/sheet_ports.csv",
+    "Data/horizons/horizons.hyper",
+    "Data/horizons/sheet_horizons.csv",
+    "Data/costs/costs.hyper",
+    "Data/costs/sheet_costs.csv",
+    "Data/emissions/emissions.hyper",
+    "Data/emissions/sheet_emissions.csv",
+    "Data/waits/waits.hyper",
+    "Data/waits/sheet_waits.csv",
+    "Data/map/map.hyper",
+    "Data/map/sheet_map.csv"
+  ],
+  "data_sources": [
+    {
+      "id": "readiness",
+      "csv": "sheet_readiness.csv",
+      "fields": 9
+    },
+    {
+      "id": "ports",
+      "csv": "sheet_ports.csv",
+      "fields": 7
+    },
+    {
+      "id": "horizons",
+      "csv": "sheet_horizons.csv",
+      "fields": 6
+    },
+    {
+      "id": "costs",
+      "csv": "sheet_costs.csv",
+      "fields": 7
+    },
+    {
+      "id": "emissions",
+      "csv": "sheet_emissions.csv",
+      "fields": 8
+    },
+    {
+      "id": "waits",
+      "csv": "sheet_waits.csv",
+      "fields": 7
+    },
+    {
+      "id": "map",
+      "csv": "sheet_map.csv",
+      "fields": 13
+    }
+  ],
+  "worksheets": [
+    {
+      "name": "Readiness by Site",
+      "template": "bar"
+    },
+    {
+      "name": "Starter vs Pathway Ports",
+      "template": "bar"
+    },
+    {
+      "name": "Ports Across Horizons",
+      "template": "line"
+    },
+    {
+      "name": "Lifecycle Cost by Horizon",
+      "template": "bar"
+    },
+    {
+      "name": "Net CO2e by Horizon",
+      "template": "line"
+    },
+    {
+      "name": "Peak Waits by Site",
+      "template": "bar"
+    },
+    {
+      "name": "Site Map",
+      "template": "map"
+    }
+  ]
+}

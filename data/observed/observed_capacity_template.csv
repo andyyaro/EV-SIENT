@@ -1,0 +1,2 @@
+site_id,observed_date,method,service_capacity_kw,spare_capacity_kw,measured_peak_kw,source_org,source_document,observer,verification_status,notes
+EXAMPLE001,2026-09-15,facility_panel_schedule,400,,,EXAMPLE facility (template row - not a real site),EXAMPLE panel schedule PS-000 (template row),EXAMPLE reviewer (template row),reviewed,TEMPLATE ROW - illustrative only. Delete before entering real data. site_id EXAMPLE001 is not a project site.

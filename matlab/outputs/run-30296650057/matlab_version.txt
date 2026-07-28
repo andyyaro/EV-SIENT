@@ -1,0 +1,4 @@
+version: 25.2.0.3177638 (R2025b) Update 5
+release: 2025b
+simulink_license_test: 1
+simulink_installed: 1

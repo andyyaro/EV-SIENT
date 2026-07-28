@@ -10,13 +10,29 @@ research-phase MATLAB/Simulink improvement backlog (a pre-V3 research
 artifact, not tracked in this repository). The two legacy scripts are
 archived unchanged in `legacy_archive/` with a full migration note.
 
-> **EXECUTION STATUS - READ FIRST**: this repository was authored in an
-> environment with **no MATLAB installation** (2026-07-19). All code is
-> statically written and reviewed; **no simulation, test run, or figure in
-> this repo has been executed or generated**. `EXECUTION_STATUS.md` records
-> exactly what was and was not verified, and
-> `RUN_ON_LICENSED_MATLAB.md` gives the exact commands for the first
-> execution on a licensed machine.
+> **EXECUTION STATUS - READ FIRST**: this code has been **executed on licensed
+> MathWorks MATLAB** — R2025b Update 5, **49 passed / 0 failed / 0 incomplete**,
+> plus a 120-row batch that completed on every row (2026-07-27). It runs in a
+> public CI harness rather than here, because that harness must never carry
+> project data.
+>
+> Two things that follow, and neither is a footnote:
+>
+> 1. **Every run used a SYNTHETIC fixture.** No output describes a real facility.
+>    Real capacity is `placeholder` at 12/12 sites, so the fail-closed guard skips
+>    both managed-charging strategies on every row — which is the correct behaviour
+>    and also means those numerics are **not** validated against real capacity.
+> 2. **The Simulink model is BUILT but never SIMULATED.** Run `30296650057` produced
+>    `site_grid_behavior_ev_charging_v3.slx`, whose 11 root blocks match the topology in
+>    `buildSimulinkModel.m` name for name. It has not been run, and no number in this
+>    repository derives from it — the layer is illustrative, as its own docstring says.
+>    Before that run the model had **never** been buildable: the availability guard tested
+>    `exist("new_system","file") ~= 2`, and `new_system` is a built-in, so it returns 0.
+>
+> `EXECUTION_STATUS.md` carries the full run record — engine, release, commit, input
+> hash, what the five failed runs found, and what may and may not be claimed. The
+> superseded "no MATLAB available" banner is kept there verbatim rather than deleted.
+> `RUN_ON_LICENSED_MATLAB.md` gives the commands for running it yourself.
 
 ## Requirements
 
@@ -145,7 +161,7 @@ buildSimulinkModel(out);   % builds simulink/<model>.slx ONCE if absent
 |---|---|
 | `peak_unmanaged_kW` | daily peak of base + uncontrolled EV request |
 | `peak_clamp_kW` / `curtailed_clamp_kWh` | legacy clamp: peak and energy refused (never rescheduled) |
-| `peak_energy_aware_kW` / `unmet_energy_aware_kWh` / `deferred_energy_aware_kWh` | scheduler: peak, energy not delivered by departure, energy shifted later and recovered |
+| `peak_energy_aware_kW` / `unmet_energy_aware_kWh` / `deferred_energy_aware_kWh` | scheduler: peak; energy not delivered by departure; and the **largest cumulative shortfall at any instant** — `max(cumtrapz(request) - cumtrapz(delivered))`, i.e. the high-water mark of how far behind schedule charging fell, **not a total of energy shifted**. Previously described as "energy shifted later and recovered", which reads as a summed quantity. |
 | `capacity_basis` / `capacity_verified` | provenance of any capacity number used |
 | `placeholder_banner` | non-empty text that MUST accompany the row wherever it is shown |
 | `service_check` | `within_service` / `exceeds_service` / `service_capacity_unknown` - labeled non-verified unless basis is verified |

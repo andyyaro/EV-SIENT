@@ -1,2 +1,2 @@
-site_id,date,sessions,energy_kwh,mean_dwell_min,facility_visitors_day
-FFX002,2026-08-01,2,19.0,95,310
+site_id,date,sessions,energy_kwh,mean_dwell_min,facility_visitors_day,ports_in_service,port_hours_available,port_hours_possible,sessions_delayed,wait_p90_min,observer,source_system
+EXAMPLE001,2026-09-15,2,19.0,95,310,2,23.5,24.0,0,0.0,EXAMPLE reviewer (template row),EXAMPLE network export (template row)

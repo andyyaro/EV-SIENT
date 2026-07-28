@@ -1,0 +1,227 @@
+"""The 3D map's arithmetic must be the model's arithmetic, in both modes.
+
+`fcf-3d/CLAUDE.md` names the failure this guards against: *the map telling planners a story
+the model never told*. Two ways that happened before integration:
+
+* The explorer kept its own copy of the scoring weights. They matched only because someone
+  maintained them by hand, and the explorer's own test merely checked its copy summed to 1.0
+  -- never that it equalled the model's. `fcf_m2.scoring` now owns the weights and the
+  explorer imports them, so this file's job is to prove the import is real and complete.
+* The ETL read the `legacy_v2` fixtures while emitting field names in a horizon convention
+  `milestone2_v3` had retired, and emitted V3 horizons alongside them in the same payload.
+  A field name must never carry a horizon its data does not have.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from fcf3d import build_sites as bs
+from fcf_m2 import scoring
+
+ROOT = Path(__file__).resolve().parents[1]
+WEB_DATA = ROOT / "explorer/web/data"
+
+RETIRED_HORIZONS = ("2035", "2050")
+CANONICAL_HORIZONS = ("2026", "2036", "2046", "2056")
+
+
+class TestWeightsAreImportedNotCopied:
+    def test_subscore_weights_are_the_same_object(self):
+        assert bs.SUBSCORE_WEIGHTS is scoring.SUBSCORE_WEIGHTS
+
+    def test_subscore_weights_sum_to_one(self):
+        assert sum(scoring.SUBSCORE_WEIGHTS.values()) == pytest.approx(1.0)
+
+    def test_each_subscore_driver_block_sums_to_one(self):
+        for subscore, weights in scoring.DRIVER_WEIGHTS.items():
+            assert sum(weights.values()) == pytest.approx(1.0), subscore
+
+    @pytest.mark.parametrize("driver", bs.DRIVERS, ids=lambda d: d.column)
+    def test_every_driver_weight_matches_the_model(self, driver):
+        model_weight = scoring.DRIVER_WEIGHTS[driver.subscore].get(driver.column)
+        assert model_weight is not None, f"{driver.column} is not a model driver"
+        assert driver.weight == pytest.approx(model_weight)
+
+    @pytest.mark.parametrize("driver", bs.DRIVERS, ids=lambda d: d.column)
+    def test_every_invert_flag_matches_the_model(self, driver):
+        assert driver.invert == (driver.column in scoring.INVERTED_DRIVERS)
+
+    def test_the_explorer_covers_every_model_driver(self):
+        """A driver the model weights but the map ignores would silently under-explain."""
+        explorer = {d.column for d in bs.DRIVERS}
+        model = {c for weights in scoring.DRIVER_WEIGHTS.values() for c in weights}
+        assert model - explorer == set(), f"model drivers missing from the map: {model - explorer}"
+        assert explorer - model == set(), f"map drivers unknown to the model: {explorer - model}"
+
+
+class TestModeSeparation:
+    def test_both_modes_declare_sources_and_horizons(self):
+        assert set(bs.MODE_SOURCES) == set(bs.MODES) == set(bs.MODE_HORIZONS)
+        assert bs.DEFAULT_MODE == bs.MODE_V3, "the canonical mode must be the default"
+
+    @pytest.mark.parametrize("mode", bs.MODES)
+    def test_each_mode_resolves_and_builds(self, mode):
+        sources = bs.resolve_sources(str(ROOT), mode)
+        result = bs.build(bs.load(sources), sources, mode)
+        assert len(result.features) == 12
+        assert result.manifest["mode"] == mode
+
+    def test_legacy_mode_emits_only_its_own_horizons(self):
+        sources = bs.resolve_sources(str(ROOT), bs.MODE_LEGACY)
+        result = bs.build(bs.load(sources), sources, bs.MODE_LEGACY)
+        props = result.features[0]["properties"]
+        leaked = [k for k in props if any(h in k for h in CANONICAL_HORIZONS)]
+        assert leaked == [], f"legacy_v2 leaked canonical horizon fields: {leaked}"
+
+    def test_canonical_mode_never_emits_a_retired_horizon(self):
+        """The defect this phase exists to fix: a ports_2050 field under a V3 repository."""
+        sources = bs.resolve_sources(str(ROOT), bs.MODE_V3)
+        result = bs.build(bs.load(sources), sources, bs.MODE_V3)
+        for feature in result.features:
+            props = feature["properties"]
+            leaked = [k for k in props if any(h in k for h in RETIRED_HORIZONS)]
+            assert leaked == [], f"{props['site_id']} carries retired horizons: {leaked}"
+            rs = props.get("right_sizing") or {}
+            leaked_rs = [k for k in rs if any(h in k for h in RETIRED_HORIZONS)]
+            assert leaked_rs == [], f"{props['site_id']} right_sizing retired: {leaked_rs}"
+
+    def test_the_two_modes_disagree_about_the_top_site(self):
+        """Not a defect -- the reason mode must be visible. Pin it so it stays visible."""
+        tops = {}
+        for mode in bs.MODES:
+            sources = bs.resolve_sources(str(ROOT), mode)
+            result = bs.build(bs.load(sources), sources, mode)
+            tops[mode] = result.features[0]["properties"]["site_id"]
+        assert tops[bs.MODE_V3] == "FFX004"
+        assert tops[bs.MODE_LEGACY] == "FFX002"
+
+
+@pytest.fixture(scope="module")
+def committed() -> dict:
+    return json.loads((WEB_DATA / "sites.geojson").read_text())
+
+
+class TestCommittedArtifacts:
+    """The built payload is committed, so it must match a fresh build of the default mode."""
+
+    def test_manifest_states_the_active_mode(self):
+        manifest = json.loads((WEB_DATA / "manifest.json").read_text())
+        assert manifest["mode"] == bs.DEFAULT_MODE
+        assert manifest["mode_is_canonical"] is True
+        assert manifest["horizons"] == list(CANONICAL_HORIZONS)
+
+    def test_committed_geojson_matches_a_fresh_build(self, committed):
+        sources = bs.resolve_sources(str(ROOT), bs.DEFAULT_MODE)
+        fresh = bs.build(bs.load(sources), sources, bs.DEFAULT_MODE)
+        assert len(fresh.features) == len(committed["features"])
+        for built, on_disk in zip(fresh.features, committed["features"]):
+            assert built["properties"]["site_id"] == on_disk["properties"]["site_id"]
+            assert built["properties"]["readiness_score"] == on_disk["properties"]["readiness_score"]
+            assert built["geometry"] == on_disk["geometry"]
+
+    def test_committed_payload_carries_no_retired_horizon(self, committed):
+        blob = json.dumps(committed)
+        for retired in ("ports_2035", "ports_2050"):
+            assert retired not in blob, f"committed payload still carries {retired}"
+
+    def test_site_ids_are_exactly_the_twelve(self, committed):
+        ids = sorted(f["properties"]["site_id"] for f in committed["features"])
+        expected = sorted([f"FFX{n:03d}" for n in range(1, 5)]
+                          + [f"PWC{n:03d}" for n in range(1, 9)])
+        assert ids == expected
+
+    def test_every_coordinate_is_in_northern_virginia(self, committed):
+        for feature in committed["features"]:
+            lon, lat = feature["geometry"]["coordinates"][:2]
+            assert -77.8 <= lon <= -77.0, f"{feature['properties']['site_id']} lon {lon}"
+            assert 38.5 <= lat <= 39.1, f"{feature['properties']['site_id']} lat {lat}"
+
+
+@pytest.fixture(scope="module")
+def app_js() -> str:
+    return (ROOT / "explorer/web/app.js").read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def index_html() -> str:
+    return (ROOT / "explorer/web/index.html").read_text(encoding="utf-8")
+
+
+class TestViewerShowsWhatItMustShow:
+    """The viewer is the most persuasive surface here, so it carries the most caveats.
+
+    Before integration it displayed neither the active data mode nor two of the four
+    required disclaimers, and it never read manifest.json at all -- the strongest
+    provenance statement in the tree shipped with every build and was shown to nobody.
+    """
+
+    def test_viewer_reads_the_manifest(self, app_js):
+        assert "data/manifest.json" in app_js, "the viewer still ignores manifest.json"
+
+    def test_viewer_has_a_mode_badge(self, index_html, app_js):
+        assert 'id="modeBadge"' in index_html
+        assert "renderModeBadge" in app_js
+
+    def test_unknown_mode_is_stated_not_assumed(self, app_js):
+        """A missing manifest must read as unknown, never as canonical."""
+        assert "Data mode unknown" in app_js
+
+    @pytest.mark.parametrize("caveat", [
+        "Screening-class only",
+        "0 of 12 sites reach High data confidence",
+        "Electrical capacity is a labeled placeholder at 12 of 12 sites",
+        "The massing is not a design",
+    ])
+    def test_all_four_standing_caveats_are_present(self, app_js, caveat):
+        assert caveat in app_js, f"the viewer no longer states: {caveat}"
+
+    def test_no_cesium_ion_token_is_committed(self, app_js, index_html):
+        """The token is runtime-only, browser-only. A committed one is a security defect."""
+        import re
+        for blob in (app_js, index_html):
+            assert not re.search(r"eyJhbGciOi[A-Za-z0-9_\-]{20,}", blob), "a JWT-shaped token is committed"
+
+
+class TestViewerIsHorizonAgnostic:
+    """Fixing a producer without fixing its consumer only moves the defect.
+
+    The ETL was corrected to emit canonical horizons, but the viewer still named
+    ports_2035 and ports_2050 in six places, so under the canonical mode those six
+    would have rendered blank. The viewer now reads its horizon vocabulary from the
+    manifest, the same way the model reads horizons from its data.
+    """
+
+    def test_no_retired_horizon_field_in_any_render_path(self, app_js):
+        import re
+        # comment lines may discuss the old names; code must not use them
+        code = "\n".join(l for l in app_js.splitlines() if not l.strip().startswith("//"))
+        for retired in ("ports_2035", "ports_2050"):
+            assert retired not in code, f"the viewer still reads {retired}"
+
+    def test_viewer_derives_horizons_from_the_manifest(self, app_js):
+        assert "setHorizons" in app_js and "horizonState" in app_js
+        assert "manifest.horizons" in app_js
+
+    def test_viewer_has_a_horizon_lookup_helper(self, app_js):
+        assert "function portsAt(" in app_js
+
+
+class TestViewerKeyboardAccess:
+    """The site list is the primary interaction and was mouse-only."""
+
+    def test_list_items_are_focusable_and_labelled(self, app_js):
+        assert "li.tabIndex = 0" in app_js
+        assert "setAttribute('role', 'button')" in app_js
+        assert "aria-label" in app_js
+
+    def test_selection_and_pinning_are_reachable_by_keyboard(self, app_js):
+        assert "li.onkeydown" in app_js
+        assert "'Enter'" in app_js
+        assert "e.key === 'p'" in app_js, "pinning must not be right-click only"
+
+    def test_arrow_keys_move_between_sites(self, app_js):
+        assert "ArrowDown" in app_js and "ArrowUp" in app_js

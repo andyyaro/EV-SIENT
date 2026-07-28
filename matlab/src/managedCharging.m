@@ -25,9 +25,13 @@ function result = managedCharging(profiles, strategy, varargin)
 %                   (clamp strategy only);
 %       unmet     - energy the scheduler intended to deliver before the
 %                   vehicle's departure but could not (energy_aware only);
-%       deferred_kWh is reported separately (energy shifted later in time
-%                   relative to the request) and is NOT part of the
-%                   balance: deferred-and-recovered energy is delivered.
+%       deferred_kWh is reported separately and is NOT part of the balance:
+%                   deferred-and-recovered energy is delivered. It is the LARGEST
+%                   CUMULATIVE SHORTFALL at any instant --
+%                   max(cumtrapz(request) - cumtrapz(delivered)) -- i.e. the
+%                   high-water mark of how far behind schedule charging fell,
+%                   NOT a sum of energy shifted. matlab/README.md carried the
+%                   same summed-quantity wording and was corrected with it.
 %
 %   Name-value options:
 %     'SiteCapacity_kW'   - finite site capacity limit (from

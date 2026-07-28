@@ -25,7 +25,14 @@
 | D | Centralized fleet hub + selective public | 3 | 3 | 3 | 3 | 2 | 3 | 58.0 | 5 |
 | E | Managed-charging-first | 4 | 3 | 4 | 4 | 3 | 3 | 72.0 | 3 |
 | F | Hybrid portfolio (B + C + E, coordinated with D) | 4 | 4 | 4 | 5 | 4 | 3 | 81.0 | 2 |
-| G | Do nothing / defer (comparator) | 3 | 0 | 3 | 1 | 0 | 5 | 37.0 | 7 |
+| G | Do nothing / defer (comparator) | 3 | 0 | 3 | 1 | 0 | 5 | 40.0 | 7 |
+
+> **Arithmetic correction (2026-07-27).** Row G previously read **37.0**. Recomputing every
+> row from the scores and weights on this page reproduces A, B, C, D, E and F **exactly**;
+> only G was out, by 3.0 points. `(3·25 + 0·20 + 3·20 + 1·15 + 0·10 + 5·10) / 5 = 40.0`.
+> **G's rank is unchanged** — it remains 7th, still below A at 41.0 — so no conclusion on
+> this page moves. Corrected because the team is asked to review and adopt this matrix, and
+> a comparator row that does not reproduce undermines confidence in the six rows that do.
 
 ## Evidence notes (per row, from the researched CSV)
 
@@ -39,7 +46,11 @@
 
 ## Known sensitivities (read before adopting)
 
-- **Equity crossover:** at roughly 2× the default equity weight (~20 vs 10), **F overtakes B**. See the disclosure in `04_WEIGHT_ADOPTION_PAGE.md`.
+- **Equity crossover:** recomputed from this matrix, the crossover is at roughly **2.5×** the
+  default equity weight (**~25 vs 10**), not 2×. At equity 20 with the other weights reduced
+  proportionally, B still leads 82.2 to 80.9; at equity 25 they tie at 80.8; above that **F
+  overtakes B**. The direction of the sensitivity is real and the disclosure stands — only the
+  threshold moves. See `04_WEIGHT_ADOPTION_PAGE.md`.
 - Faster near-term adoption evidence improves F and A (A still cannot win while all 12 sites lack electrical confirmation).
 - A client priority on fleet over public makes D the frame (a client question, not a scoring question).
 - Budget collapse makes C the floor option.

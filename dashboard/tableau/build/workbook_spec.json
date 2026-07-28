@@ -1,0 +1,255 @@
+{
+  "spec_version": "0.1",
+  "workbook": {
+    "name": "EV_Charging_Site_Readiness_M2_Canonical",
+    "description": "Future City Fellowship - EV charging site readiness. Every value derives from the canonical data contract v1.0.0 in mode milestone2_v3. CAPACITY IS A PLACEHOLDER AT ALL 12 SITES - not evidence of electrical feasibility. Screening study; nothing approved or funded."
+  },
+  "data_sources": [
+    {
+      "id": "readiness",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_readiness.csv"
+    },
+    {
+      "id": "ports",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_ports.csv"
+    },
+    {
+      "id": "horizons",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_horizons.csv"
+    },
+    {
+      "id": "costs",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_costs.csv"
+    },
+    {
+      "id": "emissions",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_emissions.csv"
+    },
+    {
+      "id": "waits",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_waits.csv"
+    },
+    {
+      "id": "map",
+      "type": "csv",
+      "path": "dashboard/tableau/build/sheets/sheet_map.csv"
+    }
+  ],
+  "worksheets": [
+    {
+      "name": "Readiness by Site",
+      "template": "bar",
+      "data_source": "readiness",
+      "rows": [
+        "site_ranked"
+      ],
+      "columns": [
+        {
+          "field": "readiness_score",
+          "aggregation": "Sum"
+        }
+      ],
+      "color": "data_confidence",
+      "label": {
+        "field": "readiness_score",
+        "aggregation": "Sum"
+      },
+      "tooltips": [
+        "site_id",
+        "site_name",
+        "recommendation_tier",
+        "jurisdiction",
+        "model_mode"
+      ],
+      "title": "Site readiness ranking \u2014 canonical milestone2_v3",
+      "subtitle": "All 12 sites are LOW data confidence; the colour legend has one value on purpose.",
+      "fit": "entire_view"
+    },
+    {
+      "name": "Starter vs Pathway Ports",
+      "template": "bar",
+      "data_source": "ports",
+      "rows": [
+        "site_ranked",
+        "series"
+      ],
+      "columns": [
+        {
+          "field": "ports",
+          "aggregation": "Sum"
+        }
+      ],
+      "color": "series",
+      "label": {
+        "field": "ports",
+        "aggregation": "Sum"
+      },
+      "tooltips": [
+        "site_id",
+        "site_name",
+        "model_mode"
+      ],
+      "title": "Starter ports today vs pathway capacity to leave room for",
+      "subtitle": "Portfolio: 25 starter, 48 pathway. NOT additive - pathway is the ceiling. Grouped bars, not bar-in-bar - see CAPABILITY_GAP.md.",
+      "fit": "entire_view"
+    },
+    {
+      "name": "Ports Across Horizons",
+      "template": "line",
+      "data_source": "horizons",
+      "rows": [
+        {
+          "field": "ports_active",
+          "aggregation": "Sum"
+        }
+      ],
+      "columns": [
+        "horizon"
+      ],
+      "color": "scenario_name",
+      "label": {
+        "field": "ports_active",
+        "aggregation": "Sum"
+      },
+      "tooltips": [
+        {
+          "field": "pathway_capacity",
+          "aggregation": "Sum"
+        },
+        "model_mode"
+      ],
+      "title": "Active ports by planning horizon",
+      "subtitle": "48-port pathway ceiling is in the tooltip \u2014 no reference line, see CAPABILITY_GAP.md.",
+      "fit": "fit_width"
+    },
+    {
+      "name": "Lifecycle Cost by Horizon",
+      "template": "bar",
+      "data_source": "costs",
+      "rows": [
+        {
+          "field": "lifecycle_cost_npv_usd",
+          "aggregation": "Sum"
+        }
+      ],
+      "columns": [
+        "horizon",
+        "cost_case"
+      ],
+      "color": "cost_case",
+      "tooltips": [
+        {
+          "field": "avoided_overbuild_cost_usd",
+          "aggregation": "Sum"
+        },
+        "estimate_class",
+        "model_mode"
+      ],
+      "title": "Lifecycle cost, net present value (base escalation)",
+      "subtitle": "Screening-class estimates for comparison only. Never a budget, quote or bid.",
+      "fit": "fit_width"
+    },
+    {
+      "name": "Net CO2e by Horizon",
+      "template": "line",
+      "data_source": "emissions",
+      "rows": [
+        {
+          "field": "net_co2e_tonnes",
+          "aggregation": "Sum"
+        }
+      ],
+      "columns": [
+        "horizon"
+      ],
+      "color": "scenario_name",
+      "tooltips": [
+        "grid_factor_source",
+        "grid_factor_vintage",
+        "model_mode"
+      ],
+      "title": "Net CO2e AVOIDED, tonnes per year (higher is better)",
+      "subtitle": "596.3 lb CO2e/MWh, eGRID2023r2, accessed 2026-07-19, SRVC. Demand is modelled, not measured.",
+      "fit": "fit_width"
+    },
+    {
+      "name": "Peak Waits by Site",
+      "template": "bar",
+      "data_source": "waits",
+      "rows": [
+        "site_ranked",
+        "series"
+      ],
+      "columns": [
+        {
+          "field": "wait_min",
+          "aggregation": "Sum"
+        }
+      ],
+      "color": "series",
+      "tooltips": [
+        "site_id",
+        "site_name",
+        "model_mode"
+      ],
+      "title": "Queue wait, minutes - mean simulated and peak-window Erlang",
+      "subtitle": "p50 and p90 are 0.0 at ALL 12 sites: utilisation is 6-20%, so a typical day has no queue. 10-minute screening threshold; no reference line generated.",
+      "fit": "entire_view"
+    },
+    {
+      "name": "Site Map",
+      "template": "map",
+      "data_source": "map",
+      "latitude": "lat",
+      "longitude": "lon",
+      "color": "data_confidence",
+      "size": {
+        "field": "ports_pathway_capacity",
+        "aggregation": "Sum"
+      },
+      "detail": [
+        "site_ranked"
+      ],
+      "tooltips": [
+        "site_id",
+        "site_name",
+        "jurisdiction",
+        "recommendation_tier",
+        "capacity_basis",
+        "model_mode"
+      ],
+      "title": "Candidate sites, Northern Virginia",
+      "subtitle": "Symbol map, not a choropleth. Mark size is pathway capacity; every capacity_basis is 'placeholder'.",
+      "fit": "entire_view"
+    }
+  ],
+  "dashboards": [
+    {
+      "name": "Milestone 2 Overview",
+      "title": "CAPACITY IS A PLACEHOLDER AT ALL 12 SITES - not evidence of electrical feasibility. Screening study; nothing approved or funded.",
+      "direction": "vertical",
+      "sizing_mode": "fixed",
+      "width": 1400,
+      "height": 3400,
+      "worksheets": [
+        "Readiness by Site",
+        "Starter vs Pathway Ports",
+        "Ports Across Horizons",
+        "Peak Waits by Site",
+        "Lifecycle Cost by Horizon",
+        "Net CO2e by Horizon",
+        "Site Map"
+      ]
+    }
+  ],
+  "output": {
+    "directory": "dashboard/tableau/build",
+    "package_twbx": true
+  }
+}

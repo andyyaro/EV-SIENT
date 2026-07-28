@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Results | Future City GMU</title>
+  
+  <style>
+    :root {
+      --ink: #101214;
+      --muted: #686d73;
+      --muted-2: #8a8f96;
+      --bg: #f5f2ea;
+      --surface: #fffdf7;
+      --surface-2: #ece7dc;
+      --line: rgba(16,18,20,.14);
+      --line-strong: rgba(16,18,20,.24);
+      --accent: #214f3f;
+      --accent-2: #2e6b55;
+      --accent-soft: rgba(33,79,63,.10);
+      --dark: #111417;
+      --dark-2: #1b2024;
+      --paper: #fffdf8;
+      --site-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --pill-bg: #101214;
+      --pill-fg: #ffffff;
+      --pill-hover: .92;
+      --radius-sm: 4px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow-soft: 0 18px 42px rgba(16,18,20,.09);
+      --shadow-tight: 0 10px 22px rgba(16,18,20,.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; height: 100%; }
+    
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--site-font);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; transition: opacity 0.2s ease; }
+    a:hover { opacity: .88; }
+    button { font-family: inherit; }
+    .topbar {
+      display: grid !important;
+      grid-template-columns: minmax(180px,260px) 1fr minmax(180px,260px) !important;
+      align-items: center !important;
+      gap: 24px !important;
+      min-height: 74px !important;
+      padding: 18px 56px !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 950 !important;
+      background: rgba(245,242,234,.78) !important;
+      backdrop-filter: blur(22px) saturate(130%) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(130%) !important;
+      border-bottom: 1px solid rgba(16,18,20,.09) !important;
+    }
+
+    .brand {
+      justify-self: start !important;
+      font-size: 22px !important;
+      line-height: 1 !important;
+      font-weight: 760 !important;
+      letter-spacing: -.035em !important;
+      white-space: nowrap !important;
+      color: var(--ink);
+    }
+
+    .topnav {
+      justify-self: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 34px !important;
+      font-size: 15px !important;
+      line-height: 1 !important;
+      font-weight: 620 !important;
+      color: var(--muted) !important;
+    }
+
+    .topnav a {
+      color: var(--muted) !important;
+      padding: 7px 0 !important;
+      border-bottom: 2px solid transparent !important;
+      transition: color .2s ease, border-color .2s ease, opacity .2s ease !important;
+    }
+
+    .topnav a:hover { color: var(--ink) !important; opacity: 1 !important; }
+    .topnav a.active {
+      color: var(--ink) !important;
+      font-weight: 760 !important;
+      border-bottom-color: var(--accent) !important;
+    }
+
+    .topbar-spacer { justify-self: end !important; width: 100% !important; min-width: 0 !important; }
+
+    /* ---------- Common Layout ---------- */
+    .container { padding: 0 56px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .section { padding: 50px 0; }
+    
+    .section-header { margin-bottom: 24px; }
+    .section-title {
+      font-size: clamp(32px, 4vw, 48px);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 700px;
+    }
+
+    /* ---------- Results Hero (Document Style) ---------- */
+    .hero { padding: 34px 56px 22px; }
+    .heroPanel {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,.9), rgba(255,252,248,.8) 40%, rgba(245,242,234,.4) 100%),
+        linear-gradient(135deg, #fffdfb 0%, #fdfcf9 100%);
+      color: var(--ink);
+      border-radius: 16px;
+      border: 1px solid rgba(16,18,20,.08);
+      box-shadow: 0 16px 40px rgba(16,18,20,.04);
+      padding: 60px 50px;
+      text-align: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 20px 0;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .kicker::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .heroTitle {
+      margin: 0 0 20px 0;
+      font-size: clamp(38px, 5vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      font-weight: 760;
+    }
+    .heroSubtitle {
+      font-size: 18px;
+      color: rgba(16,18,20,.70);
+      line-height: 1.55;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Top Model Signals Cylindrical Gallery ---------- */
+    .top-signals-section {
+      position: relative;
+      overflow: visible;
+      --accent: #214f3f; /* Using the dashboard green */
+      padding-top: 20px;
+    }
+    .component-wrap { width: 100%; position: relative; margin: 8px auto 0; }
+    .gallery-shell {
+      position: relative;
+      width: 100%;
+      min-height: 735px;
+      border-radius: 0;
+      overflow: visible;
+      isolation: isolate;
+      background: transparent;
+      user-select: none;
+    }
+    .counter {
+      position: absolute;
+      top: 78px;
+      left: 50%;
+      z-index: 8;
+      transform: translateX(-50%);
+      color: rgba(16,18,20,.42);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .counter .active { color: var(--ink); }
+    .counter .slash { color: rgba(16,18,20,.22); margin: 0 14px; }
+
+    .gallery-title {
+      position: absolute;
+      top: 121px;
+      left: 50%;
+      z-index: 8;
+      transform: translateX(-50%);
+      margin: 0;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      width: min(760px, 88%);
+      text-align: center;
+      color: var(--ink);
+      transition: opacity .26s ease, transform .26s ease, filter .26s ease;
+    }
+    
+    .stage-area {
+      position: absolute;
+      left: 50%;
+      top: 47.1%;
+      z-index: 4;
+      width: min(1000px, 94%);
+      height: 372px;
+      transform: translate(-50%, -50%);
+      perspective: 1150px;
+      transform-style: preserve-3d;
+      cursor: grab;
+      touch-action: none;
+      outline: none;
+    }
+    .stage-area:active { cursor: grabbing; }
+
+    .ambient-haze {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(16,18,20,.05), rgba(16,18,20,.01) 42%, rgba(16,18,20,0) 68%);
+      filter: blur(12px);
+      opacity: .82;
+    }
+    .shadow-active {
+      position: absolute;
+      width: 330px;
+      height: 72px;
+      left: 50%;
+      top: 61.5%;
+      z-index: 2;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse at center, rgba(16,18,20,.15), rgba(16,18,20,.04) 42%, rgba(16,18,20,0) 74%);
+      filter: blur(21px);
+      pointer-events: none;
+      transition: width .3s ease, opacity .3s ease;
+    }
+
+    /* Cards */
+    .specimen-card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 204px;
+      height: 236px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      border-radius: 12px;
+      transform-origin: center center;
+      transform-style: preserve-3d;
+      will-change: transform, opacity, filter;
+      cursor: pointer;
+      outline: none;
+      transition: opacity .09s linear, filter .09s linear;
+    }
+    .card-inner { position: absolute; inset: 0; transform-style: preserve-3d; border-radius: 12px; }
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: #090909;
+      overflow: hidden;
+      transform: translateZ(5px);
+      backface-visibility: hidden;
+      box-shadow: 0 24px 44px rgba(16,18,20,.2), 0 10px 20px rgba(16,18,20,.1), inset 0 0 0 1px rgba(255,255,255,.05);
+    }
+    .specimen-card img { width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
+    .card-face::before {
+      content: ""; position: absolute; inset: 0; z-index: 2;
+      background: linear-gradient(110deg, rgba(255,255,255,.07), rgba(255,255,255,0) 26%, rgba(255,255,255,.03) 62%, rgba(0,0,0,.2));
+      mix-blend-mode: screen; opacity: .5; pointer-events: none;
+    }
+    .card-face::after {
+      content: ""; position: absolute; inset: 0; z-index: 3;
+      background: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.05) 38%, rgba(0,0,0,.7)), radial-gradient(circle at 50% 50%, rgba(255,255,255,0), rgba(0,0,0,.4) 82%);
+      pointer-events: none;
+    }
+    .card-edge-right, .card-edge-left {
+      position: absolute; top: 7px; bottom: 7px; width: 10px; border-radius: 4px;
+      background: linear-gradient(180deg, #151515, #050505 50%, #181818); opacity: .76; transform-style: preserve-3d;
+    }
+    .card-edge-right { right: -5px; transform: rotateY(90deg) translateZ(5px); transform-origin: left center; }
+    .card-edge-left { left: -5px; transform: rotateY(-90deg) translateZ(5px); transform-origin: right center; }
+    
+    .specimen-card.is-active .card-face { box-shadow: 0 34px 54px rgba(16,18,20,.25), 0 12px 24px rgba(16,18,20,.15), inset 0 0 0 1px rgba(255,255,255,.08); }
+    .card-site-code, .card-signal { position: absolute; left: 18px; right: 18px; z-index: 5; color: #fff; text-align: left; text-shadow: 0 2px 16px rgba(0,0,0,.5); pointer-events: none; }
+    .card-site-code { top: 18px; font-size: 26px; line-height: 1; font-weight: 800; letter-spacing: -.03em; }
+    .card-signal { bottom: 18px; font-size: 13px; line-height: 1.25; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: rgba(255,255,255,.86); }
+
+    .edge-fade {
+      position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: .8;
+      background: linear-gradient(90deg, var(--bg) 0%, rgba(245,242,234,.8) 7%, rgba(245,242,234,.1) 22%, rgba(245,242,234,0) 38%, rgba(245,242,234,0) 62%, rgba(245,242,234,.1) 78%, rgba(245,242,234,.8) 93%, var(--bg) 100%);
+    }
+
+    .bottom-info { position: absolute; left: 50%; bottom: 124px; z-index: 9; width: min(430px, 86%); transform: translateX(-50%); text-align: center; pointer-events: none; }
+    .latin { margin-bottom: 20px; color: var(--ink); font-size: 16px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .26s ease, transform .26s ease; }
+    
+    .view-button {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
+      height: 42px;
+      padding: 0 24px;
+      border: 1px solid rgba(16,18,20,.12);
+      border-radius: 999px;
+      background: rgba(255,255,255,.70);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(16,18,20,.04), inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(12px);
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: all .18s ease;
+    }
+    .view-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(16,18,20,.2);
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 12px 24px rgba(16,18,20,.06), inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .progress-wrap { position: absolute; left: 50%; bottom: 100px; z-index: 9; width: 175px; height: 3px; transform: translateX(-50%); background: rgba(16,18,20,.08); border-radius: 2px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 16.6667%; background: var(--accent); transform: translateX(0%); transition: transform .56s cubic-bezier(.2,.82,.16,1); }
+    .hint { position: absolute; left: 50%; bottom: 68px; z-index: 9; transform: translateX(-50%); color: rgba(16,18,20,.42); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; white-space: nowrap; text-transform: uppercase; }
+
+    /* Overlay Detail */
+    .detail-overlay {
+      position: absolute; inset: 0; z-index: 30; opacity: 0; pointer-events: none; transform: scale(1.018);
+      transition: opacity .4s cubic-bezier(.2,.8,.18,1), transform .4s cubic-bezier(.2,.8,.18,1);
+      display: grid; place-items: center;
+      background: radial-gradient(circle at 50% 25%, rgba(255,253,247,.95), rgba(245,242,234,.98));
+      backdrop-filter: blur(12px);
+    }
+    .gallery-shell.is-open .detail-overlay { opacity: 1; pointer-events: auto; transform: scale(1); }
+    
+    .detail-panel { position: relative; width: min(800px, 90%); min-height: 392px; display: grid; grid-template-columns: minmax(280px, 368px) minmax(260px, 1fr); gap: 45px; align-items: center; }
+    .close-btn {
+      position: absolute; right: 0; top: -54px; z-index: 6; border: 0; padding: 10px; background: transparent;
+      color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: color .18s ease; text-transform: uppercase;
+    }
+    .close-btn:hover { color: var(--ink); }
+
+    .detail-image-wrap { position: relative; transform: translateY(5px); }
+    .detail-image-wrap::before, .detail-image-wrap::after, .detail-copy::before { content: ""; position: absolute; border-radius: 21px; background: rgba(16,18,20,.1); filter: blur(24px); z-index: -1; pointer-events: none; }
+    .detail-image-wrap::before { width: 128px; height: 160px; right: -50px; top: 60px; transform: rotate(7deg); }
+    .detail-image-wrap::after { width: 210px; height: 88px; left: 50px; bottom: -30px; transform: rotate(-8deg); opacity: .6; }
+    .detail-copy::before { width: 122px; height: 147px; right: 0; top: 90px; opacity: .8; transform: rotate(4deg); }
+
+    .detail-art {
+      display: block; width: 100%; aspect-ratio: 1.14 / 1; max-height: 306px; object-fit: cover; border-radius: 16px;
+      background: #090909; box-shadow: 0 34px 50px rgba(16,18,20,.15), 0 10px 20px rgba(16,18,20,.08), inset 0 0 0 1px rgba(255,255,255,.1);
+    }
+    .detail-copy { position: relative; color: var(--ink); }
+    .detail-kicker { margin-bottom: 12px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .detail-title { margin: 0 0 12px; font-size: clamp(32px, 4vw, 44px); line-height: 1; font-weight: 700; letter-spacing: -.03em; }
+    .detail-latin { margin: 0 0 20px; color: var(--muted); font-size: 15px; font-weight: 500; }
+    .detail-description { max-width: 380px; margin: 0 0 24px; color: rgba(16,18,20,.7); font-size: 15px; line-height: 1.6; }
+    
+    .lethality { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; color: var(--ink); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .pips { display: flex; gap: 6px; }
+    .pip { width: 24px; height: 4px; border-radius: 2px; background: rgba(16,18,20,.1); }
+    .pip.on { background: var(--accent); box-shadow: 0 0 8px rgba(33,79,63,.2); }
+
+    .acquire {
+      border: 0; border-radius: 8px; background: var(--ink); color: #fff; padding: 14px 24px; font-size: 14px; font-weight: 650;
+      cursor: pointer; box-shadow: 0 10px 24px rgba(16,18,20,.1); transition: transform .18s ease, background .18s ease; display: inline-flex; align-items: center; gap: 10px;
+    }
+    .acquire:hover { transform: translateY(-1px); background: #222; }
+    .acquire span { opacity: .6; font-weight: 500; }
+
+    .fade-text { opacity: 0; transform: translateY(3px); filter: blur(2px); }
+
+    /* ---------- PDF Report Viewer Module ---------- */
+    .pdf-report-section { position: relative; }
+    .pdf-report-intro { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; color: var(--muted); font-size: 14px; }
+    .pdf-report-intro span:first-child { color: var(--ink); font-weight: 600; }
+    
+    .framerComponentShell {
+      width: 100%; height: min(86vh, 900px); min-height: 720px; position: relative; overflow: hidden;
+      background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 16px 40px rgba(16,18,20,.05);
+    }
+    .framerComponentShell iframe { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% + 48px); border: 0; display: block; background: #fff; }
+    
+    .pdf-report-fallback { margin-top: 14px; font-size: 14px; color: var(--muted); }
+    .pdf-report-fallback a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ---------- Tableau Embed Showcase ---------- */
+    .viz-showcase {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid rgba(16,18,20,0.06);
+      box-shadow: 0 24px 60px rgba(16,18,20,0.05);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .viz-header-row {
+      padding: 20px 32px;
+      border-bottom: 1px solid rgba(16,18,20,0.06);
+      background: linear-gradient(180deg, #fffdfb 0%, #fdfcf9 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .chipRow { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      appearance: none; background: rgba(16,18,20,.03); border: 1px solid transparent; color: var(--muted);
+      padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; line-height: 1;
+    }
+    .chip:hover { background: rgba(16,18,20,.06); color: var(--ink); }
+    .chip.active { background: var(--ink); color: #fff; box-shadow: 0 4px 12px rgba(16,18,20,.1); }
+    .viz-fallback { font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: underline; display: inline-block;}
+    .viz-fallback:hover { color: var(--ink); }
+    .vizFrame {
+      width: 100%; height: 650px; background: #faf9f7; position: relative; display: flex; flex-direction: column;
+    }
+    .vizFrame iframe { width: 100%; height: 100%; border: 0; background: transparent; }
+
+    /* ---------- Premium Final Takeaway Module ---------- */
+    .final-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; }
+    
+    .glass-card {
+      padding: 40px;
+      background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.4));
+      border: 1px solid rgba(16,18,20,.08);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 16px 40px rgba(16,18,20,.04);
+      height: 100%;
+    }
+    .takeaway-side { display: flex; flex-direction: column; gap: 24px; }
+    .takeaway-side .glass-card { padding: 32px; height: auto; }
+    
+    .insight-list { list-style: none; display: flex; flex-direction: column; }
+    .insight-row {
+      display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid rgba(16,18,20,.06);
+    }
+    .insight-row:first-child { padding-top: 0; }
+    .insight-row:last-child { padding-bottom: 0; border-bottom: none; }
+    .insight-icon {
+      flex-shrink: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      background: rgba(33,79,63,.1); color: var(--accent); border-radius: 50%; margin-top: 2px;
+    }
+    .insight-icon svg { width: 14px; height: 14px; stroke-width: 2.5; }
+    .insight-text { font-size: 16px; line-height: 1.6; color: rgba(16,18,20,.8); }
+    .insight-text strong { color: var(--ink); font-weight: 700; }
+
+    .disclaimer-title { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .disclaimer-title svg { width: 20px; height: 20px; color: var(--accent); }
+    .disclaimer-title h4 { font-size: 13px; font-weight: 800; color: var(--ink); margin: 0; text-transform: uppercase; letter-spacing: 0.08em; }
+    .disclaimer-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; }
+    
+    .cta-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    .heroBtn {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px;
+      border-radius: 8px; border: 1px solid rgba(255,255,255,.24); font-size: 14px; font-weight: 700; transition: all .18s ease; text-decoration: none;
+    }
+    .heroBtn:hover { transform: translateY(-1px); }
+    .heroBtn.primary { background: var(--ink); color: #fff; border-color: var(--ink); box-shadow: 0 10px 24px rgba(16,18,20,.1); }
+    .heroBtn.secondary { background: rgba(255,255,255,.5); color: var(--ink); border-color: rgba(16,18,20,.12); backdrop-filter: blur(8px); }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 40px;
+      border-top: 1px solid var(--line);
+    }
+    .footer-title { font-weight: 700; color: var(--ink); margin-bottom: 8px; font-size: 16px; }
+    .footer-nav { margin-top: 24px; display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; font-weight: 500; }
+    .footer-nav a:hover { color: var(--ink); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+
+    @media (max-width: 980px) {
+      .topbar {
+        grid-template-columns: 1fr !important;
+        justify-items: center !important;
+        gap: 14px !important;
+        padding: 16px 18px !important;
+        min-height: auto !important;
+      }
+
+      .brand { justify-self: center !important; }
+      .topnav { justify-self: center !important; flex-wrap: wrap !important; gap: 18px !important; }
+      .topbar-spacer { display: none !important; }
+      
+      .heroPanel { padding: 40px 24px; border-radius: 12px; }
+      .heroTitle { font-size: clamp(32px, 7vw, 44px); }
+      .final-grid { grid-template-columns: 1fr; gap: 24px; }
+      
+      .gallery-shell { min-height: 650px; }
+      .stage-area { width: 106%; height: 326px; top: 45.4%; perspective: 930px; }
+      .specimen-card { width: 156px; height: 181px; }
+      .detail-panel { width: min(470px, 86%); grid-template-columns: 1fr; gap: 26px; align-items: start; }
+      .detail-image-wrap { width: min(310px, 100%); margin: 0 auto; }
+      .close-btn { top: -42px; right: -6px; }
+    }
+    
+    @media (max-width: 620px) {
+      .container { padding: 0 24px; }
+      .hero { padding: 24px 18px 12px; }
+      .statCard { padding: 24px; }
+      .vizFrame { height: 450px; }
+      .gallery-shell { min-height: 610px; }
+      .stage-area { top: 44%; height: 300px; }
+      .specimen-card { width: 140px; height: 164px; }
+    }
+
+    @media (max-width: 430px) {
+      .topnav { gap: 14px !important; font-size: 13px !important; }
+      .brand { font-size: 20px !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Unified Premium Navigation -->
+  <header class="topbar">
+    <a class="brand" href="index.html">Future City GMU</a>
+    <nav aria-label="primary" class="topnav">
+      <a href="dashboard.html">Dashboard</a>
+      <a class="active" href="results.html">Results</a>
+      <a href="methodology.html">Methodology</a>
+      <a href="assistant.html">AI Assistant</a>
+      <a href="https://github.com/andyyaro/Future-City-Fellowship-" rel="noopener noreferrer" target="_blank">GitHub</a>
+    </nav>
+    <div aria-hidden="true" class="topbar-spacer"></div>
+  </header>
+
+<aside class="fcf-authority" role="note" style="background:rgba(176,137,72,.12);border-top:1px solid #B08948;border-bottom:1px solid #B08948;padding:.85rem 1.15rem;font-size:.9rem;line-height:1.55;color:#2b2b2b;">
+  <strong>What this site is — and is not.</strong> This is a Future City Fellowship
+  planning-support prototype. It is <strong>not</strong> engineering advice, a permit or
+  code-compliance determination, a utility capacity confirmation, an official forecast, or a
+  procurement or construction authorization. Every siting decision remains subject to
+  electrical, ADA, fire/AHJ, stormwater and permitting review by the responsible authorities.
+  <strong>No site shown here is approved.</strong>
+  <strong>Electrical capacity is an unverified placeholder at all twelve sites</strong> —
+  nobody has confirmed the service could support chargers.
+</aside>
+
+<aside class="fcf-capacity-caveat" role="note" style="background:rgba(179,38,30,.08);border-left:4px solid #b3261e;padding:.85rem 1.15rem;margin:1rem 0;font-size:.92rem;line-height:1.55;">
+  <strong>Electrical capacity is a placeholder at all twelve sites.</strong> Nobody has
+  confirmed that the electrical service at any site could support chargers — every row of the
+  canonical contract reads <code>capacity_basis = placeholder</code>, and
+  <strong>all 12 sites score Low data confidence — none reaches even Medium</strong>. The rankings below compare sites
+  on modelled demand and screening-class cost; they are <em>not</em> a statement that any site
+  is electrically feasible. No feasibility claim is permitted on placeholder capacity, and none
+  is made here.
+</aside>
+
+
+
+  <!-- Document Style Hero -->
+  <section class="hero">
+    <div class="heroPanel">
+      <div class="kicker">Planning-Screen Results</div>
+      <h1 class="heroTitle">Key Findings from the Readiness Model</h1>
+      <p class="heroSubtitle">
+        The canonical <code>milestone2_v3</code> model identifies which candidate sites appear strongest, which sites need more review, and which locations should be monitored before public charging investment moves forward.
+      </p>
+    </div>
+  </section>
+
+  <!-- Top Model Signals Cylindrical Gallery -->
+  <aside class="fcf-mode-note" role="note" style="background:rgba(27,67,50,.07);border-left:4px solid #1B4332;padding:.8rem 1.1rem;margin:1rem 0;font-size:.9rem;line-height:1.55;">
+  <strong>These rankings come from the canonical <code>milestone2_v3</code> model.</strong>
+  An earlier published version of this page showed <code>legacy_v2</code> scores, under which
+  FFX002 led at 58.8. The canonical model uses fixed anchors rather than scoring sites against
+  each other, and ranks <strong>FFX004 (Fairfax County Government Center) first at 53.4</strong>,
+  with FFX002 second at 51.8. This page has been corrected; the change is recorded rather than
+  made silently. Neither ordering is a feasibility finding — electrical capacity is an
+  unverified placeholder at all twelve sites.
+</aside>
+  <section class="section top-signals-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Top Model Signals</h2>
+        <p class="section-desc">
+          An auto-rotating 3D gallery of planning signals from the canonical <code>milestone2_v3</code> model.
+        </p>
+      </div>
+    </div>
+
+    <main class="component-wrap">
+      <section class="gallery-shell" id="gallery" aria-label="Interactive cylindrical gallery of top model signals">
+        <div class="counter" aria-live="polite"><span class="active" id="currentCounter">01</span><span class="slash">/</span><span id="totalCounter">06</span></div>
+        <h1 class="gallery-title" id="titleText">Top overall candidate</h1>
+
+        <div class="ambient-haze" aria-hidden="true"></div>
+        <div class="shadow-active" aria-hidden="true"></div>
+        <div class="stage-area" id="stage" tabindex="0" aria-label="Rotating model signal gallery. Drag, scroll, or use arrow keys."></div>
+        <div class="edge-fade" aria-hidden="true"></div>
+
+        <div class="bottom-info">
+          <div class="latin" id="latinText">FFX004 · Fairfax County Government Center</div>
+          <button class="view-button" id="openBtn" type="button">View signal</button>
+        </div>
+
+        <div class="progress-wrap" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="hint">AUTO · DRAG · SCROLL · ← → · CLICK TO OPEN</div>
+
+        <div class="detail-overlay" id="overlay" aria-hidden="true">
+          <div class="detail-panel" role="dialog" aria-modal="true" aria-label="Model signal detail">
+            <button class="close-btn" type="button" id="closeBtn">Close ×</button>
+            <div class="detail-image-wrap">
+              <img class="detail-art" id="detailArt" alt="Model signal site image" />
+            </div>
+            <div class="detail-copy">
+              <div class="detail-kicker" id="detailKicker">MODEL SIGNAL 01</div>
+              <h2 class="detail-title" id="detailTitle">Top overall candidate</h2>
+              <p class="detail-latin" id="detailLatin">FFX004 · Fairfax County Government Center</p>
+              <p class="detail-description" id="detailDescription">Rank 1 of 12 under the canonical milestone2_v3 model. Advance as a strong starter site, pending facility and utility confirmation.</p>
+              <div class="lethality"><span>READINESS SIGNAL</span><div class="pips" id="pips"></div></div>
+              <button class="acquire" type="button">Planning-support result <span>Prototype</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <!-- Final Takeaway / Next Steps Module -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">What planners should take from this</h2>
+      </div>
+      
+      <div class="final-grid">
+        <!-- Interpretation -->
+        <div class="glass-card">
+          <ul class="insight-list">
+            <li class="insight-row">
+              <div class="insight-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="insight-text"><strong>FFX002</strong> and <strong>FFX004</strong> are the strongest current Tier 1 planning signals.</div>
+            </li>
+            <li class="insight-row">
+              <div class="insight-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="insight-text"><strong>PWC006</strong> is the strongest Prince William County library candidate.</div>
+            </li>
+            <li class="insight-row">
+              <div class="insight-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="insight-text"><strong>PWC002</strong> remains useful, but its high-review status means implementation questions should be resolved early.</div>
+            </li>
+            <li class="insight-row">
+              <div class="insight-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="insight-text"><strong>PWC008</strong> and <strong>PWC005</strong> should be monitored rather than treated as immediate high-priority expansion sites.</div>
+            </li>
+            <li class="insight-row">
+              <div class="insight-icon" style="background: rgba(220,53,69,.1); color: #dc3545;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="insight-text"><strong>PWC003</strong> should not advance as a general-public charging buildout without a changed public-access or fleet-use case.</div>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Disclaimer & CTAs -->
+        <div class="takeaway-side">
+          <div class="glass-card">
+            <div class="disclaimer-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <h4>Planning-support results, not final approvals</h4>
+            </div>
+            <p class="disclaimer-desc">These results support early screening, prioritization, and discussion. They do not replace final engineering design, utility coordination, permitting, procurement, ADA review, fire/AHJ review, stormwater review, construction approval, or stakeholder confirmation.</p>
+          </div>
+          
+          <div class="glass-card">
+            <h4 style="font-size: 13px; font-weight: 800; color: var(--ink); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.08em;">Next Steps</h4>
+            <p class="disclaimer-desc">Continue evaluating candidate sites with deeper methodologies and dashboard tooling.</p>
+            <div class="cta-buttons">
+              <a href="dashboard.html" class="heroBtn primary">Explore full dashboard &rarr;</a>
+              <a href="methodology.html" class="heroBtn secondary">Read the methodology &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tableau Evidence Module -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Tableau Evidence</h2>
+        <p class="section-desc">Exported model visuals supporting the readiness scores and action decisions.</p>
+      </div>
+      
+      <div class="viz-showcase">
+        <div class="viz-header-row">
+          <div class="chipRow" role="tablist" aria-label="Tableau Visualizations">
+            <button class="chip active" role="tab" aria-selected="true" onclick="switchTableau('https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite?:showVizHome=no&:embed=yes&:toolbar=yes&:tabs=no', 'Tableau visualization: EV Charging Readiness by Site', this)">Readiness by Site</button>
+            <button class="chip" role="tab" aria-selected="false" onclick="switchTableau('https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/StartervsPathwayPorts?:showVizHome=no&:embed=yes&:toolbar=yes&:tabs=no', 'Tableau visualization: Starter vs Pathway Ports', this)">Starter vs pathway</button>
+            <button class="chip" role="tab" aria-selected="false" onclick="switchTableau('https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PeakWaitsbySite?:showVizHome=no&:embed=yes&:toolbar=yes&:tabs=no', 'Tableau visualization: Queue Wait, Minutes', this)">Queue wait</button>
+          </div>
+          <a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite" target="_blank" class="viz-fallback">Open in Tableau &nearr;</a>
+        </div>
+
+        <div class="vizFrame">
+          <iframe id="tableauFrame" src="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite?:showVizHome=no&:embed=yes&:toolbar=yes&:tabs=no" title="Tableau visualization: EV Charging Readiness by Site"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PDF Report Viewer Module -->
+  <section class="section pdf-report-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Results Explorer</h2>
+        <p class="section-desc">
+          A planning report is embedded below from an external host; this repository cannot verify what that host serves. The copy tracked here was generated <strong>2026-06-28 from the <code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model mode. Treat it as a dated artifact, not as current model output.
+        </p>
+      </div>
+
+      <div class="pdf-report-intro">
+        <span>Public EV Charging Planning Report</span>
+        <span>Model-generated planning-support artifact</span>
+      </div>
+
+      <div class="framerComponentShell">
+        <iframe
+          src="https://flowing-devices-628649.framer.app/"
+          title="Public EV Charging Planning Report PDF viewer"
+          loading="lazy"
+          allow="fullscreen"
+          allowfullscreen
+          webkitallowfullscreen>
+        </iframe>
+      </div>
+
+      <p class="pdf-report-fallback">
+        If the embedded viewer does not load,
+        <a href="https://futurecityfellowship.andyyaro.com/reports/Public_EV_Charging_Planning_Report.pdf" target="_blank" rel="noopener noreferrer">
+          open the PDF directly ↗
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Unified Minimal Footer -->
+  <footer class="site-footer">
+    <div class="footer-title">Future City GMU</div>
+    <div>Future City Fellowship Phase 2 prototype • Built by Andy Yaro, George Mason University</div>
+    <div style="font-style: italic; margin-top: 4px;">Planning-support artifact only</div>
+    <nav class="footer-nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="results.html">Results</a>
+      <a href="methodology.html">Methodology</a>
+      <a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite" target="_blank" rel="noopener">Tableau Public</a>
+    </nav>
+  </footer>
+
+  <script>
+    /* ---------- Tableau Chip Switcher ---------- */
+    function switchTableau(url, title, btnElement) {
+      const iframe = document.getElementById('tableauFrame');
+      iframe.src = url;
+      iframe.title = title;
+      
+      const chips = btnElement.closest('.chipRow').querySelectorAll('.chip');
+      chips.forEach(t => {
+        t.setAttribute('aria-selected', 'false');
+        t.classList.remove('active');
+      });
+      btnElement.setAttribute('aria-selected', 'true');
+      btnElement.classList.add('active');
+    }
+
+    /* ---------- Cylindrical Gallery Logic ---------- */
+    (() => {
+      "use strict";
+
+      // The card image is DECORATIVE: every card renders the same abstract grain texture
+      // (img/card-background.png). Its alt text used to name the specific facility, so a
+      // screen-reader user was told the image depicts that site. It depicts nothing; the
+      // site name is already in the card's visible text, so the image is now alt="" and
+      // role="presentation" rather than announcing a picture that does not exist.
+      const specimens = [
+        {"code": "FFX004", "title": "Top overall candidate", "label": "FFX004 · Fairfax County Government Center", "site": "Fairfax County Government Center", "image": "img/card-background.png", "score": "53.4", "tier": "Tier 1", "priority": 6, "seed": 2339, "description": "Rank 1 of 12 under the canonical milestone2_v3 model. Score: 53.4. Tier: Tier 1 — advance to site screening. Install now: 3 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "FFX002", "title": "Second strongest candidate", "label": "FFX002 · City of Fairfax Regional Library", "site": "City of Fairfax Regional Library", "image": "img/card-background.png", "score": "51.8", "tier": "Tier 1", "priority": 5, "seed": 1103, "description": "Rank 2 of 12 under the canonical milestone2_v3 model. Score: 51.8. Tier: Tier 1 — advance to site screening. Install now: 2 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC002", "title": "Useful but high-review", "label": "PWC002 · Neabsco-Potomac Commuter Garage", "site": "Neabsco-Potomac Commuter Garage", "image": "img/card-background.png", "score": "51.1", "tier": "High-review", "priority": 4, "seed": 4193, "description": "Rank 3 of 12 under the canonical milestone2_v3 model. Score: 51.1. Tier: High-review candidate. Install now: 2 ports. Future-ready: 3 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC006", "title": "Promising, needs better data", "label": "PWC006 · Bull Run Library", "site": "Bull Run Library", "image": "img/card-background.png", "score": "50.2", "tier": "Tier 2", "priority": 3, "seed": 3721, "description": "Rank 4 of 12 under the canonical milestone2_v3 model. Score: 50.2. Tier: Tier 2 — promising candidate, refine data. Install now: 2 ports. Future-ready: 4 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC008", "title": "Monitor before expanding", "label": "PWC008 · Potomac Library", "site": "Potomac Library", "image": "img/card-background.png", "score": "41.8", "tier": "Tier 3", "priority": 2, "seed": 5377, "description": "Rank 10 of 12 under the canonical milestone2_v3 model. Score: 41.8. Tier: Tier 3 — lower priority / monitor. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center", "image": "img/card-background.png", "score": "32.8", "tier": "Special-use", "priority": 1, "seed": 6791, "description": "Rank 12 of 12 under the canonical milestone2_v3 model. Score: 32.8. Tier: Low public-priority / special-use. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."}
+      ];
+
+      const CONFIG = {
+        autoRotate: true, autoSpeed: 0.00182, autoResumeDelay: 2200, autoResumeRamp: 950,
+        centerSlowdownStrength: 0.46, dragSensitivity: 0.00475, wheelResumeDelay: 1700,
+        snapDelay: 320, mobileBreakpoint: 720, desktopRadiusX: 420, desktopRadiusZ: 158,
+        mobileRadiusX: 292, mobileRadiusZ: 108
+      };
+
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      const gallery = document.getElementById("gallery");
+      const stage = document.getElementById("stage");
+      const currentCounter = document.getElementById("currentCounter");
+      const totalCounter = document.getElementById("totalCounter");
+      const titleText = document.getElementById("titleText");
+      const latinText = document.getElementById("latinText");
+      const progressBar = document.getElementById("progressBar");
+      const openBtn = document.getElementById("openBtn");
+      const overlay = document.getElementById("overlay");
+      const closeBtn = document.getElementById("closeBtn");
+      const detailArt = document.getElementById("detailArt");
+      const detailKicker = document.getElementById("detailKicker");
+      const detailTitle = document.getElementById("detailTitle");
+      const detailLatin = document.getElementById("detailLatin");
+      const detailDescription = document.getElementById("detailDescription");
+      const pips = document.getElementById("pips");
+
+      if(!gallery) return;
+
+      totalCounter.textContent = String(specimens.length).padStart(2, "0");
+      progressBar.style.width = `${100 / specimens.length}%`;
+
+      const step = Math.PI * 2 / specimens.length;
+      let activeIndex = 0; let renderedIndex = -1; let rotation = 0; let targetRotation = 0;
+      let velocity = 0; let dragging = false; let pointerId = null; let lastX = 0;
+      let lastTime = 0; let dragDistance = 0; let suppressClick = false; let settleTimer = null;
+      let autoPausedUntil = 0; let lastFrameTime = performance.now(); let inViewport = true;
+
+      const autoRotate = { enabled: CONFIG.autoRotate && !reducedMotion, speed: CONFIG.autoSpeed, resumeDelay: CONFIG.autoResumeDelay };
+
+      function pauseAuto(duration = autoRotate.resumeDelay) { autoPausedUntil = Math.max(autoPausedUntil, performance.now() + duration); }
+      function isAutoRunning(now = performance.now()) { return autoRotate.enabled && !dragging && inViewport && document.visibilityState === "visible" && !gallery.classList.contains("is-open") && now >= autoPausedUntil && Math.abs(velocity) <= .00012; }
+
+      const cards = specimens.map((item, index) => {
+        const card = document.createElement("button");
+        card.className = "specimen-card"; card.type = "button"; card.setAttribute("aria-label", `Open ${item.code}: ${item.title}`);
+        card.innerHTML = `
+          <span class="card-inner">
+            <span class="card-edge-left" aria-hidden="true"></span>
+            <span class="card-edge-right" aria-hidden="true"></span>
+            <span class="card-face">
+              <img src="${item.image}" alt="" role="presentation" draggable="false">
+              <span class="card-site-code">${item.code}</span>
+              <span class="card-signal">${item.title}</span>
+            </span>
+          </span>`;
+        card.addEventListener("click", (event) => {
+          event.stopPropagation(); if (suppressClick) return;
+          setIndex(index, true); window.setTimeout(openDetail, 150);
+        });
+        stage.appendChild(card);
+        return { el: card, image: card.querySelector("img"), dataUrl: item.image };
+      });
+
+      function normalizeAngle(angle) { return Math.atan2(Math.sin(angle), Math.cos(angle)); }
+      function clamp01(value) { return Math.max(0, Math.min(1, value)); }
+      function easeOutCubic(value) { const t = clamp01(value); return 1 - Math.pow(1 - t, 3); }
+      function shortestRotationToIndex(index) { const desired = -index * step; const delta = normalizeAngle(desired - rotation); return rotation + delta; }
+      function nearestIndexFromRotation(value) { const raw = Math.round(-value / step); return ((raw % specimens.length) + specimens.length) % specimens.length; }
+
+      function animateTextSwap(nextIndex) {
+        titleText.classList.add("fade-text"); latinText.classList.add("fade-text");
+        window.setTimeout(() => {
+          const item = specimens[nextIndex];
+          currentCounter.textContent = String(nextIndex + 1).padStart(2, "0");
+          titleText.textContent = item.title; latinText.textContent = item.label;
+          progressBar.style.transform = `translateX(${nextIndex * 100}%)`;
+          titleText.classList.remove("fade-text"); latinText.classList.remove("fade-text");
+        }, 120);
+      }
+
+      function updateContent(index) { if (renderedIndex === index) return; renderedIndex = index; animateTextSwap(index); }
+      function setIndex(index, tight = false) {
+        activeIndex = ((index % specimens.length) + specimens.length) % specimens.length;
+        targetRotation = shortestRotationToIndex(activeIndex);
+        if (tight) velocity *= .2; updateContent(activeIndex);
+      }
+
+      function scheduleSnap() {
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(() => {
+          if (dragging || gallery.classList.contains("is-open")) return;
+          const nearest = nearestIndexFromRotation(rotation); setIndex(nearest);
+        }, CONFIG.snapDelay);
+      }
+
+      function openDetail() {
+        pauseAuto(CONFIG.autoResumeDelay);
+        const item = specimens[activeIndex];
+        detailArt.src = cards[activeIndex].dataUrl;
+        detailKicker.textContent = `MODEL SIGNAL ${String(activeIndex + 1).padStart(2, "0")}`;
+        detailTitle.textContent = item.title;
+        detailLatin.textContent = `${item.code} · ${item.site}`;
+        detailDescription.textContent = item.description;
+        pips.innerHTML = "";
+        for (let i = 1; i <= 5; i++) {
+          const pip = document.createElement("span");
+          pip.className = "pip" + (i <= item.priority ? " on" : ""); pips.appendChild(pip);
+        }
+        gallery.classList.add("is-open"); overlay.setAttribute("aria-hidden", "false");
+      }
+
+      function closeDetail() {
+        autoPausedUntil = performance.now() + 900;
+        gallery.classList.remove("is-open"); overlay.setAttribute("aria-hidden", "true");
+        stage.focus({ preventScroll: true });
+      }
+
+      function render(now = performance.now()) {
+        const frameDelta = Math.min(2.4, Math.max(.25, (now - lastFrameTime) / 16.667));
+        lastFrameTime = now;
+
+        if (!dragging) {
+          if (Math.abs(velocity) > .00012) {
+            rotation += velocity * frameDelta; velocity *= Math.pow(.935, frameDelta); scheduleSnap();
+          } else if (isAutoRunning(now)) {
+            const nearest = nearestIndexFromRotation(rotation); const centeredAt = -nearest * step;
+            const centerOffset = Math.abs(normalizeAngle(rotation - centeredAt));
+            const centerEase = CONFIG.centerSlowdownStrength + (1 - CONFIG.centerSlowdownStrength) * clamp01(centerOffset / (step * .30));
+            const resumeRamp = easeOutCubic((now - autoPausedUntil) / CONFIG.autoResumeRamp);
+            rotation -= autoRotate.speed * centerEase * resumeRamp * frameDelta; targetRotation = rotation;
+          } else {
+            const diff = targetRotation - rotation; rotation += diff * .085 * frameDelta;
+            if (Math.abs(diff) < .00065) rotation = targetRotation;
+          }
+        }
+
+        const index = nearestIndexFromRotation(rotation); activeIndex = index; updateContent(index);
+
+        const rect = stage.getBoundingClientRect(); const compact = rect.width < CONFIG.mobileBreakpoint;
+        const radiusX = compact ? CONFIG.mobileRadiusX : CONFIG.desktopRadiusX;
+        const radiusZ = compact ? CONFIG.mobileRadiusZ : CONFIG.desktopRadiusZ;
+
+        for (let i = 0; i < specimens.length; i++) {
+          const theta = normalizeAngle(i * step + rotation);
+          const cos = Math.cos(theta); const sin = Math.sin(theta);
+          const front = clamp01((cos + .08) / 1.08); const visible = clamp01((cos + .54) / 1.54);
+          const edge = 1 - Math.abs(sin); const x = sin * radiusX; const z = cos * radiusZ;
+          const floatY = Math.sin(now / 1350 + i * .72) * 2.2 * Math.pow(front, 2.2);
+          const y = (1 - front) * 10 - Math.pow(edge, 8) * 2 + floatY;
+          const scale = .34 + .82 * Math.pow(front, 1.58) + .08 * visible;
+          const alpha = .045 + .955 * Math.pow(visible, 1.38);
+          const brightness = .22 + 1.02 * Math.pow(front, .68);
+          const saturate = .72 + .34 * front;
+          const blur = (1 - visible) * 1.32;
+          const rotateY = -theta * .94;
+          const zIndex = Math.round(5000 + z * 10 + front * 2000);
+
+          const card = cards[i].el;
+          card.classList.toggle("is-active", i === index);
+          card.style.zIndex = String(zIndex); card.style.opacity = alpha.toFixed(3);
+          card.style.filter = `brightness(${brightness.toFixed(3)}) saturate(${saturate.toFixed(3)}) blur(${blur.toFixed(2)}px)`;
+          card.style.pointerEvents = visible > .26 ? "auto" : "none";
+          card.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) rotateY(${rotateY.toFixed(5)}rad) scale(${scale.toFixed(5)})`;
+        }
+        requestAnimationFrame(render);
+      }
+
+      stage.addEventListener("pointerdown", (event) => {
+        if (gallery.classList.contains("is-open")) return;
+        pauseAuto(2200); dragging = true; pointerId = event.pointerId;
+        lastX = event.clientX; lastTime = performance.now(); dragDistance = 0; velocity = 0; suppressClick = false;
+        window.clearTimeout(settleTimer); stage.setPointerCapture(pointerId); stage.focus({ preventScroll: true });
+      });
+
+      stage.addEventListener("pointermove", (event) => {
+        if (!dragging || event.pointerId !== pointerId) return;
+        pauseAuto(2200); const now = performance.now(); const dx = event.clientX - lastX; const dt = Math.max(16, now - lastTime);
+        dragDistance += Math.abs(dx); rotation += dx * CONFIG.dragSensitivity; velocity = (dx / dt) * .075;
+        lastX = event.clientX; lastTime = now;
+      });
+
+      function endDrag(event) {
+        if (!dragging) return; dragging = false;
+        try { if (event && pointerId !== null) stage.releasePointerCapture(pointerId); } catch (_) {}
+        if (dragDistance > 7) suppressClick = true;
+        pauseAuto(1800); scheduleSnap(); pointerId = null; window.setTimeout(() => { suppressClick = false; }, 24);
+      }
+
+      stage.addEventListener("pointerup", endDrag);
+      stage.addEventListener("pointercancel", endDrag);
+      stage.addEventListener("lostpointercapture", () => { if (dragging) endDrag(); });
+      stage.addEventListener("click", () => { if (!suppressClick) openDetail(); });
+      stage.addEventListener("wheel", (event) => {
+        event.preventDefault(); if (gallery.classList.contains("is-open")) return;
+        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        if (Math.abs(delta) < 2) return; pauseAuto(CONFIG.wheelResumeDelay); setIndex(activeIndex + (delta > 0 ? 1 : -1));
+      }, { passive: false });
+
+      openBtn.addEventListener("click", openDetail); closeBtn.addEventListener("click", closeDetail);
+      overlay.addEventListener("click", (event) => { if (event.target === overlay) closeDetail(); });
+      // Scoped to the gallery. This was a WINDOW-level handler that called preventDefault()
+      // on Space and Enter unconditionally, so anywhere on the page Space stopped scrolling
+      // and Enter opened the gallery detail instead of activating whatever the reader had
+      // focused. Escape stays global, because dismissing an open overlay from anywhere is the
+      // behaviour a reader expects.
+      const galleryHasFocus = () =>
+        gallery.contains(document.activeElement) || document.activeElement === document.body;
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") { closeDetail(); return; }
+        if (gallery.classList.contains("is-open")) return;
+        const arrow = event.key === "ArrowRight" || event.key === "ArrowLeft";
+        const activate = event.key === "Enter" || event.key === " ";
+        if (!(arrow || activate)) return;
+        // Never steal a key from a control, a link, or a text field.
+        const el = document.activeElement;
+        const interactive = el && el !== document.body &&
+          (el.matches("a, button, input, select, textarea, [tabindex]") || el.isContentEditable);
+        if (interactive && !gallery.contains(el)) return;
+        if (activate && !galleryHasFocus()) return;
+        if (event.key === "ArrowRight") { event.preventDefault(); pauseAuto(CONFIG.wheelResumeDelay); setIndex(activeIndex + 1); }
+        if (event.key === "ArrowLeft") { event.preventDefault(); pauseAuto(CONFIG.wheelResumeDelay); setIndex(activeIndex - 1); }
+        if (activate) { event.preventDefault(); openDetail(); }
+      });
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => { inViewport = entries.some((entry) => entry.isIntersecting); }, { threshold: 0.12 });
+        observer.observe(gallery);
+      }
+
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pauseAuto(600); });
+      gallery.addEventListener("mouseenter", () => pauseAuto(650));
+
+      updateContent(0); requestAnimationFrame(render);
+    })();
+  </script>
+
+<footer class="fcf-vintage" style="font-size:.75rem;color:#4b4b4b;background:#f7f3ea;border-top:1px solid #d8cdb6;padding:.7rem 1.15rem;line-height:1.5;">
+  Data: canonical contract v1.0.0 (generated 2026-07-19) · site inputs 2026-06-24 ·
+  emissions factor EPA eGRID2023 Rev&nbsp;2, SRVC, 596.3&nbsp;lb&nbsp;CO2e/MWh
+  (accessed 2026-07-19; refreshed annually) ·
+  Planning-support prototype — nothing on this site is an approval or an official forecast.
+  <a href="privacy.html" style="color:#1B4332;">Privacy</a> ·
+  <a href="standards.html" style="color:#1B4332;">Standards</a>
+</footer>
+
+</body>
+</html>

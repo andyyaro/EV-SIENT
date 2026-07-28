@@ -4,13 +4,39 @@ Implements Task 4: pie-chart repair, source citations, proxy labels, 2056 extens
 canonical scenario import, lifecycle-cost + CO2e sheets, staged-vs-broad comparison,
 low/base/high cases, assumptions register, reconciliation checks, notices, charts.
 Original workbook is never modified.
+
+REQUIRES openpyxl, WHICH THIS REPOSITORY DOES NOT DECLARE OR INSTALL
+--------------------------------------------------------------------
+`openpyxl` appears in no dependency manifest -- not `pyproject.toml`, not
+`requirements-lock.txt`, not `requirements-hashed.txt` -- and is absent from the project venv.
+So this script **cannot run** in a clean checkout, in CI, or on the machine that wrote it.
+
+It is also referenced by no gate, no declared operation and no Makefile target, which is why
+nothing ever noticed: the tracked `excel/Electric_Data_Milestone_2_Updated.xlsx` was built once
+on a machine that happened to have openpyxl, and the workbook has been shipped ever since
+without the script that produces it being runnable.
+
+Stated here rather than fixed by quietly adding the dependency. Adding it would change the
+locked dependency set and the hashed requirements for a script no gate exercises, and that is
+a decision about the project's dependency surface, not a repair. **Do not read a committed
+`.xlsx` as evidence that this script still reproduces it.**
+
+    pip install openpyxl        # then this runs; it is not part of the project environment
 """
 
 import shutil
 from pathlib import Path
 
 import pandas as pd
-import openpyxl
+
+try:
+    import openpyxl
+except ImportError as exc:      # pragma: no cover - the normal state in this repository
+    raise SystemExit(
+        "build_excel_workbook.py needs openpyxl, which this project does not declare or "
+        "install (see the module docstring). Install it explicitly to run this script; it is "
+        "deliberately not in requirements-lock.txt."
+    ) from exc
 from openpyxl.chart import BarChart, LineChart, PieChart, Reference
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
@@ -182,7 +208,7 @@ for esc in ("low", "base", "high"):
 
 # staged-vs-broad chart (base escalation)
 chart = BarChart()
-chart.title = "Staged vs broad buildout — portfolio NPC by horizon (base case, screening)"
+chart.title = "Staged vs broad buildout — portfolio NPC by horizon (all cases plotted; screening)"
 data = Reference(wp, min_col=3, max_col=4, min_row=4, max_row=10)
 cats = Reference(wp, min_col=2, min_row=8, max_row=10)
 chart.add_data(data, titles_from_data=True)
@@ -218,7 +244,7 @@ for hy in (2026, 2036, 2046, 2056):
         we.cell(row=r0, column=5, value=int(asub["avoided_active_evse_ports"].sum()))
         r0 += 1
 line = LineChart()
-line.title = "Net avoided CO2e (t/yr) — base case (screening; factor vintage eGRID2023r2)"
+line.title = "Net avoided CO2e (t/yr) — all plotted cases (screening; factor vintage eGRID2023r2)"
 data = Reference(we, min_col=4, min_row=7, max_row=r0 - 1)
 cats = Reference(we, min_col=1, min_row=8, max_row=r0 - 1)
 line.add_data(data, titles_from_data=True)

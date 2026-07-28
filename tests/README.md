@@ -2,7 +2,10 @@
 
 [← repository root](../README.md)
 
-80 pytest tests; CI enforces a coverage floor of 80% (actual ≈92%).
+The suite is run by `make test`; CI enforces a coverage floor of 80%.
+*(This line previously stated a fixed test count. It went stale, so it now describes the
+suite rather than counting it — the count lives in `docs/operations/v4-program/VERIFICATION.md`,
+where it is a dated measurement.)*
 
 | File | Covers |
 |---|---|

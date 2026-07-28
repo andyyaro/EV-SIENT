@@ -1,6 +1,27 @@
 # Execution Status
 
-## Status: BLOCKED - no MATLAB available
+## Status: EXECUTED on real MathWorks MATLAB
+
+**The MATLAB unittest suite has been run on licensed MathWorks MATLAB and passes:
+49 passed, 0 failed, 0 incomplete.** Engine, release, commit, inputs and outputs are
+recorded under "Run record" below.
+
+This banner replaces a BLOCKED banner that stood from 2026-07-19 to 2026-07-27, during which
+not one line of this code had ever been executed. That statement was true when written and is
+no longer true. The section that recorded it is kept verbatim below rather than deleted,
+because a repository that quietly rewrites what it used to admit is less trustworthy than one
+that shows the correction.
+
+**What is still not claimed.** The runs used a **SYNTHETIC** fixture, not project data. No
+output in this repository describes a real facility. Capacity remains `placeholder` at all
+twelve real sites, and the executed runs confirm the fail-closed guard refuses to emit a
+feasibility claim from it — which is the single most valuable thing these runs establish.
+
+---
+
+## Superseded banner, kept for the record
+
+### Status: BLOCKED - no MATLAB available (true 2026-07-19 to 2026-07-27)
 
 On **2026-07-19**, the implementation environment for this repository
 (macOS, Milestone 2 gap-closure workspace) had **no licensed MATLAB or
@@ -82,7 +103,7 @@ These checks are text-level sanity only. They are **not** a substitute
 for MATLAB parsing, `runtests`, or simulation, and no such substitution
 is claimed.
 
-## Known verification gaps (to be closed by the licensed run)
+## Verification gaps as they stood before the licensed run
 
 - MATLAB parser acceptance of every file (e.g. `detectImportOptions`
   name-value combinations, `renamevars`, string/table dot-access forms).
@@ -92,7 +113,123 @@ is claimed.
   (`tests/golden/regression_golden.csv`).
 - Simulink model build (Simulink-licensed machines only; optional).
 
+### Which of those gaps the runs actually closed
+
+| Gap | Status | Evidence |
+|---|---|---|
+| MATLAB parser acceptance of every file | **CLOSED** | All `src/*.m` and `tests/*.m` parsed and executed. Four genuine portability defects surfaced and were fixed at source — see "What the runs found". |
+| Numerical behavior of the energy-aware scheduler on 120 rows | **PARTIALLY CLOSED** | The 120-row batch completed with `run_status = ok` on every row. But `capacity_basis = placeholder` on all rows, so the guard skipped both managed strategies: `clamp: skipped_no_capacity_defined; energy_aware: skipped_no_capacity_defined`. The scheduler's numerics on *real capacity* remain unexercised, because no real capacity exists. |
+| Creation of the golden regression baseline | **CLOSED** | Written by run 6 and regenerated after the fixture correction. |
+| Simulink model build | **CLOSED** | Built in run `30296650057`. `site_grid_behavior_ev_charging_v3.slx` is a real Simulink package stamped `25.2.0.3177638 / R2025b / Update 5`, and its **11 root blocks match, name for name and type for type, the topology read from `buildSimulinkModel.m` by hand in Phase 0**. Built, **not simulated** — no result anywhere derives from it. |
+
 ## Run record
 
-*(empty - to be filled by the first licensed run per
-`RUN_ON_LICENSED_MATLAB.md`, step 7)*
+Per `RUN_ON_LICENSED_MATLAB.md`, step 7.
+
+### Run 6 — the first execution of this code, ever
+
+| Field | Value |
+|---|---|
+| Date (UTC) | 2026-07-27T17:51:15Z |
+| Machine | GitHub-hosted `ubuntu-24.04` runner (Azure northcentralus) |
+| Engine | **MathWorks MATLAB** — not Octave, not a reimplementation |
+| `version()` | `25.2.0.3177638 (R2025b) Update 5` |
+| Simulink | installed and licensed (`ver('simulink')` → `Simulink 25.2`) |
+| Repository | `andyyaro/fcf-matlab-ci` (public harness) |
+| Commit | `b56c6b68c138ea4f2dc499488830634b155bb524` |
+| CI run | `30291108647` |
+| Input | `harness_scenarios_synthetic.csv`, SHA-256 `8e869e11…b99220` — **SYNTHETIC** |
+| Test summary | **49 passed, 0 failed, 0 incomplete** |
+| Batch `run_id` | `batch_20260727T175445Z` |
+| Batch result | 120 rows, `run_status = ok` on all 120 |
+| Simulink build | **FAILED** — `buildSimulinkModel:simulinkUnavailable`, on a machine that has Simulink. The guard, not the product, was at fault. |
+
+### What the runs found
+
+Five runs failed before one passed. Every failure was a real defect in this repository, and
+each was fixed at source rather than worked around:
+
+1. **Hard-coded CSV path.** Tests and the batch runner both named
+   `data/canonical/matlab_scenarios.csv`, which does not exist in the public harness. 14
+   tests errored before touching any model logic. Fixed by `resolveScenarioCsv.m`.
+2. **Delimiter detection.** Every required column reported missing. The obvious hypothesis was
+   CRLF line endings; **the diagnostic disproved it** (`has CR: 0`). The real cause was
+   `detectImportOptions` guessing whitespace as the delimiter, yielding 51 variables and a
+   header on line 2. Fixed by stating the delimiter.
+3. **`DataLines` is a property, not a constructor argument.**
+4. **Three tests carried their own inline import options**, so fixing the loader did not fix
+   them. Unified in `scenarioImportOptions.m`.
+5. **A test asserted deferral at a 95 kW cap where the peak is 91.02 kW** — the cap never
+   bound. It had been written against a legacy `ports × charger_kW` peak of 115.2 kW: a
+   superseded hypothesis still alive inside a passing test. Cap corrected to 85 kW.
+6. **The first golden had 4 of its 7 columns identically zero.** The regression panel took the
+   two *lightest* sites, whose capacity never bound, so the baseline could not distinguish the
+   managed strategies from the unmanaged one. The fixture's base loads were rebalanced.
+
+### The fail-closed guard, verified on real MATLAB
+
+The batch output is the strongest evidence these runs produced. On all 120 rows:
+
+- `capacity_basis = placeholder`
+- `service_check = service_capacity_unknown`
+- `skipped_strategies = clamp: skipped_no_capacity_defined; energy_aware: skipped_no_capacity_defined`
+- `peak_clamp_kW` — NaN on every row, i.e. no number was invented
+- the mandatory planning-placeholder banner present on every row
+
+**This is the opposite of the Octave behaviour.** FIND-MATLAB-09 reproduced a case where the
+same guard does *not* fire under GNU Octave 11.3.0. The guard is sound on MathWorks MATLAB
+and unsafe on Octave, which is why Octave is documented as a syntax and smoke tier only and
+may not be used to make a feasibility statement.
+
+### Subsequent runs
+
+| Run | Purpose | Outcome |
+|---|---|---|
+| `30296162570` | Diagnose the Simulink refusal | Answered it — see below |
+| `30296566912` | Remove a real per-site value from the synthetic fixture | see `LEDGER.md` |
+| `30296650057` | Fix the Simulink availability guard | **success — Simulink model built.** 49 passed / 0 failed. Artifacts in `matlab/outputs/run-30296650057/`. |
+
+### Determinism, measured rather than assumed
+
+Run `30291108647` and run `30296650057` — different commits, separate runners, hours apart —
+were compared cell by cell across all 120 batch rows. **Exactly 3 rows differ, and they are
+exactly the 3 rows the fixture correction touched, in exactly the 2 columns that depend on
+`sessions_per_day`.** The other 117 rows are identical.
+
+The regression golden is **byte-identical** between the two runs, because the golden panel is
+built from `SYN001`/`SYN002` and the correction touched `SYN004`, `SYN008` and `SYN012`. An
+earlier note predicted the golden would be superseded by the fixture change; it was checked
+rather than assumed, and the prediction was wrong.
+
+### The Simulink guard defect
+
+`buildSimulinkModel.m` gated itself on `exist("new_system", "file") ~= 2`. `new_system` is a
+Simulink **built-in**, and `exist(name,"file")` does not report built-ins. Asked directly on a
+runner with Simulink installed (run `30296162570`):
+
+```
+exist(new_system)           = 5      built-in
+exist(new_system,"file")    = 0      the guard demanded 2
+exist(new_system,"builtin") = 5
+license test Simulink       = 1
+ver(simulink)               = Simulink 25.2
+new_system probe            = OK, a model can be created
+```
+
+So **the Simulink layer has never been reachable on any installation**, and the "Simulink is
+not available" message it prints has never once been true when printed. It failed closed,
+which is why it read as caution rather than as a defect: the layer is optional and every
+metric comes from the base-MATLAB pipeline, so nothing downstream complained. The guard now
+tests `ver("simulink")` and the license separately.
+
+### What may now be claimed, and what may not
+
+**May be claimed:** the MATLAB implementation parses, runs, and passes its own test suite on
+MathWorks MATLAB R2025b; the fail-closed capacity guard is verified to fire on real MATLAB;
+the 120-row batch completes.
+
+**May NOT be claimed:** that any simulation describes a real site — every run used a synthetic
+fixture; that electrical feasibility has been shown anywhere — capacity is `placeholder` at
+12/12 real sites and the guard refuses on exactly that basis; that the managed-charging
+numerics are validated against real capacity — no real capacity exists to validate against;
+that a Simulink model has been **simulated** — it has been *built* (run `30296650057`) and never run, and no number anywhere derives from it.

@@ -347,6 +347,94 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None) -> dict:
     return result
 
 
+def _ingest_observations(args) -> int:
+    """Report what a set of observations would change. Deliberately read-only.
+
+    This command **never writes**. Rule 2 of the data-flow document is that received values
+    enter the site inputs and the model *re-runs*, generating a new run_id -- scenario rows
+    are never edited in place. A command that quietly mutated the contract would be the
+    hand-edit that rule exists to prevent, so this one shows the consequence and stops.
+    """
+    from . import observed, triggers
+
+    if not args.capacity and not args.sessions:
+        print("Nothing to ingest. Pass --capacity and/or --sessions.\n"
+              "Templates: data/observed/observed_capacity_template.csv,\n"
+              "           data/observed/observed_sessions_template.csv")
+        return 2
+
+    exit_code = 0
+
+    if args.capacity:
+        try:
+            records = observed.read_capacity_observations(args.capacity)
+        except FileNotFoundError:
+            # A missing file is a normal condition, not a crash. The declared platform
+            # operation points at the shipped templates, so a bundle that omits them would
+            # otherwise surface a raw traceback in the UI instead of a sentence.
+            print(f"NO CAPACITY FILE\n  {args.capacity} does not exist in this installation.\n"
+                  f"  Nothing was ingested and nothing changed.")
+            return 0
+        except observed.ObservationError as err:
+            # Plain language, not a stack trace: the person holding this file is a
+            # facility manager or a fellowship member, not a Python developer.
+            print(f"CAPACITY FILE REJECTED\n  {err}")
+            return 1
+        upgrades = observed.resolve_capacity(records)
+        print(f"CAPACITY — {len(records)} observation(s) across {len(upgrades)} site(s)\n")
+        for site_id, upgrade in upgrades.items():
+            arrow = "->" if upgrade.upgraded else "unchanged,"
+            print(f"  {site_id}: {upgrade.previous_basis} {arrow} {upgrade.new_basis}")
+            if upgrade.service_capacity_kw is not None:
+                print(f"      service capacity: {upgrade.service_capacity_kw:g} kW")
+            if upgrade.spare_capacity_kw is not None:
+                print(f"      spare capacity:   {upgrade.spare_capacity_kw:g} kW")
+            print(f"      provenance: {upgrade.capacity_source}")
+            for conflict in upgrade.conflicts:
+                print(f"      !! CONFLICT, needs a human: {conflict}")
+                exit_code = max(exit_code, 3)
+            print()
+
+    if args.sessions:
+        try:
+            rows = observed.read_session_observations(args.sessions)
+        except observed.ObservationError as err:
+            print(f"SESSION FILE REJECTED\n  {err}")
+            return 1
+        summaries = observed.summarise_sessions(rows)
+        print(f"SESSIONS — {len(rows)} site-day(s) across {len(summaries)} site(s)\n")
+        for site_id, summary in summaries.items():
+            print(f"  {site_id}: {summary.days_observed} days "
+                  f"({summary.months_observed} months observed)")
+            if not summary.sufficient_for_triggers:
+                # Named, never defaulted. A defaulted uptime of 1.0 would walk straight
+                # past the reliability gate that exists to catch exactly that.
+                print(f"      cannot evaluate triggers - missing: "
+                      f"{', '.join(summary.missing_for_triggers)}")
+                print()
+                continue
+            metrics = triggers.ObservedMetrics(
+                site_id=site_id, months_observed=summary.months_observed,
+                avg_utilization=summary.avg_utilization, p90_wait_min=summary.p90_wait_min,
+                uptime=summary.uptime, equity_index_percentile=0.5)
+            decision = triggers.evaluate(metrics, args.ports_active, args.ports_pathway,
+                                         site_id=site_id)
+            print(f"      utilisation {summary.avg_utilization:.0%} · "
+                  f"uptime {summary.uptime:.1%} · p90 wait {summary.p90_wait_min:g} min")
+            print(f"      -> {decision.outcome}")
+            for line in decision.rule_trace:
+                print(f"         {line}")
+            print()
+        print("  (equity percentile defaults to 0.5 here; the model supplies the real value "
+              "during a run)")
+
+    print("\nNOTHING WAS WRITTEN. This command reports only.")
+    print("To apply these, put the values into the site inputs and re-run the model "
+          "(make run-v3), which generates a new run_id. Scenario rows are never edited "
+          "in place - see docs/human-actions/utility_facility_data/04_DATA_FLOW_INTO_MODEL.md")
+    return exit_code
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="FCF M2 V3 workflow")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -357,6 +445,23 @@ def main(argv=None):
     p_val = sub.add_parser("validate-contract")
     p_val.add_argument("contract_dir")
     sub.add_parser("docs")
+
+    # The V4 loop needs a way in from the command line. Without one, a capacity
+    # confirmation returned by a facility manager has nowhere to go except a person
+    # editing a contract row by hand -- which is exactly what
+    # docs/human-actions/utility_facility_data/04_DATA_FLOW_INTO_MODEL.md forbids.
+    p_obs = sub.add_parser(
+        "ingest-observations",
+        help="Read field observations, report what they would change. Writes nothing.")
+    p_obs.add_argument("--capacity", default=None,
+                       help="CSV of capacity confirmations (observed_capacity_template.csv shape)")
+    p_obs.add_argument("--sessions", default=None,
+                       help="CSV of charger operating data (observed_sessions_template.csv shape)")
+    p_obs.add_argument("--ports-active", type=int, default=4,
+                       help="ports currently energised, for trigger evaluation")
+    p_obs.add_argument("--ports-pathway", type=int, default=8,
+                       help="pathway capacity, for trigger evaluation")
+
     args = parser.parse_args(argv)
 
     if args.cmd == "run":
@@ -368,13 +473,45 @@ def main(argv=None):
         cdir = Path(args.contract_dir)
         st = pd.read_csv(cdir / "scenario_table.csv")
         site = pd.read_csv(cdir / "site_table.csv")
-        problems = contract.validate_scenario_table(st, site) + contract.verify_hash_chain(cdir)
+
+        # One command, version-aware -- not one command per version. The version is read
+        # from the artifact rather than passed as a flag, so a v2 directory cannot be
+        # validated under v1's weaker rules by getting the flag wrong.
+        manifest = json.loads((cdir / "contract_manifest.json").read_text())
+        version = manifest.get("contract_version", config.SCHEMA_VERSION)
+        if version == config.SCHEMA_VERSION_V2:
+            from . import contract_v2
+            problems = contract_v2.validate_v2(st, site)
+        elif version == config.SCHEMA_VERSION:
+            # RT-04 asserts the real study's accepted totals (25 starter / 48 pathway). A run
+            # on SYNTHETIC inputs cannot reproduce them and must not be tuned until it does --
+            # `run_is_synthetic()` exists for exactly this, and `write_contract()` already
+            # consults it. This command did not, so `validate-contract` failed on every
+            # synthetic contract, including the public bundle whose own REPRODUCTION.txt
+            # instructs the recipient to run it.
+            synthetic = False
+            prov_path = cdir / "source_provenance.csv"
+            if prov_path.is_file():
+                synthetic = contract.run_is_synthetic(pd.read_csv(prov_path))
+            problems = contract.validate_scenario_table(
+                st, site, expect_legacy_totals=not synthetic)
+            if synthetic:
+                print("note: this contract declares SYNTHETIC inputs, so the real study's "
+                      "25/48 golden totals are not asserted against it.")
+        else:
+            problems = [f"unknown contract_version {version!r}; known versions are "
+                        f"{', '.join(config.CONTRACT_VERSIONS)}"]
+
+        problems += contract.verify_hash_chain(cdir)
         schema = json.loads((cdir / "schema.json").read_text())
         problems += contract.validate_against_json_schema(st, schema)
         if problems:
             print("FAIL:\n- " + "\n- ".join(problems))
             sys.exit(1)
-        print("Contract valid: all rule checks, JSON Schema, and RT-10 hash chain PASS.")
+        print(f"Contract v{version} valid: all rule checks, JSON Schema, and RT-10 hash "
+              f"chain PASS.")
+    elif args.cmd == "ingest-observations":
+        sys.exit(_ingest_observations(args))
     elif args.cmd == "docs":
         docs = generate_docs()
         (ROOT / "docs/WORKFLOW_STEPS.md").write_text(docs)

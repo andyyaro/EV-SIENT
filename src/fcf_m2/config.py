@@ -7,8 +7,12 @@ Two explicit model modes:
 - ``milestone2_v3``  — canonical 2026 baseline + 2036/2046/2056 horizons, fixed-anchor
                        scoring, structured confidence, economics and emissions layers.
 
-Every result-changing constant lives here with its provenance label. Nothing in this
-file asserts external approval: multipliers are provisional planning conventions
+Most result-changing constants live here with their provenance labels, and new ones
+belong here. Some still sit in the module that uses them -- the scoring subscore weights
+in ``scoring.py``, the confidence field weights and thresholds in ``confidence.py``, the
+base-load growth rate in ``workflow.py``, the demand calibration guards in ``demand.py``.
+Those are named rather than hidden, because a docstring claiming completeness it does not
+have is how a reader stops looking. Nothing in this file asserts external approval: multipliers are provisional planning conventions
 pending calibration, and cost/emission inputs are screening benchmarks.
 """
 
@@ -17,11 +21,21 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 SCHEMA_VERSION = "1.0.0"
+#: Contract v2 is ADDITIVE over v1: every v1 field survives with identical semantics, and
+#: v2 adds the fields the V4 field-data loop produces. v1 is frozen -- see
+#: tests/test_contract_v2.py, which pins its manifest digest so a change to it fails.
+SCHEMA_VERSION_V2 = "2.0.0"
+CONTRACT_VERSIONS = (SCHEMA_VERSION, SCHEMA_VERSION_V2)
 MODEL_VERSION = "3.0.0"
+#: Bumped to 4.0.0 only when V4 is genuinely complete, per the program's own rule.
+MODEL_VERSION_V4 = "4.0.0"
 ANCHOR_SET_VERSION = "anchors_v1_2026-07"
 
 MODE_LEGACY = "legacy_v2"
 MODE_V3 = "milestone2_v3"
+#: V4 is a THIRD mode, not a replacement. legacy_v2 must still reproduce bit-exact and
+#: milestone2_v3 must still reproduce; V4 adds the observed-data loop on top of them.
+MODE_V4 = "v4"
 
 BASELINE_YEAR = 2026
 V3_HORIZONS = [2036, 2046, 2056]
@@ -164,4 +178,9 @@ def jurisdiction_for(site_id: str) -> str:
         return "fairfax"
     if prefix == "PWC":
         return "pwc"
+    # Synthetic sites belong to no real jurisdiction, and saying so is the point: a run on
+    # invented data must not be able to claim Fairfax City or Prince William County. Returning
+    # "unknown" would have been ambiguous with a genuine data gap.
+    if prefix == "SYN":
+        return "synthetic"
     return "unknown"

@@ -1,0 +1,279 @@
+/* Platform web tier.
+ *
+ * The palette is the one already in public use on the NFC landing pages, so a reader who
+ * tapped a coin in a car park and a reader who opened this page are looking at one project.
+ *
+ * Restraint is deliberate. This is a screening study whose headline finding is that nobody
+ * has confirmed the electrical capacity; a polished interface that felt authoritative would
+ * imply certainty the data does not have. Plain, legible, unhurried.
+ */
+
+:root {
+  --ink: #1a1a1a;
+  --ink-2: #4a4a4a;
+  --green: #1B4332;
+  --sand: #F5F0E6;
+  --gold: #B08948;
+  --line: #d8d2c4;
+  --panel-bg: #ffffff;
+  --warn-bg: rgba(176, 137, 72, .12);
+  --focus: #B08948;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #ececec; --ink-2: #b4b4b4; --sand: #16191a; --line: #33383a;
+    --green: #7fbf9a; --panel-bg: #1e2224; --warn-bg: rgba(176, 137, 72, .16);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--sand);
+  color: var(--ink);
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.wrap { max-width: 62rem; margin: 0 auto; padding: 0 1.15rem; }
+
+.skip {
+  position: absolute; left: -9999px; top: 0; background: var(--green); color: #fff;
+  padding: .7rem 1rem; z-index: 100;
+}
+.skip:focus { left: 0; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.top { padding: 2.4rem 0 1.4rem; }
+.eyebrow {
+  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--green); font-weight: 700; margin: 0 0 .35rem;
+}
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 .5rem; color: var(--green); }
+.lede { margin: 0; max-width: 42rem; color: var(--ink-2); font-size: 1.05rem; }
+
+/* The banner is not dismissible, on purpose. */
+.banner {
+  background: var(--warn-bg);
+  border-top: 1px solid var(--gold);
+  border-bottom: 1px solid var(--gold);
+  padding: .95rem 0;
+  margin: 1.2rem 0 2rem;
+  font-size: .95rem;
+}
+
+h2 { font-size: 1.28rem; margin: 2.4rem 0 .6rem; color: var(--green); }
+.prose { max-width: 46rem; margin: 0 0 .8rem; }
+.muted { color: var(--ink-2); font-size: .92rem; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .9em; background: rgba(127,127,127,.13); padding: .1em .35em; border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------- table */
+
+.controls { display: flex; gap: 1.2rem; flex-wrap: wrap; margin: .8rem 0 1rem; }
+.controls label { font-size: .9rem; color: var(--ink-2); display: flex; gap: .45rem; align-items: center; }
+.controls select {
+  font: inherit; font-size: .92rem; padding: .35rem .5rem;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel-bg); color: var(--ink);
+}
+
+.tablewrap { overflow-x: auto; }              /* wide content scrolls, the page never does */
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--line); }
+th { font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); }
+.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* A clickable number must LOOK clickable. A provenance panel nobody discovers is a
+ * provenance panel that does not exist. */
+.val {
+  font: inherit; font-variant-numeric: tabular-nums;
+  background: none; border: 0; border-bottom: 1px dotted var(--gold);
+  color: inherit; cursor: pointer; padding: 0 .1em; border-radius: 2px;
+}
+.val:hover { background: var(--warn-bg); }
+.val:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.flag {
+  display: inline-block; font-size: .74rem; letter-spacing: .03em; text-transform: uppercase;
+  padding: .1rem .4rem; border-radius: 3px; border: 1px solid var(--gold);
+  color: var(--gold); margin-left: .35rem;
+}
+
+/* ---------------------------------------------------------------- operations */
+
+.ops { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .7rem; }
+.ops li {
+  border: 1px solid var(--line); border-radius: 5px; padding: .8rem .9rem;
+  background: var(--panel-bg);
+}
+.ops .op-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+.ops h3 { margin: 0; font-size: 1rem; }
+.pill {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .45rem; border-radius: 999px; white-space: nowrap;
+}
+.pill-ok { background: rgba(27,67,50,.12); color: var(--green); border: 1px solid var(--green); }
+.pill-no { background: rgba(127,127,127,.12); color: var(--ink-2); border: 1px solid var(--line); }
+.ops p { margin: .4rem 0 0; font-size: .92rem; color: var(--ink-2); }
+.ops .why { color: var(--gold); }
+
+/* ---------------------------------------------------------------- engines */
+
+.engines { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .6rem; }
+.engines li { display: flex; gap: .7rem; align-items: baseline; font-size: .95rem; }
+.badge {
+  font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: .16rem .5rem; border-radius: 3px; white-space: nowrap; min-width: 9.5rem;
+  text-align: center;
+}
+/* Four visually distinct badges. The rule the platform must never break is that Python,
+ * MATLAB, Octave and Simulink output are always distinguishable on screen. */
+.badge-python   { background: #1B4332; color: #fff; }
+.badge-matlab   { background: #B08948; color: #1a1a1a; }
+.badge-octave   { background: transparent; color: var(--ink-2); border: 1px dashed var(--ink-2); }
+.badge-simulink { background: transparent; color: var(--green); border: 1px solid var(--green); }
+
+.empty {
+  border: 1px dashed var(--line); border-radius: 5px; padding: 1rem 1.1rem;
+  background: var(--panel-bg);
+}
+.empty p { margin: 0 0 .5rem; }
+.empty p:last-child { margin-bottom: 0; }
+
+/* ---------------------------------------------------------------- provenance panel */
+
+.scrim {
+  position: fixed; inset: 0; background: rgba(0,0,0,.32); z-index: 40;
+}
+.panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(30rem, 100%);
+  background: var(--panel-bg); border-left: 1px solid var(--line);
+  z-index: 50; overflow-y: auto; box-shadow: -8px 0 28px rgba(0,0,0,.16);
+}
+.panel-head {
+  position: sticky; top: 0; background: var(--panel-bg); border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .9rem 1.1rem;
+}
+.panel-head h2 { margin: 0; font-size: 1.05rem; }
+#panel-close {
+  font-size: 1.5rem; line-height: 1; background: none; border: 0; cursor: pointer;
+  color: var(--ink-2); padding: .1rem .4rem; border-radius: 4px;
+}
+#panel-close:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+#panel-body { padding: 1rem 1.1rem 2.4rem; }
+.pv-value { font-size: 1.9rem; font-weight: 700; color: var(--green); margin: 0; }
+.pv-what { margin: .1rem 0 1.1rem; color: var(--ink-2); font-size: .92rem; }
+
+.pv-group { margin: 0 0 1.15rem; }
+.pv-group h3 {
+  font-size: .76rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--ink-2); margin: 0 0 .35rem; font-weight: 700;
+}
+.pv-row { display: flex; justify-content: space-between; gap: 1rem; padding: .28rem 0;
+          border-bottom: 1px solid var(--line); font-size: .9rem; }
+.pv-row dt { color: var(--ink-2); }
+.pv-row dd { margin: 0; text-align: right; word-break: break-word; }
+.pv-hash { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; }
+
+.pv-caveat {
+  background: var(--warn-bg); border-left: 3px solid var(--gold);
+  padding: .6rem .75rem; margin: 0 0 .6rem; font-size: .89rem;
+}
+.pv-rule { font-size: .85rem; color: var(--ink-2); margin: .2rem 0; }
+
+/* ---------------------------------------------------------------- footer */
+
+.foot {
+  margin-top: 3rem; padding: 1.4rem 0 2.6rem;
+  border-top: 1px solid var(--line); font-size: .87rem; color: var(--ink-2);
+}
+.foot p { margin: 0 0 .5rem; max-width: 46rem; }
+
+/* ---------------------------------------------------------------- tier + run controls */
+
+/* One page, two tiers. Which one you are in is stated, never implied: a reader who cannot
+ * run something should know whether that is the page's limit or their own. */
+.tier {
+  display: inline-block; font-size: .86rem; font-weight: 600;
+  padding: .35rem .7rem; border-radius: 4px; margin: .2rem 0 .8rem;
+}
+.tier-web { background: rgba(127,127,127,.12); color: var(--ink-2); border: 1px solid var(--line); }
+.tier-desktop { background: rgba(27,67,50,.12); color: var(--green); border: 1px solid var(--green); }
+
+.run {
+  font: inherit; font-size: .88rem; font-weight: 600; margin-top: .7rem;
+  padding: .4rem .9rem; border-radius: 4px; cursor: pointer;
+  background: var(--green); color: #fff; border: 1px solid var(--green);
+}
+.run:hover:not(:disabled) { filter: brightness(1.15); }
+.run:disabled { opacity: .55; cursor: progress; }
+.run:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Output is shown verbatim, including failures. A green tick hiding a non-zero exit code
+ * would make this a worse witness than the terminal it replaces. */
+.op-out {
+  margin: .7rem 0 0; padding: .6rem .7rem; border-radius: 4px;
+  background: rgba(127,127,127,.08); border-left: 3px solid var(--green);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .78rem; line-height: 1.45;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 22rem; overflow-y: auto;
+}
+.op-out-bad { border-left-color: #b3261e; background: rgba(179,38,30,.09); }
+
+h3.sub { font-size: 1.02rem; margin: 1.7rem 0 .4rem; color: var(--green); }
+.engines li { align-items: flex-start; }
+.engines .pv-caveat { margin-top: .45rem; }
+
+a.run { display: inline-block; text-decoration: none; }
+.linkchip {
+  display: inline-block; font-size: .82rem; margin: .5rem .4rem 0 0;
+  padding: .28rem .6rem; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--green); text-decoration: none;
+}
+.linkchip:hover { background: var(--warn-bg); }
+.linkchip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- field entry */
+
+.fieldgrid { display: grid; gap: .9rem; max-width: 46rem; margin: 1rem 0; }
+.fieldrow { display: grid; gap: .3rem; }
+.fieldrow label { font-size: .88rem; font-weight: 600; color: var(--ink-2); }
+.fieldrow input, .fieldrow select, .fieldrow textarea {
+  font: inherit; font-size: .95rem; padding: .45rem .55rem;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel-bg); color: var(--ink); width: 100%;
+}
+.fieldrow input:focus-visible, .fieldrow select:focus-visible, .fieldrow textarea:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 1px;
+}
+/* A refused field is marked in the field itself, not only in the summary above it — a person
+ * fixing four problems should not have to hold four field names in their head. */
+.fieldrow [aria-invalid="true"] { border-color: #b3261e; border-width: 2px; }
+.fieldhelp { margin: .1rem 0 0; font-size: .84rem; }
+
+.errlist { margin: .4rem 0 0; padding-left: 1.2rem; font-size: .9rem; }
+.errlist li { margin: .2rem 0; }
+
+.run.secondary { background: transparent; color: var(--ink-2); border-color: var(--line); }
+.run.secondary:hover:not(:disabled) { filter: none; background: rgba(127,127,127,.1); }
+#pending-wrap .run { margin-right: .5rem; }
+#pending td, #pending th { font-size: .85rem; white-space: nowrap; }

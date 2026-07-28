@@ -1,0 +1,90 @@
+{
+  "schema": "fcf-engines/1",
+  "headline": "Four things can compute in this project. They are never treated as interchangeable, and no number on any screen may be attributed to the wrong one.",
+  "engines": [
+    {
+      "id": "python",
+      "name": "Python (fcf_m2)",
+      "role": "The single producer",
+      "status": "produces every number in the contract",
+      "detail": "The only scorer. Every value on every surface of this platform comes from here, via the canonical data contract.",
+      "ran_on_real_sites": true
+    },
+    {
+      "id": "matlab",
+      "name": "MathWorks MATLAB",
+      "role": "Independent execution of the same model",
+      "status": "executed \u2014 25.2.0.3177638 (R2025b) Update 5",
+      "detail": "Runs the .m implementation in public CI. It has executed and passed, but ONLY against a synthetic fixture: the harness is public and must never carry project data. It has never seen the twelve real sites, so no number here is a MATLAB result.",
+      "ran_on_real_sites": false,
+      "evidence": {
+        "run_id": "30296650057",
+        "commit": "343f1983275c",
+        "release": "2025b",
+        "input": "harness_scenarios_synthetic.csv",
+        "input_sha256": "ab1f658461c561e1",
+        "input_note": "the input is SYNTHETIC. No row corresponds to any real facility.",
+        "simulink_installed": "1"
+      }
+    },
+    {
+      "id": "octave",
+      "name": "GNU Octave",
+      "role": "Syntax and smoke tier only",
+      "status": "NOT MATLAB",
+      "detail": "Runs a mechanically transformed copy of the sources. Numerically it agrees with real MATLAB, but the fail-closed capacity guard does NOT fire under it, so it may never be used to make a feasibility statement.",
+      "ran_on_real_sites": true,
+      "warning": "An Octave result is not a MATLAB result. Nothing in this repository may present it as one."
+    },
+    {
+      "id": "simulink",
+      "name": "Simulink",
+      "role": "Illustrative block diagram",
+      "status": "built, never simulated",
+      "detail": "A block diagram generated from the model source, matching the topology read out of buildSimulinkModel.m. It has been built once, on real MATLAB. It has never been run, and no number anywhere derives from it.",
+      "ran_on_real_sites": false
+    }
+  ],
+  "guard_evidence": {
+    "title": "The fail-closed capacity guard, verified on real MATLAB",
+    "why_it_matters": "This is the most valuable thing the MATLAB runs establish. The guard refuses to emit a feasibility claim from placeholder capacity \u2014 and it fires.",
+    "from_run": "run-30296650057",
+    "rows": 120,
+    "run_status_ok": 120,
+    "capacity_basis": [
+      "placeholder"
+    ],
+    "service_check": [
+      "service_capacity_unknown"
+    ],
+    "strategies_skipped": 120,
+    "peak_clamp_all_null": true
+  },
+  "divergences": [
+    {
+      "id": "octave-vs-matlab-numeric",
+      "between": "GNU Octave vs MathWorks MATLAB",
+      "finding": "2 640 cells across 22 columns, relative tolerance 1e-9: ZERO numeric divergences.",
+      "severity": "none",
+      "surfaced": true
+    },
+    {
+      "id": "octave-string-concat",
+      "between": "GNU Octave vs MathWorks MATLAB",
+      "finding": "run_all_scenarios.m: `string(csvName) + string(csvExt)` raises under Octave (numeric addition of two char arrays) and writes the line under MATLAB. Fatal but LOUD, and it lands after every number is computed.",
+      "severity": "loud, post-computation",
+      "surfaced": true,
+      "deliberately_unfixed": "Extending the transform risks introducing a SILENT defect, which a previous rule already did once. A loud failure in a provenance line is a better trade than a silent one in a computed value."
+    },
+    {
+      "id": "charger-efficiency",
+      "between": "Python vs MATLAB",
+      "finding": "Charger efficiency was 0.92 in Python and 0.93 in three MATLAB files \u2014 one physical assumption, two values. Every MATLAB energy figure ran about 1.1% high.",
+      "severity": "FIXED",
+      "surfaced": true,
+      "how_found": "By running the reconciliation instead of assuming agreement. Identity reconciled 120/120; energy did not, and the implied efficiency measured 0.9300 across all 120 rows.",
+      "why_it_survived": "Charger efficiency is not a contract field, so there was nothing to reconcile it against \u2014 the drift was hiding in the one place the anti-drift mechanism does not reach."
+    }
+  ],
+  "what_cannot_be_shown": "A row-by-row Python-vs-MATLAB comparison of the twelve real sites. Real MATLAB has only ever run against a synthetic fixture, so that comparison does not exist \u2014 and it will not be fabricated to fill the space."
+}

@@ -1,0 +1,11 @@
+horizon_year,scenario_name,ports_active,pathway_capacity,horizon,model_mode
+2026,baseline,25,48,2026 baseline,milestone2_v3
+2036,base,35,48,2036 (+10y),milestone2_v3
+2036,high,44,48,2036 (+10y),milestone2_v3
+2036,stress_combined,44,48,2036 (+10y),milestone2_v3
+2046,base,44,48,2046 (+20y),milestone2_v3
+2046,high,48,48,2046 (+20y),milestone2_v3
+2046,stress_combined,48,48,2046 (+20y),milestone2_v3
+2056,base,44,48,2056 (+30y),milestone2_v3
+2056,high,48,48,2056 (+30y),milestone2_v3
+2056,stress_combined,48,48,2056 (+30y),milestone2_v3

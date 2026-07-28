@@ -1,0 +1,12 @@
+run_id: batch_20260727T175445Z
+generated_utc: 20260727T175445Z
+matlab_release: 2025b
+input_csv: harness_scenarios_synthetic.csv
+scenario_rows: 120
+profile_mode: deterministic_sessions
+seed: 42
+tariff_supplied: 0
+assumed_site_capacity_kW: NaN
+note: capacity_basis=placeholder rows carry the
+  mandatory planning-placeholder banner; no output
+  of this run is a feasibility claim.

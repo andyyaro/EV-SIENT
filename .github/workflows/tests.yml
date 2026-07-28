@@ -1,57 +1,49 @@
 name: tests
 
+# CI and scripts/verify.sh must run the same gates. The way to guarantee that is not to keep
+# two lists in step, but to have only one list: CI invokes verify.sh, which is the single
+# definition of what "green" means. Previously CI ran 6 of verify.sh's 10 gates and used a
+# different secret-scan exclusion set, so a contributor could pass locally and fail in CI, or
+# the reverse -- which is how the tree came to sit at 8 PASS / 2 FAIL with CI green.
+
 on:
   push:
-    branches: [main, milestone2-v3-professional-release]
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
 jobs:
-  python:
-    name: Python tests, contract, reconciliation, links
+  verify:
+    name: Repository verification (all gates)
     runs-on: ubuntu-latest
+    # A hung test must not burn an hour of the runner allowance. One did:
+    # a test that started a real server and blocked on threading.Event().wait()
+    # ran for 61 minutes before anyone noticed, on a private repo where minutes
+    # are metered. Fail fast and loudly instead.
+    timeout-minutes: 20
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       - name: Install package with test extras
+        # -c pins the same resolved versions the Makefile and requirements-lock.txt use,
+        # so CI tests the dependency set that is actually locked rather than whatever
+        # resolves fresh on the runner.
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[test]
+          pip install -e .[test] -c requirements-lock.txt
 
-      - name: Run test suite with coverage gate
-        run: python -m pytest tests/ -q --cov=fcf_m2 --cov-fail-under=80
-
-      - name: Legacy baseline reproduction (25 starter / 48 pathway)
+      - name: Report resolved environment
         run: |
-          python -m fcf_m2.workflow run --mode legacy_v2 --out data/outputs/ci_legacy
-          grep -q '"starter_total": 25' data/outputs/ci_legacy/run_summary.json
-          grep -q '"pathway_total": 48' data/outputs/ci_legacy/run_summary.json
+          python --version
+          pip freeze
 
-      - name: Validate tracked canonical contract (rules + schema + hash chain)
-        run: python -m fcf_m2.workflow validate-contract data/contract/v1
-
-      - name: Cross-model reconciliation (contract vs MATLAB canonical CSV)
-        run: |
-          python - <<'EOF'
-          import pandas as pd
-          st = pd.read_csv("data/contract/v1/scenario_table.csv")
-          m = pd.read_csv("matlab/data/canonical/matlab_scenarios.csv")
-          assert set(st.horizon_year) == set(m.horizon_year) == {2026, 2036, 2046, 2056}
-          mg = st.merge(m, on="scenario_id"); assert len(mg) == len(st) == 120
-          assert (mg.ports_active == mg.ports).all()
-          assert mg.capacity_basis_y.notna().all()
-          print("cross-model OK")
-          EOF
-
-      - name: Internal Markdown links
-        run: python scripts/check_internal_links.py
-
-      - name: Secret scan (pattern-based)
-        run: |
-          ! git grep -nIiE 'AKIA[0-9A-Z]{16}|aws_secret_access_key|BEGIN [A-Z ]*PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}' -- . ':!.github/workflows/tests.yml' ':!scripts/verify.sh'
+      - name: Run every repository verification gate
+        # VENV_PY points verify.sh at the runner's interpreter instead of ./venv.
+        # verify.sh prints a per-gate PASS/FAIL table and exits with the failure count.
+        run: VENV_PY=$(command -v python) ./scripts/verify.sh

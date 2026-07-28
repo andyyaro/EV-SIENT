@@ -14,8 +14,7 @@ function setupOnce(testCase)
     thisDir = fileparts(mfilename("fullpath"));
     repoRoot = fileparts(thisDir);
     addpath(fullfile(repoRoot, "src"));
-    testCase.TestData.csvFile = fullfile(repoRoot, "data", ...
-        "canonical", "matlab_scenarios.csv");
+    testCase.TestData.csvFile = resolveScenarioCsv();
     testCase.TestData.tmpDir = tempname;
     mkdir(testCase.TestData.tmpDir);
 end
@@ -32,7 +31,14 @@ end
 
 function testAllCanonicalHorizonsRun(testCase)
     % 2026 / 2036 / 2046 / 2056 all run end-to-end without any edits.
-    T = loadScenarios(testCase.TestData.csvFile, "SiteId", "FFX002");
+    %% Site ids are read FROM THE DATA, never hard-coded. The same discipline
+    %% ML-06 applies to horizons applies here: these sources are mirrored into a
+    %% PUBLIC harness repository, so naming a real facility id in a test would
+    %% publish client identity. Reading the id keeps the test valid against the
+    %% private canonical CSV and against a synthetic harness fixture alike.
+    allRows = loadScenarios(testCase.TestData.csvFile);
+    siteId = string(allRows.site_id(1));
+    T = loadScenarios(testCase.TestData.csvFile, "SiteId", siteId);
     horizons = unique(T.horizon_year);
     verifyEqual(testCase, sort(horizons(:)).', [2026 2036 2046 2056]);
 
@@ -62,8 +68,7 @@ end
 function testArbitraryNewHorizonRowRuns(testCase)
     % Append a 2070 row (a horizon that exists nowhere in the code) to a
     % copy of the CSV; loading and running it must need no script edits.
-    opts = detectImportOptions(testCase.TestData.csvFile, ...
-        "TextType", "string", "VariableNamingRule", "preserve");
+    opts = scenarioImportOptions(testCase.TestData.csvFile);
     T = readtable(testCase.TestData.csvFile, opts);
 
     newRow = T(1, :);

@@ -1,0 +1,317 @@
+{
+  "generated_by": "scripts/build_field_schema.py",
+  "source_of_truth": "src/fcf_m2/observed.py",
+  "note": "Generated from the model's own refusals. The browser interprets these rules; it does not restate them. Parity is asserted by tests/test_field_schema_parity.py.",
+  "method_to_basis": {
+    "utility_service_record": "verified_utility",
+    "utility_load_study": "verified_utility",
+    "facility_panel_schedule": "verified_facility",
+    "facility_walkthrough": "verified_facility",
+    "engineering_calculation": "engineering_estimate",
+    "comparable_site_proxy": "planning_proxy"
+  },
+  "forms": [
+    {
+      "id": "capacity",
+      "label": "Electrical capacity confirmation",
+      "explains": "One confirmation of a site's electrical service. This is the observation that can move a site off the placeholder capacity every site currently carries.",
+      "csv_columns": [
+        "site_id",
+        "observed_date",
+        "method",
+        "service_capacity_kw",
+        "spare_capacity_kw",
+        "measured_peak_kw",
+        "source_org",
+        "source_document",
+        "observer",
+        "verification_status",
+        "notes"
+      ],
+      "fields": [
+        {
+          "name": "site_id",
+          "label": "Site",
+          "type": "site",
+          "required": true
+        },
+        {
+          "name": "observed_date",
+          "label": "Date observed",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "method",
+          "label": "How it was established",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "utility_service_record",
+            "utility_load_study",
+            "facility_panel_schedule",
+            "facility_walkthrough",
+            "engineering_calculation",
+            "comparable_site_proxy"
+          ],
+          "value_notes": {
+            "utility_service_record": "establishes at most: verified_utility",
+            "utility_load_study": "establishes at most: verified_utility",
+            "facility_panel_schedule": "establishes at most: verified_facility",
+            "facility_walkthrough": "establishes at most: verified_facility",
+            "engineering_calculation": "establishes at most: engineering_estimate",
+            "comparable_site_proxy": "establishes at most: planning_proxy"
+          },
+          "help": "Ordered strongest first. The method caps how strong a claim the value can support \u2014 it can never establish more than what is listed."
+        },
+        {
+          "name": "service_capacity_kw",
+          "label": "Service capacity (kW)",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "spare_capacity_kw",
+          "label": "Spare capacity (kW)",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "measured_peak_kw",
+          "label": "Measured peak (kW)",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "source_org",
+          "label": "Source organisation",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "source_document",
+          "label": "Source document",
+          "type": "text",
+          "required": true,
+          "help": "Name the document or record. An observation nobody can trace back cannot upgrade anything, so this is refused rather than accepted and ignored."
+        },
+        {
+          "name": "observer",
+          "label": "Observed by",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "verification_status",
+          "label": "Verification status",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "reviewed",
+            "spot_checked",
+            "unreviewed"
+          ],
+          "default": "reviewed"
+        },
+        {
+          "name": "notes",
+          "label": "Notes",
+          "type": "textarea",
+          "required": false
+        }
+      ],
+      "rules": [
+        {
+          "rule": "non_empty",
+          "field": "source_document",
+          "message": "An observation with no source document cannot establish provenance, so it cannot upgrade capacity_basis."
+        },
+        {
+          "rule": "non_empty",
+          "field": "observer",
+          "message": "An observation with no observer cannot establish provenance, so it cannot upgrade capacity_basis."
+        },
+        {
+          "rule": "at_least_one_of",
+          "fields": [
+            "service_capacity_kw",
+            "spare_capacity_kw"
+          ],
+          "message": "This row carries neither service capacity nor spare capacity, so there is nothing to confirm."
+        },
+        {
+          "rule": "non_negative",
+          "field": "service_capacity_kw",
+          "message": "Service capacity must be a finite value of 0 kW or more."
+        },
+        {
+          "rule": "non_negative",
+          "field": "spare_capacity_kw",
+          "message": "Spare capacity must be a finite value of 0 kW or more."
+        },
+        {
+          "rule": "non_negative",
+          "field": "measured_peak_kw",
+          "message": "Measured peak must be a finite value of 0 kW or more."
+        },
+        {
+          "rule": "enum",
+          "field": "method",
+          "values": [
+            "comparable_site_proxy",
+            "engineering_calculation",
+            "facility_panel_schedule",
+            "facility_walkthrough",
+            "utility_load_study",
+            "utility_service_record"
+          ],
+          "message": "Unknown method."
+        },
+        {
+          "rule": "enum",
+          "field": "verification_status",
+          "values": [
+            "reviewed",
+            "spot_checked",
+            "unreviewed"
+          ],
+          "message": "Unknown verification status."
+        }
+      ]
+    },
+    {
+      "id": "session",
+      "label": "Charger operating day",
+      "explains": "One site-day of charger operation. Enough of these make a site's expansion trigger evaluable instead of unanswerable.",
+      "csv_columns": [
+        "site_id",
+        "date",
+        "sessions",
+        "energy_kwh",
+        "mean_dwell_min",
+        "facility_visitors_day",
+        "ports_in_service",
+        "port_hours_available",
+        "port_hours_possible",
+        "sessions_delayed",
+        "wait_p90_min",
+        "observer",
+        "source_system"
+      ],
+      "fields": [
+        {
+          "name": "site_id",
+          "label": "Site",
+          "type": "site",
+          "required": true
+        },
+        {
+          "name": "date",
+          "label": "Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "sessions",
+          "label": "Charging sessions",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "energy_kwh",
+          "label": "Energy delivered (kWh)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "mean_dwell_min",
+          "label": "Mean dwell (minutes)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "ports_in_service",
+          "label": "Ports in service",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "port_hours_available",
+          "label": "Port-hours available",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "port_hours_possible",
+          "label": "Port-hours possible",
+          "type": "number",
+          "required": true,
+          "help": "Ports in service \u00d7 hours in the day. Availability cannot exceed this."
+        },
+        {
+          "name": "facility_visitors_day",
+          "label": "Facility visitors",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "sessions_delayed",
+          "label": "Sessions delayed",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "name": "wait_p90_min",
+          "label": "90th-percentile wait (min)",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "observer",
+          "label": "Observed by",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "source_system",
+          "label": "Source system",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "rules": [
+        {
+          "rule": "positive",
+          "field": "ports_in_service",
+          "message": "Ports in service must be greater than zero."
+        },
+        {
+          "rule": "positive",
+          "field": "port_hours_possible",
+          "message": "Port-hours possible must be greater than zero."
+        },
+        {
+          "rule": "not_greater_than",
+          "field": "port_hours_available",
+          "than": "port_hours_possible",
+          "message": "Port-hours available exceeds port-hours possible; uptime cannot exceed 1."
+        },
+        {
+          "rule": "non_negative",
+          "field": "sessions",
+          "message": "Sessions must be zero or more."
+        },
+        {
+          "rule": "non_negative",
+          "field": "energy_kwh",
+          "message": "Energy must be zero or more."
+        },
+        {
+          "rule": "non_negative",
+          "field": "mean_dwell_min",
+          "message": "Mean dwell must be zero or more."
+        }
+      ]
+    }
+  ]
+}

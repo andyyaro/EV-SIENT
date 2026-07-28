@@ -23,12 +23,24 @@ function setupOnce(testCase)
     thisDir = fileparts(mfilename("fullpath"));
     repoRoot = fileparts(thisDir);
     addpath(fullfile(repoRoot, "src"));
-    testCase.TestData.csvFile = fullfile(repoRoot, "data", ...
-        "canonical", "matlab_scenarios.csv");
+    testCase.TestData.csvFile = resolveScenarioCsv();
     testCase.TestData.goldenFile = fullfile(thisDir, "golden", ...
         "regression_golden.csv");
     testCase.TestData.seed = 42;                 % fixed forever
-    testCase.TestData.assumedCap_kW = 200;       % fixed planning cap
+    % Fixed planning capacity for the panel. It was 200 kW, and the first real
+    % MathWorks run showed why that was wrong: at 200 the cap never binds, so
+    % curtailed_clamp_kWh and unmet_energy_aware_kWh came back identically zero
+    % and peak_clamp_kW equalled peak_unmanaged_kW on every row. Four of the seven
+    % golden columns carried no information, and a regression baseline that cannot
+    % tell the managed strategies apart from the unmanaged one would not detect a
+    % regression in them.
+    %
+    % 100 kW binds in both trees, which matters because this test runs against the
+    % real canonical CSV here and against a synthetic fixture in the public harness:
+    % 10 of 20 panel rows curtail on the canonical data and 20 of 20 on the harness
+    % fixture. A mix is better than all-or-nothing - it exercises the bound and the
+    % unbound path in one panel.
+    testCase.TestData.assumedCap_kW = 100;       % binds; see note above
     testCase.TestData.relTol = 1e-6;             % deterministic panel
 end
 
@@ -101,14 +113,20 @@ end
 
 function panel = localComputePanel(testCase)
 %LOCALCOMPUTEPANEL Fixed scenario panel -> one summary row per scenario.
-%   Panel: FFX002 and PWC001 across every horizon in the data, first
-%   case per horizon in canonical order (deterministic composition).
-    T = loadScenarios(testCase.TestData.csvFile, ...
-        "SiteId", ["FFX002", "PWC001"]);
+%   Panel: the FIRST TWO site ids in sorted order, across every horizon in
+%   the data, first case per horizon in canonical order. Reading the ids from
+%   the data rather than naming them keeps the panel deterministic while
+%   letting the same test run against a synthetic public-harness fixture
+%   without publishing a real facility id.
+    allRows = loadScenarios(testCase.TestData.csvFile);
+    panelSites = unique(string(allRows.site_id));
+    panelSites = sort(panelSites);
+    panelSites = panelSites(1:min(2, numel(panelSites))).';
+    T = loadScenarios(testCase.TestData.csvFile, "SiteId", panelSites);
     horizons = unique(T.horizon_year);
 
     rows = {};
-    for site = ["FFX002", "PWC001"]
+    for site = panelSites
         for h = horizons(:).'
             sub = T(string(T.site_id) == site & ...
                 T.horizon_year == h, :);

@@ -2,7 +2,7 @@
 
 # AHJ Question Set — Fairfax City Fire Marshal (Fairfax City Fire & Rescue)
 
-*For use in a requested meeting, site visit, or written exchange. Nothing has been sent or asked. Answers are recorded verbatim with respondent name, title, and date; interpretations by the AHJ govern over any code reading in our documents. Sites in this jurisdiction: FFX002 City of Fairfax Regional Library (rank 1), FFX004 Fairfax County Government Center (rank 2 — confirm whether county facilities within city limits fall under city or county fire review), FFX001 Fairfax City Hall.*
+*For use in a requested meeting, site visit, or written exchange. Nothing has been sent or asked. Answers are recorded verbatim with respondent name, title, and date; interpretations by the AHJ govern over any code reading in our documents. Sites in this jurisdiction: FFX002 City of Fairfax Regional Library (**rank 2** under the canonical `milestone2_v3` model), FFX004 Fairfax County Government Center (**rank 1**, the strongest candidate — confirm whether county facilities within city limits fall under city or county fire review), FFX001 Fairfax City Hall. *(Ranks corrected 2026-07-28: this previously showed the `legacy_v2` order, FFX002 first.)*
 
 ## A. Code basis
 

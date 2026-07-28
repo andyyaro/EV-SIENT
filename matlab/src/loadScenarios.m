@@ -56,17 +56,7 @@ function T = loadScenarios(csvFile, varargin)
     % "case" is a MATLAB keyword, so the CSV column "case" is imported
     % with its name preserved and then renamed to "case_label" for safe
     % dot access throughout this codebase (documented in DATA_DICTIONARY.md).
-    opts = detectImportOptions(csvFile, "TextType", "string", ...
-        "VariableNamingRule", "preserve");
-
-    stringCols = ["scenario_id", "site_id", "site_name", "case", ...
-                  "capacity_basis", "capacity_source", ...
-                  "managed_charging_policy", "electrical_risk_level", ...
-                  "source_note"];
-    presentStringCols = intersect(stringCols, string(opts.VariableNames));
-    if ~isempty(presentStringCols)
-        opts = setvartype(opts, presentStringCols, "string");
-    end
+    opts = scenarioImportOptions(csvFile);
 
     T = readtable(csvFile, opts);
 

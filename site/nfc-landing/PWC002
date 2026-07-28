@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Neabsco-Potomac Commuter Garage — EV charging study | Future City Fellowship</title>
+<meta name="description" content="Neabsco-Potomac Commuter Garage is one of twelve sites being studied for possible public EV charging. Nothing has been approved or funded.">
+<meta name="robots" content="index, follow">
+<style>
+  :root {
+    --ink: #1a1a1a; --ink-2: #4a4a4a; --green: #1B4332; --sand: #F5F0E6;
+    --gold: #B08948; --line: #d8d2c4;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--sand); color: var(--ink);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+             env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1.1rem 3rem; }
+  .eyebrow {
+    font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--green); font-weight: 700; margin: 0 0 .3rem;
+  }
+  h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .2rem; color: var(--green); }
+  .where { color: var(--ink-2); margin: 0 0 1.4rem; }
+  .answer {
+    background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--gold);
+    border-radius: 4px; padding: 1rem 1.05rem; margin: 0 0 1.5rem;
+  }
+  .answer p:first-child { margin-top: 0; font-weight: 600; }
+  .answer p:last-child { margin-bottom: 0; }
+  h2 { font-size: 1.12rem; margin: 1.9rem 0 .5rem; color: var(--green); }
+  dl.figures { margin: 0; }
+  dl.figures div {
+    display: flex; justify-content: space-between; gap: 1rem;
+    padding: .55rem 0; border-bottom: 1px solid var(--line);
+  }
+  dl.figures dt { color: var(--ink-2); }
+  dl.figures dd { margin: 0; font-weight: 600; text-align: right; }
+  .caveat {
+    font-size: .88rem; color: var(--ink-2); background: rgba(176,137,72,.10);
+    border-left: 3px solid var(--gold); padding: .7rem .85rem; margin: 1.2rem 0;
+  }
+  .caveat strong { color: #6b4d10; }
+  ul { padding-left: 1.15rem; }
+  li { margin: .35rem 0; }
+  a { color: var(--green); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .actions { margin: 1.6rem 0 0; }
+  .btn {
+    display: block; text-align: center; text-decoration: none; font-weight: 600;
+    padding: .85rem 1rem; border-radius: 4px; margin: .55rem 0;
+    background: var(--green); color: #fff; border: 1px solid var(--green);
+  }
+  .btn.secondary { background: transparent; color: var(--green); }
+  footer {
+    margin-top: 2.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line);
+    font-size: .8rem; color: var(--ink-2);
+  }
+  footer code { font-size: .95em; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #ececec; --ink-2: #b4b4b4; --sand: #16191a; --line: #33383a; --green: #7fbf9a; }
+    .answer { background: #1e2224; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <p class="eyebrow">Public EV charging study</p>
+  <h1>Neabsco-Potomac Commuter Garage</h1>
+  <p class="where">commuter parking garage · Prince William County</p>
+
+  <div class="answer">
+    <p>Nothing is being built here.</p>
+    <p>This site is one of twelve being <strong>studied</strong> for whether public electric
+       vehicle charging could work here one day. No charger has been approved, funded,
+       designed, or scheduled — and this study cannot approve one.</p>
+    <p>You tapped a tag placed by a George Mason University student fellowship team doing
+       that study.</p>
+  </div>
+
+  <h2>What the study says about this site</h2>
+  <dl class="figures">
+    <div><dt>Chargers that might make sense to start with</dt><dd>2</dd></div>
+    <div><dt>Space worth leaving room for, long term</dt><dd>up to 3</dd></div>
+    <div><dt>How confident we are in the data here</dt><dd>Low</dd></div>
+    <div><dt>Is the electrical capacity confirmed?</dt><dd>No — placeholder</dd></div>
+  </dl>
+
+  <div class="caveat">
+    <strong>The most important thing on this page:</strong> nobody has confirmed that the
+    electrical service here could actually support chargers. That figure is a
+    <strong>placeholder</strong> — a stand-in used so the study could be completed — and it
+    is a placeholder at <strong>all twelve</strong> sites. Confirming it needs the building's
+    electrical records and the utility, and that work has not been done.
+  </div>
+
+  <h2>What this can and cannot tell you</h2>
+  <ul>
+    <li><strong>It can</strong> help compare sites and decide which are worth looking at first.</li>
+    <li><strong>It cannot</strong> approve, permit, or fund anything.</li>
+    <li><strong>It is not</strong> an engineering design, a utility confirmation, a fire or
+        accessibility review, or a commitment by any government.</li>
+    <li>The demand figures are modelled, not measured. No one has counted real charging here.</li>
+    <li>Costs are early screening estimates for comparison, never budgets or quotes.</li>
+  </ul>
+
+  <div class="actions">
+    <a class="btn" href="/f/PWC002">I have facility information about this site</a>
+    <a class="btn secondary" href="/">About the study</a>
+  </div>
+
+  <h2>Why a site gets looked at at all</h2>
+  <p>The team's starting point was a real local lesson: a nearby garage had 70 charging
+     ports installed, and 17 stations were later switched off. Building ahead of demand is
+     expensive and wasteful. So this study asks a narrower question — where might a
+     <em>small</em> number of chargers be justified now, while leaving room to add more only
+     once real use justifies it?</p>
+
+  <footer>
+    <p><strong>Site reference:</strong> <code>PWC002</code> · Data: canonical contract
+       v1.0.0 · Screening-class planning study, not an approval.</p>
+    <p>No personal information is collected by this page. Nothing you tapped identifies you.
+       <a href="/privacy.html">Privacy</a></p>
+    <p>George Mason University Future City Fellowship, in consultation with Prince William
+       County's Office of Sustainability. No decision on this page has been made by any
+       government body.</p>
+  </footer>
+
+</main>
+</body>
+</html>

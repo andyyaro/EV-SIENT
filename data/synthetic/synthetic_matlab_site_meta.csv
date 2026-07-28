@@ -1,0 +1,13 @@
+site_id,arrival_start_hr,arrival_end_hr,base_load_mean_kw,base_load_peak_kw,spare_capacity_kw_placeholder,provenance
+SYN001,9,19,104.8,130.7,90.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN002,9,18,130.0,169.9,90.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN003,11,18,117.0,147.7,60.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN004,6,18,98.7,108.0,60.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN005,9,19,106.5,131.0,130.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN006,11,19,88.4,109.2,90.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN007,11,18,86.2,109.7,90.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN008,9,18,47.4,50.5,90.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN009,11,18,101.2,126.2,25.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN010,6,19,121.8,150.4,130.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN011,9,19,89.2,119.6,130.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building
+SYN012,6,18,122.6,164.3,90.0,SYNTHETIC planning placeholder generated for public distribution (DEC-016); base loads and spare capacity are INVENTED and describe no real building

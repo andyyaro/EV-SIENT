@@ -17,6 +17,7 @@ import pandas as pd
 from .config import (
     CHARGER_EFFICIENCY,
     DISPLACED_GASOLINE_G_CO2_PER_MI,
+    ECON,
     ENERGY_PER_SESSION_KWH,
     EV_EFFICIENCY_KWH_PER_MI,
     GRID_FACTOR_LB_PER_MWH,
@@ -76,7 +77,8 @@ def avoided_evse_metric(scenarios: pd.DataFrame) -> pd.DataFrame:
     """
     df = scenarios.copy()
     df["avoided_active_evse_ports"] = (df["ports_pathway"] - df["ports_active"]).clip(lower=0)
-    df["avoided_network_fee_usd_yr"] = df["avoided_active_evse_ports"] * 1000.0
+    df["avoided_network_fee_usd_yr"] = (
+        df["avoided_active_evse_ports"] * ECON["network_fee_usd_per_port_yr"])
     df["avoided_evse_note"] = (
         "Ports kept as pathway-only capacity instead of energized hardware; avoided annual "
         "network/maintenance fees use the client's ~$1k/station/yr operating frame (screening)."

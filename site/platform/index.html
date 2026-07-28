@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EV Charging Site Readiness — Future City Fellowship</title>
+<meta name="description" content="A screening-class planning study of twelve candidate public EV charging sites in Northern Virginia. Every number shows where it came from.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">George Mason University · Future City Fellowship</p>
+    <h1>EV charging site readiness</h1>
+    <p class="lede">
+      Twelve candidate sites in Northern Virginia, screened for whether public charging could
+      make sense — and if so, how much to start with.
+    </p>
+  </div>
+</header>
+
+<!--
+  The banner is not decoration and is not dismissible. It states the study's headline
+  limitation before any number is visible, because a reader who scrolls straight to a table
+  and leaves has still been told the most important thing.
+-->
+<div class="banner" role="note">
+  <div class="wrap">
+    <strong>Nothing here is approved, funded or permitted.</strong>
+    Electrical capacity is a <strong>placeholder at all twelve sites</strong> — nobody has
+    confirmed the service could support chargers. Demand is modelled, not measured. Costs are
+    screening estimates for comparison, never budgets or quotes.
+  </div>
+</div>
+
+<main id="main" class="wrap">
+
+  <section aria-labelledby="how-h">
+    <h2 id="how-h">How to read this</h2>
+    <p class="prose">
+      <strong>Every number on this page is clickable.</strong> Click one and you get its
+      lineage: which model run produced it, in which mode, from which contract version, backed
+      by which source, at what confidence, and which caveats apply to it specifically. If a
+      number cannot be explained, it is not shown — this page has no "unknown".
+    </p>
+    <p class="prose muted" id="run-line">Loading the canonical contract…</p>
+  </section>
+
+  <section aria-labelledby="sites-h">
+    <h2 id="sites-h">Sites</h2>
+    <div class="controls">
+      <label for="horizon">Horizon
+        <select id="horizon"></select>
+      </label>
+      <label for="scenario">Case
+        <select id="scenario"></select>
+      </label>
+    </div>
+    <div class="tablewrap">
+      <table id="sites">
+        <caption class="sr-only">Candidate sites with readiness, ports and capacity basis. Every value is clickable for its provenance.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Site</th>
+            <th scope="col" class="num">Starter ports</th>
+            <th scope="col" class="num">Pathway capacity</th>
+            <th scope="col">Capacity basis</th>
+            <th scope="col">Data confidence</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="ops-h">
+    <h2 id="ops-h">What this platform can do</h2>
+    <p class="prose">
+      The list below is complete. Capabilities that need the desktop application are shown
+      with the reason, rather than hidden.
+    </p>
+    <p id="tier-note" class="tier tier-web">Detecting which tier this is…</p>
+    <ul id="operations" class="ops"></ul>
+  </section>
+
+  <section aria-labelledby="surf-h">
+    <h2 id="surf-h">Everything else this study produced</h2>
+    <p class="prose muted" id="surf-note"></p>
+    <ul id="surfaces" class="ops"></ul>
+  </section>
+
+  <section aria-labelledby="engines-h">
+    <h2 id="engines-h">Which engine produced what</h2>
+    <p class="prose" id="engines-headline"></p>
+    <ul id="engines" class="engines"></ul>
+
+    <h3 class="sub" id="guard-h">The fail-closed capacity guard</h3>
+    <div id="guard" class="empty"></div>
+
+    <h3 class="sub" id="div-h">Divergences between engines</h3>
+    <p class="prose muted">
+      Surfaced, not hidden — including the ones deliberately left unfixed, with the reason.
+    </p>
+    <ul id="divergences" class="ops"></ul>
+
+    <p class="prose muted" id="cannot-show"></p>
+  </section>
+
+  <section aria-labelledby="sim-h">
+    <h2 id="sim-h">Simulink view</h2>
+    <div id="simulink" class="empty"></div>
+  </section>
+
+  <section aria-labelledby="field-h">
+    <h2 id="field-h">Field data</h2>
+    <div class="empty" id="field-state">
+      <p><strong>No field observations have been received.</strong></p>
+      <p class="muted">
+        The loop that ingests them is built and tested: a utility load study or a month of
+        charger logs would upgrade a site's capacity from <code>placeholder</code> to
+        <code>verified</code>, raise its data confidence, and make its expansion trigger
+        evaluable. Until something arrives, this stays empty — which is the honest state, not
+        an omission.
+      </p>
+    </div>
+
+    <h3 class="sub" id="record-h">Record an observation</h3>
+    <p class="prose">
+      This builds a file. <strong>It does not change any number on this page.</strong> Nothing
+      here is a live database — you fill in what was observed, download it as a CSV, and the
+      ingest step reads it. That step is where a site's capacity actually moves, and it is
+      shown in <a href="#ops-h">what this platform can do</a>.
+    </p>
+    <p class="prose muted">
+      The rules below are not this page's own. They are generated from the model's refusals,
+      so anything accepted here is accepted by the ingest step, and anything refused here
+      would have been refused there. The page will not tell you a row is fine and then have it
+      fail later.
+    </p>
+
+    <div class="controls">
+      <label for="form-kind">What was observed
+        <select id="form-kind"></select>
+      </label>
+    </div>
+
+    <form id="field-form" novalidate>
+      <div id="field-fields" class="fieldgrid"></div>
+      <div id="field-errors" role="alert" aria-live="polite"></div>
+      <button type="submit" class="run" id="field-add">Add this observation</button>
+    </form>
+
+    <div id="pending-wrap" hidden>
+      <h3 class="sub">Not yet submitted</h3>
+      <p class="prose muted" id="pending-note"></p>
+      <div class="tablewrap"><table id="pending"><thead></thead><tbody></tbody></table></div>
+      <button type="button" class="run" id="field-download">Download CSV</button>
+      <button type="button" class="run secondary" id="field-clear">Discard all</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- The provenance panel. Hidden until a number is clicked. -->
+<aside id="panel" class="panel" hidden aria-labelledby="panel-h" role="dialog" aria-modal="false">
+  <div class="panel-head">
+    <h2 id="panel-h">Where this number comes from</h2>
+    <button id="panel-close" type="button" aria-label="Close provenance panel">×</button>
+  </div>
+  <div id="panel-body"></div>
+</aside>
+<div id="scrim" class="scrim" hidden></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>
+      Screening-class planning study. Not an engineering design, not a utility confirmation,
+      not a fire or accessibility review, and not a commitment by any government body.
+    </p>
+    <p class="muted" id="foot-provenance"></p>
+  </div>
+</footer>
+
+<script src="field_validate.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

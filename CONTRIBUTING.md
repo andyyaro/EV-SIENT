@@ -4,7 +4,8 @@
 
 ```bash
 make setup            # venv + editable install with pinned [test] extras (Python 3.11+)
-make test             # 80 tests incl. legacy golden tests; coverage gate 80%
+make test             # full suite incl. legacy golden tests; reports coverage (the 80% floor
+                      #   is enforced by ./scripts/verify.sh and CI, not by this target)
 make run-legacy       # reproduce the accepted V2 baseline (25 starter / 48 pathway)
 make run-v3           # full V3 run into data/outputs/v3_run/
 make validate         # validate the tracked contract at data/contract/v1
@@ -29,8 +30,10 @@ erode it:
   reword, or soften it in any README, report, visual, or caption.
 - **Screening values are not budgets.** Costs are screening-class net present
   cost; never present them as budgets, bids, or forecasts.
-- MATLAB code is statically checked but has never been executed — do not
-  claim otherwise until `matlab/EXECUTION_STATUS.md` records a licensed run.
+- MATLAB has been executed on licensed MathWorks R2025b Update 5 (**49 passed / 0 failed**)
+  against a **synthetic fixture only**. No MATLAB output describes a real facility, and the
+  Simulink model was **built, never simulated** — do not claim more than
+  `matlab/EXECUTION_STATUS.md` records.
 
 ## Golden-test rule
 

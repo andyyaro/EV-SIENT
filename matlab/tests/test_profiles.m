@@ -60,6 +60,9 @@ function testEnergyConservationDeterministic(testCase)
     % integral of the request equals sessions_per_day x per-session
     % deliverable grid energy.
     row = testCase.TestData.baseRow;
+    % Deliberately NOT the 0.92 default. Passing a non-default value is what proves the
+    % parameter is honoured rather than silently ignored -- a test that passes the default
+    % would still pass if the argument were dropped on the floor.
     eta = 0.93;
     p = makeSessionProfiles(row, "ChargerEfficiency", eta);
 
@@ -74,9 +77,13 @@ function testEnergyConservationDeterministic(testCase)
 end
 
 function testFractionalSessionsConserved(testCase)
-    % sessions_per_day = 1.16 (a real adapter value) must be conserved.
+    % A fractional sessions_per_day must be conserved exactly through the
+    % per-session weighting. The value is SYNTHETIC and deliberately not any
+    % value present in the canonical adapter CSV: these sources are mirrored
+    % into a PUBLIC harness repository, so a test fixture must never carry a
+    % real per-site input. See docs/operations/v4-program/MATLAB_LIBERATION.md.
     row = testCase.TestData.baseRow;
-    row.sessions_per_day = 1.16;
+    row.sessions_per_day = 1.75;
     eta = 0.93;
     p = makeSessionProfiles(row, "ChargerEfficiency", eta);
 
@@ -84,7 +91,7 @@ function testFractionalSessionsConserved(testCase)
     deliverable = min(gridPerSession, ...
         row.dwell_hr * row.charger_power_kW);
     verifyEqual(testCase, p.energyRequested_kWh, ...
-        1.16 * deliverable, "RelTol", 1e-6);
+        1.75 * deliverable, "RelTol", 1e-6);
 end
 
 function testEfficiencyIncreasesGridEnergy(testCase)

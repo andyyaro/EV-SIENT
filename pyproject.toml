@@ -14,10 +14,29 @@ dependencies = [
     "jsonschema>=4.20",
 ]
 
+[project.scripts]
+# The desktop tier's entry point. DEC-015 chose a Python-native local server over a packaged
+# native shell, so "the desktop app" is this command: it builds any missing generated surface,
+# starts the loopback server, and opens a browser. Before it existed the instruction was
+# `python -m fcf_m2.server`, which fails with a bare traceback if the bundle was never built.
+fcf-platform = "fcf_m2.launcher:main"
+
 [project.optional-dependencies]
 gis = ["geopandas>=0.14", "contextily>=1.5", "xyzservices>=2024.0"]
 test = ["pytest>=8.0", "pytest-cov>=4.1"]
 presentation = ["pillow>=10.0", "reportlab>=4.0"]
+# scripts/md_to_docx.py regenerates the reports/milestone-2/*.docx from their Markdown
+# sources. It was previously undeclared, so the .docx could not be rebuilt from a
+# documented environment and had drifted from the Markdown it is generated from.
+reports = ["python-docx>=1.1"]
+# The 3D explorer's ETL. It needs only pandas, which is already a core dependency, so
+# this extra exists to name the capability rather than to add packages. The explorer was
+# previously a separate tree with its own requirements.txt and its own bootstrap venv;
+# it is now one dependency story, one test story, one Makefile.
+explorer = []
+# QR fallbacks for the NFC layer. Every tag destination must also be reachable by QR and
+# by a typed URL -- NFC is a convenience layer, never the only door.
+nfc = ["segno>=1.6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

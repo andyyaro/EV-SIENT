@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChargeReady NOVA — 3D Site Explorer</title>
+
+<!--
+  CesiumJS, PINNED to 1.128.
+
+  This used to read `unpkg.com/cesium/...` with no version, directly under a comment
+  telling the reader to pin it -- so every page load silently took whatever "latest"
+  happened to be, and a viewer built against one Cesium could render against another.
+
+  1.128 is chosen because Google Photorealistic 3D Tiles require >= 1.124. Do not lower
+  the pin below 1.124 without also removing the Photoreal basemap option.
+
+  The viewer works offline without this CDN in Flat mode; see explorer/README.md for
+  vendoring instructions if a fully offline demo is needed.
+-->
+<!--
+  Loader: prefer a vendored copy (make explorer-vendor) so the viewer runs with no network
+  at all; fall back to the pinned CDN so a clean checkout works with no build step. Both
+  paths are the same pinned release, checked by scripts/check_cdn_pins.py.
+-->
+<script>
+(function () {
+  var VENDOR = 'vendor/Cesium/', CDN = 'https://unpkg.com/cesium@1.128/Build/Cesium/';
+  function add(tag, attrs) {
+    var e = document.createElement(tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    document.head.appendChild(e);
+    return e;
+  }
+  var probe = new XMLHttpRequest();
+  var base = CDN, offline = false;
+  try {
+    probe.open('HEAD', VENDOR + 'Cesium.js', false);
+    probe.send(null);
+    if (probe.status >= 200 && probe.status < 400) { base = VENDOR; offline = true; }
+  } catch (e) { /* no vendored copy: use the CDN */ }
+  window.__FCF_CESIUM_SOURCE__ = offline ? 'vendored (offline capable)' : 'CDN (pinned 1.128)';
+  add('link', { href: base + 'Widgets/widgets.css', rel: 'stylesheet' });
+  document.write('<script src="' + base + 'Cesium.js"><\/script>');
+})();
+</script>
+<link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="cesiumContainer"></div>
+
+<!-- ---------------------------------------------------------------- header -->
+<header id="topbar">
+  <div class="brand">
+    <span class="mark"></span>
+    <div>
+      <h1>ChargeReady NOVA</h1>
+      <p>Public EV Charging Site-Readiness &amp; Right-Sizing — 3D Explorer</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" id="basemapSeg" role="group" aria-label="Base map mode">
+      <button data-mode="photoreal" title="Google Photorealistic 3D Tiles (requires Cesium ion token)">Photoreal</button>
+      <button data-mode="terrain" class="active" title="World terrain + OSM building footprints">Terrain</button>
+      <button data-mode="flat" title="No token required">Flat</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="toggleBuilds" checked><span>Proposed builds</span></label>
+    <label class="toggle"><input type="checkbox" id="toggleLabels" checked><span>Labels</span></label>
+    <button class="ghost" id="btnReset" title="Fly back to the full portfolio">Overview</button>
+  </div>
+
+  <!-- Which model mode produced these numbers. Populated from data/manifest.json at load.
+       The viewer previously never displayed this at all: it read the legacy_v2 fixtures
+       and said nothing about it, so a planner had no way to know whether the ports on
+       screen were current or superseded. A map that cannot say which numbers it is
+       showing cannot be trusted about any of them. -->
+  <div id="modeBadge" class="mode-badge" role="status" aria-live="polite">
+    <span class="mode-label">Loading mode…</span>
+  </div>
+</header>
+
+<!-- ------------------------------------------------------------- left rail -->
+<aside id="rail">
+  <div class="rail-head">
+    <h2>Candidate sites <span class="count" id="siteCount">—</span></h2>
+    <div class="filters">
+      <select id="filterJurisdiction" aria-label="Filter by jurisdiction">
+        <option value="">All jurisdictions</option>
+        <option value="fairfax">Fairfax</option>
+        <option value="prince_william">Prince William</option>
+      </select>
+      <select id="sortBy" aria-label="Sort sites">
+        <option value="model_rank">By model rank</option>
+        <option value="readiness_score">By readiness score</option>
+        <option value="demand_subscore">By demand</option>
+        <option value="feasibility_subscore">By feasibility</option>
+        <option value="equity_subscore">By equity</option>
+        <option value="ports_2056">By 2056 port need</option>
+      </select>
+    </div>
+  </div>
+  <ol id="siteList"></ol>
+  <footer class="rail-foot" id="railFoot"></footer>
+</aside>
+
+<!-- ------------------------------------------------------------ detail panel -->
+<section id="panel" class="hidden" aria-live="polite">
+  <button class="close" id="panelClose" aria-label="Close">×</button>
+  <div id="panelBody"></div>
+</section>
+
+<!-- ---------------------------------------------------------- compare tray -->
+<div id="tray" class="hidden">
+  <div class="tray-head">
+    <strong>Compare</strong>
+    <span id="trayHint">Pin up to 4 sites</span>
+    <div class="spacer"></div>
+    <button class="ghost" id="btnCompare">Open comparison</button>
+    <button class="ghost" id="btnClearTray">Clear</button>
+  </div>
+  <div id="trayChips"></div>
+</div>
+
+<!-- --------------------------------------------------------- compare modal -->
+<div id="modal" class="hidden">
+  <div class="modal-card">
+    <button class="close" id="modalClose" aria-label="Close">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ------------------------------------------------------------- token gate -->
+<div id="tokenGate" class="hidden" role="dialog" aria-modal="true"
+     aria-labelledby="tokenGateTitle" aria-describedby="tokenGateIntro">
+  <div class="gate-card">
+    <h3 id="tokenGateTitle">You can skip this</h3>
+    <p id="tokenGateIntro">
+      Every site, every score, and every proposed build works without doing
+      anything here. Just continue.
+    </p>
+    <div class="gate-actions">
+      <button id="tokenSkip">Continue to the map</button>
+    </div>
+    <hr>
+    <p class="fine">
+      <strong>Optional:</strong> a free Cesium ion key adds 3D terrain, building
+      shapes, and photorealistic tiles. Get one at
+      <span class="mono">cesium.com/ion</span> → Access Tokens. It is stored in
+      this browser only and is sent to nobody except Cesium.
+    </p>
+    <label class="fine" for="tokenInput">Cesium ion access token</label>
+    <input type="password" id="tokenInput" autocomplete="off"
+           placeholder="paste your token here"
+           aria-describedby="tokenGateFine">
+    <div class="gate-actions">
+      <button class="ghost" id="tokenSave">Use this token</button>
+    </div>
+    <p class="fine" id="tokenGateFine">
+      Without a token the map opens in <em>Flat</em> mode with OpenStreetMap
+      imagery. Nothing about the study is hidden in either mode.
+    </p>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>

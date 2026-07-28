@@ -1,0 +1,10 @@
+engine: MathWorks MATLAB
+release_requested: R2025b
+repository: andyyaro/fcf-matlab-ci
+commit_sha: 343f1983275ceb55fdae4647f5295d3b3e3dc00f
+run_id: 30296650057
+run_number: 9
+generated_utc: 2026-07-27T19:06:44Z
+input_csv: harness_scenarios_synthetic.csv
+input_sha256: ab1f658461c561e1a1ae31df368cf88d1c4d3976a25e079d4176195b0907d5fb
+note: the input is SYNTHETIC. No row corresponds to any real facility.

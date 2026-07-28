@@ -13,7 +13,7 @@ boundaries are cached in `data/cache/`.
 make setup      # creates ./venv and installs the package editable with pinned [test] extras
 ```
 
-## 1. Test suite (expect: 80 tests pass; coverage gate ≥ 80%)
+## 1. Test suite (expect: all tests pass; coverage gate ≥ 80%)
 
 ```bash
 make test
@@ -81,13 +81,15 @@ matlab -batch "addpath('src'); results = runtests('tests'); assertSuccess(result
 See [matlab/RUN_ON_LICENSED_MATLAB.md](../../matlab/RUN_ON_LICENSED_MATLAB.md)
 for the full first-run procedure and expected outputs, and
 [matlab/EXECUTION_STATUS.md](../../matlab/EXECUTION_STATUS.md) for what has
-and has not been executed (nothing has — no license was available).
+and has not been executed. **The suite has since run on licensed MathWorks
+R2025b Update 5: 49 passed / 0 failed** — but against a *synthetic* fixture only.
+No MATLAB output describes a real facility.
 
 ## Expected results summary
 
 | Check | Expected |
 |---|---|
-| `make test` | 80 tests pass; coverage ≥ 80% |
+| `make test` | all tests pass; coverage ≥ 80% |
 | `make run-legacy` | starter_total 25, pathway_total 48 (accepted V2 baseline) |
 | `make validate` | contract v1.0.0 passes all rules, JSON Schema, and the manifest hash chain |
 | `./scripts/verify.sh` | `ALL REPOSITORY VERIFICATION GATES PASSED` |
