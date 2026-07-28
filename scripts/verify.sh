@@ -138,6 +138,12 @@ gate "hygiene: no machine-specific absolute paths in tracked source" \
 gate "hygiene: no tracked file over 25 MB" \
   bash -c "cd '$REPO' && [ -z \"\$(git ls-files -z | xargs -0 -I{} find {} -size +25M 2>/dev/null)\" ]"
 
+# Every other gate in this file checks the tree it is run in, and therefore cannot see a
+# dependency that is present here and absent from a clone. That blind spot has produced the
+# same failure three times (Phase 1; FIND-CI-01 root cause A; DEC-021's missing script).
+gate "clone-safety: every declared dependency is tracked, not just present on this machine" \
+  bash -c "cd '$REPO' && '$PY' scripts/check_clone_safety.py"
+
 gate "3d: explorer suite passes (attribution reproduces the model score in BOTH modes)" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_explorer_pipeline.py tests/test_explorer_drift.py -q"
 
