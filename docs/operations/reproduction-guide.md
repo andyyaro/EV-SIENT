@@ -81,7 +81,9 @@ matlab -batch "addpath('src'); results = runtests('tests'); assertSuccess(result
 See [matlab/RUN_ON_LICENSED_MATLAB.md](../../matlab/RUN_ON_LICENSED_MATLAB.md)
 for the full first-run procedure and expected outputs, and
 [matlab/EXECUTION_STATUS.md](../../matlab/EXECUTION_STATUS.md) for what has
-and has not been executed (nothing has — no license was available).
+and has not been executed. **The suite has since run on licensed MathWorks
+R2025b Update 5: 49 passed / 0 failed** — but against a *synthetic* fixture only.
+No MATLAB output describes a real facility.
 
 ## Expected results summary
 

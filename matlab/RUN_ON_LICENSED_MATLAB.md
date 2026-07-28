@@ -1,8 +1,13 @@
 # Running on a Licensed MATLAB Machine
 
-This repository was authored without any MATLAB installation
-(see `EXECUTION_STATUS.md` - nothing here has been executed). This page is
-the exact, copy-paste procedure for the first licensed run: MATLAB
+> **This page is preserved as the first-run procedure. Its opening sentence was true
+> when written and is no longer.** The suite has since been executed on licensed MathWorks
+> R2025b Update 5 — **49 passed / 0 failed** — against a synthetic fixture. See
+> `EXECUTION_STATUS.md` for the run record. The procedure below remains correct for anyone
+> running it themselves.
+
+This repository was authored without any MATLAB installation. This page is
+the exact, copy-paste procedure for a licensed run: MATLAB
 **R2025b**, base MATLAB is sufficient for everything except step 6.
 
 All commands are run from the `matlab/` directory of the repository.

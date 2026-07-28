@@ -20,7 +20,7 @@ what it is.
 | 5 | Net CO2e — line, caption carries factor + vintage | **yes** | Factor, subregion, rate and vintage all in the subtitle, from `config.py`. |
 | 6 | Peak waits — bar + **reference line at 10 min** | **partial** | Bars built. **No reference line.** The 10-minute screening threshold is stated in the subtitle instead. |
 | 7 | Map — lat/lon, size by pathway, colour top-3 | **yes**, with a caveat | **Symbol** map, which is what the recipe asked for. Coloured by data confidence rather than top-3 rank, because all twelve are `Low` and that is the more honest thing for the colour channel to carry. |
-| 8 | Dashboard 1600×900, filters scoped to sheets 3–5 | **partial** | Dashboard built at 1600×900 with four sheets in one container. **No filter cards and no scoping** — dashboard extras are not generated. |
+| 8 | Dashboard 1600×900, filters scoped to sheets 3–5 | **partial** | Dashboard built at **1400×3400** with **seven** sheets in one container (this row previously said 1600×900 and four sheets; corrected 2026-07-28 against the `.twb` itself and the build manifest). **No filter cards and no scoping** — dashboard extras are not generated. |
 | 9 | **Story, 8 points** | **no** | **Not built.** Stories are not implemented. |
 
 ## Residual blockers — the honest list

@@ -398,10 +398,14 @@ than in principle.
 | One-directional hash-gated sync | **done** — exercised in both directions |
 | Runtime tier chosen with evidence | **done** — Tier 2, by execution, 120/120 rows |
 | Fail-closed guard proof | **done** — 16/16 with a negative control |
-| **Real MathWorks MATLAB executed** | **YES** — run #1, 35 passed / 14 failed / 11 incomplete |
+| **Real MathWorks MATLAB executed** | **YES — 49 passed / 0 failed** on R2025b Update 5 (run #1 was 35/14/11; the defect below was fixed and it was re-run) |
 | First-run defect found and fixed | **done** — non-portable CSV path |
-| CI run fully green | **not yet** — run #2 in flight after the fix |
-| `regression_golden.csv` generated | **not yet** — needs a green `test_regression` |
-| `.slx` built by CI | **not yet** |
-| `EXECUTION_STATUS.md` updated | **NO — deliberately.** It gets its run record when a run *passes*, not when one merely happens. |
-| Python/MATLAB cross-validation | **not started** — needs the golden file |
+| CI run fully green | **done** |
+| `regression_golden.csv` generated | **done** — committed under `matlab/outputs/run-30291108647/` |
+| `.slx` built by CI | **done** — `run-30296650057`, 11 blocks; **built, never simulated** |
+| `EXECUTION_STATUS.md` updated | **done** — the BLOCKED banner is kept verbatim below the new one rather than deleted |
+| Python/MATLAB cross-validation | **done** — 2 640 cells, **zero** numeric divergences at 1e-9 (under Octave; see the tier note) |
+
+> **Corrected 2026-07-28.** Every row above except the first two read "not yet" or "no" long
+> after each had been completed. Found by the DEC-014 line-by-line audit. A status table that
+> under-reports is still a status table that lies.

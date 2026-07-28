@@ -127,9 +127,10 @@ output of the failing command rather than swallowing it. That output is what to 
 
 Stated because a capability that is quietly absent looks like a capability that is broken.
 
-- **No MATLAB or Simulink results.** Those record executions against the study's real sites and
-  are not distributed. The platform's engine surface says so explicitly rather than appearing
-  empty.
+- **No MATLAB or Simulink results.** Not because they describe real sites — they do not; every
+  MATLAB run used a synthetic fixture. They are excluded because they are **received CI
+  artifacts from a separate harness repository**, not something this installer can produce or
+  reproduce. The platform's engine surface says so explicitly rather than appearing empty.
 - **No 3D explorer.** Its site geometry is generated from the real twelve facilities, so it is
   excluded. The surface is skipped rather than shown broken.
 - **No real site data at all.** That is the point — see DEC-016.
