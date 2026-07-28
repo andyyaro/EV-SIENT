@@ -279,13 +279,18 @@ def validate_v2(scenario_v2: pd.DataFrame, site_table: pd.DataFrame) -> list[str
 
     # The guardrail, enforced rather than documented: an observed value may not appear on a
     # row that claims no observation, because that is a number with no provenance.
-    if "observed_uptime" in scenario_v2.columns:
-        claims_none = scenario_v2.trigger_outcome.astype(str).str.startswith("awaiting")
-        has_value = ~_is_blank(scenario_v2.observed_uptime)
-        orphaned = scenario_v2[claims_none & has_value]
+    # Checked on EVERY observed_* column, not just uptime. The rule above is stated
+    # generally and was enforced on one field; observed_utilization, observed_p90_wait_min
+    # and observed_months could all be set on an "awaiting" row and validate clean. Measured
+    # before fixing: setting all three on row 0 of the shipped v2 returned no problems.
+    claims_none = scenario_v2.trigger_outcome.astype(str).str.startswith("awaiting")
+    for column in (c for c in V2_ADDED_FIELDS if c.startswith("observed_")):
+        if column not in scenario_v2.columns:
+            continue
+        orphaned = scenario_v2[claims_none & ~_is_blank(scenario_v2[column])]
         if not orphaned.empty:
             problems.append(
-                f"{len(orphaned)} row(s) carry observed_uptime while reporting "
+                f"{len(orphaned)} row(s) carry {column} while reporting "
                 f"awaiting_observed_data - an observed value with no observation behind it")
 
     # A verified capacity must name when and how it was verified.

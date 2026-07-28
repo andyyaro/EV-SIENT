@@ -174,7 +174,7 @@ async function loadSites() {
   } catch { /* fall through */ }
 
   throw new Error(
-    'Could not load data/sites.geojson. Run `make data`, then serve this ' +
+    'Could not load data/sites.geojson. Run `make explorer` from the repository root, then serve this ' +
     'directory (python -m http.server 8080) rather than opening the file directly.'
   );
 }

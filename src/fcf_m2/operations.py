@@ -154,9 +154,20 @@ OPERATIONS: list[Operation] = [
         desktop_reason=(
             "Reads observation files from your machine. The web tier has no access to your "
             "files and cannot run the ingestion."),
-        command=["{py}", "-m", "fcf_m2.workflow", "ingest-observations"],
-        caveat=("No field observations have been received. Today this reports nothing to "
-                "change, which is the correct answer."),
+        # The templates, deliberately. Declared with NO arguments this operation could never
+        # succeed: the workflow prints "Nothing to ingest" and returns 2, so the platform
+        # button reported FAILED every time -- flatly contradicting this operation's own
+        # caveat that "today this reports nothing to change, which is the correct answer".
+        # Pointed at the shipped templates it does the real thing and exits 0, showing what a
+        # real observation WOULD do using the templates' clearly-labelled EXAMPLE row.
+        command=["{py}", "-m", "fcf_m2.workflow", "ingest-observations",
+                 "--capacity", "data/observed/observed_capacity_template.csv",
+                 "--sessions", "data/observed/observed_sessions_template.csv"],
+        caveat=("**No real field observations have been received.** This runs against the two "
+                "shipped TEMPLATE files, so what it shows is the template's own EXAMPLE row -- "
+                "site EXAMPLE001, explicitly marked 'not a real site' -- demonstrating the "
+                "upgrade path a genuine observation would take. Nothing in the contract "
+                "changes, and no real site's capacity moves off placeholder."),
     ),
 
     # ---------------------------------------------------------------- generate artifacts
