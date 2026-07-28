@@ -76,10 +76,38 @@ CAPACITY_CAVEAT = """
   <strong>Electrical capacity is a placeholder at all twelve sites.</strong> Nobody has
   confirmed that the electrical service at any site could support chargers — every row of the
   canonical contract reads <code>capacity_basis = placeholder</code>, and
-  <strong>0 of 12 sites reach High data confidence</strong>. The rankings below compare sites
+  <strong>all 12 sites score Low data confidence — none reaches even Medium</strong>. The rankings below compare sites
   on modelled demand and screening-class cost; they are <em>not</em> a statement that any site
   is electrically feasible. No feasibility claim is permitted on placeholder capacity, and none
   is made here.
+</aside>
+"""
+
+
+#: FIND-NUM-03, open since Phase 0 and never disclosed to a reader until now.
+#:
+#: The rotating gallery on results.html publishes `legacy_score` for six sites -- FFX002 58.8,
+#: FFX004 54.4, PWC006 52.1, PWC002 50.3, PWC008 40.1, PWC003 29.6 -- all six matching
+#: `legacy_v2` exactly and none matching `milestone2_v3`. It names FFX002 as "Top overall
+#: candidate"; canonically that is FFX004 at 53.4. The page names no mode anywhere.
+#:
+#: The scores are NOT changed here. The owner asked for the 3D gallery to be kept as it is,
+#: and re-baselining the public headline recommendation is a decision about a deliverable a
+#: client has already seen, not a repair an assistant should make unilaterally. What was
+#: genuinely wrong is that a reader could not tell which model produced these numbers. That is
+#: fixed; the re-baselining question is logged as a human action.
+MODE_MARKER = "fcf-mode-note"
+
+MODE_NOTE = """
+<aside class="fcf-mode-note" role="note" style="background:rgba(27,67,50,.07);border-left:4px solid #1B4332;padding:.8rem 1.1rem;margin:1rem 0;font-size:.9rem;line-height:1.55;">
+  <strong>These scores come from the <code>legacy_v2</code> baseline, not the current model.</strong>
+  This project keeps two model modes and never treats them as interchangeable.
+  <code>legacy_v2</code> reproduces the earlier accepted baseline exactly; the current
+  canonical mode, <code>milestone2_v3</code>, uses fixed anchors instead of scoring sites
+  against each other, and it ranks them differently — under it the strongest candidate is
+  <strong>FFX004 (Fairfax County Government Center) at 53.4</strong>, with FFX002 second at
+  51.8. Neither ordering is a feasibility finding: electrical capacity is an unverified
+  placeholder at all twelve sites.
 </aside>
 """
 
@@ -219,6 +247,18 @@ def main() -> int:
             text = replace_disclaimer(text, AUTHORITY_DISCLAIMER)
         if VINTAGE_MARKER not in text:
             text = insert_before_body_close(text, VINTAGE_FOOTER)
+        if page == "results.html" and MODE_MARKER not in text:
+            # Immediately before the rotating gallery, so the mode is read before the scores.
+            gallery = '<section class="section top-signals-section">'
+            if gallery in text:
+                text = text.replace(gallery, MODE_NOTE.strip() + "\n  " + gallery, 1)
+            # The gallery described itself as showing "the latest model run". It shows the
+            # earlier baseline, which is the opposite of latest.
+            text = text.replace(
+                "An auto-rotating 3D gallery of the highest-priority planning signals from the "
+                "latest model run.",
+                "An auto-rotating 3D gallery of the highest-priority planning signals from the "
+                "<code>legacy_v2</code> baseline run.")
         if page == "results.html" and CAVEAT_MARKER not in text:
             # Immediately after the disclaimer, so it is above the rankings rather than
             # below them.

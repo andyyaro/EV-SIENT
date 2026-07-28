@@ -73,10 +73,11 @@ annually) with labeled displacement assumptions.
 
 Top-ranked site under the canonical `milestone2_v3` mode: **FFX004 (53.4)**, with
 **FFX002 — City of Fairfax Regional Library** second at **51.8**. FFX002 ranks first under
-`legacy_v2` at 58.8; the two modes are not interchangeable, so every surface built from this
-repository names the mode wherever a rank appears. The exception is the superseded public
-workbook in limitation 5 below, which carries `legacy_v2` ranks without saying so — which is
-why its removal is an open action.
+`legacy_v2` at 58.8; the two modes are not interchangeable, so the mode is named wherever a
+rank appears — with **two disclosed exceptions**, both tracked as open actions: the superseded
+public Tableau workbook (limitation 5 below), and this project's own `results.html`, whose
+rotating gallery publishes `legacy_v2` scores. The gallery now states which mode produced them
+(FIND-NUM-03); whether to re-baseline its headline recommendation is the owner's call.
 Data confidence is **Low at all 12 sites** — no site reaches Medium, let alone High.
 
 ## How the system fits together

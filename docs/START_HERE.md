@@ -64,9 +64,11 @@ confidence floor.
 
 Every number resolves to the run that produced it and the source behind it. Two model modes
 exist, and every surface this repository builds names which one it used. Standards scope,
-adopted code editions, and the [Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ) boundary are stated explicitly. One caveat: an **older
-Tableau workbook is still public** carrying superseded `legacy_v2` ranks and overstated
-confidence — removing it needs the account holder, and it is tracked as an open action.
+adopted code editions, and the [Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ) boundary are stated explicitly. **Two caveats**, both
+tracked as open actions: an older **Tableau workbook is still public** carrying superseded
+`legacy_v2` ranks and overstated confidence, and this project's own results page publishes
+`legacy_v2` scores in its rotating gallery — now labelled as such, though the ranking itself
+has not been re-baselined.
 
 → [Methodology](methodology/) · [Standards matrix](standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)
 → [Migration from V2](migration-from-v2.md) — why two modes exist and what moved
@@ -107,9 +109,9 @@ conventions rather than forecasts.
 Two model modes exist. `legacy_v2` reproduces an earlier accepted baseline exactly, and
 `milestone2_v3` is the current canonical model. They disagree about the top site — FFX002 under
 the old mode, FFX004 under the current one — so every surface built from this repository
-**names the mode** wherever a rank appears. They are not interchangeable. The exception is the
-superseded public workbook noted above, which carries `legacy_v2` ranks without saying so; that
-is precisely why it is queued for removal.
+**names the mode** wherever a rank appears. They are not interchangeable. Two public surfaces
+still show `legacy_v2` ranks — the superseded Tableau workbook, queued for removal, and this
+project's own results gallery, which now says so on the page. Both are open actions.
 
 **Why is the data confidence low everywhere?**
 Because it is scored from where the data actually came from, not from how good the answer

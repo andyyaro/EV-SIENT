@@ -70,6 +70,14 @@ def main() -> int:
                 "without it the page makes a claim the contract does not support.")
         if "placeholder" not in text.lower():
             problems.append("results.html: never uses the word 'placeholder'")
+        # FIND-NUM-03. The rotating gallery publishes legacy_v2 scores and named no mode at
+        # all, so a reader met a ranking with no way to know which model produced it -- and
+        # the headline it names is not the canonical top site. The scores are deliberately
+        # unchanged (the owner asked for the gallery as-is); the disclosure is mandatory.
+        if "fcf-mode-note" not in text:
+            problems.append(
+                "results.html: NO model-mode note. The gallery publishes legacy_v2 scores "
+                "and names FFX002 as top candidate; canonically that is FFX004 at 53.4.")
 
     # Every figure the site states must still be the contract's figure.
     rows = list(csv.DictReader(open(REPO / "data/contract/v1/scenario_table.csv")))

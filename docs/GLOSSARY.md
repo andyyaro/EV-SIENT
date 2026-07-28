@@ -11,8 +11,10 @@ you has made the term sound more solid than it is.
 ### AADT — Annual Average Daily Traffic
 
 The average number of vehicles passing a point per day over a year, used as one signal of how
-much passing demand a site might see. It is supplied for all twelve sites and ranges widely
-across them, from 490 to 51 000 vehicles a day.
+much passing demand a site might see. It is supplied for all twelve sites and ranges widely,
+from 490 to 51 000 vehicles a day — but it comes from the nearest VDOT traffic segment, and the
+source notes say it should be treated as **screening-level traffic, not site-access
+validation**.
 
 ### AHJ — Authority Having Jurisdiction
 
@@ -43,9 +45,10 @@ when it changes.
 
 ### Equity gap index
 
-A composite measure of how underserved an area is relative to others, used to weight sites so
-that charging is not concentrated only where it is easiest to build. It is one input among
-several and it does not, on its own, decide anything.
+A composite 0–1 measure of how underserved an area is relative to others, used to weight sites
+so that charging is not concentrated only where it is easiest to build. It is a **derived proxy
+built from public ACS/LODES data, not a measurement**, and it is one input among several: it
+drives the equity sub-score, which is 10% of the readiness score.
 
 ### Expansion trigger
 
