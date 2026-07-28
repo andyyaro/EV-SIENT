@@ -212,6 +212,13 @@ gate "platform: the desktop launcher builds what is derivable and refuses what i
 gate "platform: every surface link resolves to a file that exists in the bundle" \
   bash -c "cd '$REPO' && '$PY' scripts/check_surface_links.py"
 
+# A version pin says WHICH release to install; it says nothing about whether the bytes that
+# arrived are that release. requirements-hashed.txt closes that for the non-editable path.
+# The lock itself stays unhashed on purpose: pip refuses hashes in a constraints file used for
+# an editable install, so hashing it would break the everyday developer command.
+gate "supply chain: the hashed requirements match the lock and every pin carries a digest" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_lock_hashes.py -q"
+
 # The packaging workflow's constraints are billing and honesty constraints. Two of them fail
 # silently and expensively: a branch trigger would build Windows artifacts on every push at 2x
 # billing against a 2000-minute private-repo allowance, and an unbounded job can burn it in an

@@ -1,0 +1,2 @@
+[console_scripts]
+fcf-platform = fcf_m2.launcher:main
