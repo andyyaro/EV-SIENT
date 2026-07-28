@@ -349,11 +349,24 @@ def main() -> int:
 
     (OUT / "README.md").write_text(
         "# Synthetic site inputs — invented data, for public distribution\n\n"
-        "**Every value in this directory is invented.** No file here describes any real\n"
-        "building, and nothing here was derived from the real inputs — not copied, not\n"
-        "perturbed, not fitted to their distributions. The values come from generic stated\n"
-        "assumptions about what a public library or county office is like, written down in\n"
-        "`scripts/build_synthetic_inputs.py` where they can be argued with.\n\n"
+        # This paragraph used to say "nothing here was derived from the real inputs -- not
+        # copied, not perturbed, not fitted to their distributions." That is the exact
+        # overclaim the module docstring above records as having been disproved by adversarial
+        # review, and it was still being written into every public bundle. The accurate
+        # statement is narrower, so it is the narrower one that ships.
+        "**No file here describes any real building.** No site id, name, address, postcode or\n"
+        "coordinate; no per-site measurement; no rank order, spacing or correlation structure;\n"
+        "no row-to-row correspondence with the real study. Every facility-scale number is drawn\n"
+        "from generic stated assumptions about what a public library or county office is like,\n"
+        "written down in `scripts/build_synthetic_inputs.py` where they can be argued with.\n\n"
+        "**What IS shared with the real files, deliberately, none of it distinguishing a\n"
+        "facility:** the schema vocabularies (the model cannot parse a file that uses others);\n"
+        "boolean and small-integer domains (0/1 flags, ranks 1..12 — arithmetic, not leakage);\n"
+        "the study's uniform conventions such as 480 V service and $150/ft trenching, which are\n"
+        "identical across all twelve real rows *because they are assumptions the study adopted*,\n"
+        "so each separates no site from any other; and the electrical placeholders\n"
+        "(`elec_service_rating_amp = 0`, `spare_capacity_kw = 0`), which must be preserved or\n"
+        "the fail-closed capacity guard would stop firing.\n\n"
         "It exists because DEC-016 requires a public installer to ship synthetic inputs\n"
         "rather than the twelve real facilities' data, and `workflow.py` cannot run without\n"
         "*some* site table.\n\n"
