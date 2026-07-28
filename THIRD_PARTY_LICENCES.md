@@ -16,7 +16,7 @@ Choosing one is the owner's decision, not a packaging detail.
 | Component | Licence | Why it applies |
 |---|---|---|
 | CesiumJS | Apache-2.0 | Vendored into explorer/web/vendor by scripts/vendor_cesium.sh and shipped with the 3D explorer. |
-| amazon-cognito-identity-js | Apache-2.0 | **Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`. Added 2026-07-28 — this table exists to cover exactly this case and the file had been absent from it since it was vendored. |
+| amazon-cognito-identity-js | Apache-2.0 | **Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`. |
 | OpenStreetMap data | ODbL 1.0 | The explorer's fallback basemap is OSM-derived. Attribution is required on display, not merely in a file. |
 | Google Photorealistic 3D Tiles | Terms of Service (not an open-source licence) | The explorer can consume them when a key is supplied. It ships no key and no tiles, so the terms bind whoever supplies the key rather than this repository. |
 | US Census TIGER/Line | Public domain (US Government work) | A filtered boundary extract is cached under data/cache/boundaries. |

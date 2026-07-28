@@ -180,6 +180,12 @@
       "notice": "explorer/web/vendor/LICENSE-CesiumJS.txt (written by the vendoring script)"
     },
     {
+      "name": "amazon-cognito-identity-js",
+      "licence": "Apache-2.0",
+      "why": "**Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`.",
+      "notice": "site/www/vendor/amazon-cognito-identity.min.js (SPDX header in the file)"
+    },
+    {
       "name": "OpenStreetMap data",
       "licence": "ODbL 1.0",
       "why": "The explorer's fallback basemap is OSM-derived. Attribution is required on display, not merely in a file.",
