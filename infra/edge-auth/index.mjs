@@ -95,6 +95,12 @@ const COOKIE_ATTRS = "Path=/; HttpOnly; Secure; SameSite=Lax";
  */
 const GRANTED = [
   { sub: "00000000-0000-4000-8000-000000000003", email: "redacted-3@example.org" },
+  // Added at the owner's request after the first deployment. The bytechisel account is
+  // CONFIRMED but carries no `email_verified`, and this pool's recovery mechanisms are
+  // `verified_email` then `verified_phone_number` — so "Forgot your password?" cannot deliver
+  // to it. Granting an account whose credentials the owner already holds is the route that
+  // does not require the assistant to touch a password.
+  { sub: "00000000-0000-4000-8000-000000000004", email: "redacted-6@example.org" },
 ];
 
 // ---------------------------------------------------------------- small helpers

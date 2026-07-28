@@ -369,12 +369,22 @@ def assert_safe_change(before: dict, after: dict) -> None:
             "REFUSING TO DEPLOY: the DEFAULT behaviour has a Lambda association.\n"
             "  That would gate the public NFC pages. Not what this deploys.")
 
-    # Every origin that existed before must survive untouched.
+    # Every origin that existed before must survive untouched — EXCEPT the platform origin,
+    # which this script owns and rewrites on every run. Without that exemption the guard fires
+    # on the second deploy of an unchanged config, which is a guard that cries wolf: the useful
+    # signal (someone else's origin moved) gets lost in a failure that happens every time.
     before_origins = {o["Id"]: o for o in before["Origins"]["Items"]}
     after_origins = {o["Id"]: o for o in after["Origins"]["Items"]}
     for origin_id, origin in before_origins.items():
+        if origin_id == ORIGIN_ID:
+            continue
         if after_origins.get(origin_id) != origin:
             raise SystemExit(f"REFUSING TO DEPLOY: existing origin {origin_id} was modified.")
+    if ORIGIN_ID in before_origins:
+        # It may change, but only in ways that keep it pointing at the isolated bucket.
+        if after_origins[ORIGIN_ID]["DomainName"] != f"{PLATFORM_BUCKET}.s3.{REGION}.amazonaws.com":
+            raise SystemExit("REFUSING TO DEPLOY: the platform origin no longer points at the "
+                             "isolated bucket — that is the whole bypass defence.")
     added = set(after_origins) - set(before_origins)
     if added - {ORIGIN_ID}:
         raise SystemExit(f"REFUSING TO DEPLOY: unexpected new origins {sorted(added)}")

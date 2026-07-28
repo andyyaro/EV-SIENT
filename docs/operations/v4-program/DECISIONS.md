@@ -930,3 +930,44 @@ localisation table, including the string `"Login pages unavailable"` itself, ins
 `<script>` on *every* page — including the working one. The reliable signal is the presence of
 a `type="password"` input. Had that grep been trusted, a working fix would have been reported
 as broken.
+
+### Access widened to a second account, and why the first one alone was not workable
+
+The granted account `redacted-3@example.org` is `CONFIRMED` and enabled, so it has a
+password — set on 2026-07-09, thirty-nine seconds after the account was created. But the owner
+reported never receiving a sign-in email, which surfaced a second problem behind the first:
+
+**No email was ever sent, and none could have been.** The assistant did not create the account
+and deliberately did not touch its credential, so there was no invitation to send. More
+importantly, the account carried **no `email_verified` attribute**, and this pool's recovery
+mechanisms are `verified_email` then `verified_phone_number`. *"Forgot your password?" could
+not have delivered either.* The missing attribute had already been noticed while building the
+allowlist and designed around for **authorisation**; what was missed is that the same gap also
+breaks **recovery**. One fact, two consequences, only one of them followed through.
+
+At the owner's direction, both routes were opened:
+
+1. **`email_verified` set to `true`** on `redacted-3@example.org`. This is a verification
+   flag, not a credential — it lets the owner run a self-service reset in which the password
+   travels from Cognito to their mailbox and is never seen by the assistant.
+2. **`redacted-6@example.org` added to the allowlist.** It already existed in the same pool with
+   credentials the owner holds. Widening access beyond the single account originally specified
+   was the owner's explicit decision, recorded here because it changes who can read the study.
+
+`redacted-1@example.org` is in the same pool and is **not** granted — a test asserts that a valid
+pool member who is not allowlisted is still refused, because being able to authenticate is not
+the same as being authorised.
+
+A further test asserts that one account's `sub` paired with the other's email is **refused**.
+With a single entry that was hypothetical; with two it is a real shape, and an allowlist that
+checked the two fields independently would admit a token that mixes two genuine accounts.
+
+**A guard that cried wolf.** The redeploy was refused by `assert_safe_change` with "existing
+origin platform-gated was modified" — the guard treated *every* pre-existing origin as
+untouchable, including the one the script itself owns and rewrites on every run. So it fired
+on the second deploy of an unchanged configuration. That is worse than not having it: a check
+that fails every time teaches the operator to skip it, and the genuine signal — *someone
+else's* origin moved — drowns. Now exempted, with the platform origin still asserted to point
+at the isolated bucket. **Lambda version 2 was published while this fired, and CloudFront was
+never updated to use it**, so for a few minutes the newly published code was live nowhere. The
+failure was safe, which is the point, but it was not free.

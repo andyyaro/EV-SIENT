@@ -43,6 +43,8 @@ const ISSUER = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_mKrwfQTkg"
 const CLIENT_ID = "1b9ab91m46pr3m2n74qapq3ls5";
 const GRANTED_SUB = "00000000-0000-4000-8000-000000000003";
 const GRANTED_EMAIL = "redacted-3@example.org";
+const GRANTED2_SUB = "00000000-0000-4000-8000-000000000004";
+const GRANTED2_EMAIL = "redacted-6@example.org";
 
 // ---------------------------------------------------------------- network stub
 
@@ -390,4 +392,41 @@ for (const path of ["/platform/_auth/logout", "/platform/_auth/signed-out"]) {
 test("a client that sends no Sec-Fetch-Dest is not blocked (curl is not a forgery risk)", async () => {
   const r = await handler(ev("/platform/_auth/signed-out"));
   assert.equal(r.status, "200");
+});
+
+// ---------------------------------------------------------------- the second granted account
+
+test("the second granted account also reaches the origin", async () => {
+  const r = await handler(ev("/platform/index.html", {
+    cookies: [session(idToken({ sub: GRANTED2_SUB, email: GRANTED2_EMAIL }))],
+  }));
+  assert.ok(isAllow(r), "redacted-6@example.org is on the allowlist and must pass");
+});
+
+test("DENIED: one account's sub paired with the other's email", async () => {
+  // The allowlist requires both fields to match the SAME entry. Checking them independently
+  // ("is this sub known?" and "is this email known?") would let a token that mixes two real
+  // accounts through — and with two entries that stops being hypothetical.
+  for (const [sub, email] of [[GRANTED_SUB, GRANTED2_EMAIL], [GRANTED2_SUB, GRANTED_EMAIL]]) {
+    const r = await handler(ev("/platform/index.html", { cookies: [session(idToken({ sub, email }))] }));
+    assert.ok(!isAllow(r), `sub ${sub.slice(0, 8)} + ${email} must be refused`);
+  }
+});
+
+test("DENIED: a third pool member who is not on the allowlist", async () => {
+  // redacted-1@example.org exists in the same Cognito pool. Being able to authenticate is not the
+  // same as being granted, and the gate must keep those separate.
+  const r = await handler(ev("/platform/index.html", {
+    cookies: [session(idToken({ sub: "00000000-0000-4000-8000-000000000008", email: "redacted-1@example.org" }))],
+  }));
+  assert.ok(!isAllow(r), "a valid pool member who is not allowlisted must still be refused");
+});
+
+test("email_verified is deliberately NOT required (the granted account lacks it)", async () => {
+  // Requiring it would have produced a gate that could never open. Pinned so a well-meaning
+  // 'hardening' change fails loudly rather than locking the owner out.
+  const r = await handler(ev("/platform/index.html", {
+    cookies: [session(idToken({ email_verified: undefined }))],
+  }));
+  assert.ok(isAllow(r), "a token with no email_verified claim must still be accepted");
 });

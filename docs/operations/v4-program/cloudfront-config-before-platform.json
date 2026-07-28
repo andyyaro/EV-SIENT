@@ -8,8 +8,26 @@
   },
   "DefaultRootObject": "index.html",
   "Origins": {
-    "Quantity": 1,
+    "Quantity": 2,
     "Items": [
+      {
+        "Id": "platform-gated",
+        "DomainName": "future-city-fellowship-platform.s3.us-east-1.amazonaws.com",
+        "OriginPath": "",
+        "CustomHeaders": {
+          "Quantity": 0
+        },
+        "S3OriginConfig": {
+          "OriginAccessIdentity": "",
+          "OriginReadTimeout": 30
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10,
+        "OriginShield": {
+          "Enabled": false
+        },
+        "OriginAccessControlId": "E1JND6HMX02LBD"
+      },
       {
         "Id": "future-city-fellowship.s3.us-east-1.amazonaws.com-mqx6u9i5r2r",
         "DomainName": "future-city-fellowship.s3.us-east-1.amazonaws.com",
@@ -75,7 +93,56 @@
     }
   },
   "CacheBehaviors": {
-    "Quantity": 0
+    "Quantity": 1,
+    "Items": [
+      {
+        "PathPattern": "/platform*",
+        "TargetOriginId": "platform-gated",
+        "TrustedSigners": {
+          "Enabled": false,
+          "Quantity": 0
+        },
+        "TrustedKeyGroups": {
+          "Enabled": false,
+          "Quantity": 0
+        },
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": [
+            "HEAD",
+            "GET"
+          ],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": [
+              "HEAD",
+              "GET"
+            ]
+          }
+        },
+        "SmoothStreaming": false,
+        "Compress": true,
+        "LambdaFunctionAssociations": {
+          "Quantity": 1,
+          "Items": [
+            {
+              "LambdaFunctionARN": "arn:aws:lambda:us-east-1:<ACCOUNT>:function:fcf-platform-edge-auth:1",
+              "EventType": "viewer-request",
+              "IncludeBody": false
+            }
+          ]
+        },
+        "FunctionAssociations": {
+          "Quantity": 0
+        },
+        "FieldLevelEncryptionId": "",
+        "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+        "GrpcConfig": {
+          "Enabled": false
+        }
+      }
+    ]
   },
   "CustomErrorResponses": {
     "Quantity": 2,
