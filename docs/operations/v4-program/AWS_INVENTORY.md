@@ -145,6 +145,20 @@ headline the live site and the contract agree on. The served PDF
 (`Public_EV_Charging_Planning_Report.pdf`, 15 KB) is a different artifact from anything in `reports/` and
 contains none of the checked figures.
 
+> **CORRECTION, 2026-07-28 — both sentences above are wrong.** Kept verbatim rather than edited,
+> because this section is a dated Phase 0 record and rewriting it would hide that the audit
+> reached the wrong conclusion.
+>
+> 1. **FFX002 is not "correctly named", and this is not a headline the site and the contract
+>    agree on — it is the one they disagree on.** FFX002 leads at 58.8 only under `legacy_v2`.
+>    Canonically (`milestone2_v3`) the top site is **FFX004 at 53.4**, with FFX002 second at
+>    51.8. Phase 0's own **FIND-NUM-03** records exactly this divergence, so the inventory and
+>    the findings register contradicted each other from the start.
+> 2. **The served PDF does contain the checked figures.** Read page by page on 2026-07-28: page 2
+>    states "readiness score 58.8" and page 3, headed "Current Site Ranking", tabulates all
+>    twelve `legacy_v2` scores. It is now labelled where it is linked, and logged as owner
+>    decision **8d**.
+
 Full numeric reconciliation of the live site against `data/contract/v1/` is **Phase 1** work; this section
 records only what discovery observed.
 
