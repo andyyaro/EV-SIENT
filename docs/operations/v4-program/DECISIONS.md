@@ -895,3 +895,38 @@ refutation threw and the results were discarded. The empty result was not a clea
 health, and was not reported as one — the agents' raw output was read from the run journal
 instead. A green result whose plumbing failed is indistinguishable from a real one unless the
 plumbing is checked.*
+
+### Post-deployment defect: the gate worked and the sign-in page did not exist
+
+Reported by the owner within minutes of the deployment being called verified:
+`/platform/` redirected to Cognito, and Cognito answered
+**"Login pages unavailable · Please contact an administrator."**
+
+**Cause.** This pool runs **Managed Login version 2**, under which *every app client needs its
+own branding record*. A client without one does not fall back to a default page — it has no
+sign-in page at all. The newly created `future-city-platform-edge` client had none. Nothing in
+the app client's own configuration hints at this; the existing `future-city-assistant-web`
+client had a branding record (`50b10138-…`) and so had never exposed the gap, and the site's
+other sign-in never used the hosted UI at all.
+
+**Fix.** `create-managed-login-branding --use-cognito-provided-values`, now performed by
+`deploy_platform.py` so a rebuild cannot omit it.
+
+**The real lesson, which is about the verification and not the bug.** Every one of the 32
+assertions passed while the feature was unusable, because they asserted *the gate redirects to
+Cognito* — and it did. That is a strictly weaker claim than *a person can reach a sign-in
+form*, and the weaker claim is the one that was checked. The verifier now **follows the
+redirect** and asserts a real password field renders. This is the same failure as the two
+blank Tableau sheets: verifying the step this program controls rather than the outcome the
+reader experiences.
+
+It also lands squarely on the caveat published alongside the deployment — that whether anything
+*behind* the redirect worked was explicitly unverified. The caveat was correct, and being
+correct about an unverified thing is not the same as it working.
+
+**Ninth text-versus-meaning trap, caught this time.** The first check for the fix searched the
+returned page for "unavailable" and reported it still present. It was: Cognito ships its entire
+localisation table, including the string `"Login pages unavailable"` itself, inside a
+`<script>` on *every* page — including the working one. The reliable signal is the presence of
+a `type="password"` input. Had that grep been trusted, a working fix would have been reported
+as broken.

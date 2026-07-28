@@ -138,6 +138,30 @@ def main() -> int:
         gated = ("amazoncognito.com" in location) or status in (403, 404)
         r.check(gated and not served, f"{path} does not serve the bundle", f"HTTP {status}")
 
+    print("\nHALF 1c — the sign-in page the gate sends people to must actually EXIST\n")
+    # Added after this shipped broken. The gate redirected to Cognito correctly and Cognito
+    # had no page to serve: under Managed Login v2 an app client without a branding record
+    # gets "Login pages unavailable · Please contact an administrator". Asserting the redirect
+    # is a strictly weaker claim than asserting a person can reach a sign-in form, and the
+    # weaker claim is the one that passed.
+    _status, _body, headers = fetch("/platform/index.html")
+    login_url = headers.get("location", "")
+    if not login_url:
+        r.check(False, "gate provides a sign-in URL", "no Location header")
+    else:
+        proc = subprocess.run(
+            ["curl", "-sSL", "--max-time", "30", "-w", "\n%{http_code}", login_url],
+            capture_output=True, text=True)
+        page, _, code = proc.stdout.rpartition("\n")
+        # The presence of a password input is the reliable signal. Searching the text for
+        # "unavailable" is NOT: Cognito ships its entire error-string table, including the
+        # definition of "Login pages unavailable", inside a <script> on every page — the ninth
+        # text-versus-meaning trap in this program.
+        has_password_field = 'type="password"' in page
+        r.check(code.strip() == "200" and has_password_field,
+                "Cognito sign-in page renders a real form",
+                f"HTTP {code.strip()}, password field: {has_password_field}")
+
     print("\nHALF 2 — the NFC field layer must remain PUBLIC (no account, no app)\n")
     for site in SITES:
         status, body, _ = fetch(f"/t/{site}")

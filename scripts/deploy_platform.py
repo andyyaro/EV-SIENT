@@ -156,6 +156,38 @@ def ensure_platform_bucket(apply: bool) -> None:
     say("s3", "public access blocked; policy allows only this distribution")
 
 
+USER_POOL_ID = "us-east-1_mKrwfQTkg"
+APP_CLIENT_ID = "1b9ab91m46pr3m2n74qapq3ls5"
+
+
+def ensure_managed_login_branding(apply: bool) -> None:
+    """Give the app client a managed-login branding style, or its sign-in page will not exist.
+
+    This is not cosmetic and the failure it prevents is not obvious. This pool runs
+    **Managed Login (version 2)**, and under version 2 every app client needs its own branding
+    record. A client without one does not fall back to a default page — Cognito serves
+    "Login pages unavailable · Please contact an administrator", with nothing in the app
+    client's own configuration to suggest why.
+
+    It shipped that way once: the gate correctly redirected to Cognito, and Cognito had no page
+    to show. The deployment verifier now follows the redirect for exactly this reason, because
+    checking that the gate *redirects* is a weaker claim than checking a person can *sign in*.
+    """
+    existing = aws("cognito-idp", "describe-managed-login-branding-by-client",
+                   "--user-pool-id", USER_POOL_ID, "--client-id", APP_CLIENT_ID,
+                   check=False, parse=False)
+    if existing.returncode == 0:
+        say("cognito", "app client already has managed-login branding")
+        return
+    if not apply:
+        say("cognito", "WOULD create managed-login branding for the app client")
+        return
+    created = aws("cognito-idp", "create-managed-login-branding",
+                  "--user-pool-id", USER_POOL_ID, "--client-id", APP_CLIENT_ID,
+                  "--use-cognito-provided-values")
+    say("cognito", f"created branding {created['ManagedLoginBranding']['ManagedLoginBrandingId']}")
+
+
 def ensure_oac(apply: bool) -> str:
     listed = aws("cloudfront", "list-origin-access-controls")
     for item in listed.get("OriginAccessControlList", {}).get("Items", []):
@@ -444,6 +476,7 @@ def main() -> int:
           f"({'APPLY' if args.apply else 'DRY RUN — nothing will change'})\n")
 
     check_identity()
+    ensure_managed_login_branding(args.apply)
     ensure_platform_bucket(args.apply)
     oac_id = ensure_oac(args.apply)
     role_arn = ensure_role(args.apply)
