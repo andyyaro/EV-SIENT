@@ -212,6 +212,14 @@ gate "platform: the desktop launcher builds what is derivable and refuses what i
 gate "platform: every surface link resolves to a file that exists in the bundle" \
   bash -c "cd '$REPO' && '$PY' scripts/check_surface_links.py"
 
+# The packaging workflow's constraints are billing and honesty constraints. Two of them fail
+# silently and expensively: a branch trigger would build Windows artifacts on every push at 2x
+# billing against a 2000-minute private-repo allowance, and an unbounded job can burn it in an
+# afternoon (one already did). The third is that nothing may claim notarization, because there
+# is no Apple Developer account.
+gate "packaging: tags-only, time-bounded, and never claims notarization" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_packaging_workflow.py -q"
+
 # A public installer ships invented inputs (DEC-016). This gate checks the synthetic set is
 # usable, honest, and NOT a disguised copy — including the subtle failure, where a fixture
 # produced by perturbing real values preserves the rank order and re-identifies sites anyway.

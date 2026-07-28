@@ -1,0 +1,214 @@
+name: package
+
+# Desktop artifacts for macOS and Windows, attached to a tagged release.
+#
+# TAGS ONLY. This is not a preference.
+# ------------------------------------
+# The repository is PRIVATE, where GitHub bills **Windows runners at 2x** against a 2 000
+# minute monthly allowance. A packaging job on every push would spend that allowance on builds
+# nobody asked for, and a scheduled one would spend it while everyone slept. So the only
+# trigger is a version tag, plus a manual dispatch for when someone needs to test the workflow
+# itself.
+#
+# The precedent is fresh: a hung test suite burned 106 runner-minutes in one afternoon before
+# anyone noticed, which is why every job here also carries a timeout.
+#
+# What is built
+# -------------
+# DEC-015 chose a Python-native local server over a packaged native shell, so the artifact is
+# a portable directory plus a run script — not a signed .app or .exe. `build_release_artifact.py
+# --public` produces it, ships SYNTHETIC inputs per DEC-016, and refuses to emit an archive
+# that contains any real facility identifier.
+#
+# What is NOT claimed
+# -------------------
+# **Nothing here is notarized.** There is no Apple Developer account. Ad-hoc signing is applied
+# where it costs nothing, and it does **not** satisfy Gatekeeper — measured on macOS 26.5.1,
+# `spctl -a -t exec` rejects an ad-hoc-signed binary with exit 3. The friction that causes is
+# documented in docs/INSTALL.md rather than papered over, and this workflow does not print
+# anything suggesting the artifacts are trusted by the OS.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write        # required to create the release and upload assets
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false     # a Windows failure must not hide a working macOS artifact
+      matrix:
+        include:
+          - os: macos-latest
+            label: macOS
+            platform: macos
+          - os: windows-latest
+            label: Windows
+            platform: windows
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install with the locked dependency set
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . -c requirements-lock.txt
+
+      - name: Determine the version from the tag
+        # Stamped from the repository, not from pyproject's static 3.0.0. A manual dispatch has
+        # no tag, so it is labelled explicitly as an untagged build rather than borrowing a
+        # version it does not have.
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "FCF_VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          else
+            echo "FCF_VERSION=untagged-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the synthetic input set
+        run: python scripts/build_synthetic_inputs.py
+
+      - name: Build the public artifact
+        # --public swaps in the synthetic inputs, restricts the file set to the model and its
+        # sources, and INSPECTS the finished archive for real facility identifiers, deleting it
+        # if any are present. That check is the reason this step can be trusted at all: an
+        # earlier artifact had every input correctly substituted and still carried 36 real
+        # identifiers through files nobody had considered.
+        run: python scripts/build_release_artifact.py dist --public
+
+      - name: Record third-party licences
+        run: python scripts/build_licence_manifest.py
+
+      - name: Add the platform run script
+        shell: bash
+        run: |
+          mkdir -p staging && cd staging
+          unzip -q ../dist/*.zip
+          cp ../THIRD_PARTY_LICENCES.md .
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            cat > run-platform.cmd <<'CMD'
+          @echo off
+          REM Starts the Future City Fellowship platform. Requires Python 3.11 or newer.
+          REM First run builds the model surfaces from the SYNTHETIC inputs and takes a minute.
+          where python >nul 2>nul || (echo Python 3.11+ is required and was not found on PATH. & pause & exit /b 1)
+          python -m pip install -e . -c requirements-lock.txt || (echo Dependency install failed. & pause & exit /b 1)
+          python -m fcf_m2.launcher
+          pause
+          CMD
+          else
+            cat > run-platform.command <<'SH'
+          #!/bin/bash
+          # Starts the Future City Fellowship platform. Requires Python 3.11 or newer.
+          # First run builds the model surfaces from the SYNTHETIC inputs and takes a minute.
+          cd "$(dirname "$0")" || exit 1
+          command -v python3 >/dev/null || { echo "Python 3.11+ is required and was not found."; exit 1; }
+          python3 -m pip install -e . -c requirements-lock.txt || { echo "Dependency install failed."; exit 1; }
+          python3 -m fcf_m2.launcher
+          SH
+            chmod +x run-platform.command
+          fi
+
+      - name: Ad-hoc sign the run script (macOS only)
+        if: matrix.platform == 'macos'
+        # Costs nothing and is worth doing. It does NOT make the artifact trusted: measured on
+        # macOS 26.5.1, `spctl -a -t exec` rejects an ad-hoc-signed binary with exit 3. This
+        # step therefore claims nothing about Gatekeeper, and the install guide states the
+        # friction plainly.
+        run: codesign -s - --force staging/run-platform.command || echo "ad-hoc signing unavailable; continuing"
+
+      - name: Repackage with checksums
+        shell: bash
+        run: |
+          mkdir -p out
+          NAME="fcf-platform-${FCF_VERSION}-${{ matrix.platform }}"
+          (cd staging && zip -qr "../out/${NAME}.zip" .)
+          cd out
+          if command -v shasum >/dev/null; then
+            shasum -a 256 "${NAME}.zip" > "${NAME}.zip.sha256"
+          else
+            certutil -hashfile "${NAME}.zip" SHA256 > "${NAME}.zip.sha256"
+          fi
+          cat "${NAME}.zip.sha256"
+
+      - name: Prove the artifact carries no credential
+        # Verified by INSPECTING the built package, never by assuming. The real-facility check
+        # already ran inside the builder; this is the credential half.
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib, re, sys, zipfile
+          patterns = {
+              "AWS access key": rb"AKIA[0-9A-Z]{16}",
+              "AWS secret":     rb"(?i)aws_secret_access_key",
+              "private key":    rb"BEGIN (?:RSA |EC )?PRIVATE KEY",
+              "12-digit acct":  rb"\b\d{12}\b",
+              "bearer token":   rb"(?i)bearer\s+[A-Za-z0-9._\-]{20,}",
+          }
+          found = []
+          for archive in pathlib.Path("out").glob("*.zip"):
+              with zipfile.ZipFile(archive) as z:
+                  for info in z.infolist():
+                      if info.is_dir():
+                          continue
+                      blob = z.read(info.filename)
+                      for label, pattern in patterns.items():
+                          for hit in re.findall(pattern, blob):
+                              found.append(f"{archive.name}:{info.filename}: {label} {hit[:20]!r}")
+          if found:
+              print("\n".join(found[:20]))
+              sys.exit(f"REFUSING: {len(found)} credential pattern(s) in the built artifact")
+          print("verified: no credential pattern in any built archive")
+          PY
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: fcf-platform-${{ matrix.platform }}
+          path: out/*
+          if-no-files-found: error
+
+  release:
+    name: Attach to the release
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+
+      - name: Create the release with both platforms attached
+        uses: softprops/action-gh-release@v2
+        with:
+          files: assets/**/*
+          # Stated on the release itself, where someone downloading will actually read it.
+          body: |
+            Desktop artifacts for the Future City Fellowship planning platform.
+
+            **These installers ship SYNTHETIC site data.** Every value in them is invented and
+            describes no real building (DEC-016, DEC-020). Running the model against them
+            produces synthetic results, and the contract it writes declares
+            `synthetic_inputs: true` in its own manifest.
+
+            **Neither artifact is notarized or signed by a recognised publisher.** There is no
+            Apple Developer account and no Windows code-signing certificate. macOS will refuse
+            to open the run script until you allow it in System Settings, and Windows
+            SmartScreen will warn about an unrecognised publisher. See `docs/INSTALL.md` for
+            the exact click-paths. Do not disable Gatekeeper or SmartScreen system-wide —
+            neither is necessary and both make your machine less safe.
+
+            Verify your download against the `.sha256` file beside it.
