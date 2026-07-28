@@ -416,10 +416,31 @@ def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
     current = aws("cloudfront", "get-distribution-config", "--id", DISTRIBUTION_ID)
     etag, config = current["ETag"], current["DistributionConfig"]
 
-    backup = REPO / "docs/operations/v4-program/cloudfront-config-before-platform.json"
-    backup.parent.mkdir(parents=True, exist_ok=True)
-    backup.write_text(redact(json.dumps(config, indent=2)) + "\n")
-    say("cloudfront", f"original config saved (account redacted) -> {backup.relative_to(REPO)}")
+    # The rollback snapshot is written ONCE and never again.
+    #
+    # This used to overwrite `cloudfront-config-before-platform.json` on every run, including
+    # dry runs. So the file whose entire purpose is "what the distribution looked like before
+    # the platform behaviour existed" was replaced, the first time the script ran, with the
+    # config that HAS the platform behaviour in it — `platform-gated` origin, `/platform*`
+    # cache behaviour and all. Six commits carried it that way. Restoring from it would have
+    # restored the change it exists to undo, and the log line calling it the "original config"
+    # made that harder to notice, not easier.
+    #
+    # The pre-change state was recovered from `93c651d`, the only revision that still held it.
+    before = REPO / "docs/operations/v4-program/cloudfront-config-before-platform.json"
+    before.parent.mkdir(parents=True, exist_ok=True)
+    if before.is_file():
+        say("cloudfront", f"rollback snapshot left untouched -> {before.relative_to(REPO)}")
+    else:
+        before.write_text(redact(json.dumps(config, indent=2)) + "\n")
+        say("cloudfront", f"rollback snapshot created (account redacted) -> "
+                          f"{before.relative_to(REPO)}")
+
+    # The current config is still worth recording — it is just not the rollback target, so it
+    # gets its own name and says what it is.
+    latest = REPO / "docs/operations/v4-program/cloudfront-config-observed.json"
+    latest.write_text(redact(json.dumps(config, indent=2)) + "\n")
+    say("cloudfront", f"config as it is RIGHT NOW saved -> {latest.relative_to(REPO)}")
 
     new_config = json.loads(json.dumps(config))
     origins = [o for o in new_config["Origins"]["Items"] if o["Id"] != ORIGIN_ID]
