@@ -64,7 +64,7 @@ confidence floor.
 
 Every number resolves to the run that produced it and the source behind it. Two model modes
 exist, and every surface this repository builds names which one it used. Standards scope,
-adopted code editions, and the AHJ boundary are stated explicitly. One caveat: an **older
+adopted code editions, and the [Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ) boundary are stated explicitly. One caveat: an **older
 Tableau workbook is still public** carrying superseded `legacy_v2` ranks and overstated
 confidence — removing it needs the account holder, and it is tracked as an open action.
 

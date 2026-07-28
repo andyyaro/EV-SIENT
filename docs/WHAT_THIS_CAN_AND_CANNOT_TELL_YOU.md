@@ -87,7 +87,8 @@ observed. Two different wait figures exist and they are easy to confuse:
 Neither is a measurement. The 2026 zero is often quoted on its own; it describes the starter
 build only and does not carry to later horizons.
 
-**Whether anyone has approved any of this.** No client endorsement, no **AHJ** acceptance, no
+**Whether anyone has approved any of this.** No client endorsement, no acceptance from the
+[Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ), no
 utility confirmation, and no funding award exists or is implied anywhere. The expansion-trigger
 policy is proposed configuration, not adopted municipal policy.
 

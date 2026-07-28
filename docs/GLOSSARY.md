@@ -8,6 +8,12 @@ you has made the term sound more solid than it is.
 
 ---
 
+### AADT — Annual Average Daily Traffic
+
+The average number of vehicles passing a point per day over a year, used as one signal of how
+much passing demand a site might see. It is supplied for all twelve sites and ranges widely
+across them, from 490 to 51 000 vehicles a day.
+
 ### AHJ — Authority Having Jurisdiction
 
 The local official who actually decides whether something is permitted to be built — usually the
@@ -29,10 +35,17 @@ which is Low** — not one reaches even Medium.
 
 ### eGRID factor
 
-The US EPA's published figure for how much carbon dioxide equivalent is emitted per unit of
-electricity in a given region. This project uses **596.3 lb CO2e/MWh** (eGRID2023 Rev 2, SRVC
+eGRID is the US Environmental Protection Agency's *Emissions & Generation Resource Integrated
+Database*. The eGRID factor is its published figure for how much carbon dioxide equivalent is
+emitted per unit of electricity in a given region. This project uses **596.3 lb CO2e/MWh** (eGRID2023 Rev 2, SRVC
 region, accessed 2026-07-19); it is revised annually, so emissions results must be recomputed
 when it changes.
+
+### Equity gap index
+
+A composite measure of how underserved an area is relative to others, used to weight sites so
+that charging is not concentrated only where it is easiest to build. It is one input among
+several and it does not, on its own, decide anything.
 
 ### Expansion trigger
 
