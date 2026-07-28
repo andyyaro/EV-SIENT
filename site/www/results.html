@@ -593,28 +593,27 @@
       <div class="kicker">Planning-Screen Results</div>
       <h1 class="heroTitle">Key Findings from the Readiness Model</h1>
       <p class="heroSubtitle">
-        This page's rankings come from the <code>legacy_v2</code> baseline. They identify which candidate sites appear strongest under that mode, which sites need more review, and which locations should be monitored before public charging investment moves forward.
+        The canonical <code>milestone2_v3</code> model identifies which candidate sites appear strongest, which sites need more review, and which locations should be monitored before public charging investment moves forward.
       </p>
     </div>
   </section>
 
   <!-- Top Model Signals Cylindrical Gallery -->
   <aside class="fcf-mode-note" role="note" style="background:rgba(27,67,50,.07);border-left:4px solid #1B4332;padding:.8rem 1.1rem;margin:1rem 0;font-size:.9rem;line-height:1.55;">
-  <strong>These scores come from the <code>legacy_v2</code> baseline, not the current model.</strong>
-  This project keeps two model modes and never treats them as interchangeable.
-  <code>legacy_v2</code> reproduces the earlier accepted baseline exactly; the current
-  canonical mode, <code>milestone2_v3</code>, uses fixed anchors instead of scoring sites
-  against each other, and it ranks them differently — under it the strongest candidate is
-  <strong>FFX004 (Fairfax County Government Center) at 53.4</strong>, with FFX002 second at
-  51.8. Neither ordering is a feasibility finding: electrical capacity is an unverified
-  placeholder at all twelve sites.
+  <strong>These rankings come from the canonical <code>milestone2_v3</code> model.</strong>
+  An earlier published version of this page showed <code>legacy_v2</code> scores, under which
+  FFX002 led at 58.8. The canonical model uses fixed anchors rather than scoring sites against
+  each other, and ranks <strong>FFX004 (Fairfax County Government Center) first at 53.4</strong>,
+  with FFX002 second at 51.8. This page has been corrected; the change is recorded rather than
+  made silently. Neither ordering is a feasibility finding — electrical capacity is an
+  unverified placeholder at all twelve sites.
 </aside>
   <section class="section top-signals-section">
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Top Model Signals</h2>
         <p class="section-desc">
-          An auto-rotating 3D gallery of the highest-priority planning signals from the <code>legacy_v2</code> baseline run.
+          An auto-rotating 3D gallery of planning signals from the canonical <code>milestone2_v3</code> model.
         </p>
       </div>
     </div>
@@ -646,8 +645,8 @@
             <div class="detail-copy">
               <div class="detail-kicker" id="detailKicker">MODEL SIGNAL 01</div>
               <h2 class="detail-title" id="detailTitle">Top overall candidate</h2>
-              <p class="detail-latin" id="detailLatin">FFX002 · City of Fairfax Regional Library</p>
-              <p class="detail-description" id="detailDescription">Strongest site under the legacy_v2 baseline; FFX004 leads under the current model. Advance as a strong starter site, pending facility and utility confirmation.</p>
+              <p class="detail-latin" id="detailLatin">FFX004 · Fairfax County Government Center</p>
+              <p class="detail-description" id="detailDescription">Rank 1 of 12 under the canonical milestone2_v3 model. Advance as a strong starter site, pending facility and utility confirmation.</p>
               <div class="lethality"><span>READINESS SIGNAL</span><div class="pips" id="pips"></div></div>
               <button class="acquire" type="button">Planning-support result <span>Prototype</span></button>
             </div>
@@ -755,7 +754,7 @@
       <div class="section-header">
         <h2 class="section-title">Results Explorer</h2>
         <p class="section-desc">
-          A planning report is embedded below from an external host; this repository cannot verify what that host serves. The copy tracked here was generated <strong>2026-06-28 from the <code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site Ranking&rdquo; but carries the same superseded scores as the gallery above, and names no model mode. Treat it as a dated artifact, not as current model output.
+          A planning report is embedded below from an external host; this repository cannot verify what that host serves. The copy tracked here was generated <strong>2026-06-28 from the <code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model mode. Treat it as a dated artifact, not as current model output.
         </p>
       </div>
 
@@ -818,42 +817,12 @@
       "use strict";
 
       const specimens = [
-        {
-            "code": "FFX002", "title": "Top overall candidate", "label": "FFX002 · City of Fairfax Regional Library", "site": "City of Fairfax Regional Library",
-            "image": "img/card-background.png",
-            "score": "58.8", "tier": "Tier 1", "priority": 5, "seed": 1103,
-            "description": "Strongest site under the legacy_v2 baseline; FFX004 leads under the current model. Score: 58.8. Tier: Tier 1. Install now: 2 ports. Future-ready: 8 ports. Advance as a strong starter site, pending facility and utility confirmation."
-        },
-        {
-            "code": "FFX004", "title": "Second strongest candidate", "label": "FFX004 · Fairfax County Government Center", "site": "Fairfax County Government Center",
-            "image": "img/card-background.png",
-            "score": "54.4", "tier": "Tier 1", "priority": 5, "seed": 2339,
-            "description": "Strong public-sector anchor site. Score: 54.4. Tier: Tier 1. Install now: 3 ports. Future-ready: 8 ports. Good early candidate for starter charging with room to grow."
-        },
-        {
-            "code": "PWC006", "title": "Strongest PWC library candidate", "label": "PWC006 · Bull Run Library", "site": "Bull Run Library",
-            "image": "img/card-background.png",
-            "score": "52.1", "tier": "Tier 2", "priority": 4, "seed": 3721,
-            "description": "Strongest Prince William County library signal. Score: 52.1. Tier: Tier 2. Install now: 2 ports. Future-ready: 4 ports. Good starter candidate with expandable design."
-        },
-        {
-            "code": "PWC002", "title": "Useful but high-review", "label": "PWC002 · Neabsco-Potomac Commuter Garage", "site": "Neabsco-Potomac Commuter Garage",
-            "image": "img/card-background.png",
-            "score": "50.3", "tier": "High-review", "priority": 3, "seed": 4193,
-            "description": "Useful public charging location, but verify first. Score: 50.3. Garage, fire/AHJ, access, and electrical review should be resolved before expansion."
-        },
-        {
-            "code": "PWC008", "title": "Monitor before expanding", "label": "PWC008 · Potomac Library", "site": "Potomac Library",
-            "image": "img/card-background.png",
-            "score": "40.1", "tier": "Tier 3", "priority": 2, "seed": 5377,
-            "description": "Monitor before expanding. Score: 40.1. Tier: Tier 3. Nearby charging supply and scenario sensitivity make this better for tracking, not immediate major buildout."
-        },
-        {
-            "code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center",
-            "image": "img/card-background.png",
-            "score": "29.6", "tier": "Special-use / low public-priority", "priority": 1, "seed": 6791,
-            "description": "Do not advance for general-public buildout yet. Score: 29.6. Special-use / low public-priority. Reconsider only if public-access or fleet-use assumptions change."
-        }
+        {"code": "FFX004", "title": "Top overall candidate", "label": "FFX004 · Fairfax County Government Center", "site": "Fairfax County Government Center", "image": "img/card-background.png", "score": "53.4", "tier": "Tier 1", "priority": 6, "seed": 2339, "description": "Rank 1 of 12 under the canonical milestone2_v3 model. Score: 53.4. Tier: Tier 1 — advance to site screening. Install now: 3 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "FFX002", "title": "Second strongest candidate", "label": "FFX002 · City of Fairfax Regional Library", "site": "City of Fairfax Regional Library", "image": "img/card-background.png", "score": "51.8", "tier": "Tier 1", "priority": 5, "seed": 1103, "description": "Rank 2 of 12 under the canonical milestone2_v3 model. Score: 51.8. Tier: Tier 1 — advance to site screening. Install now: 2 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC002", "title": "Useful but high-review", "label": "PWC002 · Neabsco-Potomac Commuter Garage", "site": "Neabsco-Potomac Commuter Garage", "image": "img/card-background.png", "score": "51.1", "tier": "High-review", "priority": 4, "seed": 4193, "description": "Rank 3 of 12 under the canonical milestone2_v3 model. Score: 51.1. Tier: High-review candidate. Install now: 2 ports. Future-ready: 3 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC006", "title": "Promising, needs better data", "label": "PWC006 · Bull Run Library", "site": "Bull Run Library", "image": "img/card-background.png", "score": "50.2", "tier": "Tier 2", "priority": 3, "seed": 3721, "description": "Rank 4 of 12 under the canonical milestone2_v3 model. Score: 50.2. Tier: Tier 2 — promising candidate, refine data. Install now: 2 ports. Future-ready: 4 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC008", "title": "Monitor before expanding", "label": "PWC008 · Potomac Library", "site": "Potomac Library", "image": "img/card-background.png", "score": "41.8", "tier": "Tier 3", "priority": 2, "seed": 5377, "description": "Rank 10 of 12 under the canonical milestone2_v3 model. Score: 41.8. Tier: Tier 3 — lower priority / monitor. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center", "image": "img/card-background.png", "score": "32.8", "tier": "Special-use", "priority": 1, "seed": 6791, "description": "Rank 12 of 12 under the canonical milestone2_v3 model. Score: 32.8. Tier: Low public-priority / special-use. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."}
       ];
 
       const CONFIG = {

@@ -76,8 +76,44 @@ def main() -> int:
         # unchanged (the owner asked for the gallery as-is); the disclosure is mandatory.
         if "fcf-mode-note" not in text:
             problems.append(
-                "results.html: NO model-mode note. The gallery publishes legacy_v2 scores "
-                "and names FFX002 as top candidate; canonically that is FFX004 at 53.4.")
+                "results.html: NO model-mode note. The gallery must state which model "
+                "produced its scores.")
+
+        # The gallery drifted away from the model once, silently, and published the wrong top
+        # site publicly for months. It is now generated from the canonical fixture -- this
+        # asserts the published bytes actually match it, because a generator nobody re-runs is
+        # just a slower way to drift.
+        import json as _json
+        match = re.search(r"const specimens = (\[.*?\]);", text, re.S)
+        if not match:
+            problems.append("results.html: the gallery data block is missing entirely")
+        else:
+            try:
+                gallery = _json.loads(match.group(1))
+            except ValueError as exc:
+                problems.append(f"results.html: gallery data is not valid JSON ({exc})")
+                gallery = []
+            canonical = {}
+            fixture = REPO / "tests/fixture_milestone2_v3_site_results.csv"
+            if fixture.is_file():
+                for row in csv.DictReader(open(fixture)):
+                    canonical[row["site_id"]] = row
+            for card in gallery:
+                site = card.get("code")
+                if site not in canonical:
+                    problems.append(f"results.html: gallery card {site!r} is not a known site")
+                    continue
+                expected = f'{float(canonical[site]["readiness_score"]):.1f}'
+                if card.get("score") != expected:
+                    problems.append(
+                        f"results.html: gallery shows {site} at {card.get('score')}, "
+                        f"canonically {expected} — the gallery has drifted from the model")
+            ranks = [int(canonical[c["code"]]["model_rank"]) for c in gallery
+                     if c.get("code") in canonical]
+            if ranks != sorted(ranks):
+                problems.append(
+                    "results.html: gallery cards are not in canonical rank order; the first "
+                    "card is titled 'Top overall candidate' and must be the top-ranked site")
 
     # Every figure the site states must still be the contract's figure.
     rows = list(csv.DictReader(open(REPO / "data/contract/v1/scenario_table.csv")))

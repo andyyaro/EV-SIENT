@@ -100,14 +100,13 @@ MODE_MARKER = "fcf-mode-note"
 
 MODE_NOTE = """
 <aside class="fcf-mode-note" role="note" style="background:rgba(27,67,50,.07);border-left:4px solid #1B4332;padding:.8rem 1.1rem;margin:1rem 0;font-size:.9rem;line-height:1.55;">
-  <strong>These scores come from the <code>legacy_v2</code> baseline, not the current model.</strong>
-  This project keeps two model modes and never treats them as interchangeable.
-  <code>legacy_v2</code> reproduces the earlier accepted baseline exactly; the current
-  canonical mode, <code>milestone2_v3</code>, uses fixed anchors instead of scoring sites
-  against each other, and it ranks them differently — under it the strongest candidate is
-  <strong>FFX004 (Fairfax County Government Center) at 53.4</strong>, with FFX002 second at
-  51.8. Neither ordering is a feasibility finding: electrical capacity is an unverified
-  placeholder at all twelve sites.
+  <strong>These rankings come from the canonical <code>milestone2_v3</code> model.</strong>
+  An earlier published version of this page showed <code>legacy_v2</code> scores, under which
+  FFX002 led at 58.8. The canonical model uses fixed anchors rather than scoring sites against
+  each other, and ranks <strong>FFX004 (Fairfax County Government Center) first at 53.4</strong>,
+  with FFX002 second at 51.8. This page has been corrected; the change is recorded rather than
+  made silently. Neither ordering is a feasibility finding — electrical capacity is an
+  unverified placeholder at all twelve sites.
 </aside>
 """
 
@@ -122,47 +121,58 @@ MODE_NOTE = """
 #: version control, and outside all 39 gates. We cannot verify what it serves, so we no longer
 #: claim what it contains.
 CURRENCY_CORRECTIONS = [
+    # The gallery is now generated from `milestone2_v3`, so the legacy hedging added while it
+    # still published legacy scores is itself now wrong. Each entry maps EVERY prior variant
+    # of a sentence to the canonical one, because this page has been patched more than once
+    # and a rule that matches only the original text silently does nothing.
     ("The current model identifies which candidate sites appear strongest",
-     "This page's rankings come from the <code>legacy_v2</code> baseline. They identify which "
-     "candidate sites appear strongest under that mode"),
+     "The canonical <code>milestone2_v3</code> model identifies which candidate sites appear "
+     "strongest"),
+    ("This page's rankings come from the <code>legacy_v2</code> baseline. They identify which "
+     "candidate sites appear strongest under that mode",
+     "The canonical <code>milestone2_v3</code> model identifies which candidate sites appear "
+     "strongest"),
+
     ("An auto-rotating 3D gallery of the highest-priority planning signals from the "
      "latest model run.",
-     "An auto-rotating 3D gallery of the highest-priority planning signals from the "
-     "<code>legacy_v2</code> baseline run."),
-    ('"description": "Best current planning signal. Score: 58.8.',
-     '"description": "Strongest site under the legacy_v2 baseline; FFX004 leads under the '
-     'current model. Score: 58.8.'),
-    # A fifth instance, in the detail panel's static fallback markup rather than the JS data.
-    # Found only because the count after the first four corrections was 1, not 0 -- the fix
-    # was verified by counting rather than by assuming the list was complete.
+     "An auto-rotating 3D gallery of planning signals from the canonical "
+     "<code>milestone2_v3</code> model."),
+    ("An auto-rotating 3D gallery of the highest-priority planning signals from the "
+     "<code>legacy_v2</code> baseline run.",
+     "An auto-rotating 3D gallery of planning signals from the canonical "
+     "<code>milestone2_v3</code> model."),
+
+    # The static fallback shown before the JS runs. It named FFX002 as the top card; the
+    # canonical top card is FFX004.
+    ('<p class="detail-latin" id="detailLatin">FFX002 · City of Fairfax Regional Library</p>',
+     '<p class="detail-latin" id="detailLatin">FFX004 · Fairfax County Government Center</p>'),
     ('<p class="detail-description" id="detailDescription">Best current planning signal.',
-     '<p class="detail-description" id="detailDescription">Strongest site under the legacy_v2 '
-     'baseline; FFX004 leads under the current model.'),
-    # First attempt at this line replaced an unverifiable claim about a third-party host with
-    # a CHECKABLE AND FALSE one: it called `reports/` "the authoritative copy". That file is
-    # `site/www/reports/Public_EV_Charging_Planning_Report.pdf` -- generated 2026-06-28, page 3
-    # headed "Current Site Ranking", carrying all twelve `legacy_v2` scores and naming no mode.
-    # So the sentence sent a reader from a mode note saying "not the current model" to a
-    # document calling the same numbers "the current readiness score". The defect was
-    # relocated, not removed.
-    # A revised correction must also match its OWN previous output, or it silently does
-    # nothing on any page already patched with the earlier wording. This entry exists purely
-    # because the line below was corrected once and then corrected again.
+     '<p class="detail-description" id="detailDescription">Rank 1 of 12 under the canonical '
+     'milestone2_v3 model.'),
+    ('<p class="detail-description" id="detailDescription">Strongest site under the legacy_v2 '
+     'baseline; FFX004 leads under the current model.',
+     '<p class="detail-description" id="detailDescription">Rank 1 of 12 under the canonical '
+     'milestone2_v3 model.'),
+
+    # The embedded report is a separate, still-legacy artifact (owner decision 8d).
     ("A generated planning report is embedded below from an external host. Its contents are "
      "not verified by this repository; the authoritative copy is the one in "
      "<code>reports/</code>.",
      "A planning report is embedded below from an external host; this repository cannot verify "
      "what that host serves. The copy tracked here was generated <strong>2026-06-28 from the "
      "<code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site "
-     "Ranking&rdquo; but carries the same superseded scores as the gallery above, and names no "
-     "model mode. Treat it as a dated artifact, not as current model output."),
+     "Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model "
+     "mode. Treat it as a dated artifact, not as current model output."),
     ("The full planning analysis from the latest model run is available below as a generated "
      "report.",
      "A planning report is embedded below from an external host; this repository cannot verify "
      "what that host serves. The copy tracked here was generated <strong>2026-06-28 from the "
      "<code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site "
-     "Ranking&rdquo; but carries the same superseded scores as the gallery above, and names no "
-     "model mode. Treat it as a dated artifact, not as current model output."),
+     "Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model "
+     "mode. Treat it as a dated artifact, not as current model output."),
+    ("carries the same superseded scores as the gallery above, and names no "
+     "model mode.",
+     "its scores are superseded by the gallery above, and it names no model mode."),
 ]
 
 
@@ -180,6 +190,105 @@ METHODOLOGY_CORRECTIONS = [
     ("The latest model run has zero blocking validation errors.",
      "That baseline run has zero blocking validation errors."),
 ]
+
+
+# --------------------------------------------------------------- the rotating gallery
+#
+# The gallery published `legacy_v2` scores with no mode named, headlining FFX002 at 58.8 when
+# the canonical top site is FFX004 at 53.4 (FIND-NUM-03, open since Phase 0). The owner has
+# cleared re-baselining it to `milestone2_v3`.
+#
+# It is GENERATED rather than hand-corrected. Hand-editing would fix today's six numbers and
+# leave the same trap armed: this array drifted away from the model once already, silently,
+# for months. Only the SELECTION of sites and their presentation fields are editorial; every
+# score, rank, tier and port count is read from the canonical fixture and the contract.
+
+#: The editorial choice: six sites spanning the decision categories, not simply the top six.
+#: Presentation fields are preserved verbatim from the original cards.
+GALLERY_PRESENTATION = {
+    "FFX002": {"seed": 1103, "site": "City of Fairfax Regional Library"},
+    "FFX004": {"seed": 2339, "site": "Fairfax County Government Center"},
+    "PWC006": {"seed": 3721, "site": "Bull Run Library"},
+    "PWC002": {"seed": 4193, "site": "Neabsco-Potomac Commuter Garage"},
+    "PWC008": {"seed": 5377, "site": "Potomac Library"},
+    "PWC003": {"seed": 6791, "site": "Public Safety Training Center"},
+}
+
+#: Card headings for positions after the top two, keyed by the canonical tier text so they
+#: cannot contradict the tier shown beside them.
+TIER_TITLE = {
+    "Tier 1 — advance to site screening": "Strong starter candidate",
+    "High-review candidate": "Useful but high-review",
+    "Tier 2 — promising candidate, refine data": "Promising, needs better data",
+    "Tier 3 — lower priority / monitor": "Monitor before expanding",
+    "Low public-priority / special-use": "Do not advance yet",
+}
+
+TIER_SHORT = {
+    "Tier 1 — advance to site screening": "Tier 1",
+    "High-review candidate": "High-review",
+    "Tier 2 — promising candidate, refine data": "Tier 2",
+    "Tier 3 — lower priority / monitor": "Tier 3",
+    "Low public-priority / special-use": "Special-use",
+}
+
+
+def build_specimens() -> str:
+    """Emit the gallery array from `milestone2_v3`, ordered by canonical rank."""
+    import csv as _csv
+    import json as _json
+
+    scores = {}
+    with open(REPO / "tests/fixture_milestone2_v3_site_results.csv") as fh:
+        for row in _csv.DictReader(fh):
+            scores[row["site_id"]] = row
+
+    ports = {}
+    with open(REPO / "data/contract/v1/scenario_table.csv") as fh:
+        for row in _csv.DictReader(fh):
+            if row["horizon_year"] == "2026":
+                ports[row["site_id"]] = row
+
+    chosen = sorted(GALLERY_PRESENTATION, key=lambda s: int(scores[s]["model_rank"]))
+
+    out = []
+    for position, site_id in enumerate(chosen):
+        src, pres = scores[site_id], GALLERY_PRESENTATION[site_id]
+        tier_full = src["recommendation_tier"]
+        score = float(src["readiness_score"])
+        now = int(float(ports[site_id]["ports_active"]))
+        pathway = int(float(ports[site_id]["ports_pathway_capacity"]))
+
+        if position == 0:
+            title = "Top overall candidate"
+        elif position == 1:
+            title = "Second strongest candidate"
+        else:
+            title = TIER_TITLE.get(tier_full, tier_full)
+
+        staging = (f"Install now: {now} ports. Future-ready: {pathway} ports."
+                   if pathway > now else
+                   f"Install now: {now} ports, with no additional pathway modelled.")
+
+        out.append({
+            "code": site_id,
+            "title": title,
+            "label": f"{site_id} · {pres['site']}",
+            "site": pres["site"],
+            "image": "img/card-background.png",
+            "score": f"{score:.1f}",
+            "tier": TIER_SHORT.get(tier_full, tier_full),
+            "priority": len(chosen) - position,
+            "seed": pres["seed"],
+            "description": (
+                f"Rank {src['model_rank']} of 12 under the canonical milestone2_v3 model. "
+                f"Score: {score:.1f}. Tier: {tier_full}. {staging} "
+                f"Readiness compares sites; it is not a finding that this site is "
+                f"electrically feasible."),
+        })
+
+    body = ",\n        ".join(_json.dumps(item, ensure_ascii=False) for item in out)
+    return "const specimens = [\n        " + body + "\n      ];"
 
 
 def read(page: str) -> str:
@@ -332,6 +441,11 @@ def main() -> int:
             for stale, fixed in METHODOLOGY_CORRECTIONS:
                 text = text.replace(stale, fixed)
         if page == "results.html":
+            # The gallery data itself, regenerated from `milestone2_v3` every run. Unguarded
+            # and idempotent: the array is replaced wholesale, so running twice produces the
+            # same bytes and a model change flows through automatically instead of drifting.
+            text = re.sub(r"const specimens = \[.*?\];", lambda _m: build_specimens(),
+                          text, count=1, flags=re.S)
             # NOT guarded by a marker. These are corrections to prose that already exists, so
             # a marker guard would skip them on every page that has been patched before --
             # which is the insert-only trap this file has now fallen into three times. Plain
