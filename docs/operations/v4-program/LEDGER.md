@@ -94,18 +94,37 @@ bundle deployed as the web tier. **Built, gated and rendered-verified:**
 | Engine record — divergences surfaced | `scripts/build_engine_record.py` | ✓ |
 | Surfaces manifest + deploy allowlist | `scripts/build_platform_surfaces.py` | ✓ |
 
-### Phase 7 — what is NOT built yet
+### Phase 7 — what remains
 
-1. **Simulink view in the platform** — the `.slx` is committed (`matlab/outputs/run-30296650057/`)
-   but no surface renders its topology.
-2. **Field-data entry screens** — the V4 loop is CLI-only; the platform shows the empty state
-   honestly but offers no way to enter an observation.
-3. **Reports/workbook download surface** — reports exist in `reports/milestone-2/` and are not
-   yet offered.
-4. **A desktop launcher** — today it is `python -m fcf_m2.server`. Per DEC-016 any public
-   installer ships **synthetic** inputs.
-5. **CLI/platform byte-equivalence gate over GENERATED ARTIFACTS** — currently proven for one
-   read-only operation's stdout, not for produced files.
+1. ~~Simulink view~~ **done** — topology extracted from the real `.slx`, stated as never simulated.
+2. ~~Field-data entry screens~~ **done** — the form is generated from `observed.py`'s own
+   refusals (`field_schema.json`), so the browser cannot drift more permissive than the model.
+   Parity gate + 9 real-Chrome tests. It produces a CSV and says plainly that it changes
+   nothing; the empty state still reads *"No field observations have been received"* after you
+   fill it in, and a test asserts that.
+3. ~~Reports surface~~ **done** — 12 documents offered.
+4. **A desktop launcher** — still `python -m fcf_m2.server`. Per DEC-016 any public installer
+   ships **synthetic** inputs. *The only Phase 7 item left.*
+5. ~~CLI/platform byte-equivalence over produced files~~ **done**.
+
+### Two defects Phase 7 surfaced, both of the same shape
+
+**DEC-018 — blank attribution accepted as the string `"nan"`.** `CapacityObservation` refuses
+an unattributed observation; the refusal never fired, because pandas reads a blank cell as
+`NaN` and `str(NaN)` is `'nan'` — non-empty. A row naming no document and no observer claimed
+`verified_utility`, the exact condition the fail-closed capacity guard tests before emitting a
+feasibility claim. Found by the form/model parity test reporting the *opposite* of the expected
+failure.
+
+**Five surface links were 404s in production.** `dashboard/`, `contract/v1/`, `contract/v2/`,
+`nfc/`, `reports/` all linked to directories. S3 has no directories. It passed every local
+check because **Python's `http.server` generates directory listings and S3 does not** — the
+local server was more capable than production and hid it.
+
+Both are the same failure as the blank Tableau sheets and the missing Cognito sign-in page:
+*the step under our control behaved, and the thing the reader touches did not.* For Phase 10:
+**a guard is only as good as the boundary conversion in front of it, and a local pass is not a
+production pass when the local tool is the more capable one.**
 
 ### Standing corrections to my own process, earned the hard way
 
