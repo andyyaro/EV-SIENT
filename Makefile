@@ -65,3 +65,9 @@ nfc:
 
 verify:
 	./scripts/verify.sh
+
+platform:
+	$(PY) -m fcf_m2.launcher
+
+platform-check:
+	$(PY) -m fcf_m2.launcher --check

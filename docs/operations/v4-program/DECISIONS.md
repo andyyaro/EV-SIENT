@@ -1067,3 +1067,89 @@ path real data actually takes. **A guard is only as good as the boundary convers
 of it**, and the tests were aimed at the guard rather than at the boundary. That belongs in the
 Phase 10 audit's brief: for every refusal, ask what the value looks like when it *arrives*, not
 what it looks like in the test that constructs it.
+
+---
+
+## DEC-019 — The website embedded a workbook that had been deleted, and nobody traced the dependency
+
+**Date:** 2026-07-27 · **Phase:** 8.3 · **Raised by the owner**
+
+### What happened
+
+DEC-013 found the live Tableau workbook wrong on three counts, a corrected workbook was
+published under a **new name**, and the original was deleted — an open human action the owner
+carried out. **Nothing re-pointed the website.** Its embeds still named
+`EV_Charging_Site_Readiness_Workbook`, so every one of them resolved to
+`public.tableau.com/app/resource-not-found`: **12 distinct sheets, 21 references**, across
+`dashboard.html` and `results.html`.
+
+The owner surfaced it, not the program: *"you had me deleted the initial workbook published
+having its visuals embedded/used on the website, what does that mean?"* The dependency was
+never traced when the deletion was requested, and the deployment earlier the same day
+republished the broken pages without noticing.
+
+**Detection note worth keeping.** Tableau answers **HTTP 302 for live and deleted views
+alike**, and both redirect chains end in a 200 carrying the same 1 442-byte JavaScript shell.
+A status-code check distinguishes nothing. The difference is only visible in the *final URL* —
+`/app/resource-not-found` versus the real view path. Any future check must follow the redirect
+and read where it lands.
+
+### Why it was not a find-and-replace
+
+The deleted workbook had **12** sheets; the canonical one has **7**, and they are different
+analyses. Four map cleanly. The rest — review burden, per-dimension subscores, profile
+readiness, rank stability — come from the **old scoring model**, whose fields the canonical
+contract does not carry. Rebuilding them would mean inventing the numbers underneath, so they
+were removed rather than faked or quietly pointed at some unrelated chart.
+
+The owner's instruction was *"I do not really care about the old ones… we can replace the old
+ones placeholder with the current ones"*, with `dashboard.html` to keep **fewer, larger
+charts** and the 3D rotating gallery on `results.html` left alone (it is images, unaffected).
+
+### The part that was actual work
+
+Every embed sits in a slide with a title, tab labels and explanatory copy describing *that
+specific old chart*. Swapping only the URLs would have left the page describing charts it no
+longer shows — **replacing a broken embed with a false one, which is worse**. So each slide's
+title, chip label, tooltip, and info bar was rewritten to name the chart now behind it.
+
+Two hard-coded counters also had to be derived rather than left: the carousel's `1 / 7` and the
+hero's *"Planning views: 7"*. The deck's JavaScript reads the *current* slide from the DOM but
+not the *total*, so after removing two slides the page advertised seven views over five.
+
+### Result
+
+| | Before | After |
+|---|---|---|
+| Slides in the deck | 7 (+2 clones) | **5** (+2 clones) |
+| Distinct sheets embedded | 12, all dead | **7, all canonical** |
+| References to the deleted workbook | 21 | **0** |
+| Chart height | `clamp(450px, 60vh, 650px)` | `clamp(520px, 70vh, 820px)` |
+
+New deck: Site Readiness · Location Context · Port Right-Sizing (2 tabs) · Cost and Emissions
+(2 tabs) · Waiting Times. All seven canonical sheets are used.
+
+### Two attempts that produced a wrong deck, kept here because the reason generalises
+
+1. **Renumbering in place.** The carousel's two clones carry their own `data-slide` and
+   "Part N" markup, so a sequential walk counted them as slides and shifted every real one —
+   the deck read Part 1…7 for five charts.
+2. **Patching the clones' attributes.** A clone is a copy of an entire slide's markup. After
+   the slide it was cloned from was deleted, it kept displaying a chart that existed nowhere
+   else in the deck. Fixing the attribute did not fix the content.
+
+Both were replaced by regenerating the deck from the surviving slides, so a clone is *derived
+from* its source and cannot disagree with it.
+
+### Gate
+
+`scripts/check_site_www.py` now fails if any page references the deleted workbook, if a stated
+view count disagrees with the number of slides, or if a slide still carries a title naming a
+chart it no longer shows.
+
+### Open question this raises for Phase 10
+
+**What else was deleted or renamed without tracing what depended on it?** This one was caught
+because the owner remembered. The audit brief should include a pass over every external
+resource the repository or the live site references, checking that each still resolves — by
+following redirects, not by trusting a status code.

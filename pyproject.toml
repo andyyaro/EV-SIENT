@@ -14,6 +14,13 @@ dependencies = [
     "jsonschema>=4.20",
 ]
 
+[project.scripts]
+# The desktop tier's entry point. DEC-015 chose a Python-native local server over a packaged
+# native shell, so "the desktop app" is this command: it builds any missing generated surface,
+# starts the loopback server, and opens a browser. Before it existed the instruction was
+# `python -m fcf_m2.server`, which fails with a bare traceback if the bundle was never built.
+fcf-platform = "fcf_m2.launcher:main"
+
 [project.optional-dependencies]
 gis = ["geopandas>=0.14", "contextily>=1.5", "xyzservices>=2024.0"]
 test = ["pytest>=8.0", "pytest-cov>=4.1"]

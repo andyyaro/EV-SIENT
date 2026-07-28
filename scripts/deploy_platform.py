@@ -473,6 +473,56 @@ def deploy_bundle(apply: bool) -> None:
         say("cloudfront", f"invalidation {inv['Invalidation']['Id']} created")
 
 
+
+# ---------------------------------------------------------------- the public website
+
+WWW = REPO / "site/www"
+
+#: Objects that exist only because the same picture was uploaded six times under six names,
+#: plus one orphan nothing references. Removing them reclaims 6.5 MB of the site's 8.1 MB and
+#: saves a visitor the same on every load of the results page. Safe: the bucket has versioning
+#: ENABLED (verified before writing this), and the surviving copy is tracked in git as
+#: site/www/img/card-background.png.
+STALE_OBJECTS = [f"top-model-findings-cards-bgs/image{n}.png" for n in range(1, 7)] + \
+                ["top-model-findings-cards-bgs/image1.jpeg"]
+
+
+def deploy_www(apply: bool) -> None:
+    """Publish the public pages. Never with --delete.
+
+    The main bucket also holds the NFC landing pages, the capture forms and the error page,
+    none of which come from ``site/www``. A ``--delete`` sync would remove all of them, which
+    is precisely the sort of quiet catastrophe this program is meant not to have.
+    """
+    if not (WWW / "index.html").is_file():
+        raise SystemExit(f"{WWW} has no index.html")
+
+    files = sorted(p for p in WWW.rglob("*") if p.is_file())
+    say("www", f"{len(files)} public page/asset(s) -> s3://{MAIN_BUCKET}/")
+
+    args = ["s3", "sync", str(WWW), f"s3://{MAIN_BUCKET}/"]
+    if not apply:
+        args.append("--dryrun")
+    proc = subprocess.run(["aws", *args, "--profile", PROFILE], capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise SystemExit(redact(proc.stderr))
+    changed = [ln for ln in proc.stdout.splitlines() if ln.strip()]
+    say("www", f"{len(changed)} object(s) {'would be ' if not apply else ''}written")
+
+    for key in STALE_OBJECTS:
+        if not apply:
+            say("www", f"WOULD delete duplicate {key}")
+            continue
+        subprocess.run(["aws", "s3", "rm", f"s3://{MAIN_BUCKET}/{key}", "--profile", PROFILE],
+                       capture_output=True, text=True)
+    if apply:
+        say("www", f"removed {len(STALE_OBJECTS)} duplicate/orphan object(s) "
+                   f"(recoverable — bucket versioning is enabled)")
+        inv = aws("cloudfront", "create-invalidation", "--distribution-id", DISTRIBUTION_ID,
+                  "--paths", "/*")
+        say("www", f"invalidation {inv['Invalidation']['Id']} created")
+
+
 # ---------------------------------------------------------------- main
 
 def main() -> int:
@@ -492,6 +542,7 @@ def main() -> int:
     role_arn = ensure_role(args.apply)
     lambda_arn = deploy_lambda(args.apply, role_arn)
     deploy_bundle(args.apply)
+    deploy_www(args.apply)
     deploy_cloudfront(args.apply, lambda_arn, oac_id)
 
     print(f"\n{'Deployed.' if args.apply else 'Dry run complete. Re-run with --apply.'}\n")

@@ -1,0 +1,1398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Methodology | Future City GMU</title>
+
+  <style>
+    :root {
+      --ink: #101214;
+      --muted: #686d73;
+      --muted-2: #8a8f96;
+      --bg: #f5f2ea;
+      --surface: #fffdf7;
+      --surface-2: #ece7dc;
+      --line: rgba(16,18,20,.14);
+      --line-strong: rgba(16,18,20,.24);
+      --accent: #214f3f;
+      --accent-2: #2e6b55;
+      --accent-soft: rgba(33,79,63,.10);
+      --dark: #111417;
+      --dark-2: #1b2024;
+      --paper: #fffdf8;
+      --site-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --pill-bg: #101214;
+      --pill-fg: #ffffff;
+      --pill-hover: .92;
+      --radius-sm: 4px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow-soft: 0 18px 42px rgba(16,18,20,.09);
+      --shadow-tight: 0 10px 22px rgba(16,18,20,.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; height: 100%; }
+    
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--site-font);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; transition: opacity 0.2s ease; }
+    a:hover { opacity: .88; }
+    button { font-family: inherit; }
+    .topbar {
+      display: grid !important;
+      grid-template-columns: minmax(180px,260px) 1fr minmax(180px,260px) !important;
+      align-items: center !important;
+      gap: 24px !important;
+      min-height: 74px !important;
+      padding: 18px 56px !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 950 !important;
+      background: rgba(245,242,234,.78) !important;
+      backdrop-filter: blur(22px) saturate(130%) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(130%) !important;
+      border-bottom: 1px solid rgba(16,18,20,.09) !important;
+    }
+
+    .brand {
+      justify-self: start !important;
+      font-size: 22px !important;
+      line-height: 1 !important;
+      font-weight: 760 !important;
+      letter-spacing: -.035em !important;
+      white-space: nowrap !important;
+      color: var(--ink);
+    }
+
+    .topnav {
+      justify-self: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 34px !important;
+      font-size: 15px !important;
+      line-height: 1 !important;
+      font-weight: 620 !important;
+      color: var(--muted) !important;
+    }
+
+    .topnav a {
+      color: var(--muted) !important;
+      padding: 7px 0 !important;
+      border-bottom: 2px solid transparent !important;
+      transition: color .2s ease, border-color .2s ease, opacity .2s ease !important;
+    }
+
+    .topnav a:hover { color: var(--ink) !important; opacity: 1 !important; }
+    .topnav a.active {
+      color: var(--ink) !important;
+      font-weight: 760 !important;
+      border-bottom-color: var(--accent) !important;
+    }
+
+    .topbar-spacer { justify-self: end !important; width: 100% !important; min-width: 0 !important; }
+
+    /* ---------- Common Layout & Premium Glass Cards ---------- */
+    .container { padding: 0 56px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    
+    .glass-card {
+      background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.4));
+      border: 1px solid rgba(16,18,20,.08);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 16px 40px rgba(16,18,20,.04);
+    }
+
+    /* ---------- Hero Section ---------- */
+    .hero { padding: 60px 56px 40px; text-align: center; max-width: 1000px; margin: 0 auto; }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 20px 0;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .kicker::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .heroTitle {
+      margin: 0 0 20px 0;
+      font-size: clamp(38px, 5vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      font-weight: 760;
+    }
+    .heroSub {
+      font-size: 18px;
+      color: rgba(16,18,20,.70);
+      line-height: 1.55;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Case Study Content Layout ---------- */
+    .case-study-container { max-width: 900px; margin: 0 auto; padding: 0 56px 100px; }
+    .study-section { margin-bottom: 56px; }
+    .study-heading {
+      font-size: 28px;
+      font-weight: 760;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+    }
+    .study-subheading {
+      font-size: 20px;
+      font-weight: 650;
+      margin-top: 36px;
+      margin-bottom: 12px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    p { margin-bottom: 24px; font-size: 17px; color: rgba(16,18,20,.8); line-height: 1.7; }
+    ul, ol { margin-bottom: 24px; padding-left: 24px; }
+    li { margin-bottom: 12px; font-size: 17px; color: rgba(16,18,20,.8); line-height: 1.6; }
+    strong { font-weight: 700; color: var(--ink); }
+
+    /* Code/Technical Box */
+    .tech-box { padding: 32px; margin: 32px 0 48px; }
+    .tech-box h4 { margin-top: 0; font-size: 18px; font-weight: 760; margin-bottom: 20px; letter-spacing: -0.02em; }
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+    .tech-item span {
+      display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin-bottom: 6px; font-weight: 700;
+    }
+    .tech-item div { font-weight: 500; font-size: 16px; color: var(--ink); line-height: 1.5; }
+
+    /* Premium Light Callout for Results */
+    .result-card {
+      background: rgba(33,79,63,.03);
+      border: 1px solid rgba(33,79,63,.1);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 48px 0;
+      box-shadow: 0 16px 40px rgba(16,18,20,.03);
+    }
+    .result-card h3 {
+      margin-top: 0; font-size: 24px; font-weight: 760; letter-spacing: -0.02em;
+      color: var(--ink); margin-bottom: 20px;
+    }
+    .result-card > p { color: rgba(16,18,20, 0.85); margin-bottom: 32px; font-size: 16px; }
+    
+    .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 32px 24px; }
+    .metric { display: flex; flex-direction: column; }
+    .metric-val {
+      font-size: 44px; font-weight: 760; line-height: 1; margin-bottom: 8px;
+      color: var(--accent); letter-spacing: -0.03em;
+    }
+    .metric-label { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--muted); }
+
+    /* ---------- Kinetic Wheel Methodology Timeline ---------- */
+    .method-wheel {
+      --kw-bg: #060705;
+      --kw-panel: rgba(255,255,255,.075);
+      --kw-panel-strong: rgba(255,255,255,.12);
+      --kw-ink: #fffdf5;
+      --kw-muted: rgba(255,253,245,.56);
+      --kw-soft: rgba(255,253,245,.34);
+      --kw-line: rgba(255,255,255,.11);
+      --kw-accent: #9fc6b4;
+      --kw-accent-strong: #cfe3d9;
+
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      outline: none;
+      width: min(1164px, calc(100vw - 64px));
+      margin: 48px 0 58px 50%;
+      transform: translateX(-50%);
+      height: clamp(520px, 62vw, 620px);
+      border-radius: 30px;
+      background:
+        radial-gradient(ellipse 840px 680px at 70% 46%, rgba(159,198,180,.135) 0%, rgba(159,198,180,.082) 28%, rgba(159,198,180,.035) 52%, rgba(159,198,180,.012) 68%, rgba(159,198,180,0) 86%),
+        radial-gradient(ellipse 620px 560px at 25% 50%, rgba(255,253,245,.072) 0%, rgba(255,253,245,.035) 34%, rgba(255,253,245,.012) 58%, rgba(255,253,245,0) 82%),
+        linear-gradient(140deg, #050604 0%, #080a07 46%, #030403 100%);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -1px 0 rgba(255,255,255,.04),
+        0 30px 80px rgba(16,18,20,.18);
+      color: var(--kw-ink);
+      user-select: none;
+      touch-action: none;
+      cursor: grab;
+    }
+    .method-wheel:active { cursor: grabbing; }
+    .method-wheel:focus-visible {
+      box-shadow:
+        0 0 0 3px rgba(33,79,63,.18),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        0 30px 80px rgba(16,18,20,.18);
+    }
+    .method-wheel::before,
+    .method-wheel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .method-wheel::before {
+      background:
+        radial-gradient(ellipse 820px 620px at 68% 50%, rgba(207,227,217,.092) 0%, rgba(159,198,180,.058) 30%, rgba(159,198,180,.024) 56%, rgba(159,198,180,0) 84%),
+        linear-gradient(90deg, rgba(3,4,3,.50) 0%, rgba(3,4,3,.24) 13%, rgba(3,4,3,0) 31%, rgba(3,4,3,.09) 58%, rgba(3,4,3,.36) 82%, rgba(3,4,3,.72) 100%),
+        linear-gradient(180deg, rgba(255,255,255,.052) 0%, rgba(255,255,255,.020) 19%, rgba(255,255,255,0) 44%, rgba(0,0,0,.18) 100%);
+    }
+    .method-wheel::after {
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.040) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.032) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 780px 560px at 68% 48%, rgba(0,0,0,.78) 0%, rgba(0,0,0,.52) 38%, rgba(0,0,0,.20) 64%, rgba(0,0,0,0) 88%);
+      -webkit-mask-image: radial-gradient(ellipse 780px 560px at 68% 48%, rgba(0,0,0,.78) 0%, rgba(0,0,0,.52) 38%, rgba(0,0,0,.20) 64%, rgba(0,0,0,0) 88%);
+    }
+
+    .method-wheel-topline {
+      position: absolute;
+      left: clamp(22px, 4vw, 42px);
+      right: clamp(22px, 4vw, 42px);
+      top: clamp(20px, 3.4vw, 34px);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      pointer-events: none;
+    }
+    .method-wheel-count {
+      display: inline-block;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: rgba(255,253,245,.62);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 820;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .method-wheel-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .method-wheel-item {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      color: var(--kw-ink);
+      font-family: inherit;
+      font-size: clamp(23px, 2.55vw, 32px);
+      line-height: .96;
+      letter-spacing: -.075em;
+      font-weight: 790;
+      text-align: left;
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      appearance: none;
+      cursor: pointer;
+      transform-origin: left center;
+      will-change: transform, opacity, filter;
+      pointer-events: auto;
+    }
+    .method-wheel-item:focus-visible { outline: none; }
+    .method-wheel-marker {
+      display: inline-block;
+      width: 31px;
+      height: 2px;
+      flex: 0 0 31px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0;
+      transform: scaleX(0);
+      transform-origin: right center;
+    }
+    .method-wheel-index {
+      display: inline-block;
+      min-width: 34px;
+      color: var(--kw-soft);
+      font-size: .56em;
+      font-weight: 820;
+      letter-spacing: .08em;
+      transform: translateY(1px);
+    }
+    .method-wheel-name { color: currentColor; }
+    .method-wheel-item.is-active {
+      color: #fffdf7;
+      text-shadow: 0 12px 30px rgba(0,0,0,.28);
+    }
+    .method-wheel-item.is-active .method-wheel-marker {
+      opacity: 1;
+      transform: scaleX(1);
+      transition: opacity 80ms linear, transform 190ms cubic-bezier(.16, 1, .3, 1);
+    }
+    .method-wheel-item.is-active .method-wheel-index { color: var(--kw-accent-strong); }
+
+    .method-wheel-detail {
+      position: absolute;
+      right: clamp(38px, 6.6vw, 86px);
+      top: 50%;
+      z-index: 4;
+      width: min(418px, 39%);
+      transform: translateY(-47%);
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .method-wheel-detail::before {
+      content: "";
+      position: absolute;
+      z-index: -2;
+      inset: -150px -150px -150px -170px;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 760px 560px at 50% 50%, rgba(207,227,217,.145) 0%, rgba(159,198,180,.092) 26%, rgba(159,198,180,.045) 48%, rgba(159,198,180,.018) 66%, rgba(159,198,180,0) 88%),
+        radial-gradient(ellipse 520px 400px at 16% 50%, rgba(255,253,245,.052) 0%, rgba(255,253,245,.023) 42%, rgba(255,253,245,0) 78%);
+      filter: blur(18px);
+      opacity: .78;
+      transform: translateZ(0);
+    }
+
+    .method-wheel-detail::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      left: -26px;
+      top: -10px;
+      bottom: -10px;
+      width: 1px;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(255,253,245,0) 0%,
+        rgba(255,253,245,.055) 12%,
+        rgba(207,227,217,.44) 47%,
+        rgba(255,253,245,.07) 84%,
+        rgba(255,253,245,0) 100%
+      );
+      box-shadow: 0 0 28px rgba(159,198,180,.13);
+    }
+
+    .method-wheel-detail-inner {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 0;
+      transition: opacity .18s ease, transform .18s ease, filter .18s ease;
+    }
+
+    .method-wheel-detail.is-changing .method-wheel-detail-inner {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: blur(2px);
+    }
+
+    .method-wheel-meta {
+      display: inline-grid;
+      grid-template-columns: auto auto;
+      justify-content: start;
+      align-items: center;
+      column-gap: 12px;
+      width: fit-content;
+      margin: 0 0 24px;
+      padding: 0 0 15px;
+      border-bottom: 1px solid rgba(255,253,245,.12);
+      color: rgba(255,253,245,.50);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 860;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .method-wheel-meta::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f4fff9;
+      box-shadow:
+        0 0 0 5px rgba(159,198,180,.10),
+        0 0 24px rgba(159,198,180,.35);
+    }
+
+    .method-wheel-meta::after {
+      content: "";
+      display: block;
+      grid-column: 1 / -1;
+      width: min(360px, 34vw);
+      height: 1px;
+      margin-top: 15px;
+      background: linear-gradient(90deg, rgba(207,227,217,.42), rgba(255,253,245,.10), rgba(255,253,245,0));
+      transform: translateY(16px);
+    }
+
+    #methodWheelStep {
+      color: var(--kw-accent-strong);
+      text-shadow: 0 0 18px rgba(159,198,180,.30);
+    }
+
+    .method-wheel-detail h3 {
+      max-width: 12.5ch;
+      margin: 0 0 18px;
+      color: #fffdf7;
+      font-size: clamp(32px, 3.05vw, 40px);
+      line-height: 1.01;
+      letter-spacing: -.066em;
+      font-weight: 815;
+      text-wrap: balance;
+      text-shadow: 0 18px 50px rgba(0,0,0,.48);
+    }
+
+    .method-wheel-detail p {
+      max-width: 38ch;
+      margin: 0;
+      padding-left: 18px;
+      border-left: 1px solid rgba(255,253,245,.12);
+      color: rgba(255,253,245,.66);
+      font-size: clamp(14px, 1.04vw, 15px);
+      line-height: 1.68;
+      letter-spacing: -.01em;
+      text-wrap: pretty;
+    }
+
+    .method-wheel-progress {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: min(338px, 100%);
+      margin-top: 34px;
+      padding: 0;
+      border: 0;
+    }
+
+    .method-wheel-progress::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(255,253,245,.18), rgba(255,253,245,.06));
+      pointer-events: none;
+    }
+
+    .method-wheel-progress span {
+      position: relative;
+      z-index: 1;
+      width: 9px;
+      height: 9px;
+      flex: 0 0 9px;
+      border-radius: 999px;
+      background: rgba(255,253,245,.22);
+      box-shadow: 0 0 0 7px rgba(6,7,5,.72);
+      opacity: .78;
+      transition: background .22s ease, opacity .22s ease, transform .22s ease, box-shadow .22s ease, width .22s ease;
+    }
+
+    .method-wheel-progress span.is-filled {
+      background: rgba(207,227,217,.92);
+      opacity: 1;
+    }
+
+    .method-wheel-progress span.is-current {
+      width: 38px;
+      flex-basis: 38px;
+      background: linear-gradient(90deg, rgba(244,255,249,1), rgba(159,198,180,.88));
+      box-shadow:
+        0 0 0 7px rgba(6,7,5,.74),
+        0 0 22px rgba(159,198,180,.34);
+      transform: none;
+    }
+
+
+    /* Indicator-free detail treatment: removes the top step counter and bottom dot progress from the selected milestone panel. */
+    .method-wheel-detail-inner {
+      padding-top: 2px;
+    }
+
+    .method-wheel-detail h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .method-wheel-detail p {
+      margin-top: 0;
+    }
+
+    @media (max-width: 760px) {
+      .method-wheel {
+        width: calc(100vw - 36px);
+        height: 660px;
+        margin: 36px 0 48px 50%;
+        border-radius: 24px;
+      }
+      .method-wheel-topline {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .method-wheel-count { display: none; }
+      .method-wheel-item { font-size: 23px; }
+      .method-wheel-index { min-width: 30px; }
+      .method-wheel-detail {
+        left: 34px;
+        right: 26px;
+        bottom: 32px;
+        top: auto;
+        width: auto;
+        transform: none;
+      }
+      .method-wheel-detail::before { inset: -54px -24px -56px -52px; }
+      .method-wheel-detail::after { left: -18px; top: -8px; bottom: -8px; }
+      .method-wheel-meta { margin-bottom: 21px; font-size: 9px; letter-spacing: .16em; column-gap: 10px; }
+      .method-wheel-meta::after { width: min(300px, 72vw); }
+      .method-wheel-detail h3 { max-width: 100%; font-size: 31px; line-height: 1.02; letter-spacing: -.056em; }
+      .method-wheel-detail p { max-width: 100%; padding-left: 14px; font-size: 14px; line-height: 1.56; }
+      .method-wheel-progress { width: min(310px, 100%); margin-top: 26px; gap: 6px; }
+      .method-wheel-progress span { width: 8px; height: 8px; flex-basis: 8px; }
+      .method-wheel-progress span.is-current { width: 30px; flex-basis: 30px; }
+    }
+
+
+    /* Editorial Insight Panels — premium, open layout instead of boxed cards */
+    .insight-panel {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+      gap: clamp(24px, 4vw, 54px);
+      margin: 38px 0 50px;
+      padding: 34px 0 32px;
+      border-top: 1px solid rgba(16,18,20,.14);
+      border-bottom: 1px solid rgba(16,18,20,.10);
+    }
+    .insight-panel::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: -1px;
+      width: 112px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), rgba(33,79,63,0));
+    }
+    .insight-label { align-self: start; }
+    .insight-eyebrow {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 820;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .insight-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 780;
+      letter-spacing: -.025em;
+      color: var(--ink);
+    }
+    .insight-body { min-width: 0; }
+    .insight-copy {
+      max-width: 780px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(16,18,20,.68);
+    }
+
+    .burden-ledger {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 0 0 24px;
+      border-top: 1px solid rgba(16,18,20,.10);
+      border-bottom: 1px solid rgba(16,18,20,.10);
+    }
+    .burden-metric {
+      display: flex;
+      min-height: 112px;
+      padding: 18px 14px;
+      border-right: 1px solid rgba(16,18,20,.10);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .burden-metric:last-child { border-right: 0; }
+    .burden-value {
+      display: block;
+      font-size: clamp(34px, 4vw, 52px);
+      line-height: .92;
+      font-weight: 800;
+      letter-spacing: -.055em;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .burden-name {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 780;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .burden-metric.is-focus .burden-value { color: var(--accent); }
+
+    .scenario-verdict {
+      max-width: 850px;
+      margin: 0 0 30px;
+      font-size: clamp(24px, 3.4vw, 38px);
+      line-height: 1.14;
+      font-weight: 500;
+      letter-spacing: -.045em;
+      color: rgba(16,18,20,.86);
+    }
+    .scenario-verdict strong {
+      color: var(--ink);
+      font-weight: 820;
+    }
+    .scenario-detail {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(170px, 230px);
+      gap: clamp(24px, 4vw, 44px);
+      align-items: start;
+      padding-top: 24px;
+      border-top: 1px solid rgba(16,18,20,.10);
+    }
+    .gap-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid rgba(16,18,20,.12);
+    }
+    .gap-list li {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: baseline;
+      margin: 0;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(16,18,20,.12);
+      font-size: 15px;
+      line-height: 1.3;
+      color: rgba(16,18,20,.76);
+    }
+    .gap-code {
+      font-weight: 820;
+      letter-spacing: -.02em;
+      color: var(--ink);
+    }
+    .gap-amount {
+      font-weight: 780;
+      color: var(--accent);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+
+    /* Indicator-free detail treatment: removes the top step counter and bottom dot progress from the selected milestone panel. */
+    .method-wheel-detail-inner {
+      padding-top: 2px;
+    }
+
+    .method-wheel-detail h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .method-wheel-detail p {
+      margin-top: 0;
+    }
+
+    @media (max-width: 760px) {
+      .insight-panel {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 28px 0;
+        margin: 32px 0 42px;
+      }
+      .burden-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .burden-metric:nth-child(2) { border-right: 0; }
+      .burden-metric:nth-child(-n+2) { border-bottom: 1px solid rgba(16,18,20,.10); }
+      .scenario-detail { grid-template-columns: 1fr; }
+    }
+
+    /* Action Footer */
+    .case-footer {
+      margin-top: 60px; padding-top: 48px; border-top: 1px solid var(--line);
+      text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .heroBtn {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px;
+      border-radius: 8px; border: 1px solid transparent; font-size: 14px; font-weight: 700; transition: all .18s ease; text-decoration: none;
+    }
+    .heroBtn:hover { transform: translateY(-1px); }
+    .heroBtn.primary { background: var(--ink); color: #fff; box-shadow: 0 10px 24px rgba(16,18,20,.1); }
+    .secondary-link { font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: underline; text-underline-offset: 4px; }
+    .secondary-link:hover { color: var(--ink); }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      text-align: center; padding: 50px 20px; color: var(--muted); font-size: 14px; margin-top: 40px; border-top: 1px solid var(--line);
+    }
+    .footer-title { font-weight: 700; color: var(--ink); margin-bottom: 8px; font-size: 16px; }
+    .footer-nav { margin-top: 24px; display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; font-weight: 500; }
+    .footer-nav a:hover { color: var(--ink); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .method-wheel-item,
+      .method-wheel-marker,
+      .method-wheel-detail-inner,
+      .method-wheel-progress span {
+        transition: none !important;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .topbar {
+        grid-template-columns: 1fr !important;
+        justify-items: center !important;
+        gap: 14px !important;
+        padding: 16px 18px !important;
+        min-height: auto !important;
+      }
+
+      .brand { justify-self: center !important; }
+      .topnav { justify-self: center !important; flex-wrap: wrap !important; gap: 18px !important; }
+      .topbar-spacer { display: none !important; }
+      .hero { padding: 40px 24px 20px; }
+      .case-study-container { padding: 0 24px 80px; }
+      .result-card { padding: 32px 24px; }
+      .metric-row { gap: 24px; }
+    }
+    @media (max-width: 768px) {
+      .heroTitle { font-size: clamp(32px, 7vw, 44px); }
+    }
+
+    @media (max-width: 430px) {
+      .topnav { gap: 14px !important; font-size: 13px !important; }
+      .brand { font-size: 20px !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Unified Premium Navigation -->
+  <header class="topbar">
+    <a class="brand" href="index.html">Future City GMU</a>
+    <nav aria-label="primary" class="topnav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="results.html">Results</a>
+      <a class="active" href="methodology.html">Methodology</a>
+      <a href="assistant.html">AI Assistant</a>
+      <a href="https://github.com/andyyaro/Future-City-Fellowship-" rel="noopener noreferrer" target="_blank">GitHub</a>
+    </nav>
+    <div aria-hidden="true" class="topbar-spacer"></div>
+  </header>
+
+<aside class="fcf-authority" role="note" style="background:rgba(176,137,72,.12);border-top:1px solid #B08948;border-bottom:1px solid #B08948;padding:.85rem 1.15rem;font-size:.9rem;line-height:1.55;color:#2b2b2b;">
+  <strong>What this site is — and is not.</strong> This is a Future City Fellowship
+  planning-support prototype. It is <strong>not</strong> engineering advice, a permit or
+  code-compliance determination, a utility capacity confirmation, an official forecast, or a
+  procurement or construction authorization. Every siting decision remains subject to
+  electrical, ADA, fire/AHJ, stormwater and permitting review by the responsible authorities.
+  <strong>No site shown here is approved.</strong>
+</aside>
+
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <p class="kicker">Method</p>
+    <h1 class="heroTitle">How the EV Charging Site-Readiness Model Works</h1>
+    <p class="heroSub">
+      A transparent planning-support method for screening candidate public EV charging sites, right-sizing starter installations, and identifying review needs before implementation decisions move forward.
+    </p>
+  </section>
+
+  <!-- Main Article Content -->
+  <article class="case-study-container">
+    <!-- Analytical Overview Box -->
+    <div class="tech-box glass-card">
+      <h4>Model Overview & Analytical Tools</h4>
+      <div class="tech-grid">
+        <div class="tech-item">
+          <span>Programming environment</span>
+          <div>Python</div>
+        </div>
+        <div class="tech-item">
+          <span>Core libraries</span>
+          <div>pandas, NumPy, and simple rule-based scoring logic for prototype modeling and data preparation.</div>
+        </div>
+        <div class="tech-item">
+          <span>Outputs</span>
+          <div>CSV exports, Tableau-ready tables, scenario outputs, and a generated Public EV Charging Planning Report PDF.</div>
+        </div>
+        <div class="tech-item">
+          <span>Planning use</span>
+          <div>Early screening, prioritization, right-sizing discussion, and review-need identification.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Purpose & Workflow -->
+    <div class="study-section">
+      <h2 class="study-heading">Model Purpose & Workflow</h2>
+      <p>
+        The model supports early planning decisions for public EV charging candidate sites. It is intentionally designed to help public-sector planners and local government staff systematically compare sites, prioritize starter candidates, identify future expansion needs, and flag specific administrative or engineering review issues early in the process.
+      </p>
+      
+      <h3 class="study-subheading">How the model flows</h3>
+      <p>The logic follows a straightforward, transparent sequence to transform raw site concepts into actionable planning categories:</p>
+      
+      <!-- Kinetic Wheel Timeline Component -->
+      <section class="method-wheel" id="methodWheelStage" tabindex="0" aria-label="Kinetic methodology timeline. Scroll, drag, or click milestones to move through the model workflow.">
+        <div class="method-wheel-topline" aria-hidden="true">
+          <span class="method-wheel-count">09 milestones</span>
+        </div>
+
+        <div class="method-wheel-layer" id="methodWheelLayer"></div>
+
+        <aside class="method-wheel-detail" aria-live="polite" aria-label="Selected methodology milestone">
+          <div class="method-wheel-detail-inner" id="methodWheelDetailInner">
+            <h3 id="methodWheelTitle">Candidate sites</h3>
+            <p id="methodWheelDesc">Candidate public EV charging locations are loaded into the model.</p>
+          </div>
+        </aside>
+      </section>
+
+    </div>
+
+    <!-- Section 2: Inputs & Scoring -->
+    <div class="study-section">
+      <h2 class="study-heading">Inputs and Scoring Dimensions</h2>
+      
+      <h3 class="study-subheading">Candidate site inputs</h3>
+      <p>
+        The model evaluates a range of planning-screen inputs for each site. Because these are early-stage planning attributes, <strong>they may require formal confirmation</strong> and are not treated as final verified engineering data. Input categories include:
+      </p>
+      <ul>
+        <li><strong>Site identity:</strong> Site ID, site name, and jurisdiction.</li>
+        <li><strong>Context & Use:</strong> Public-serving use type, operating hours, and parking context.</li>
+        <li><strong>Demand proxies:</strong> Visitor or employee counts and nearby charging supply.</li>
+        <li><strong>Infrastructure:</strong> Likely charger placement, electrical service rating, and spare electrical capacity.</li>
+        <li><strong>Safety & Compliance:</strong> ADA and accessibility considerations, emergency disconnect visibility, garage/structure-specific needs, fire/AHJ indicators, and stormwater/site-work indicators.</li>
+        <li><strong>Testing conditions:</strong> Future demand scenarios.</li>
+      </ul>
+
+      <h3 class="study-subheading">Core scoring dimensions</h3>
+      <p>Sites are evaluated qualitatively and systematically across six high-level dimensions:</p>
+      <ol>
+        <li><strong>Demand signal:</strong> Whether the site appears likely to support sufficient public charging demand based on context and visitation proxies.</li>
+        <li><strong>Electrical and cost feasibility:</strong> Whether the site's electrical capacity, service constraints, and likely implementation complexity support immediate readiness or pose heavy upgrade burdens.</li>
+        <li><strong>Accessibility and site suitability:</strong> Whether site access, ADA spacing considerations, parking layout, and likely charger placement are viable.</li>
+        <li><strong>Public value and equity:</strong> Whether a site supports useful public access, serves the community context well, and offers strategic planning value.</li>
+        <li><strong>Safety, review, and implementation burden:</strong> Whether AHJ, fire codes, structured parking rules, emergency disconnect visibility, or stormwater impacts may complicate or slow down implementation.</li>
+        <li><strong>Future readiness and scenario sensitivity:</strong> Whether a site appears structurally and spatially able to support future demand expansion under varying planning scenarios.</li>
+      </ol>
+    </div>
+
+    <!-- Section 3: Decision Categories -->
+    <div class="study-section">
+      <h2 class="study-heading">Decision Categories</h2>
+      <p>
+        Based on the scoring dimensions, candidate sites are sorted into one of five decision categories. This helps teams quickly triage which sites warrant immediate detailed engineering study and which should be tabled.
+      </p>
+      <ul>
+        <li><strong>Advance / strong starter candidates:</strong> These are the strongest current starter candidates in the model, demonstrating solid demand and lower implementation friction.</li>
+        <li><strong>Good starter candidates with expandable design:</strong> These sites may support starter installations well, but should be planned carefully with future expansion and verification in mind.</li>
+        <li><strong>Resolve review issues before expansion:</strong> These sites may be useful public assets, but significant review burdens or electrical constraints should be addressed before committing to major capacity.</li>
+        <li><strong>Monitor / small pilot:</strong> These sites should be monitored over time or considered only for smaller pilot-style planning rather than immediate general expansion.</li>
+        <li><strong>Do not advance for general-public buildout yet:</strong> A site should not advance as a general-public charging site unless foundational assumptions (e.g., public access hours, fleet-only use-cases) change.</li>
+      </ul>
+    </div>
+
+    <!-- Light Callout: Current Run Summary -->
+    <div class="result-card">
+      <h3>Current Model Run Summary</h3>
+      <p>The latest execution of the planning-support prototype yielded the following outputs across the Fairfax City and Prince William County geographies:</p>
+      
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-val">12</div>
+          <div class="metric-label">Candidate sites evaluated</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">2</div>
+          <div class="metric-label">Tier 1 starter candidates identified</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">5</div>
+          <div class="metric-label">Decision categories applied</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">15</div>
+          <div class="metric-label">Tableau-ready data exports generated</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">0</div>
+          <div class="metric-label">Blocking validation errors</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">38</div>
+          <div class="metric-label">Review items requiring confirmation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Right-Sizing & Review -->
+    <div class="study-section">
+      <h2 class="study-heading">Right-Sizing & Review Burden Logic</h2>
+      
+      <h3 class="study-subheading">Right-sizing logic</h3>
+      <p>
+        The model aims to prevent overbuilding while ensuring sites are prepared for the future. It does this by separating capacity into two distinct recommendations:
+      </p>
+      <ul>
+        <li><strong>Install-now ports:</strong> A smaller starter recommendation focused on immediate feasibility, electrical capacity, and proven current demand.</li>
+        <li><strong>Future-ready ports:</strong> The amount of underlying capacity (e.g., conduit, panel space, spatial planning) the site should be prepared to accommodate if demand grows over time.</li>
+      </ul>
+      <p><em>Note: Right-sizing is a planning-support recommendation. It must always be checked against engineering, utility, procurement, site design, ADA, and permitting review.</em></p>
+
+      <h3 class="study-subheading">Review burden logic</h3>
+      <p>
+        Review burden flags are <strong>not failures</strong>. They indicate where more information or administrative confirmation is needed before final planning or implementation can proceed. Recurring review fields include electrical service ratings, spare electrical capacity, emergency disconnect visibility, visitor/employee counts, operating hours, parking counts, likely charger placement, and specific garage/fire/AHJ/access reviews for special-use sites.
+      </p>
+      
+      <div class="insight-panel review-insight">
+        <div class="insight-label">
+          <span class="insight-eyebrow">Current run</span>
+          <h4 class="insight-title">Review burden</h4>
+        </div>
+        <div class="insight-body">
+          <div class="burden-ledger" aria-label="Current review burden counts">
+            <div class="burden-metric">
+              <span class="burden-value">0</span>
+              <span class="burden-name">Errors</span>
+            </div>
+            <div class="burden-metric">
+              <span class="burden-value">0</span>
+              <span class="burden-name">Warnings</span>
+            </div>
+            <div class="burden-metric is-focus">
+              <span class="burden-value">38</span>
+              <span class="burden-name">Review flags</span>
+            </div>
+            <div class="burden-metric">
+              <span class="burden-value">12</span>
+              <span class="burden-name">Info items</span>
+            </div>
+          </div>
+          <p class="insight-copy">
+            The latest model run has zero blocking validation errors. The 38 review flags are not failures; they identify fields local staff should confirm before proceeding to detailed design.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Scenarios & Outputs -->
+    <div class="study-section">
+      <h2 class="study-heading">Scenario Testing</h2>
+      <p>
+        To ensure that future-ready recommendations are resilient, the model tests whether future-ready assumptions remain adequate under different simulated planning conditions. 
+      </p>
+      <p>Current scenarios tested include:</p>
+      <ul style="column-count: 2; column-gap: 40px;">
+        <li>Base</li>
+        <li>High growth</li>
+        <li>Long sessions</li>
+        <li>Short daily window</li>
+        <li>Peakier demand</li>
+        <li>Combined stress</li>
+      </ul>
+      
+      <div class="insight-panel scenario-insight">
+        <div class="insight-label">
+          <span class="insight-eyebrow">Current results</span>
+          <h4 class="insight-title">Scenario testing</h4>
+        </div>
+        <div class="insight-body">
+          <p class="scenario-verdict">
+            The first five scenarios show <strong>no future-ready capacity gaps</strong> across the candidate sites.
+          </p>
+          <div class="scenario-detail">
+            <p class="insight-copy">
+              The <em>combined-stress</em> scenario, which layers multiple constraints simultaneously, creates two minor future-ready capacity gaps.
+            </p>
+            <ul class="gap-list" aria-label="Combined-stress capacity gaps">
+              <li><span class="gap-code">PWC002</span><span class="gap-amount">gap 1</span></li>
+              <li><span class="gap-code">PWC008</span><span class="gap-amount">gap 1</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Limitations -->
+    <div class="study-section">
+      <h2 class="study-heading">Outputs & Limitations</h2>
+      
+      <p>The execution of this model generates a suite of planning-support materials, including a comprehensive <strong>planning report PDF</strong>, visual summaries, site rankings, decision buckets, port recommendations, scenario results, and Tableau-ready CSV exports.</p>
+      
+      <h3 class="study-subheading">Planning-support artifact only</h3>
+      <p>
+        The outputs from this model support early screening, prioritization, and discussion. They <strong>should not</strong> be treated as final approval, final design, or a construction-ready determination. 
+      </p>
+      <p>
+        This model does not replace:
+      </p>
+      <ul style="column-count: 2; column-gap: 40px;">
+        <li>Final engineering design</li>
+        <li>Utility coordination</li>
+        <li>Formal permitting</li>
+        <li>Procurement processes</li>
+        <li>ADA compliance review</li>
+        <li>Fire / AHJ review</li>
+        <li>Stormwater review</li>
+        <li>Construction approval</li>
+        <li>On-the-ground site surveys</li>
+        <li>Stakeholder confirmation</li>
+        <li>Official municipal decision-making</li>
+      </ul>
+    </div>
+
+    <!-- Action Footer -->
+    <div class="case-footer">
+      <a href="results.html" class="heroBtn primary">
+        View latest results &rarr;
+      </a>
+      <a href="dashboard.html" class="secondary-link">
+        Explore the interactive dashboard
+      </a>
+    </div>
+  </article>
+
+  <!-- Unified Minimal Footer -->
+  <footer class="site-footer">
+    <div class="footer-title">Future City GMU</div>
+    <div>Future City Fellowship Phase 2 prototype • Built by Andy Yaro, George Mason University</div>
+    <div style="font-style: italic; margin-top: 4px;">Planning-support artifact only</div>
+    <nav class="footer-nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="results.html">Results</a>
+      <a href="methodology.html">Methodology</a>
+      <a href="https://github.com/andyyaro/Future-City-Fellowship-" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </footer>
+
+  <script>
+    (function () {
+      const items = [
+        { label: "Candidate sites", desc: "Candidate public EV charging locations are loaded into the model." },
+        { label: "Input attributes", desc: "Each site is described using planning-screen inputs such as site type, public access, operating hours, parking context, nearby charging supply, and electrical assumptions." },
+        { label: "Scoring dimensions", desc: "The model evaluates demand, electrical and cost feasibility, accessibility, public value, safety and review burden, and future readiness." },
+        { label: "Readiness scores", desc: "Each candidate receives a planning-support readiness score used for comparison." },
+        { label: "Decision categories", desc: "Scores and review signals are translated into planning categories such as advance, expandable starter, resolve review issues, monitor, or do not advance yet." },
+        { label: "Port recommendations", desc: "The model separates install-now ports from future-ready capacity." },
+        { label: "Review flags", desc: "The model identifies fields or site conditions that need confirmation before implementation decisions." },
+        { label: "Scenario testing", desc: "Alternative future-demand conditions are tested to see whether future-ready capacity remains adequate." },
+        { label: "Planning outputs", desc: "The model exports site rankings, decision buckets, Tableau-ready files, scenario results, and the generated PDF planning report." }
+      ];
+
+      const stage = document.getElementById("methodWheelStage");
+      const wheel = document.getElementById("methodWheelLayer");
+      const detail = document.querySelector(".method-wheel-detail");
+      const detailInner = document.getElementById("methodWheelDetailInner");
+      const titleEl = document.getElementById("methodWheelTitle");
+      const descEl = document.getElementById("methodWheelDesc");
+
+      if (!stage || !wheel || !detailInner || !titleEl || !descEl) return;
+
+      const mod = (number, divisor) => ((number % divisor) + divisor) % divisor;
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      let position = 0;
+      let velocity = 0;
+      let forcedTarget = null;
+      let committedPosition = Math.round(position);
+      let committedActive = mod(committedPosition, items.length);
+      let lastDetailIndex = -1;
+      let isDragging = false;
+      let dragStartY = 0;
+      let dragStartPosition = 0;
+      let lastPointerY = 0;
+      let lastPointerTime = 0;
+      let releaseVelocity = 0;
+      let cachedGap = 38;
+      let pointerSamples = [];
+
+      const pool = [];
+      const poolSize = 39;
+
+      for (let i = 0; i < poolSize; i += 1) {
+        const node = document.createElement("button");
+        node.type = "button";
+        node.className = "method-wheel-item";
+        node.innerHTML = `<span class="method-wheel-marker"></span><span class="method-wheel-index"></span><span class="method-wheel-name"></span>`;
+        node.addEventListener("click", () => {
+          const destination = Number(node.dataset.position);
+          forcedTarget = destination;
+          velocity *= 0.28;
+        });
+        wheel.appendChild(node);
+        pool.push(node);
+      }
+
+      function lineGapForHeight(height) {
+        return clamp(height * 0.064, 34, 43);
+      }
+
+      function updateDetail(index) {
+        if (index === lastDetailIndex) return;
+        lastDetailIndex = index;
+
+        const item = items[index];
+        const apply = () => {
+          titleEl.textContent = item.label;
+          descEl.textContent = item.desc;
+        };
+
+        if (reducedMotion) {
+          apply();
+          return;
+        }
+
+        detail.classList.add("is-changing");
+        window.setTimeout(() => {
+          apply();
+          detail.classList.remove("is-changing");
+        }, 140);
+      }
+
+      function render(value) {
+        const rect = stage.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        const mobile = w < 720;
+
+        const focusY = mobile ? h * 0.34 : h * 0.505;
+        const focusX = mobile ? clamp(w * 0.36, 136, 190) : clamp(w * 0.205, 160, 205);
+        const gap = lineGapForHeight(h);
+        cachedGap = gap;
+
+        const curveDepth = mobile ? clamp(w * 0.16, 118, 160) : clamp(w * 0.215, 170, 235);
+        const start = Math.floor(value) - Math.floor(poolSize / 2);
+
+        updateDetail(committedActive);
+
+        for (let i = 0; i < pool.length; i += 1) {
+          const absolutePosition = start + i;
+          const local = absolutePosition - value;
+          const item = items[mod(absolutePosition, items.length)];
+          const normalized = clamp(local / 9.2, -1.55, 1.55);
+          const absLocal = Math.abs(local);
+          const absNorm = Math.abs(normalized);
+          const direction = local === 0 ? 0 : Math.sign(local);
+
+          const y = focusY + local * gap + direction * Math.pow(absLocal, 1.16) * 0.32;
+          const cylindricalPull = (1 - Math.cos(absNorm)) * curveDepth;
+          const outerPull = Math.pow(absNorm, 2.08) * (mobile ? 18 : 25);
+          const asymmetricLean = -Math.sin(normalized) * (mobile ? 7 : 10);
+          const x = focusX - cylindricalPull - outerPull + asymmetricLean;
+          const rotation = normalized * 27;
+          const scale = 1 - Math.min(absNorm, 1.2) * 0.04;
+          const edge = absLocal > 10.8 ? Math.max(0, 1 - (absLocal - 10.8) * 0.72) : 1;
+          const opacity = edge;
+          const blur = absLocal > 11.4 ? Math.min(1.25, (absLocal - 11.4) * 0.52) : 0;
+          const isActive = absolutePosition === committedPosition;
+
+          const node = pool[i];
+          node.dataset.position = String(absolutePosition);
+          node.querySelector(".method-wheel-index").textContent = String(mod(absolutePosition, items.length) + 1).padStart(2, "0");
+          node.querySelector(".method-wheel-name").textContent = item.label;
+          node.classList.toggle("is-active", isActive);
+          node.style.transform = `translate3d(${x.toFixed(3)}px, ${y.toFixed(3)}px, 0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+          node.style.opacity = opacity.toFixed(3);
+          node.style.filter = blur ? `blur(${blur.toFixed(2)}px)` : "none";
+          node.style.zIndex = String(1000 - Math.round(absLocal * 10));
+          node.style.pointerEvents = opacity < 0.05 ? "none" : "auto";
+        }
+      }
+
+      function animate() {
+        if (!isDragging) {
+          if (forcedTarget !== null) {
+            const diff = forcedTarget - position;
+            velocity += diff * 0.042;
+            velocity *= 0.82;
+
+            if (Math.abs(diff) < 0.0008 && Math.abs(velocity) < 0.0008) {
+              position = forcedTarget;
+              velocity = 0;
+              forcedTarget = null;
+            }
+          } else {
+            const nearest = Math.round(position);
+            velocity += (nearest - position) * 0.024;
+            velocity *= 0.935;
+
+            if (Math.abs(nearest - position) < 0.0004 && Math.abs(velocity) < 0.0004) {
+              position = nearest;
+              velocity = 0;
+            }
+          }
+
+          velocity = clamp(velocity, -2.0, 2.0);
+          position += velocity;
+        }
+
+        const nearestPosition = Math.round(position);
+        const nearestIndex = mod(nearestPosition, items.length);
+        const distToCenter = Math.abs(position - nearestPosition);
+        const isSettling = Math.abs(velocity) < 0.12 && distToCenter < 0.18;
+        const committedTooFarFromVisiblePool = Math.abs(committedPosition - position) > Math.floor(poolSize / 2) - 4;
+
+        if ((isSettling || committedTooFarFromVisiblePool) && nearestPosition !== committedPosition) {
+          committedPosition = nearestPosition;
+          committedActive = nearestIndex;
+        }
+
+        render(position);
+        requestAnimationFrame(animate);
+      }
+
+      stage.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+        forcedTarget = null;
+        velocity += delta * 0.00175;
+        velocity = clamp(velocity, -2.0, 2.0);
+      }, { passive: false });
+
+      stage.addEventListener("pointerdown", (event) => {
+        isDragging = true;
+        forcedTarget = null;
+        velocity = 0;
+        stage.setPointerCapture(event.pointerId);
+        dragStartY = event.clientY;
+        dragStartPosition = position;
+        lastPointerY = event.clientY;
+        lastPointerTime = performance.now();
+        releaseVelocity = 0;
+        pointerSamples = [];
+      });
+
+      stage.addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+
+        const dy = event.clientY - dragStartY;
+        position = dragStartPosition - dy / cachedGap;
+
+        const now = performance.now();
+        const dt = Math.max(4, now - lastPointerTime);
+        const instantVel = -((event.clientY - lastPointerY) / cachedGap) * (16.667 / dt);
+
+        pointerSamples.push({ v: instantVel, t: now });
+        if (pointerSamples.length > 4) pointerSamples.shift();
+
+        const cutoff = now - 80;
+        const recent = pointerSamples.filter(s => s.t > cutoff);
+        releaseVelocity = recent.length
+          ? recent.reduce((sum, s) => sum + s.v, 0) / recent.length
+          : instantVel;
+
+        lastPointerY = event.clientY;
+        lastPointerTime = now;
+      });
+
+      function endDrag(event) {
+        if (!isDragging) return;
+        isDragging = false;
+        try { stage.releasePointerCapture(event.pointerId); } catch (_) {}
+        velocity = clamp(releaseVelocity * 1.25, -2.0, 2.0);
+      }
+
+      stage.addEventListener("pointerup", endDrag);
+      stage.addEventListener("pointercancel", endDrag);
+      stage.addEventListener("pointerleave", (event) => {
+        if (event.buttons === 0) endDrag(event);
+      });
+
+      stage.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+          event.preventDefault();
+          forcedTarget = Math.round(position) + 1;
+        }
+
+        if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          forcedTarget = Math.round(position) - 1;
+        }
+      });
+
+      window.addEventListener("resize", () => render(position));
+      render(position);
+      animate();
+    })();
+  </script>
+
+
+<footer class="fcf-vintage" style="font-size:.75rem;color:#4b4b4b;background:#f7f3ea;border-top:1px solid #d8cdb6;padding:.7rem 1.15rem;line-height:1.5;">
+  Data: canonical contract v1.0.0 (generated 2026-07-19) · site inputs 2026-06-24 ·
+  emissions factor EPA eGRID2023 Rev&nbsp;2, SRVC, 596.3&nbsp;lb&nbsp;CO2e/MWh
+  (accessed 2026-07-19; refreshed annually) ·
+  Planning-support prototype — nothing on this site is an approval or an official forecast.
+  <a href="privacy.html" style="color:#1B4332;">Privacy</a> ·
+  <a href="standards.html" style="color:#1B4332;">Standards</a>
+</footer>
+
+</body>
+</html>

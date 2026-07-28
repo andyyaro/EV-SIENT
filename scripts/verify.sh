@@ -192,6 +192,12 @@ gate "matlab: nothing destined for the PUBLIC harness carries site-identifying d
 gate "field-entry: the browser's rules never accept what the model rejects" \
   bash -c "cd '$REPO' && '$PY' scripts/build_field_schema.py >/dev/null && '$PY' -m pytest tests/test_field_schema_parity.py -q"
 
+# The desktop tier's entry point. Before it existed the documented command was
+# `python -m fcf_m2.server`, which fails with a bare traceback if the bundle was never built --
+# an error naming a missing directory rather than the step the reader skipped.
+gate "platform: the desktop launcher builds what is derivable and refuses what is not" \
+  bash -c "cd '$REPO' && '$PY' -m pytest tests/test_launcher.py -q && '$PY' -m fcf_m2.launcher --check"
+
 # Every link the platform offers must resolve to a real file, resolved the way S3 resolves it
 # (a trailing slash means index.html, nothing is generated on demand). Five surfaces linked to
 # directories that do not exist as objects; it passed locally because Python's http.server
@@ -199,6 +205,12 @@ gate "field-entry: the browser's rules never accept what the model rejects" \
 # production and hid the defect.
 gate "platform: every surface link resolves to a file that exists in the bundle" \
   bash -c "cd '$REPO' && '$PY' scripts/check_surface_links.py"
+
+# The public website must carry its own caveats and must not embed a workbook that no longer
+# exists. The patch package sat unapplied for three weeks; the Tableau embeds pointed at a
+# workbook that had been deleted, so every one resolved to resource-not-found.
+gate "website: public pages carry their caveats and embed only the canonical workbook" \
+  bash -c "cd '$REPO' && '$PY' scripts/patch_site_www.py >/dev/null && '$PY' scripts/retarget_tableau_embeds.py >/dev/null && '$PY' scripts/check_site_www.py"
 
 # Drives the entry form in a real headless Chrome — the only check that sees what a person
 # sees. It exists because this program has twice shipped a feature that passed every test and
