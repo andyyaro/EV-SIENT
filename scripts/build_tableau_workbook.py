@@ -419,7 +419,10 @@ def build_spec(paths: dict[str, Path]) -> dict:
                 "columns": ["horizon"],
                 "color": "scenario_name",
                 "tooltips": ["grid_factor_source", "grid_factor_vintage", "model_mode"],
-                "title": "Net CO2e, tonnes per year",
+                # AVOIDED, not emitted. `net_co2e_kg` is `displaced_tailpipe_kg - grid_emissions_kg`
+                # (emissions.py:56), so the line RISING is a good outcome. Titled "Net CO2e"
+                # it read as emissions, and the chart looked like pollution increasing.
+                "title": "Net CO2e AVOIDED, tonnes per year (higher is better)",
                 "subtitle": (f"{config.GRID_FACTOR_LB_PER_MWH} lb CO2e/MWh, "
                              f"{config.GRID_FACTOR_VINTAGE}, SRVC. Demand is modelled, not measured."),
                 "fit": "fit_width",

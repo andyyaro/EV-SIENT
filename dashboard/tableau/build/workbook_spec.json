@@ -174,7 +174,7 @@
         "grid_factor_vintage",
         "model_mode"
       ],
-      "title": "Net CO2e, tonnes per year",
+      "title": "Net CO2e AVOIDED, tonnes per year (higher is better)",
       "subtitle": "596.3 lb CO2e/MWh, eGRID2023r2, accessed 2026-07-19, SRVC. Demand is modelled, not measured.",
       "fit": "fit_width"
     },

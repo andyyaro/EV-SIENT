@@ -48,7 +48,7 @@ SHEET_MAP = {
     "Line-EVChargingPortGrowthbyPlanningYear": ("StartervsPathwayPorts", "Starter vs Pathway Ports"),
     "Line-PortUtilizationSimulation": ("PortsAcrossHorizons", "Active Ports by Horizon"),
     "HeatMap-ProfileReadinessScorebyScoringProfile": ("LifecycleCostbyHorizon", "Lifecycle Cost NPV"),
-    "HeatMap-SiteSubscoresbyDimension": ("NetCO2ebyHorizon", "Net CO2e per Year"),
+    "HeatMap-SiteSubscoresbyDimension": ("NetCO2ebyHorizon", "Net CO2e Avoided per Year"),
     "HeatMap-PortSizingScenarioGaps": ("PeakWaitsbySite", "Queue Wait, Minutes"),
 }
 
@@ -89,8 +89,8 @@ CHIP_COPY = {
         what="Lifecycle cost NPV per site at each horizon.",
         why="It allows sites to be compared on cost without implying any figure is a quote."),
     "NetCO2ebyHorizon": dict(
-        label="Net CO2e",
-        title="Tableau visualization: Net CO2e per Year",
+        label="Net CO2e avoided",
+        title="Tableau visualization: Net CO2e Avoided per Year",
         info="Uses the EPA eGRID2023 Rev 2 SRVC factor, which changes annually.",
         note="596.3 lb CO2e/MWh, accessed 2026-07-19. Results must be recomputed when it changes.",
         what="Net annual CO2e associated with each site's modelled charging.",

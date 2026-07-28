@@ -189,6 +189,18 @@ METHODOLOGY_CORRECTIONS = [
      "following outputs"),
     ("The latest model run has zero blocking validation errors.",
      "That baseline run has zero blocking validation errors."),
+    # Six scenarios are listed under the heading "Current scenarios tested". The canonical
+    # contract carries FOUR scenario names -- baseline, base, high, stress_combined -- and the
+    # six named here (adding long sessions, short daily window, peakier demand) are the
+    # legacy_v2 sweep. Labelled rather than rewritten: the sweep genuinely ran, it is simply
+    # not what "current" means.
+    ("<p>Current scenarios tested include:</p>",
+     "<p>Scenarios tested in the <code>legacy_v2</code> sweep. The canonical "
+     "<code>milestone2_v3</code> contract carries four scenario names \u2014 "
+     "<code>baseline</code>, <code>base</code>, <code>high</code>, "
+     "<code>stress_combined</code>:</p>"),
+    ('<span class="insight-eyebrow">Current results</span>',
+     '<span class="insight-eyebrow">Results (legacy_v2 sweep)</span>'),
 ]
 
 
