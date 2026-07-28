@@ -1,6 +1,59 @@
 # Changelog
 
-## Unreleased — V4 platform program, Phase 4: contract v2
+## Unreleased — V4 platform program, Phases 5–10
+
+The study became a running system. Everything below preserves the epistemics: `capacity_basis`
+is still `placeholder` on all 120 contract rows, all 12 sites still score Low data confidence,
+and `legacy_v2` still reproduces 25 starter / 48 pathway bit-exactly.
+
+### Added
+- **The platform** — one interface, two tiers. The **web tier** shows what the model produced;
+  the **desktop tier** (`fcf-platform`) also runs it. Every displayed number resolves to the run,
+  contract version, source and confidence behind it, and anything that cannot be explained is
+  not shown. Deployed at `futurecityfellowship.andyyaro.com/platform/` behind a **Lambda@Edge
+  Cognito gate**, in its own bucket so a percent-encoded path cannot reach it — a structural
+  guarantee rather than a behavioural one.
+- **NFC field layer** — 12 landing pages and 12 capture forms, so a correction can come from
+  someone standing in the car park. **No tag has been placed and no permission sought.**
+- **3D explorer** integrated as a first-class surface, mode-labelled, keyboard-reachable, and
+  usable with no Cesium token.
+- **Tableau workbook** rebuilt from the canonical contract, published, and verified by reading
+  the published package's own extracts. Four kinds of presentation feature remain unbuildable
+  and are named rather than approximated.
+- **Data intake** (DEC-021) — another jurisdiction can bring its own file. It degrades
+  confidence rather than cleaning data up: absent fields stay absent, guessed mappings are
+  reported as guesses, projected coordinates are refused rather than reprojected.
+- **Synthetic input set** (DEC-020) so a public installer can ship without real facility data.
+- **Reader-facing documentation** — a glossary, "what this can and can't tell you", and a
+  "start here" page with a reader map and an honest FAQ.
+- **`verify.sh` grew 15 → 40 gates**, every one mutation-tested.
+
+### Fixed
+- A **DEC-014 line-by-line audit** of all 480 tracked files / 90 645 lines: **143 confirmed
+  defects**, then **45 more introduced by the fixes themselves**, then the low-severity backlog.
+  Among them: the capacity caveat was **invisible** on the home page (present in the markup,
+  painted over by a full-viewport iframe); the results gallery published the **wrong top-ranked
+  site**; the live **AWS account id was committed** inside the secret scanner's own test, in the
+  list of strings the gate is asserted to ignore; a Tableau deck had been **silently eaten** from
+  7 sheets to 4 by a non-idempotent script; and `guardproof.m` — the proof that the fail-closed
+  capacity guard works — **could not pass as documented**.
+
+### Changed
+- `results.html`'s rotating gallery re-baselined from `legacy_v2` to the canonical
+  `milestone2_v3`: **FFX004 at 53.4** leads, not FFX002 at 58.8. Generated from the contract now,
+  not hand-maintained.
+- Four artifacts still carry `legacy_v2` ranks and each says so: the superseded Tableau workbook,
+  a 2026-06-28 planning-report PDF (now stamped with a superseded cover page), the dated
+  Milestone 2 deck, and the results gallery before this change.
+
+### Known limitations
+Unchanged and central: **nobody has confirmed the electrical capacity at any of the twelve
+sites.** See [`RESIDUAL_RISKS.md`](docs/operations/v4-program/RESIDUAL_RISKS.md) for the full
+list, including two dormant model defects pinned as known defects, and
+[`VERIFICATION.md`](docs/operations/v4-program/VERIFICATION.md) for every check that was run and
+what was observed.
+
+## Earlier — V4 platform program, Phase 4: contract v2
 
 Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
 [docs/migration-from-v3.md](docs/migration-from-v3.md).
