@@ -69,7 +69,15 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def build_schema() -> dict:
+def build_schema(synthetic: bool = False) -> dict:
+    """Build the contract's JSON Schema. ``synthetic=True`` admits generated sites.
+
+    Widened, not relaxed. A synthetic run keeps ``SYN000``-style ids and the jurisdiction
+    ``synthetic``, so its rows stay distinguishable from real ones at a glance and to any
+    downstream consumer. Making synthetic ids match ``^(FFX|PWC)[0-9]{3}$`` would have
+    satisfied the validator by making invented data indistinguishable from the real study's —
+    the opposite of what a fixture is for.
+    """
     """JSON Schema for one scenario_table row."""
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -80,9 +88,12 @@ def build_schema() -> dict:
             "contract_version": {"const": SCHEMA_VERSION},
             "run_id": {"type": "string", "minLength": 8},
             "generated_at": {"type": "string"},
-            "site_id": {"type": "string", "pattern": "^(FFX|PWC)[0-9]{3}$"},
+            "site_id": {"type": "string",
+                        "pattern": "^(FFX|PWC|SYN)[0-9]{3}$" if synthetic
+                                   else "^(FFX|PWC)[0-9]{3}$"},
             "site_name": {"type": "string", "minLength": 3},
-            "jurisdiction": {"enum": ["fairfax", "pwc"]},
+            "jurisdiction": {"enum": ["fairfax", "pwc", "synthetic"] if synthetic
+                                     else ["fairfax", "pwc"]},
             "site_type": {"type": "string"},
             "public_or_fleet": {"enum": ["public", "fleet", "mixed"]},
             "horizon_year": {"enum": sorted(VALID_HORIZONS)},
@@ -241,6 +252,26 @@ def validate_scenario_table(df: pd.DataFrame, site_table: pd.DataFrame,
     return problems
 
 
+
+def run_is_synthetic(provenance: pd.DataFrame) -> bool:
+    """True only when EVERY provenance row declares synthetic inputs.
+
+    Used to decide whether the RT-04 golden-baseline totals apply. They are the real study's
+    accepted figures (25 starter / 48 pathway) and a run on invented inputs cannot reproduce
+    them — nor should it be made to. Tuning a synthetic fixture until it hits the real totals
+    would encode the real results inside data labelled as invented, which is both a false
+    label and a leak.
+
+    The test is deliberately **all**, not **any**. A run that mixes real and synthetic
+    provenance gets the strict check, because the safe default when the input's nature is
+    ambiguous is to hold it to the real study's standard. A single flag anyone could set would
+    be a way to switch off the golden baseline by accident; the run has to prove what it is.
+    """
+    if provenance is None or len(provenance) == 0 or "source_class" not in provenance:
+        return False
+    return bool((provenance["source_class"].astype(str) == "synthetic_model").all())
+
+
 def validate_or_raise(df: pd.DataFrame, site_table: pd.DataFrame, **kw) -> None:
     problems = validate_scenario_table(df, site_table, **kw)
     if problems:
@@ -272,8 +303,9 @@ def write_contract(out_dir: str | Path, scenario_table: pd.DataFrame, site_table
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    validate_or_raise(scenario_table, site_table)
-    schema = build_schema()
+    synthetic = run_is_synthetic(provenance)
+    validate_or_raise(scenario_table, site_table, expect_legacy_totals=not synthetic)
+    schema = build_schema(synthetic=synthetic)
     schema_problems = validate_against_json_schema(scenario_table, schema)
     if schema_problems:
         raise ContractValidationError(schema_problems)
@@ -288,6 +320,10 @@ def write_contract(out_dir: str | Path, scenario_table: pd.DataFrame, site_table
     tables = ["schema.json", "scenario_table.csv", "site_table.csv",
               "source_provenance.csv", "standards_register.csv", "assumptions.json"]
     manifest = {
+        # Stated in the artifact itself, not only in the build log. A contract directory that
+        # travels without saying its inputs were invented is one someone quotes.
+        "synthetic_inputs": synthetic,
+        "legacy_totals_checked": not synthetic,
         "contract_version": SCHEMA_VERSION,
         "model_version": MODEL_VERSION,
         "run_id": run_id,

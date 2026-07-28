@@ -1153,3 +1153,103 @@ chart it no longer shows.
 because the owner remembered. The audit brief should include a pass over every external
 resource the repository or the live site references, checking that each still resolves — by
 following redirects, not by trusting a status code.
+
+---
+
+## DEC-020 — The synthetic input set, and what "synthetic" turned out to mean
+
+**Date:** 2026-07-28 · **Phase:** 8.4 · **Owner's decision: "build a synthetic site-input set"**
+
+### What was blocking
+
+DEC-016 required a public installer to ship synthetic inputs rather than the twelve real
+facilities' data. The set was never built, which made the public installer **unbuildable**
+rather than merely undone — `workflow.py` cannot start without a site table, so a public
+artifact could only leak the real data or fail to run.
+
+### It was never one file
+
+`_load_inputs()` reads **four** site-keyed inputs. Building only the sites table would have
+left three others pointing at real sites. All four are generated.
+
+### Substituting the inputs was nowhere near sufficient
+
+The first artifact had its four inputs correctly replaced — and still shipped **36 distinct
+real facility identifiers across 87 files**: model outputs under `data/outputs`, the test
+fixtures, the NFC placement cards and tag payloads, the contract, and the docs. The real site
+identities are woven through everything the study has ever produced.
+
+So a public artifact carries **no derived results at all** — the model, the synthetic inputs,
+and nothing else. `src/` and `data/anchors/` were verified to contain zero real identifiers;
+five scripts do contain them and are excluded by allowlist rather than by hope. The builder
+then **opens the finished archive, proves no real identifier is present, and deletes it if one
+is** — because a leaking artifact that exists on disk is one command from being attached to a
+release.
+
+**This is why the requirement says to verify by inspecting the built package.** Every
+substitution was correct and the artifact still leaked.
+
+### Three refusals from the model itself, each of which improved the result
+
+The synthetic set did not work first time, and every failure was the codebase declining to
+accept something it should decline:
+
+1. **`unknown source_class values: ['synthetic']`.** The confidence system rejected an
+   invented vocabulary term. It already had `synthetic_model`, worth 30 — below
+   `planning_assumption` (35), above `unconfirmed` (15) — which is exactly the right weight for
+   invented data. The model knew the answer; the fixture had to use its vocabulary.
+2. **`RT-04: baseline starter total 24 != 25`.** The golden-baseline rule asserts the real
+   study's accepted totals. A synthetic run cannot reproduce them and **must not be tuned until
+   it does** — that would encode real results inside data labelled invented, which is both a
+   false label and a leak. The rule now applies unless the run proves itself synthetic, and
+   the test is `all` provenance rows, not `any`: a mixed run gets the strict check.
+3. **`'SYN011' does not match '^(FFX|PWC)[0-9]{3}$'`.** The schema is widened for provably
+   synthetic runs rather than relaxed. Making synthetic ids match the real pattern would have
+   satisfied the validator by making invented data indistinguishable from the study's — the
+   opposite of what a fixture is for. `jurisdiction_for("SYN…")` returns `synthetic`, never
+   `fairfax` or `pwc`.
+
+**The real run still produces exactly 25 / 48**, verified after each change.
+
+### The overclaim, and the review that caught it
+
+The first version of this generator stated: *"Nothing here is derived from the real files. Not
+copied, not perturbed, not sampled, not fitted to their distributions."*
+
+**That was false**, and false in the way overclaims usually are — broadly true, precisely
+wrong, and contradicted by a comment twelve lines below reading *"Copied verbatim from the real
+file."* An adversarial review (five attack angles, findings independently reproduced)
+established:
+
+| Claimed clean | Actually |
+|---|---|
+| Nothing fitted to real distributions | `avg_dwell_min`, arrival hours, spare-capacity placeholders, EV-share and risk points were drawn from `rng.choice` lists that were **exactly the real file's distinct values** — read off it while exploring the schema. That publishes the precise set of values in use across the twelve real facilities. |
+| Nothing copied | Two risk free-text strings were verbatim; twelve columns are verbatim constants. |
+| "A county that does not exist" | Every row still carried `state = VA`. |
+
+All fixed: the support sets now share no member with the real ones, the risk strings are
+reworded, the state code is `ZZ`.
+
+### What is shared, deliberately, and why none of it identifies a site
+
+"Zero overlap" is neither achievable nor desirable — a synthetic set must share the schema to
+be usable. What is shared: **schema vocabularies** (`site_type`, the seven provenance field
+groups) because the model cannot parse the file otherwise; **boolean and small-integer
+domains** (`public_access` is 0 or 1; twelve ranks are 1..12) because that is arithmetic; the
+**study's uniform conventions** (480 V, $150/ft trenching, the safety-review flags), each a
+single fact true of every site equally and therefore separating none of them; and the
+**electrical placeholders**.
+
+The placeholders are load-bearing. `elec_service_rating_amp = 0` and `spare_capacity_kw = 0`
+are what make `capacity_basis` come out `placeholder` at every site. A fixture that invented
+capacity would make a synthetic run report **more** confidence than the real study — the one
+direction a fixture must never move.
+
+### Result
+
+The public artifact is **0.1 MB, 44 files**, verified free of all 36 real identifiers, and the
+model runs from a clean extraction: `starter_total_2026: 24`, `pathway_total: 42`,
+`high_confidence_sites: 0`, capacity placeholder at 12/12. Different data, different answer,
+honestly labelled — and the contract it writes declares `synthetic_inputs: true` and
+`legacy_totals_checked: false` in its own manifest, so a directory that travels cannot be
+quoted as the study's numbers.

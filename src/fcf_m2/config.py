@@ -178,4 +178,9 @@ def jurisdiction_for(site_id: str) -> str:
         return "fairfax"
     if prefix == "PWC":
         return "pwc"
+    # Synthetic sites belong to no real jurisdiction, and saying so is the point: a run on
+    # invented data must not be able to claim Fairfax City or Prince William County. Returning
+    # "unknown" would have been ambiguous with a genuine data gap.
+    if prefix == "SYN":
+        return "synthetic"
     return "unknown"

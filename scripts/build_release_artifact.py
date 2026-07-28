@@ -23,6 +23,7 @@ producing an artifact that cannot run.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import platform
@@ -44,21 +45,57 @@ PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facil
                                 "electrical and occupancy data (DEC-016)"}
 
 
-def refuse_if_public(public: bool) -> None:
-    """A public artifact may not carry the real site inputs, and cannot yet be built without
-    them, so it is refused with the reason rather than shipped incomplete."""
+#: A public artifact ships the MODEL and SYNTHETIC INPUTS ONLY.
+#:
+#: Swapping the four input files was the obvious approach and it is not close to sufficient.
+#: Inspecting a built artifact showed **87 files leaking 36 distinct real facility
+#: identifiers** — not from the inputs, which had been substituted correctly, but from every
+#: derived artifact: model outputs under data/outputs, the test fixtures, the NFC placement
+#: cards and tag payloads, the contract, and the docs. The real site identities are woven
+#: through everything the study has ever produced.
+#:
+#: So the public artifact carries no derived results at all. The recipient runs the model
+#: against the synthetic inputs and generates their own. `src/` and `data/anchors/` were
+#: verified to contain zero real identifiers; five scripts do contain them and are excluded
+#: by the allowlist below rather than by hoping.
+PUBLIC_INCLUDE = ["src", "data/anchors", "pyproject.toml", "requirements-lock.txt"]
+
+#: Only the scripts a recipient needs to run the model and rebuild the synthetic set.
+PUBLIC_SCRIPTS = [
+    "scripts/build_synthetic_inputs.py",
+    "scripts/verify.sh",
+]
+
+PUBLIC_SUBSTITUTIONS = {
+    "data/inputs/real_sites_v2.csv":
+        "data/synthetic/synthetic_sites_v2.csv",
+    "data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv":
+        "data/synthetic/synthetic_v2_electrical_risk_summary.csv",
+    "data/inputs/legacy_matlab_site_meta.csv":
+        "data/synthetic/synthetic_matlab_site_meta.csv",
+    "data/provenance/field_provenance_v1.csv":
+        "data/synthetic/synthetic_field_provenance_v1.csv",
+}
+
+
+def resolve_public(public: bool) -> tuple[dict, list[str]]:
+    """Return (substitutions, problems) for a public build.
+
+    Refuses rather than degrades. A public artifact that silently omitted an input would ship
+    an installer that starts and fails on first run — the recipient would conclude the model
+    was broken rather than absent, which is the worse of the two misunderstandings.
+    """
     if not public:
-        return
-    carried = [p for p in INCLUDE if p in PRIVATE_PATHS]
-    raise SystemExit(
-        "REFUSING to build a public artifact.\n\n"
-        + "".join(f"  {p} carries {PRIVATE_PATHS[p]}\n" for p in carried)
-        + "\nDEC-016 requires a public installer to ship SYNTHETIC inputs. No synthetic\n"
-          "counterpart to real_sites_v2.csv exists in this repository, so a public artifact\n"
-          "would either leak the real data or be unable to run the model at all.\n\n"
-        "Build the synthetic input set first, then give this script a PUBLIC_INCLUDE list.\n"
-        "Without --public this script still builds the INTERNAL archive, which is what it\n"
-        "has always produced.")
+        return {}, []
+    problems = []
+    for synth_rel in PUBLIC_SUBSTITUTIONS.values():
+        if not (ROOT / synth_rel).is_file():
+            problems.append(f"  {synth_rel} is missing; run scripts/build_synthetic_inputs.py")
+    for private, what in PRIVATE_PATHS.items():
+        if not any(k.startswith(private) for k in PUBLIC_SUBSTITUTIONS):
+            problems.append(f"  {private} has no synthetic substitute ({what})")
+    return dict(PUBLIC_SUBSTITUTIONS), problems
+
 
 LIMITATIONS = """\
 Release limitations (read before use):
@@ -81,6 +118,56 @@ Reproduction (fresh environment):
 """
 
 
+
+def assert_no_real_identifiers(zip_path: Path) -> None:
+    """Open the finished archive and prove it carries nothing real. Delete it if it does.
+
+    This is the check the requirement actually asks for — *verified by inspecting the built
+    package, not by assuming*. It exists because the assumption failed: an artifact whose
+    inputs had been correctly substituted still shipped 36 real facility identifiers through
+    files nobody had thought of.
+
+    Deleting the archive rather than merely warning is deliberate. A leaking artifact that
+    exists on disk is one command away from being attached to a release.
+    """
+    # Building-level identifiers only: the site id, the facility name, the street address.
+    #
+    # City and state are deliberately NOT searched. The first version included them and fired
+    # on `"Building official / electrical inspector (Fairfax City / PWC)"` in standards.py —
+    # which names the permitting authority for a jurisdiction, not a facility. The study is
+    # openly about Fairfax City and Prince William County; that is in its README, its title and
+    # its public website. What DEC-016 protects is *which buildings were assessed and what was
+    # found about them*, and a jurisdiction name reveals neither.
+    real_rows = list(csv.DictReader((ROOT / "data/inputs/real_sites_v2.csv").open()))
+    needles = ({r["site_id"] for r in real_rows}
+               | {r["site_name"] for r in real_rows}
+               | {r["address"] for r in real_rows})
+    needles = {n.strip() for n in needles if len(n.strip()) >= 5}
+
+    found: dict[str, list[str]] = {}
+    with zipfile.ZipFile(zip_path) as archive:
+        for info in archive.infolist():
+            if info.is_dir():
+                continue
+            try:
+                text = archive.read(info.filename).decode("utf-8", errors="ignore")
+            except Exception:
+                continue
+            for needle in needles:
+                if needle in text:
+                    found.setdefault(needle, []).append(info.filename)
+
+    if found:
+        zip_path.unlink(missing_ok=True)
+        lines = [f"  {needle!r} in {files[:3]}" for needle, files in list(found.items())[:10]]
+        raise SystemExit(
+            f"REFUSING: the built public artifact contains {len(found)} real facility "
+            f"identifier(s).\n" + "\n".join(lines)
+            + f"\n\nThe archive has been deleted. DEC-016 forbids publishing this data.")
+    print(f"  verified: no real facility identifier appears in the archive "
+          f"({len(needles)} searched)")
+
+
 def sha256(p: Path) -> str:
     h = hashlib.sha256()
     with open(p, "rb") as f:
@@ -90,19 +177,28 @@ def sha256(p: Path) -> str:
 
 
 def main(out_dir: str | None = None, public: bool = False) -> Path:
-    refuse_if_public(public)
+    substitutions, problems = resolve_public(public)
+    if problems:
+        raise SystemExit("REFUSING to build a public artifact:\n" + "\n".join(problems)
+                         + "\n\nDEC-016 requires a public installer to ship SYNTHETIC inputs.")
     out = Path(out_dir) if out_dir else ROOT / "release"
     out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d")
     zpath = out / f"fcf_m2_v3_release_{stamp}.zip"
 
     files: list[Path] = []
-    for item in INCLUDE + OUTPUTS:
+    wanted = (PUBLIC_INCLUDE + PUBLIC_SCRIPTS) if public else (INCLUDE + OUTPUTS)
+    for item in wanted:
         p = ROOT / item
         if p.is_file():
             files.append(p)
         elif p.is_dir():
             files.extend(q for q in p.rglob("*") if q.is_file() and "__pycache__" not in str(q))
+
+    if public:
+        # The synthetic files are added explicitly, under the names the model expects.
+        for real_rel in PUBLIC_SUBSTITUTIONS:
+            files.append(ROOT / PUBLIC_SUBSTITUTIONS[real_rel])
 
     manifest = {
         "release": f"fcf_m2 v3.0.0 ({stamp})",
@@ -113,13 +209,27 @@ def main(out_dir: str | None = None, public: bool = False) -> Path:
 
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
         for p in files:
-            z.write(p, p.relative_to(ROOT))
+            rel = str(p.relative_to(ROOT))
+            # The synthetic file is written under the REAL file's name so the model reads it
+            # unchanged. Its own contents announce that every value is invented.
+            target = rel
+            for real_rel, synth_rel in substitutions.items():
+                if rel == synth_rel:
+                    target = real_rel      # written under the name the model reads
+            z.write(p, target)
         z.writestr("RELEASE_MANIFEST.json", json.dumps(manifest, indent=2))
         z.writestr("LIMITATIONS.txt", LIMITATIONS)
         z.writestr("REPRODUCTION.txt", REPRO)
 
+    if public:
+        assert_no_real_identifiers(zpath)
+
     (out / f"fcf_m2_v3_release_{stamp}.sha256").write_text(sha256(zpath) + f"  {zpath.name}\n")
-    print(f"release artifact: {zpath} ({zpath.stat().st_size/1e6:.1f} MB, {len(files)} files)")
+    kind = "PUBLIC (synthetic inputs)" if public else "INTERNAL (real inputs - DO NOT PUBLISH)"
+    print(f"release artifact [{kind}]: {zpath} "
+          f"({zpath.stat().st_size/1e6:.1f} MB, {len(files)} files)")
+    for real_rel, synth_rel in substitutions.items():
+        print(f"  substituted {synth_rel} -> {real_rel}")
     return zpath
 
 

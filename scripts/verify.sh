@@ -206,6 +206,15 @@ gate "platform: the desktop launcher builds what is derivable and refuses what i
 gate "platform: every surface link resolves to a file that exists in the bundle" \
   bash -c "cd '$REPO' && '$PY' scripts/check_surface_links.py"
 
+# A public installer ships invented inputs (DEC-016). This gate checks the synthetic set is
+# usable, honest, and NOT a disguised copy — including the subtle failure, where a fixture
+# produced by perturbing real values preserves the rank order and re-identifies sites anyway.
+# It also builds the public artifact and INSPECTS IT, because an artifact whose inputs were
+# correctly substituted still shipped 36 real facility identifiers through files nobody had
+# thought of.
+gate "synthetic: the public input set is usable, honest, and not a disguised copy" \
+  bash -c "cd '$REPO' && '$PY' scripts/build_synthetic_inputs.py >/dev/null && '$PY' -m pytest tests/test_synthetic_inputs.py -q && '$PY' scripts/build_release_artifact.py /tmp/fcf_public_gate --public >/dev/null && rm -rf /tmp/fcf_public_gate"
+
 # The public website must carry its own caveats and must not embed a workbook that no longer
 # exists. The patch package sat unapplied for three weeks; the Tableau embeds pointed at a
 # workbook that had been deleted, so every one resolved to resource-not-found.
