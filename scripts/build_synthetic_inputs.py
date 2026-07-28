@@ -101,12 +101,18 @@ GRID_LAT, GRID_LON = 38.5000, -98.0000
 #: arrival hours — which an adversarial review correctly identified as *exactly* the real
 #: file's distinct values, because they had been read off it while exploring the schema. That
 #: is support-fitting: it publishes the precise set of values in use across the twelve real
-#: facilities, and it falsified this module's own claim that nothing was fitted to the real
-#: distributions. The sets below share no member with the real ones.
+#: facilities, and it falsified this module's own claim that nothing was fitted.
+#:
+#: The FIRST attempt at the fix failed in a subtler way, and the same review caught it. The
+#: replacement spare-capacity set [42.0, 63.0, 84.0, 168.0] was the real set scaled by exactly
+#: 35/32 — every ratio 1.09375, both normalising to the multiplier vector {2, 3, 4, 8}. No
+#: value matched, and the relative structure was preserved perfectly. That is *perturbation*,
+#: which is the signature this module claims to avoid: a set that shares no member can still
+#: share its shape. The current values have a different shape, not merely different members.
 DWELL_CHOICES = [75, 105, 150, 210]
 ARRIVAL_START_CHOICES = [6, 9, 11]
 ARRIVAL_END_CHOICES = [14, 18, 19]
-SPARE_PLACEHOLDER_CHOICES = [42.0, 63.0, 84.0, 168.0]
+SPARE_PLACEHOLDER_CHOICES = [25.0, 60.0, 90.0, 130.0]
 
 #: Generic profiles per facility type. Every range here is a stated assumption about what such
 #: a building is like — argue with the numbers, they are not measurements of anything.

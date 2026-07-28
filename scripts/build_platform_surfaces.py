@@ -65,8 +65,19 @@ def copy_surfaces() -> dict[str, int]:
     for src_rel, dst_rel in DEPLOY_COPY:
         src, dst = REPO / src_rel, OUT / dst_rel
         if not src.is_dir():
-            raise SystemExit(f"{src_rel} does not exist; the manifest would claim a surface "
-                             f"that is not there")
+            # A surface whose source is absent is SKIPPED, not fabricated and not fatal.
+            #
+            # Refusing outright was right for this repository, where a missing surface means a
+            # broken checkout. It is wrong for a public installer, where some surfaces are
+            # deliberately not distributed — the 3D explorer's site data is generated from the
+            # real twelve, so it is excluded, and dying on its absence made the whole platform
+            # unreachable rather than merely one card emptier.
+            #
+            # The manifest still never claims a surface that is not there: the entry is simply
+            # not written, and `count` comes out zero.
+            print(f"  skipping {src_rel}: not present in this installation")
+            counts[dst_rel] = 0
+            continue
         for banned in NEVER_DEPLOY:
             if src_rel.startswith(banned):
                 raise SystemExit(f"refusing to deploy {src_rel}: it is on the never-deploy list")
@@ -140,10 +151,19 @@ of the study's own artifacts — nothing here is generated on request.</p>
 def build() -> dict:
     counts = copy_surfaces()
 
-    charts = sorted(p.name for p in (OUT / "dashboard").glob("*.png"))
-    models = sorted(p.name for p in (OUT / "explorer/models").glob("*.glb"))
-    qr = sorted(p.name for p in (OUT / "nfc/qr").glob("*.svg"))
-    reports = sorted(p.name for p in (OUT / "reports").iterdir() if p.is_file())
+    # `.glob()` on a missing directory returns empty; `.iterdir()` RAISES. With surfaces now
+    # skippable, that difference decided whether the launcher started at all — the reports
+    # listing crashed the build one line after the skip message said the directory was absent.
+    def listing(relative: str, pattern: str = "*") -> list[str]:
+        directory = OUT / relative
+        if not directory.is_dir():
+            return []
+        return sorted(p.name for p in directory.glob(pattern) if p.is_file())
+
+    charts = listing("dashboard", "*.png")
+    models = listing("explorer/models", "*.glb")
+    qr = listing("nfc/qr", "*.svg")
+    reports = listing("reports")
 
     return {
         "schema": "fcf-surfaces/1",

@@ -69,10 +69,39 @@ def guard_evidence(run_dir: Path) -> dict:
     }
 
 
-def build() -> dict:
+def build(allow_missing: bool = False) -> dict:
     runs = sorted(p for p in RUNS.glob("run-*") if p.is_dir())
-    if not runs:
+    if not runs and not allow_missing:
+        # Default refusal preserved: in this repository, absent MATLAB artifacts mean a broken
+        # checkout, and the engine record's whole purpose is to report what actually ran.
         raise SystemExit(f"no committed MATLAB run artifacts under {RUNS}")
+    if not runs:
+        # Refusing outright was right for this repository and wrong for a public installer,
+        # where the MATLAB artifacts are deliberately absent — they record executions of the
+        # REAL study against real sites, and shipping them would defeat the synthetic set.
+        #
+        # So the record is emitted empty and says why, which is this project's stated posture
+        # for plumbing with no data behind it: ship it labelled as awaiting data rather than
+        # pretend it does not exist. The platform's engine surface then shows an honest empty
+        # state instead of the launcher dying three steps into a first run.
+        print(f"no committed MATLAB run artifacts under {RUNS} — emitting an empty record")
+        return {
+            "schema": "fcf-engines/1",
+            "matlab_runs_available": False,
+            "headline": ("No MATLAB or Simulink execution is recorded in this installation. "
+                         "Every value here was produced by the Python package."),
+            "engines": [{
+                "engine": "Python (fcf_m2)",
+                "badge": "python",
+                "role": "produced every number in this installation",
+                "executed": True,
+            }],
+            "divergences": [],
+            "cannot_show": ("MATLAB and Simulink run artifacts are not distributed with this "
+                            "package: they record executions against the study's real sites. "
+                            "This is an absence, not a failure, and no result here depends on "
+                            "them."),
+        }
     latest = runs[-1]
     prov = read_provenance(latest)
     guard = guard_evidence(latest)
@@ -199,14 +228,20 @@ def build() -> dict:
 
 
 def main() -> int:
-    payload = build()
+    payload = build(allow_missing="--allow-missing" in sys.argv)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
-    g = payload["guard_evidence"]
     print(f"wrote {OUT.relative_to(REPO)}")
     print(f"  engines: {len(payload['engines'])}   divergences: {len(payload['divergences'])}")
-    print(f"  guard evidence from {g['from_run']}: {g['run_status_ok']}/{g['rows']} rows ok, "
-          f"{g['strategies_skipped']} rows with strategies skipped")
+    # The empty record has no guard evidence, because there was no run to take evidence from.
+    # Reporting "0 rows ok" would be a claim about a run that did not happen.
+    guard = payload.get("guard_evidence")
+    if guard:
+        print(f"  guard evidence from {guard['from_run']}: "
+              f"{guard['run_status_ok']}/{guard['rows']} rows ok, "
+              f"{guard['strategies_skipped']} rows with strategies skipped")
+    else:
+        print("  no guard evidence: no MATLAB run is distributed with this installation")
     return 0
 
 

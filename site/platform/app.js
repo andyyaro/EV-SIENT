@@ -607,7 +607,7 @@ async function main() {
     renderSimulink();
     await initFieldEntry();
 
-    // Deep-link a provenance panel: ?number=FFX004|2036|base|ports_active
+    // Deep-link a provenance panel: ?number=SYN004|2036|base|ports_active
     //
     // A shareable link to a number's lineage is the useful form of "show your working" --
     // you can send someone the provenance rather than the claim. It also means the panel

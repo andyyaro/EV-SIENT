@@ -58,12 +58,29 @@ PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facil
 #: against the synthetic inputs and generates their own. `src/` and `data/anchors/` were
 #: verified to contain zero real identifiers; five scripts do contain them and are excluded
 #: by the allowlist below rather than by hoping.
-PUBLIC_INCLUDE = ["src", "data/anchors", "pyproject.toml", "requirements-lock.txt"]
+PUBLIC_INCLUDE = [
+    "src", "data/anchors", "pyproject.toml", "requirements-lock.txt",
+    # The platform's hand-written sources. Each was checked for real identifiers before being
+    # added; app.js carried one, in a comment showing a deep-link example, and now uses the
+    # synthetic id space. The GENERATED surfaces (provenance_v1.json, the contract copies, the
+    # explorer and dashboard) are deliberately absent — they are built from real data. A
+    # recipient generates their own by running the model on the synthetic inputs.
+    "site/platform/index.html", "site/platform/app.js",
+    "site/platform/styles.css", "site/platform/field_validate.js",
+]
 
 #: Only the scripts a recipient needs to run the model and rebuild the synthetic set.
 PUBLIC_SCRIPTS = [
     "scripts/build_synthetic_inputs.py",
     "scripts/verify.sh",
+    # What `fcf-platform` runs to build the surfaces it needs. Without these the launcher
+    # correctly refuses to start, which is honest but leaves the recipient with a CLI and no
+    # platform.
+    "scripts/build_platform_web.py",
+    "scripts/build_field_schema.py",
+    "scripts/build_engine_record.py",
+    "scripts/build_simulink_view.py",
+    "scripts/build_platform_surfaces.py",
 ]
 
 PUBLIC_SUBSTITUTIONS = {

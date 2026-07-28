@@ -33,13 +33,27 @@ REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "site/platform/simulink.json"
 
 
-def find_slx() -> Path:
+def find_slx(allow_missing: bool = False) -> Path | None:
+    """The newest committed .slx, or None when this installation has none.
+
+    Returning None rather than raising is the change a public installer forced, and the
+    distinction it preserves is the important one: the view must still be built **from a real
+    artifact, never from a description of one**. What changed is only what happens when there
+    is no artifact at all — previously the build died, which on a public install killed the
+    launcher three steps into a first run. Now the surface is emitted empty and says the model
+    was never distributed with one.
+    """
     candidates = sorted(REPO.glob("matlab/outputs/run-*/simulink/*.slx"))
-    if not candidates:
+    if candidates:
+        return candidates[-1]
+    if not allow_missing:
+        # The DEFAULT stays a refusal. In this repository a missing .slx means a broken
+        # checkout, and the guard exists so the view can never be generated from a description
+        # of an artifact instead of the artifact.
         raise SystemExit(
             "no committed .slx found under matlab/outputs/run-*/simulink/. The Simulink view "
             "must be built from a real CI artifact, never from a description of one.")
-    return candidates[-1]
+    return None
 
 
 def extract(slx: Path) -> dict:
@@ -104,6 +118,21 @@ def extract(slx: Path) -> dict:
 
 
 def main() -> int:
+    allow_missing = "--allow-missing" in sys.argv
+    slx = find_slx(allow_missing=allow_missing)
+    if slx is None:
+        print("no committed .slx in this installation — emitting an empty Simulink view")
+        OUT.write_text(json.dumps({
+            "schema": "fcf-simulink/1",
+            "model_available": False,
+            "headline": "No Simulink model is distributed with this installation.",
+            "note": ("The block diagram records a model built once against the study's real "
+                     "sites and NEVER SIMULATED. It is not shipped here, and nothing in this "
+                     "installation depends on it."),
+            "blocks": [],
+        }, indent=2) + "\n")
+        return 0
+
     slx = find_slx()
     payload = extract(slx)
     OUT.parent.mkdir(parents=True, exist_ok=True)

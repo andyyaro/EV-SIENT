@@ -214,3 +214,52 @@ def test_regenerating_is_deterministic(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     after = {p.name: p.read_bytes() for p in SYNTH.glob("*.csv")}
     assert before == after
+
+
+def test_no_categorical_support_shares_its_SHAPE_with_the_real_one():
+    """A set that shares no member can still share its structure.
+
+    This is the leak that survived the first fix. The replacement spare-capacity set
+    `[42.0, 63.0, 84.0, 168.0]` shared no value with the real `[38.4, 57.6, 76.8, 153.6]` —
+    and was that set scaled by exactly 35/32, every ratio 1.09375, both normalising to the
+    multiplier vector {2, 3, 4, 8}. That is perturbation: the relative spacing is preserved
+    perfectly, which is what "not perturbed" is supposed to rule out.
+
+    Checking membership alone would pass it. This checks shape.
+    """
+    import itertools
+    real_sites = rows(REAL / "real_sites_v2.csv")
+    syn_sites = rows(SYNTH / "synthetic_sites_v2.csv")
+    real_meta = rows(REAL / "legacy_matlab_site_meta.csv")
+    syn_meta = rows(SYNTH / "synthetic_matlab_site_meta.csv")
+
+    def support(data, column):
+        out = []
+        for row in data:
+            try:
+                out.append(float(row[column]))
+            except (ValueError, KeyError):
+                return []
+        return sorted(set(out))
+
+    problems = []
+    pairs = [(real_sites, syn_sites, ["avg_dwell_min", "ev_share_local", "ev_registrations_local"]),
+             (real_meta, syn_meta, ["arrival_start_hr", "arrival_end_hr",
+                                    "spare_capacity_kw_placeholder"])]
+    for real_data, syn_data, columns in pairs:
+        for column in columns:
+            a, b = support(real_data, column), support(syn_data, column)
+            if len(a) < 2 or len(b) < 2:
+                continue
+            if set(a) & set(b):
+                problems.append(f"{column}: shares members {sorted(set(a) & set(b))}")
+            if len(a) == len(b) and a[0] and b[0]:
+                # Uniform elementwise ratio == a pure rescale of the real set.
+                ratios = {round(y / x, 6) for x, y in zip(a, b) if x}
+                if len(ratios) == 1:
+                    problems.append(f"{column}: is the real support scaled by {ratios.pop()}")
+                # Same normalised shape == same relative spacing by another route.
+                if ([round(v / a[0], 4) for v in a] == [round(v / b[0], 4) for v in b]):
+                    problems.append(f"{column}: has the real support's normalised shape")
+    assert problems == [], "categorical supports share structure with the real data:\n  " + \
+                          "\n  ".join(problems)

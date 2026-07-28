@@ -21,12 +21,22 @@ sys.path.insert(0, str(REPO / "src"))
 from fcf_m2 import launcher  # noqa: E402
 
 
-def test_every_generated_artifact_names_a_real_build_script():
+def test_every_generated_artifact_names_a_real_producer():
     """An artifact whose producer does not exist would fail at the worst moment — mid-launch,
-    after the user has been told a build is starting."""
+    after the user has been told a build is starting.
+
+    Two shapes are legal: a script path, and `-m module` for the model run itself. The contract
+    is produced by running the model, not by a script, and pinning that distinction here keeps
+    the check honest rather than making it pass by loosening it.
+    """
+    import importlib.util
     for path, command in launcher.GENERATED:
-        script = REPO / command[0]
-        assert script.is_file(), f"{path} claims to be built by {command[0]}, which is missing"
+        if command[0] == "-m":
+            assert importlib.util.find_spec(command[1]) is not None, (
+                f"{path} claims to be built by module {command[1]}, which does not import")
+        else:
+            script = REPO / command[0]
+            assert script.is_file(), f"{path} claims to be built by {command[0]}, missing"
 
 
 def test_required_sources_all_exist_in_a_healthy_checkout():

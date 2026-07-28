@@ -40,11 +40,23 @@ REPO = Path(__file__).resolve().parents[2]
 #: running the same script a person would run — never by importing and calling, for the same
 #: reason the operations registry declares commands rather than callables.
 GENERATED = [
+    # The contract comes first because every surface below is built from it. It was previously
+    # listed as a REQUIRED SOURCE, which made the launcher refuse to start on a fresh install
+    # over a file the model produces in one command — exactly the pedantry this module's
+    # docstring warns against. On a public installer, where the real contract is deliberately
+    # absent, that refusal made the platform unreachable.
+    ("data/contract/v1/contract_manifest.json",
+     # --contract-dir is not optional here. Without it the contract lands under --out, and
+     # build_platform_web.py reads data/contract/v1 — so the launcher would run the model
+     # successfully and then fail on the next step claiming the contract did not exist. The
+     # declared output path and what the command actually produces have to be the same file.
+     ["-m", "fcf_m2.workflow", "run", "--mode", "milestone2_v3",
+      "--out", "data/outputs/v3_run", "--contract-dir", "data/contract/v1"]),
     ("site/platform/provenance_v1.json", ["scripts/build_platform_web.py"]),
     ("site/platform/operations.json", ["scripts/build_platform_web.py"]),
     ("site/platform/field_schema.json", ["scripts/build_field_schema.py"]),
-    ("site/platform/engines.json", ["scripts/build_engine_record.py"]),
-    ("site/platform/simulink.json", ["scripts/build_simulink_view.py"]),
+    ("site/platform/engines.json", ["scripts/build_engine_record.py", "--allow-missing"]),
+    ("site/platform/simulink.json", ["scripts/build_simulink_view.py", "--allow-missing"]),
     ("site/platform/surfaces.json", ["scripts/build_platform_surfaces.py"]),
     ("site/platform/explorer/index.html", ["scripts/build_platform_surfaces.py"]),
 ]
@@ -52,8 +64,6 @@ GENERATED = [
 #: Source files that cannot be regenerated. If one of these is gone, something is wrong that a
 #: build step cannot fix, and guessing would be worse than stopping.
 REQUIRED_SOURCES = [
-    "data/contract/v1/contract_manifest.json",
-    "data/contract/v1/scenario_table.csv",
     "site/platform/index.html",
     "site/platform/app.js",
     "site/platform/field_validate.js",
