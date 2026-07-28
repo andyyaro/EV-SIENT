@@ -18,6 +18,15 @@ that they would work at release time.
 
 The environment tests are pure — they take an installed set as an argument — so they assert the
 same thing on a developer machine, in CI, and on a release runner.
+
+**And the guard's first shape was wrong**, which these tests now pin. It demanded that the
+environment *equal* the lock. Both packaging runners install with `pip install -e . -c
+requirements-lock.txt`, where the lock is a **constraints** file — it pins versions for what
+gets installed rather than installing every line — so a correct release environment carries the
+runtime closure and none of the test-only pins. The guard refused, and the first real execution
+of the packaging workflow failed on macOS and Windows alike. The rule is a subset, not an
+equality, and `test_a_constraints_install_is_accepted_rather_than_called_broken` is the
+regression.
 """
 
 from __future__ import annotations
@@ -80,10 +89,10 @@ def test_names_are_normalised_so_underscores_and_hyphens_are_one_package():
 # The environment guard — both directions
 # --------------------------------------------------------------------------------------------
 
-def test_a_locked_package_that_is_absent_is_reported_missing():
+def test_a_declared_runtime_dependency_that_is_absent_is_reported_missing():
     installed = locked_names() - {"pandas"}
     missing, unexpected = blm.check_environment(LOCK.read_text(), installed)
-    assert "pandas" in missing, "a shipped dependency would go unattributed and nothing objected"
+    assert "pandas" in missing, "this is not the project's environment and nothing objected"
     assert unexpected == []
 
 
@@ -102,18 +111,47 @@ def test_pip_and_its_siblings_are_not_treated_as_unexpected():
     assert (missing, unexpected) == ([], [])
 
 
-def test_a_marker_that_does_not_apply_is_not_a_missing_package(monkeypatch):
-    """On Python 3.13+ `typing-extensions` is correctly absent. The guard must not fire."""
-    lock = 'numpy==2.5.1\ntyping-extensions==4.16.0 ; python_version < "0"\n'
-    missing, unexpected = blm.check_environment(lock, {"numpy"})
-    assert missing == [] and unexpected == []
+def test_a_constraints_install_is_accepted_rather_than_called_broken():
+    """The regression that failed both packaging runners on their first real execution.
+
+    `pip install -e . -c requirements-lock.txt` uses the lock as CONSTRAINTS: it pins versions
+    for what gets installed, it does not install every line. So a correct release environment
+    carries the runtime closure and none of the test-only or extra-only pins. The first version
+    of this guard demanded equality with the lock and refused — on macOS for 9 missing packages
+    and on Windows for the same 9 — turning a working packaging job red.
+    """
+    runtime_closure = {
+        "numpy", "pandas", "matplotlib", "jsonschema", "pillow", "packaging", "contourpy",
+        "cycler", "fonttools", "kiwisolver", "pyparsing", "python-dateutil", "six", "attrs",
+        "referencing", "rpds-py", "jsonschema-specifications", "typing-extensions", "pip",
+    }
+    missing, unexpected = blm.check_environment(LOCK.read_text(), runtime_closure)
+    assert (missing, unexpected) == ([], []), (
+        f"a lock-constrained release install was rejected: missing={missing} "
+        f"unexpected={unexpected}")
 
 
-def test_an_unparseable_marker_fails_closed():
-    """An unreadable marker is treated as applying. Skipping it would let a real gap through."""
-    lock = "numpy==2.5.1 ; this is not a marker\n"
-    missing, _ = blm.check_environment(lock, set())
-    assert missing == ["numpy"]
+def test_the_declared_runtime_dependencies_are_read_from_pyproject():
+    declared = blm.declared_runtime_dependencies()
+    assert declared == {"numpy", "pandas", "matplotlib", "jsonschema"}, (
+        f"the required set no longer matches [project] dependencies: {sorted(declared)}")
+
+
+def test_a_marker_that_does_not_apply_is_not_an_unexpected_package():
+    """On Python 3.13+ `typing-extensions` is correctly absent, and on 3.12 correctly present.
+    Neither may be reported as a surprise."""
+    lock = 'numpy==2.5.1\ntyping-extensions==4.16.0 ; python_version < "99"\n'
+    missing, unexpected = blm.check_environment(
+        lock, {"numpy", "typing-extensions"}, required={"numpy"})
+    assert (missing, unexpected) == ([], [])
+
+
+def test_an_unparseable_marker_is_still_permitted_rather_than_dropped():
+    """An unreadable marker is treated as applying, so the pin stays permitted. Dropping it
+    would make a legitimately installed package look like an unexplained extra."""
+    lock = "segno==1.6.6 ; this is not a marker\n"
+    _, unexpected = blm.check_environment(lock, {"segno"}, required=set())
+    assert unexpected == []
 
 
 # --------------------------------------------------------------------------------------------
