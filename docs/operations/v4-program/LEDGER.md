@@ -64,18 +64,21 @@ nothing in it. Behavioural guarantee → structural one.
 **Cost:** S3 25.27 MB ≈ $0.0006/mo, Lambda@Edge ≈ $0.001/mo at this traffic, Cognito free
 below 50 000 MAU. Incremental total **< $0.01/month** against the $10 ceiling.
 
-**NOT VERIFIED — two things, listed separately on purpose:**
+**CLOSED — both verified by the owner signing in (2026-07-27).** They reported *"i was able to
+sign in and it renders"*, which settles the two claims this ledger had deliberately kept open:
 
-1. **That the gate opens** for `redacted-3@example.org`. Needs a password the assistant
-   does not have and should not have.
-2. **That the content behind the gate loads.** A distinct claim, and the easier one to let
-   hide inside the first. Everything past the redirect is unexercised — the origin access
-   control, the gated bucket's policy, and the URI rewrite from `/platform/` to
-   `/platform/index.html`. Each mirrors the main bucket's working configuration, but
-   *configured like a working one* is not *observed working*.
+1. **The gate opens.** Confirmed with `redacted-6@example.org`, the second granted account.
+2. **The content behind it loads.** This is the one that mattered, because it was the easier
+   claim to let hide inside the first. It exercises what no check from the deploying side
+   could reach: the origin access control, the gated bucket's policy, and the URI rewrite from
+   `/platform/` to `/platform/index.html`. All three were *configured like* the working main
+   bucket; now they are observed working.
 
-Both resolve together on the owner's first sign-in. **Open human action.** Everything else
-about the gate is observed, not assumed.
+**Still not claimed:** that every surface inside the platform behaves. "It renders" establishes
+that `index.html` and its assets are served through the gate — not that the provenance panel
+resolves, that the explorer and dashboard sub-surfaces load, or that tier detection reports the
+web tier correctly. Those are separate assertions and none of them has been exercised by a
+human yet.
 
 ### Where Phase 7 actually is
 
