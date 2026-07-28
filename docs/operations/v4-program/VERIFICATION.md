@@ -13,7 +13,7 @@ committed. Every one was caught by looking at the thing rather than at the repor
 
 ---
 
-## 1. Repository gate suite — 39 PASS / 0 FAIL
+## 1. Repository gate suite — 40 PASS / 0 FAIL
 
 `./scripts/verify.sh`, exit code captured directly (never through a pipe — `| tail` returns
 *tail's* exit code, which is how two failing gates were once pushed).
@@ -58,7 +58,8 @@ committed. Every one was caught by looking at the thing rather than at the repor
 | 36 | website: public pages carry their caveats and embed only the canonical workbook | PASS |
 | 37 | browser: the form refuses VISIBLY, and the explorer's first screen asks nothing of a reader | PASS |
 | 38 | edge-auth: only a verified `id_token` for the granted account reaches the origin | PASS |
-| 39 | links: markdown links resolve | PASS |
+| 39 | octave: the fail-closed capacity guard refuses every non-verified basis | PASS |
+| 40 | links: markdown links resolve | PASS |
 
 ---
 
@@ -66,10 +67,10 @@ committed. Every one was caught by looking at the thing rather than at the repor
 
 | Suite | Result | How it was counted |
 |---|---|---|
-| Python | **669 tests collected**, all passing | `pytest --collect-only`, read |
+| Python | **675+ tests collected**, all passing (a dated figure — it moves whenever a test is added) | `pytest --collect-only`, read |
 | Coverage | floor **80%**, enforced | `--cov-fail-under=80` in `verify.sh` and `tests.yml` |
 | Node — edge authoriser | **50 pass / 0 fail** | `node --test tests/edge_auth/*.test.mjs` |
-| Node — real browser | **16 pass / 0 fail** | headless Chrome over CDP; skips loudly if Chrome absent |
+| Node — real browser | **22 pass / 0 fail** (3 suites: field form, explorer gate, www visibility) | headless Chrome over CDP; skips loudly if Chrome absent |
 | MATLAB | **49 passed / 0 failed** on MathWorks R2025b Update 5 | CI run record in `matlab/EXECUTION_STATUS.md` |
 | Octave ↔ MATLAB | **2 640 cells, 0 numeric divergences** at 1e-9 | cross-validation run |
 
@@ -148,7 +149,7 @@ explorer and dashboard sub-surfaces, and tier detection have not been exercised 
 | Notarization | Ad-hoc signature achieves nothing for Gatekeeper (`spctl` exit 3, measured) | `docs/INSTALL.md` |
 | Editable dev install integrity | pip cannot hash an editable requirement — measured, not assumed | `add_lock_hashes.py` |
 | Content of two Framer-hosted iframes | Third-party hosted, outside version control and every gate | `RESIDUAL_RISKS.md` |
-| A real fresh-clone walkthrough | Gate 23 catches the mechanical case only | `RESIDUAL_RISKS.md` |
+| ~~A real fresh-clone walkthrough~~ | **DONE 2026-07-28 — see §9 below.** | — |
 
 ---
 
@@ -162,3 +163,39 @@ explorer and dashboard sub-surfaces, and tier detection have not been exercised 
   this program was checked by deliberately breaking what it guards.
 - **Parse or exercise; never grep.** At least eleven defects in this program were text-versus-
   meaning errors: prose that was accurate about something other than the thing it annotated.
+
+
+---
+
+## 9. The clean-clone walkthrough — done, 2026-07-28
+
+Cloned the pushed branch into an empty directory and followed the README's own Quick start from
+zero, on a tree carrying none of this repository's local state. **487 tracked files at
+`25db4d6`.**
+
+| Documented step | Observed |
+|---|---|
+| `make setup` | exit 0 — venv built, 24 packages installed from the lock |
+| `make test` | exit 0 — full suite passes, **coverage 88%** against an 80% floor |
+| `make run-legacy` | exit 0 — **starter 25 / pathway 48**, the accepted baseline reproduced |
+| `make validate` | exit 0 — rules, JSON Schema and RT-10 hash chain all PASS |
+| `./scripts/verify.sh` | exit 0 — **40 PASS / 0 FAIL** on a tree never built in |
+| `fcf-platform --check` | exit 0 — "Everything the platform needs is present. Nothing would be rebuilt." |
+| `fcf-platform --no-browser` | serves; `index.html`, `provenance_v1.json`, `operations.json`, `engines.json` all **200** |
+
+**No documentation had to be corrected to make this pass** — which is the claim the walkthrough
+exists to test, and the first point in this program at which it could honestly be made.
+
+Static pages serve without a token by design; the token gates API calls, which
+`tests/test_server.py` covers separately.
+
+### A false commit message, corrected
+
+The commit that first reported this result — `9fb343f` — said "Recorded as VERIFICATION.md
+section 9". **It was not.** The edit that would have written this section raised an
+`AssertionError` because its anchor text did not match, and the commit ran anyway, carrying
+only the ledger line. The message asserted work that had not happened.
+
+That is the specific failure this program exists to prevent, and it was found by checking the
+commit rather than trusting it. The history is left standing and this section is the
+correction; §9 now exists, written after the claim rather than before it.
