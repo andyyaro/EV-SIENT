@@ -349,3 +349,48 @@ def test_an_observation_with_no_site_id_is_refused(tmp_path):
     path = _write_csv(tmp_path, observed.CAPACITY_COLUMNS, dict(CAPACITY_ROW, site_id=""))
     with pytest.raises(observed.ObservationError, match="site_id"):
         observed.read_capacity_observations(str(path))
+
+
+# ---------------------------------------------------------------- provenance may not be upgraded
+
+def _observation(method: str):
+    import datetime
+    return observed.CapacityObservation(
+        site_id="S1", observed_date=datetime.date(2026, 7, 1), method=method,
+        service_capacity_kw=400.0, spare_capacity_kw=120.0, measured_peak_kw=180.0,
+        source_org="Org", source_document="Doc-1", observer="A. Person",
+        verification_status="reviewed", notes="")
+
+
+def test_a_weak_method_cannot_score_like_an_official_source():
+    """The inversion this guards against actually shipped.
+
+    `observation_provenance_rows()` mapped any basis with no same-named entry in
+    SOURCE_CLASS_SCORES onto `official_source` (90). The only two bases that fall through
+    are `engineering_estimate` and `planning_proxy` -- the two WEAKEST methods -- so a
+    comparable-site guess scored 95 against a real utility record's 100. The module's own
+    rule says an assumption can never upgrade provenance.
+    """
+    from fcf_m2.confidence import SOURCE_CLASS_SCORES
+    strong = observed.observation_provenance_rows([_observation("utility_service_record")])
+    weak = observed.observation_provenance_rows([_observation("comparable_site_proxy")])
+    calc = observed.observation_provenance_rows([_observation("engineering_calculation")])
+
+    strong_score = SOURCE_CLASS_SCORES[strong.iloc[0].source_class]
+    for frame, label in ((weak, "comparable_site_proxy"), (calc, "engineering_calculation")):
+        score = SOURCE_CLASS_SCORES[frame.iloc[0].source_class]
+        assert score < strong_score, (
+            f"{label} scored {score} against a verified utility record's {strong_score}")
+        assert score <= 35, f"{label} scored {score}; a reasoned estimate is not evidence"
+
+
+def test_an_unmapped_basis_is_refused_rather_than_defaulted():
+    """A default is what caused the inversion. An unknown basis must stop the run."""
+    obs = _observation("utility_service_record")
+    object.__setattr__(obs, "method", "some_future_method")
+    observed.METHOD_TO_BASIS["some_future_method"] = "a_basis_nobody_scored"
+    try:
+        with pytest.raises(observed.ObservationError, match="no source class"):
+            observed.observation_provenance_rows([obs])
+    finally:
+        observed.METHOD_TO_BASIS.pop("some_future_method", None)

@@ -66,6 +66,17 @@ CAPACITY_METHOD_PRECEDENCE = [
 
 #: Which capacity_basis each method may justify. A method can never justify a stronger
 #: basis than the evidence supports, and an assumption can never upgrade provenance.
+#: capacity_basis -> the provenance class it may claim. Written out, because the two weak
+#: bases have no same-named entry in SOURCE_CLASS_SCORES and a fallback silently promoted
+#: them to `official_source`. An engineering calculation and a comparable-site proxy are
+#: both planning assumptions: they are reasoning, not measurement.
+BASIS_TO_SOURCE_CLASS = {
+    "verified_utility": "verified_utility",       # 100
+    "verified_facility": "verified_facility",     # 100
+    "engineering_estimate": "planning_assumption",  # 35 -- a calculation, not a measurement
+    "planning_proxy": "planning_assumption",        # 35 -- another site's number
+}
+
 METHOD_TO_BASIS = {
     "utility_service_record": "verified_utility",
     "utility_load_study": "verified_utility",
@@ -470,9 +481,17 @@ def observation_provenance_rows(observations: list[CapacityObservation]) -> pd.D
     """
     rows = []
     for obs in observations:
-        source_class = obs.implied_basis
-        if source_class not in SOURCE_CLASS_SCORES:
-            source_class = "official_source"
+        source_class = BASIS_TO_SOURCE_CLASS.get(obs.implied_basis)
+        if source_class is None:
+            # Refuse rather than default. The previous fallback sent any unrecognised basis
+            # to "official_source" (90/100) -- and the two bases that fall through are
+            # `engineering_estimate` and `planning_proxy`, i.e. the two WEAKEST methods. A
+            # comparable-site guess scored 95 while a real utility record scored 100. That is
+            # exactly the inversion this module's own rule at the top of METHOD_TO_BASIS
+            # forbids: "an assumption can never upgrade provenance."
+            raise ObservationError(
+                f"no source class is defined for capacity basis {obs.implied_basis!r} "
+                f"(method {obs.method!r}); refusing to score it rather than guessing")
         rows.append({
             "site_id": obs.site_id,
             "field_group": "electrical_service",
