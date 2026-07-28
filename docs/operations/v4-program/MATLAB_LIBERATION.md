@@ -130,7 +130,7 @@ RGB component *and* a textbox width. So the gate requires the discriminating val
 column it belongs to on the same line, which is exactly the shape of a real leak (`row.sessions_per_day = 1.16`)
 and not the shape of a colour array.
 
-Current state: **clean — 15 files scanned, 134 site-discriminating values gated.** Mutation-tested by
+Current state: **clean — 18 files scanned, 134 site-discriminating values gated.** Mutation-tested by
 reinstating both original leaks; the gate catches both.
 
 ---

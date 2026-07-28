@@ -29,7 +29,7 @@
 - [Regulatory & stakeholder map](../reports/milestone-2/REGULATORY_STAKEHOLDER_MAP.md)
 
 ## For human-action owners
-- [Open human actions](operations/open-human-actions.md) — the ten things software cannot close
+- [Open human actions](operations/open-human-actions.md) — what software cannot close, and who has to
 - [Human-action packages](human-actions/README.md) — client meeting #2, team session, AHJ, utility data, public engagement, fellowship clarification (all drafts, nothing sent)
 
 ## For maintainers

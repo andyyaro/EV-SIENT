@@ -16,7 +16,8 @@ the reports appears here, and nothing reads as more certain, more finished, or m
 than it is. Warm copy that quietly upgrades a placeholder into a fact would be a defect, not
 a style choice.
 
-Pages are generated. Never hand-edit `explorer/../nfc-landing/`; edit this file.
+Pages are generated into `site/nfc-landing/`. Never hand-edit them; edit this file.
+*(That path was written as `explorer/../nfc-landing/`, which resolves nowhere.)*
 """
 
 from __future__ import annotations

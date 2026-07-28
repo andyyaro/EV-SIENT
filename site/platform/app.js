@@ -260,7 +260,10 @@ function renderSites() {
     for (const [column, opts] of [
       ["ports_active", { num: true }],
       ["ports_pathway_capacity", { num: true }],
-      ["capacity_basis", { flagPlaceholder: false }],
+      // TRUE. The placeholder chip inside numberCell() was unreachable because this, its
+      // only caller, passed false -- so the one column whose whole purpose is to say
+      // "placeholder" was the one that never showed the placeholder chip.
+      ["capacity_basis", { flagPlaceholder: true }],
       ["data_confidence", {}],
     ]) {
       const td = document.createElement("td");

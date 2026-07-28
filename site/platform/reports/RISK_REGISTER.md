@@ -2,7 +2,7 @@
 
 **Project:** Future City Fellowship — Milestone 2, staged municipal EV charging (Fairfax City + Prince William County, VA)
 **Date:** 2026-07-19 · **Machine version:** `RISK_REGISTER.csv` (same 18 rows)
-**Basis:** upgraded from the research-phase failure-mitigation ranking `FAILURE_MITIGATION_OPTIONS.csv` (pre-V3 research archive, not tracked in this repository; 15 assessed failure modes) plus four cross-cutting risks from Reports 07–10: ADA redesign, overbuild/underuse, trenching cost escalation, data staleness, and funding volatility.
+**Basis:** upgraded from the research-phase failure-mitigation ranking `FAILURE_MITIGATION_OPTIONS.csv` (pre-V3 research archive, not tracked in this repository; 15 assessed failure modes) plus five cross-cutting risks from Reports 07–10: ADA redesign, overbuild/underuse, trenching cost escalation, data staleness, and funding volatility.
 **Scoring discipline:** Likelihood and consequence are 1–5 **team screening judgments at pilot scale, not measured probabilities**; score = likelihood × consequence. They exist to rank attention, not to certify risk levels. Every mitigation is design intent pending AHJ/utility confirmation; nothing is approved, and service capacity is unconfirmed at 12/12 sites (0 sites carry High data confidence).
 
 ## 1. Ranked register (by score)

@@ -32,7 +32,8 @@ def add_inline(par, text, size=10.5, color=BLACK, italic=False):
             r.italic = True
 
 
-def convert(md_path: Path, docx_path: Path, landscape_tables=False):
+def convert(md_path: Path, docx_path: Path):
+    # `landscape_tables=False` removed: the body never read it and no caller passed it.
     doc = Document()
     for section in doc.sections:
         section.left_margin = section.right_margin = Inches(0.7)

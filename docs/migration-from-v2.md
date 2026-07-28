@@ -20,7 +20,7 @@ this codebase's `legacy_v2` mode (golden-tested).
 | Waits | steady-state Erlang-C only | + peak-window Erlang + seeded discrete-event simulation (P10/P50/P90) |
 | Economics / emissions | none | lifecycle NPC (staged/overbuild/defer) + net CO2e with sourced factor |
 | Cross-model | hand-built MATLAB adapter CSV (port mismatches) | generated adapter from the validated contract; `capacity_basis` on every row |
-| Tests | output checkers only | 80-test pytest suite incl. golden legacy fixtures; CI coverage gate |
+| Tests | output checkers only | full pytest suite incl. golden legacy fixtures; CI coverage gate |
 | GIS | live TIGER/basemap downloads (failed offline) | cached, filtered boundary GeoJSON — fully offline |
 
 ## Old commands → new commands

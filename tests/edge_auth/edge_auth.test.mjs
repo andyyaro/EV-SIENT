@@ -24,6 +24,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync, createSign } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -223,10 +224,20 @@ test("every cookie satisfies the __Host- prefix rules a browser enforces", async
 });
 
 test("a sibling subdomain cannot shadow the session (this is what __Host- buys)", () => {
-  // Not assertable from inside the handler — it is a browser rule. Pinned here so that
-  // renaming the cookies without the prefix is a test failure rather than a silent
-  // reintroduction of the permanent-lockout attack.
-  for (const name of ["__Host-fcf_session", "__Host-fcf_pkce"]) {
+  // Not assertable from inside the handler — it is a browser rule. Pinned so that renaming
+  // the cookies without the prefix is a test failure rather than a silent reintroduction of
+  // the permanent-lockout attack.
+  //
+  // The names are read FROM THE AUTHORISER SOURCE, not restated here. This loop used to
+  // iterate over its own string literals and assert they start with "__Host-", which is
+  // true by construction: the test could not fail, and the comment above claimed it could.
+  const source = readFileSync(new URL("../../infra/edge-auth/index.mjs", import.meta.url), "utf8");
+  // Names ENDING in _COOKIE only. A looser \w*COOKIE\w* also matched COOKIE_ATTRS, whose
+  // value is "Path=/; HttpOnly; ..." -- not a cookie name, and it failed the assertion on a
+  // clean tree. Caught immediately because the test can now actually fail.
+  const names = [...source.matchAll(/^const \w+_COOKIE = "([^"]+)";/gm)].map((m) => m[1]);
+  assert.ok(names.length >= 2, `expected at least two cookie constants, found ${names.length}`);
+  for (const name of names) {
     assert.match(name, /^__Host-/);
   }
 });

@@ -2,7 +2,7 @@
 
 **Project:** Future City Fellowship — Milestone 2, staged municipal EV charging (Fairfax City + Prince William County, VA)
 **Date:** 2026-07-19 · **Status:** Design intent pending AHJ/utility confirmation. Service capacity is unconfirmed at 12/12 candidate sites; nothing here is an as-built description.
-**Basis:** Report 07 (Technical Integration and Failure-Mitigation Research); `rankings/FAILURE_MITIGATION_OPTIONS.csv`; EX16 (protocols); EX12 (Dominion programs).
+**Basis:** Report 07 (Technical Integration and Failure-Mitigation Research); `FAILURE_MITIGATION_OPTIONS.csv` (**pre-V3 research archive, not tracked in this repository** — cited here as the evidentiary basis, not as a file a reader can open); EX16 (protocols); EX12 (Dominion programs).
 **Companion visual:** `../assets/architecture/integration_architecture.png`
 
 ---

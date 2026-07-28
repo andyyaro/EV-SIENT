@@ -122,7 +122,9 @@ button.ghost:hover { color: var(--ink); border-color: #37404c; }
 }
 #siteList li:hover { background: var(--panel-2); }
 #siteList li.selected { background: rgba(22,180,139,.11); border-color: rgba(22,180,139,.4); }
-#siteList li.pinned::after { content: "PIN"; }
+/* Removed: `#siteList li.pinned::after { content: "PIN"; }` keyed on a class NOTHING adds.
+   Pins are shown by the button label in the detail panel and by the tray counter, so the
+   rule was dead and its absence looked like a styling bug rather than a missing class. */
 
 .rank {
   font-family: var(--mono); font-size: 12px; font-weight: 600;

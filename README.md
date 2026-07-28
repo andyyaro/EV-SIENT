@@ -125,7 +125,8 @@ V3 never silently replaces legacy numbers — see the
 
 ```bash
 make setup          # venv + editable install with pinned test extras
-make test           # full suite incl. legacy golden tests (coverage gate 80%)
+make test           # full suite incl. legacy golden tests (reports coverage; the 80% floor
+                    #   is enforced by ./scripts/verify.sh and CI, not by this target)
 make run-legacy     # reproduce the accepted V2 baseline (25/48)
 make run-v3         # full V3 run: scores, scenarios, economics, emissions, contract
 make validate       # validate the tracked canonical contract

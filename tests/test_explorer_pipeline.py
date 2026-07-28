@@ -115,7 +115,7 @@ def test_build_emits_no_drift_warnings(result):
 
 @needs_repo
 def test_invert_flags_match_scoring_module():
-    """These four drivers are the ones fcf_m2.scoring wraps in (1 - x)."""
+    """These six drivers are the ones fcf_m2.scoring wraps in (1 - x)."""
     inverted = {d.column for d in bs.DRIVERS if d.invert}
     assert inverted == {
         "existing_ports_total_n",
