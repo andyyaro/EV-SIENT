@@ -119,7 +119,7 @@ V3 never silently replaces legacy numbers — see the
 
 ```bash
 make setup          # venv + editable install with pinned test extras
-make test           # 652 tests incl. legacy golden tests (coverage gate 80%)
+make test           # full suite incl. legacy golden tests (coverage gate 80%)
 make run-legacy     # reproduce the accepted V2 baseline (25/48)
 make run-v3         # full V3 run: scores, scenarios, economics, emissions, contract
 make validate       # validate the tracked canonical contract
@@ -138,7 +138,7 @@ never against real site data; see
 |---|---|
 | [`src/fcf_m2/`](src/README.md) | The Python model (scoring, right-sizing, waits, economics, emissions, confidence, triggers, contract) |
 | [`data/`](data/README.md) | Site inputs, scoring anchors, provenance, cached GIS boundaries, the canonical contract |
-| [`tests/`](tests/README.md) | 652-test suite incl. golden legacy fixtures and contract validation |
+| [`tests/`](tests/README.md) | The test suite incl. golden legacy fixtures and contract validation |
 | [`matlab/`](matlab/README.md) | Site-grid load-behavior model (session-based profiles, capacity guard, managed charging) |
 | [`excel/`](excel/README.md) | Updated grid-planning workbook with live reconciliation checks |
 | [`dashboard/`](dashboard/README.md) | Offline static dashboard (9 visuals) + Tableau patch package |
