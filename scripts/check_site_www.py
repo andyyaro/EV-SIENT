@@ -34,6 +34,13 @@ REQUIRED_EVERYWHERE = [
     ("fcf-vintage", "source-vintage footer"),
     ('href="privacy.html"', "privacy link"),
     ('href="standards.html"', "standards link"),
+    # Added in Phase 9. The capacity caveat was required on results.html only, on the
+    # reasoning that results.html is where "advance this site" language appears. But the
+    # HOME PAGE never once used the word `placeholder` -- the single most important fact
+    # about this study was absent from the first page anyone sees, and a reader who landed
+    # there and went no further was never told it. It is cheap to state everywhere and
+    # expensive to omit anywhere.
+    ("placeholder at all twelve sites", "capacity-placeholder statement"),
 ]
 
 

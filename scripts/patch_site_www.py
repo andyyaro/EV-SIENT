@@ -64,6 +64,8 @@ AUTHORITY_DISCLAIMER = """
   procurement or construction authorization. Every siting decision remains subject to
   electrical, ADA, fire/AHJ, stormwater and permitting review by the responsible authorities.
   <strong>No site shown here is approved.</strong>
+  <strong>Electrical capacity is an unverified placeholder at all twelve sites</strong> —
+  nobody has confirmed the service could support chargers.
 </aside>
 """
 
@@ -94,6 +96,20 @@ def insert_before_body_close(text: str, block: str) -> str:
     if "</body>" in text:
         return text.replace("</body>", f"{block}\n</body>", 1)
     return text + block
+
+
+def replace_disclaimer(text: str, block: str) -> str:
+    """Swap an existing `fcf-authority` aside for the canonical one, in place.
+
+    Matches the whole `<aside class="fcf-authority" ...>...</aside>` element non-greedily.
+    These asides never nest, so a non-greedy match to the first `</aside>` is exact rather
+    than merely usually-right. If the element cannot be found the text is returned unchanged
+    and the caller's own check reports the page, which is better than a partial rewrite.
+    """
+    pattern = re.compile(r'<aside class="fcf-authority".*?</aside>', re.S)
+    if not pattern.search(text):
+        return text
+    return pattern.sub(lambda _m: block.strip(), text, count=1)
 
 
 def insert_after_nav_or_body_open(text: str, block: str) -> str:
@@ -194,6 +210,13 @@ def main() -> int:
 
         if DISCLAIMER_MARKER not in text:
             text = insert_after_nav_or_body_open(text, AUTHORITY_DISCLAIMER)
+        else:
+            # This block is GENERATED, so it must be rewritten when it changes -- not left
+            # alone because a marker happens to be present. Insert-only was how the whole
+            # patch package sat unapplied for three weeks (Phase 8.3): the check asked
+            # "is there a disclaimer?" rather than "is it the current one?", so amending
+            # the text here would have silently changed nothing on any existing page.
+            text = replace_disclaimer(text, AUTHORITY_DISCLAIMER)
         if VINTAGE_MARKER not in text:
             text = insert_before_body_close(text, VINTAGE_FOOTER)
         if page == "results.html" and CAVEAT_MARKER not in text:
