@@ -13,7 +13,7 @@ boundaries are cached in `data/cache/`.
 make setup      # creates ./venv and installs the package editable with pinned [test] extras
 ```
 
-## 1. Test suite (expect: 80 tests pass; coverage gate ≥ 80%)
+## 1. Test suite (expect: 652 tests pass; coverage gate ≥ 80%)
 
 ```bash
 make test
@@ -87,7 +87,7 @@ and has not been executed (nothing has — no license was available).
 
 | Check | Expected |
 |---|---|
-| `make test` | 80 tests pass; coverage ≥ 80% |
+| `make test` | 652 tests pass; coverage ≥ 80% |
 | `make run-legacy` | starter_total 25, pathway_total 48 (accepted V2 baseline) |
 | `make validate` | contract v1.0.0 passes all rules, JSON Schema, and the manifest hash chain |
 | `./scripts/verify.sh` | `ALL REPOSITORY VERIFICATION GATES PASSED` |

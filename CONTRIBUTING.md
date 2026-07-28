@@ -4,7 +4,7 @@
 
 ```bash
 make setup            # venv + editable install with pinned [test] extras (Python 3.11+)
-make test             # 80 tests incl. legacy golden tests; coverage gate 80%
+make test             # 652 tests incl. legacy golden tests; coverage gate 80%
 make run-legacy       # reproduce the accepted V2 baseline (25 starter / 48 pathway)
 make run-v3           # full V3 run into data/outputs/v3_run/
 make validate         # validate the tracked contract at data/contract/v1

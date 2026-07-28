@@ -5,7 +5,7 @@ Decision-support platform for planning safe, code-responsive public EV charging 
 
 ![tests](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/tests.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
-![matlab](https://img.shields.io/badge/MATLAB-R2025b%20(static%20checks%20only)-B08948)
+![matlab](https://img.shields.io/badge/MATLAB-R2025b%20suite%2049%2F49%20(synthetic%20fixture)-B08948)
 
 ![Staged pilots beat broad buildout at every horizon](docs/assets/readme/project-overview.png)
 
@@ -79,7 +79,7 @@ V3 never silently replaces legacy numbers — see the
 
 ```bash
 make setup          # venv + editable install with pinned test extras
-make test           # 80 tests incl. legacy golden tests (coverage gate 80%)
+make test           # 652 tests incl. legacy golden tests (coverage gate 80%)
 make run-legacy     # reproduce the accepted V2 baseline (25/48)
 make run-v3         # full V3 run: scores, scenarios, economics, emissions, contract
 make validate       # validate the tracked canonical contract

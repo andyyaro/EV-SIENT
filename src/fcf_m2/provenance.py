@@ -123,9 +123,20 @@ CAVEAT_TEXT: dict[str, str] = {
     "demand_modelled": (
         "Demand is MODELLED, not measured. No charging has been observed at any of these "
         "sites; the figures come from benchmark assumptions applied to site characteristics."),
+    # This caveat used to read: "The p50 and p90 are 0.0 at every site because simulated
+    # utilisation runs 6-20%." That sentence is TRUE -- of a different statistic, in a
+    # different table, at one horizon. It described the discrete-event run in
+    # tbl_peak_waits.csv at 2026. It is attached to `average_wait_minutes` and
+    # `peak_wait_minutes`, which are Erlang-C estimates across all four horizons and reach
+    # 215.35 minutes at 2046. A reader hovering a 215-minute wait was being told waits are
+    # zero. Text-versus-meaning again: accurate prose, wrong referent.
     "wait_simulated": (
-        "Waits are simulated from modelled demand, never observed. The p50 and p90 are 0.0 at "
-        "every site because simulated utilisation runs 6-20%."),
+        "Waits are SIMULATED from modelled demand and have never been observed -- no charging "
+        "has happened at any of these sites. This is an Erlang-C queueing estimate, and it is "
+        "not nil: the peak reaches about 42 minutes at 2026 and about 215 minutes at 2046, as "
+        "fixed port counts meet rising modelled demand. A separate discrete-event run reports "
+        "p50 and p90 waits of 0.0 at all 12 sites at the 2026 starter build -- that is a "
+        "different statistic from a different table, and it is not this number."),
     "screening_only": (
         "A screening-class planning output for comparing sites. It cannot approve, permit or "
         "fund anything, and it is not an engineering design."),
