@@ -15,7 +15,7 @@
     "spare_capacity_kw":      {"lo": 0,    "hi": 200,   "note": "all cohort values 0 (unconfirmed); anchor allows future verified values without rescaling"},
     "distance_to_service_ft": {"lo": 0,    "hi": 300,   "note": "cohort range 75-150"},
     "trenching_ft":           {"lo": 0,    "hi": 250,   "note": "cohort range 50-125"},
-    "install_cost_est_usd":   {"lo": 0,    "hi": 100000, "note": "cohort max 63750 (derived field)"},
+    "install_cost_est_usd":   {"lo": 0,    "hi": 100000, "note": "derived field: trenching_ft * trench_cost_per_ft + service_upgrade_cost_usd; cohort max 52500 (PWC002), recomputed 2026-07-28 -- this note previously said 63750, which no site reaches. The anchor hi of 100000 is unchanged, so no score moves."},
     "equity_gap_index":       {"lo": 0,    "hi": 1.0,   "note": "index is already 0-1 constructed"},
     "ev_share_local":         {"lo": 0,    "hi": 0.10,  "note": "legacy fixed benchmark EV_SHARE_HIGH_BENCHMARK retained"}
   }

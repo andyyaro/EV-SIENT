@@ -12,7 +12,9 @@
 | `anchors/anchor_set_v1.json` | tracked reference | yes | versioned fixed scoring anchors (V3); changing this changes scores |
 | `provenance/` | tracked reference | yes | typed field-level provenance driving data confidence |
 | `cache/boundaries/` | tracked reference (external cache) | yes | US Census TIGER 2024 county boundaries, filtered+simplified for offline maps (see ATTRIBUTION.md) |
-| `contract/v1/` | tracked reference — **the canonical cross-model contract** | yes | site × horizon × case table + schema + manifest with hash chain; every downstream artifact quotes these values |
+| `contract/v1/` | tracked reference — **the canonical cross-model contract, FROZEN** | yes | site × horizon × case table + schema + manifest with hash chain; every downstream artifact quotes these values. Frozen at Phase 4: its values never change, and its manifest digest is pinned so a change is detected. |
+| `contract/v2/` | tracked reference — **additive over v1** | yes | every v1 field carried across byte-identically, plus the observed-data fields (`observed_*`, capacity confirmation, trigger outcome). Gated to rebuild byte-identically from v1, so v2 cannot silently restate a v1 value. |
+| `synthetic/` | tracked reference (fabricated) | yes | the invented site set shipped with the public installer (DEC-020). Every value is fabricated and labelled; a run against it declares `synthetic_inputs: true`. |
 | `observed/observed_sessions_template.csv` | example/template | yes | import format for future observed-session calibration |
 | `outputs/` | generated output | **no (gitignored)** | reproduce with `make run-legacy` / `make run-v3` |
 
