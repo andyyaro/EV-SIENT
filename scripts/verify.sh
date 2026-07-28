@@ -192,6 +192,18 @@ gate "matlab: nothing destined for the PUBLIC harness carries site-identifying d
 gate "field-entry: the browser's rules never accept what the model rejects" \
   bash -c "cd '$REPO' && '$PY' scripts/build_field_schema.py >/dev/null && '$PY' -m pytest tests/test_field_schema_parity.py -q"
 
+# Drives the entry form in a real headless Chrome — the only check that sees what a person
+# sees. It exists because this program has twice shipped a feature that passed every test and
+# was unusable: two blank Tableau sheets, and a sign-in page that did not exist. Both times the
+# check verified the step under our control rather than the outcome the reader experiences.
+# Skips loudly (not silently) when Chrome is absent, so CI without a browser stays green.
+gate "field-entry: the form refuses and accepts VISIBLY in a real browser" \
+  bash -c "cd '$REPO' && if ! command -v node >/dev/null; then echo 'node absent - browser test SKIPPED'; exit 0; fi; \
+    '$PY' -m fcf_m2.server --port 8799 >/tmp/fcf_gate_server.log 2>&1 & SRV=\$!; \
+    trap 'kill \$SRV 2>/dev/null' EXIT; \
+    for i in \$(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8799/index.html && break; sleep 0.5; done; \
+    node --test 'tests/browser/*.test.mjs'"
+
 # The edge authoriser is the only thing standing between an anonymous request and the study's
 # full lineage, so its tests run here rather than only in the deploy path. They exercise the
 # REAL handler with REAL RSA keys — only the network is stubbed — so a regression in token

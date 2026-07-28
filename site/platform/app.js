@@ -605,6 +605,7 @@ async function main() {
     renderSurfaces();
     renderEngines();
     renderSimulink();
+    await initFieldEntry();
 
     // Deep-link a provenance panel: ?number=FFX004|2036|base|ports_active
     //
@@ -650,3 +651,229 @@ async function main() {
 }
 
 document.addEventListener("DOMContentLoaded", main);
+
+/* ------------------------------------------------------------------ field-data entry
+ *
+ * The form is BUILT FROM `field_schema.json`, which is generated from `observed.py`. Nothing
+ * about which fields exist, which values are legal, or which combinations are refused is
+ * written here — this file only draws what the schema describes and calls the shared
+ * validator. That is the whole point: a hand-written form is a second copy of the model's
+ * refusals, and a second copy drifts toward being more permissive than the thing it mirrors.
+ *
+ * What this deliberately does NOT do
+ * ----------------------------------
+ * It does not submit anything. A browser cannot write to the model, and pretending otherwise
+ * would be the worst possible lie for this particular feature: someone records a capacity
+ * confirmation in the field, sees a success message, and believes a site's evidence has been
+ * updated when nothing has changed. So the form produces a **file**, says so plainly, and
+ * points at the ingest step that actually reads it.
+ */
+
+const FIELD = { schema: null, formId: null, pending: [] };
+
+function currentForm() {
+  return FIELD.schema.forms.find((f) => f.id === FIELD.formId);
+}
+
+/** Site ids come from the contract, so the form cannot offer a site the model does not know. */
+function knownSiteIds() {
+  return [...new Set(Object.keys(STATE.prov.entries).map((k) => k.split("|")[0]))].sort();
+}
+
+function fieldControl(field) {
+  const wrap = document.createElement("div");
+  wrap.className = "fieldrow";
+
+  const label = document.createElement("label");
+  label.setAttribute("for", `f-${field.name}`);
+  label.textContent = field.label + (field.required ? " *" : "");
+  wrap.append(label);
+
+  let input;
+  if (field.type === "enum" || field.type === "site") {
+    input = document.createElement("select");
+    const blank = document.createElement("option");
+    blank.value = "";
+    blank.textContent = "—";
+    input.append(blank);
+    const values = field.type === "site" ? knownSiteIds() : field.values;
+    for (const value of values) {
+      const option = document.createElement("option");
+      option.value = value;
+      // The method a person picks caps how strong a claim the value can support. Showing that
+      // at the point of choosing is the difference between a dropdown and an explanation.
+      const note = field.value_notes && field.value_notes[value];
+      option.textContent = note ? `${value} — ${note}` : value;
+      input.append(option);
+    }
+    if (field.default) input.value = field.default;
+  } else if (field.type === "textarea") {
+    input = document.createElement("textarea");
+    input.rows = 2;
+  } else {
+    input = document.createElement("input");
+    input.type = field.type === "date" ? "date"
+      : (field.type === "number" || field.type === "integer") ? "number" : "text";
+    if (field.type === "number") input.step = "any";
+  }
+  input.id = `f-${field.name}`;
+  input.name = field.name;
+  wrap.append(input);
+
+  if (field.help) {
+    const help = document.createElement("p");
+    help.className = "muted fieldhelp";
+    help.textContent = field.help;
+    wrap.append(help);
+  }
+  return wrap;
+}
+
+function renderFieldForm() {
+  const form = currentForm();
+  const host = $("#field-fields");
+  host.replaceChildren();
+  for (const field of form.fields) host.append(fieldControl(field));
+
+  const explain = document.createElement("p");
+  explain.className = "prose muted";
+  explain.textContent = form.explains;
+  host.prepend(explain);
+
+  $("#field-errors").replaceChildren();
+  renderPending();
+}
+
+function readForm() {
+  const row = {};
+  for (const field of currentForm().fields) {
+    const el = document.getElementById(`f-${field.name}`);
+    row[field.name] = el ? el.value : "";
+  }
+  return row;
+}
+
+function showErrors(errors) {
+  const host = $("#field-errors");
+  host.replaceChildren();
+  if (!errors.length) return;
+
+  const heading = document.createElement("p");
+  heading.className = "pv-caveat";
+  heading.textContent = errors.length === 1
+    ? "This observation was not added:"
+    : `This observation was not added — ${errors.length} problems:`;
+  host.append(heading);
+
+  const list = document.createElement("ul");
+  list.className = "errlist";
+  for (const error of errors) {
+    const item = document.createElement("li");
+    // The message is the MODEL's own wording, carried through the schema. A friendlier
+    // paraphrase here would be a third place the rules are described.
+    item.textContent = error.message;
+    list.append(item);
+    const el = document.getElementById(`f-${error.field}`);
+    if (el) el.setAttribute("aria-invalid", "true");
+  }
+  host.append(list);
+}
+
+function renderPending() {
+  const rows = FIELD.pending.filter((p) => p.formId === FIELD.formId);
+  const wrap = $("#pending-wrap");
+  wrap.hidden = rows.length === 0;
+  if (!rows.length) return;
+
+  const form = currentForm();
+  const thead = $("#pending thead");
+  const tbody = $("#pending tbody");
+  thead.replaceChildren();
+  tbody.replaceChildren();
+
+  const head = document.createElement("tr");
+  for (const column of form.csv_columns) {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = column;
+    head.append(th);
+  }
+  thead.append(head);
+
+  for (const entry of rows) {
+    const tr = document.createElement("tr");
+    for (const column of form.csv_columns) {
+      const td = document.createElement("td");
+      td.textContent = entry.row[column] || "";
+      tr.append(td);
+    }
+    tbody.append(tr);
+  }
+
+  $("#pending-note").textContent =
+    `${rows.length} observation${rows.length === 1 ? "" : "s"} held in this browser only. ` +
+    `Nothing has been sent anywhere and no number on this page has changed. Download the CSV, ` +
+    `then run the ingest step to see what it would change.`;
+}
+
+function downloadPending() {
+  const form = currentForm();
+  const rows = FIELD.pending.filter((p) => p.formId === FIELD.formId).map((p) => p.row);
+  const csv = FieldValidate.toCsv(form, rows);
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `observed_${form.id}.csv`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function initFieldEntry() {
+  try {
+    FIELD.schema = await loadJSON("field_schema.json");
+  } catch (err) {
+    $("#field-fields").textContent =
+      `The entry form could not load its rules (${err.message}), so it is not being shown. ` +
+      `A form that cannot check what you type would accept observations the model refuses.`;
+    $("#field-form").querySelector("button").disabled = true;
+    return;
+  }
+
+  const kind = $("#form-kind");
+  for (const form of FIELD.schema.forms) {
+    const option = document.createElement("option");
+    option.value = form.id;
+    option.textContent = form.label;
+    kind.append(option);
+  }
+  FIELD.formId = FIELD.schema.forms[0].id;
+  kind.value = FIELD.formId;
+  kind.addEventListener("change", () => {
+    FIELD.formId = kind.value;
+    renderFieldForm();
+  });
+
+  $("#field-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    for (const el of $("#field-fields").querySelectorAll("[aria-invalid]")) {
+      el.removeAttribute("aria-invalid");
+    }
+    const row = readForm();
+    const errors = FieldValidate.validateRow(currentForm(), row);
+    showErrors(errors);
+    if (errors.length) return;
+    FIELD.pending.push({ formId: FIELD.formId, row });
+    renderFieldForm();
+  });
+
+  $("#field-download").addEventListener("click", downloadPending);
+  $("#field-clear").addEventListener("click", () => {
+    FIELD.pending = FIELD.pending.filter((p) => p.formId !== FIELD.formId);
+    renderPending();
+  });
+
+  renderFieldForm();
+}

@@ -251,3 +251,29 @@ a.run { display: inline-block; text-decoration: none; }
 }
 .linkchip:hover { background: var(--warn-bg); }
 .linkchip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- field entry */
+
+.fieldgrid { display: grid; gap: .9rem; max-width: 46rem; margin: 1rem 0; }
+.fieldrow { display: grid; gap: .3rem; }
+.fieldrow label { font-size: .88rem; font-weight: 600; color: var(--ink-2); }
+.fieldrow input, .fieldrow select, .fieldrow textarea {
+  font: inherit; font-size: .95rem; padding: .45rem .55rem;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel-bg); color: var(--ink); width: 100%;
+}
+.fieldrow input:focus-visible, .fieldrow select:focus-visible, .fieldrow textarea:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 1px;
+}
+/* A refused field is marked in the field itself, not only in the summary above it — a person
+ * fixing four problems should not have to hold four field names in their head. */
+.fieldrow [aria-invalid="true"] { border-color: #b3261e; border-width: 2px; }
+.fieldhelp { margin: .1rem 0 0; font-size: .84rem; }
+
+.errlist { margin: .4rem 0 0; padding-left: 1.2rem; font-size: .9rem; }
+.errlist li { margin: .2rem 0; }
+
+.run.secondary { background: transparent; color: var(--ink-2); border-color: var(--line); }
+.run.secondary:hover:not(:disabled) { filter: none; background: rgba(127,127,127,.1); }
+#pending-wrap .run { margin-right: .5rem; }
+#pending td, #pending th { font-size: .85rem; white-space: nowrap; }
