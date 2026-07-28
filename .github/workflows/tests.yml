@@ -16,6 +16,11 @@ jobs:
   verify:
     name: Repository verification (all gates)
     runs-on: ubuntu-latest
+    # A hung test must not burn an hour of the runner allowance. One did:
+    # a test that started a real server and blocked on threading.Event().wait()
+    # ran for 61 minutes before anyone noticed, on a private repo where minutes
+    # are metered. Fail fast and loudly instead.
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v7

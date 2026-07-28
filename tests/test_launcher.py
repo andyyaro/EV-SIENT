@@ -55,20 +55,33 @@ def test_a_missing_source_stops_the_launch_and_names_it(monkeypatch, capsys):
     assert "no build step" in out, "it must say WHY it cannot simply build the thing"
 
 
-def test_a_missing_generated_file_is_built_not_refused(monkeypatch, capsys):
-    """The other half of the rule: derived files are the launcher's problem, not the user's."""
+def test_a_missing_generated_file_is_built_not_refused(monkeypatch):
+    """The other half of the rule: derived files are the launcher's problem, not the user's.
+
+    Note how the server is stubbed. The first version replaced ``sys.modules['fcf_m2.server']``,
+    which passed when this file ran alone and **hung the entire suite** when it did not: once
+    another test module has imported the submodule, ``from . import server`` resolves the
+    package attribute rather than consulting ``sys.modules``, so the real ``serve()`` started
+    and ``threading.Event().wait()`` blocked forever. The suite showed 27 minutes elapsed
+    against 4.5 seconds of CPU.
+
+    Patching the attribute on the real module is what actually intercepts the call, and it
+    behaves the same whether or not the module was already imported.
+    """
     calls = []
     monkeypatch.setattr(launcher, "GENERATED", [("nope.json", ["scripts/build_field_schema.py"])])
     monkeypatch.setattr(launcher, "build", lambda commands, python=None: calls.append(commands))
     monkeypatch.setattr(launcher, "missing_sources", lambda: [])
 
-    # Stop before the server starts; we are testing the decision, not the socket.
     class Stop(Exception):
-        pass
+        """Raised in place of starting a real server, so the test ends at the decision."""
 
-    def explode(*_a, **_k):
+    from fcf_m2 import server as real_server
+
+    def explode(*_args, **_kwargs):
         raise Stop
-    monkeypatch.setitem(sys.modules, "fcf_m2.server", type("M", (), {"serve": staticmethod(explode)}))
+    monkeypatch.setattr(real_server, "serve", explode)
+
     with pytest.raises(Stop):
         launcher.main([])
     assert calls == [[["scripts/build_field_schema.py"]]]

@@ -38,6 +38,11 @@ jobs:
   validate:
     name: Deploy plan is well-formed (no credentials)
     runs-on: ubuntu-latest
+    # A hung test must not burn an hour of the runner allowance. One did:
+    # a test that started a real server and blocked on threading.Event().wait()
+    # ran for 61 minutes before anyone noticed, on a private repo where minutes
+    # are metered. Fail fast and loudly instead.
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -123,6 +128,11 @@ jobs:
     needs: validate
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # A hung test must not burn an hour of the runner allowance. One did:
+    # a test that started a real server and blocked on threading.Event().wait()
+    # ran for 61 minutes before anyone noticed, on a private repo where minutes
+    # are metered. Fail fast and loudly instead.
+    timeout-minutes: 20
     steps:
       - name: Check whether a deploy role is configured
         id: role
