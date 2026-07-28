@@ -7,7 +7,15 @@ Decision-support platform for planning safe, code-responsive public EV charging 
 ![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
 ![matlab](https://img.shields.io/badge/MATLAB-R2025b%20suite%2049%2F49%20(synthetic%20fixture)-B08948)
 
-![Staged pilots beat broad buildout at every horizon](docs/assets/readme/project-overview.png)
+![Lifecycle cost in net present value across three horizons for three build cases — defer, overbuild now, and staged. Staged costs less than overbuild at every horizon.](docs/assets/readme/project-overview.png)
+
+Portfolio lifecycle cost, net present value, base escalation — from the canonical
+`milestone2_v3` run. **STG** (staged, the recommendation) costs less than **OVB** (energise the
+whole future-ready pathway in 2026) at every horizon: **$1.56M vs $1.87M** by 2036, **$3.01M vs
+$3.41M** by 2056. **DEF** is a floor comparator and not a plan — it lays the pathway and
+energises **no ports at all**, which is why it sits flat at $0.62M and why the lowest bars on
+this chart are the ones that charge nobody. Screening-class estimates for comparing cases
+against each other. Never a budget, quote or bid.
 
 ## Start here
 
