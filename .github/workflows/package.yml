@@ -162,17 +162,31 @@ jobs:
 
       - name: Repackage with checksums
         shell: bash
+        # Python rather than `zip`, because the Windows runner's git-bash has `unzip` and NOT
+        # `zip` — measured: "line 3: zip: command not found", exit 127, on the first Windows
+        # run this workflow ever had. The shasum/certutil branch went with it, because the two
+        # tools do not write the same thing: the macOS artifact shipped a `<digest>  <file>`
+        # line and the Windows one shipped whatever certutil prints. One format, produced by
+        # one implementation, is what lets `docs/INSTALL.md` describe the file the same way on
+        # both platforms. (Not a measured claim about certutil's exact layout — it has not been
+        # run here; the point is that it was a second implementation, and now there is one.)
         run: |
-          mkdir -p out
           NAME="fcf-platform-${FCF_VERSION}-${{ matrix.platform }}"
-          (cd staging && zip -qr "../out/${NAME}.zip" .)
-          cd out
-          if command -v shasum >/dev/null; then
-            shasum -a 256 "${NAME}.zip" > "${NAME}.zip.sha256"
-          else
-            certutil -hashfile "${NAME}.zip" SHA256 > "${NAME}.zip.sha256"
-          fi
-          cat "${NAME}.zip.sha256"
+          python - "$NAME" <<'PY'
+          import hashlib, pathlib, sys, zipfile
+          name = sys.argv[1]
+          out = pathlib.Path("out"); out.mkdir(exist_ok=True)
+          staging = pathlib.Path("staging")
+          archive = out / f"{name}.zip"
+          with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
+              for path in sorted(staging.rglob("*")):
+                  if path.is_file():
+                      z.write(path, path.relative_to(staging).as_posix())
+          digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+          line = f"{digest}  {archive.name}\n"
+          (out / f"{name}.zip.sha256").write_text(line)
+          print(line, end="")
+          PY
 
       - name: Prove the artifact carries no credential
         # Verified by INSPECTING the built package, never by assuming. The real-facility check

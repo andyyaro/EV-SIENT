@@ -87,7 +87,10 @@ than forgotten.
    ```
    certutil -hashfile fcf-platform-<version>-windows.zip SHA256
    ```
-   Compare the printed hash to the contents of the `.sha256` file. If they differ, stop.
+   The `.sha256` file holds one line — the digest, two spaces, the filename — written by the
+   same code on both platforms, so the hash you compare against looks identical to the one a
+   macOS reader sees. Compare the hash certutil prints to the digest in that file, ignoring
+   any spaces certutil inserts. If they differ, stop.
 3. Right-click the `.zip` → **Properties**. If there is an **Unblock** checkbox at the bottom,
    tick it and click OK. This clears the mark-of-the-web on the whole archive and saves
    unblocking each file inside it.
