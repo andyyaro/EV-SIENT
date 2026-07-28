@@ -3,6 +3,12 @@
 # dependencies the original lock omitted. No existing pin was changed. typing-extensions
 # carries its upstream environment marker: referencing needs it only below Python 3.13,
 # which is why a lock generated on 3.14 could not contain it while CI on 3.12 requires it.
+#
+# tzdata added 2026-07-28 for the same reason, one platform over. pandas declares
+# `tzdata; sys_platform == "win32"` — Windows has no system tz database — and this lock was
+# generated on macOS, so every Windows install pulled an unpinned, unhashed tzdata while the
+# lock claimed to be the complete pinned set. Found by the packaging workflow's first real
+# execution on a Windows runner, not by reading the file. No existing pin was changed.
 attrs==26.1.0
 contourpy==1.3.3
 coverage==7.15.2
@@ -30,3 +36,4 @@ rpds-py==2026.6.3
 segno==1.6.6
 six==1.17.0
 typing-extensions==4.16.0 ; python_version < "3.13"
+tzdata==2026.3 ; sys_platform == "win32"

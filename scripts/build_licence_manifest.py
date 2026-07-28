@@ -14,8 +14,15 @@ hypothetical: run once from the ambient macOS interpreter it dropped 20 of this 
 dependencies (pandas, matplotlib, pytest, segno, python-docx…), added 12 the project does not
 use (playwright, PyQt6-QScintilla, CairoSVG…), printed `all licences resolved`, and exited 0.
 A licence manifest that omits shipped dependencies is an attribution failure, not a cosmetic
-one, so `check_environment` now refuses to write unless every package the lock requires for
-this interpreter is actually present.
+one, so `check_environment` refuses to write from an environment that is not this project's.
+
+The shape of that check took two attempts, and the first was wrong in a way worth recording.
+It demanded that the environment **equal** `requirements-lock.txt`, and that failed both
+packaging runners on the first real run: the workflow installs with `pip install -e . -c
+requirements-lock.txt`, and a lock used as a *constraints* file pins versions without
+installing every line, so a correct release environment legitimately lacks the test-only and
+extra-only pins. The rule is a **subset**, not an equality — nothing installed that the lock
+does not pin, and at least what `pip install -e .` puts there.
 
 What it does NOT do is guess. Modern packaging moved licence information from the `License:`
 field to `License-Expression` and `License-File`, and a great many distributions now leave the
@@ -140,29 +147,55 @@ def locked_requirements(lock_text: str) -> list[tuple[str, str | None]]:
 ENVIRONMENT_PACKAGES = {"pip", "setuptools", "wheel"}
 
 
-def check_environment(lock_text: str, installed: set[str]) -> tuple[list[str], list[str]]:
-    """(missing, unexpected) — how this interpreter differs from `requirements-lock.txt`.
+def declared_runtime_dependencies() -> set[str]:
+    """The `[project] dependencies` of this package — what `pip install -e .` actually installs.
 
-    Both directions matter and they fail differently.
+    Deliberately NOT the whole lock. The lock is a **constraints** file: `pip install -e . -c
+    requirements-lock.txt` pins versions for whatever gets installed, it does not install every
+    line. So a correct release environment legitimately lacks the test-only and extra-only pins
+    (pytest, coverage, segno, python-docx …), and demanding the full lock is what made the first
+    version of this guard fail both packaging runners.
+    """
+    try:
+        import tomllib
+        data = tomllib.loads((REPO / "pyproject.toml").read_text())
+    except Exception:
+        return set()
+    out = set()
+    for spec in data.get("project", {}).get("dependencies", []):
+        name = re.split(r"[<>=!~\[; ]", spec, maxsplit=1)[0].strip()
+        if name:
+            out.add(normalise(name))
+    return out
 
-    *Missing* is an attribution failure: a dependency the artifact ships would go unlisted.
-    *Unexpected* is the opposite error and it is just as wrong — a manifest naming software the
-    artifact does not carry is a false statement about what was distributed, and it is the
-    likelier one in practice because a working venv accumulates tools. This repository's own
-    venv had picked up Markdown, markdown-it-py and mdurl, none of which the release artifact
-    contains and all of which a regeneration would have added.
 
-    Both empty means the environment equals the lock, so the manifest is reproducible: anyone
-    with the lock gets the same file, which is the only property that makes a generated
-    artifact checkable at all.
+def check_environment(lock_text: str, installed: set[str],
+                      required: set[str] | None = None) -> tuple[list[str], list[str]]:
+    """(missing, unexpected) — how this interpreter differs from what the project declares.
+
+    Two different errors, and they are not symmetric.
+
+    *Missing* — a package the project declares as a runtime dependency is not installed. Then
+    this is not the project's environment at all and every licence reported would describe
+    other software.
+
+    *Unexpected* — a package is installed that the lock does not pin. That one is the likelier
+    failure and just as wrong: a manifest naming software the artifact does not carry is a
+    false statement about what was distributed. This repository's own venv had accumulated
+    Markdown, markdown-it-py and mdurl; the ambient macOS interpreter had playwright, PyQt6 and
+    CairoSVG. Both would have been published as attributions.
+
+    The asymmetry is deliberate. The environment must be a **subset** of the lock — never
+    more — and must contain at least what `pip install -e .` puts there. Requiring equality
+    was wrong: it failed the macOS and Windows packaging jobs, which install with the lock as
+    a *constraints* file and therefore correctly carry only the runtime closure.
     """
     try:
         from packaging.markers import Marker
     except ImportError:  # packaging is itself a locked dependency
         return (["packaging (import failed — this is not the project environment)"], [])
 
-    expected = set()
-    missing = []
+    permitted = set()
     for name, marker in locked_requirements(lock_text):
         if marker is not None:
             try:
@@ -170,10 +203,12 @@ def check_environment(lock_text: str, installed: set[str]) -> tuple[list[str], l
                     continue
             except Exception:
                 pass  # an unparseable marker is treated as applying, which fails closed
-        expected.add(name)
-        if name not in installed:
-            missing.append(name)
-    unexpected = sorted(installed - expected - ENVIRONMENT_PACKAGES)
+        permitted.add(name)
+
+    if required is None:
+        required = declared_runtime_dependencies()
+    missing = sorted(name for name in required if name not in installed)
+    unexpected = sorted(installed - permitted - ENVIRONMENT_PACKAGES)
     return missing, unexpected
 
 
@@ -229,17 +264,17 @@ def main() -> int:
         print(f"REFUSING to write a licence manifest from this interpreter.\n"
               f"  {sys.executable}", file=sys.stderr)
         if missing:
-            print(f"  {len(missing)} package(s) requirements-lock.txt requires are NOT "
-                  f"installed here: {', '.join(sorted(missing))}\n"
-                  f"    -> the manifest would omit dependencies the artifact ships.",
-                  file=sys.stderr)
+            print(f"  {len(missing)} runtime dependency(ies) this project declares are NOT "
+                  f"installed here: {', '.join(missing)}\n"
+                  f"    -> this is not the project's environment; the licences would describe "
+                  f"other software.", file=sys.stderr)
         if unexpected:
             print(f"  {len(unexpected)} package(s) installed here are NOT in the lock: "
                   f"{', '.join(unexpected)}\n"
                   f"    -> the manifest would attribute software the artifact does not carry.",
                   file=sys.stderr)
-        print("  Build an environment from requirements-lock.txt and re-run. The manifest is "
-              "reproducible only from the locked set.", file=sys.stderr)
+        print("  Install this project with requirements-lock.txt as the constraints file and "
+              "re-run.", file=sys.stderr)
         return 1
 
     unresolved = [e for e in entries if e["licence"] == "UNRESOLVED"]

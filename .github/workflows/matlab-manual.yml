@@ -57,3 +57,7 @@ jobs:
           path: |
             matlab/test-results/
             matlab/outputs/
+          # Same reasoning as package.yml: artifact storage is an account-level quota that
+          # fails uploads outright once exhausted. This workflow is manual, so its output is
+          # looked at within days or not at all.
+          retention-days: 14

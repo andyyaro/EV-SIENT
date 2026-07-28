@@ -118,35 +118,69 @@ def test_a_signing_step_must_survive_the_archiving_step(text):
         "drop the signing step — do not ship a build that appears to sign and does not.")
 
 
-def test_no_shipped_document_claims_the_artifact_is_signed(text):
-    """The install guide said "The artifact *is* ad-hoc signed". It was not, and had not been
-    for as long as the signing step and the `zip` step had coexisted.
+#: Affirmative signing claims that were actually made in this repository and were false. Each
+#: is pinned as a literal pattern rather than inferred, for the reason in the test below.
+FALSE_SIGNING_CLAIMS = [
+    r"artifact\s+\*{0,2}is\*{0,2}\s+ad-?hoc\s+signed",
+    r"artifact\s+\*{0,2}is\*{0,2}\s+signed",
+    r"ad-?hoc\s+signing\s+is\s+applied",
+    r"artifacts?\s+are\s+signed",
+]
 
-    A claim about the artifact must track what the workflow actually produces, so this reads
-    the workflow to decide what the documents are allowed to say.
+
+def test_no_shipped_document_claims_the_artifact_is_signed(text):
+    """The install guide said "The artifact *is* ad-hoc signed", and the workflow header said
+    "Ad-hoc signing is applied where it costs nothing". Neither was true.
+
+    **What this test does, precisely:** it forbids a short list of affirmative phrasings that
+    were actually written here, and separately requires the guide to state the true position.
+    It does **not** understand English, and two earlier attempts that tried to failed:
+
+    * the first looked for a negation within a few lines, and passed the false sentence because
+      an unrelated paragraph two lines away contained "used to";
+    * the second scoped to the sentence, and passed it again because YAML comment lines join
+      into one pseudo-sentence and the section heading "What is NOT claimed" supplied the word
+      "NOT" from three lines above.
+
+    A heuristic that keeps finding excuses is worse than a narrow check that cannot. This one is
+    narrow on purpose, and its narrowness is stated so nobody reads a pass as "no document
+    overclaims about signing" — it means "none of the four phrasings we got wrong before".
     """
     runnable = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
     signs = any("codesign" in line for line in runnable) and "ditto -c -k" in text
     if signs:
         return
 
-    for name in ("docs/INSTALL.md", "README.md", "DEPLOYMENT.md"):
+    # The workflow's own header is checked too. It kept saying "Ad-hoc signing is applied where
+    # it costs nothing" for a commit after the signing step was deleted — a stale claim in the
+    # file that defines the behaviour, which is the worst place for one.
+    for name in ("docs/INSTALL.md", "README.md", "DEPLOYMENT.md",
+                 ".github/workflows/package.yml"):
         doc = REPO / name
         if not doc.is_file():
             continue
-        # Scoped to the SENTENCE, not to a window of nearby lines. A window is too generous:
-        # the first version of this test passed the false sentence "The artifact *is* ad-hoc
-        # signed" because an unrelated paragraph two lines later happened to contain the words
-        # "used to". Sentences are split on a period FOLLOWED BY WHITESPACE, which leaves
-        # dotted identifiers like com.apple.cs.CodeDirectory intact.
         prose = " ".join(doc.read_text().splitlines())
-        for sentence in re.split(r"(?<=[.!?])\s+", prose):
-            if not re.search(r"\b(is|are|was|were)\b[^.]{0,40}\bsigned\b", sentence, re.I):
-                continue
-            assert re.search(r"\b(not|no|never|nothing|previously|used to)\b", sentence,
-                             re.I), (
-                f"{name} states the artifact is signed; the packaging workflow produces an "
-                f"unsigned artifact: {sentence.strip()[:160]}")
+        for pattern in FALSE_SIGNING_CLAIMS:
+            found = re.search(pattern, prose, re.I)
+            assert not found, (
+                f"{name} asserts the artifact is signed ({found.group(0)!r}); the packaging "
+                f"workflow has no signing step and produces an unsigned artifact")
+
+
+def test_the_install_guide_states_that_nothing_is_signed(text):
+    """The other half, and the one that cannot be satisfied by deleting a sentence: the guide
+    has to say what is true, not merely avoid saying what is false."""
+    runnable = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
+    if any("codesign" in line for line in runnable):
+        return
+    guide = REPO / "docs/INSTALL.md"
+    if not guide.is_file():
+        pytest.skip("install guide absent")
+    prose = " ".join(guide.read_text().splitlines())
+    assert re.search(r"(carries no signature|is not signed|nothing is signed|"
+                     r"no signature at all)", prose, re.I), (
+        "docs/INSTALL.md never states that the downloaded artifact is unsigned, which is the "
+        "one thing a reader hitting Gatekeeper needs to know is expected")
 
 
 def test_the_install_guide_states_the_measured_gatekeeper_outcome():
