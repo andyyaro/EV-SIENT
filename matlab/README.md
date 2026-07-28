@@ -161,7 +161,7 @@ buildSimulinkModel(out);   % builds simulink/<model>.slx ONCE if absent
 |---|---|
 | `peak_unmanaged_kW` | daily peak of base + uncontrolled EV request |
 | `peak_clamp_kW` / `curtailed_clamp_kWh` | legacy clamp: peak and energy refused (never rescheduled) |
-| `peak_energy_aware_kW` / `unmet_energy_aware_kWh` / `deferred_energy_aware_kWh` | scheduler: peak, energy not delivered by departure, energy shifted later and recovered |
+| `peak_energy_aware_kW` / `unmet_energy_aware_kWh` / `deferred_energy_aware_kWh` | scheduler: peak; energy not delivered by departure; and the **largest cumulative shortfall at any instant** — `max(cumtrapz(request) - cumtrapz(delivered))`, i.e. the high-water mark of how far behind schedule charging fell, **not a total of energy shifted**. Previously described as "energy shifted later and recovered", which reads as a summed quantity. |
 | `capacity_basis` / `capacity_verified` | provenance of any capacity number used |
 | `placeholder_banner` | non-empty text that MUST accompany the row wherever it is shown |
 | `service_check` | `within_service` / `exceeds_service` / `service_capacity_unknown` - labeled non-verified unless basis is verified |

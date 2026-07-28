@@ -35,7 +35,7 @@ about a site, a jurisdiction, or a charger.
 | `batch_results.csv` | The 120-row batch. `run_status = ok` on every row. |
 | `batch_manifest.txt` | Batch run id, seed, profile mode, and the placeholder note, as MATLAB wrote them. |
 | `batch_hashes.txt` | SHA-256 of the input and the output, written by the run itself. |
-| `regression_golden.csv` | The golden baseline as this run created it. **Superseded** — see below. |
+| `regression_golden.csv` | The golden baseline as this run created it. **NOT superseded** — see the caveat below; the table previously said the opposite of the section it points to. Byte-identical to `run-30296650057`'s copy, and now also committed at `matlab/tests/golden/` where `test_regression.m` actually reads it. |
 | `matlab_version.txt` | `version()`, `version('-release')`, and the Simulink license test. |
 | `run_provenance.txt` | Engine, release, repository, commit, run id, input hash, written *before* anything executed. |
 
