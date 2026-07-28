@@ -85,7 +85,7 @@
 - Two highlighted ULSE standards: UL 2594 (3rd ed., 2022) — safety for the exact equipment class; UL 3600 (2023) — measurable sustainability via circularity disclosure and annual reporting.
 - Adopted-vs-latest discipline: 2020 NEC via 2021 VA USBC, effective 2024-01-18; Access Board rule still at NPRM.
 - Conditional standards are NOT in scope (no DCFC/BESS anywhere).
-- Proposed standard: say the label exactly — "a fellowship design concept": *Municipal EV Charging Site Readiness and Emergency Access Standard*, three modules.
+- Proposed standard: say the label exactly — "a fellowship design concept": *Municipal EV Charging Site Readiness and Emergency Access Standard*, **seven** modules *(corrected 2026-07-28: this said three; the concept document defines Modules 1-7 — emergency access, expandability, accessibility, monitoring triggers, managed-charging fail-safe, commissioning evidence, and materials/end-of-life)*.
 
 ## Slide 13 — Beat 10: Integration + failure modes (Andy, ~0:50)
 

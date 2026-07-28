@@ -62,8 +62,8 @@ Checkpoint calls during the live run (timekeeper: whoever is not speaking — Pa
 - [ ] Copy the whole `presentation/` folder to the presentation machine (not just the .pptx).
 - [ ] **Turn networking off.** Open `Future_City_Fellowship_Milestone_2_Final.pdf` — all 17 pages render, every image visible (images are embedded; the PDF is the fail-safe).
 - [ ] Open the .pptx offline — all 17 slides render identically; no font substitution warnings that change layout (deck uses Georgia + Arial only).
-- [ ] Open all 11 files in `static_visuals/` directly — each PNG opens offline (no live map tiles; `09_site_map_offline.png` is the offline-rendered map).
+- [ ] Open all **9** files in `dashboard/static/` directly *(corrected 2026-07-28: this said 11 files in `static_visuals/`, a directory that does not exist in this repository)* — each PNG opens offline (no live map tiles; `09_site_map_offline.png` is the offline-rendered map).
 - [ ] Stand 3 m from the screen: slide titles, table numbers, and chart headlines readable.
-- [ ] Spot-check numbers against the deck's canonical set: 58.8 / 54.4 / 52.1 · 25/48 · 44→47 & 47→48 · $1.56M/$1.87M · $2.29M/$2.64M · $3.01M/$3.41M · $0.31M/$0.34M/$0.39M · ≈43 → ≈173–260 t/yr · 596.3 lb CO2e/MWh (eGRID2023 Rev 2, accessed 2026-07-19).
+- [ ] Spot-check numbers against the deck's canonical set: 58.8 / 54.4 / 52.1 · 25/48 · 44→48 *(corrected 2026-07-28: this read 44→47 & 47→48; **47 is not a portfolio total at any horizon or scenario** — the active-port series across the contract is 25 → 35 → 44 → 48)* · $1.56M/$1.87M · $2.29M/$2.64M · $3.01M/$3.41M · $0.31M/$0.34M/$0.39M · ≈43 → ≈173–260 t/yr · 596.3 lb CO2e/MWh (eGRID2023 Rev 2, accessed 2026-07-19).
 - [ ] Every data slide shows its source/vintage footer; every ports/capacity slide shows the placeholder caption.
 - [ ] Backup: PDF copies on a USB stick **and** a second laptop.
