@@ -1,0 +1,184 @@
+name: deploy
+
+# Deployment as code, without handing CI a standing key to production.
+#
+# The obvious way to make a deploy workflow is to give it AWS credentials. The standing rules
+# forbid the easy version of that outright -- "never create long-lived access keys to simplify
+# deployment" -- and the compliant version, a GitHub OIDC trust, is not free either: it creates
+# a path from "can push to this repository" to "can rewrite the live public site". That is a
+# persistent capability and belongs to the project owner to grant, not to the assistant to
+# assume. So it is opt-in, and its absence is the default.
+#
+# What this workflow does instead is the half that needs no credentials and catches the
+# failures that actually happened: it rebuilds every generated artifact from a clean checkout
+# and asserts the deploy would be well-formed. Two real defects would have been caught here --
+# a bundle whose surfaces were gitignored so a clean checkout lacked them, and a website
+# embedding a Tableau workbook that had been deleted.
+#
+# The credentialed job runs only on manual dispatch AND only when the repository has an
+# AWS_DEPLOY_ROLE_ARN configured. With no role it reports what is missing and stops, rather
+# than failing in a way that trains people to ignore a red workflow.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Actually deploy (requires AWS_DEPLOY_ROLE_ARN). Unchecked = dry run."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write        # only consumed by the deploy job, and only if a role is configured
+
+jobs:
+  validate:
+    name: Deploy plan is well-formed (no credentials)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install package with test extras
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test] -c requirements-lock.txt
+
+      - name: Rebuild every generated artifact from a clean checkout
+        # The bundle's copied surfaces are generated, so a clean checkout does not have them.
+        # CI was red for three commits before this was understood; building here means the
+        # next person to clone gets the same result CI does.
+        run: |
+          python scripts/build_platform_web.py
+          python scripts/build_field_schema.py
+          python scripts/build_engine_record.py
+          python scripts/build_simulink_view.py
+          python scripts/build_platform_surfaces.py
+
+      - name: Public website carries its caveats and embeds only the canonical workbook
+        run: |
+          python scripts/patch_site_www.py
+          python scripts/retarget_tableau_embeds.py
+          python scripts/check_site_www.py
+
+      - name: Every surface link resolves the way S3 resolves it
+        # A trailing slash means index.html. Python's http.server generates directory listings
+        # and S3 does not, so passing locally proved nothing -- five surfaces were 404s in
+        # production while every local check was green.
+        run: python scripts/check_surface_links.py
+
+      - name: No credentials, tokens or account ids in anything tracked
+        run: python scripts/secret_scan.py
+
+      - name: The deploy script's safety assertions actually refuse a bad config
+        # assert_safe_change is the guard protecting the NFC field layer from a whole-config
+        # replace. A guard nobody exercises is a guard nobody can trust.
+        run: |
+          python - <<'PY'
+          import importlib.util, copy, sys
+          spec = importlib.util.spec_from_file_location("dp", "scripts/deploy_platform.py")
+          dp = importlib.util.module_from_spec(spec); spec.loader.exec_module(dp)
+
+          before = {
+              "Origins": {"Quantity": 1, "Items": [{"Id": "main", "DomainName": "x"}]},
+              "CacheBehaviors": {"Quantity": 0, "Items": []},
+              "DefaultCacheBehavior": {"TargetOriginId": "main",
+                                       "LambdaFunctionAssociations": {"Quantity": 0}},
+              "Aliases": {"Quantity": 1, "Items": ["futurecityfellowship.andyyaro.com"]},
+          }
+
+          # 1. Touching the default behaviour must be refused -- that is what serves the NFC tags.
+          bad = copy.deepcopy(before)
+          bad["DefaultCacheBehavior"]["LambdaFunctionAssociations"] = {"Quantity": 1}
+          try:
+              dp.assert_safe_change(before, bad)
+              sys.exit("FAIL: a config gating the DEFAULT behaviour was accepted")
+          except SystemExit as exc:
+              if "REFUSING" not in str(exc):
+                  raise
+
+          # 2. Dropping an alias must be refused.
+          bad2 = copy.deepcopy(before)
+          bad2["Aliases"] = {"Quantity": 0, "Items": []}
+          try:
+              dp.assert_safe_change(before, bad2)
+              sys.exit("FAIL: a config dropping the alias was accepted")
+          except SystemExit as exc:
+              if "REFUSING" not in str(exc):
+                  raise
+
+          print("deploy guards refuse both a gated default behaviour and a dropped alias")
+          PY
+
+  deploy:
+    name: Deploy to AWS (opt-in, manual only)
+    needs: validate
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check whether a deploy role is configured
+        id: role
+        env:
+          ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+        run: |
+          if [ -z "$ROLE_ARN" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No AWS_DEPLOY_ROLE_ARN is configured, so this workflow cannot deploy."
+            echo "Deployment currently runs locally, where AWS SSO works:"
+            echo "    aws sso login --profile future-city"
+            echo "    python scripts/deploy_platform.py            # dry run"
+            echo "    python scripts/deploy_platform.py --apply"
+            echo ""
+            echo "To enable deploying from CI, see DEPLOYMENT.md -> 'Deploying from CI'."
+            echo "That grants anyone who can dispatch this workflow the ability to rewrite the"
+            echo "live public site, which is why it is not configured by default."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out repository
+        if: steps.role.outputs.configured == 'true'
+        uses: actions/checkout@v7
+
+      - name: Assume the deploy role via OIDC
+        if: steps.role.outputs.configured == 'true'
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Set up Python
+        if: steps.role.outputs.configured == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        if: steps.role.outputs.configured == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . -c requirements-lock.txt
+
+      - name: Deploy
+        if: steps.role.outputs.configured == 'true'
+        # The script is dry-run by default. --apply is passed only when the operator ticked the
+        # box, so a mis-dispatched run reports its plan instead of changing production.
+        run: |
+          if [ "${{ inputs.apply }}" = "true" ]; then
+            python scripts/deploy_platform.py --apply
+          else
+            python scripts/deploy_platform.py
+          fi
+
+      - name: Verify the deployment from the outside
+        if: steps.role.outputs.configured == 'true' && inputs.apply
+        # Both halves, always: the platform shut AND the NFC field layer still open.
+        run: python scripts/verify_deployment.py
