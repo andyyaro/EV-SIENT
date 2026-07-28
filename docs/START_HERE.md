@@ -1,7 +1,8 @@
 # Start here
 
-This project studies where to put public EV chargers in **Fairfax City** and **Prince William
-County**, Virginia — and, more importantly, *how many* to put there.
+This project studies where to put public EV chargers at twelve public buildings in **Fairfax
+City**, **Fairfax County** and **Prince William County**, Virginia — and, more importantly,
+*how many* to put there.
 
 If you have five minutes, read this page. Everything it links to is optional.
 
@@ -34,15 +35,16 @@ Everything else on this page sits underneath that sentence.
 ### I live here and just want to know what's happening
 
 Nothing is being built yet. This is a study of where charging *could* go, and no approval,
-permit, funding, or utility sign-off exists for any of it. If you scanned an NFC tag at a
-parking lot, you reached the page for that specific site.
+permit, funding, or utility sign-off exists for any of it. Each site also has its own page,
+reachable by a tap-to-open tag — though **no tag has actually been placed at any site yet**.
 
 → [What this can and can't tell you](WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md)
 
 ### I'm on a council or a board and have to decide something
 
-Read the limits before the numbers, because the limits are the finding. The headline
-comparison is real; the feasibility question is open at every site. No number here is a budget.
+Read the limits before the numbers, because the limits are the finding. The comparison
+between sites is screening-class — good enough to decide what to study next, not what to build
+— and the feasibility question is open at every site. No number here is a budget.
 
 → [What this can and can't tell you](WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md)
 → [Final Milestone 2 report](../reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md)
@@ -61,8 +63,10 @@ confidence floor.
 ### I'm an engineer or a planner
 
 Every number resolves to the run that produced it and the source behind it. Two model modes
-exist and are never mixed. Standards scope, adopted code editions, and the AHJ boundary are
-stated explicitly.
+exist, and every surface this repository builds names which one it used. Standards scope,
+adopted code editions, and the AHJ boundary are stated explicitly. One caveat: an **older
+Tableau workbook is still public** carrying superseded `legacy_v2` ranks and overstated
+confidence — removing it needs the account holder, and it is tracked as an open action.
 
 → [Methodology](methodology/) · [Standards matrix](standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)
 → [Migration from V2](migration-from-v2.md) — why two modes exist and what moved
@@ -94,22 +98,25 @@ No. They are screening-class estimates for comparing options against each other.
 budgets, quotes, bids, or engineering estimates, and they should not be used as any of those.
 
 **Where does the demand number come from?**
-A model, not a meter. No charging has been observed at any of these sites, so demand is
-modelled from benchmark assumptions applied to site characteristics, and the growth multipliers
-are provisional conventions rather than forecasts.
+A model, not a meter. The contract's own label for it is **synthetic and uncalibrated**: no
+charging has been observed at any of these sites, so demand is modelled from benchmark
+assumptions applied to site characteristics, and the growth multipliers are provisional
+conventions rather than forecasts.
 
 **Why does one site rank first in one place and second in another?**
 Two model modes exist. `legacy_v2` reproduces an earlier accepted baseline exactly, and
 `milestone2_v3` is the current canonical model. They disagree about the top site — FFX002 under
-the old mode, FFX004 under the current one — so **the mode is always named** wherever a rank
-appears. They are not interchangeable.
+the old mode, FFX004 under the current one — so every surface built from this repository
+**names the mode** wherever a rank appears. They are not interchangeable. The exception is the
+superseded public workbook noted above, which carries `legacy_v2` ranks without saying so; that
+is precisely why it is queued for removal.
 
 **Why is the data confidence low everywhere?**
 Because it is scored from where the data actually came from, not from how good the answer
 looks. All twelve sites score 33.8, which is Low; none reaches Medium. That number is designed
 to be uncomfortable while capacity is unverified.
 
-**Is this an official Fairfax City or Prince William County document?**
+**Is this an official Fairfax City, Fairfax County or Prince William County document?**
 No. It is student work from a George Mason University Future City Fellowship team, produced in
 consultation with Prince William County's Office of Sustainability and Fire & Rescue
 interviewees. It carries no authority and asserts none.
@@ -123,9 +130,10 @@ marshal. Every permit, disconnect-placement, access, and code-edition determinat
 them, not with this study.
 
 **Something here is wrong. Can I correct it?**
-Yes, and that is a designed-for case rather than a courtesy. The NFC tags on site lead to a
-form that feeds corrections back into the model, and there is a documented path for another
-jurisdiction to bring its own data file.
+Yes, and that is a designed-for case rather than a courtesy. Each site has a correction form
+that feeds observations back into the model — reachable by tag once tags are placed, and by link
+in the meantime — and there is a documented path for another jurisdiction to bring its own data
+file.
 
 ---
 

@@ -36,9 +36,10 @@ when it changes.
 
 ### Expansion trigger
 
-A predefined condition — on observed utilisation, wait time, reliability and equity — that must
-be met before more chargers are energised. Because no site has been observed in operation, **no
-trigger has ever been evaluated against real data.**
+A predefined condition — on observed utilisation, wait time, reliability and equity — proposed
+as the gate that should be met before more chargers are energised. It is **proposed
+configuration, not adopted municipal policy**, and because no site has been observed in
+operation, **no trigger has ever been evaluated against real data.**
 
 ### Fail-closed capacity guard
 
@@ -105,8 +106,10 @@ observed data clears the expansion triggers. The strategy this whole project exi
 
 ### Starter ports
 
-The number of charging ports recommended for immediate installation at a site — deliberately
-smaller than the pathway capacity.
+The number of charging ports recommended for immediate installation at a site. Across the
+portfolio it is deliberately smaller than the pathway capacity — 25 now against a pathway for 48
+— though at three of the twelve sites (PWC003, PWC005, PWC008) the two are equal at 2 ports, so
+"starter" and "pathway" are not always different numbers.
 
 ---
 

@@ -360,3 +360,10 @@ button.primary:hover { background: #19c99a; }
 }
 .standing-caveats li { margin: .15rem 0; }
 .standing-caveats strong { color: #6b4d10; }
+
+/* A reader who asks their system for reduced motion gets no transitions here either.
+   The camera flights are handled in app.js, where the duration is set to 0. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}

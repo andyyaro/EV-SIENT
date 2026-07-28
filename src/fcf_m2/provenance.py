@@ -131,12 +131,17 @@ CAVEAT_TEXT: dict[str, str] = {
     # 215.35 minutes at 2046. A reader hovering a 215-minute wait was being told waits are
     # zero. Text-versus-meaning again: accurate prose, wrong referent.
     "wait_simulated": (
+        # No site is named in this string. It ships inside the public installer, where DEC-016
+        # forbids real facility identifiers -- the release gate caught a draft that named two.
+        # The reader always knows which site they are looking at, because the caveat is
+        # attached to that row.
         "Waits are SIMULATED from modelled demand and have never been observed -- no charging "
-        "has happened at any of these sites. This is an Erlang-C queueing estimate, and it is "
-        "not nil: the peak reaches about 42 minutes at 2026 and about 215 minutes at 2046, as "
-        "fixed port counts meet rising modelled demand. A separate discrete-event run reports "
-        "p50 and p90 waits of 0.0 at all 12 sites at the 2026 starter build -- that is a "
-        "different statistic from a different table, and it is not this number."),
+        "has happened at any of these sites. This is an Erlang-C queueing estimate and it "
+        "spans the full range: exactly 0.0 at one site, up to about 215 minutes at another in "
+        "2046, and BLANK on 5 rows where the modelled queue never clears, so no finite wait "
+        "exists. A blank here means unbounded, not unknown. A separate discrete-event run "
+        "reports p50 and p90 waits of 0.0 at all 12 sites at the 2026 starter build -- that "
+        "is a different statistic from a different table, and it is not this number."),
     "screening_only": (
         "A screening-class planning output for comparing sites. It cannot approve, permit or "
         "fund anything, and it is not an engineering design."),

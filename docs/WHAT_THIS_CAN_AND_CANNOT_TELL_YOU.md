@@ -30,8 +30,10 @@ the answer, and it is deliberate.
 ## What it can tell you
 
 **How twelve specific sites compare to each other**, on modelled demand and screening-class
-cost. Because the scoring uses **fixed anchors** rather than ranking sites against each other,
-a site's score doesn't move when another site is added or removed.
+cost. In the current `milestone2_v3` mode the scoring uses **fixed anchors** rather than ranking
+sites against each other, so a site's score doesn't move when another site is added or removed.
+The older `legacy_v2` mode scores each site relative to the rest of the group, and its scores
+*do* move — which is one reason the two are never treated as interchangeable.
 
 **Roughly how much overbuilding costs.** This is the project's actual argument: a real
 installation put in 70 ports and later took 17 of them offline. Comparing a right-sized
@@ -72,15 +74,15 @@ forecasts.
 **How long anyone will wait.** Waits are simulated from modelled demand and have never been
 observed. Two different wait figures exist and they are easy to confuse:
 
-- The **queueing estimate** carried in the data contract is *not* zero. Peak waits reach about
-  42 minutes at 2026 and about 215 minutes at 2046, as fixed port counts meet rising modelled
-  demand.
+- The **queueing estimate** carried in the data contract spans the whole range. It is exactly
+  0.0 at FFX002, rises to about 215 minutes at PWC002 in 2046, and is **blank on five rows** —
+  all PWC002, at 2046 and 2056 — where the modelled queue never clears and no finite wait
+  exists. A blank there means *unbounded*, not *unknown*, and it is the model's real worst case.
 - A separate **discrete-event simulation** of the 2026 starter build reports median and
   90th-percentile waits of 0.0 at all twelve sites, at 6–20% utilisation.
 
-Both are outputs of the model, not missing data, and neither is a measurement. The 2026 zero is
-often quoted on its own; it describes the starter build only, and it does not carry to later
-horizons.
+Neither is a measurement. The 2026 zero is often quoted on its own; it describes the starter
+build only and does not carry to later horizons.
 
 **Whether anyone has approved any of this.** No client endorsement, no **AHJ** acceptance, no
 utility confirmation, and no funding award exists or is implied anywhere. The expansion-trigger
@@ -96,10 +98,11 @@ observed in operation, so **no trigger has ever been evaluated against real data
 
 ## Two things that look like results and aren't
 
-**The MATLAB and Simulink views.** These are illustrative, and they run under the same
-placeholder capacity as everything else. No simulation is claimed beyond what was actually
-executed — and the Simulink model has never been simulated at all, which the view states on its
-face.
+**The MATLAB and Simulink views.** The MATLAB suite has genuinely been executed — 49 tests
+passed on licensed MathWorks R2025b — but **only against a synthetic fixture, never against
+these twelve sites**. No output anywhere in this project describes a real facility, and the
+managed-charging numerics have never met real capacity, because no real capacity exists to meet.
+The Simulink model has never been simulated at all, which the view states on its face.
 
 **One scoring weight does nothing.** 35% of the feasibility sub-score is weighted on spare
 capacity, which is `0` at all twelve sites — so that 35% currently contributes nothing to any

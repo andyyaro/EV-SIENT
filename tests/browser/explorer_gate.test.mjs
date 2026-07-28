@@ -111,3 +111,23 @@ test("every control in the gate is reachable by keyboard", { skip }, async () =>
   })()`);
   assert.deepEqual(unreachable, [], `not keyboard reachable: ${JSON.stringify(unreachable)}`);
 });
+
+// ------------------------------------------------------------------ reduced motion
+
+test("a reader who asks for reduced motion gets no camera flight", { skip }, async () => {
+  // The strongest motion in this app is a 2-second camera swoop across a globe, which is a
+  // classic vestibular trigger. Asserting the CSS media query exists would prove nothing:
+  // the flight duration is set in JavaScript, so the only honest check is to emulate the
+  // preference and read back the duration the app would actually use.
+  await chrome.send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
+  const reduced = await chrome.eval(`flightDuration(2.0)`);
+  assert.equal(reduced, 0, "a reduced-motion reader would still be flown across the globe");
+
+  await chrome.send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+  });
+  const normal = await chrome.eval(`flightDuration(2.0)`);
+  assert.equal(normal, 2.0, "everyone else must keep the flight");
+});

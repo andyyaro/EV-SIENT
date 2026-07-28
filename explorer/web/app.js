@@ -430,6 +430,24 @@ function select(id, opts = {}) {
   if (opts.fly !== false) flyTo(id);
 }
 
+/**
+ * Camera flights are the strongest motion in this app, and a swooping globe is a classic
+ * vestibular trigger. When the reader's system asks for reduced motion we jump straight to
+ * the destination instead: same view, same data, no journey.
+ *
+ * Read live rather than cached, because the setting can change while the page is open.
+ */
+function flightDuration(normal) {
+  const reduce = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return reduce ? 0 : normal;
+}
+
+// Exposed deliberately. This file is a module, so nothing in it is reachable from a test
+// otherwise, and an accessibility guarantee that cannot be exercised is a guarantee nobody
+// will notice breaking. Read-only, and used by tests/browser/explorer_gate.test.mjs.
+window.flightDuration = flightDuration;
+
 function flyTo(id) {
   const f = state.byId.get(id);
   const [lon, lat] = f.geometry.coordinates;
@@ -440,7 +458,7 @@ function flyTo(id) {
       pitch: Cesium.Math.toRadians(-32),
       roll: 0,
     },
-    duration: 2.0,
+    duration: flightDuration(2.0),
   });
 }
 
@@ -448,7 +466,7 @@ function flyHome() {
   state.viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(NOVA_HOME.lon, NOVA_HOME.lat - 0.28, NOVA_HOME.height),
     orientation: { heading: 0, pitch: Cesium.Math.toRadians(-52), roll: 0 },
-    duration: 2.2,
+    duration: flightDuration(2.2),
   });
 }
 
@@ -675,17 +693,25 @@ function renderPanel(p) {
     </div>
 
     <div class="tab-body hidden" data-body="score">
-      <h4 class="sec">Subscores → readiness</h4>
+      <p class="callout">Every point in this site's score is accounted for below. Each factor
+      earns some of the points available to it; add them all up and you get the readiness
+      score, with nothing left over and nothing hidden.</p>
+
+      <h4 class="sec">What each category contributed</h4>
       ${subscoreBlock(p)}
       <p style="font-size:11px;color:var(--ink-3);font-family:var(--mono)">
-        Σ contributions = ${num(p.score_reconstructed, 1)} = readiness score ✓
+        these add up to ${num(p.score_reconstructed, 1)} — the readiness score ✓
       </p>
 
-      <h4 class="sec">Strengths — points earned</h4>
+      <h4 class="sec">What helped — points this site earned</h4>
       ${driverList(p.strengths, 'pos')}
 
-      <h4 class="sec">Constraints — points forgone</h4>
+      <h4 class="sec">What held it back — points it did not earn</h4>
       ${driverList(p.constraints, 'neg')}
+
+      <p class="callout">A readiness score compares sites on what is known about them. It is
+      <strong>not</strong> a statement that a site is electrically feasible — nobody has
+      confirmed the electrical capacity at any of these twelve sites.</p>
     </div>
 
     <div class="tab-body hidden" data-body="sizing">

@@ -96,9 +96,11 @@ Python is the single producer; MATLAB, Excel, Tableau, the platform, the 3D expl
 visual consume the same validated contract, so no two artifacts can disagree about a port
 count, a year, or whether capacity is a placeholder (`capacity_basis` travels with every row).
 
-The dotted arrow is the point of the whole design: an NFC tag on a bollard leads to a form that
-feeds observations back into the inputs, so the study can be corrected by someone standing at
-the site rather than only by whoever holds the spreadsheet.
+The dotted arrow is the point of the whole design: a tapped NFC tag opens a form that feeds
+observations back into the inputs, so the study can be corrected by someone standing at the site
+rather than only by whoever holds the spreadsheet. The pages and forms are live; the **tags
+themselves are not deployed** — placing anything on a public facility needs the facility
+manager's consent, and that has not been sought.
 
 ## Two model modes
 
@@ -197,9 +199,11 @@ Milestone 2 package complete (July 2026); presentation 2026-07-21.
 Since then the project has become a running system rather than a document set: the model is
 served through a **platform** with two capability tiers, deployed at
 `futurecityfellowship.andyyaro.com` with `/platform/` behind Cognito sign-in; a **3D explorer**
-and a **static dashboard** read the same contract; **NFC tags** on site let someone standing in
-the parking lot send a correction back into the model; and an **intake layer** lets another
-jurisdiction bring its own data file without that file quietly scoring better than it should.
+and a **static dashboard** read the same contract; an **NFC field layer** is built and walked
+end to end on real hardware, so that someone standing in a car park could send a correction back
+into the model — **no tag has been placed at any site, and no permission to place one has been
+sought**; and an **intake layer** lets another jurisdiction bring its own data file without that
+file quietly scoring better than it should.
 
 None of this changes the epistemics. Capacity is still a placeholder at all twelve sites, and
 the next real step is unchanged: client follow-up, utility and facility data requests (which
