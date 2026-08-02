@@ -145,8 +145,38 @@ def test_every_text_file_in_the_public_archive_is_valid_utf8(public_archive):
                      f"with default settings gets a decode error:\n  " + "\n  ".join(bad[:5]))
 
 
-def test_the_synthetic_writers_never_rely_on_the_platform_encoding():
-    """Structural companion to the test above.
+def packaging_scripts() -> list[Path]:
+    """Every repo script the packaging workflow runs, read out of the workflow.
+
+    Derived rather than hand-listed, because a hand-list is a claim that goes stale the first
+    time a build step is added — and the gap this closes was exactly that shape:
+    `THIRD_PARTY_LICENCES.md` is written by `build_licence_manifest.py` and copied into the
+    bundle by the workflow's staging step, so it never passes through
+    `build_release_artifact.py` and the archive test above could not see it. The Windows runner
+    shipped it in cp1252 and every check in this file was green.
+    """
+    workflow = REPO / ".github/workflows/package.yml"
+    if not workflow.is_file():
+        return []
+    found = []
+    for line in workflow.read_text().splitlines():
+        if line.lstrip().startswith("#"):
+            continue
+        for token in line.split():
+            if token.startswith("scripts/") and token.endswith(".py"):
+                path = REPO / token
+                if path.is_file() and path not in found:
+                    found.append(path)
+    return found
+
+
+def test_the_packaging_workflow_runs_scripts_this_test_can_see():
+    assert packaging_scripts(), "no build scripts were found in package.yml — has it moved?"
+
+
+@pytest.mark.parametrize("script", packaging_scripts(), ids=lambda p: p.name)
+def test_no_packaging_script_relies_on_the_platform_encoding(script):
+    """Structural companion to the archive test above.
 
     The property test only fails where the locale differs, which is precisely the machine this
     suite usually does not run on. This one fails everywhere the moment a writer goes back to
@@ -158,7 +188,7 @@ def test_the_synthetic_writers_never_rely_on_the_platform_encoding():
     repository has produced. An AST walk cannot make that mistake: a docstring is a string
     constant, not a call.
     """
-    tree = ast.parse((REPO / "scripts" / "build_synthetic_inputs.py").read_text())
+    tree = ast.parse(script.read_text())
     offenders = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
@@ -174,7 +204,7 @@ def test_the_synthetic_writers_never_rely_on_the_platform_encoding():
         if not any(kw.arg == "encoding" for kw in node.keywords):
             offenders.append(f"line {node.lineno}: {name}() with no encoding=")
     assert not offenders, (
-        "these writes use the interpreter's locale encoding, which is cp1252 on Windows:\n  "
+        f"{script.name} writes with the interpreter's locale encoding, cp1252 on Windows:\n  "
         + "\n  ".join(offenders))
 
 

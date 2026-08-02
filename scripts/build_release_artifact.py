@@ -289,7 +289,7 @@ def main(out_dir: str | None = None, public: bool = False) -> Path:
     # CRLF endings cannot be verified with `shasum -c`, and this one had the same defect
     # waiting for the first person to build on Windows.
     (out / f"fcf_m2_v3_release_{stamp}.sha256").write_text(
-        sha256(zpath) + f"  {zpath.name}\n", newline="\n")
+        sha256(zpath) + f"  {zpath.name}\n", encoding="utf-8", newline="\n")
     kind = "PUBLIC (synthetic inputs)" if public else "INTERNAL (real inputs - DO NOT PUBLISH)"
     print(f"release artifact [{kind}]: {zpath} "
           f"({zpath.stat().st_size/1e6:.1f} MB, {len(files)} files)")

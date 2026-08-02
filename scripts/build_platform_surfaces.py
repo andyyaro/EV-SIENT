@@ -253,7 +253,8 @@ def build() -> dict:
 def main() -> int:
     payload = build()
     indexes = write_directory_indexes(payload)
-    MANIFEST.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
+    MANIFEST.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n",
+                        encoding="utf-8", newline="\n")
     print(f"wrote {MANIFEST.relative_to(REPO)}")
     for s in payload["surfaces"]:
         print(f"  {s['id']:12} {s['count']:>3} items  {s['title']}")
