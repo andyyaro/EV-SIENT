@@ -295,7 +295,12 @@ def main() -> int:
                                  "decision. Until it is chosen, no artifact should claim a "
                                  "licence for this project's own code."),
     }
-    OUT_JSON.write_text(json.dumps(payload, indent=2) + "\n")
+    # encoding/newline pinned: see build_synthetic_inputs.write_csv. This file ships
+    # INSIDE the release artifact, and the Windows runner wrote it in cp1252 -- the em
+    # dashes in the attribution table came out as single bytes and the shipped
+    # THIRD_PARTY_LICENCES.md was not valid UTF-8.
+    OUT_JSON.write_text(json.dumps(payload, indent=2) + "\n",
+                        encoding="utf-8", newline="\n")
 
     lines = [
         "# Third-party licences",
@@ -330,7 +335,7 @@ def main() -> int:
                   ""]
         for entry in unresolved:
             lines.append(f"- **{entry['name']} {entry['version']}**")
-    OUT_TEXT.write_text("\n".join(lines) + "\n")
+    OUT_TEXT.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
     print(f"wrote {OUT_JSON.name} and {OUT_TEXT.name}")
     print(f"  {len(entries)} Python dependencies, {len(NON_PYTHON)} other components")

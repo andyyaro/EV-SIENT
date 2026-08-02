@@ -21,8 +21,15 @@ web server you start from a script and view in your browser (DEC-015).
 (DEC-016, DEC-020). Running it produces synthetic results, and the contract it writes says
 `synthetic_inputs: true` in its own manifest so nobody can mistake its numbers for the study's.
 
-**You need Python 3.11 or newer** already installed. The run script checks, and says so if it
-is missing rather than failing obscurely.
+**You need Python 3.11 or newer** already installed. The run script checks both that a `python3`
+exists **and that it is new enough**, and names the version it found if it is not.
+
+**macOS users read this bit.** The `python3` Apple ships at `/usr/bin/python3` is **3.9.6** —
+measured on macOS 26.5.1 — and it is what `python3` resolves to unless you have installed
+another. It is too old: its pip cannot perform the editable install this package needs, and
+before the version check existed the only thing a recipient saw was *"Dependency install
+failed"*. Install a current Python from [python.org](https://www.python.org/downloads/) or
+Homebrew, make sure it comes first on your `PATH`, and run the script again.
 
 ---
 
