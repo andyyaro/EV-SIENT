@@ -129,6 +129,7 @@ jobs:
           REM Starts the Future City Fellowship platform. Requires Python 3.11 or newer.
           REM First run builds the model surfaces from the SYNTHETIC inputs and takes a minute.
           where python >nul 2>nul || (echo Python 3.11+ is required and was not found on PATH. & pause & exit /b 1)
+          python -c "import sys; sys.exit(0 if sys.version_info>=(3,11) else 1)" || (echo This needs Python 3.11 or newer. Found: & python -V & echo Install a newer Python from python.org and run this again. & pause & exit /b 1)
           python -m pip install -e . -c requirements-lock.txt || (echo Dependency install failed. & pause & exit /b 1)
           python -m fcf_m2.launcher
           pause
@@ -140,6 +141,17 @@ jobs:
           # First run builds the model surfaces from the SYNTHETIC inputs and takes a minute.
           cd "$(dirname "$0")" || exit 1
           command -v python3 >/dev/null || { echo "Python 3.11+ is required and was not found."; exit 1; }
+          # Presence is not enough, and this is the likeliest way a first run fails on macOS.
+          # /usr/bin/python3 is 3.9.6 on macOS 26 -- measured by extracting a CI artifact and
+          # running this script -- and 3.9's pip cannot do a PEP 660 editable install of a
+          # pyproject-only package. The recipient saw "Dependency install failed", which is the
+          # obscure failure docs/INSTALL.md promises they will not get.
+          python3 -c 'import sys; sys.exit(0 if sys.version_info>=(3,11) else 1)' || {
+            echo "This needs Python 3.11 or newer. Found: $(python3 -V 2>&1)"
+            echo "macOS ships 3.9 at /usr/bin/python3. Install a newer Python from python.org"
+            echo "or Homebrew, make sure it is first on your PATH, then run this again."
+            exit 1
+          }
           python3 -m pip install -e . -c requirements-lock.txt || { echo "Dependency install failed."; exit 1; }
           python3 -m fcf_m2.launcher
           SH
