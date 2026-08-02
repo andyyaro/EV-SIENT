@@ -326,10 +326,34 @@ def build_field_provenance(sites: list[dict]) -> list[dict]:
     return rows
 
 
+def write_utf8(path: Path, *parts: str) -> None:
+    """Write text as UTF-8 with LF endings, on every operating system.
+
+    Same reason as `write_csv` below: the default encoding is the interpreter's locale, and the
+    default newline translation turns "\\n" into CRLF on Windows. Both defaults are wrong for a
+    file that ships to someone else's machine.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(parts), encoding="utf-8", newline="\n")
+
+
 def write_csv(path: Path, rows: list[dict], columns: list[str] | None = None) -> None:
+    """Write UTF-8, always, on every operating system.
+
+    `path.open("w")` uses the interpreter's locale encoding, which is cp1252 on a Windows
+    runner. Measured on the packaging workflow's first green run: the note on every synthetic
+    row reads "SYNTHETIC FIXTURE - invented facility" with an em dash, and the Windows artifact
+    shipped that dash as the single byte 0x97. The file was therefore **not valid UTF-8**, and
+    a recipient reading it the ordinary way -- `pandas.read_csv`, which defaults to UTF-8 --
+    would have hit a UnicodeDecodeError on their first run. The macOS artifact from the same
+    commit was fine, because the locale there is UTF-8.
+
+    `newline=""` is the csv module's documented requirement and is separate: it stops the
+    writer's "\r\n" being translated again into "\r\r\n" on Windows.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     cols = columns or list(rows[0])
-    with path.open("w", newline="") as handle:
+    with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=cols)
         writer.writeheader()
         writer.writerows(rows)
@@ -347,7 +371,7 @@ def main() -> int:
     write_csv(OUT / "synthetic_matlab_site_meta.csv", meta)
     write_csv(OUT / "synthetic_field_provenance_v1.csv", provenance)
 
-    (OUT / "README.md").write_text(
+    write_utf8(OUT / "README.md",
         "# Synthetic site inputs — invented data, for public distribution\n\n"
         # This paragraph used to say "nothing here was derived from the real inputs -- not
         # copied, not perturbed, not fitted to their distributions." That is the exact

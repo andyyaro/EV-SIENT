@@ -22,6 +22,7 @@ machine. The integration tests assert the invariant on a real build.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
 import zipfile
@@ -112,6 +113,69 @@ def test_the_public_archive_carries_every_input_the_model_reads(public_archive):
     assert not missing, (
         f"the public artifact is missing {missing} — these are the paths the model reads, and "
         f"without them a recipient's first run finds no inputs")
+
+
+#: Extensions the recipient's tooling will read as text. Binary members are skipped rather than
+#: guessed at.
+TEXT_SUFFIXES = {".py", ".csv", ".json", ".md", ".txt", ".html", ".js", ".css", ".toml", ".sh"}
+
+
+def test_every_text_file_in_the_public_archive_is_valid_utf8(public_archive):
+    """The third Windows defect from the same green run.
+
+    `path.open("w")` uses the interpreter's LOCALE encoding, which is cp1252 on a Windows
+    runner. Every synthetic row carries the note "SYNTHETIC FIXTURE — invented facility", and
+    the Windows artifact shipped that em dash as the single byte `0x97`. The file was not valid
+    UTF-8, so a recipient reading it the ordinary way — `pandas.read_csv`, which defaults to
+    UTF-8 — would have hit a UnicodeDecodeError on their first run. The macOS artifact from the
+    same commit was fine, because the locale there is UTF-8.
+
+    This asserts the property a recipient depends on, rather than the call that produces it.
+    """
+    bad = []
+    with zipfile.ZipFile(public_archive) as z:
+        for info in z.infolist():
+            if info.is_dir() or Path(info.filename).suffix not in TEXT_SUFFIXES:
+                continue
+            try:
+                z.read(info.filename).decode("utf-8")
+            except UnicodeDecodeError as exc:
+                bad.append(f"{info.filename}: {exc}")
+    assert not bad, ("the public artifact ships text that is not UTF-8; a recipient reading it "
+                     f"with default settings gets a decode error:\n  " + "\n  ".join(bad[:5]))
+
+
+def test_the_synthetic_writers_never_rely_on_the_platform_encoding():
+    """Structural companion to the test above.
+
+    The property test only fails where the locale differs, which is precisely the machine this
+    suite usually does not run on. This one fails everywhere the moment a writer goes back to
+    the default, so the two together cover the case rather than one of them pretending to.
+
+    The source is PARSED, not searched. The first version of this test grepped for
+    `.open("w"` and flagged the sentence in `write_csv`'s own docstring that explains the bug —
+    matching text where meaning was intended, which is the single most common defect this
+    repository has produced. An AST walk cannot make that mistake: a docstring is a string
+    constant, not a call.
+    """
+    tree = ast.parse((REPO / "scripts" / "build_synthetic_inputs.py").read_text())
+    offenders = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+            continue
+        name = node.func.attr
+        if name not in ("open", "write_text"):
+            continue
+        if name == "open":
+            mode = node.args[0].value if node.args and isinstance(node.args[0], ast.Constant) \
+                else ""
+            if "w" not in str(mode) and "a" not in str(mode):
+                continue
+        if not any(kw.arg == "encoding" for kw in node.keywords):
+            offenders.append(f"line {node.lineno}: {name}() with no encoding=")
+    assert not offenders, (
+        "these writes use the interpreter's locale encoding, which is cp1252 on Windows:\n  "
+        + "\n  ".join(offenders))
 
 
 def test_the_manifest_keys_match_the_archive_names(public_archive):
