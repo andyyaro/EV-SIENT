@@ -197,6 +197,36 @@ def test_the_install_guide_states_the_measured_gatekeeper_outcome():
         "loosely")
 
 
+def test_the_release_body_only_points_at_files_a_downloader_can_open(text):
+    """The Release page is read by someone who has the zip and nothing else.
+
+    The body said *"See `docs/INSTALL.md` for the exact click-paths"*. `docs/` is excluded from
+    the public bundle by DEC-016 and this repository is PRIVATE, so that sentence pointed at a
+    file the reader had no way to open — at the exact moment they were staring at a Gatekeeper
+    refusal and needed it. Every repo-relative path the body names must therefore be something
+    the staging step actually puts in the archive.
+    """
+    if "body:" not in text:
+        pytest.skip("the release job has no body")
+    body = text.split("body:")[-1]
+    staged = text  # the staging step's `cp` lines are in the same workflow file
+
+    referenced = set(re.findall(r"`([A-Za-z0-9_./-]+\.(?:md|txt|json|csv|py|sh))`", body))
+    unreachable = []
+    for ref in sorted(referenced):
+        leaf = ref.split("/")[-1]
+        # Present if the staging step copies it, or if it is generated into the bundle.
+        if re.search(rf"cp \.\./[A-Za-z0-9_./-]*{re.escape(leaf)}\b", staged):
+            continue
+        if leaf in ("LIMITATIONS.txt", "REPRODUCTION.txt", "RELEASE_MANIFEST.json"):
+            continue  # written directly into the archive by build_release_artifact.py
+        unreachable.append(ref)
+
+    assert not unreachable, (
+        f"the Release body sends a downloader to {unreachable}, which the artifact does not "
+        f"contain and which they cannot reach in a private repository")
+
+
 def test_the_install_guide_never_advises_disabling_gatekeeper():
     """Explicitly forbidden: that advice makes every future download less safe to open one
     file, and it is not necessary."""

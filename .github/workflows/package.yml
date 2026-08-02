@@ -123,6 +123,13 @@ jobs:
           mkdir -p staging && cd staging
           unzip -q ../dist/*.zip
           cp ../THIRD_PARTY_LICENCES.md .
+          # The Release body tells a downloader to "see docs/INSTALL.md for the exact
+          # click-paths". docs/ is excluded from the public bundle by DEC-016 and this
+          # repository is PRIVATE, so before this line that sentence pointed at a file the
+          # reader had no way to open -- at exactly the moment they are staring at a Gatekeeper
+          # refusal. The guide was checked for real facility identifiers before being added:
+          # zero of the 24 in the contract, and no FFX/PWC site code anywhere in its 158 lines.
+          cp ../docs/INSTALL.md .
           if [ "${{ matrix.platform }}" = "windows" ]; then
             cat > run-platform.cmd <<'CMD'
           @echo off
