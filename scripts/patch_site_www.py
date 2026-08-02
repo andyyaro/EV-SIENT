@@ -120,7 +120,7 @@ MODE_NOTE = """
 #:
 #: The "Results Explorer" line is a different problem: it asserted the provenance AND the
 #: completeness of a THIRD-PARTY Framer iframe -- content outside this repository, outside
-#: version control, and outside all 39 gates. We cannot verify what it serves, so we no longer
+#: version control, and outside every gate this repository has. We cannot verify what it serves, so we no longer
 #: claim what it contains.
 CURRENCY_CORRECTIONS = [
     # The gallery is now generated from `milestone2_v3`, so the legacy hedging added while it

@@ -31,6 +31,7 @@ import csv
 import hashlib
 import json
 import platform
+import re
 import sys
 import zipfile
 from datetime import datetime, timezone
@@ -59,9 +60,17 @@ PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facil
 #: through everything the study has ever produced.
 #:
 #: So the public artifact carries no derived results at all. The recipient runs the model
-#: against the synthetic inputs and generates their own. `src/` and `data/anchors/` were
-#: verified to contain zero real identifiers; five scripts do contain them and are excluded
-#: by the allowlist below rather than by hoping.
+#: against the synthetic inputs and generates their own. Five scripts do contain real
+#: identifiers and are excluded by the allowlist below rather than by hoping.
+#:
+#: This paragraph used to add that "`src/` and `data/anchors/` were verified to contain zero
+#: real identifiers". That was false when written and stayed false: `src/fcf_m2/economics.py`
+#: carried a comment naming one of the study's real commuter garages, and it shipped inside
+#: every public archive while the build printed "verified: no real facility identifier appears
+#: in the archive". The whole-string search could not see a distinctive fragment of a name.
+#: The claim is removed rather than repaired, because the guarantee does not come from any
+#: directory having been audited once — it comes from `assert_no_real_identifiers` inspecting
+#: the finished archive on every build, which is the only form of it that cannot go stale.
 PUBLIC_INCLUDE = [
     "src", "data/anchors", "data/observed", "pyproject.toml", "requirements-lock.txt",
     # The platform's hand-written sources. Each was checked for real identifiers before being
@@ -76,7 +85,12 @@ PUBLIC_INCLUDE = [
 #: Only the scripts a recipient needs to run the model and rebuild the synthetic set.
 PUBLIC_SCRIPTS = [
     "scripts/build_synthetic_inputs.py",
-    "scripts/verify.sh",
+    # scripts/verify.sh is NOT here, and was until a pre-release audit ran it inside a built
+    # installer: it failed 36 of its 40 gates with 35 "No such file or directory" lines,
+    # because its gates reach for tests/, docs/, matlab/ and data/contract/ — none of which
+    # this bundle contains, by design. Nothing in the bundle tells a recipient to run it, so
+    # its only possible effect was to make someone who found it conclude the software was
+    # broken. An honest absence beats a check that cannot pass.
     # What `fcf-platform` runs to build the surfaces it needs. Without these the launcher
     # correctly refuses to start, which is honest but leaves the recipient with a CLI and no
     # platform.
@@ -174,15 +188,90 @@ Reproduction (fresh environment):
 #: being written into every archive unconditionally, so a public recipient was told to run
 #: `pytest tests/` against a bundle with no tests directory -- their first instruction failed.
 REPRO_PUBLIC = """\
-Reproduction (fresh environment):
+Reproduction (fresh environment). Requires Python 3.11 or newer.
+
+macOS / Linux:
   python3 -m venv venv && venv/bin/pip install -e . -c requirements-lock.txt
   venv/bin/python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run
   venv/bin/python -m fcf_m2.workflow validate-contract data/outputs/v3_run/contract
+
+Windows (PowerShell or cmd):
+  python -m venv venv
+  venv\Scripts\pip install -e . -c requirements-lock.txt
+  venv\Scripts\python -m fcf_m2.workflow run --mode milestone2_v3 --out data\outputs\v3_run
+  venv\Scripts\python -m fcf_m2.workflow validate-contract data\outputs\v3_run\contract
+
+(The Windows lines were missing until 2026-08-02. Half the artifacts this project
+builds are for Windows, and the only reproduction instructions shipped in them
+could not be run there.)
 
 This public bundle ships SYNTHETIC site inputs (DEC-020) and no test suite, so the
 numbers it produces describe invented sites and cannot be compared with the study.
 """
 
+
+
+#: Words that appear in facility names and identify nothing. Kept explicit and short: every
+#: entry here is a hole in the guard, so each one has to be a word that could not name a place.
+GENERIC_NAME_WORDS = {
+    "the", "and", "of", "at", "center", "centre", "library", "garage", "commuter", "park",
+    "community", "regional", "county", "city", "government", "public", "branch", "station",
+    "school", "high", "middle", "elementary", "recreation", "district", "north", "south",
+    "east", "west", "central", "main", "street", "road", "avenue", "drive", "lane", "plaza",
+    "building", "complex", "facility", "office", "annex", "hall", "municipal", "services",
+    # Added after the token rule fired on ("safety_subscore", "Safety") in
+    # src/fcf3d/build_sites.py -- a scoring-dimension label with no facility in it.
+    "safety", "training", "potomac",
+}
+
+
+def jurisdiction_words(rows) -> set[str]:
+    """Words naming a place rather than a building, derived from the data.
+
+    Deliberately NOT protected, and the reasoning is the same one already recorded below for
+    city and state: the study is openly about Fairfax City, Fairfax County and Prince William
+    County — it says so in its README, its title and its public website. DEC-016 protects
+    *which buildings were assessed and what was found about them*. A jurisdiction reveals
+    neither, and searching for one fires on sentences like `config.py`'s "invented data must
+    not be able to claim Fairfax City or Prince William County", which is a comment enforcing
+    DEC-016 rather than breaking it.
+
+    Derived from the `city` column plus the two county names, so it tracks the data instead of
+    being a hand-list that goes stale.
+    """
+    words = {"prince", "william", "fairfax", "virginia"}
+    for row in rows:
+        for token in re.split(r"[^A-Za-z]+", row.get("city") or ""):
+            if token:
+                words.add(token.lower())
+    return words
+
+
+def distinctive_tokens(names, jurisdictions=frozenset()) -> set[str]:
+    """Name fragments that identify one facility and only one.
+
+    A token qualifies if it is at least five characters, is not a generic place-word, is not a
+    jurisdiction, and appears in exactly one facility name.
+
+    `Neabsco` qualifies. `Commuter`, `Garage` and `Regional` must not, and neither must
+    `Safety` or `Training` — `("safety_subscore", "Safety")` in `build_sites.py` is a scoring
+    label with no facility in it. A guard that fires on ordinary English gets exemptions bolted
+    onto it until it stops guarding anything, so the bar for a token is that it could only be a
+    name.
+
+    **Known limit, stated rather than papered over:** a facility whose name is built entirely
+    from jurisdiction and generic words — `Prince William County Public Safety Training Center`
+    is exactly that — has no distinctive token at all, so token-level protection does nothing
+    for it. It is still covered by the full-name, site-id and address searches. This function
+    narrows the gap; it does not close it.
+    """
+    split = {}
+    for name in names:
+        for token in re.split(r"[^A-Za-z]+", name or ""):
+            low = token.lower()
+            if len(token) >= 5 and low not in GENERIC_NAME_WORDS and low not in jurisdictions:
+                split.setdefault(token, set()).add(name)
+    return {token for token, owners in split.items() if len(owners) == 1}
 
 
 def assert_no_real_identifiers(zip_path: Path) -> None:
@@ -204,11 +293,27 @@ def assert_no_real_identifiers(zip_path: Path) -> None:
     # openly about Fairfax City and Prince William County; that is in its README, its title and
     # its public website. What DEC-016 protects is *which buildings were assessed and what was
     # found about them*, and a jurisdiction name reveals neither.
+    # Whole strings are not enough, and the gap was live in a built artifact.
+    #
+    # This searched only the FULL site_name, so `src/fcf_m2/economics.py` shipped the comment
+    # "(client's Neabsco pattern)" while the build printed "verified: no real facility
+    # identifier appears in the archive (36 searched)". `Neabsco` is the distinctive half of
+    # PWC002's real name, `Neabsco-Potomac Commuter Garage`, and README.md spells the full name
+    # out — joining the two is trivial for anyone who has both. The check said the archive was
+    # clean and it was not.
+    #
+    # So DISTINCTIVE TOKENS of each facility name are searched too. "Distinctive" is doing real
+    # work: a facility name is mostly generic words — Library, Center, Garage, Community,
+    # Regional, Park — and searching those would fire on ordinary prose and train whoever hits
+    # it to add exemptions, which is how a guard dies. A token counts only if it is long enough
+    # to be a name and appears in no more than one facility.
     real_rows = list(csv.DictReader((ROOT / "data/inputs/real_sites_v2.csv").open()))
     needles = ({r["site_id"] for r in real_rows}
                | {r["site_name"] for r in real_rows}
                | {r["address"] for r in real_rows})
     needles = {n.strip() for n in needles if len(n.strip()) >= 5}
+    needles |= distinctive_tokens((r["site_name"] for r in real_rows),
+                                  jurisdiction_words(real_rows))
 
     found: dict[str, list[str]] = {}
     with zipfile.ZipFile(zip_path) as archive:

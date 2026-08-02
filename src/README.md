@@ -24,8 +24,9 @@ canonical horizons). Installed editable via `make setup` from the repo root.
 | `workflow.py` | Orchestrator + the single step manifest that generates `docs/WORKFLOW_STEPS.md` |
 
 Run: `python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run`
-Outputs land in `data/outputs/` (gitignored; regenerate at will). Verified by
-[`tests/`](../tests/README.md) and [`scripts/verify.sh`](../scripts/README.md).
+Outputs land in `data/outputs/` (gitignored; regenerate at will). Verified by the repository's `tests/` suite and `scripts/verify.sh` — **neither of which
+is part of the public installer**, which ships the model and the surfaces it can build
+rather than the harness that checks them.
 
 Limitations that ship with the code: demand uncalibrated, capacity placeholder at all
 sites, screening-class costs — see the root README's Known limitations.

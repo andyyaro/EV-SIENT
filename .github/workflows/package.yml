@@ -308,8 +308,8 @@ jobs:
             **Neither artifact is notarized or signed by a recognised publisher.** There is no
             Apple Developer account and no Windows code-signing certificate. macOS will refuse
             to open the run script until you allow it in System Settings, and Windows
-            SmartScreen will warn about an unrecognised publisher. See `docs/INSTALL.md` for
-            the exact click-paths. Do not disable Gatekeeper or SmartScreen system-wide —
+            SmartScreen will warn about an unrecognised publisher. See `INSTALL.md`, included
+            beside this archive's run script, for the exact click-paths. Do not disable Gatekeeper or SmartScreen system-wide —
             neither is necessary and both make your machine less safe.
 
             Verify your download against the `.sha256` file beside it.

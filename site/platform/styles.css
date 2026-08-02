@@ -129,6 +129,10 @@ th { font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color:
   padding: .12rem .45rem; border-radius: 999px; white-space: nowrap;
 }
 .pill-ok { background: rgba(27,67,50,.12); color: var(--green); border: 1px solid var(--green); }
+/* Absence is not health: a surface that was never distributed must not
+   wear the same green pill as one that works. */
+.pill-warn{background:#f3e2c7;color:#6b4e16;border:1px solid #d8bd85}
+
 .pill-no { background: rgba(127,127,127,.12); color: var(--ink-2); border: 1px solid var(--line); }
 .ops p { margin: .4rem 0 0; font-size: .92rem; color: var(--ink-2); }
 .ops .why { color: var(--gold); }

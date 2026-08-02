@@ -75,7 +75,7 @@ answer is FFX004 at 53.4.
 - `results.html` — the "Results Explorer"
 
 Everything inside them is third-party-hosted: **outside version control, outside review, and
-outside all 39 gates.** The content can change without a commit and nothing here would notice.
+outside every gate this repository has.** The content can change without a commit and nothing here would notice.
 The linking text no longer asserts anything about what those hosts serve.
 
 This is a structural fact about what "the public site" means for this project, not a bug with a
@@ -90,7 +90,7 @@ fix. It is the owner's call whether to bring that content into the repository.
 | **Real MATLAB has never seen the real sites** | The public harness must never carry facility data | 49/49 on a synthetic fixture; Octave↔MATLAB cross-validated at 2 640 cells / 0 divergences |
 | **Simulink has never been simulated** | Model built only | The view states it on its face; no number derives from it |
 | ~~**No true fresh-clone walkthrough**~~ | **CLOSED 2026-07-28.** Cloned to an empty directory and followed the README from zero: 40/40 gates on a tree never built in, and no documentation needed correcting | [`VERIFICATION.md`](VERIFICATION.md) §9 |
-| **Windows install unexercised** | No Windows machine available. The **CI packaging job has also never run** — `package.yml` is on this branch only, and `workflow_dispatch` requires the workflow on the default branch, so it cannot be exercised until the branch merges | Every step of the macOS job was run by hand instead and the artifact installed and launched; see [`VERIFICATION.md`](VERIFICATION.md) §10 |
+| **Windows install unexercised** | No Windows machine available. **The CI packaging job now runs** — it first executed 2026-07-28 and has been green on both platforms since 2026-08-02 — but nobody has ever *installed* the Windows artifact, because there is no Windows machine to install it on | Every published artifact is opened and inspected rather than trusted; four Windows-only defects were found that way and fixed. v3.0.0 is tagged **pre-release** for this reason. See [`VERIFICATION.md`](VERIFICATION.md) §10–§11 |
 | **macOS Gatekeeper** | **Nothing is signed.** `spctl -a -t exec` rejects the artifact, exit 3, measured on macOS 26.5.1. The workflow used to ad-hoc sign the run script, but `zip` discards the extended attributes the signature lives in, so no build ever shipped one — the step has been removed and the guide corrected | Real click-path documented; disabling Gatekeeper explicitly refused; a test fails if a signing step returns without xattr-preserving archiving |
 | **Editable dev install is not hash-verified** | pip cannot hash an editable requirement — measured, not assumed | `requirements-hashed.txt` covers the clean non-editable install and the packaging build |
 | **Platform sub-surfaces unexercised by a human** | Only "it renders" was confirmed | Stated explicitly rather than folded into the sign-in confirmation |
@@ -134,7 +134,7 @@ Recorded because they are more likely to recur than any single defect above.
 
 ## 8. Open human actions, in full
 
-`docs/operations/open-human-actions.md` carries fourteen rows. The ones that block something:
+`docs/operations/open-human-actions.md` carries 15 rows (1–10 plus 8b, 8c, 8d, 8e). The ones that block something:
 
 - **4** — utility and facility data requests. Unblocks §1 entirely.
 - **8b** — remove the superseded Tableau workbook (account holder only).

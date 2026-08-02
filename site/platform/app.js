@@ -356,8 +356,15 @@ function renderSurfaces() {
     const h3 = document.createElement("h3");
     h3.textContent = s.title;
     const pill = document.createElement("span");
-    pill.className = "pill pill-ok";
-    pill.textContent = `${s.count} item${s.count === 1 ? "" : "s"}`;
+    // An absent surface must not wear the same green pill as a working one. In the public
+    // installer five surfaces are deliberately not distributed, and this rendered "0 items"
+    // in pill-ok beside an Open link that 404s -- a capability that was never shipped looked
+    // like a capability that is broken.
+    const present = s.present !== false;
+    pill.className = present ? "pill pill-ok" : "pill pill-warn";
+    pill.textContent = present
+      ? `${s.count} item${s.count === 1 ? "" : "s"}`
+      : "not in this installation";
     head.append(h3, pill);
     li.append(head);
 

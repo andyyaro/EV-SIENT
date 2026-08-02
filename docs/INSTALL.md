@@ -116,19 +116,38 @@ to recognise. The warning is accurate.
 
 ## Uninstalling
 
-There is nothing to uninstall in the usual sense — no installer ran, nothing was written
-outside the folder you extracted.
+No installer ran, but **the run script does write outside the folder you extracted**, and this
+section previously said it did not. Being precise about it:
+
+`run-platform.command` / `run-platform.cmd` runs `pip install -e . -c requirements-lock.txt`
+against whichever Python is on your `PATH`. That writes into **that interpreter's
+site-packages**, not into the extracted folder: a `__editable__.fcf_m2-3.0.0.pth` file, an
+`fcf_m2-3.0.0.dist-info` directory, and roughly twenty third-party packages (numpy, pandas,
+matplotlib, jsonschema, pillow and their dependencies). pip also caches downloads under your
+home directory. **No virtual environment is created** — an earlier version of this section said
+one was, and deleting the folder would then have left a dangling editable install pointing at a
+path that no longer exists.
+
+**If you want it isolated, make a virtual environment yourself before running the script:**
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\activate
+```
+
+Then run the script from that shell. Everything lands inside `.venv` and deleting the folder
+really does remove all of it.
 
 **macOS and Windows:**
 
-1. Delete the extracted folder.
-2. If you ran the platform, it created a Python virtual environment inside that folder; deleting
-   the folder removes it.
+1. `pip uninstall fcf-m2` — removes the editable install. The third-party dependencies stay,
+   because other things on your machine may be using them; `pip uninstall` each if you want
+   them gone.
+2. Delete the extracted folder.
 3. macOS only: to also forget the security exception you granted, there is nothing to do — the
    exception is tied to the file, which you have deleted.
 
-The platform binds to **loopback only** and stores nothing outside its own directory. It opens
-no ports to your network and writes nothing to your system folders.
+While running, the platform binds to **loopback only**. It opens no ports to your network and
+writes nothing to your system folders.
 
 ---
 
@@ -153,6 +172,18 @@ Stated because a capability that is quietly absent looks like a capability that 
   MATLAB run used a synthetic fixture. They are excluded because they are **received CI
   artifacts from a separate harness repository**, not something this installer can produce or
   reproduce. The platform's engine surface says so explicitly rather than appearing empty.
-- **No 3D explorer.** Its site geometry is generated from the real twelve facilities, so it is
-  excluded. The surface is skipped rather than shown broken.
+**Five surfaces are not distributed at all**, because each is generated from the real twelve
+facilities: the **3D explorer**, the **static dashboard**, the **written reports**, the **NFC
+field layer**, and the **downloadable contract**. In the platform each appears as a card
+labelled *"not in this installation"*, with **no Open link** — deliberately, so that a
+capability which was never shipped cannot be mistaken for one that is broken.
+
+That behaviour is newer than this guide. Until a pre-release audit measured it, the manifest
+carried a link for every one of those five, and the explorer card read *"All 12 sites in 3D"*
+above an Open button that returned 404. This section claimed the surfaces were "skipped rather
+than shown broken"; they were shown broken.
+
+**What you do get** is the Tableau workbook links, which point at Tableau Public and work, and
+everything the model itself produces when you run it on the synthetic inputs.
+
 - **No real site data at all.** That is the point — see DEC-016.

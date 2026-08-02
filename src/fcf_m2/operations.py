@@ -285,10 +285,30 @@ def runs_here(op: "Operation", platform: str | None = None) -> bool:
     Windows user to install the desktop app in order to run something the desktop app cannot
     run for them either.
     """
+    if not script_present(op):
+        return False
     if not op.platforms:
         return True
     current = platform or sys.platform
     return any(current.startswith(name) for name in op.platforms)
+
+
+def script_present(op: "Operation") -> bool:
+    """Whether the repo script this operation shells out to exists in THIS installation.
+
+    Some operations run a script that the public installer deliberately does not ship.
+    `verify-all` is the case that forced this: `scripts/verify.sh` was removed from the public
+    bundle after a pre-release audit ran it there and watched it fail 36 of its 40 gates,
+    because those gates reach for tests/, docs/ and matlab/. Without this check the platform
+    would still have offered the button, and pressing it would have produced "no such file" —
+    an operation appearing broken rather than declaring itself absent, which is the exact rule
+    this registry is built on.
+    """
+    root = Path(__file__).resolve().parents[2]
+    for token in op.command:
+        if token.startswith("scripts/") and not (root / token).exists():
+            return False
+    return True
 
 
 def for_tier(tier: str, platform: str | None = None) -> list[dict]:
@@ -303,12 +323,23 @@ def for_tier(tier: str, platform: str | None = None) -> list[dict]:
     out = []
     for op in OPERATIONS:
         tier_ok = tier == TIER_DESKTOP or op.tier == TIER_BOTH
+        script_ok = script_present(op)
         platform_ok = runs_here(op, platform)
-        available = tier_ok and platform_ok
-        # The tier reason and the platform reason are different facts, and the platform one is
-        # reported first when both apply: telling a Windows user to install the desktop app
-        # would be useless advice for an operation the desktop app cannot run there either.
-        if not platform_ok:
+        available = tier_ok and platform_ok and script_ok
+        # THREE different facts, reported most-specific first. Telling a Windows user to install
+        # the desktop app is useless advice for an operation the desktop app cannot run there
+        # either — and telling anyone "this is a bash script" is the wrong answer entirely when
+        # the script is simply not part of their installation. Reporting the platform reason for
+        # an absent file would be an accurate sentence about the wrong problem, which is this
+        # project's most frequent defect.
+        if not script_ok:
+            reason = (
+                "This operation runs a repository script that is not part of this "
+                "installation. The public installer ships the model and the surfaces it can "
+                "build, not the repository's own verification harness — that harness checks "
+                "files (tests, docs, the MATLAB tier, the real contract) which are deliberately "
+                "not distributed, so it could not pass here even if it were included.")
+        elif not platform_ok:
             reason = op.platform_reason
         elif not tier_ok:
             reason = op.desktop_reason
@@ -320,7 +351,8 @@ def for_tier(tier: str, platform: str | None = None) -> list[dict]:
             "description": op.description,
             "available": available,
             "unavailable_reason": reason,
-            "unavailable_because": ("platform" if not platform_ok
+            "unavailable_because": ("not_installed" if not script_ok
+                                    else "platform" if not platform_ok
                                     else "tier" if not tier_ok else ""),
             "caveat": op.caveat,
             "produces": list(op.produces),

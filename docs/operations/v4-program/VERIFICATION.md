@@ -259,3 +259,53 @@ returns without an xattr-preserving archiving step.
 is that the generator enumerated whatever interpreter ran it, and the vendored Cognito SDK's
 attribution had been added by hand to the generated file, so the first release build would have
 deleted it.
+
+---
+
+## 11. The pre-release audit — 2026-08-02
+
+A git tag and a GitHub Release cannot be deleted under this project's standing orders, so
+before creating one, five independent agents audited release-readiness along separate
+dimensions and every finding was then handed to a sixth agent instructed to **refute** it.
+
+**39 raised → 24 refuted → 15 confirmed → 3 blocking.** The refutation rate is the point: a
+finder that is never contradicted is a finder nobody checked.
+
+### What it found that measurement confirmed
+
+| # | Finding | How it was confirmed here |
+|---|---|---|
+| 1 | **A real facility identifier shipped in the public installer.** `src/fcf_m2/economics.py` carried the comment *"(client's Neabsco pattern)"*. `Neabsco` is the distinctive half of PWC002's real name | Built the artifact and grepped it: **1 occurrence**, while the build printed *"verified: no real facility identifier appears in the archive (36 searched)"* — the guard matched whole names only |
+| 2 | **The installer advertised five surfaces it does not contain**, with dead `Open` links; the explorer card read *"All 12 sites in 3D"* above a 404 | Built it, ran the first-start build, read `surfaces.json` against the files on disk: 5 dead links |
+| 3 | **`docs/INSTALL.md` said nothing was written outside the extracted folder.** The run script `pip install -e .` writes a `.pth`, a dist-info and ~20 packages into the user's interpreter | Ran the install and listed site-packages |
+| 4 | **The same guide said a virtual environment is created.** None is | Neither run script contains the string `venv` |
+| 5 | **`scripts/verify.sh` shipped in the bundle** and fails 36 of its 40 gates there | Ran it inside a built installer: exit 36, **35** "No such file or directory" lines |
+| 6 | **`RESIDUAL_RISKS.md` still said the CI packaging job had never run.** It first ran 2026-07-28 | `gh run list`, and this document's own §10 |
+| 7 | **`LEDGER.md`'s status board still said the artifact IS ad-hoc signed** | Corrected everywhere else on 2026-07-28 and missed here |
+| 8 | **`REPRODUCTION.txt` gave POSIX-only commands** in an artifact half of whose builds are for Windows | Read the shipped text |
+
+Plus four smaller ones: a stale gate count in three live claims, a release body pointing at
+`docs/INSTALL.md` when the guide ships at the bundle root, a row count of fourteen for a
+fifteen-row table, and two literal `\n` escapes rendering as text.
+
+### What was done about each
+
+Every one was fixed, and two produced code rather than prose:
+
+- `assert_no_real_identifiers` now searches **distinctive tokens** of facility names, not only
+  whole strings — 41 needles instead of 36. It refuses and deletes the archive, as before.
+  **Stated limit:** seven of the twelve facilities have names built entirely from jurisdiction
+  and generic words (`Prince William County Public Safety Training Center`), so they have no
+  distinctive token and are covered only by the whole-name, site-id and address searches. This
+  narrows the gap; it does not close it.
+- `mark_absent_surfaces()` strips the link from any surface not present in the installation and
+  labels the card *"not in this installation"*. A surface reachable only through `links` counts
+  as absent when all of them are stripped — the contract card kept a healthy pill after both of
+  its downloads were removed, which is the same defect one level down.
+
+### What the audit did NOT establish
+
+It read files and built artifacts. It did not install on Windows, did not confirm capacity at
+any site, and did not run MATLAB against anything real. Those remain exactly as recorded in
+[`RESIDUAL_RISKS.md`](RESIDUAL_RISKS.md), and the Windows one is why v3.0.0 is tagged
+**pre-release**.
