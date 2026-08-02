@@ -279,9 +279,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: assets/**/*
+          # PRE-RELEASE, deliberately, and not because the software is unstable.
+          #
+          # The macOS artifact has been installed and launched from a CI build and serves all
+          # five platform surfaces. **The Windows artifact has never been run on Windows by
+          # anyone** -- there is no Windows machine on this project, so CI builds it and
+          # nothing has ever executed it. RESIDUAL_RISKS.md records that as an open gap.
+          # Labelling this "latest release" would imply a level of exercise it has not had.
+          #
+          # Remove this line once someone has actually installed the Windows build.
+          prerelease: true
           # Stated on the release itself, where someone downloading will actually read it.
           body: |
             Desktop artifacts for the Future City Fellowship planning platform.
+
+            **Marked pre-release, and here is the specific reason.** The macOS build has
+            been installed from CI and launched, and serves every platform surface. The
+            **Windows build has never been run on Windows by anyone** — this project has
+            no Windows machine, so CI builds that artifact and nothing has ever executed
+            it. The software is not known to be unstable; it is simply less exercised on
+            one platform than "latest release" would imply.
 
             **These installers ship SYNTHETIC site data.** Every value in them is invented and
             describes no real building (DEC-016, DEC-020). Running the model against them
