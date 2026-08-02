@@ -73,8 +73,12 @@ def copy_surfaces() -> dict[str, int]:
             # real twelve, so it is excluded, and dying on its absence made the whole platform
             # unreachable rather than merely one card emptier.
             #
-            # The manifest still never claims a surface that is not there: the entry is simply
-            # not written, and `count` comes out zero.
+            # `count` comes out zero. That is NOT by itself enough, and the sentence that used
+            # to sit here -- "the manifest still never claims a surface that is not there: the
+            # entry is simply not written" -- was false. It is true of this function and false
+            # of `build()`, which is where the manifest is actually written and which emits
+            # every entry unconditionally, href and all. `mark_absent_surfaces()` is what makes
+            # the claim true now, by stripping the link after the fact.
             print(f"  skipping {src_rel}: not present in this installation")
             counts[dst_rel] = 0
             continue
@@ -250,14 +254,69 @@ def build() -> dict:
     }
 
 
+def mark_absent_surfaces(payload: dict) -> list[str]:
+    """Strip links to surfaces that are not in THIS installation, and say so on the card.
+
+    `build()` writes every surface entry unconditionally, with a fixed `href`. In this
+    repository everything is present, so that was invisible. In the **public installer** it was
+    not: `copy_surfaces()` deliberately skips the explorer, dashboard, reports, NFC layer and
+    contract v2 — they are generated from the real twelve facilities — yet the manifest still
+    carried their hrefs, and `app.js` renders an "Open" anchor for any entry that has one.
+
+    Measured on a built public artifact: five cards with dead links, the explorer's reading
+    "All 12 sites in 3D with 0 building models" beside a green pill, and Open going to a 404.
+    `copy_surfaces()`'s own comment claimed "the manifest still never claims a surface that is
+    not there" — true of that function, false of `build()`, which is where the manifest is
+    actually written.
+
+    That is worse than an empty card. A recipient sees a capability advertised, clicks, and
+    concludes the software is broken rather than that the surface was never distributed —
+    exactly the misreading `docs/INSTALL.md` says this design prevents.
+    """
+    absent = []
+    for surface in payload.get("surfaces", []):
+        href = surface.get("href")
+        live_href = bool(href) and (OUT / href).exists()
+        if href and not live_href:
+            surface.pop("href", None)
+            absent.append(surface["id"])
+
+        kept = []
+        for link in surface.get("links", []):
+            target = link.get("href", "")
+            # http links are someone else's server — Tableau's — and their reachability is not
+            # something this build can decide. They are kept and the surface counts as present.
+            if target.startswith("http") or (OUT / target).exists():
+                kept.append(link)
+            else:
+                absent.append(f"{surface['id']}:{target}")
+        if "links" in surface:
+            surface["links"] = kept
+
+        # Present means A READER CAN GET TO SOMETHING: a live href, or at least one live link.
+        # The first version of this only looked at `href`, so the contract card — which has no
+        # href and reaches its downloads entirely through `links` — kept a green "0 items" pill
+        # and the text "Download the contract itself" after both of its links had been stripped.
+        # A card offering a download and no way to take it is the same defect one level down.
+        surface["present"] = bool(live_href or kept)
+        if not surface["present"]:
+            surface["detail"] = (
+                f"Not included in this installation. {surface.get('detail', '')}".strip())
+    return absent
+
+
 def main() -> int:
     payload = build()
+    absent = mark_absent_surfaces(payload)
     indexes = write_directory_indexes(payload)
     MANIFEST.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n",
                         encoding="utf-8", newline="\n")
     print(f"wrote {MANIFEST.relative_to(REPO)}")
     for s in payload["surfaces"]:
-        print(f"  {s['id']:12} {s['count']:>3} items  {s['title']}")
+        state = "" if s.get("present", True) else "  NOT IN THIS INSTALLATION"
+        print(f"  {s['id']:12} {s['count']:>3} items  {s['title']}{state}")
+    if absent:
+        print(f"  absent, links stripped so no card offers a dead Open: {', '.join(absent)}")
     print(f"  directory indexes: {len(indexes)} written ({', '.join(indexes)})")
     print(f"  never deployed: {', '.join(payload['never_deployed'])}")
     return 0

@@ -7,7 +7,8 @@
       "href": "explorer/index.html",
       "detail": "All 12 sites in 3D with 12 building models. Works with no Cesium account and no token \u2014 it falls back to a flat basemap rather than requiring a credential.",
       "count": 12,
-      "available_on_web": true
+      "available_on_web": true,
+      "present": true
     },
     {
       "id": "dashboard",
@@ -26,7 +27,8 @@
         "09_site_map_offline.png"
       ],
       "count": 9,
-      "available_on_web": true
+      "available_on_web": true,
+      "present": true
     },
     {
       "id": "tableau",
@@ -63,7 +65,8 @@
         }
       ],
       "count": 7,
-      "available_on_web": true
+      "available_on_web": true,
+      "present": true
     },
     {
       "id": "contract",
@@ -80,7 +83,8 @@
         }
       ],
       "count": 16,
-      "available_on_web": true
+      "available_on_web": true,
+      "present": true
     },
     {
       "id": "reports",
@@ -102,7 +106,8 @@
         "RISK_REGISTER.md"
       ],
       "count": 12,
-      "available_on_web": true
+      "available_on_web": true,
+      "present": true
     },
     {
       "id": "nfc",
@@ -110,7 +115,8 @@
       "href": "nfc/",
       "detail": "Tag payloads for all 12 sites with 12 QR fallbacks, the writing runbook and the placement cards. Writing a physical tag is done with a phone.",
       "count": 12,
-      "available_on_web": true
+      "available_on_web": true,
+      "present": true
     }
   ],
   "deploy_note": "Everything above is copied into the public bundle from an explicit allowlist. The real site input data is never copied \u2014 not by convention, by construction. See DEC-016.",
