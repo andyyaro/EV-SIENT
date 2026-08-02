@@ -99,6 +99,37 @@ PUBLIC_SUBSTITUTIONS = {
 }
 
 
+def archive_path(path: Path) -> str:
+    """A repo-relative path with forward slashes, on every operating system.
+
+    `str(p.relative_to(ROOT))` returns backslashes on Windows, and both places this script used
+    it were then compared against, or written as, the forward-slash keys of
+    `PUBLIC_SUBSTITUTIONS`. Neither comparison could ever match on a Windows runner.
+
+    Measured on the packaging workflow's first successful run: the Windows artifact shipped the
+    synthetic inputs at their own `data/synthetic/...` paths instead of at the four paths the
+    model reads, so a recipient's first run would have found no inputs at all — and 58 of its 60
+    RELEASE_MANIFEST entries carried backslash keys that matched none of the names in the
+    archive beside them. The macOS artifact from the same run was correct, which is exactly why
+    building on one platform and assuming the other proves nothing.
+    """
+    return path.relative_to(ROOT).as_posix()
+
+
+def substituted_name(rel: str, substitutions: dict) -> str:
+    """The name a file is stored under: its own, unless a synthetic file stands in for a real
+    one, in which case the REAL name so the model reads it unchanged.
+
+    Split out from the archive loop so it can be tested against Windows-shaped input on any
+    machine. The bug it exists for was invisible to every test in this repository, because none
+    of them ran where the path separator differs.
+    """
+    for real_rel, synth_rel in substitutions.items():
+        if rel == synth_rel:
+            return real_rel
+    return rel
+
+
 def resolve_public(public: bool) -> tuple[dict, list[str]]:
     """Return (substitutions, problems) for a public build.
 
@@ -239,19 +270,14 @@ def main(out_dir: str | None = None, public: bool = False) -> Path:
         "release": f"fcf_m2 v3.0.0 ({stamp})",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {"python": sys.version, "platform": platform.platform()},
-        "files": {str(p.relative_to(ROOT)): sha256(p) for p in sorted(files)},
+        "files": {archive_path(p): sha256(p) for p in sorted(files)},
     }
 
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
         for p in files:
-            rel = str(p.relative_to(ROOT))
             # The synthetic file is written under the REAL file's name so the model reads it
             # unchanged. Its own contents announce that every value is invented.
-            target = rel
-            for real_rel, synth_rel in substitutions.items():
-                if rel == synth_rel:
-                    target = real_rel      # written under the name the model reads
-            z.write(p, target)
+            z.write(p, substituted_name(archive_path(p), substitutions))
         z.writestr("RELEASE_MANIFEST.json", json.dumps(manifest, indent=2))
         z.writestr("LIMITATIONS.txt", LIMITATIONS)
         z.writestr("REPRODUCTION.txt", REPRO_PUBLIC if public else REPRO)
@@ -259,7 +285,11 @@ def main(out_dir: str | None = None, public: bool = False) -> Path:
     if public:
         assert_no_real_identifiers(zpath)
 
-    (out / f"fcf_m2_v3_release_{stamp}.sha256").write_text(sha256(zpath) + f"  {zpath.name}\n")
+    # newline="\n": see the note in .github/workflows/package.yml. A checksum file with
+    # CRLF endings cannot be verified with `shasum -c`, and this one had the same defect
+    # waiting for the first person to build on Windows.
+    (out / f"fcf_m2_v3_release_{stamp}.sha256").write_text(
+        sha256(zpath) + f"  {zpath.name}\n", newline="\n")
     kind = "PUBLIC (synthetic inputs)" if public else "INTERNAL (real inputs - DO NOT PUBLISH)"
     print(f"release artifact [{kind}]: {zpath} "
           f"({zpath.stat().st_size/1e6:.1f} MB, {len(files)} files)")

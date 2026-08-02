@@ -186,7 +186,13 @@ jobs:
                       z.write(path, path.relative_to(staging).as_posix())
           digest = hashlib.sha256(archive.read_bytes()).hexdigest()
           line = f"{digest}  {archive.name}\n"
-          (out / f"{name}.zip.sha256").write_text(line)
+          # newline="\n" is not cosmetic. Python translates "\n" to CRLF on Windows, and
+          # the first successful run shipped a Windows .sha256 ending "windows.zip\r\n" --
+          # `shasum -a 256 -c` then looks for a file whose name ends in a carriage return
+          # and reports "No such file or directory". The digest was correct; the file was
+          # unverifiable by the command docs/INSTALL.md gives a reader. Measured, on the
+          # artifact GitHub actually published.
+          (out / f"{name}.zip.sha256").write_text(line, newline="\n")
           print(line, end="")
           PY
 
