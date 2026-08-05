@@ -47,14 +47,35 @@ this exact condition as the trigger) and updating the "Windows install unexercis
 
 ## 3. Two live-state facts a new session must not guess at
 
-**The AWS SSO token is expired.** Any `aws` call fails with *"Token has expired and refresh
-failed"*. Before any AWS work:
+**The AWS SSO token was expired and has been renewed** (2026-08-04), and a full live audit ran
+against the real estate — see §3a. It will expire again; before any AWS work:
 
 ```bash
 aws sso login --profile future-city     # S3, CloudFront, certs, hosting, deployment
 aws sso login --profile cerfodes-dns    # Route 53 ONLY
 aws sts get-caller-identity --profile future-city   # verify before every phase; mismatch -> stop
 ```
+
+### 3a. The live estate, audited 2026-08-04 with credentials
+
+Asked of AWS directly, not inferred from the deploy script:
+
+| Check | Observed |
+|---|---|
+| `verify_deployment.py` against the public URLs | **33 passed, 0 failed** |
+| Platform bucket public-access blocks | **all four on** |
+| Objects under `platform/` in the MAIN bucket | **0** — the isolation is structural, not behavioural |
+| CloudFront cache behaviours | **1**, `/platform*`, at **Lambda v8** |
+| Gate allowlist | **2 accounts**, matched on `sub` **and** `email` |
+| Cognito pool members | **3 confirmed** — so `redacted-1@example.org` can sign in to the shared pool and **cannot** reach `/platform/*` |
+| Spend, 30 days | **$0.50** against a $10/month ceiling |
+
+**This program's incremental AWS cost is effectively zero.** The two largest lines — Secrets
+Manager and Amplify — were created 2026-06-29 and 2026-07-07, before this program began on
+2026-07-27. Neither is ours. (Running the Cost Explorer query itself cost $0.04 of that $0.50.)
+
+A shared user pool is **not** shared access: the authoriser holds an explicit two-entry
+allowlist, so pool membership alone opens nothing.
 
 **The live platform is 4 files behind the repo, and it does not matter.** `site/platform/`'s
 `app.js`, `index.html`, `styles.css` and `surfaces.json` changed in `27a6bdb` after the last
