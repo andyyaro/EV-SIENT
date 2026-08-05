@@ -438,9 +438,14 @@ def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
 
     # The current config is still worth recording — it is just not the rollback target, so it
     # gets its own name and says what it is.
+    # Written LAST, from a fresh fetch, not from the config read at the top of this function.
+    #
+    # It used to be written here from `config` -- the state BEFORE this run's update -- while
+    # being labelled "config as it is RIGHT NOW". After the 2026-07-28 apply the file therefore
+    # recorded Lambda version 7 while the distribution was serving version 8, and the audit that
+    # found it had to diff against live to notice. A snapshot whose name asserts currency has to
+    # be taken after the change, or it is documentation of a moment that has already passed.
     latest = REPO / "docs/operations/v4-program/cloudfront-config-observed.json"
-    latest.write_text(redact(json.dumps(config, indent=2)) + "\n")
-    say("cloudfront", f"config as it is RIGHT NOW saved -> {latest.relative_to(REPO)}")
 
     new_config = json.loads(json.dumps(config))
     origins = [o for o in new_config["Origins"]["Items"] if o["Id"] != ORIGIN_ID]
@@ -454,6 +459,7 @@ def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
 
     if not apply:
         say("cloudfront", "WOULD update the distribution (dry run)")
+        write_observed(apply)
         return
 
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
@@ -465,9 +471,19 @@ def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
     finally:
         Path(path).unlink(missing_ok=True)
     say("cloudfront", "distribution updated; edge propagation takes a few minutes")
+    write_observed(apply)
 
 
 # ---------------------------------------------------------------- content
+
+
+def write_observed(apply: bool) -> None:
+    """Record the distribution config as it is AFTER any change this run made."""
+    fresh = aws("cloudfront", "get-distribution-config", "--id", DISTRIBUTION_ID)
+    latest = REPO / "docs/operations/v4-program/cloudfront-config-observed.json"
+    latest.write_text(redact(json.dumps(fresh["DistributionConfig"], indent=2)) + "\n")
+    when = "after this run's update" if apply else "unchanged (dry run made no change)"
+    say("cloudfront", f"observed config saved, {when} -> {latest.relative_to(REPO)}")
 
 def deploy_bundle(apply: bool) -> None:
     if not (BUNDLE / "index.html").is_file():
@@ -519,6 +535,13 @@ STALE_OBJECTS = [f"top-model-findings-cards-bgs/image{n}.png" for n in range(1, 
                 ["top-model-findings-cards-bgs/image1.jpeg"]
 
 
+def object_exists(bucket: str, key: str) -> bool:
+    """Whether an object is actually there. Used so a dry run cannot promise a phantom delete."""
+    proc = subprocess.run(["aws", "s3api", "head-object", "--bucket", bucket, "--key", key,
+                           "--profile", PROFILE], capture_output=True, text=True)
+    return proc.returncode == 0
+
+
 def deploy_www(apply: bool) -> None:
     """Publish the public pages. Never with --delete.
 
@@ -541,9 +564,19 @@ def deploy_www(apply: bool) -> None:
     changed = [ln for ln in proc.stdout.splitlines() if ln.strip()]
     say("www", f"{len(changed)} object(s) {'would be ' if not apply else ''}written")
 
-    for key in STALE_OBJECTS:
-        if not apply:
+    # A dry run must not claim an action it would not take. These seven were deleted on
+    # 2026-07-28 and are gone -- verified with head-object, all 404 -- yet every dry run since
+    # has printed "WOULD delete duplicate ..." for all seven. Harmless in effect and wrong in
+    # kind: this project's whole standard is that the report matches what happens, and a plan
+    # that lists phantom deletions is the same defect as a check that cannot fail.
+    present = [k for k in STALE_OBJECTS if object_exists(MAIN_BUCKET, k)]
+    if not apply:
+        for key in present:
             say("www", f"WOULD delete duplicate {key}")
+        if not present:
+            say("www", f"none of the {len(STALE_OBJECTS)} known duplicates remain; nothing to delete")
+    for key in present:
+        if not apply:
             continue
         subprocess.run(["aws", "s3", "rm", f"s3://{MAIN_BUCKET}/{key}", "--profile", PROFILE],
                        capture_output=True, text=True)
