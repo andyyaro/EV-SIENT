@@ -1,4 +1,4 @@
-# LANE L01 — THE MODEL CORE (`src/`)
+# LANE L01 - THE MODEL CORE (`src/`)
 
 Repo: `/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo` (branch `v4-platform`, HEAD `95e91e0 docs(v4-program): initialize program ledger`).
 All 23 assigned files read end to end. Paths below are repo-relative.
@@ -45,17 +45,17 @@ machinery at all.
   - `TRIGGER_POLICY` (L124-138): `policy_status "proposed_default_pending_team_and_client_adoption"`, `utilization_threshold 0.40`, `wait_threshold_min 10.0`, `reliability_uptime_min 0.97`, `min_observation_months 6`, `equity_override {enabled True, equity_index_percentile_min 0.60, reduced_utilization_threshold 0.25}`, `budget_gate "human_approval_required"`, `pathway_gate "ports_active_plus_step_must_not_exceed_ports_pathway"`.
   - `CAPACITY_BASIS_VALUES` (L140-147): `verified_utility, verified_facility, engineering_estimate, planning_proxy, placeholder, unknown`.
   - `JURISDICTIONS = {"FFX":"fairfax","PWC":"pwc"}` (L149); `RunConfig` dataclass (L152-158); `jurisdiction_for()` (L161-167) returns `"unknown"` for unmatched prefixes.
-- **Notes:** The module docstring (L11) claims *"Every result-changing constant lives here with its provenance label."* **That is false** — see finding F-02 for the eight-plus result-changing constants that live in other modules. `jurisdiction_for` can emit `"unknown"`, which would fail the contract schema enum `["fairfax","pwc"]` (`contract.py:85`); harmless today because all 12 site_ids are FFX/PWC.
+- **Notes:** The module docstring (L11) claims *"Every result-changing constant lives here with its provenance label."* **That is false** - see finding F-02 for the eight-plus result-changing constants that live in other modules. `jurisdiction_for` can emit `"unknown"`, which would fail the contract schema enum `["fairfax","pwc"]` (`contract.py:85`); harmless today because all 12 site_ids are FFX/PWC.
 
 ---
 
 ### src/fcf_m2/scoring.py  (216 lines)
-- **Role:** The single readiness scorer — cohort min-max (`legacy_v2`) or fixed-anchor (`milestone2_v3`) normalization, four subscores, composite readiness, port screen, ranking, tiering.
+- **Role:** The single readiness scorer - cohort min-max (`legacy_v2`) or fixed-anchor (`milestone2_v3`) normalization, four subscores, composite readiness, port screen, ranking, tiering.
 - **Kind:** authored
 - **Reads:** `load_anchor_set()` opens the anchor JSON path handed to it (`workflow` passes `data/anchors/anchor_set_v1.json`). Otherwise operates on the DataFrame it is given.
 - **Written by / read by:** Called by `workflow.run()` (`enrich_and_score`, `add_tiers`, `load_anchor_set`) and by `tests/conftest.py::scored_legacy`. Its output columns feed `right_sizing.py`, the migration report, and `site_table`.
-- **Key contents (verbatim weights — inline literals, no named table):**
-  - `EV_SHARE_HIGH_BENCHMARK = 0.10` (L26) — **hardcoded here, not in config.py.**
+- **Key contents (verbatim weights - inline literals, no named table):**
+  - `EV_SHARE_HIGH_BENCHMARK = 0.10` (L26) - **hardcoded here, not in config.py.**
   - `YES_NO_FIELDS` (L28-31, 7 fields): `public_access, ada_layout_possible, fire_access_ok, garage_enclosed, emergency_disconnect_visible, stormwater_risk, battery_storage_flag`.
   - `NUMERIC_FIELDS` (L33-40, 20 fields) incl. `employees_day, visitors_day, fleet_vehicles, parking_spaces, hours_open, avg_dwell_min, nearby_households_1mi, nearby_jobs_1mi, aadt_nearest, amenities_count_0_5mi, ev_share_local, existing_l2_ports_1mi, existing_dcfc_ports_3mi, equity_gap_index, spare_capacity_kw, distance_to_service_ft, trenching_ft, trench_cost_per_ft, service_upgrade_cost_usd, elec_service_rating_amp`.
   - `NORMALIZE_COLS` (L42-46, **12 fields**): `nearby_households_1mi, nearby_jobs_1mi, aadt_nearest, amenities_count_0_5mi, parking_spaces, avg_dwell_min, existing_ports_total, spare_capacity_kw, distance_to_service_ft, trenching_ft, install_cost_est_usd, equity_gap_index`.
@@ -70,10 +70,10 @@ machinery at all.
   - `expected_sessions()` (L107-116): `0.0015×visitors_day + 0.0006×employees_day + 0.00002×nearby_jobs_1mi + 0.00003×nearby_households_1mi×(1+ev_share_local)`, clipped at floor `0.3`.
   - Port screen (L179-190): per row, `avg_session_hr = avg_dwell_min/60` (fallback `2` when dwell<=0), then `queueing.choose_ports()` → `recommended_ports_now`, `estimated_utilization`, `mean_wait_min`.
   - Ranking (L192-196): sort by `readiness_score` desc → `model_rank` 1..n; plus `scoring_mode`, `anchor_set_version` (empty string in legacy), `anchor_fallback_fields`.
-  - `recommendation_tier()` (L200-210), evaluated in order: `public_access == 0` → `"Low public-priority / special-use"`; `garage_enclosed == 1` → `"High-review candidate"`; `model_rank <= 2 and readiness_score >= 50` → `"Tier 1 — advance to site screening"`; `readiness_score >= 45` → `"Tier 2 — promising candidate, refine data"`; else `"Tier 3 — lower priority / monitor"`.
+  - `recommendation_tier()` (L200-210), evaluated in order: `public_access == 0` → `"Low public-priority / special-use"`; `garage_enclosed == 1` → `"High-review candidate"`; `model_rank <= 2 and readiness_score >= 50` → `"Tier 1 - advance to site screening"`; `readiness_score >= 45` → `"Tier 2 - promising candidate, refine data"`; else `"Tier 3 - lower priority / monitor"`.
 - **Notes:**
   - **No `SUBSCORE_WEIGHTS`, no `DRIVERS`, no per-driver "Earned/Forgone" attribution exists here.** The explorer duplicates these numbers independently (F-01).
-  - `access_adjustment` (0.35 branch) is computed and shipped in the output CSV but **never used in any formula** (only `readiness_access_adjustment` is). Dead but externally visible — it is a column in `tests/fixture_legacy_v2_site_results.csv`.
+  - `access_adjustment` (0.35 branch) is computed and shipped in the output CSV but **never used in any formula** (only `readiness_access_adjustment` is). Dead but externally visible - it is a column in `tests/fixture_legacy_v2_site_results.csv`.
   - `spare_capacity_kw` is **0 for all 12 sites** in `data/inputs/real_sites_v2.csv` (verified), so `spare_capacity_kw_n` is identically 0 and **35% of `feasibility_subscore` is structurally dead weight** (F-04).
   - Tier-1 rank cutoff here is `rank <= 2`; `right_sizing.build_strategy` uses `rank <= 3` for the equivalent branch (`right_sizing.py:134`). Two different cutoffs for "top of the list".
 
@@ -91,33 +91,33 @@ machinery at all.
   - All five exist and all five SHA-256 hashes match `data/contract/v1/contract_manifest.json` (verified).
 - **Written by / read by:** Produces every model output; consumed by `tests/conftest.py::v3_outputs`, `Makefile`, `scripts/verify.sh`. `docs/WORKFLOW_STEPS.md` is written by the `docs` subcommand.
 - **Key contents:**
-  - **`STEPS` — exactly 11 entries (L37-49)**, matching `docs/WORKFLOW_STEPS.md` ("Step count: **11**") verbatim:
-    1. `load_inputs` — Load site table, electrical-risk fixture, provenance, anchors, MATLAB site meta
-    2. `score_sites` — Score readiness (legacy min-max or V3 fixed anchors) + Erlang-C port screen
-    3. `right_sizing` — Starter vs pathway right-sizing (legacy 2035/2050 or V3 2026/2036/2046/2056)
-    4. `confidence` — Structured field-level data confidence (V3) / legacy confidence passthrough
-    5. `peak_wait` — Peak-window Erlang and seeded discrete-event wait simulation (P10/P50/P90)
-    6. `economics` — Lifecycle NPC: staged vs overbuild vs defer at 2036/2046/2056, low/base/high
-    7. `emissions` — Net avoided CO2e with sourced grid factor + avoided-EVSE resource metric
-    8. `scenario_table` — Assemble canonical scenario rows (all required contract fields)
-    9. `contract` — Validate + write versioned hybrid CSV/JSON contract with manifest hashes
-    10. `matlab_adapter` — Generate MATLAB input CSV from the contract (capacity_basis on every row)
-    11. `summary` — Write run summary with headline totals and claims-discipline labels
-  - **CLI subcommands (L350-381), 3 total:** `run` (`--mode {legacy_v2, milestone2_v3}` default `milestone2_v3`; `--out`; `--contract-dir`), `validate-contract <contract_dir>`, `docs`. Default out dir: `data/outputs/run_%Y%m%d_%H%M%S` (L363, **local time**, not UTC — inconsistent with `run_id` which is UTC, L97).
+  - **`STEPS` - exactly 11 entries (L37-49)**, matching `docs/WORKFLOW_STEPS.md` ("Step count: **11**") verbatim:
+    1. `load_inputs` - Load site table, electrical-risk fixture, provenance, anchors, MATLAB site meta
+    2. `score_sites` - Score readiness (legacy min-max or V3 fixed anchors) + Erlang-C port screen
+    3. `right_sizing` - Starter vs pathway right-sizing (legacy 2035/2050 or V3 2026/2036/2046/2056)
+    4. `confidence` - Structured field-level data confidence (V3) / legacy confidence passthrough
+    5. `peak_wait` - Peak-window Erlang and seeded discrete-event wait simulation (P10/P50/P90)
+    6. `economics` - Lifecycle NPC: staged vs overbuild vs defer at 2036/2046/2056, low/base/high
+    7. `emissions` - Net avoided CO2e with sourced grid factor + avoided-EVSE resource metric
+    8. `scenario_table` - Assemble canonical scenario rows (all required contract fields)
+    9. `contract` - Validate + write versioned hybrid CSV/JSON contract with manifest hashes
+    10. `matlab_adapter` - Generate MATLAB input CSV from the contract (capacity_basis on every row)
+    11. `summary` - Write run summary with headline totals and claims-discipline labels
+  - **CLI subcommands (L350-381), 3 total:** `run` (`--mode {legacy_v2, milestone2_v3}` default `milestone2_v3`; `--out`; `--contract-dir`), `validate-contract <contract_dir>`, `docs`. Default out dir: `data/outputs/run_%Y%m%d_%H%M%S` (L363, **local time**, not UTC - inconsistent with `run_id` which is UTC, L97).
   - `validate-contract` runs `contract.validate_scenario_table` + `contract.verify_hash_chain` + `contract.validate_against_json_schema`, exits 1 on failure, else prints `"Contract valid: all rule checks, JSON Schema, and RT-10 hash chain PASS."` (L367-377).
   - `docs` writes `ROOT/docs/WORKFLOW_STEPS.md` (L380).
-  - `BASE_LOAD_GROWTH_PER_YEAR = 0.008` (L35) — **result-changing constant living outside `config.py`**, labelled "commercial base-load growth planning proxy".
+  - `BASE_LOAD_GROWTH_PER_YEAR = 0.008` (L35) - **result-changing constant living outside `config.py`**, labelled "commercial base-load growth planning proxy".
   - `run_id = f"{mode}_{UTCnow:%Y%m%dT%H%M%SZ}"` (L97).
   - **Deliberate-migration rule (L102-105, 115-125):** right-sizing is *always* driven by `scored_legacy`, never by V3 anchor scores, so RT-04 (25 starter / 48 pathway) reconciles. In V3 mode a `scoring_migration_report.csv` is written with `legacy_score/legacy_rank/v3_anchor_score/v3_anchor_rank/rank_change` plus a fixed `explanation` string.
   - **Output paths:** `site_results_milestone2_v3.csv`, `scoring_migration_report.csv`, `site_results_legacy_v2.csv`, `right_sizing_legacy_2035_2050.csv`, `right_sizing_v3_canonical.csv`, `data_confidence_v3.csv`, `peak_wait_simulation.csv`, `lifecycle_costs.csv`, `lifecycle_costs_portfolio.csv`, `avoided_evse_metric.csv`, `standards_register.csv`, `matlab_scenarios.csv`, `run_summary.json`, and the contract dir (default `<out>/contract`).
-  - `_sessions_multiplier` (L71-76): baseline year → 1.0; `stress_combined` → `high × 1.15`; else the table value. `_sessions_by_year` (L79-92) linearly interpolates between horizon anchor points over `range(2026, 2057)` — **`2057` is a hardcoded literal** rather than `economics.END_YEAR + 1`.
+  - `_sessions_multiplier` (L71-76): baseline year → 1.0; `stress_combined` → `high × 1.15`; else the table value. `_sessions_by_year` (L79-92) linearly interpolates between horizon anchor points over `range(2026, 2057)` - **`2057` is a hardcoded literal** rather than `economics.END_YEAR + 1`.
   - Scenario-row constants: `capacity_basis = "placeholder"` (L265), `capacity_confidence = "none"` (L268), `managed_charging_policy = "none"` (L269), `energy_curtailed_kwh = 0.0` (L270), `service_capacity_kw`/`spare_capacity_kw` = `None` (L263-264), `source_date = "2026-06-24"` (L281), `source_id = "real_sites_v2+frozen_v2_outputs+anchors_v1"` (L282), `capacity_source` string says **"12/12 sites unconfirmed"** (L266).
   - `peak_factor = PEAK_WINDOW_SHARE / (PEAK_WINDOW_HOURS / max(hours,1))` (L258) = `0.55 × hours_open / 4`.
-  - `public_or_fleet` only ever emits `"public"` or `"mixed"` (L244) — the schema also permits `"fleet"`, which is never produced.
-  - `assumptions` dict (L293-305) embeds `emissions.net_co2e_kg(1000.0)` — a **1000 kWh sample calculation**, not a portfolio total.
+  - `public_or_fleet` only ever emits `"public"` or `"mixed"` (L244) - the schema also permits `"fleet"`, which is never produced.
+  - `assumptions` dict (L293-305) embeds `emissions.net_co2e_kg(1000.0)` - a **1000 kWh sample calculation**, not a portfolio total.
   - Run-summary keys (L334-345): `right_sizing`, `contract_dir`, `scenario_rows`, `matlab_rows`, `starter_total_2026`, `pathway_total`, `legacy_starter_total`, `legacy_pathway_total`, `high_confidence_sites`, `claims_discipline` ("…capacity placeholder at 12/12 sites; demand uncalibrated; costs screening-class; nothing approved.").
 - **Notes:**
-  - `right_sizing_legacy_2035_2050.csv` is written **unconditionally, in both modes** (L131-132). In `milestone2_v3` runs this produces a 2035/2050-named artifact alongside the canonical one. It is correctly *named* legacy, so it is a labelled-legacy artifact rather than a horizon violation — but downstream consumers must not pick it up by accident.
+  - `right_sizing_legacy_2035_2050.csv` is written **unconditionally, in both modes** (L131-132). In `milestone2_v3` runs this produces a 2035/2050-named artifact alongside the canonical one. It is correctly *named* legacy, so it is a labelled-legacy artifact rather than a horizon violation - but downstream consumers must not pick it up by accident.
   - `high_confidence_sites` will be **0** for the frozen contract: all 120 scenario rows carry `data_confidence = Low` (verified in `data/contract/v1/scenario_table.csv`).
   - `V3_HORIZON_LABELS` values `now / plus10 / plus20 / plus30` are the *contract-legal* labels (enum in `contract.py:89`). Any prose that renders these as "10/20/30-year" horizons is describing 2036/2046/2056 correctly; prose that renders them as 2035/2050 is not.
 
@@ -134,7 +134,7 @@ machinery at all.
   - `VALID_CASES = {"baseline","base","high","stress_combined"}` (L60); `VALID_HORIZONS = {2026, 2036, 2046, 2056}` (L61, derived from config).
   - **Hash algorithm: SHA-256**, streamed in 65536-byte chunks (`sha256_file`, L64-69).
   - **RT-10 manifest hash chain mechanics:** `write_contract` writes the six tables first, then computes `{name: sha256_file(out/name)}` over the fixed list `["schema.json","scenario_table.csv","site_table.csv","source_provenance.csv","standards_register.csv","assumptions.json"]` (L282-283, 291) and stores them under `manifest["tables"]`. Input hashes (`manifest["inputs"]`) are computed by the caller (`workflow.py:311-318`) over the five source files. `contract_manifest.json` itself is **not** self-hashed (it cannot be). `verify_hash_chain()` (L315-324) re-hashes each table and reports `"RT-10: {name} hash mismatch (stale contract)"`.
-  - `build_schema()` (L72-129) — JSON Schema draft 2020-12. Load-bearing constraints: `site_id` pattern `^(FFX|PWC)[0-9]{3}$`; `jurisdiction` enum `["fairfax","pwc"]`; `public_or_fleet` enum `["public","fleet","mixed"]`; `horizon_year` enum `[2026,2036,2046,2056]`; `horizon_label` enum `["now","plus10","plus20","plus30"]`; `ports_active`/`ports_pathway_capacity` integers 0-100; `evse_power_kw` (0,5000]; `energy_per_session_kwh` 0-1000; `charging_window_hr` 0-24; `average_dwell_hr` 0-24; `peak_factor` 0-10; `utilization` 0-2 nullable; `capacity_basis` enum = `CAPACITY_BASIS_VALUES`; `capacity_confidence` enum `["high","medium","low","none"]`; `managed_charging_policy` enum `["none","clamp","energy_aware"]`; **`grid_factor_value` `{"const": 596.3}`**; `grid_factor_units` `{"const": "lb CO2e/MWh"}`; `data_confidence` enum `["High","Medium","Low"]`; `equity_indicator` 0-1 nullable.
+  - `build_schema()` (L72-129) - JSON Schema draft 2020-12. Load-bearing constraints: `site_id` pattern `^(FFX|PWC)[0-9]{3}$`; `jurisdiction` enum `["fairfax","pwc"]`; `public_or_fleet` enum `["public","fleet","mixed"]`; `horizon_year` enum `[2026,2036,2046,2056]`; `horizon_label` enum `["now","plus10","plus20","plus30"]`; `ports_active`/`ports_pathway_capacity` integers 0-100; `evse_power_kw` (0,5000]; `energy_per_session_kwh` 0-1000; `charging_window_hr` 0-24; `average_dwell_hr` 0-24; `peak_factor` 0-10; `utilization` 0-2 nullable; `capacity_basis` enum = `CAPACITY_BASIS_VALUES`; `capacity_confidence` enum `["high","medium","low","none"]`; `managed_charging_policy` enum `["none","clamp","energy_aware"]`; **`grid_factor_value` `{"const": 596.3}`**; `grid_factor_units` `{"const": "lb CO2e/MWh"}`; `data_confidence` enum `["High","Medium","Low"]`; `equity_indicator` 0-1 nullable.
   - **Rule validation `validate_scenario_table()` (L138-235):**
     - RT-01 identity: unknown `site_id`s; and `site_name` must equal the canonical `site_name_display` from `site_table`.
     - RT-02 completeness: duplicate `(site_id, horizon_year, scenario_name)`; per-site horizon set must equal `{2026,2036,2046,2056}`; `scenario_name` ⊆ `VALID_CASES`.
@@ -150,7 +150,7 @@ machinery at all.
   - `write_contract` (L262-312) validates **before** writing anything, then writes tables, then the manifest, then `_write_readme`. Manifest also records `model_version`, `run_id`, `generated_utc`, `producer {package: fcf_m2, module: fcf_m2.contract}`, `grid_factor {source, value_lb_per_mwh: 596.3, vintage}`, `conventions {baseline_year 2026, horizons [2036,2046,2056], cases, discount_rate_real 0.03}`, and 4 `consumer_rules`.
 - **Notes:**
   - **Docstring path is wrong:** L15 says the layout is `data_contract/v1/`; the real directory is **`data/contract/v1/`** (F-05).
-  - **RT-06 is never implemented.** The docstring (L140) claims "RT-01..RT-07, RT-09" but the body implements RT-01,02,03,04,05,07,08,09,10 — RT-06 has no check, and RT-08 is implemented despite not being named in the docstring (F-06).
+  - **RT-06 is never implemented.** The docstring (L140) claims "RT-01..RT-07, RT-09" but the body implements RT-01,02,03,04,05,07,08,09,10 - RT-06 has no check, and RT-08 is implemented despite not being named in the docstring (F-06).
   - RT-02's per-site horizon loop `break`s after the first offending site (L167-168), so only one site is ever reported.
   - **I verified the frozen contract end to end (read-only):** all 6 table hashes match, all 5 input hashes match, 120 rows / 12 sites, baseline starter sum = **25**, pathway sum = **48**, horizons exactly `{2026,2036,2046,2056}`, cases exactly `{baseline,base,high,stress_combined}`, labels `{now,plus10,plus20,plus30}`, `grid_factor_value` uniformly `596.3`, `capacity_basis` uniformly `placeholder`, `data_confidence` uniformly `Low`, `contract_version 1.0.0`, `model_mode milestone2_v3`, single `run_id milestone2_v3_20260719T052322Z`. **The contract is internally consistent and not drifted.**
 
@@ -168,10 +168,10 @@ machinery at all.
   - Unresolved-flag penalty: **15 points** when `unresolved_flag ∈ {1, true, yes}` (L82).
   - `FIELD_GROUP_WEIGHTS` (L45-53), sums to 1.00: `electrical_service 0.25`, `site_use_and_demand 0.20`, `address_and_public_access 0.10`, `coordinates 0.05`, `parking_and_layout 0.15`, `safety_review_fields 0.15`, `equity_and_context 0.10`.
   - `REQUIRED_COLUMNS` (L55-56, 9): `site_id, field_group, source_class, verification_status, source_org, source_date, reviewer, assumption_type, unresolved_flag`.
-  - **Exact thresholds — `level_for()` (L59-64): `score >= 75` → `"High"`; `score >= 50` → `"Medium"`; otherwise `"Low"`.**
+  - **Exact thresholds - `level_for()` (L59-64): `score >= 75` → `"High"`; `score >= 50` → `"Medium"`; otherwise `"Low"`.**
   - `score_field()` (L78-83): `clamp(0,100, source_class_score + verification_adj − staleness − unresolved)`.
   - `validate_provenance()` (L86-98) rejects unknown `source_class` / `field_group` values; `build_confidence()` (L101-131) raises `ValueError` on any provenance problem and assigns the `missing` score (0) for any field group absent for a site. Output columns: `site_id`, `data_confidence_score_v3`, `data_confidence_level_v3`, `confidence_breakdown` (`"group=score; …"`).
-- **Notes:** `_staleness_penalty` defaults `today` to `date.today()`, so **confidence output is a function of wall-clock time** — re-running the pipeline far enough in the future silently downgrades sites relative to the frozen contract (F-07). Every row in the frozen contract is `Low`, so `workflow`'s `high_confidence_sites` headline is 0.
+- **Notes:** `_staleness_penalty` defaults `today` to `date.today()`, so **confidence output is a function of wall-clock time** - re-running the pipeline far enough in the future silently downgrades sites relative to the frozen contract (F-07). Every row in the frozen contract is `Low`, so `workflow`'s `high_confidence_sites` headline is 0.
 
 ---
 
@@ -183,16 +183,16 @@ machinery at all.
 - **Key contents:**
   - **eGRID factor: `GRID_FACTOR_LB_PER_MWH = 596.3`, imported from `config.py:91`. Sourced as "EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e", vintage "eGRID2023r2, accessed 2026-07-19".** The module never hardcodes a factor of its own.
   - `annual_energy_delivered_kwh()` (L30-34): `sessions_day × 9.5 × 365`, zero when `active_ports <= 0`.
-  - `net_co2e_kg()` (L37-69) — the headline formula:
+  - `net_co2e_kg()` (L37-69) - the headline formula:
     - `grid_energy_mwh = (delivered_kwh / 0.92) / 1000`
     - `effective_factor = 596.3 × (1 − renewable_matched_share)`
     - `grid_kg = grid_energy_mwh × effective_factor × 0.45359237`
     - `miles = delivered_kwh / 0.30`
     - `displaced_kg = miles × 400.0 / 1000`
-    - `net_co2e_avoided_kg = displaced_kg − grid_kg` — **explicitly never clipped** (docstring L6-7), may be negative.
+    - `net_co2e_avoided_kg = displaced_kg − grid_kg` - **explicitly never clipped** (docstring L6-7), may be negative.
     - Returns `grid_factor_value/units/source/vintage/next_refresh` and an `assumption_note` naming all four benchmark inputs.
   - `avoided_evse_metric()` (L72-85): `avoided_active_evse_ports = clip(ports_pathway − ports_active, lower=0)`; `avoided_network_fee_usd_yr = avoided_ports × 1000.0`. Note text cites "the client's decommissioning experience (**17 of 70 ports** taken offline)" (L75) and "~$1k/station/yr".
-- **Notes:** `1000.0` at L79 duplicates `config.ECON["network_fee_usd_per_port_yr"] = 1000.0` instead of importing it — a silent drift point if the ECON value is ever changed (F-03). The "17 of 70 ports" figure is client anecdote in a docstring; it does not trace to `data/contract/v1/`.
+- **Notes:** `1000.0` at L79 duplicates `config.ECON["network_fee_usd_per_port_yr"] = 1000.0` instead of importing it - a silent drift point if the ECON value is ever changed (F-03). The "17 of 70 ports" figure is client anecdote in a docstring; it does not trace to `data/contract/v1/`.
 
 ---
 
@@ -242,7 +242,7 @@ machinery at all.
   - `run_right_sizing_legacy()` (L165-197): multipliers `h1_base 1.8, h1_high 2.5, h2_base 3.0, h2_high 4.5`; output columns `site_id, site_name, model_rank, readiness_score, recommendation_tier, electrical_risk_level, expected_sessions_day_now, model_recommended_ports_now, ports_now, ports_2035_base, ports_2035_high, ports_2050_base, ports_2050_high, site_capacity_cap, future_ready_capacity, expansion_strategy, right_sizing_reason`. **2035/2050 appear only here and are correctly scoped to `legacy_v2`.**
   - `run_right_sizing_v3()` (L200-271): pathway and `ports_now` are taken from the legacy result (L215-216); horizon targets use V3 multipliers mapped `2036→h1`, `2046→h2`; 2056 computed directly and floored at the 2046 value; `stress_combined` = `high × 1.15` floored at the corresponding high value; everything capped at `site_capacity_cap`. Then **monotonic non-decreasing enforcement across horizons per case (RT-03) followed by saturation cap at `max(pathway, ports_now)`** (L246-254). Output rows: `site_id, site_name, model_rank, horizon_year, case, ports_active, ports_pathway, site_capacity_cap, expansion_strategy, right_sizing_reason`; grid is 2026(baseline) + 3 horizons × 3 cases = 10 rows/site → 120 rows (matches the frozen contract).
   - `_merge_risk_defaults()` (L274-284): defaults `electrical_risk_level` to `"medium"`, reconstructs `existing_ports_total` if absent.
-- **Notes:** `run_right_sizing_v3` recomputes the entire legacy right-sizing internally (L209) even though `workflow` already computed it (L131) — duplicated work, and a divergence risk if the two are ever fed different frames. The `parking_spaces <= 0 → cap 6` branch is an unexplained magic default.
+- **Notes:** `run_right_sizing_v3` recomputes the entire legacy right-sizing internally (L209) even though `workflow` already computed it (L131) - duplicated work, and a divergence risk if the two are ever fed different frames. The `parking_spaces <= 0 → cap 6` branch is an unexplained magic default.
 
 ---
 
@@ -255,7 +255,7 @@ machinery at all.
   - `erlang_c(lambda_hr, mu_hr, ports)` (L17-32): returns `(nan,nan,nan)` when `ports<=0 or mu<=0`; `(1.0, inf, utilization)` when `utilization >= 1`; otherwise standard Erlang-C with `utilization = λ/(c·μ)`, `traffic_load = λ/μ`, `wait_hours = P(wait)/(c·μ − λ)`.
   - `choose_ports(...)` (L35-55): scans `ports` 1..**20** (`MAX_PORTS_SEARCH`), returns the first count with finite wait, `utilization <= 0.70` and `wait_minutes <= 10.0`; otherwise returns the last (20-port) tuple as fallback.
   - `arrivals_per_hour = sessions_day / max(hours_open, 1)`; `service_rate = 1 / max(avg_session_hr, 0.1)`.
-- **Notes:** Uses `math.factorial(n)` in a Python loop — fine at c<=20. The fallback path silently returns a 20-port result that may violate both targets; callers do not distinguish "met targets" from "fell back".
+- **Notes:** Uses `math.factorial(n)` in a Python loop - fine at c<=20. The fallback path silently returns a 20-port result that may violate both targets; callers do not distinguish "met targets" from "fell back".
 
 ---
 
@@ -269,15 +269,15 @@ machinery at all.
   - `SimResult` dataclass (L35-45): `ports, n_days, mean_wait_min, p10/p50/p90_wait_min, peak_p90_wait_min, mean_utilization, seed`.
   - `simulate_waits()` (L48-103): **`n_days = 400`, `seed = 20260719`, `peak_share = 0.55`, `peak_hours = 4.0`, `dwell_cv = 0.45`** (the CV default is hardcoded here, not in config). Non-homogeneous Poisson arrivals (Poisson counts for peak and off-peak separately), lognormal dwell with `σ² = ln(1+cv²)`, `μ_log = ln(mean) − σ²/2`, greedy assignment to the earliest-free port. `mean_utilization = busy_time / (ports × hours_open × n_days)`.
   - `_off_window_arrivals()` (L106-113): uniform over open hours excluding the peak window, clipped to `[0, hours_open]`.
-- **Notes:** Reproducible only because the seed is fixed; the same seed is reused for every site (`workflow.py:172` never varies it), so per-site draws are correlated. `simulate_waits` is called with the default `n_days=400` for all 12 sites on every run — the main runtime cost of the pipeline.
+- **Notes:** Reproducible only because the seed is fixed; the same seed is reused for every site (`workflow.py:172` never varies it), so per-site draws are correlated. `simulate_waits` is called with the default `n_days=400` for all 12 sites on every run - the main runtime cost of the pipeline.
 
 ---
 
 ### src/fcf_m2/demand.py  (146 lines)
 - **Role:** Demand-model status record, provenance, and the calibration path with explicit refusal logic.
 - **Kind:** authored
-- **Reads:** `load_observed(path)` reads a CSV; the documented location is `data/observed/observed_sessions_template.csv` (exists, 102 bytes — template only).
-- **Written by / read by:** `workflow.run()` serializes `current_model_record().__dict__` into `assumptions.json` under `demand_model`. `calibrate()` and `write_record()` are **not called anywhere in the pipeline** — they are the forward path.
+- **Reads:** `load_observed(path)` reads a CSV; the documented location is `data/observed/observed_sessions_template.csv` (exists, 102 bytes - template only).
+- **Written by / read by:** `workflow.run()` serializes `current_model_record().__dict__` into `assumptions.json` under `demand_model`. `calibrate()` and `write_record()` are **not called anywhere in the pipeline** - they are the forward path.
 - **Key contents:**
   - Acceptance gates (L26-28): `MIN_OBSERVED_ROWS = 60` ("~2 months of daily data"), `MIN_SITES_OBSERVED = 3`, `MAX_ACCEPTABLE_MAPE = 0.50` ("screening-grade acceptance; team may tighten").
   - `OBSERVED_COLUMNS` (L30): `site_id, date, sessions, energy_kwh, mean_dwell_min, facility_visitors_day`.
@@ -285,7 +285,7 @@ machinery at all.
   - `current_model_record()` (L45-51): status `"synthetic_uncalibrated"`, the four config coefficients, floor `0.3`, and the "no published derivation exists" provenance string.
   - `calibrate()` (L63-131): non-negative least squares (`np.linalg.lstsq` then `np.clip(coef, 0, None)`) on `[visitors_day, employees_day, nearby_jobs_1mi, nearby_households_1mi×(1+ev_share_local)]`; 25% holdout, `seed=0`; **refuses** (returns the uncalibrated record with `calibration_metrics["refused"]=True`) on insufficient rows/sites, on site mismatch, or when holdout MAPE > 0.50. On success returns status `"calibrated_observed"` with `holdout_mape, n_fit, n_holdout, pred_p10/p50/p90`.
   - `presentation_caveat()` (L140-146): the uncalibrated string is *"Demand estimates use a synthetic, uncalibrated screening formula. No observed charging sessions exist yet; values are planning inputs, not forecasts."*
-- **Notes:** The refusal design is genuinely load-bearing for claims discipline and Phase 4 should preserve it. Note the model is fit **without an intercept** and against **mean daily sessions per site**, so 3 sites can fit 4 coefficients — an underdetermined system that `lstsq` will happily solve; `MIN_SITES_OBSERVED = 3 < 4 coefficients` is a latent overfit hazard.
+- **Notes:** The refusal design is genuinely load-bearing for claims discipline and Phase 4 should preserve it. Note the model is fit **without an intercept** and against **mean daily sessions per site**, so 3 sites can fit 4 coefficients - an underdetermined system that `lstsq` will happily solve; `MIN_SITES_OBSERVED = 3 < 4 coefficients` is a latent overfit hazard.
 
 ---
 
@@ -306,7 +306,7 @@ machinery at all.
     6. `avg_utilization >= util_gate` **OR** `p90_wait_min >= 10.0` → `expand_review_recommended`, with a trace line recording `budget_gate = human_approval_required` and "this tool never authorizes expansion".
     7. else → `hold`.
   - `status_for_contract()` (L85-88): returns `"awaiting_observed_data (proposed policy, not adopted)"` when there is no observed data.
-- **Notes:** Outcome vocabulary is exactly `{expand_review_recommended, hold, awaiting_observed_data}`. The equity override is OR-ed with the wait threshold, so a high-equity site can trigger on wait alone even below 25% utilization. Trigger outcomes are never written to a CSV today — only the frozen `awaiting_observed_data` string reaches the contract.
+- **Notes:** Outcome vocabulary is exactly `{expand_review_recommended, hold, awaiting_observed_data}`. The equity override is OR-ed with the wait threshold, so a high-equity site can trigger on wait alone even below 25% utilization. Trigger outcomes are never written to a CSV today - only the frozen `awaiting_observed_data` string reaches the contract.
 
 ---
 
@@ -315,10 +315,10 @@ machinery at all.
 - **Kind:** authored (generator of `matlab_scenarios.csv`)
 - **Reads:** the in-memory `scenario_table` and a `site_meta` frame; writes to the path given by `workflow` (`<out>/matlab_scenarios.csv`).
 - **Written by / read by:** Called at `workflow.py:330-331`. `site_meta` is assembled at `workflow.py:322-329` from `data/inputs/legacy_matlab_site_meta.csv` joined to `scored_legacy[["site_id","model_rank"]]` and the risk fixture's `electrical_risk_level`.
-- **Key contents — exactly what is exported (`MATLAB_COLUMNS`, L14-20, 22 columns in this order):**
+- **Key contents - exactly what is exported (`MATLAB_COLUMNS`, L14-20, 22 columns in this order):**
   `scenario_id, site_id, site_name, horizon_year, case, ports, charger_power_kW, spare_capacity_kW, service_capacity_kW, capacity_basis, capacity_source, base_load_mean_kW, base_load_peak_kW, arrival_start_hr, arrival_end_hr, dwell_hr, sessions_per_day, energy_per_session_kWh, managed_charging_policy, model_rank, electrical_risk_level, source_note`.
   - Renames: contract `scenario_name` → `case`; `ports_active` → `ports`; `evse_power_kw` → `charger_power_kW`; `average_dwell_hr` → `dwell_hr`. Note the **kW/kWh columns use MATLAB-style capitalisation** while the contract uses lowercase `_kw`.
-  - NaN capacity is exported as the **empty string** `""` (L47-48), not `NaN` — deliberate, so MATLAB reads a missing value rather than a number.
+  - NaN capacity is exported as the **empty string** `""` (L47-48), not `NaN` - deliberate, so MATLAB reads a missing value rather than a number.
   - **Placeholder guard (L36-38, 61-66):** `placeholder = capacity_basis not in ("verified_utility","verified_facility")`; each row's `source_note` becomes `"Generated from canonical contract {contract_version} run {run_id}. CAPACITY IS A PLANNING PLACEHOLDER - no feasibility claim permitted. Do not hand-edit; regenerate via fcf_m2.matlab_adapter."` (or "Capacity verified. " when not placeholder).
   - Prints to stdout when any row is non-verified: `"WARNING: {warned}/{len(df)} MATLAB scenario rows carry non-verified capacity_basis - placeholder captions are mandatory on every capacity visual."` (L73-74). For the frozen contract this is **120/120**.
 - **Notes:** Creates parent directories itself (L70). It is the ML-04 counterpart guard; the MATLAB side is expected to refuse feasibility claims on the same field (see `contract.py:305` consumer rule).
@@ -326,16 +326,16 @@ machinery at all.
 ---
 
 ### src/fcf_m2/standards.py  (224 lines)
-- **Role:** Standards traceability register — site × standard × lifecycle stage, with adopted vs latest edition and open AHJ questions.
+- **Role:** Standards traceability register - site × standard × lifecycle stage, with adopted vs latest edition and open AHJ questions.
 - **Kind:** authored (hand-curated reference data embedded in code)
 - **Reads:** nothing; `build_register()` takes the `site_table` frame.
 - **Written by / read by:** `workflow.run()` → `standards_register.csv` in the run dir and in the contract.
 - **Key contents:**
   - `STANDARDS` (L15-178), **9 entries**. Active (7): `UL2594` (highlighted_safety, 3rd ed. 2022-12-15), `UL3600` (highlighted_sustainability, 1st ed. 2023-01-09), `UL2231` (supporting_essential, 2021 editions), `NEC625` (supporting_essential, **2020 NEC via 2021 USBC, effective 2024-01-18; 2023 NEC published but NOT adopted in Virginia**), `VA-USBC-SFPC` (2021 editions, 2024 cycle ~2027), `ACCESS-BOARD-EVSE` (**NPRM 2024-09-03; final rule NOT issued as of 2026-07-19**), `OCPP-ISO15118` (supporting_protocol, explicitly "NOT ULSE standards").
-    Conditional / out of scope (2): `UL2202` (DCFC — "No DCFC in the current plan"), `UL9540-9540A-NFPA855` (UL 9540A 5th ed. 2025-03-12; NFPA 855 2026 ed. — "**battery_storage_flag=0 at all 12 sites**").
+    Conditional / out of scope (2): `UL2202` (DCFC - "No DCFC in the current plan"), `UL9540-9540A-NFPA855` (UL 9540A 5th ed. 2025-03-12; NFPA 855 2026 ed. - "**battery_storage_flag=0 at all 12 sites**").
   - `STAGES` (L180-181, 7): `design, procurement, installation, commissioning, operation, emergency_response, end_of_life`.
-  - `build_register()` (L184-224): conditional standards emit exactly one `stage="n/a"` row per site with `applicability="conditional_out_of_scope"`; active standards emit one row per stage whose requirement is not the em-dash placeholder `"—"`. Output columns: `site_id, standard_id, standard_title, role, stage, requirement, adopted_edition, latest_edition, applicability, evidence_required, authority, open_ahj_question`.
-- **Notes:** **Dead reference:** the docstring (L8) says "Editions verified 2026-07-19 (see `research/CURRENT_FACTS_SOURCE_REGISTER.md`)". **`research/` does not exist in this repo** — the live file is `docs/methodology/current-facts-source-register.md` (F-09). All edition dates are as-of 2026-07-19 and will go stale; the Access Board rule status in particular is time-sensitive and is flagged in-file ("rule status must be re-checked at design time", L134).
+  - `build_register()` (L184-224): conditional standards emit exactly one `stage="n/a"` row per site with `applicability="conditional_out_of_scope"`; active standards emit one row per stage whose requirement is not the em-dash placeholder `"-"`. Output columns: `site_id, standard_id, standard_title, role, stage, requirement, adopted_edition, latest_edition, applicability, evidence_required, authority, open_ahj_question`.
+- **Notes:** **Dead reference:** the docstring (L8) says "Editions verified 2026-07-19 (see `research/CURRENT_FACTS_SOURCE_REGISTER.md`)". **`research/` does not exist in this repo** - the live file is `docs/methodology/current-facts-source-register.md` (F-09). All edition dates are as-of 2026-07-19 and will go stale; the Access Board rule status in particular is time-sensitive and is flagged in-file ("rule status must be re-checked at design time", L134).
 
 ---
 
@@ -356,14 +356,14 @@ machinery at all.
 ### src/fcf_m2/gis_offline.py  (80 lines)
 - **Role:** Offline-reproducible candidate-site map from cached boundaries; no network access on any code path.
 - **Kind:** authored
-- **Reads:** `ROOT/data/cache/boundaries/tl_2024_va_counties.geojson` (L29) — **exists**, 171,997 bytes, with `data/cache/boundaries/ATTRIBUTION.md` alongside it. Also reads `FCF_OFFLINE` from the environment (L74).
+- **Reads:** `ROOT/data/cache/boundaries/tl_2024_va_counties.geojson` (L29) - **exists**, 171,997 bytes, with `data/cache/boundaries/ATTRIBUTION.md` alongside it. Also reads `FCF_OFFLINE` from the environment (L74).
 - **Written by / read by:** Not called from `workflow.py`; invoked by the dashboard/visual scripts. Depends on `visuals.py` for palette, styling, footer, and save.
 - **Key contents:**
   - `build_site_map(sites, out_path, title="Candidate Site Readiness Map")` (L44-80).
   - Dual path: `geopandas` if importable (`gdf.boundary.plot`), else `_plot_boundary_pure()` (L32-41) which parses the GeoJSON with the stdlib `json` module and plots each ring with matplotlib at `linewidth=0.4, alpha=0.6`.
   - Top-3 sites (`nsmallest(3, "model_rank")`) rendered at `s=140` in `DARK_GREEN`; others `s=60` in `ACCENT`; each annotated with `site_id`. Axis padding `0.15` degrees.
   - Footer: `source="US Census TIGER/Line 2024 (cached in repo) + real_sites_v2.csv"`, `source_date="TIGER 2024 / sites 2026-06-24"`, `scenario="site map, {mode}"` where mode is `"offline (FCF_OFFLINE set)"` or `"offline-capable (cached boundaries)"`, `assumption="no basemap tiles in offline mode"`.
-- **Notes:** The docstring says "attribution in `ATTRIBUTION.md`" (L5) without a path; the file is at `data/cache/boundaries/ATTRIBUTION.md`, **not** at the repo root — a reader following the reference literally will not find it. `FCF_OFFLINE` is purely cosmetic: it only changes the footer string, it does not assert or enforce anything (the docstring admits this, L11-13).
+- **Notes:** The docstring says "attribution in `ATTRIBUTION.md`" (L5) without a path; the file is at `data/cache/boundaries/ATTRIBUTION.md`, **not** at the repo root - a reader following the reference literally will not find it. `FCF_OFFLINE` is purely cosmetic: it only changes the footer string, it does not assert or enforce anything (the docstring admits this, L11-13).
 
 ---
 
@@ -372,8 +372,8 @@ machinery at all.
 - **Kind:** authored
 - **Reads:** n/a
 - **Written by / read by:** Linked from the repo root README (`[← repository root](../../../../README.md)`, L3); links out to `../README.md`, `../tests/README.md`, `../scripts/README.md`, `../scripts/verify.sh`. **All four link targets exist** (verified).
-- **Key contents:** A 15-row module table (L8-24) covering `config, scoring, queueing, peak_wait, right_sizing, demand, confidence, economics, emissions, standards, triggers, contract, matlab_adapter, visuals/gis_offline, workflow`; run command `python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run` (L26); statement that outputs land in `data/outputs/` (gitignored — confirmed in `.gitignore`); and a closing "Limitations that ship with the code: demand uncalibrated, capacity placeholder at all sites, screening-class costs".
-- **Notes:** Line 14 says right_sizing covers "legacy 2035/2050 and canonical 2026/2036/2046/2056" — **a correct, explicitly-labelled legacy reference**, not a horizon violation. Accurate against the code as read; no stale claims found. `__init__.py` is (correctly) not listed.
+- **Key contents:** A 15-row module table (L8-24) covering `config, scoring, queueing, peak_wait, right_sizing, demand, confidence, economics, emissions, standards, triggers, contract, matlab_adapter, visuals/gis_offline, workflow`; run command `python -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run` (L26); statement that outputs land in `data/outputs/` (gitignored - confirmed in `.gitignore`); and a closing "Limitations that ship with the code: demand uncalibrated, capacity placeholder at all sites, screening-class costs".
+- **Notes:** Line 14 says right_sizing covers "legacy 2035/2050 and canonical 2026/2036/2046/2056" - **a correct, explicitly-labelled legacy reference**, not a horizon violation. Accurate against the code as read; no stale claims found. `__init__.py` is (correctly) not listed.
 
 ---
 
@@ -383,7 +383,7 @@ machinery at all.
 - **Reads:** n/a
 - **Written by / read by:** Written by `pip install -e .` / `setuptools`; read by pip/importlib.metadata.
 - **Key contents:** `Metadata-Version: 2.4`, `Name: fcf-m2`, **`Version: 3.0.0`**, `Requires-Python: >=3.11`, core deps `numpy>=1.26, pandas>=2.1, matplotlib>=3.8, jsonschema>=4.20`, extras `gis` (geopandas>=0.14, contextily>=1.5, xyzservices>=2024.0), `test` (pytest>=8.0, pytest-cov>=4.1), `presentation` (pillow>=10.0, reportlab>=4.0). Summary ends "Planning prototype only - not an engineering, permitting, or procurement tool."
-- **Notes:** **Consistent with `pyproject.toml`** — name, version 3.0.0, python floor, all four core deps and all three extras match exactly. Version also matches `config.MODEL_VERSION = "3.0.0"`. No drift.
+- **Notes:** **Consistent with `pyproject.toml`** - name, version 3.0.0, python floor, all four core deps and all three extras match exactly. Version also matches `config.MODEL_VERSION = "3.0.0"`. No drift.
 
 ---
 
@@ -393,7 +393,7 @@ machinery at all.
 - **Reads:** n/a
 - **Written by / read by:** Written by setuptools; not read by the model.
 - **Key contents:** `README.md`, `pyproject.toml`, all 17 `src/fcf_m2/*.py`, the 5 egg-info files, and 4 test modules: `tests/test_contract_and_integration.py`, `tests/test_legacy_golden.py`, `tests/test_modules.py`, `tests/test_scoring_and_queueing.py`.
-- **Notes:** **Stale.** The `tests/` directory actually contains 8 entries — `conftest.py`, `README.md`, `fixture_legacy_v2_right_sizing.csv`, `fixture_legacy_v2_site_results.csv` plus the 4 test modules. `conftest.py` is absent from the manifest even though `git log` shows it was committed in the **same commit** (`252099f`) as the egg-info, meaning the metadata was generated from an earlier working-tree state and then committed as-is (F-10). Harmless for an editable install; misleading as a manifest.
+- **Notes:** **Stale.** The `tests/` directory actually contains 8 entries - `conftest.py`, `README.md`, `fixture_legacy_v2_right_sizing.csv`, `fixture_legacy_v2_site_results.csv` plus the 4 test modules. `conftest.py` is absent from the manifest even though `git log` shows it was committed in the **same commit** (`252099f`) as the egg-info, meaning the metadata was generated from an earlier working-tree state and then committed as-is (F-10). Harmless for an editable install; misleading as a manifest.
 
 ---
 
@@ -403,7 +403,7 @@ machinery at all.
 - **Reads:** n/a
 - **Written by / read by:** setuptools/pip.
 - **Key contents:** base `numpy>=1.26, pandas>=2.1, matplotlib>=3.8, jsonschema>=4.20`; `[gis]` geopandas>=0.14, contextily>=1.5, xyzservices>=2024.0; `[presentation]` pillow>=10.0, reportlab>=4.0; `[test]` pytest>=8.0, pytest-cov>=4.1.
-- **Notes:** Exact match to `pyproject.toml` (extras alphabetised by setuptools). No drift. Note `geopandas` is genuinely optional — `gis_offline.py` has a working pure-matplotlib fallback.
+- **Notes:** Exact match to `pyproject.toml` (extras alphabetised by setuptools). No drift. Note `geopandas` is genuinely optional - `gis_offline.py` has a working pure-matplotlib fallback.
 
 ---
 
@@ -413,7 +413,7 @@ machinery at all.
 - **Reads:** n/a
 - **Written by / read by:** setuptools/pip.
 - **Key contents:** `fcf_m2`
-- **Notes:** Correct — matches `[tool.setuptools.packages.find] where = ["src"]`. Note the *distribution* name is `fcf-m2` (hyphen) while the *import* name is `fcf_m2` (underscore).
+- **Notes:** Correct - matches `[tool.setuptools.packages.find] where = ["src"]`. Note the *distribution* name is `fcf-m2` (hyphen) while the *import* name is `fcf_m2` (underscore).
 
 ---
 
@@ -423,7 +423,7 @@ machinery at all.
 - **Reads:** n/a
 - **Written by / read by:** setuptools; obsolete in modern pip.
 - **Key contents:** A single newline character (`od -c` → `\n`). Empty.
-- **Notes:** Vestigial. Its only significance is that all five egg-info files are **tracked in git** (`git ls-files` confirms) while `.gitignore` never excludes `*.egg-info/` — build artifacts committed to VCS.
+- **Notes:** Vestigial. Its only significance is that all five egg-info files are **tracked in git** (`git ls-files` confirms) while `.gitignore` never excludes `*.egg-info/` - build artifacts committed to VCS.
 
 ---
 
@@ -440,7 +440,7 @@ the V3 labels are the contract-legal enum `now / plus10 / plus20 / plus30`.
 **eGRID audit of this lane: clean.** `596.3` appears once, in `config.py:91`, and flows to `emissions.py`,
 `contract.build_schema()` (as a JSON-Schema `const`), and `contract_manifest.json`. **`590.2` appears
 nowhere in `src/`.** Repo-wide it survives only in four explicit correction notes (`CHANGELOG.md:24`,
-`docs/methodology/current-facts-source-register.md:7`, and two report files) — see F-11.
+`docs/methodology/current-facts-source-register.md:7`, and two report files) - see F-11.
 
 **Numbers that DO trace to `data/contract/v1/` (verified by direct read of the frozen artifacts):**
 25 starter ports, 48 pathway ports, 120 scenario rows, 12 sites, horizons {2026,2036,2046,2056},
@@ -458,18 +458,18 @@ and the "**17 of 70 ports**" client decommissioning anecdote in `emissions.py:75
 
 ## Findings index
 
-- **F-01** — `SUBSCORE_WEIGHTS` / `DRIVERS` / "Earned:/Forgone:" exist only in the explorer, not in the repo scorer; the explorer independently re-implements the weights. (high)
-- **F-02** — `config.py` docstring claims it holds every result-changing constant; at least eight live elsewhere. (medium)
-- **F-03** — `emissions.py:79` hardcodes `1000.0` instead of `ECON["network_fee_usd_per_port_yr"]`. (medium)
-- **F-04** — 35% of `feasibility_subscore` is weighted on `spare_capacity_kw`, which is 0 at all 12 sites. (medium)
-- **F-05** — `contract.py:15` documents the contract at `data_contract/v1/`; the real path is `data/contract/v1/`. (medium)
-- **F-06** — RT-06 is never implemented; the `validate_scenario_table` docstring misstates the implemented rule set. (medium)
-- **F-07** — `confidence.py` staleness uses `date.today()`, making confidence output wall-clock-dependent and non-reproducible. (medium)
-- **F-08** — `economics.py` models only one electronics replacement (t=10) across a 30-year lifecycle. (medium)
-- **F-09** — `standards.py:8` cites `research/CURRENT_FACTS_SOURCE_REGISTER.md`, which does not exist. (medium)
-- **F-10** — `SOURCES.txt` omits `tests/conftest.py` though both were committed together; egg-info is stale build metadata tracked in git. (low)
-- **F-11** — `590.2` survives in four documents, all as explicitly-labelled correction notes. (info)
-- **F-12** — `scoring.access_adjustment` is computed and exported but never used in any formula. (low)
-- **F-13** — `anchor_set_v1.json` declares an `ev_share_local` anchor the code never reads. (low)
-- **F-14** — Tier-1 rank cutoff differs between `scoring.recommendation_tier` (`rank<=2`) and `right_sizing.build_strategy` (`rank<=3`). (low)
-- **F-15** — `workflow.main` default out dir uses local time while `run_id` uses UTC. (low)
+- **F-01** - `SUBSCORE_WEIGHTS` / `DRIVERS` / "Earned:/Forgone:" exist only in the explorer, not in the repo scorer; the explorer independently re-implements the weights. (high)
+- **F-02** - `config.py` docstring claims it holds every result-changing constant; at least eight live elsewhere. (medium)
+- **F-03** - `emissions.py:79` hardcodes `1000.0` instead of `ECON["network_fee_usd_per_port_yr"]`. (medium)
+- **F-04** - 35% of `feasibility_subscore` is weighted on `spare_capacity_kw`, which is 0 at all 12 sites. (medium)
+- **F-05** - `contract.py:15` documents the contract at `data_contract/v1/`; the real path is `data/contract/v1/`. (medium)
+- **F-06** - RT-06 is never implemented; the `validate_scenario_table` docstring misstates the implemented rule set. (medium)
+- **F-07** - `confidence.py` staleness uses `date.today()`, making confidence output wall-clock-dependent and non-reproducible. (medium)
+- **F-08** - `economics.py` models only one electronics replacement (t=10) across a 30-year lifecycle. (medium)
+- **F-09** - `standards.py:8` cites `research/CURRENT_FACTS_SOURCE_REGISTER.md`, which does not exist. (medium)
+- **F-10** - `SOURCES.txt` omits `tests/conftest.py` though both were committed together; egg-info is stale build metadata tracked in git. (low)
+- **F-11** - `590.2` survives in four documents, all as explicitly-labelled correction notes. (info)
+- **F-12** - `scoring.access_adjustment` is computed and exported but never used in any formula. (low)
+- **F-13** - `anchor_set_v1.json` declares an `ev_share_local` anchor the code never reads. (low)
+- **F-14** - Tier-1 rank cutoff differs between `scoring.recommendation_tier` (`rank<=2`) and `right_sizing.build_strategy` (`rank<=3`). (low)
+- **F-15** - `workflow.main` default out dir uses local time while `run_id` uses UTC. (low)

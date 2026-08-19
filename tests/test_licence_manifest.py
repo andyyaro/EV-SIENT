@@ -12,17 +12,17 @@ that they would work at release time.
    would have attributed three packages that are not distributed.
 
 2. **The vendored Cognito SDK was attributed by hand in the generated file.** It was never
-   added to the generator, so the next run — which the packaging workflow performs on every
-   release build — would have deleted the attribution for a 112 KB Apache-2.0 bundle that is
+   added to the generator, so the next run - which the packaging workflow performs on every
+   release build - would have deleted the attribution for a 112 KB Apache-2.0 bundle that is
    publicly served. A hand-edit of a generated artifact is not a fix; it is a countdown.
 
-The environment tests are pure — they take an installed set as an argument — so they assert the
+The environment tests are pure - they take an installed set as an argument - so they assert the
 same thing on a developer machine, in CI, and on a release runner.
 
 **And the guard's first shape was wrong**, which these tests now pin. It demanded that the
 environment *equal* the lock. Both packaging runners install with `pip install -e . -c
-requirements-lock.txt`, where the lock is a **constraints** file — it pins versions for what
-gets installed rather than installing every line — so a correct release environment carries the
+requirements-lock.txt`, where the lock is a **constraints** file - it pins versions for what
+gets installed rather than installing every line - so a correct release environment carries the
 runtime closure and none of the test-only pins. The guard refused, and the first real execution
 of the packaging workflow failed on macOS and Windows alike. The rule is a subset, not an
 equality, and `test_a_constraints_install_is_accepted_rather_than_called_broken` is the
@@ -57,7 +57,7 @@ blm = _load()
 def locked_names(applicable_only: bool = False) -> set[str]:
     """Names pinned in the lock.
 
-    With ``applicable_only``, drops pins whose environment marker does not hold here — the lock
+    With ``applicable_only``, drops pins whose environment marker does not hold here - the lock
     carries `typing-extensions` only below Python 3.13 and `tzdata` only on Windows, and a
     manifest generated on macOS correctly contains neither.
     """
@@ -102,7 +102,7 @@ def test_names_are_normalised_so_underscores_and_hyphens_are_one_package():
 
 
 # --------------------------------------------------------------------------------------------
-# The environment guard — both directions
+# The environment guard - both directions
 # --------------------------------------------------------------------------------------------
 
 def test_a_declared_runtime_dependency_that_is_absent_is_reported_missing():
@@ -133,8 +133,8 @@ def test_a_constraints_install_is_accepted_rather_than_called_broken():
     `pip install -e . -c requirements-lock.txt` uses the lock as CONSTRAINTS: it pins versions
     for what gets installed, it does not install every line. So a correct release environment
     carries the runtime closure and none of the test-only or extra-only pins. The first version
-    of this guard demanded equality with the lock and refused — on macOS for 9 missing packages
-    and on Windows for the same 9 — turning a working packaging job red.
+    of this guard demanded equality with the lock and refused - on macOS for 9 missing packages
+    and on Windows for the same 9 - turning a working packaging job red.
     """
     runtime_closure = {
         "numpy", "pandas", "matplotlib", "jsonschema", "pillow", "packaging", "contourpy",
@@ -171,7 +171,7 @@ def test_an_unparseable_marker_is_still_permitted_rather_than_dropped():
 
 
 # --------------------------------------------------------------------------------------------
-# The committed manifest — checkable without rebuilding an environment
+# The committed manifest - checkable without rebuilding an environment
 # --------------------------------------------------------------------------------------------
 
 @pytest.mark.skipif(not MANIFEST_JSON.is_file(), reason="manifest not generated yet")
@@ -184,7 +184,7 @@ def test_the_committed_manifest_covers_every_locked_dependency():
     unlisted = locked_names(applicable_only=True) - listed
     assert not unlisted, (
         f"{sorted(unlisted)} are pinned in requirements-lock.txt, apply on this platform, and "
-        f"are absent from the committed licence manifest — the artifact ships them "
+        f"are absent from the committed licence manifest - the artifact ships them "
         f"unattributed")
 
 
@@ -194,7 +194,7 @@ def test_the_committed_manifest_attributes_nothing_the_lock_does_not_pin():
     listed = {blm.normalise(e["name"]) for e in payload["python_dependencies"]}
     extra = listed - locked_names() - blm.ENVIRONMENT_PACKAGES
     assert not extra, (
-        f"{sorted(extra)} are attributed in the committed manifest and are not in the lock — "
+        f"{sorted(extra)} are attributed in the committed manifest and are not in the lock - "
         f"the manifest was generated somewhere other than the locked environment")
 
 
@@ -203,7 +203,7 @@ def test_every_tracked_vendored_bundle_is_attributed():
     """The regression this file exists for, in its general form.
 
     A third-party file committed under a `vendor/` directory is shipped by this repository and
-    needs an attribution that survives regeneration — which means it must come from the
+    needs an attribution that survives regeneration - which means it must come from the
     generator's own table, not from an edit to its output.
     """
     vendored = sorted(p for p in REPO.glob("**/vendor/*")

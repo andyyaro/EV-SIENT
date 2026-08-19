@@ -77,14 +77,14 @@ def build(allow_missing: bool = False) -> dict:
         raise SystemExit(f"no committed MATLAB run artifacts under {RUNS}")
     if not runs:
         # Refusing outright was right for this repository and wrong for a public installer,
-        # where the MATLAB artifacts are deliberately absent — they record executions of the
+        # where the MATLAB artifacts are deliberately absent - they record executions of the
         # REAL study against real sites, and shipping them would defeat the synthetic set.
         #
         # So the record is emitted empty and says why, which is this project's stated posture
         # for plumbing with no data behind it: ship it labelled as awaiting data rather than
         # pretend it does not exist. The platform's engine surface then shows an honest empty
         # state instead of the launcher dying three steps into a first run.
-        print(f"no committed MATLAB run artifacts under {RUNS} — emitting an empty record")
+        print(f"no committed MATLAB run artifacts under {RUNS} - emitting an empty record")
         # The KEYS here are load-bearing. This fallback used to emit engine/badge/role/executed
         # while site/platform/app.js reads id/name/status/detail/ran_on_real_sites -- so on a
         # public install the engine list rendered "undefined" in every field, which is the
@@ -153,7 +153,7 @@ def build(allow_missing: bool = False) -> dict:
                 "id": "matlab",
                 "name": "MathWorks MATLAB",
                 "role": "Independent execution of the same model",
-                "status": f"executed — {prov.get('version', 'version not recorded')}",
+                "status": f"executed - {prov.get('version', 'version not recorded')}",
                 "detail": (
                     "Runs the .m implementation in public CI. It has executed and passed, "
                     "but ONLY against a synthetic fixture: the harness is public and must "
@@ -201,7 +201,7 @@ def build(allow_missing: bool = False) -> dict:
             "title": "The fail-closed capacity guard, verified on real MATLAB",
             "why_it_matters": (
                 "This is the most valuable thing the MATLAB runs establish. The guard refuses "
-                "to emit a feasibility claim from placeholder capacity — and it fires."),
+                "to emit a feasibility claim from placeholder capacity - and it fires."),
             "from_run": latest.name,
             **guard,
         },
@@ -233,7 +233,7 @@ def build(allow_missing: bool = False) -> dict:
                 "between": "Python vs MATLAB",
                 "finding": (
                     f"Charger efficiency was {config.CHARGER_EFFICIENCY} in Python and 0.93 in "
-                    f"three MATLAB files — one physical assumption, two values. Every MATLAB "
+                    f"three MATLAB files - one physical assumption, two values. Every MATLAB "
                     f"energy figure ran about 1.1% high."),
                 "severity": "FIXED",
                 "surfaced": True,
@@ -243,14 +243,14 @@ def build(allow_missing: bool = False) -> dict:
                     "0.9300 across all 120 rows."),
                 "why_it_survived": (
                     "Charger efficiency is not a contract field, so there was nothing to "
-                    "reconcile it against — the drift was hiding in the one place the "
+                    "reconcile it against - the drift was hiding in the one place the "
                     "anti-drift mechanism does not reach."),
             },
         ],
         "what_cannot_be_shown": (
             "A row-by-row Python-vs-MATLAB comparison of the twelve real sites. Real MATLAB "
             "has only ever run against a synthetic fixture, so that comparison does not exist "
-            "— and it will not be fabricated to fill the space."),
+            "- and it will not be fabricated to fill the space."),
     }
 
 

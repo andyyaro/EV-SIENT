@@ -1,6 +1,6 @@
-# AWS_INVENTORY.md — discovered state, before any change
+# AWS_INVENTORY.md - discovered state, before any change
 
-**Phase 0.5 — read-only discovery. Nothing in this document was created, modified, or deleted by the
+**Phase 0.5 - read-only discovery. Nothing in this document was created, modified, or deleted by the
 discovery that produced it.** Every line below was observed by an AWS CLI call or an HTTP request on
 **2026-07-27 (UTC)**, with `--profile` passed explicitly on every command and the default profile never used.
 
@@ -46,10 +46,10 @@ passes `--profile` explicitly; `sudo` is never used.
 ```
 
 DNS validation for the certificate is a `_…` CNAME in the same zone. The zone `andyyaro.com` holds 25 records
-total and is shared with unrelated projects — **only the two `futurecityfellowship.*` records belong to this
+total and is shared with unrelated projects - **only the two `futurecityfellowship.*` records belong to this
 project.** Two other zones exist in `cerfodes-dns` (`bytechisel.com`, `cerfodes-usa.com`); neither is in scope.
 
-### 2.1 What is actually being served — all 16 objects
+### 2.1 What is actually being served - all 16 objects
 
 | Key | Size | Last modified |
 |---|---:|---|
@@ -65,7 +65,7 @@ project.** Two other zones exist in `cerfodes-dns` (`bytechisel.com`, `cerfodes-
 | `top-model-findings-cards-bgs/image1.jpeg` | 44,667 B | 2026-06-28 |
 | `top-model-findings-cards-bgs/image1.png` … `image6.png` | 1,295,217 B **each** | 2026-06-28 |
 
-**16 objects, 8,191,997 B total.** All six PNGs share one ETag (`f5587cb2…`) — they are **byte-identical
+**16 objects, 8,191,997 B total.** All six PNGs share one ETag (`f5587cb2…`) - they are **byte-identical
 duplicates**, 7.77 MB of the 8.19 MB total. Last-30-day CloudFront traffic was **2,132 requests /
 323,172,829 B**; the duplicated images dominate that transfer.
 
@@ -83,7 +83,7 @@ assumes the landing page can be corrected by an S3 sync is wrong. Recorded as **
 | Resource | Identifier | Configuration observed |
 |---|---|---|
 | Cognito user pool | `us-east-1_mKrwfQTkg` ("User pool - pl3gnq") | created 2026-06-29; gates `assistant.html` |
-| HTTP API | `zale82q9w3` — `future-city-assistant-api` | one route `POST /chat`, **JWT** authorization; CORS restricted to `https://futurecityfellowship.andyyaro.com`, methods POST/OPTIONS |
+| HTTP API | `zale82q9w3` - `future-city-assistant-api` | one route `POST /chat`, **JWT** authorization; CORS restricted to `https://futurecityfellowship.andyyaro.com`, methods POST/OPTIONS |
 | Lambda | `future-city-assistant-chat` | **python3.14**, 128 MB, 30 s timeout, x86_64, 20,749 B package, last modified 2026-06-29 |
 | DynamoDB | `future-city-assistant-usage` | **PAY_PER_REQUEST**, 44 items, 76,790 B, keys `pk`/`sk`, 30-day TTL via `USAGE_LOG_TTL_DAYS` |
 | Secrets Manager | `future-city-assistant-secrets` | created 2026-06-29, last accessed 2026-07-24 |
@@ -96,13 +96,13 @@ The Lambda is rate-limited in its own configuration (`HOURLY_USER_LIMIT=20`, `DA
 Manager rather than in the function's environment. **No credential value appears in any environment variable.**
 That is a good design and this program will not weaken it.
 
-### 3.1 FIND-AWS-01 (high) — the live assistant is grounded on a superseded branch
+### 3.1 FIND-AWS-01 (high) - the live assistant is grounded on a superseded branch
 
 The Lambda reads the repository at **`GITHUB_BRANCH=v2-expansion-planning`**, not `main`.
 
 Verified against the actual remote: that branch's tip is `0be9373`, it holds 220 files, and it contains
 **zero** files under `data/contract/v1/`. The canonical V3 contract does not exist on the branch the assistant
-reads. Every answer the public assistant gives is therefore grounded in the pre-V3 tree — the same tree whose
+reads. Every answer the public assistant gives is therefore grounded in the pre-V3 tree - the same tree whose
 numbers the V3 CHANGELOG corrected. This is the single most consequential live-surface defect found in
 Phase 0, and it is invisible to any repository-only audit.
 
@@ -110,7 +110,7 @@ Not fixed in Phase 0 (discovery is read-only). Carried to **Phase 8**.
 
 ---
 
-## 4. Did the website patch package ever get applied? — **No.**
+## 4. Did the website patch package ever get applied? - **No.**
 
 `docs/operations/website-patch-package/` specifies nine patches. Its own README says *"Nothing in this package
 has been deployed."* That statement is **still true on 2026-07-27**, confirmed against the live site rather
@@ -130,27 +130,27 @@ than assumed from the document.
 
 Recorded as **FIND-AWS-02 (high)**. Nine unapplied patches carry to **Phase 8**.
 
-### 4.1 FIND-AWS-03 (high) — the live site does not carry the canonical horizons at all
+### 4.1 FIND-AWS-03 (high) - the live site does not carry the canonical horizons at all
 
 Independent of the patch package: across all five live HTML pages and the served PDF, the canonical horizon
 years **2036 / 2046 / 2056 appear zero times**. So do `2035` and `2050`. The live pages are written almost
-entirely qualitatively, so this is **not** a case of stale superseded years surviving — it is a case of the
+entirely qualitatively, so this is **not** a case of stale superseded years surviving - it is a case of the
 public surface carrying no horizon convention at all while the repository is explicit about one.
 
 The eGRID factor is equally absent: **neither `596.3` nor `590.2` appears anywhere on the live site or in the
 served PDF.** The corrected factor is not published; the superseded factor is at least not published either.
 
-`58.8` appears twice, on `results.html`, and FFX002 is correctly named the top overall candidate — the one
+`58.8` appears twice, on `results.html`, and FFX002 is correctly named the top overall candidate - the one
 headline the live site and the contract agree on. The served PDF
 (`Public_EV_Charging_Planning_Report.pdf`, 15 KB) is a different artifact from anything in `reports/` and
 contains none of the checked figures.
 
-> **CORRECTION, 2026-07-28 — both sentences above are wrong.** Kept verbatim rather than edited,
+> **CORRECTION, 2026-07-28 - both sentences above are wrong.** Kept verbatim rather than edited,
 > because this section is a dated Phase 0 record and rewriting it would hide that the audit
 > reached the wrong conclusion.
 >
 > 1. **FFX002 is not "correctly named", and this is not a headline the site and the contract
->    agree on — it is the one they disagree on.** FFX002 leads at 58.8 only under `legacy_v2`.
+>    agree on - it is the one they disagree on.** FFX002 leads at 58.8 only under `legacy_v2`.
 >    Canonically (`milestone2_v3`) the top site is **FFX004 at 53.4**, with FFX002 second at
 >    51.8. Phase 0's own **FIND-NUM-03** records exactly this divergence, so the inventory and
 >    the findings register contradicted each other from the start.
@@ -183,7 +183,7 @@ projects. **Touch nothing outside the table below.**
 | DynamoDB table | `future-city-assistant-usage` |
 | Secrets Manager secret | `future-city-assistant-secrets` |
 
-**Explicitly not ours** — do not modify: buckets and distributions for `cerfodes-*`, `aga-datathon-*`,
+**Explicitly not ours** - do not modify: buckets and distributions for `cerfodes-*`, `aga-datathon-*`,
 `my-portfolio-crc*`, `valentine-*`, `bintaidea`, `jackportfolioupdate`, `matthieu-bere-*`, `adama-andy`,
 `cyse-130`, `grace-birthday`, `ikram-faith-video`, `fall-2025-schedule`, `my-blog-crc`,
 `cf-templates-*`; the four `cerfodes-*-web-clean-urls` CloudFront Functions; the Amplify app
@@ -213,16 +213,16 @@ with no Free Tier and no credits, per the program's cost rule.**
 
 ### Cost-hygiene gaps found (carry to Phase 8)
 
-- **FIND-AWS-04 (medium)** — `/aws/lambda/future-city-assistant-chat` has **no retention policy**; logs are
+- **FIND-AWS-04 (medium)** - `/aws/lambda/future-city-assistant-chat` has **no retention policy**; logs are
   kept forever. Explicit retention is required.
-- **FIND-AWS-06 (medium)** — **no AWS Budgets exist** in the account. Phase 8 requires a budget alert.
-- **FIND-AWS-07 (low)** — **no project resource is tagged.** The S3 bucket has no tag set; the project
+- **FIND-AWS-06 (medium)** - **no AWS Budgets exist** in the account. Phase 8 requires a budget alert.
+- **FIND-AWS-07 (low)** - **no project resource is tagged.** The S3 bucket has no tag set; the project
   CloudFront distribution has no `Project` tag (nine unrelated distributions carry a `Name` tag, and one
-  unrelated certificate carries `Project`/`Environment`, so the account is not uniformly untagged — ours
+  unrelated certificate carries `Project`/`Environment`, so the account is not uniformly untagged - ours
   simply are not). Phase 8 requires tagging every new resource and should backfill these.
-- **FIND-AWS-08 (low)** — six byte-identical 1.3 MB PNGs are stored and served separately, ~7.8 MB of 8.2 MB
+- **FIND-AWS-08 (low)** - six byte-identical 1.3 MB PNGs are stored and served separately, ~7.8 MB of 8.2 MB
   of origin data and most of the 323 MB monthly transfer. Deduplicating is free and reduces both.
-- **FIND-AWS-09 (info)** — the project CloudFront distribution has **no custom error responses**. Any
+- **FIND-AWS-09 (info)** - the project CloudFront distribution has **no custom error responses**. Any
   client-routed path in the Phase 7 web tier, and any NFC short link, will 403 rather than resolve, exactly as
   `/privacy.html` does today. Phase 8 must handle this deliberately.
 

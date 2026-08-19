@@ -1,7 +1,7 @@
 """Structured, typed data-confidence scoring (PY-05).
 
 Replaces the legacy note-keyword heuristics ('official' +5 / 'unconfirmed' -6) with
-field-level provenance records. Confidence derives ONLY from typed fields — changing
+field-level provenance records. Confidence derives ONLY from typed fields - changing
 prose in `notes` cannot change a confidence score.
 
 Provenance input: ``data/provenance/field_provenance_v1.csv`` with one row per

@@ -3,7 +3,7 @@
 Why there are two files at all
 ------------------------------
 `requirements-lock.txt` is used as a **constraints** file by `pip install -e . -c ...`, which is
-what the Makefile and CI run. Adding hashes to it breaks that outright — measured: *"the
+what the Makefile and CI run. Adding hashes to it breaks that outright - measured: *"the
 editable requirement cannot be installed when requiring hashes, because there is no single file
 to hash."* An editable install has no artifact to verify, so the two are mutually exclusive by
 design.
@@ -74,7 +74,7 @@ def test_hashes_are_full_length_sha256():
 def test_packages_with_many_artifacts_list_many_hashes():
     """pip accepts a download matching ANY listed digest, so all of a version's artifacts must
     be recorded. Recording only the one this machine uses produces a file that fails on the
-    Windows runner — precisely where reproducibility is meant to help.
+    Windows runner - precisely where reproducibility is meant to help.
 
     This is also the shape that made an early tamper test meaningless: corrupting one digest of
     several still installs, correctly. Only corrupting all of them proves verification runs.

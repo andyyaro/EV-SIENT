@@ -68,7 +68,7 @@ def test_the_artifact_build_is_the_public_one(text):
 
 
 def test_it_verifies_the_built_package_for_credentials(text):
-    """Verified by inspecting the built package, never by assuming — the requirement's own
+    """Verified by inspecting the built package, never by assuming - the requirement's own
     wording, and the lesson from an artifact whose inputs were correctly substituted and which
     still carried 36 real facility identifiers."""
     assert "AKIA" in text, "the credential scan must run against the built archive"
@@ -93,19 +93,19 @@ def test_a_signing_step_must_survive_the_archiving_step(text):
 
     The workflow ad-hoc signed `run-platform.command` and then archived it with `zip`. Ad-hoc
     signing a shell script writes the signature to extended attributes rather than into the
-    file, and `zip` discards extended attributes — so the step destroyed its own output one
+    file, and `zip` discards extended attributes - so the step destroyed its own output one
     line later and every build produced an unsigned artifact while the workflow read as though
     it did not. Measured by running these steps by hand on macOS 26.5.1: the staging file
     carried `com.apple.cs.CodeDirectory`, `CodeRequirements` and `CodeSignature`; after
     zip+unzip it carried none and `codesign -dv` reported "code object is not signed at all".
 
     Nothing here forbids signing. It requires that a signing step be packaged in a way that
-    keeps the signature — `ditto -c -k`, which preserves extended attributes — so the workflow
+    keeps the signature - `ditto -c -k`, which preserves extended attributes - so the workflow
     cannot silently go back to claiming something it does not do.
     """
     # Comment lines are stripped first. The block explaining WHY there is no signing step
     # names `codesign` several times, and matching the word rather than the command is the
-    # same text-versus-meaning error this repository keeps finding — including, on the first
+    # same text-versus-meaning error this repository keeps finding - including, on the first
     # run of this test, here.
     runnable = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
     if not any("codesign" in line for line in runnable):
@@ -115,7 +115,7 @@ def test_a_signing_step_must_survive_the_archiving_step(text):
     assert any("ditto -c -k" in line for line in archiving), (
         "the workflow signs the run script and then archives with plain `zip`, which discards "
         "the extended attributes the signature lives in. Either archive with `ditto -c -k` or "
-        "drop the signing step — do not ship a build that appears to sign and does not.")
+        "drop the signing step - do not ship a build that appears to sign and does not.")
 
 
 #: Affirmative signing claims that were actually made in this repository and were false. Each
@@ -144,7 +144,7 @@ def test_no_shipped_document_claims_the_artifact_is_signed(text):
 
     A heuristic that keeps finding excuses is worse than a narrow check that cannot. This one is
     narrow on purpose, and its narrowness is stated so nobody reads a pass as "no document
-    overclaims about signing" — it means "none of the four phrasings we got wrong before".
+    overclaims about signing" - it means "none of the four phrasings we got wrong before".
     """
     runnable = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
     signs = any("codesign" in line for line in runnable) and "ditto -c -k" in text
@@ -152,7 +152,7 @@ def test_no_shipped_document_claims_the_artifact_is_signed(text):
         return
 
     # The workflow's own header is checked too. It kept saying "Ad-hoc signing is applied where
-    # it costs nothing" for a commit after the signing step was deleted — a stale claim in the
+    # it costs nothing" for a commit after the signing step was deleted - a stale claim in the
     # file that defines the behaviour, which is the worst place for one.
     for name in ("docs/INSTALL.md", "README.md", "DEPLOYMENT.md",
                  ".github/workflows/package.yml"):
@@ -185,7 +185,7 @@ def test_the_install_guide_states_that_nothing_is_signed(text):
 
 def test_the_install_guide_states_the_measured_gatekeeper_outcome():
     """The number a reader needs is what actually happens, not what ought to. `spctl -a -t exec`
-    exits 3 on this artifact — measured on both the signed staging file and the unsigned
+    exits 3 on this artifact - measured on both the signed staging file and the unsigned
     extracted one, which is why removing the signing step changed nothing for a recipient."""
     guide = REPO / "docs/INSTALL.md"
     if not guide.is_file():
@@ -202,7 +202,7 @@ def test_the_release_body_only_points_at_files_a_downloader_can_open(text):
 
     The body said *"See `docs/INSTALL.md` for the exact click-paths"*. `docs/` is excluded from
     the public bundle by DEC-016 and this repository is PRIVATE, so that sentence pointed at a
-    file the reader had no way to open — at the exact moment they were staring at a Gatekeeper
+    file the reader had no way to open - at the exact moment they were staring at a Gatekeeper
     refusal and needed it. Every repo-relative path the body names must therefore be something
     the staging step actually puts in the archive.
     """
@@ -239,7 +239,7 @@ def test_the_install_guide_never_advises_disabling_gatekeeper():
         for index, line in enumerate(lines):
             if forbidden not in line.lower():
                 continue
-            # The negation may wrap onto an adjacent line — English sentences do not respect
+            # The negation may wrap onto an adjacent line - English sentences do not respect
             # line breaks, and checking one line at a time is the same match-the-text-where-
             # meaning-was-intended mistake this project keeps hitting. Read a window.
             window = " ".join(lines[max(0, index - 2):index + 3]).lower()

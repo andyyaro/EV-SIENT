@@ -119,7 +119,7 @@ def yesno_to_num(value, field: str = "yes/no field") -> float:
       CSV cell parsed as text or as a number silently changed the score.
 
     It refuses rather than clamping. Clamping 7 to 1 would be a cleaner that quietly improves
-    data — the thing this project exists not to do — and it would hide the upstream mistake
+    data - the thing this project exists not to do - and it would hide the upstream mistake
     that produced a 7. All 12 current sites carry strictly 0/1 in every flag, so **no
     published number moves**; this closes the door before Phase 6B opens it to data nobody
     here prepared.
@@ -292,10 +292,10 @@ def recommendation_tier(row: pd.Series) -> str:
     if row["garage_enclosed"] == 1:
         return "High-review candidate"
     if row["model_rank"] <= 2 and row["readiness_score"] >= 50:
-        return "Tier 1 — advance to site screening"
+        return "Tier 1 - advance to site screening"
     if row["readiness_score"] >= 45:
-        return "Tier 2 — promising candidate, refine data"
-    return "Tier 3 — lower priority / monitor"
+        return "Tier 2 - promising candidate, refine data"
+    return "Tier 3 - lower priority / monitor"
 
 
 def add_tiers(results: pd.DataFrame) -> pd.DataFrame:

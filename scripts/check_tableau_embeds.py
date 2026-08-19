@@ -2,13 +2,13 @@
 
 Two forms exist and they are not interchangeable:
 
-* ``public.tableau.com/views/<workbook>/<Sheet>`` — the **share / embed** form, what
+* ``public.tableau.com/views/<workbook>/<Sheet>`` - the **share / embed** form, what
   Tableau's own Share button produces, and what an ``<iframe>`` needs.
-* ``public.tableau.com/app/profile/<profile>/viz/<workbook>/<Sheet>`` — the profile-app
+* ``public.tableau.com/app/profile/<profile>/viz/<workbook>/<Sheet>`` - the profile-app
   page route. Fine for a human clicking through, wrong inside an embed.
 
 Both return HTTP 200 and both return the same ~1.4 KB JavaScript shell, because Tableau
-Public is a single-page app — so nothing about a status check will catch the mistake, and an
+Public is a single-page app - so nothing about a status check will catch the mistake, and an
 embed built on the page form fails in a way that looks like a rendering problem rather than a
 wrong URL.
 

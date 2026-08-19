@@ -1,4 +1,4 @@
-# ChargeReady NOVA — 3D Site Explorer
+# ChargeReady NOVA - 3D Site Explorer
 
 A Google Earth–style 3D viewer for the Future City Fellowship's Public EV
 Charging Site-Readiness and Right-Sizing Model. Real terrain, real buildings,
@@ -23,7 +23,7 @@ to an LLM client.
 application. It has no terrain streaming, no level-of-detail tiling, no
 geographic coordinate system, no click-to-inspect UI layer, and no web
 delivery story. Building an interactive planning tool inside it means
-reimplementing a GIS engine — and then handing stakeholders a `.blend` file
+reimplementing a GIS engine - and then handing stakeholders a `.blend` file
 and a 4 GB install instead of a URL.
 
 So the split is:
@@ -53,9 +53,9 @@ does the other's job.
   src/fcf3d/
     build_sites.py     model CSVs  → explorer/web/data/sites.geojson
     geometry.py        parametric infrastructure massing (zero dependencies)
-    glb.py             glTF 2.0 writer — the pipeline runs without Blender
+    glb.py             glTF 2.0 writer - the pipeline runs without Blender
     build_models.py    CLI; routes to glb.py or to Blender (the --blender route
-                       is NOT wired up here — see "Blender assets" below)
+                       is NOT wired up here - see "Blender assets" below)
   tests/
     test_explorer_pipeline.py    the ETL and the payload
     test_explorer_drift.py       committed artifacts vs a fresh build
@@ -68,7 +68,7 @@ explorer/                        <- this directory
     app.js             globe, markers, panels, comparison, placement editor
     style.css
     data/              generated
-    models/            generated — one GLB per site
+    models/            generated - one GLB per site
     vendor/            optional local CesiumJS (gitignored; `make explorer-vendor`)
 ```
 
@@ -93,11 +93,11 @@ Those numbers sum back to 51.8 for this site. Across the twelve, the reconstruct
 with the published score at 10 of 12; at FFX001 and PWC008 it differs by 0.1, which is rounding
 in the parts rather than a disagreement about the total, and the viewer now says so instead of
 printing a tick. (This example previously
-quoted 58.8 and rank #1 — those are `legacy_v2` figures, and the shipped viewer
+quoted 58.8 and rank #1 - those are `legacy_v2` figures, and the shipped viewer
 data is `milestone2_v3`. A worked example that does not match the artifact it
 documents is a defect, not a rounding.)
 `test_attribution_reproduces_model_score` fails the build if anyone reweights
-the model without updating the map — so the viewer can never quietly tell
+the model without updating the map - so the viewer can never quietly tell
 planners a story the model never told.
 
 ### Asset pipeline
@@ -125,7 +125,7 @@ They cannot drift, because there is only one geometry definition.
 - **Click any pin** for a five-tab panel: Overview, Score (with the driver
   decomposition), Right-sizing, Risk & gaps, Place.
 - **Pin up to four sites** and open a side-by-side table, with the best value in each
-  numeric row highlighted — the *lowest* on rows where lower is better (rank, install cost,
+  numeric row highlighted - the *lowest* on rows where lower is better (rank, install cost,
   mean wait, worst-case rank change), the highest elsewhere. *(Until 2026-07-28 this was a
   bare `Math.max`, so on those four rows the table highlighted the worst option.)*
 - **Placement editor.** Nudge heading, east/north offset, and height until the
@@ -140,7 +140,7 @@ They cannot drift, because there is only one geometry definition.
 
 > **Corrected 2026-07-28.** This section previously named `make all`, `make serve`,
 > `make candidates`, `make doctor`, `make models-blender` and an `FCF_REPO` variable.
-> **None of them exist in this repository's Makefile** — they are from the explorer's original
+> **None of them exist in this repository's Makefile** - they are from the explorer's original
 > standalone repo, before it was integrated here, and `FCF_REPO` is unnecessary now that the
 > explorer lives inside the model repository. The real targets are below.
 
@@ -155,7 +155,7 @@ Two further targets exist: `make explorer-legacy` builds the payload in `legacy_
 All of them run from the **repository root**, not from `explorer/`.
 
 `make setup` builds a local `venv/` and the Makefile picks it up automatically
-from then on — no `pip install` into system Python, which recent macOS and
+from then on - no `pip install` into system Python, which recent macOS and
 Homebrew Pythons refuse anyway.
 
 There is nothing to point at any more. The old `make candidates`, `make doctor` and the
@@ -172,19 +172,19 @@ Cesium ion. Get a free token at <https://cesium.com/ion> → Access Tokens, and
 paste it into the gate on first load. It is stored in your browser only.
 
 Photorealistic 3D Tiles are included with a Cesium ion account and cover 2,500+
-cities — Fairfax, Manassas, and Woodbridge are all in coverage. Google requires
+cities - Fairfax, Manassas, and Woodbridge are all in coverage. Google requires
 that its logo and the data attribution stay visible; the app leaves Cesium's
 credit widget in place, so don't remove it.
 
 Without a token the viewer runs in *Flat* mode on OpenStreetMap imagery. Every
 score, comparison, and proposed build still works.
 
-### Blender assets (optional — NOT WIRED UP IN THIS REPOSITORY)
+### Blender assets (optional - NOT WIRED UP IN THIS REPOSITORY)
 
 > **Corrected 2026-07-28.** This section documented `make models-blender`, which **this
 > repository's Makefile does not define**. The underlying `--blender` route in
 > `src/fcf3d/build_models.py` is also broken: it builds the script path
-> `src/blender/build_assets.py`, and that file does not exist — the ETL moved into `src/`
+> `src/blender/build_assets.py`, and that file does not exist - the ETL moved into `src/`
 > during integration and the sibling `blender/` directory did not follow it. The real script
 > is still at `explorer/blender/build_assets.py`.
 >
@@ -196,7 +196,7 @@ score, comparison, and proposed build still works.
 Or interactively, with the official MCP server
 (<https://www.blender.org/lab/mcp-server/>, Blender 5.1+): install the add-on,
 point your LLM client at the server, and art-direct the canopy by conversation.
-Note Blender's own warning — the MCP server executes generated Python inside
+Note Blender's own warning - the MCP server executes generated Python inside
 your live session with no sandbox, so use a scratch scene.
 
 For batch generation prefer `blender --background --python`. It is
@@ -245,7 +245,7 @@ handle the tiling.
   of forgone points almost everywhere.
 - **The massing is not a design.** Stall and canopy dimensions follow common
   US surface-lot practice for a siting conversation. ADA stall provision uses
-  a screening rule of thumb — confirm against the AHJ's adopted accessibility
+  a screening rule of thumb - confirm against the AHJ's adopted accessibility
   code before it informs anything real.
 - **Placement offsets are eyeballed.** The default drops the massing on the
   site's official coordinate, which is usually a building centroid, not a
@@ -260,4 +260,4 @@ handle the tiling.
 CesiumJS is Apache-2.0. Google Photorealistic 3D Tiles are governed by the
 Google Maps Platform Terms of Service and require visible brand and data
 attribution. OpenStreetMap imagery and building data are ODbL. Blender is
-GPL — that covers the application, not the glTF it exports.
+GPL - that covers the application, not the glTF it exports.

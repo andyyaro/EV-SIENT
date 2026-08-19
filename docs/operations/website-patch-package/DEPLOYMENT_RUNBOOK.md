@@ -3,7 +3,7 @@
 ## Preconditions
 - AWS CLI configured with the site maintainer's credentials (never stored in this repo).
 - S3 origin bucket name + CloudFront distribution ID at hand (kept outside this package
-  by design — see PY-18/PY-16 no-secrets rule).
+  by design - see PY-18/PY-16 no-secrets rule).
 
 ## Deploy
 1. Stage the patched bundle locally; run the acceptance checklist in PATCH_GUIDE.md.

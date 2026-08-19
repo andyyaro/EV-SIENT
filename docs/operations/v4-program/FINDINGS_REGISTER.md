@@ -1,4 +1,4 @@
-# FINDINGS_REGISTER.md — every finding from the Phase 0 read
+# FINDINGS_REGISTER.md - every finding from the Phase 0 read
 
 **200 findings** raised by twelve independent reader lanes over **224 files**, every assigned file read end to
 end (**zero** files reported as not fully read). This is the complete register; `LEDGER.md` carries the
@@ -6,7 +6,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 > **Every finding here is a lead, not a fact.** Per the program's subagent doctrine, nothing is acted on
 > until it is independently confirmed against the actual files. The `Confirmed` column records whether the
-> lead has verified it first-hand yet. Unconfirmed does not mean doubted — it means not yet re-checked.
+> lead has verified it first-hand yet. Unconfirmed does not mean doubted - it means not yet re-checked.
 
 | Severity | Count |
 |---|---|
@@ -35,56 +35,56 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 ---
 
-## HIGH — 41 findings
+## HIGH - 41 findings
 
 ### H-01 · `src/fcf_m2/scoring.py`
 **Lane:** L01-model-core · **Category:** duplicate-scorer · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** SUBSCORE_WEIGHTS, DRIVERS, and the 'Earned:/Forgone:' driver attribution do NOT exist anywhere in repo/ — they exist only in the separate 3D explorer, which independently re-implements the scoring weights. This violates 'nothing else may re-implement the scorer' and is a live drift risk: the numbers agree today only by coincidence of hand-copying.
+**Claim.** SUBSCORE_WEIGHTS, DRIVERS, and the 'Earned:/Forgone:' driver attribution do NOT exist anywhere in repo/ - they exist only in the separate 3D explorer, which independently re-implements the scoring weights. This violates 'nothing else may re-implement the scorer' and is a live drift risk: the numbers agree today only by coincidence of hand-copying.
 
 **Evidence.** grep -rn 'SUBSCORE_WEIGHTS|DRIVERS|Earned:|Forgone:' over repo/ (excluding .git, venv) returns ZERO hits. In incoming/explorer/fcf-3d/fcf3d/build_sites.py:92-97 `SUBSCORE_WEIGHTS = {"demand_subscore": 0.45, "feasibility_subscore": 0.30, "safety_subscore": 0.15, "equity_subscore": 0.10}`; lines 134-148 define `DRIVERS: list[Driver]` with weights 0.18/0.18/0.13/0.11/0.10/0.08/0.07; lines 238-248 compute `possible = SUBSCORE_WEIGHTS[drv.subscore] * drv.weight * 100.0 * adj`, `points_earned`, `points_forgone`. In repo/src/fcf_m2/scoring.py:140-175 the identical numbers appear as inline literals with no named constant. Also present in incoming/explorer/fcf-3d/web/app.js.
 
 ### H-02 · `dashboard/static/footer_log.json`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** yes — LEDGER FIND-REPO-03
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** yes - LEDGER FIND-REPO-03
 
 **Claim.** scripts/verify.sh gate 8 ("hygiene: no local absolute paths in code/config") FAILS on the tree as committed, because the tracked dashboard/static/footer_log.json contains nine absolute /Users/andyyaro/... paths and the gate's pathspec includes '*.json'.
 
 **Evidence.** dashboard/static/footer_log.json lines 7,14,21,28,35,42,49,56,59 each contain "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/0X_*.png". scripts/verify.sh:60 = `! git grep -nI '/Users/andyyaro' -- '*.py' '*.sh' '*.toml' '*.yml' '*.json' ':!scripts/verify.sh'`. I ran that exact command: exit 1 (FAIL).
 
 ### H-03 · `scripts/verify.sh`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** yes — LEDGER FIND-REPO-01/02
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** yes - LEDGER FIND-REPO-01/02
 
 **Claim.** scripts/verify.sh gate 7 ("secrets") FAILS on a self-inflicted false positive: it lacks the ':!.github/workflows/tests.yml' exclusion that CI's identical scan has, and tests.yml contains the literal 'aws_secret_access_key' inside its own pattern.
 
 **Evidence.** scripts/verify.sh:57 excludes only ':!scripts/verify.sh'; .github/workflows/tests.yml:57 excludes both ':!.github/workflows/tests.yml' and ':!scripts/verify.sh'. The grep matches .github/workflows/tests.yml:57. I ran verify.sh's exact gate command: exit 1 (FAIL). So ./scripts/verify.sh reports 2 FAIL / 8 PASS today.
 
 ### H-04 · `scripts/build_static_dashboard.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** dashboard/static/ is a committed generated artifact that did NOT come from scripts/build_static_dashboard.py in this repo — its footer log records a different machine's directory tree — and the footer-QA gate cannot detect this because it compares basenames only.
+**Claim.** dashboard/static/ is a committed generated artifact that did NOT come from scripts/build_static_dashboard.py in this repo - its footer log records a different machine's directory tree - and the footer-QA gate cannot detect this because it compares basenames only.
 
-**Evidence.** build_static_dashboard.py:24-26 sets OUT = REPO/'dashboard/static' and LOG = OUT/'footer_log.json'; the committed log's file entries all point at '/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/'. src/fcf_m2/visuals.py:76 = `logged = {Path(e["file"]).name for e in ...}` — basename-only, so verify.sh gate 6 passes anyway (I ran it: exit 0).
+**Evidence.** build_static_dashboard.py:24-26 sets OUT = REPO/'dashboard/static' and LOG = OUT/'footer_log.json'; the committed log's file entries all point at '/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/'. src/fcf_m2/visuals.py:76 = `logged = {Path(e["file"]).name for e in ...}` - basename-only, so verify.sh gate 6 passes anyway (I ran it: exit 0).
 
 ### H-05 · `matlab/src/capacityGuard.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-02
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-02
 
 **Claim.** Octave Tier 1 (unmodified .m) is provably unreachable, and the failure mode in the safety-critical gates is SILENT rather than loud: 14 string-array literals of the form ["a","b"] collapse to a single concatenated char row under Octave, which mangles the capacity-provenance vocabulary check and the strategy check.
 
 **Evidence.** capacityGuard.m:53 `allowedBases = ["verified_utility", "verified_facility", ...` consumed at :76 `if ~ismember(basis, allowedBases)` and :84 `isVerified = ismember(basis, ["verified_utility", "verified_facility"]);`; managedCharging.m:57 `validStrategies = ["unmanaged", "clamp", "energy_aware"];` consumed at :59. 14 total sites: capacityGuard.m:53,60,84; loadScenarios.m:62,81; makeSessionProfiles.m:68,71,158,219,299; managedCharging.m:57; run_all_scenarios.m:51; runScenario.m:47,51
 
 ### H-06 · `matlab/src/plotScenario.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** plotScenario's mandatory provenance footer HARD-CODES the source CSV path as a literal string instead of echoing the CsvFile actually used, so any batch run against a different CSV produces figures that state a source they did not use — a provenance defect inside the file whose whole stated purpose is provenance labelling.
+**Claim.** plotScenario's mandatory provenance footer HARD-CODES the source CSV path as a literal string instead of echoing the CsvFile actually used, so any batch run against a different CSV produces figures that state a source they did not use - a provenance defect inside the file whose whole stated purpose is provenance labelling.
 
-**Evidence.** plotScenario.m:180-183 `footer = sprintf("Source: data/canonical/matlab_scenarios.csv " + "(auto-generated adapter) | scenario %s | capacity basis: %s " + "| generated %s | Milestone 2 V3 MATLAB model", ...)` — no CsvFile argument is available to plotScenario at all (its only options are OutputFolder/SaveFigure/Visible, :31-37), while run_all_scenarios.m:45-47 exposes a settable 'CsvFile'.
+**Evidence.** plotScenario.m:180-183 `footer = sprintf("Source: data/canonical/matlab_scenarios.csv " + "(auto-generated adapter) | scenario %s | capacity basis: %s " + "| generated %s | Milestone 2 V3 MATLAB model", ...)` - no CsvFile argument is available to plotScenario at all (its only options are OutputFolder/SaveFigure/Visible, :31-37), while run_all_scenarios.m:45-47 exposes a settable 'CsvFile'.
 
 ### H-07 · `matlab/src/run_all_scenarios.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-04
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-04
 
 **Claim.** The SHA-256 provenance hashing that produces the named deliverable hashes.txt depends on the Java bridge, which is absent under `matlab -nojvm` and absent in stock Octave. This is a hard Tier-2 blocker on the batch runner.
 
-**Evidence.** run_all_scenarios.m:194-197 `md = java.security.MessageDigest.getInstance("SHA-256"); md.update(bytes); digest = typecast(md.digest(), "uint8");` — docstring at :19-21 claims it is "computed with java.security.MessageDigest - available in base MATLAB".
+**Evidence.** run_all_scenarios.m:194-197 `md = java.security.MessageDigest.getInstance("SHA-256"); md.update(bytes); digest = typecast(md.digest(), "uint8");` - docstring at :19-21 claims it is "computed with java.security.MessageDigest - available in base MATLAB".
 
 ### H-08 · `.github/workflows/matlab-manual.yml`
 **Lane:** L04-matlab-tests-docs · **Category:** ci-defect · **Confirmed:** not yet re-checked by the lead
@@ -94,7 +94,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** matlab/tests/test_regression.m:45-53 writes tests/golden/regression_golden.csv when absent then passes against it ('if ~isfile(goldenFile) ... writetable(current, goldenFile); log(testCase, 1, sprintf("GOLDEN CREATED at %s - commit this file..."))'). RUN_ON_LICENSED_MATLAB.md:29-30 says '**Commit that file** - it becomes the drift baseline for every later run.' But .github/workflows/matlab-manual.yml:50-53 uploads only 'matlab/test-results/' and 'matlab/outputs/' - matlab/tests/golden/ is absent from the artifact paths.
 
 ### H-09 · `matlab/data/canonical/matlab_scenarios.csv`
-**Lane:** L04-matlab-tests-docs · **Category:** exposure-blocker · **Confirmed:** yes — LEDGER FIND-MATLAB-06
+**Lane:** L04-matlab-tests-docs · **Category:** exposure-blocker · **Confirmed:** yes - LEDGER FIND-MATLAB-06
 
 **Claim.** The canonical CSV cannot be published in a public harness repo as-is: it carries client identity plus four columns of study results attached to 12 named public facilities.
 
@@ -103,14 +103,14 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### H-10 · `data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv`
 **Lane:** L05-data-contract · **Category:** headline-not-traceable-to-contract · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The 58.8 headline readiness score does NOT trace to data/contract/v1/. There is no readiness/score column anywhere in the contract — not in scenario_table.csv (48 cols), site_table.csv (9 cols), or schema.json's 48 required fields. Its sole data-layer origin is a frozen legacy_v2 INPUT. This directly violates the contract's own consumer rule 3 ('Presentation numbers cite contract_version + generated_utc from the manifest', data/contract/v1/README.md:20) and rule 'Excel/Tableau/presentation quote contract values; no re-derivation' (contract_manifest.json:48), which ~13 prose files breach by quoting 58.8.
+**Claim.** The 58.8 headline readiness score does NOT trace to data/contract/v1/. There is no readiness/score column anywhere in the contract - not in scenario_table.csv (48 cols), site_table.csv (9 cols), or schema.json's 48 required fields. Its sole data-layer origin is a frozen legacy_v2 INPUT. This directly violates the contract's own consumer rule 3 ('Presentation numbers cite contract_version + generated_utc from the manifest', data/contract/v1/README.md:20) and rule 'Excel/Tableau/presentation quote contract values; no re-derivation' (contract_manifest.json:48), which ~13 prose files breach by quoting 58.8.
 
 **Evidence.** Exhaustive grep for '58.8' across data/ returns exactly ONE hit: data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv:2 → 'FFX002,City of Fairfax Regional Library,1,58.8,medium,6.0,...' where col 4 is base_readiness_score. Confirmed programmatically: scenario_table.csv has no score column; its 48 headers are contract_version…notes. Re-published outside the contract at dashboard/tableau/patch_package/tbl_readiness_confidence.csv:2 (readiness_score=58.8). Quoted in prose by README.md, CHANGELOG.md, CONTRIBUTING.md, docs/migration-from-v2.md, docs/operations/reproduction-guide.md, docs/operations/legacy-baseline/BASELINE_VERIFICATION.md, docs/operations/website-patch-package/content/methodology_update.md, .github/pull_request_template.md, presentation/deck/*Speaker_Notes.md, presentation/deck/*Timing_Runbook.md, reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md, scripts/build_static_dashboard.py, tests/test_legacy_golden.py.
 
 ### H-11 · `data/contract/v1/scenario_table.csv`
-**Lane:** L05-data-contract · **Category:** internal-contradiction · **Confirmed:** yes — LEDGER FIND-NUM-01/02
+**Lane:** L05-data-contract · **Category:** internal-contradiction · **Confirmed:** yes - LEDGER FIND-NUM-01/02
 
-**Claim.** The expected 'FFX002 = Medium confidence' is FALSE against the data. All 10 FFX002 contract rows carry data_confidence=Low, as do all 120 rows. The only 'medium' attached to FFX002 anywhere is electrical_risk_level=medium in the frozen legacy file — a different variable. Any prose pairing '58.8' with 'Medium confidence' is conflating electrical-risk-level with data-confidence.
+**Claim.** The expected 'FFX002 = Medium confidence' is FALSE against the data. All 10 FFX002 contract rows carry data_confidence=Low, as do all 120 rows. The only 'medium' attached to FFX002 anywhere is electrical_risk_level=medium in the frozen legacy file - a different variable. Any prose pairing '58.8' with 'Medium confidence' is conflating electrical-risk-level with data-confidence.
 
 **Evidence.** scenario_table.csv col 42 data_confidence distinct value set across all 120 rows = {'Low'} (verified via csv.DictReader + Counter). All 10 FFX002 rows: data_confidence='Low'. dashboard/tableau/patch_package/tbl_readiness_confidence.csv:2 gives FFX002 data_confidence_score_v3=33.8, data_confidence_level_v3='Low'. The 'medium' token is legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv:2 col 5 electrical_risk_level='medium' with electrical_risk_points=6.0.
 
@@ -124,35 +124,35 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### H-13 · `data/observed/observed_sessions_template.csv`
 **Lane:** L05-data-contract · **Category:** schema-insufficient-for-stated-purpose · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The observed-sessions template is structurally insufficient to evaluate the expansion-trigger policy it exists to feed. It captures 6 fields with no port/charger id, no session timestamps, no uptime and no curtailment — but assumptions.json defines the trigger on utilization_threshold 0.4, wait_threshold_min 10.0 AND reliability_uptime_min 0.97. Uptime is uncomputable from this schema; utilisation and wait can only be approximated. This is the central Phase-4 design gap.
+**Claim.** The observed-sessions template is structurally insufficient to evaluate the expansion-trigger policy it exists to feed. It captures 6 fields with no port/charger id, no session timestamps, no uptime and no curtailment - but assumptions.json defines the trigger on utilization_threshold 0.4, wait_threshold_min 10.0 AND reliability_uptime_min 0.97. Uptime is uncomputable from this schema; utilisation and wait can only be approximated. This is the central Phase-4 design gap.
 
 **Evidence.** data/observed/observed_sessions_template.csv in full (102 bytes): header 'site_id,date,sessions,energy_kwh,mean_dwell_min,facility_visitors_day' + row 'FFX002,2026-08-01,2,19.0,95,310'. Against data/contract/v1/assumptions.json:71-85 trigger_policy: utilization_threshold 0.4, wait_threshold_min 10.0, reliability_uptime_min 0.97, min_observation_months 6. Also the example row is circular: 19.0 kWh / 2 sessions = 9.5 kWh/session, exactly the energy_per_session_kwh benchmark at assumptions.json:33.
 
 ### H-14 · `README.md`
-**Lane:** L06-root-ci · **Category:** headline-number-untraceable · **Confirmed:** yes — LEDGER FIND-NUM-01/02, FIND-REPO-08
+**Lane:** L06-root-ci · **Category:** headline-number-untraceable · **Confirmed:** yes - LEDGER FIND-NUM-01/02, FIND-REPO-08
 
 **Claim.** The README headline table's "Active ports (base → high path)" column (44 → 47 / 47 → 48 / 47 → 48) does not trace to data/contract/v1. Summing ports_active across the 12 sites gives base path 25 → 35 → 44 → 44 and high path 25 → 44 → 48 → 48. The value 47 appears nowhere in the contract. Every other number in that table reconciles exactly.
 
 **Evidence.** README.md:39-41 '| 2036 | 44 → 47 | $1.56M | ...', '| 2046 | 47 → 48 | ...', '| 2056 | 47 → 48 (48-port pathway ceiling) | ...' vs computed sums of data/contract/v1/scenario_table.csv: (2036,base)=35, (2036,high)=44, (2046,base)=44, (2046,high)=48, (2056,base)=44, (2056,high)=48; `grep -c ',47,' data/contract/v1/scenario_table.csv` = 0. Same sums reproduce in dashboard/tableau/patch_package/tbl_canonical_scenarios.csv and matlab/data/canonical/matlab_scenarios.csv.
 
 ### H-15 · `scripts/verify.sh`
-**Lane:** L06-root-ci · **Category:** gate-claims-false · **Confirmed:** yes — LEDGER FIND-REPO-01/02
+**Lane:** L06-root-ci · **Category:** gate-claims-false · **Confirmed:** yes - LEDGER FIND-REPO-01/02
 
-**Claim.** scripts/verify.sh does NOT pass on the pristine committed tree — two of its ten gates fail — yet README, CONTRIBUTING, CHANGELOG and the PR template all assert it passes or must pass. Gate 'secrets' fails because verify.sh excludes only itself, not .github/workflows/tests.yml, whose line 57 contains the literal string aws_secret_access_key. Gate 'hygiene: no local absolute paths' fails on dashboard/static/footer_log.json.
+**Claim.** scripts/verify.sh does NOT pass on the pristine committed tree - two of its ten gates fail - yet README, CONTRIBUTING, CHANGELOG and the PR template all assert it passes or must pass. Gate 'secrets' fails because verify.sh excludes only itself, not .github/workflows/tests.yml, whose line 57 contains the literal string aws_secret_access_key. Gate 'hygiene: no local absolute paths' fails on dashboard/static/footer_log.json.
 
 **Evidence.** scripts/verify.sh:57 `! git grep -nIiE '...|aws_secret_access_key|...' -- . ':!scripts/verify.sh'` matches .github/workflows/tests.yml:57 (re-ran read-only, git grep exit 0 = match). scripts/verify.sh:60 `! git grep -nI '/Users/andyyaro' -- '*.py' '*.sh' '*.toml' '*.yml' '*.json' ':!scripts/verify.sh'` matches dashboard/static/footer_log.json lines 7,14,21,28,35,42,49,56,59. Claims: README.md:116-120, CONTRIBUTING.md:11 'must pass before you open a PR', CHANGELOG.md:43, .github/pull_request_template.md:22.
 
 ### H-16 · `dashboard/static/footer_log.json`
-**Lane:** L06-root-ci · **Category:** absolute-local-path · **Confirmed:** yes — LEDGER FIND-REPO-03
+**Lane:** L06-root-ci · **Category:** absolute-local-path · **Confirmed:** yes - LEDGER FIND-REPO-03
 
 **Claim.** Nine absolute local paths from the author's machine are committed in a tracked JSON file, pointing at a build directory that is not this repository.
 
-**Evidence.** dashboard/static/footer_log.json:7 '"file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/01_readiness_ranking.png"' and the same pattern at lines 14,21,28,35,42,49,56,59. (fcf_m2.visuals.audit_footer_metadata keys on Path(e['file']).name, src/fcf_m2/visuals.py:76, so the footer QA still passes — it is pure leakage.)
+**Evidence.** dashboard/static/footer_log.json:7 '"file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/01_readiness_ranking.png"' and the same pattern at lines 14,21,28,35,42,49,56,59. (fcf_m2.visuals.audit_footer_metadata keys on Path(e['file']).name, src/fcf_m2/visuals.py:76, so the footer QA still passes - it is pure leakage.)
 
 ### H-17 · `docs/operations/website-patch-package/content/results_2036_2046_2056.md`
-**Lane:** L07-docs-core · **Category:** headline-number-does-not-trace-to-contract · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L07-docs-core · **Category:** headline-number-does-not-trace-to-contract · **Confirmed:** yes - LEDGER FIND-NUM-01
 
-**Claim.** The three-horizon active-ports table published to the website says 44→47 / 47→48 / 47→48, but data/contract/v1/scenario_table.csv aggregates to 35→44 / 44→48 / 44→48. The same file claims 'All values from canonical contract v1.0.0' and PATCH_GUIDE.md mandates every number on that page trace to the scenario table. The file also self-contradicts: its closing line says the staged plan avoids energizing '13–23 pathway ports', and 13 avoided against a 48 ceiling implies 35 active at 2036 — the contract value, not the printed 44. Same wrong figures also appear in root README.md:38-40, reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:36-39, and presentation/deck/Future_City_Fellowship_Milestone_2_Timing_Runbook.md:67 (which enshrines '44→47 & 47→48' in the deck's spot-check list). The CO2e columns in the same rows DO match the contract, so the error is isolated to the ports column. No verify.sh or CI gate compares prose headline numbers to contract aggregates.
+**Claim.** The three-horizon active-ports table published to the website says 44→47 / 47→48 / 47→48, but data/contract/v1/scenario_table.csv aggregates to 35→44 / 44→48 / 44→48. The same file claims 'All values from canonical contract v1.0.0' and PATCH_GUIDE.md mandates every number on that page trace to the scenario table. The file also self-contradicts: its closing line says the staged plan avoids energizing '13–23 pathway ports', and 13 avoided against a 48 ceiling implies 35 active at 2036 - the contract value, not the printed 44. Same wrong figures also appear in root README.md:38-40, reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:36-39, and presentation/deck/Future_City_Fellowship_Milestone_2_Timing_Runbook.md:67 (which enshrines '44→47 & 47→48' in the deck's spot-check list). The CO2e columns in the same rows DO match the contract, so the error is isolated to the ports column. No verify.sh or CI gate compares prose headline numbers to contract aggregates.
 
 **Evidence.** docs/operations/website-patch-package/content/results_2036_2046_2056.md lines 9-12: '| 2026 (baseline) | 25 | 25 | 48 |', '| 2036 | 44 | 47 | 48 |', '| 2046 | 47 | 48 | 48 |', '| 2056 | 47 | 48 | 48 |'. Contract aggregation of all 120 rows of data/contract/v1/scenario_table.csv by horizon_year x scenario_name: 2026 baseline ports=25 pathway=48; 2036 base=35, high=44; 2046 base=44, high=48; 2056 base=44, high=48. Independently confirmed identical in dashboard/tableau/patch_package/tbl_canonical_scenarios.csv. Line 3 of the doc: 'All values from canonical contract v1.0.0 (generated 2026-07-19)'. Line 29: 'The staged plan also avoids energizing 13–23 pathway ports'. dashboard/tableau/patch_package/tbl_avoided_evse.csv aggregates: 2026 baseline 23, 2036 base 13, 2046 base 4, 2056 base 4. PATCH_GUIDE.md:23-24: 'Every number on this page must trace to `data/contract/v1/scenario_table.csv`; remove any figure that does not.'
 
@@ -173,12 +173,12 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### H-20 · `docs/human-actions/team_alternatives_session/04_WEIGHT_ADOPTION_PAGE.md`
 **Lane:** L08-human-actions · **Category:** unreproducible-claim · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The 'MANDATORY DISCLOSURE' equity-weighting crossover does not reproduce from the published matrix. At 2x the default equity weight (20/100) Alternative F never strictly overtakes B under any weight reallocation that keeps the total at 100 — the best case is a tie. F only wins at roughly 2.5x (equity 25). The cited source, Report 04 section 2, does not exist in the repository.
+**Claim.** The 'MANDATORY DISCLOSURE' equity-weighting crossover does not reproduce from the published matrix. At 2x the default equity weight (20/100) Alternative F never strictly overtakes B under any weight reallocation that keeps the total at 100 - the best case is a tie. F only wins at roughly 2.5x (equity 25). The cited source, Report 04 section 2, does not exist in the repository.
 
 **Evidence.** docs/human-actions/team_alternatives_session/04_WEIGHT_ADOPTION_PAGE.md:7 `Sensitivity analysis (Report 04 §2) shows that at roughly **2× the default equity weight (~20/100)**, the **Hybrid portfolio (F) overtakes Staged pilots (B)** as the winner`; repeated at 02_PROVISIONAL_MCDA.md:42 `**Equity crossover:** at roughly 2× the default equity weight (~20 vs 10), **F overtakes B**`. Recomputed with B=[4,4,5,5,3,4], F=[4,4,4,5,4,3], equity 10->20 with total held at 100: donor Data-confidence -> B 83.0 / F 83.0 (TIE); donor Cost -> B 81.0 / F 81.0 (TIE); donor Expandability -> B 81.0 / F 79.0 (B wins); donor Safety -> B 83.0 / F 81.0 (B wins); donor Demand -> B 83.0 / F 81.0 (B wins). At equity 25 (from confidence 10 + cost 5): B 81.0 / F 83.0 (F wins).
 
 ### H-21 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md`
-**Lane:** L09-deliverables · **Category:** headline-number-does-not-trace · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L09-deliverables · **Category:** headline-number-does-not-trace · **Confirmed:** yes - LEDGER FIND-NUM-01
 
 **Claim.** The published active-port series (base 25→44→47→47, high 25→47→48→48) contradicts the canonical contract, which sums to base 25→35→44→44 and high 25→44→48→48. The value 47 is not a portfolio total at any horizon under any case.
 
@@ -189,7 +189,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** FFX002 is published as '58.8 (Medium confidence)' in three artifacts while both contract-derived CSVs record Low confidence for all 12 sites.
 
-**Evidence.** tbl_readiness_confidence.csv rows 2-13: data_confidence_score_v3=33.8 and data_confidence_level_v3=Low on every one of the 12 rows, with an identical confidence_breakdown string. tbl_canonical_scenarios.csv: data_confidence='Low' is the single distinct value across all 120 rows. Contradicting text: Final_Report.md:51 'FFX002 City of Fairfax Regional Library #1 at 58.8 (Medium)'; Speaker_Notes.md:63 'FFX002 City of Fairfax Regional Library leads at 58.8 (Medium confidence)'; repo-root README.md:47 'FFX002 — City of Fairfax Regional Library (58.8, Medium confidence)'. Speaker_Notes.md:64, one line later, says "The 'Low' labels are printed on the chart deliberately."
+**Evidence.** tbl_readiness_confidence.csv rows 2-13: data_confidence_score_v3=33.8 and data_confidence_level_v3=Low on every one of the 12 rows, with an identical confidence_breakdown string. tbl_canonical_scenarios.csv: data_confidence='Low' is the single distinct value across all 120 rows. Contradicting text: Final_Report.md:51 'FFX002 City of Fairfax Regional Library #1 at 58.8 (Medium)'; Speaker_Notes.md:63 'FFX002 City of Fairfax Regional Library leads at 58.8 (Medium confidence)'; repo-root README.md:47 'FFX002 - City of Fairfax Regional Library (58.8, Medium confidence)'. Speaker_Notes.md:64, one line later, says "The 'Low' labels are printed on the chart deliberately."
 
 ### H-23 · `dashboard/tableau/patch_package/tbl_canonical_scenarios.csv`
 **Lane:** L09-deliverables · **Category:** horizon-convention · **Confirmed:** not yet re-checked by the lead
@@ -203,7 +203,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The Tableau recipe's peak-waits worksheet plots four columns that are 0.0 on all 12 rows, so building it exactly as specified produces twelve zero-height bars.
 
-**Evidence.** tbl_peak_waits.csv lines 2-13: p10_wait_min, p50_wait_min, p90_wait_min and peak_p90_wait_min are '0.0' on every one of the 12 data rows. TABLEAU_IMPLEMENTATION_BLOCKER.md:44 specifies '6. *Peak waits* — bar, p50 vs peak P90 wait, top-6 sites; reference line 10 min.' The only non-zero wait columns in the file are mean_wait_min (0.069–8.020) and peak_erlang_wait_min (0.381–42.365, PWC002 line 4).
+**Evidence.** tbl_peak_waits.csv lines 2-13: p10_wait_min, p50_wait_min, p90_wait_min and peak_p90_wait_min are '0.0' on every one of the 12 data rows. TABLEAU_IMPLEMENTATION_BLOCKER.md:44 specifies '6. *Peak waits* - bar, p50 vs peak P90 wait, top-6 sites; reference line 10 min.' The only non-zero wait columns in the file are mean_wait_min (0.069–8.020) and peak_erlang_wait_min (0.381–42.365, PWC002 line 4).
 
 ### H-25 · `incoming/explorer/fcf-3d/fcf3d/build_sites.py`
 **Lane:** L10-explorer-python · **Category:** horizon-convention · **Confirmed:** not yet re-checked by the lead
@@ -224,21 +224,21 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** README states a mangled horizon sequence that matches neither the canonical convention nor a labelled legacy one.
 
-**Evidence.** README.md:199 — "- Time slider driving `ports_active` across the 2026 → 2036 → 2050 horizons," (canonical is 2026/2036/2046/2056)
+**Evidence.** README.md:199 - "- Time slider driving `ports_active` across the 2026 → 2036 → 2050 horizons," (canonical is 2026/2036/2046/2056)
 
 ### H-28 · `incoming/explorer/fcf-3d/README.md`
 **Lane:** L10-explorer-python · **Category:** headline-number · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** README's worked example headline number is a legacy_v2 result presented without a legacy label. Under the canonical milestone2_v3 mode the same site is #2 at 51.8 and FFX004 is #1 at 53.4. I recomputed the six attribution figures from the fixture and they reproduce exactly, so the arithmetic is right but the regime is unstated.
 
-**Evidence.** README.md:77-79 — "City of Fairfax Regional Library ranks #1 at 58.8. / Earned: equity gap index +8.11 pts, short service run +7.50 pts, install cost +7.50 pts. / Forgone: spare electrical capacity −10.50 pts, adjacent traffic −4.52 pts, jobs within 1 mi −4.08 pts." My recomputation from repo/tests/fixture_legacy_v2_site_results.csv: Equity gap index +8.11, Distance to electrical service +7.50, Estimated install cost +7.50; Spare electrical capacity −10.50, Adjacent traffic (AADT) −4.52, Jobs within 1 mi −4.08. repo/data/outputs/v3_run/site_results_milestone2_v3.csv: FFX002 51.8 rank 2, FFX004 53.4 rank 1.
+**Evidence.** README.md:77-79 - "City of Fairfax Regional Library ranks #1 at 58.8. / Earned: equity gap index +8.11 pts, short service run +7.50 pts, install cost +7.50 pts. / Forgone: spare electrical capacity −10.50 pts, adjacent traffic −4.52 pts, jobs within 1 mi −4.08 pts." My recomputation from repo/tests/fixture_legacy_v2_site_results.csv: Equity gap index +8.11, Distance to electrical service +7.50, Estimated install cost +7.50; Spare electrical capacity −10.50, Adjacent traffic (AADT) −4.52, Jobs within 1 mi −4.08. repo/data/outputs/v3_run/site_results_milestone2_v3.csv: FFX002 51.8 rank 2, FFX004 53.4 rank 1.
 
 ### H-29 · `incoming/explorer/fcf-3d/tests/test_pipeline.py`
 **Lane:** L10-explorer-python · **Category:** false-guarantee · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The advertised drift gate cannot do what CLAUDE.md and README claim: the test never imports fcf_m2.scoring, it only compares the map's weights against a frozen CSV's own readiness_score column. Reweighting scoring.py without re-freezing leaves the test green.
 
-**Evidence.** tests/test_pipeline.py:94-102 — reads only frames["results"] and row["readiness_score"]; no import of fcf_m2 anywhere in the file (imports at lines 25-33 are fcf3d only). CLAUDE.md:53 "test_attribution_reproduces_model_score guards this"; README.md:82-84 "fails the build if anyone reweights the model without updating the map".
+**Evidence.** tests/test_pipeline.py:94-102 - reads only frames["results"] and row["readiness_score"]; no import of fcf_m2 anywhere in the file (imports at lines 25-33 are fcf3d only). CLAUDE.md:53 "test_attribution_reproduces_model_score guards this"; README.md:82-84 "fails the build if anyone reweights the model without updating the map".
 
 ### H-30 · `incoming/explorer/fcf-3d/fcf3d/build_sites.py`
 **Lane:** L10-explorer-python · **Category:** integration-blocker · **Confirmed:** not yet re-checked by the lead
@@ -280,7 +280,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Two of the four expected disclaimers are entirely absent: the 0/12 High-confidence statement and the "massing is not a design" statement.
 
-**Evidence.** grep -i for `High confidence|0 of 12|massing|not a design|illustrative|conceptual` across web/index.html, app.js, style.css, data/manifest.json returns only one hit: app.js:486 `<p class="callout">Nudge the massing onto the actual parking area you'd` — an instruction, not a disclaimer. Data supports the missing claim: confidence_band tally across sites.geojson is Counter({'Medium confidence': 8, 'Low confidence': 4}), i.e. zero High.
+**Evidence.** grep -i for `High confidence|0 of 12|massing|not a design|illustrative|conceptual` across web/index.html, app.js, style.css, data/manifest.json returns only one hit: app.js:486 `<p class="callout">Nudge the massing onto the actual parking area you'd` - an instruction, not a disclaimer. Data supports the missing claim: confidence_band tally across sites.geojson is Counter({'Medium confidence': 8, 'Low confidence': 4}), i.e. zero High.
 
 ### H-36 · `fcf-3d/web/app.js`
 **Lane:** L11-explorer-web · **Category:** correctness · **Confirmed:** not yet re-checked by the lead
@@ -301,10 +301,10 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The site list is mouse-only, so the app's primary interaction is unreachable by keyboard, and pinning is circularly unreachable.
 
-**Evidence.** app.js:407-425 builds `const li = el('li');` with `li.onclick = () => select(p.site_id);` and `li.oncontextmenu = (e) => { e.preventDefault(); togglePin(p.site_id); };` — no tabindex, no role, no keydown. The only keydown handler is app.js:826-832 (Escape, and `c` which requires `state.selected`, settable only by mouse click). No focus management on #panel (app.js:652), #modal (app.js:798), or #tokenGate (app.js:883); no role=dialog/aria-modal; grep for `:focus` in style.css returns zero hits; #toast has no aria-live (index.html:115).
+**Evidence.** app.js:407-425 builds `const li = el('li');` with `li.onclick = () => select(p.site_id);` and `li.oncontextmenu = (e) => { e.preventDefault(); togglePin(p.site_id); };` - no tabindex, no role, no keydown. The only keydown handler is app.js:826-832 (Escape, and `c` which requires `state.selected`, settable only by mouse click). No focus management on #panel (app.js:652), #modal (app.js:798), or #tokenGate (app.js:883); no role=dialog/aria-modal; grep for `:focus` in style.css returns zero hits; #toast has no aria-live (index.html:115).
 
 ### H-39 · `dashboard/static/footer_log.json`
-**Lane:** L12-binaries · **Category:** contradiction · **Confirmed:** yes — LEDGER FIND-REPO-03
+**Lane:** L12-binaries · **Category:** contradiction · **Confirmed:** yes - LEDGER FIND-REPO-03
 
 **Claim.** scripts/verify.sh's gate 'hygiene: no local absolute paths in code/config' FAILS on the current tree, yet docs/operations/reproduction-guide.md promises ALL REPOSITORY VERIFICATION GATES PASSED. dashboard/static/footer_log.json contains 9 absolute authoring-machine paths under /Users/andyyaro/Documents/, and the gate's pathspec explicitly includes '*.json'.
 
@@ -315,7 +315,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** All four reports/milestone-2/*.docx are stale against their Markdown sources: they still contain the pre-reorganisation directory layout that the .md files have since updated. Proven by regenerating each with scripts/md_to_docx.py into a scratchpad and diffing on (style, text) plus every table cell.
 
-**Evidence.** Future_City_Fellowship_Milestone_2_Final_Report.docx contains `data_contract/v1/` x1, `human_actions/` x8, `repos/matlab_simulink_m2_v3/` x1, `visuals/static_dashboard/` x1, `website_patch_package/` x1, `reports/RISK_REGISTER` x1, `reports/REGULATORY_STAKEHOLDER_MAP` x1, ` tableau/` x1 — while the .md says data/contract/v1/, docs/human-actions/, matlab/, dashboard/static/, docs/operations/website-patch-package/, reports/milestone-2/RISK_REGISTER, reports/milestone-2/REGULATORY_STAKEHOLDER_MAP, dashboard/tableau/ (57 diff lines). Milestone_2_Gap_Closure_Status.docx row A1 still says `(human_actions/client_meeting_2/)` vs md `(docs/human-actions/client_meeting_2/)` (7 diff lines). FINAL_STANDARDS_APPLICATION_MATRIX.docx says `data_contract/v1/standards_register.csv` vs md `data/contract/v1/standards_register.csv`.
+**Evidence.** Future_City_Fellowship_Milestone_2_Final_Report.docx contains `data_contract/v1/` x1, `human_actions/` x8, `repos/matlab_simulink_m2_v3/` x1, `visuals/static_dashboard/` x1, `website_patch_package/` x1, `reports/RISK_REGISTER` x1, `reports/REGULATORY_STAKEHOLDER_MAP` x1, ` tableau/` x1 - while the .md says data/contract/v1/, docs/human-actions/, matlab/, dashboard/static/, docs/operations/website-patch-package/, reports/milestone-2/RISK_REGISTER, reports/milestone-2/REGULATORY_STAKEHOLDER_MAP, dashboard/tableau/ (57 diff lines). Milestone_2_Gap_Closure_Status.docx row A1 still says `(human_actions/client_meeting_2/)` vs md `(docs/human-actions/client_meeting_2/)` (7 diff lines). FINAL_STANDARDS_APPLICATION_MATRIX.docx says `data_contract/v1/standards_register.csv` vs md `data/contract/v1/standards_register.csv`.
 
 ### H-41 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.pdf`
 **Lane:** L12-binaries · **Category:** generated-artifact-drift · **Confirmed:** not yet re-checked by the lead
@@ -327,7 +327,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 ---
 
-## MEDIUM — 66 findings
+## MEDIUM - 66 findings
 
 ### M-01 · `src/fcf_m2/config.py`
 **Lane:** L01-model-core · **Category:** internal-contradiction · **Confirmed:** not yet re-checked by the lead
@@ -341,12 +341,12 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** emissions.avoided_evse_metric hardcodes the $1000/port/yr network fee instead of importing config.ECON['network_fee_usd_per_port_yr'], so changing the ECON value would silently desynchronise the avoided-EVSE metric from the lifecycle-cost model.
 
-**Evidence.** emissions.py:79 `df["avoided_network_fee_usd_yr"] = df["avoided_active_evse_ports"] * 1000.0` — emissions.py imports nothing from ECON (imports at lines 17-27 are CHARGER_EFFICIENCY, DISPLACED_GASOLINE_G_CO2_PER_MI, ENERGY_PER_SESSION_KWH, EV_EFFICIENCY_KWH_PER_MI, GRID_FACTOR_*, LB_TO_KG). config.py:105 `"network_fee_usd_per_port_yr": 1000.0`.
+**Evidence.** emissions.py:79 `df["avoided_network_fee_usd_yr"] = df["avoided_active_evse_ports"] * 1000.0` - emissions.py imports nothing from ECON (imports at lines 17-27 are CHARGER_EFFICIENCY, DISPLACED_GASOLINE_G_CO2_PER_MI, ENERGY_PER_SESSION_KWH, EV_EFFICIENCY_KWH_PER_MI, GRID_FACTOR_*, LB_TO_KG). config.py:105 `"network_fee_usd_per_port_yr": 1000.0`.
 
 ### M-03 · `src/fcf_m2/scoring.py`
 **Lane:** L01-model-core · **Category:** dead-weight-input · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** 35% of feasibility_subscore is weighted on spare_capacity_kw, which is literally 0 for all 12 sites, so that weight contributes exactly zero to every site's score in both modes — the feasibility subscore is effectively driven by only three of its four inputs.
+**Claim.** 35% of feasibility_subscore is weighted on spare_capacity_kw, which is literally 0 for all 12 sites, so that weight contributes exactly zero to every site's score in both modes - the feasibility subscore is effectively driven by only three of its four inputs.
 
 **Evidence.** scoring.py:153-158 `df["feasibility_subscore"] = 100 * (0.35 * df["spare_capacity_kw_n"] + 0.25 * (1 - df["distance_to_service_ft_n"]) + 0.25 * (1 - df["install_cost_est_usd_n"]) + 0.15 * (1 - df["trenching_ft_n"]))`. Verified read-only over data/inputs/real_sites_v2.csv: 12 sites, `spare_capacity_kw` distinct values = ['0']. Corroborated by data/anchors/anchor_set_v1.json note for spare_capacity_kw: "all cohort values 0 (unconfirmed)". minmax() returns all zeros when max==min (scoring.py:61-62) and anchored() returns (0-0)/(200-0)=0.
 
@@ -376,7 +376,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The lifecycle model books only ONE electronics replacement across the entire 2026-2056 (30-year) horizon, at t=10 exactly, despite a 10-year replacement interval constant. This under-counts refresh cost in both OVB and STG and compresses the avoided-overbuild headline that the staged-vs-overbuild argument rests on.
 
-**Evidence.** economics.py:106-109 `# replacement ~year 10 for ports active since baseline` / `if t == ECON["replacement_year_offset"] and ports[year] > 0:` — an equality test, not a modulo. config.py:110 `"replacement_year_offset": 10`. economics.py:26-27 `END_YEAR = 2056; YEARS = list(range(BASELINE_YEAR, END_YEAR + 1))` i.e. t runs 0..30, so t=20 and t=30 refreshes are never charged.
+**Evidence.** economics.py:106-109 `# replacement ~year 10 for ports active since baseline` / `if t == ECON["replacement_year_offset"] and ports[year] > 0:` - an equality test, not a modulo. config.py:110 `"replacement_year_offset": 10`. economics.py:26-27 `END_YEAR = 2056; YEARS = list(range(BASELINE_YEAR, END_YEAR + 1))` i.e. t runs 0..30, so t=20 and t=30 refreshes are never charged.
 
 ### M-08 · `src/fcf_m2/standards.py`
 **Lane:** L01-model-core · **Category:** dead-link · **Confirmed:** not yet re-checked by the lead
@@ -386,84 +386,84 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** standards.py:8 'Editions verified 2026-07-19 (see research/CURRENT_FACTS_SOURCE_REGISTER.md).' Existence check: `research/CURRENT_FACTS_SOURCE_REGISTER.md` -> MISSING; repo-root `ls -la` shows no `research/` directory. The corresponding live document is docs/methodology/current-facts-source-register.md (confirmed present, contains the IM-01 grid-factor row).
 
 ### M-09 · `scripts/build_static_dashboard.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** Chart 01 contradicts itself: the title hard-codes "(Medium confidence)" (a legacy-V2 label) while the per-bar annotations use V3 confidence, which is Low for all 12 sites.
 
-**Evidence.** build_static_dashboard.py:48 `ax.set_title("Site readiness ranking — FFX002 leads at 58.8 (Medium confidence)")`; line 49 annotates with df["data_confidence_level_v3"]. I ran the V3 workflow into scratchpad: data_confidence_v3.csv has {'Low': 12}; FFX002 data_confidence_score_v3 = 33.8. The "Medium" traces to tests/fixture_legacy_v2_site_results.csv row 2 ('53.0,Medium').
+**Evidence.** build_static_dashboard.py:48 `ax.set_title("Site readiness ranking - FFX002 leads at 58.8 (Medium confidence)")`; line 49 annotates with df["data_confidence_level_v3"]. I ran the V3 workflow into scratchpad: data_confidence_v3.csv has {'Low': 12}; FFX002 data_confidence_score_v3 = 33.8. The "Medium" traces to tests/fixture_legacy_v2_site_results.csv row 2 ('53.0,Medium').
 
 ### M-10 · `scripts/build_excel_workbook.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** Two committed-deliverable generators depend on packages declared nowhere in the repo and absent from the venv, so excel/Electric_Data_Milestone_2_Updated.xlsx and the four reports/*.docx cannot be regenerated here.
 
-**Evidence.** build_excel_workbook.py:13 `import openpyxl`; md_to_docx.py:8 `from docx import Document`. pyproject.toml:10-20 declares numpy/pandas/matplotlib/jsonschema plus extras gis/test/presentation — neither package appears; requirements-lock.txt (21 pins) has neither. venv/bin/python -c 'import openpyxl' and 'import docx' both raise ModuleNotFoundError.
+**Evidence.** build_excel_workbook.py:13 `import openpyxl`; md_to_docx.py:8 `from docx import Document`. pyproject.toml:10-20 declares numpy/pandas/matplotlib/jsonschema plus extras gis/test/presentation - neither package appears; requirements-lock.txt (21 pins) has neither. venv/bin/python -c 'import openpyxl' and 'import docx' both raise ModuleNotFoundError.
 
 ### M-11 · `.github/workflows/tests.yml`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** yes — LEDGER FIND-REPO-04/06
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** yes - LEDGER FIND-REPO-04/06
 
 **Claim.** CI's push trigger does not cover the current branch, so pushes to v4-platform run no tests.
 
 **Evidence.** .github/workflows/tests.yml:5 `branches: [main, milestone2-v3-professional-release]`; `git rev-parse --abbrev-ref HEAD` = v4-platform. Only pull_request and workflow_dispatch remain.
 
 ### M-12 · `tests/test_contract_and_integration.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The doc-drift test does not test the committed doc — it compares generate_docs() against itself; only verify.sh (never run by CI) checks docs/WORKFLOW_STEPS.md.
+**Claim.** The doc-drift test does not test the committed doc - it compares generate_docs() against itself; only verify.sh (never run by CI) checks docs/WORKFLOW_STEPS.md.
 
 **Evidence.** tests/test_contract_and_integration.py:135-140: `docs = workflow.generate_docs(); assert f"Step count: **{len(workflow.STEPS)}**" in docs`. scripts/verify.sh:47 is the only check against the file on disk. They currently agree (docs/WORKFLOW_STEPS.md:3 'Step count: **11**', workflow.py:37-49 has 11 STEPS).
 
 ### M-13 · `matlab/src/makeSessionProfiles.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** DiversityFactor is applied to the aggregate request curve but NOT to the sessions table, so the energy_aware strategy silently ignores it. With DiversityFactor < 1, energy_aware.requested_kWh exceeds unmanaged.requested_kWh by 1/DiversityFactor and deferred_kWh compares a scaled request against an unscaled dispatch, making it meaningless.
 
-**Evidence.** makeSessionProfiles.m:180 `evRequest_kW = evRequest_kW * opt.DiversityFactor;` — the sessions table is built at :154-161 BEFORE this line and is never scaled. managedCharging.m:137 `requested_kWh = sum(perVehicle.requested_kWh);` derives from sessions (:232-236), while :144-146 `cumReq = cumtrapz(t_hr, evRequest_kW); ... deferred_kWh = max(max(cumReq - cumEv, [], "omitnan"), 0);` mixes the two bases. Option is exposed all the way up at runScenario.m:56-57.
+**Evidence.** makeSessionProfiles.m:180 `evRequest_kW = evRequest_kW * opt.DiversityFactor;` - the sessions table is built at :154-161 BEFORE this line and is never scaled. managedCharging.m:137 `requested_kWh = sum(perVehicle.requested_kWh);` derives from sessions (:232-236), while :144-146 `cumReq = cumtrapz(t_hr, evRequest_kW); ... deferred_kWh = max(max(cumReq - cumEv, [], "omitnan"), 0);` mixes the two bases. Option is exposed all the way up at runScenario.m:56-57.
 
 ### M-14 · `matlab/src/managedCharging.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** Integration-basis mismatch inside managedCharging: energy_aware accumulates delivered energy as a left-Riemann sum (p*dt) while unmanaged/clamp use trapz and the plotted curve is integrated with cumtrapz. The area under the plotted energy_aware ev_kW curve therefore does not equal the reported delivered_kWh.
 
 **Evidence.** managedCharging.m:265 and :286 `delivered_kWh(idx) = delivered_kWh(idx) + p_kW * dt_hr;` versus :97 `requested_kWh = trapz(t_hr, evRequest_kW);`, :109-110 `requested_kWh = trapz(...); delivered_kWh = trapz(t_hr, ev_kW);`, and :145 `cumEv = cumtrapz(t_hr, ev_kW);`
 
 ### M-15 · `matlab/src/makeSessionProfiles.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The pulse energy-pinning rescale can push instantaneous request power ABOVE the physical charger limit p_kW, inflating peak_ev_kW and peak_unmanaged_kW — both headline metrics — by roughly m/(m-1) where m is the number of covered time steps (~1.4% for a 6-hour charge at the 5-minute default).
+**Claim.** The pulse energy-pinning rescale can push instantaneous request power ABOVE the physical charger limit p_kW, inflating peak_ev_kW and peak_unmanaged_kW - both headline metrics - by roughly m/(m-1) where m is the number of covered time steps (~1.4% for a 6-hour charge at the 5-minute default).
 
-**Evidence.** makeSessionProfiles.m:284-289 `prof = p_kW * (overlap / dt_hr); ... eNow = trapz(t_hr, prof); if eNow > 0 && eTarget_kWh > 0; prof = prof * (eTarget_kWh / eNow); end` — trapz under-counts the two half-edges of a rectangular pulse, so the correction factor is > 1. Feeds peak_unmanaged_kW via runScenario.m:139.
+**Evidence.** makeSessionProfiles.m:284-289 `prof = p_kW * (overlap / dt_hr); ... eNow = trapz(t_hr, prof); if eNow > 0 && eTarget_kWh > 0; prof = prof * (eTarget_kWh / eNow); end` - trapz under-counts the two half-edges of a rectangular pulse, so the correction factor is > 1. Feeds peak_unmanaged_kW via runScenario.m:139.
 
 ### M-16 · `matlab/src/makeSessionProfiles.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The `ports` column is required but never constrains concurrency in the session-based modes — nothing caps the number of simultaneously charging sessions at the number of installed ports. It is used only in the legacy_gaussian presentation mode.
+**Claim.** The `ports` column is required but never constrains concurrency in the session-based modes - nothing caps the number of simultaneously charging sessions at the number of installed ports. It is used only in the legacy_gaussian presentation mode.
 
 **Evidence.** makeSessionProfiles.m:219-222 lists `ports` in requiredFields; its only numeric use is :120 `evRequest_kW = s.ports * s.charger_power_kW * arrivalShape;` inside the `if mode == "legacy_gaussian"` branch opened at :112. The session branch (:121-176) never references s.ports. managedCharging's scheduler (:249-290) likewise has no port-count bound.
 
 ### M-17 · `matlab/src/makeSessionProfiles.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The energy-aware scheduler's documented priority-class tier is inert: priority_class is hard-set to 1 for every session, so the first sort key never discriminates and the scheduler is pure earliest-departure-first.
 
 **Evidence.** makeSessionProfiles.m:157 `ones(nSessions, 1), ...` supplies the priority_class column (named at :161). managedCharging.m:272-274 `[~, order] = sortrows([sessions.priority_class(active), sessions.departure_hr(active), sessions.arrival_hr(active)]);` and the docstring at :215-219 claims sorting "by priority_class (ascending; 1 = highest priority), then departure time".
 
 ### M-18 · `matlab/src/runScenario.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** runScenario's default GuardMode inverts capacityGuard's own fail-closed default, so the default execution path never fail-closes; feasibility mode is only reached if a caller explicitly asks for it, and run_all_scenarios hard-codes planning_illustration with no option to override.
 
 **Evidence.** capacityGuard.m:59 `addParameter(p, "Mode", "feasibility", ...)` versus runScenario.m:46 `addParameter(p, "GuardMode", "planning_illustration", ...)`; run_all_scenarios.m:91 `"GuardMode", "planning_illustration", ...` is a literal with no corresponding addParameter in the batch runner's 7 options (:45-58).
 
 ### M-19 · `matlab/src/capacityGuard.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-02
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-02
 
 **Claim.** A headline number appears in a docstring and does not trace to anything inside matlab/src/: the claim that placeholder is 'the current adapter CSV state for ALL 12 sites'. Nothing in the MATLAB layer establishes a site count; it must be traced to data/contract/v1/ or the adapter.
 
 **Evidence.** capacityGuard.m:12-13 `%       placeholder          - declared placeholder (the current adapter\n%                              CSV state for ALL 12 sites)`. The canonical CSV read by loadScenarios has 120 data rows and 22 columns; the site count is not asserted or checked anywhere in src/.
 
 ### M-20 · `matlab/src/buildSimulinkModel.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** UNCERTAIN (untestable without MATLAB): the sole Simulink-availability gate uses `exist(name,'file') ~= 2`, which does not reliably return 2 for built-in / P-coded functions, so buildSimulinkModel may raise 'Simulink is not available' on a correctly licensed machine. Should be the first thing checked on the licensed run.
 
@@ -479,9 +479,9 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### M-22 · `data/contract/v1/contract_manifest.json`
 **Lane:** L05-data-contract · **Category:** verification-gap · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** RT-10 hash verification checks only the 6 'tables' entries and never the 5 'inputs' entries. Drift in real_sites_v2.csv, the frozen legacy file, field_provenance_v1.csv, anchor_set_v1.json, or legacy_matlab_site_meta.csv is silently undetectable by `make validate`. (I verified all 5 by hand — they PASS today — but the tooling would not catch it tomorrow.)
+**Claim.** RT-10 hash verification checks only the 6 'tables' entries and never the 5 'inputs' entries. Drift in real_sites_v2.csv, the frozen legacy file, field_provenance_v1.csv, anchor_set_v1.json, or legacy_matlab_site_meta.csv is silently undetectable by `make validate`. (I verified all 5 by hand - they PASS today - but the tooling would not catch it tomorrow.)
 
-**Evidence.** src/fcf_m2/contract.py:315-324 verify_hash_chain(): 'for name, expected in manifest["tables"].items():' — iterates tables only; manifest['inputs'] is never read. Docstring line 316: 'RT-10: manifest table hashes match files on disk.' The 5 input digests at contract_manifest.json:11-15 are write-only.
+**Evidence.** src/fcf_m2/contract.py:315-324 verify_hash_chain(): 'for name, expected in manifest["tables"].items():' - iterates tables only; manifest['inputs'] is never read. Docstring line 316: 'RT-10: manifest table hashes match files on disk.' The 5 input digests at contract_manifest.json:11-15 are write-only.
 
 ### M-23 · `data/inputs/legacy_matlab_site_meta.csv`
 **Lane:** L05-data-contract · **Category:** latent-trap · **Confirmed:** not yet re-checked by the lead
@@ -493,14 +493,14 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### M-24 · `data/inputs/real_sites_v2.csv`
 **Lane:** L05-data-contract · **Category:** dead-reference · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** Three files referenced as provenance sources inside real_sites_v2.csv notes do not exist anywhere in the repository — dangling provenance pointers to an external working set.
+**Claim.** Three files referenced as provenance sources inside real_sites_v2.csv notes do not exist anywhere in the repository - dangling provenance pointers to an external working set.
 
 **Evidence.** data/inputs/real_sites_v2.csv notes cells cite 'amenities_0_5mi_v4_osm_reviewed.csv' (rows for PWC001, PWC002, PWC004, FFX001, FFX002, FFX003, FFX004 and others), 'v2c003_model_row_assumptions.csv' (line 8, FFX003), 'v2c007_model_row_assumptions.csv' (line 9, FFX004). A repo-wide find for all three returns nothing.
 
 ### M-25 · `data/provenance/v2_source_confidence_tracker.csv`
 **Lane:** L05-data-contract · **Category:** incomplete-coverage · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** v2_source_confidence_tracker.csv covers only 2 of 12 sites (FFX003, FFX004) and site_coordinate_sources.csv only 6 of 12, yet data/README.md classifies the whole provenance/ directory as 'typed field-level provenance driving data confidence'. Both files are also unhashed and have no programmatic consumer, so they can drift silently. Worse, v2_source_confidence_tracker uses a 10-group field taxonomy incompatible with field_provenance_v1's 7-group taxonomy — the two provenance systems cannot be joined.
+**Claim.** v2_source_confidence_tracker.csv covers only 2 of 12 sites (FFX003, FFX004) and site_coordinate_sources.csv only 6 of 12, yet data/README.md classifies the whole provenance/ directory as 'typed field-level provenance driving data confidence'. Both files are also unhashed and have no programmatic consumer, so they can drift silently. Worse, v2_source_confidence_tracker uses a 10-group field taxonomy incompatible with field_provenance_v1's 7-group taxonomy - the two provenance systems cannot be joined.
 
 **Evidence.** v2_source_confidence_tracker.csv: 20 data rows, distinct site_ids = ['FFX003','FFX004'] only. site_coordinate_sources.csv: 6 data rows, distinct site_ids = ['FFX001','FFX002','PWC001','PWC002','PWC003','PWC004'] only. data/README.md:13 classifies 'provenance/' as 'tracked reference | yes | typed field-level provenance driving data confidence'. Taxonomy mismatch: tracker groups = address_and_public_access, coordinates, hours_and_parking, nearby_EV_supply, households_jobs_traffic, amenities, equity, EV_adoption, visitors_and_employees, electrical_and_site_layout; field_provenance groups = electrical_service, safety_review_fields, site_use_and_demand, address_and_public_access, coordinates, parking_and_layout, equity_and_context. Only 2 of 10 names shared. Neither file appears in contract_manifest.json.
 
@@ -509,12 +509,12 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** PWC004 (Chinn Park Regional Library) is documented in a notes cell as closed for renovation, yet it ranks 7th and carries a full 10-row scenario decade in the contract as if operating. Nothing downstream flags the operating-status caveat.
 
-**Evidence.** data/inputs/real_sites_v2.csv:5 notes: '...official library page currently lists Chinn Park Library as closed for renovation so operating status remains a caveat; hours and parking remain future planning assumptions.' PWC004 nonetheless appears with 10 rows in scenario_table.csv, base_readiness_score 48.6 / base_rank 7 in the frozen legacy file, and 'Tier 2 — promising candidate, refine data' in tbl_readiness_confidence.csv:8. No column in scenario_table.csv or site_table.csv encodes operating status.
+**Evidence.** data/inputs/real_sites_v2.csv:5 notes: '...official library page currently lists Chinn Park Library as closed for renovation so operating status remains a caveat; hours and parking remain future planning assumptions.' PWC004 nonetheless appears with 10 rows in scenario_table.csv, base_readiness_score 48.6 / base_rank 7 in the frozen legacy file, and 'Tier 2 - promising candidate, refine data' in tbl_readiness_confidence.csv:8. No column in scenario_table.csv or site_table.csv encodes operating status.
 
 ### M-27 · `data/contract/v1/standards_register.csv`
 **Lane:** L05-data-contract · **Category:** data-not-differentiated · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The standards register is entirely site-invariant — the identical 37-row block is replicated for all 12 sites with no per-site variation. PWC002, the only enclosed garage, gets exactly the same rows as every open-lot library, despite the legacy risk file asserting garage-specific fire/AHJ review risk for it. The 'per-site standards applicability' framing is nominal.
+**Claim.** The standards register is entirely site-invariant - the identical 37-row block is replicated for all 12 sites with no per-site variation. PWC002, the only enclosed garage, gets exactly the same rows as every open-lot library, despite the legacy risk file asserting garage-specific fire/AHJ review risk for it. The 'per-site standards applicability' framing is nominal.
 
 **Evidence.** standards_register.csv: 444 data rows, every site_id has exactly 37 rows (verified by Counter). Only 9 distinct standard_ids, and requirement/evidence_required/authority/open_ahj_question strings are identical across sites for a given (standard_id, stage). Meanwhile legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv:8 gives PWC002 electrical_risk_reason '...garage or enclosed-structure context adds fire/AHJ review risk...' and electrical_data_needed_next '...confirm garage fire/AHJ requirements', and site_table.csv:4 sets garage_enclosed=1.0 for PWC002 alone. No corresponding garage-specific row exists in the register.
 
@@ -526,25 +526,25 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** cmp reports 'differ: char 117, line 1'. field_provenance_v1.csv = 11470 bytes, 85 CR bytes (CRLF); source_provenance.csv = 11385 bytes, 0 CR bytes (LF). 11470-11385 = 85 = line count. `diff <(tr -d '\r' < field_provenance_v1.csv) source_provenance.csv` → identical. Digests: 9a07aa1e0dc4bca43e160459db7a0985bc99a08454fe51437481bb2f7af4d482 (input) vs 2d346861cf6216fb9b1f5c4500f8fe30c65411204d9c18fd1bbfd047a0efd875 (table). field_provenance_v1.csv is the only CRLF file in the whole data/ tree.
 
 ### M-29 · `README.md`
-**Lane:** L06-root-ci · **Category:** ci-verify-divergence · **Confirmed:** yes — LEDGER FIND-NUM-01/02, FIND-REPO-08
+**Lane:** L06-root-ci · **Category:** ci-verify-divergence · **Confirmed:** yes - LEDGER FIND-NUM-01/02, FIND-REPO-08
 
-**Claim.** README says 'CI runs the same gates on every push and pull request'. CI omits four of verify.sh's ten gates (docs step-count, dashboard 9-PNG + footer QA, /Users/andyyaro local-path scan, 25 MB size limit) — three of which the README names in the immediately preceding sentence — and the push trigger is restricted to two branches, so the active v4-platform branch gets no push CI.
+**Claim.** README says 'CI runs the same gates on every push and pull request'. CI omits four of verify.sh's ten gates (docs step-count, dashboard 9-PNG + footer QA, /Users/andyyaro local-path scan, 25 MB size limit) - three of which the README names in the immediately preceding sentence - and the push trigger is restricted to two branches, so the active v4-platform branch gets no push CI.
 
 **Evidence.** README.md:116-120 lists 'footer QA on every dashboard visual, secret and local-path scans, size limits' then asserts 'CI runs the same gates on every push and pull request'. .github/workflows/tests.yml:3-7 `on: push: branches: [main, milestone2-v3-professional-release]`; tests.yml has no equivalent of scripts/verify.sh:46-47, 49-54, 59-60, 62-63. Current branch is v4-platform.
 
 ### M-30 · `requirements-lock.txt`
-**Lane:** L06-root-ci · **Category:** lock-ci-incoherence · **Confirmed:** yes — LEDGER FIND-REPO-05
+**Lane:** L06-root-ci · **Category:** lock-ci-incoherence · **Confirmed:** yes - LEDGER FIND-REPO-05
 
 **Claim.** requirements-lock.txt claims to record the environment used for all V3 verification (Python 3.14.6 arm64) but CI pins Python 3.12 on ubuntu-latest and never applies the lock; only make setup uses it as a constraints file. The two supported install paths can resolve different dependency sets, and the lock is never exercised by CI.
 
 **Evidence.** requirements-lock.txt:1 '# Lock generated 2026-07-19 from Python 3.14.6 arm64 venv used for all V3 verification runs'; .github/workflows/tests.yml:21 'python-version: "3.12"', tests.yml:12 'runs-on: ubuntu-latest', tests.yml:25 'pip install -e .[test]' (no -c); Makefile:6 'venv/bin/pip install -e ".[test]" -c requirements-lock.txt'; pyproject.toml:9 'requires-python = ">=3.11"'; README.md:85 'Python 3.11+ (verified on 3.12/3.14)'.
 
 ### M-31 · `README.md`
-**Lane:** L06-root-ci · **Category:** internal-contradiction · **Confirmed:** yes — LEDGER FIND-NUM-01/02, FIND-REPO-08
+**Lane:** L06-root-ci · **Category:** internal-contradiction · **Confirmed:** yes - LEDGER FIND-NUM-01/02, FIND-REPO-08
 
 **Claim.** README's headline section is labelled 'canonical contract v1.0.0' but attributes FFX002 a readiness score of 58.8 and 'Medium confidence'; neither is in the contract. The contract has no score column and its data_confidence is Low in all 120 rows, and the README's own blockquote says 0 of 12 sites reach High confidence.
 
-**Evidence.** README.md:34 '## Headline results (canonical contract v1.0.0, screening values)'; README.md:45-46 'Top-ranked site: **FFX002 — City of Fairfax Regional Library (58.8, Medium confidence)**'. data/contract/v1/scenario_table.csv: Counter of data_confidence = {'Low': 120}; no readiness-score column in scenario_table.csv or site_table.csv. 58.8/'medium' originate in data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv:2 and tests/fixture_legacy_v2_right_sizing.csv:2; V3 typed confidence for FFX002 is Low in dashboard/tableau/patch_package/tbl_readiness_confidence.csv:2.
+**Evidence.** README.md:34 '## Headline results (canonical contract v1.0.0, screening values)'; README.md:45-46 'Top-ranked site: **FFX002 - City of Fairfax Regional Library (58.8, Medium confidence)**'. data/contract/v1/scenario_table.csv: Counter of data_confidence = {'Low': 120}; no readiness-score column in scenario_table.csv or site_table.csv. 58.8/'medium' originate in data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv:2 and tests/fixture_legacy_v2_right_sizing.csv:2; V3 typed confidence for FFX002 is Low in dashboard/tableau/patch_package/tbl_readiness_confidence.csv:2.
 
 ### M-32 · `Makefile`
 **Lane:** L06-root-ci · **Category:** documented-behavior-mismatch · **Confirmed:** not yet re-checked by the lead
@@ -591,7 +591,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### M-38 · `docs/human-actions/client_meeting_2/02_CLIENT_PREREAD.md`
 **Lane:** L08-human-actions · **Category:** horizon-convention · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** Horizon-convention drift in the two client-facing documents: relative '10/20/30-year' and '10-yr' labels are used without any legacy_v2 marking. The underlying numbers are correct and trace to the contract's plus10/2036 rows, so this is labelling drift rather than a wrong figure — but canon is 2026/2036/2046/2056.
+**Claim.** Horizon-convention drift in the two client-facing documents: relative '10/20/30-year' and '10-yr' labels are used without any legacy_v2 marking. The underlying numbers are correct and trace to the contract's plus10/2036 rows, so this is labelling drift rather than a wrong figure - but canon is 2026/2036/2046/2056.
 
 **Evidence.** docs/human-actions/client_meeting_2/02_CLIENT_PREREAD.md:9 `models demand and capacity at 10/20/30-year horizons`; :15 column header `| 10-yr cost screen (NPV) |`. docs/human-actions/client_meeting_2/04_ALTERNATIVES_BRIEFING.md uses `10-yr cost order` at lines 5, 11, 19, 27, 35, 43, 51, 59 (8 occurrences). Canon from data/contract/v1/contract_manifest.json `"conventions": {"baseline_year": 2026, "horizons": [2036, 2046, 2056]}`; scenario_table.csv horizon_label values are now/plus10/plus20/plus30. The quoted NPVs do trace: FFX002 ~$134k = FFX002_2036_* lifecycle_cost_npv_usd 133641.0; FFX004 ~$166k = 166275.0; PWC006 ~$148k = 147663.0. Contrast the correct handling at docs/human-actions/fellowship_confirmation/02_CONTINGENCY_SUMMARY.md:19-21 (`Keep the current consistent 2026 baseline + 2036/2046/2056 set`).
 
@@ -607,24 +607,24 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The AHJ proposed-standard feedback sheet uses a 3-module numbering (M1/M2/M3) that contradicts the concept document's 7 modules. Its Q4 asks about 'M2's fail-safe on comms loss' but that content is Module 5 in the concept doc. An AHJ handed both documents reads two incompatible numbering schemes.
 
-**Evidence.** docs/human-actions/ahj_fire_marshal/05_PROPOSED_STANDARD_FEEDBACK_SHEET.md:11-13 lists only `M1 — Emergency access & disconnect`, `M2 — Expandability & right-sizing documentation: pathway capacity declaration; utilization-monitoring capability; documented expansion triggers; load-management fail-safe behavior on communications loss`, `M3 — Accessibility & site conditions cross-references`; :20 asks `Does M2's "fail-safe on comms loss" behavior matter to your office`. But docs/standards/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.md defines seven modules: :23 Module 1 Emergency access and disconnect; :33 Module 2 Expandability and right-sizing documentation; :42 Module 3 Accessibility and site-condition cross-references; :51 Module 4 Monitoring and expansion triggers; :59 Module 5 Managed-charging fail-safe (`Comms-loss behavior | Disconnect network link; observe EVSE output settles to documented default-safe profile`); :67 Module 6 Commissioning; :76 Module 7 Materials/take-back. The sheet's M2 bundles concept Modules 2+4+5.
+**Evidence.** docs/human-actions/ahj_fire_marshal/05_PROPOSED_STANDARD_FEEDBACK_SHEET.md:11-13 lists only `M1 - Emergency access & disconnect`, `M2 - Expandability & right-sizing documentation: pathway capacity declaration; utilization-monitoring capability; documented expansion triggers; load-management fail-safe behavior on communications loss`, `M3 - Accessibility & site conditions cross-references`; :20 asks `Does M2's "fail-safe on comms loss" behavior matter to your office`. But docs/standards/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.md defines seven modules: :23 Module 1 Emergency access and disconnect; :33 Module 2 Expandability and right-sizing documentation; :42 Module 3 Accessibility and site-condition cross-references; :51 Module 4 Monitoring and expansion triggers; :59 Module 5 Managed-charging fail-safe (`Comms-loss behavior | Disconnect network link; observe EVSE output settles to documented default-safe profile`); :67 Module 6 Commissioning; :76 Module 7 Materials/take-back. The sheet's M2 bundles concept Modules 2+4+5.
 
 ### M-41 · `docs/human-actions/utility_facility_data/03_TRACKING_REGISTER.md`
 **Lane:** L08-human-actions · **Category:** schema-gap · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The tracking register does not cover every field the facility-manager letter requests, and two requested quantities carry no units. Phase 4's ingestion schema and Phase 5's NFC capture form must resolve both gaps because the source documents do not.
 
-**Evidence.** docs/human-actions/utility_facility_data/02_DATA_REQUEST_FACILITY_MANAGERS.md:28 requests item 9 `Any known site constraints (drainage, easements, planned repaving — repaving is an opportunity to lay conduit cheaply)` but docs/human-actions/utility_facility_data/03_TRACKING_REGISTER.md has no corresponding row — its 11 rows are Service rating (V/A/kVA), Interval load data 12+ mo, Spare capacity at peak, Transformer/feeder info, Service distance to charging area, Panel details / spare positions, Planned shutdowns/outages, Parking counts (incl. ADA), Visitor/activity counts, Fleet duty cycles (if any), Planned capital projects (lines 9-19, repeated at 25-35 and 41-51). Unitless requests: :19 item 2 `Spare breaker positions and spare panel capacity` (capacity units unstated) and :21 item 4 `Approximate distance from the electrical room/service to the candidate parking rows` (ft/m unstated). By contrast :20 item 3 does specify units (`kWh and peak demand kW by month`) and :27 item 8 specifies `daily mileage, dwell windows`.
+**Evidence.** docs/human-actions/utility_facility_data/02_DATA_REQUEST_FACILITY_MANAGERS.md:28 requests item 9 `Any known site constraints (drainage, easements, planned repaving - repaving is an opportunity to lay conduit cheaply)` but docs/human-actions/utility_facility_data/03_TRACKING_REGISTER.md has no corresponding row - its 11 rows are Service rating (V/A/kVA), Interval load data 12+ mo, Spare capacity at peak, Transformer/feeder info, Service distance to charging area, Panel details / spare positions, Planned shutdowns/outages, Parking counts (incl. ADA), Visitor/activity counts, Fleet duty cycles (if any), Planned capital projects (lines 9-19, repeated at 25-35 and 41-51). Unitless requests: :19 item 2 `Spare breaker positions and spare panel capacity` (capacity units unstated) and :21 item 4 `Approximate distance from the electrical room/service to the candidate parking rows` (ft/m unstated). By contrast :20 item 3 does specify units (`kWh and peak demand kW by month`) and :27 item 8 specifies `daily mileage, dwell windows`.
 
 ### M-42 · `docs/human-actions/public_engagement/08_STAKEHOLDER_CONTACT_MAP.md`
 **Lane:** L08-human-actions · **Category:** consent-not-obtained · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** No facility manager has been identified, contacted, or granted any permission at any of the three top sites. Any Phase-5 artifact that presents charger placement as authorised would directly contradict three files in this lane.
 
-**Evidence.** docs/human-actions/public_engagement/08_STAKEHOLDER_CONTACT_MAP.md:15-17 — all three facility-manager rows read `[TO BE IDENTIFIED]` with Status `Placeholder` (FFX002 City of Fairfax Regional Library; FFX004 Fairfax County Government Center; PWC006 Bull Run Library `[TO BE IDENTIFIED — route via [client contact]/PWC facilities]`). docs/human-actions/utility_facility_data/03_TRACKING_REGISTER.md — all 33 rows (11 fields x 3 sites) are `not_requested`; :53 `Last updated: 2026-07-19 (creation; no requests sent)`. docs/human-actions/utility_facility_data/01_DATA_REQUEST_DOMINION.md:5 `a facility-owner authorization may be required for account-level data`. docs/human-actions/utility_facility_data/02_DATA_REQUEST_FACILITY_MANAGERS.md:5 `Nothing has been sent.`
+**Evidence.** docs/human-actions/public_engagement/08_STAKEHOLDER_CONTACT_MAP.md:15-17 - all three facility-manager rows read `[TO BE IDENTIFIED]` with Status `Placeholder` (FFX002 City of Fairfax Regional Library; FFX004 Fairfax County Government Center; PWC006 Bull Run Library `[TO BE IDENTIFIED - route via [client contact]/PWC facilities]`). docs/human-actions/utility_facility_data/03_TRACKING_REGISTER.md - all 33 rows (11 fields x 3 sites) are `not_requested`; :53 `Last updated: 2026-07-19 (creation; no requests sent)`. docs/human-actions/utility_facility_data/01_DATA_REQUEST_DOMINION.md:5 `a facility-owner authorization may be required for account-level data`. docs/human-actions/utility_facility_data/02_DATA_REQUEST_FACILITY_MANAGERS.md:5 `Nothing has been sent.`
 
 ### M-43 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md`
-**Lane:** L09-deliverables · **Category:** claim-contradicted-by-data · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L09-deliverables · **Category:** claim-contradicted-by-data · **Confirmed:** yes - LEDGER FIND-NUM-01
 
 **Claim.** 'Even peak-window P90 waits sit under the 10-minute target at every top site' is true only because every P90 column is zero; the contract contains 21 rows with peak_wait_minutes > 10, up to 215.35 min, plus 5 blank peak-wait cells all at PWC002.
 
@@ -635,45 +635,45 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The offline-open QA checklist points at presentation/static_visuals/, a directory that does not exist anywhere in the repository, and the surrounding text contradicts presentation/README.md's 'single source, no duplicates' rule.
 
-**Evidence.** Timing_Runbook.md:65 '- [ ] Open all 11 files in `static_visuals/` directly — each PNG opens offline'. `find . -name "static_visuals*"` over the repo returns zero matches. The count 11 matches dashboard/static/ (9 PNGs + footer_log.json + STATIC_DASHBOARD.pdf). Runbook:62 says 'Copy the whole `presentation/` folder'; Final_Report.md:124 says 'self-contained static visuals (`presentation/`)'; but presentation/ contains only assets/10_mcda_provisional.png, and presentation/README.md:15-16 states 'The nine shared data visuals live in `dashboard/static/` — single source, no duplicates.'
+**Evidence.** Timing_Runbook.md:65 '- [ ] Open all 11 files in `static_visuals/` directly - each PNG opens offline'. `find . -name "static_visuals*"` over the repo returns zero matches. The count 11 matches dashboard/static/ (9 PNGs + footer_log.json + STATIC_DASHBOARD.pdf). Runbook:62 says 'Copy the whole `presentation/` folder'; Final_Report.md:124 says 'self-contained static visuals (`presentation/`)'; but presentation/ contains only assets/10_mcda_provisional.png, and presentation/README.md:15-16 states 'The nine shared data visuals live in `dashboard/static/` - single source, no duplicates.'
 
 ### M-45 · `dashboard/static/footer_log.json`
-**Lane:** L09-deliverables · **Category:** absolute-local-paths · **Confirmed:** yes — LEDGER FIND-REPO-03
+**Lane:** L09-deliverables · **Category:** absolute-local-paths · **Confirmed:** yes - LEDGER FIND-REPO-03
 
 **Claim.** All nine entries of the tracked footer audit log carry absolute paths on the author's local machine, pointing at a directory tree that does not exist in the repo.
 
 **Evidence.** dashboard/static/footer_log.json lines 7, 14, 21, 28, 35, 42, 49, 56, 59: "file": "/Users/andyyaro/Documents/Milestone 2 Gaps Addressing/Milestone_2_Full_Implementation/visuals/static_dashboard/<name>.png". The verify gate still passes because src/fcf_m2/visuals.py:76 matches on Path(e['file']).name only. No secrets, tokens, AWS account IDs or keys were found anywhere in this lane.
 
 ### M-46 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md`
-**Lane:** L09-deliverables · **Category:** dead-reference · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L09-deliverables · **Category:** dead-reference · **Confirmed:** yes - LEDGER FIND-NUM-01
 
 **Claim.** The Final Report's integrity footer cites two manifests that do not exist in the tree, and the document it says it supersedes is also absent.
 
-**Evidence.** Final_Report.md:156 'Full manifests: `00_IMPLEMENTATION_MANIFEST.md`, `verification/`.' Neither exists (checked at repo root and by find). Final_Report.md:8 'Supersedes: `Future_City_Fellowship_Milestone_2_Phase_Report.md` (July 2026) — that report remains the authoritative record of the Phase 2 build' — file not present. Separately, Gap_Closure_Status.md:46,69 cite lifecycle_costs.csv and :64 cites avoided_evse_metric.csv as contract evidence; both live at data/outputs/v3_run/, not data/contract/v1/. dashboard/README.md:8 names 'verify.sh'; actual path is scripts/verify.sh (the footer-gate claim itself is true — scripts/verify.sh:49-53).
+**Evidence.** Final_Report.md:156 'Full manifests: `00_IMPLEMENTATION_MANIFEST.md`, `verification/`.' Neither exists (checked at repo root and by find). Final_Report.md:8 'Supersedes: `Future_City_Fellowship_Milestone_2_Phase_Report.md` (July 2026) - that report remains the authoritative record of the Phase 2 build' - file not present. Separately, Gap_Closure_Status.md:46,69 cite lifecycle_costs.csv and :64 cites avoided_evse_metric.csv as contract evidence; both live at data/outputs/v3_run/, not data/contract/v1/. dashboard/README.md:8 names 'verify.sh'; actual path is scripts/verify.sh (the footer-gate claim itself is true - scripts/verify.sh:49-53).
 
 ### M-47 · `dashboard/tableau/TABLEAU_IMPLEMENTATION_BLOCKER.md`
 **Lane:** L09-deliverables · **Category:** tableau-capability-boundary · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The Tableau build recipe requires stories, reference lines, dashboard filter cards, cross-file joins and top-N sets; 5 of its 12 specified items are NOT-BUILDABLE against the stated capability boundary, and the recipe is internally inconsistent in four separate places.
 
-**Evidence.** TABLEAU_IMPLEMENTATION_BLOCKER.md:30 'join nothing on names — join on `site_id`' (joins); :39 'reference line y=48 "pathway ceiling"'; :44 'reference line 10 min'; :46 'Map — lat/lon from sites dimension, size by ports_pathway, color top-3' (needs a join for ports_pathway_capacity + a set/group for top-3); :48-49 'filters kept minimal (single horizon-year filter, applied to worksheets 3–5 only)' (dashboard filter card/action — and worksheet 3 is not on the dashboard, which lists 'worksheets 1/2/4/5 + map'); :49-50 'Story: 8 points in the order of the static dashboard files 01→09' (stories — and 01→09 is nine files, not eight); :53 'every number matches `tbl_canonical_scenarios.csv`' (that file's 48 columns contain no readiness_score, no wait percentiles and no portfolio NPVs). BUILDABLE as written: worksheets 1, 2, 4, 5 and the mandatory caption rule.
+**Evidence.** TABLEAU_IMPLEMENTATION_BLOCKER.md:30 'join nothing on names - join on `site_id`' (joins); :39 'reference line y=48 "pathway ceiling"'; :44 'reference line 10 min'; :46 'Map - lat/lon from sites dimension, size by ports_pathway, color top-3' (needs a join for ports_pathway_capacity + a set/group for top-3); :48-49 'filters kept minimal (single horizon-year filter, applied to worksheets 3–5 only)' (dashboard filter card/action - and worksheet 3 is not on the dashboard, which lists 'worksheets 1/2/4/5 + map'); :49-50 'Story: 8 points in the order of the static dashboard files 01→09' (stories - and 01→09 is nine files, not eight); :53 'every number matches `tbl_canonical_scenarios.csv`' (that file's 48 columns contain no readiness_score, no wait percentiles and no portfolio NPVs). BUILDABLE as written: worksheets 1, 2, 4, 5 and the mandatory caption rule.
 
 ### M-48 · `reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md`
 **Lane:** L09-deliverables · **Category:** egrid-factor · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** 590.2 survives in two report-tier documents; both occurrences are explicit correction notes with 596.3 asserted as operative, so nothing computes from it, but the lane rule says it must survive nowhere.
 
-**Evidence.** ENVIRONMENT_AND_RESILIENCE.md:22 'Correction note: the research package (EX10) carried ≈590.2; the implementation run verified EPA's published SRVC CO2e total output rate as 596.326 lb/MWh. 596.3 with vintage label is the value used everywhere in this implementation.' Final_Report.md:27 '596.3 lb CO2e/MWh, accessed 2026-07-19 — the research package's 590.2 figure was superseded by direct EPA verification'. Repo-wide, 590.2 also appears at CHANGELOG.md:24 and docs/methodology/current-facts-source-register.md:7 (both correction notes) and at docs/operations/v4-program/LEDGER.md:139 and AWS_INVENTORY.md:140 (both saying it is absent from the live site). 596.3 is consistent everywhere: grid_factor_value='596.3' on all 120 contract rows, plus 13 prose/config occurrences.
+**Evidence.** ENVIRONMENT_AND_RESILIENCE.md:22 'Correction note: the research package (EX10) carried ≈590.2; the implementation run verified EPA's published SRVC CO2e total output rate as 596.326 lb/MWh. 596.3 with vintage label is the value used everywhere in this implementation.' Final_Report.md:27 '596.3 lb CO2e/MWh, accessed 2026-07-19 - the research package's 590.2 figure was superseded by direct EPA verification'. Repo-wide, 590.2 also appears at CHANGELOG.md:24 and docs/methodology/current-facts-source-register.md:7 (both correction notes) and at docs/operations/v4-program/LEDGER.md:139 and AWS_INVENTORY.md:140 (both saying it is absent from the live site). 596.3 is consistent everywhere: grid_factor_value='596.3' on all 120 contract rows, plus 13 prose/config occurrences.
 
 ### M-49 · `presentation/deck/Future_City_Fellowship_Milestone_2_Speaker_Notes.md`
 **Lane:** L09-deliverables · **Category:** internal-contradiction · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The proposed standard is described as having three modules in the speaker notes and seven test modules in the Final Report and Gap Closure status.
 
-**Evidence.** Speaker_Notes.md:88 'Proposed standard: say the label exactly — "a fellowship design concept": *Municipal EV Charging Site Readiness and Emergency Access Standard*, three modules.' Final_Report.md:105 'defines seven test modules (emergency access/disconnect; expandability/right-sizing documentation; accessibility cross-references; monitoring/triggers; managed-charging fail-safe; commissioning evidence; materials/end-of-life) with three conformance levels.' Gap_Closure_Status.md:53 (C7) 'Seven test modules, conformance levels, intervals'. ENVIRONMENT_AND_RESILIENCE.md:44 cites 'proposed-standard Module 7'.
+**Evidence.** Speaker_Notes.md:88 'Proposed standard: say the label exactly - "a fellowship design concept": *Municipal EV Charging Site Readiness and Emergency Access Standard*, three modules.' Final_Report.md:105 'defines seven test modules (emergency access/disconnect; expandability/right-sizing documentation; accessibility cross-references; monitoring/triggers; managed-charging fail-safe; commissioning evidence; materials/end-of-life) with three conformance levels.' Gap_Closure_Status.md:53 (C7) 'Seven test modules, conformance levels, intervals'. ENVIRONMENT_AND_RESILIENCE.md:44 cites 'proposed-standard Module 7'.
 
 ### M-50 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md`
-**Lane:** L09-deliverables · **Category:** horizon-convention · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L09-deliverables · **Category:** horizon-convention · **Confirmed:** yes - LEDGER FIND-NUM-01
 
 **Claim.** Three prose instances use 10/20/30-year or bare 2050 without canonical-year pairing and without a legacy_v2 label; a fourth uses 'now' informally for the 2026 baseline.
 
@@ -698,12 +698,12 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** 15 of the 46 collected tests silently skip unless FCF_REPO resolves to a real directory, including the load-bearing attribution test. The default path is machine-specific.
 
-**Evidence.** tests/test_pipeline.py:35-38 — REPO = os.environ.get("FCF_REPO", os.path.expanduser("~/fcf/Future-City-Fellowship--main-2")); needs_repo = pytest.mark.skipif(not os.path.isdir(REPO), reason=...). grep -c "@needs_repo" = 15.
+**Evidence.** tests/test_pipeline.py:35-38 - REPO = os.environ.get("FCF_REPO", os.path.expanduser("~/fcf/Future-City-Fellowship--main-2")); needs_repo = pytest.mark.skipif(not os.path.isdir(REPO), reason=...). grep -c "@needs_repo" = 15.
 
 ### M-54 · `incoming/explorer/fcf-3d/fcf3d/build_sites.py`
 **Lane:** L10-explorer-python · **Category:** dead-code · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The readiness_conf source (tbl_readiness_confidence.csv) is resolved and loaded into a DataFrame but never consumed by build(); it only inflates the manifest sources block. This is also the likely origin of README's "seven tables" undercount — the code resolves eight.
+**Claim.** The readiness_conf source (tbl_readiness_confidence.csv) is resolved and loaded into a DataFrame but never consumed by build(); it only inflates the manifest sources block. This is also the likely origin of README's "seven tables" undercount - the code resolves eight.
 
 **Evidence.** build_sites.py:55 "readiness_conf": "dashboard/tableau/patch_package/tbl_readiness_confidence.csv"; frames["readiness_conf"] appears nowhere in build() (lines 338-538). build_sites.py docstring lines 11-18 lists only 7 source tables, omitting readiness_conf. README.md:66-67 "It joins seven frozen model tables on `site_id`". The shipped web/data/manifest.json sources block lists 8 entries.
 
@@ -719,7 +719,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The documented file:// fallback via sites.inline.js cannot work, and app.js contradicts itself about it 14 lines apart.
 
-**Evidence.** app.js:87-88 comment: "Falls back to the inlined copy so the app also runs straight off the filesystem with no web server." But index.html:118 is `<script src="app.js" type="module"></script>` — module scripts are blocked over file://, so app.js never executes and the `await import('./data/sites.inline.js')` at app.js:97 is blocked identically. No `<script>` tag in index.html loads sites.inline.js (grep for `inline` in index.html: no hits), so `window.__FCF_SITES__` at app.js:94 is never set independently. app.js:101-104 then says the opposite and correct thing: "serve this directory (python -m http.server 8080) rather than opening the file directly."
+**Evidence.** app.js:87-88 comment: "Falls back to the inlined copy so the app also runs straight off the filesystem with no web server." But index.html:118 is `<script src="app.js" type="module"></script>` - module scripts are blocked over file://, so app.js never executes and the `await import('./data/sites.inline.js')` at app.js:97 is blocked identically. No `<script>` tag in index.html loads sites.inline.js (grep for `inline` in index.html: no hits), so `window.__FCF_SITES__` at app.js:94 is never set independently. app.js:101-104 then says the opposite and correct thing: "serve this directory (python -m http.server 8080) rather than opening the file directly."
 
 ### M-57 · `fcf-3d/web/data/sites.geojson`
 **Lane:** L11-explorer-web · **Category:** spec-conformance · **Confirmed:** not yet re-checked by the lead
@@ -747,7 +747,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Google Photorealistic 3D Tiles is instantiated without the onlyUsingWithGoogleGeocoder acknowledgement while the geocoder is explicitly disabled.
 
-**Evidence.** app.js:208 `state.layers.photoreal = await Cesium.createGooglePhotorealistic3DTileset();` — zero arguments. Cesium ref-doc for createGooglePhotorealistic3DTileset(apiOptions, tilesetOptions) states a one-time warning is displayed unless the caller confirms "that this tileset will only be used with the Google geocoder". app.js:156 sets `geocoder: false` in the Viewer options. (The zero-argument call itself is still valid API — the 1.125 deprecation / 1.126 removal affected only the positional createGooglePhotorealistic3DTileset(key) form.)
+**Evidence.** app.js:208 `state.layers.photoreal = await Cesium.createGooglePhotorealistic3DTileset();` - zero arguments. Cesium ref-doc for createGooglePhotorealistic3DTileset(apiOptions, tilesetOptions) states a one-time warning is displayed unless the caller confirms "that this tileset will only be used with the Google geocoder". app.js:156 sets `geocoder: false` in the Viewer options. (The zero-argument call itself is still valid API - the 1.125 deprecation / 1.126 removal affected only the positional createGooglePhotorealistic3DTileset(key) form.)
 
 ### M-61 · `fcf-3d/.gitignore`
 **Lane:** L11-explorer-web · **Category:** build-integration · **Confirmed:** not yet re-checked by the lead
@@ -759,7 +759,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### M-62 · `reports/milestone-2/FINAL_STANDARDS_APPLICATION_MATRIX.docx`
 **Lane:** L12-binaries · **Category:** unreproducible-artifact · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** FINAL_STANDARDS_APPLICATION_MATRIX.docx and PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.docx were NOT produced by the tracked scripts/md_to_docx.py and cannot be reproduced by it — regenerating them would silently restyle the documents.
+**Claim.** FINAL_STANDARDS_APPLICATION_MATRIX.docx and PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.docx were NOT produced by the tracked scripts/md_to_docx.py and cannot be reproduced by it - regenerating them would silently restyle the documents.
 
 **Evidence.** Committed docx use styles Heading 1/2/3 and table style `Table Grid`. scripts/md_to_docx.py:68-76 maps `# `->add_heading(level=0) (=Title), `## `->level 1, `### `->level 2, and line 57 hardcodes `table.style = "Light Grid Accent 3"`; line 87 renders `---` as `doc.add_paragraph("_" * 60)` where the committed files have empty paragraphs. Regeneration diff: 97 and 96 lines respectively, dominated by these three systematic shifts. Their .md sources are also in a different directory: docs/standards/, not reports/milestone-2/.
 
@@ -794,19 +794,19 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 ---
 
-## LOW — 48 findings
+## LOW - 48 findings
 
 ### L-01 · `src/fcf_m2.egg-info/SOURCES.txt`
 **Lane:** L01-model-core · **Category:** stale-generated-artifact · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The committed egg-info build metadata is stale relative to the tree it was generated from: SOURCES.txt omits tests/conftest.py even though conftest.py was committed in the same commit as the egg-info. All five egg-info files are tracked in git while .gitignore never excludes *.egg-info/.
 
-**Evidence.** src/fcf_m2.egg-info/SOURCES.txt lines 25-28 list only test_contract_and_integration.py, test_legacy_golden.py, test_modules.py, test_scoring_and_queueing.py. `ls tests/` shows conftest.py, README.md, fixture_legacy_v2_right_sizing.csv, fixture_legacy_v2_site_results.csv in addition. `git log --oneline -- tests/conftest.py` and `git log --oneline -- src/fcf_m2.egg-info/SOURCES.txt` both return the same single commit 252099f. `git ls-files src/fcf_m2.egg-info/` lists all 5 files as tracked; .gitignore has no *.egg-info entry. (PKG-INFO/requires.txt/top_level.txt themselves match pyproject.toml exactly — version 3.0.0, all deps and extras identical.)
+**Evidence.** src/fcf_m2.egg-info/SOURCES.txt lines 25-28 list only test_contract_and_integration.py, test_legacy_golden.py, test_modules.py, test_scoring_and_queueing.py. `ls tests/` shows conftest.py, README.md, fixture_legacy_v2_right_sizing.csv, fixture_legacy_v2_site_results.csv in addition. `git log --oneline -- tests/conftest.py` and `git log --oneline -- src/fcf_m2.egg-info/SOURCES.txt` both return the same single commit 252099f. `git ls-files src/fcf_m2.egg-info/` lists all 5 files as tracked; .gitignore has no *.egg-info entry. (PKG-INFO/requires.txt/top_level.txt themselves match pyproject.toml exactly - version 3.0.0, all deps and extras identical.)
 
 ### L-02 · `src/fcf_m2/scoring.py`
 **Lane:** L01-model-core · **Category:** dead-code · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** scoring.py computes an `access_adjustment` column (1.00 / 0.35) that is never used in any formula — only `readiness_access_adjustment` (1.00 / 0.65) is applied — yet access_adjustment ships in the output CSVs and in the golden fixture, where a reader would reasonably assume it is load-bearing.
+**Claim.** scoring.py computes an `access_adjustment` column (1.00 / 0.35) that is never used in any formula - only `readiness_access_adjustment` (1.00 / 0.65) is applied - yet access_adjustment ships in the output CSVs and in the golden fixture, where a reader would reasonably assume it is load-bearing.
 
 **Evidence.** scoring.py:131 `df["access_adjustment"] = np.where(df["public_access"] >= 1, 1.00, 0.35)`; scoring.py:132 `df["readiness_access_adjustment"] = np.where(df["public_access"] >= 1, 1.00, 0.65)`; scoring.py:151 `df["demand_subscore"] = df["demand_subscore"] * df["readiness_access_adjustment"]`. grep for 'access_adjustment' across src/ tests/ scripts/ dashboard/ excel/ presentation/ returns only those three code lines plus the header row of tests/fixture_legacy_v2_site_results.csv, which carries both columns.
 
@@ -822,73 +822,73 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Two modules disagree on the rank cutoff for 'top of the list': the tier assignment uses rank<=2 while the expansion-strategy assignment uses rank<=3, so a rank-3 site can receive the 'install now and make future ready' strategy without being Tier 1.
 
-**Evidence.** scoring.py:206 `if row["model_rank"] <= 2 and row["readiness_score"] >= 50: return "Tier 1 — advance to site screening"`. right_sizing.py:134 `if tier.startswith("Tier 1") or (rank <= 3 and score >= 50): return ("install_now_and_make_future_ready", ...)`. A third cutoff appears at right_sizing.py:90 `elif score >= 50 and rank <= 6 and "garage" not in site_type`.
+**Evidence.** scoring.py:206 `if row["model_rank"] <= 2 and row["readiness_score"] >= 50: return "Tier 1 - advance to site screening"`. right_sizing.py:134 `if tier.startswith("Tier 1") or (rank <= 3 and score >= 50): return ("install_now_and_make_future_ready", ...)`. A third cutoff appears at right_sizing.py:90 `elif score >= 50 and rank <= 6 and "garage" not in site_type`.
 
 ### L-05 · `src/fcf_m2/workflow.py`
 **Lane:** L01-model-core · **Category:** timestamp-inconsistency · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The CLI's default output directory is stamped in local time while the run_id embedded in every contract row is stamped in UTC, so a default-invoked run produces a directory name that can disagree with the run_id it contains by up to a day.
 
-**Evidence.** workflow.py:97 `run_id = f"{mode}_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"`. workflow.py:363 `out = Path(args.out) if args.out else ROOT / "data/outputs" / datetime.now().strftime("run_%Y%m%d_%H%M%S")` — naive datetime.now(), no tz.
+**Evidence.** workflow.py:97 `run_id = f"{mode}_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"`. workflow.py:363 `out = Path(args.out) if args.out else ROOT / "data/outputs" / datetime.now().strftime("run_%Y%m%d_%H%M%S")` - naive datetime.now(), no tz.
 
 ### L-06 · `scripts/verify.sh`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** yes — LEDGER FIND-REPO-01/02
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** yes - LEDGER FIND-REPO-01/02
 
 **Claim.** Three different output directories are used for the same legacy-reproduction check, and the release packager only knows one of them.
 
 **Evidence.** scripts/verify.sh:27 → data/outputs/verify_legacy; Makefile:12 → data/outputs/legacy_check; .github/workflows/tests.yml:32 → data/outputs/ci_legacy; build_release_artifact.py:23 OUTPUTS = ['data/outputs/v3_run', 'data/outputs/legacy_check'].
 
 ### L-07 · `pyproject.toml`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The 80% coverage floor is duplicated in two hard-coded places and absent from pyproject.toml; `make test` applies no floor at all.
 
 **Evidence.** scripts/verify.sh:24 and .github/workflows/tests.yml:28 both pass `--cov-fail-under=80`. pyproject.toml:25-27 [tool.pytest.ini_options] has only testpaths and addopts='-q'. Makefile:9 = `pytest tests/ -q --cov=fcf_m2 --cov-report=term`. Measured total: 92.15%.
 
 ### L-08 · `scripts/build_release_artifact.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** build_release_artifact.py will silently produce a release ZIP containing no model outputs, because both OUTPUTS directories are gitignored and absent from the working tree, and the script has no existence check.
 
 **Evidence.** build_release_artifact.py:23 OUTPUTS = ['data/outputs/v3_run', 'data/outputs/legacy_check']; .gitignore:11 'data/outputs/'; both paths return MISSING on the current tree; lines 61-66 just skip non-existent items.
 
 ### L-09 · `scripts/README.md`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** scripts/README.md omits the `make run-v3` prerequisite for build_excel_workbook.py, and its blanket claim that all scripts use repo-relative paths is contradicted by the committed footer_log.json.
 
 **Evidence.** scripts/README.md:10 mentions only '--source'; build_excel_workbook.py:140 reads data/outputs/v3_run/lifecycle_costs.csv and :208 avoided_evse_metric.csv. excel/README.md:20-21 states the prerequisite correctly. scripts/README.md:15-16: 'All scripts use repo-relative paths...'.
 
 ### L-10 · `scripts/build_field_provenance.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** build_field_provenance.py contains a branch that can never execute and a hard-coded verification_status.
 
 **Evidence.** Line 55 selects 'verified_facility' when elec_service_rating_amp > 0 and spare_capacity_kw > 0, but all 12 sites have both == 0 (tests/fixture_legacy_v2_site_results.csv, columns elec_service_rating_amp / spare_capacity_kw). Line 45: 'verification_status': 'spot_checked' for all 84 rows.
 
 ### L-11 · `matlab/src/electricalEconomics.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The ML-11 electrical-fidelity outputs are computed and then dropped: apparent power (kVA), peak_reduction_kW and the absolute demand-charge figures never reach results.csv, and PowerFactor is not exposed by runScenario or run_all_scenarios so the batch is permanently pinned at 0.95.
 
 **Evidence.** electricalEconomics.m:77-79 computes `peak_kVA_unmanaged`, `peak_kVA_managed`, `peak_reduction_kW` and :137-138 the absolute demand charges; runScenario.m:157-160 copies only `econ.service_check`, `econ.cost_status`, `econ.demand_charge_savings_usd_month` into metrics. electricalEconomics.m:54 `addParameter(p, "PowerFactor", 0.95, ...)` has no counterpart in runScenario.m:44-61 or run_all_scenarios.m:43-59.
 
 ### L-12 · `matlab/src/run_all_scenarios.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-04
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-04
 
 **Claim.** manifest.txt does not record ChargerEfficiency, DiversityFactor, PowerFactor or CommsLoss, so a run that varied any of them could not be reproduced from its own manifest.
 
 **Evidence.** run_all_scenarios.m:126-138 writes exactly run_id, generated_utc, matlab_release, input_csv, scenario_rows, profile_mode, seed, tariff_supplied, assumed_site_capacity_kW plus a 3-line note. runScenario.m:54-60 exposes ChargerEfficiency, DiversityFactor and CommsLoss which run_all_scenarios never forwards or records.
 
 ### L-13 · `matlab/src/loadScenarios.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-01
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-01
 
-**Claim.** loadScenarios attaches a provenance payload to the table that no consumer in src/ ever reads — run_all_scenarios recomputes the horizon list itself instead.
+**Claim.** loadScenarios attaches a provenance payload to the table that no consumer in src/ ever reads - run_all_scenarios recomputes the horizon list itself instead.
 
 **Evidence.** loadScenarios.m:160-166 sets `T.Properties.Description` and `T.Properties.UserData` with source_csv, loaded_utc, horizons_in_data, cases_in_data; run_all_scenarios.m:80-81 instead does `fprintf("Horizons in data: %s\n", strjoin(string(unique(T.horizon_year)), ", "));`. Grep for `UserData` outside loadScenarios.m returns nothing.
 
 ### L-14 · `matlab/src/plotScenario.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The scenario summary bar chart plots kW and kWh quantities on a single shared axis, which is dimensionally incoherent and should not be carried into the platform's own rendering.
 
@@ -916,7 +916,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** DATA_DICTIONARY.md:53 'All columns above are required; missing column => error.' vs src/loadScenarios.m:81-87 requiredCols list, which contains 19 names ending at 'managed_charging_policy' and omits model_rank, electrical_risk_level, source_note.
 
 ### L-18 · `matlab/src/loadScenarios.m`
-**Lane:** L04-matlab-tests-docs · **Category:** latent-type-risk · **Confirmed:** yes — LEDGER FIND-MATLAB-01
+**Lane:** L04-matlab-tests-docs · **Category:** latent-type-risk · **Confirmed:** yes - LEDGER FIND-MATLAB-01
 
 **Claim.** The two all-empty numeric capacity columns are never type-forced on import, so whether they arrive as double-NaN or as text is an unverified detectImportOptions heuristic. Contained by capacityGuard's defensive conversion; unit tests cannot catch it.
 
@@ -932,16 +932,16 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### L-20 · `data/contract/v1/schema.json`
 **Lane:** L05-data-contract · **Category:** horizon-convention · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** horizon_label carries relative-offset naming (now/plus10/plus20/plus30) alongside the canonical absolute horizon_year. Arithmetically consistent against a 2026 base, so not a convention violation — but any artifact that surfaces horizon_label raw renders exactly the 'Now / 10 / 20 / 30-year' vocabulary the program is trying to purge from prose.
+**Claim.** horizon_label carries relative-offset naming (now/plus10/plus20/plus30) alongside the canonical absolute horizon_year. Arithmetically consistent against a 2026 base, so not a convention violation - but any artifact that surfaces horizon_label raw renders exactly the 'Now / 10 / 20 / 30-year' vocabulary the program is trying to purge from prose.
 
 **Evidence.** schema.json:98-105 horizon_label enum ['now','plus10','plus20','plus30']; scenario_table.csv col 10 distribution now×12, plus10×36, plus20×36, plus30×36, perfectly aligned with horizon_year 2026×12, 2036×36, 2046×36, 2056×36.
 
 ### L-21 · `data/contract/v1/schema.json`
 **Lane:** L05-data-contract · **Category:** egrid-factor · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** 590.2 is absent from the entire data layer (correct), but survives in 4 documentation files. In all four it is explicitly narrated as the superseded value, so these are legitimate correction notes rather than live figures — however the brief's standard is 'must survive NOWHERE', so Phase 1 needs an explicit keep-or-scrub decision.
+**Claim.** 590.2 is absent from the entire data layer (correct), but survives in 4 documentation files. In all four it is explicitly narrated as the superseded value, so these are legitimate correction notes rather than live figures - however the brief's standard is 'must survive NOWHERE', so Phase 1 needs an explicit keep-or-scrub decision.
 
-**Evidence.** grep -rn '590\.2' over data/ returns zero hits. Repo-wide, exactly 4 hits, all correction narratives: CHANGELOG.md:24 '**596.3 lb CO2e/MWh** — correcting the 590.2 figure used earlier'; docs/methodology/current-facts-source-register.md:7 '**Correction:** research register EX10 carried ≈590.2; EPA's published CO2e total output rate for SRVC is 596.326 lb/MWh'; reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27 'the research package's 590.2 figure was superseded by direct EPA verification'; reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22 'the research package (EX10) carried ≈590.2...'. Contract side is hard-locked: schema.json:266 'grid_factor_value': {'const': 596.3}.
+**Evidence.** grep -rn '590\.2' over data/ returns zero hits. Repo-wide, exactly 4 hits, all correction narratives: CHANGELOG.md:24 '**596.3 lb CO2e/MWh** - correcting the 590.2 figure used earlier'; docs/methodology/current-facts-source-register.md:7 '**Correction:** research register EX10 carried ≈590.2; EPA's published CO2e total output rate for SRVC is 596.326 lb/MWh'; reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27 'the research package's 590.2 figure was superseded by direct EPA verification'; reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22 'the research package (EX10) carried ≈590.2...'. Contract side is hard-locked: schema.json:266 'grid_factor_value': {'const': 596.3}.
 
 ### L-22 · `data/cache/boundaries/tl_2024_va_counties.geojson`
 **Lane:** L05-data-contract · **Category:** join-key-hazard · **Confirmed:** not yet re-checked by the lead
@@ -951,7 +951,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** data/cache/boundaries/tl_2024_va_counties.geojson parses as valid JSON, FeatureCollection, 25 features, crs EPSG:4269, STATEFP set {'51'}. NAME list in file order includes 'Fairfax' at index 8 and again at index 17, plus 'Manassas Park' (index 10) and 'Manassas' (index 21). Feature property keys are exactly ['GEOID','NAME','NAMELSAD','STATEFP'].
 
 ### L-23 · `scripts/verify.sh`
-**Lane:** L06-root-ci · **Category:** nondeterministic-gate · **Confirmed:** yes — LEDGER FIND-REPO-01/02
+**Lane:** L06-root-ci · **Category:** nondeterministic-gate · **Confirmed:** yes - LEDGER FIND-REPO-01/02
 
 **Claim.** verify.sh's markdown-link gate behaves differently depending on whether lychee happens to be installed on the machine, so the harness is not reproducible; CI always runs the weaker internal-only check.
 
@@ -972,7 +972,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** CHANGELOG.md contains exactly two headings: '## Milestone 2 V3 (2026-07-19)' (line 3) and '## Pre-V3 history' (line 45). git log shows HEAD 95e91e0 'docs(v4-program): initialize program ledger' adding docs/operations/v4-program/LEDGER.md (147 lines); git tag -l includes pre-v4-program-20260727.
 
 ### L-26 · `docs/operations/website-patch-package/content/results_2036_2046_2056.md`
-**Lane:** L07-docs-core · **Category:** imprecise-number · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L07-docs-core · **Category:** imprecise-number · **Confirmed:** yes - LEDGER FIND-NUM-01
 
 **Claim.** The claim that the staged plan 'avoids energizing 13–23 pathway ports' sits under a '10 / 20 / 30 years' heading and reads as a range across the three horizons, but the underlying data gives 23 at the 2026 baseline and 13 at 2036 base, dropping to 4 at both 2046 base and 2056 base. It overstates the later horizons.
 
@@ -983,7 +983,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The legacy 2035/2050 headline row in BASELINE_VERIFICATION.md is legitimate legacy content (the whole document is about the reproduced V1/V2 baseline) but the row itself carries no legacy_v2 token, so it reads as a horizon violation if quoted out of context. Its numbers 35/44/44 also visually collide with the V3 contract's 35/44/44 while meaning something different (legacy ends at 54, V3 at 48).
 
-**Evidence.** docs/operations/legacy-baseline/BASELINE_VERIFICATION.md:22 '| 2035 base / 2035 high / 2050 base / 2050 high | 35 / 44 / 44 / 54 | 35 / 44 / 44 / 54 |' under the heading ':14 ## Headline metrics — all match expected values exactly'. Contrast with the correctly self-labelling docs/WORKFLOW_STEPS.md:7 '(legacy 2035/2050 or V3 2026/2036/2046/2056)'.
+**Evidence.** docs/operations/legacy-baseline/BASELINE_VERIFICATION.md:22 '| 2035 base / 2035 high / 2050 base / 2050 high | 35 / 44 / 44 / 54 | 35 / 44 / 44 / 54 |' under the heading ':14 ## Headline metrics - all match expected values exactly'. Contrast with the correctly self-labelling docs/WORKFLOW_STEPS.md:7 '(legacy 2035/2050 or V3 2026/2036/2046/2056)'.
 
 ### L-28 · `docs/operations/reproduction-guide.md`
 **Lane:** L07-docs-core · **Category:** version-inconsistency · **Confirmed:** not yet re-checked by the lead
@@ -997,17 +997,17 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Two divergent privacy notices describe the project website's assistant differently: the public engagement notice presents it as an open explainer the public might type into, while the website patch package says it is restricted to authenticated Cognito users and that conversations may be logged. The public-facing notice mentions neither authentication nor logging.
 
-**Evidence.** docs/human-actions/public_engagement/05_PRIVACY_NOTICE.md:13 `**The website assistant explains — it does not collect.** Our project website's assistant exists to explain the study... you should not enter personal information into it.`; docs/human-actions/public_engagement/03_LISTENING_SESSION_ONE_PAGER.md:34 `not through our project website's assistant, which only explains the project`. Versus docs/operations/website-patch-package/content/privacy_notice.md `**The AI Assistant is restricted to approved, authenticated users** (Cognito)... Assistant conversations may be logged for quality and security`. Neither is live: docs/operations/v4-program/LEDGER.md:138 FIND-AWS-02 `The website patch package was **never applied**... `privacy.html` and `standards.html` both **403**`.
+**Evidence.** docs/human-actions/public_engagement/05_PRIVACY_NOTICE.md:13 `**The website assistant explains - it does not collect.** Our project website's assistant exists to explain the study... you should not enter personal information into it.`; docs/human-actions/public_engagement/03_LISTENING_SESSION_ONE_PAGER.md:34 `not through our project website's assistant, which only explains the project`. Versus docs/operations/website-patch-package/content/privacy_notice.md `**The AI Assistant is restricted to approved, authenticated users** (Cognito)... Assistant conversations may be logged for quality and security`. Neither is live: docs/operations/v4-program/LEDGER.md:138 FIND-AWS-02 `The website patch package was **never applied**... `privacy.html` and `standards.html` both **403**`.
 
 ### L-30 · `docs/human-actions/public_engagement/05_PRIVACY_NOTICE.md`
 **Lane:** L08-human-actions · **Category:** stale-text · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** Present-tense deployment language inside instruments that are explicitly undeployed: the privacy notice describes itself as already printed and posted, and the listening-session one-pager advertises a Spanish survey that does not exist.
 
-**Evidence.** docs/human-actions/public_engagement/05_PRIVACY_NOTICE.md:1 header `# DRAFT — PREPARED 2026-07-19 — NOT PUBLISHED` but :5 `Printed on survey forms, on the listening-session handout, and posted on the project website.` and :22 `Spanish version: [PENDING — see language access plan]`. docs/human-actions/public_engagement/03_LISTENING_SESSION_ONE_PAGER.md:35 `Survey (5 min, anonymous, English/Español): [QR / LINK WHEN DEPLOYED]` while docs/human-actions/public_engagement/04_LANGUAGE_ACCESS_PLAN.md:3 states `No translations have been produced yet.` and its production register (lines 16-21) is entirely blank.
+**Evidence.** docs/human-actions/public_engagement/05_PRIVACY_NOTICE.md:1 header `# DRAFT - PREPARED 2026-07-19 - NOT PUBLISHED` but :5 `Printed on survey forms, on the listening-session handout, and posted on the project website.` and :22 `Spanish version: [PENDING - see language access plan]`. docs/human-actions/public_engagement/03_LISTENING_SESSION_ONE_PAGER.md:35 `Survey (5 min, anonymous, English/Español): [QR / LINK WHEN DEPLOYED]` while docs/human-actions/public_engagement/04_LANGUAGE_ACCESS_PLAN.md:3 states `No translations have been produced yet.` and its production register (lines 16-21) is entirely blank.
 
 ### L-31 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md`
-**Lane:** L09-deliverables · **Category:** partial-claim · **Confirmed:** yes — LEDGER FIND-NUM-01
+**Lane:** L09-deliverables · **Category:** partial-claim · **Confirmed:** yes - LEDGER FIND-NUM-01
 
 **Claim.** '13–23 pathway ports deliberately not energized on the base path' quotes only the 2026 and 2036 values and omits 2046/2056, where the figure is 4.
 
@@ -1023,7 +1023,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### L-33 · `dashboard/tableau/patch_package/tbl_portfolio_costs.csv`
 **Lane:** L09-deliverables · **Category:** data-quality · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** tbl_portfolio_costs.csv's DEF (defer) case is constant at 617,403 across all three horizons and all three escalation cases, with nominal exactly equal to NPV — no discounting and no escalation applied.
+**Claim.** tbl_portfolio_costs.csv's DEF (defer) case is constant at 617,403 across all three horizons and all three escalation cases, with nominal exactly equal to NPV - no discounting and no escalation applied.
 
 **Evidence.** tbl_portfolio_costs.csv lines 2-4, 11-13, 20-22: '2036,DEF,base,617403.0,617403.0,0.0,0.0', '2036,DEF,high,617403.0,617403.0,...', '2046,DEF,base,617403.0,617403.0,...', '2056,DEF,low,617403.0,617403.0,...'. By contrast STG and OVB rows vary correctly by horizon and escalation (e.g. 2056,OVB,high,6072548.0,4030270.0). Not quoted in any prose in this lane, so latent rather than active.
 
@@ -1032,14 +1032,14 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Comment points at a test file that does not exist in the tree.
 
-**Evidence.** build_sites.py:89 — "# arithmetic, not a re-interpretation of it. test_build_sites.py asserts that". The only test file is tests/test_pipeline.py.
+**Evidence.** build_sites.py:89 - "# arithmetic, not a re-interpretation of it. test_build_sites.py asserts that". The only test file is tests/test_pipeline.py.
 
 ### L-35 · `incoming/explorer/fcf-3d/tests/test_pipeline.py`
 **Lane:** L10-explorer-python · **Category:** internal-contradiction · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** Test docstring says four drivers are inverted; the assertion in the same function lists six.
 
-**Evidence.** tests/test_pipeline.py:113 — """These four drivers are the ones fcf_m2.scoring wraps in (1 - x)."""; lines 115-122 assert inverted == {existing_ports_total_n, distance_to_service_ft_n, install_cost_est_usd_n, trenching_ft_n, garage_enclosed, stormwater_risk} — six entries.
+**Evidence.** tests/test_pipeline.py:113 - """These four drivers are the ones fcf_m2.scoring wraps in (1 - x)."""; lines 115-122 assert inverted == {existing_ports_total_n, distance_to_service_ft_n, install_cost_est_usd_n, trenching_ft_n, garage_enclosed, stormwater_risk} - six entries.
 
 ### L-36 · `incoming/explorer/fcf-3d/README.md`
 **Lane:** L10-explorer-python · **Category:** overclaim · **Confirmed:** not yet re-checked by the lead
@@ -1074,7 +1074,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Dead CSS rule for a pinned-state indicator that app.js never triggers, so pinned sites are invisible in the left rail.
 
-**Evidence.** style.css:125 `#siteList li.pinned::after { content: "PIN"; }`. app.js:408 is the only class added to a list item: `if (p.site_id === state.selected) li.classList.add('selected');` — the string 'pinned' never appears as a classList argument in app.js.
+**Evidence.** style.css:125 `#siteList li.pinned::after { content: "PIN"; }`. app.js:408 is the only class added to a list item: `if (p.site_id === state.selected) li.classList.add('selected');` - the string 'pinned' never appears as a classList argument in app.js.
 
 ### L-41 · `fcf-3d/web/app.js`
 **Lane:** L11-explorer-web · **Category:** correctness · **Confirmed:** not yet re-checked by the lead
@@ -1095,14 +1095,14 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** The placement editor emits a JSON key that does not exist in the asset contract, and no placement has ever been committed back.
 
-**Evidence.** app.js:695 emits `height_offset_m: pl.height` inside the copied `asset` object; the generated asset dict keys are model, heading_deg, offset_east_m, offset_north_m, clamp_to_ground, ports, pathway_ports — no height_offset_m, and placementFor (app.js:240-246) never reads one. app.js:488 instructs the user to paste it back into sites.geojson properties.asset. All 12 sites currently have heading_deg=0.0, offset_east_m=0.0, offset_north_m=0.0.
+**Evidence.** app.js:695 emits `height_offset_m: pl.height` inside the copied `asset` object; the generated asset dict keys are model, heading_deg, offset_east_m, offset_north_m, clamp_to_ground, ports, pathway_ports - no height_offset_m, and placementFor (app.js:240-246) never reads one. app.js:488 instructs the user to paste it back into sites.geojson properties.asset. All 12 sites currently have heading_deg=0.0, offset_east_m=0.0, offset_north_m=0.0.
 
 ### L-44 · `fcf-3d/web/app.js`
 **Lane:** L11-explorer-web · **Category:** usability · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** A saved bad or expired Cesium ion token cannot be cleared from the UI, and the toast that mentions recovery gives impossible advice.
 
-**Evidence.** app.js:879-880 `const saved = store.get('fcf3d.ionToken'); if (saved) { start(saved); return; }` — the gate is skipped entirely and there is no clear/replace control anywhere in index.html or app.js. app.js:193 toast: 'That base map needs a Cesium ion token. Reload and add one to enable it.' — a reload takes the stored-token path again.
+**Evidence.** app.js:879-880 `const saved = store.get('fcf3d.ionToken'); if (saved) { start(saved); return; }` - the gate is skipped entirely and there is no clear/replace control anywhere in index.html or app.js. app.js:193 toast: 'That base map needs a Cesium ion token. Reload and add one to enable it.' - a reload takes the stored-token path again.
 
 ### L-45 · `fcf-3d/web/app.js`
 **Lane:** L11-explorer-web · **Category:** silent-failure · **Confirmed:** not yet re-checked by the lead
@@ -1114,12 +1114,12 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### L-46 · `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.pdf`
 **Lane:** L12-binaries · **Category:** egrid-factor · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** 590.2 survives in exactly one place across all 38 binaries — the Final Report DOCX and its exported PDF — inside an explicitly-labelled supersession sentence. It is not a live figure, but the lane rule says 590.2 must survive nowhere, so Phase 1 must adjudicate.
+**Claim.** 590.2 survives in exactly one place across all 38 binaries - the Final Report DOCX and its exported PDF - inside an explicitly-labelled supersession sentence. It is not a live figure, but the lane rule says 590.2 must survive nowhere, so Phase 1 must adjudicate.
 
-**Evidence.** Final Report PDF page 2 / DOCX §2: "a net-CO2e layer with a corrected, sourced grid factor (EPA eGRID2023 Rev 2, SRVC, 596.3 lb CO2e/MWh, accessed 2026-07-19 — the research package's 590.2 figure was superseded by direct EPA verification)". Token scan of all four PDFs, the PPTX, the XLSX and footer_log.json finds 596.3 in every live location and 590.2 nowhere else.
+**Evidence.** Final Report PDF page 2 / DOCX §2: "a net-CO2e layer with a corrected, sourced grid factor (EPA eGRID2023 Rev 2, SRVC, 596.3 lb CO2e/MWh, accessed 2026-07-19 - the research package's 590.2 figure was superseded by direct EPA verification)". Token scan of all four PDFs, the PPTX, the XLSX and footer_log.json finds 596.3 in every live location and 590.2 nowhere else.
 
 ### L-47 · `dashboard/static/footer_log.json`
-**Lane:** L12-binaries · **Category:** generated-artifact-drift · **Confirmed:** yes — LEDGER FIND-REPO-03
+**Lane:** L12-binaries · **Category:** generated-artifact-drift · **Confirmed:** yes - LEDGER FIND-REPO-03
 
 **Claim.** dashboard/static/footer_log.json has drifted from its generator in a second way beyond absoluteness: it records the pre-reorg directory visuals/static_dashboard/, whereas the current generator would emit dashboard/static/. It has never been regenerated since the repository reorganisation.
 
@@ -1130,71 +1130,71 @@ subset the program lead independently confirmed and the plan for acting on each.
 
 **Claim.** Three deliverables cannot be regenerated from a clean clone: the Excel workbook (needs an untracked source file), the QA Backup PDF (no .pptx source), and the Final deck .pptx (python-pptx output whose generating script is not tracked).
 
-**Evidence.** scripts/build_excel_workbook.py:20-22 `_ap.add_argument("--source", required=True, help="Path to the original 'Electric Data.xlsx'")`, docstring `Original workbook is never modified`; excel/README.md `The original source workbook is not tracked in this repository`. presentation/deck/ contains only Future_City_Fellowship_Milestone_2_Final.pptx — no QA_Backup pptx. PPTX docProps/core.xml `<dc:description>generated using python-pptx</dc:description>` but no build script references the pptx path.
+**Evidence.** scripts/build_excel_workbook.py:20-22 `_ap.add_argument("--source", required=True, help="Path to the original 'Electric Data.xlsx'")`, docstring `Original workbook is never modified`; excel/README.md `The original source workbook is not tracked in this repository`. presentation/deck/ contains only Future_City_Fellowship_Milestone_2_Final.pptx - no QA_Backup pptx. PPTX docProps/core.xml `<dc:description>generated using python-pptx</dc:description>` but no build script references the pptx path.
 
 
 ---
 
-## INFO — 45 findings
+## INFO - 45 findings
 
 ### I-01 · `src/fcf_m2/config.py`
 **Lane:** L01-model-core · **Category:** egrid-factor · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The 590.2 eGRID figure survives in exactly four places repo-wide, and in every case it is explicitly labelled as the superseded/corrected-away value, never as a live factor. 596.3 is the only value in code, schema, and contract. No repair needed unless the program wants the string purged entirely.
 
-**Evidence.** src/ contains zero occurrences of 590.2 (grep). The four surviving references: CHANGELOG.md:24 '**596.3 lb CO2e/MWh** — correcting the 590.2 figure used earlier.'; docs/methodology/current-facts-source-register.md:7 '**Correction:** research register EX10 carried ≈590.2; EPA's published CO2e total output rate for SRVC is 596.326 lb/MWh.'; reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27 'the research package's 590.2 figure was superseded by direct EPA verification'; reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22. Live value: config.py:91 `GRID_FACTOR_LB_PER_MWH = 596.3`, pinned as a JSON-Schema const at contract.py:117 and recorded in data/contract/v1/contract_manifest.json as `"value_lb_per_mwh": 596.3`; all 120 scenario rows carry grid_factor_value 596.3 (verified).
+**Evidence.** src/ contains zero occurrences of 590.2 (grep). The four surviving references: CHANGELOG.md:24 '**596.3 lb CO2e/MWh** - correcting the 590.2 figure used earlier.'; docs/methodology/current-facts-source-register.md:7 '**Correction:** research register EX10 carried ≈590.2; EPA's published CO2e total output rate for SRVC is 596.326 lb/MWh.'; reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27 'the research package's 590.2 figure was superseded by direct EPA verification'; reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22. Live value: config.py:91 `GRID_FACTOR_LB_PER_MWH = 596.3`, pinned as a JSON-Schema const at contract.py:117 and recorded in data/contract/v1/contract_manifest.json as `"value_lb_per_mwh": 596.3`; all 120 scenario rows carry grid_factor_value 596.3 (verified).
 
 ### I-02 · `scripts/build_excel_workbook.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** build_excel_workbook.py's portfolio chart plots 6 data points against 3 categories while titled 'base case'.
 
 **Evidence.** Line 186 `Reference(wp, min_col=3, max_col=4, min_row=4, max_row=10)` spans header row 4 plus rows 5-10 = low(2036,2046,2056) + base(2036,2046,2056); line 187 `cats = Reference(wp, min_col=2, min_row=8, max_row=10)` = base horizons only; line 185 title '...by horizon (base case, screening)'.
 
 ### I-03 · `tests/test_legacy_golden.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** No horizon-convention violation exists in this lane: every 2035/2050 occurrence is inside an explicitly legacy-labelled artifact, and 2040 is a deliberate negative test.
 
 **Evidence.** tests/test_legacy_golden.py:25-26 asserts ports_2035_base/high, ports_2050_base/high inside a module whose docstring is 'legacy_v2 mode must reproduce the frozen V2 baseline exactly' and which calls run_right_sizing_legacy. tests/test_contract_and_integration.py:52-56 test_unsupported_horizon_fails sets horizon_year = 2040 and asserts validation fails. No 'Now'/'10-year'/'20-year'/'30-year' strings in any assigned file.
 
 ### I-04 · `tests/test_modules.py`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** 596.3 is machine-asserted in two places and 590.2 appears nowhere in this lane; repo-wide the four 590.2 occurrences are all explicit correction notes.
 
-**Evidence.** tests/test_modules.py:170 `assert out["grid_factor_value"] == 596.3`; tests/test_contract_and_integration.py:131 `assert (with_co2["grid_factor_value"] == 596.3).all()`. git grep '590\.2' → CHANGELOG.md:24, docs/methodology/current-facts-source-register.md:7, reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22, reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27 — all phrased as superseded.
+**Evidence.** tests/test_modules.py:170 `assert out["grid_factor_value"] == 596.3`; tests/test_contract_and_integration.py:131 `assert (with_co2["grid_factor_value"] == 596.3).all()`. git grep '590\.2' → CHANGELOG.md:24, docs/methodology/current-facts-source-register.md:7, reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22, reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27 - all phrased as superseded.
 
 ### I-05 · `data/contract/v1/scenario_table.csv`
-**Lane:** L02-tests-scripts · **Category:** — · **Confirmed:** yes — LEDGER FIND-NUM-01/02
+**Lane:** L02-tests-scripts · **Category:** - · **Confirmed:** yes - LEDGER FIND-NUM-01/02
 
 **Claim.** The tracked contract and MATLAB canonical CSV have NOT drifted from their generator: a fresh V3 run reproduces them byte-for-byte apart from run_id/generated_at/source_note.
 
 **Evidence.** I ran `workflow run --mode milestone2_v3 --out <scratchpad>/v3run`. site_table.csv and schema.json sha256 prefixes identical (0ed5e4ec7078, fb08b84ad2fd). scenario_table.csv: all 46 non-(run_id, generated_at) columns identical across 120 rows. matlab_scenarios.csv: only source_note differs, embedding the run id. Tracked run id = milestone2_v3_20260719T052322Z.
 
 ### I-06 · `matlab/src/run_all_scenarios.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-04
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-04
 
 **Claim.** Backlog coverage gap: ML-02, ML-09 and ML-10 are never referenced anywhere in matlab/src/, while ML-01, ML-03, ML-04, ML-05, ML-06, ML-07, ML-08, ML-11 and ML-12 are. Similarly only H1, H2, H3, H4, H5 and H8 are referenced despite EXECUTION_STATUS.md citing H1-H15.
 
 **Evidence.** grep -o 'ML-[0-9]*' over matlab/src/*.m yields only ML-01, ML-03, ML-04, ML-05, ML-06, ML-07, ML-08, ML-11, ML-12 (31 sites). Hypothesis refs: capacityGuard.m:2 (H3), buildSimulinkModel.m:8 (H8), managedCharging.m:12,115 (H4), makeSessionProfiles.m:9 (H1/H2/H5), :165 (H1). matlab/EXECUTION_STATUS.md:29 says "the Report 13 findings (H1-H15)".
 
 ### I-07 · `matlab/src/managedCharging.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** Docstring drift in three modules: documented output-field lists are incomplete relative to what the code actually returns.
 
 **Evidence.** capacityGuard.m:33-42 lists 8 returned fields but :143-153 returns 10 (adds scenario_id, allowed_bases). managedCharging.m:50-53 lists 15 but :171-190 returns 19 (adds site_capacity_kW, peak_ev_kW, max_overload_kW, comms_loss). electricalEconomics.m:36-48 omits strategy_unmanaged, strategy_managed, service_check_note and tariff which :71-72, :112, :148 do set.
 
 ### I-08 · `matlab/src/run_all_scenarios.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** yes — LEDGER FIND-MATLAB-04
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** yes - LEDGER FIND-MATLAB-04
 
 **Claim.** The variable named repoRoot in two files actually resolves to matlab/, not the git repository root. The resolved paths happen to be correct but the name will mislead anyone relocating the tree.
 
-**Evidence.** run_all_scenarios.m:40-41 `thisDir = fileparts(mfilename("fullpath")); repoRoot = fileparts(thisDir);` — thisDir is matlab/src so repoRoot is matlab/. Same pattern at buildSimulinkModel.m:44-45, making the default ModelFolder matlab/simulink (:46).
+**Evidence.** run_all_scenarios.m:40-41 `thisDir = fileparts(mfilename("fullpath")); repoRoot = fileparts(thisDir);` - thisDir is matlab/src so repoRoot is matlab/. Same pattern at buildSimulinkModel.m:44-45, making the default ModelFolder matlab/simulink (:46).
 
 ### I-09 · `matlab/src/makeSessionProfiles.m`
-**Lane:** L03-matlab-src · **Category:** — · **Confirmed:** not yet re-checked by the lead
+**Lane:** L03-matlab-src · **Category:** - · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** CLEAN BILL for this lane on the four global defect classes: no horizon-convention violations, no eGRID emissions factor of any value, no absolute local paths, no secrets/keys/account IDs anywhere in the 9 files.
 
@@ -1245,30 +1245,30 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### I-16 · `data/contract/v1/contract_manifest.json`
 **Lane:** L05-data-contract · **Category:** hash-chain-verified · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** All 11 manifest hashes independently verified with shasum -a 256: 11 of 11 PASS. The contract is byte-exact to its manifest. The construction is NOT a linked chain — it is 11 flat independent SHA-256 digests of raw file bytes, streamed in 65536-byte chunks, with zero normalisation (no line-ending canonicalisation, no key sorting, no whitespace handling). Tables are hashed in a fixed literal order after being written; inputs are hashed by the caller at their own locations.
+**Claim.** All 11 manifest hashes independently verified with shasum -a 256: 11 of 11 PASS. The contract is byte-exact to its manifest. The construction is NOT a linked chain - it is 11 flat independent SHA-256 digests of raw file bytes, streamed in 65536-byte chunks, with zero normalisation (no line-ending canonicalisation, no key sorting, no whitespace handling). Tables are hashed in a fixed literal order after being written; inputs are hashed by the caller at their own locations.
 
-**Evidence.** src/fcf_m2/contract.py:64-69 sha256_file() — hashlib.sha256 over open(path,'rb') in 65536-byte chunks, .hexdigest(). contract.py:282-283 fixed table order ['schema.json','scenario_table.csv','site_table.csv','source_provenance.csv','standards_register.csv','assumptions.json']; contract.py:291 hashes each after write (lines 275-280). contract.py:264,290 inputs passed in as inputs_hashed. Verified values: inputs 582e0b37…/064b6fdc…/9a07aa1e…/a0a3968b…/1b425597…; tables fb08b84a…/a4035888…/0ed5e4ec…/2d346861…/943f5b8f…/0ef70e9b… — every one matched.
+**Evidence.** src/fcf_m2/contract.py:64-69 sha256_file() - hashlib.sha256 over open(path,'rb') in 65536-byte chunks, .hexdigest(). contract.py:282-283 fixed table order ['schema.json','scenario_table.csv','site_table.csv','source_provenance.csv','standards_register.csv','assumptions.json']; contract.py:291 hashes each after write (lines 275-280). contract.py:264,290 inputs passed in as inputs_hashed. Verified values: inputs 582e0b37…/064b6fdc…/9a07aa1e…/a0a3968b…/1b425597…; tables fb08b84a…/a4035888…/0ed5e4ec…/2d346861…/943f5b8f…/0ef70e9b… - every one matched.
 
 ### I-17 · `data/contract/v1/scenario_table.csv`
-**Lane:** L05-data-contract · **Category:** claim-confirmed · **Confirmed:** yes — LEDGER FIND-NUM-01/02
+**Lane:** L05-data-contract · **Category:** claim-confirmed · **Confirmed:** yes - LEDGER FIND-NUM-01/02
 
-**Claim.** Both program-critical claims CONFIRMED, one more strongly than stated. capacity_basis == placeholder at 12 of 12 sites (120 of 120 rows). data_confidence High at 0 of 12 sites — and Medium is also 0 of 12; all 12 sites are Low on all 120 rows.
+**Claim.** Both program-critical claims CONFIRMED, one more strongly than stated. capacity_basis == placeholder at 12 of 12 sites (120 of 120 rows). data_confidence High at 0 of 12 sites - and Medium is also 0 of 12; all 12 sites are Low on all 120 rows.
 
 **Evidence.** scenario_table.csv col 29 capacity_basis distinct set = {'placeholder'} (120 rows). Col 42 data_confidence distinct set = {'Low'}. Col 31 capacity_confidence distinct set = {'none'}. service_capacity_kw blank 120/120; spare_capacity_kw blank 120/120. capacity_source constant: 'legacy adapter future-ready placeholder; utility/facility confirmation pending (12/12 sites unconfirmed)'. Corroborated by assumptions.json:86 and by real_sites_v2.csv where elec_service_rating_amp and spare_capacity_kw are '0' at all 12 sites.
 
 ### I-18 · `data/contract/v1/site_table.csv`
 **Lane:** L05-data-contract · **Category:** brief-premise-correction · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** site_table.csv contains NO capacity_basis and NO data_confidence column — it is a pure 9-column identity dimension. Those fields live at scenario grain in scenario_table.csv (cols 29 and 42). Any Phase-1 document that points at site_table.csv for capacity_basis is citing the wrong file.
+**Claim.** site_table.csv contains NO capacity_basis and NO data_confidence column - it is a pure 9-column identity dimension. Those fields live at scenario grain in scenario_table.csv (cols 29 and 42). Any Phase-1 document that points at site_table.csv for capacity_basis is citing the wrong file.
 
-**Evidence.** data/contract/v1/site_table.csv:1 header is exactly 'site_id,site_name_display,site_name_safe,jurisdiction,lat,lon,site_type,public_access,garage_enclosed' — 9 columns, 12 data rows (lines 2-13). data/contract/v1/README.md:10 describes it as 'identity dimension - one canonical spelling per site; join on site_id only'.
+**Evidence.** data/contract/v1/site_table.csv:1 header is exactly 'site_id,site_name_display,site_name_safe,jurisdiction,lat,lon,site_type,public_access,garage_enclosed' - 9 columns, 12 data rows (lines 2-13). data/contract/v1/README.md:10 describes it as 'identity dimension - one canonical spelling per site; join on site_id only'.
 
 ### I-19 · `data/inputs/legacy_matlab_site_meta.csv`
 **Lane:** L05-data-contract · **Category:** lineage-verified · **Confirmed:** not yet re-checked by the lead
 
 **Claim.** The base-load lineage is fully reproducible end-to-end from the tracked input and the assumptions file, which is strong evidence the generator ran as documented.
 
-**Evidence.** legacy_matlab_site_meta.csv:2 FFX002 base_load_mean_kw=51.4 → scenario_table.csv FFX002_2026_baseline base_load_kw=51.4. Applying assumptions.json:29 base_load_growth_per_year=0.008: 51.4×1.008^10=55.66≈55.7 (2036 rows), ×1.008^20=60.27≈60.3 (2046 rows), ×1.008^30=65.27≈65.3 (2056 rows) — matches the contract exactly.
+**Evidence.** legacy_matlab_site_meta.csv:2 FFX002 base_load_mean_kw=51.4 → scenario_table.csv FFX002_2026_baseline base_load_kw=51.4. Applying assumptions.json:29 base_load_growth_per_year=0.008: 51.4×1.008^10=55.66≈55.7 (2036 rows), ×1.008^20=60.27≈60.3 (2046 rows), ×1.008^30=65.27≈65.3 (2056 rows) - matches the contract exactly.
 
 ### I-20 · `data/contract/v1/assumptions.json`
 **Lane:** L05-data-contract · **Category:** never-ran · **Confirmed:** not yet re-checked by the lead
@@ -1292,14 +1292,14 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Evidence.** git grep -nI '590\.2' returns only CHANGELOG.md:24 ('correcting the 590.2 figure used earlier'), docs/methodology/current-facts-source-register.md:7 ('research register EX10 carried ~590.2; EPA's published CO2e total output rate for SRVC is 596.326 lb/MWh'), reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md:22, reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md:27. git grep -cI '596\.3' shows 120 hits in data/contract/v1/scenario_table.csv and 1 in src/fcf_m2/config.py.
 
 ### I-23 · `README.md`
-**Lane:** L06-root-ci · **Category:** link-audit-clean · **Confirmed:** yes — LEDGER FIND-NUM-01/02, FIND-REPO-08
+**Lane:** L06-root-ci · **Category:** link-audit-clean · **Confirmed:** yes - LEDGER FIND-NUM-01/02, FIND-REPO-08
 
 **Claim.** All 23 internal link/image targets referenced in README.md exist on disk; zero broken. CHANGELOG's four git refs (branch archive/pre-milestone2-v3-20260719, tags pre-milestone2-v3-20260719, v1-demo-scalability-ready, v1-review-ready) all exist. CONTRIBUTING's two links exist.
 
 **Evidence.** Existence-checked each target with a shell loop: all 23 returned OK, including docs/assets/readme/project-overview.png, matlab/EXECUTION_STATUS.md, dashboard/tableau/TABLEAU_IMPLEMENTATION_BLOCKER.md, presentation/deck/Future_City_Fellowship_Milestone_2_Final.pdf. git branch -a / git tag -l confirm the refs.
 
 ### I-24 · `README.md`
-**Lane:** L06-root-ci · **Category:** claim-verified · **Confirmed:** yes — LEDGER FIND-NUM-01/02, FIND-REPO-08
+**Lane:** L06-root-ci · **Category:** claim-verified · **Confirmed:** yes - LEDGER FIND-NUM-01/02, FIND-REPO-08
 
 **Claim.** Several README/CHANGELOG headline claims DO check out and should not be touched in Phase 1: 80 tests (78 def test_ plus one 3-way parametrize = 80 collected), 9 dashboard visuals, 120 contract rows, 12 sites, 52 fellowship criteria, 25/48 legacy totals, docs step count 11, and all NPC/CO2e figures in the headline table.
 
@@ -1329,7 +1329,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### I-28 · `docs/human-actions/team_alternatives_session/01_FACILITATION_GUIDE.md`
 **Lane:** L08-human-actions · **Category:** missing-file · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The facilitation guide lists 'the MCDA CSV' as required session material, but that file is not in the repository — the team cannot open it from the repo on session day.
+**Claim.** The facilitation guide lists 'the MCDA CSV' as required session material, but that file is not in the repository - the team cannot open it from the repo on session day.
 
 **Evidence.** docs/human-actions/team_alternatives_session/01_FACILITATION_GUIDE.md:6 `**Materials:** this package printed or on screen; the MCDA CSV; the alternatives briefing`. The file is named at 02_PROVISIONAL_MCDA.md:5 as `SOLUTION_ALTERNATIVES_MCDA.csv (pre-V3 research archive, not tracked in this repository)`. Verified: `find . -iname "*MCDA*" -not -path "./.git/*"` returns only ./docs/human-actions/team_alternatives_session/02_PROVISIONAL_MCDA.md and ./presentation/assets/10_mcda_provisional.png.
 
@@ -1357,7 +1357,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### I-32 · `incoming/explorer/fcf-3d/fcf3d/build_sites.py`
 **Lane:** L10-explorer-python · **Category:** drift-gate-verified · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** SUBSCORE_WEIGHTS and DRIVERS are NUMERICALLY IDENTICAL to repo/src/fcf_m2/scoring.py — zero differences across all 19 driver weights, all 6 inversions, and all 4 subscore weights. Structural differences (hours_open_n computed inline upstream, ev_share_local_n via bounded_signal, access_adjustment 1.00/0.35 deliberately not mirrored, .round(1)) are each handled correctly.
+**Claim.** SUBSCORE_WEIGHTS and DRIVERS are NUMERICALLY IDENTICAL to repo/src/fcf_m2/scoring.py - zero differences across all 19 driver weights, all 6 inversions, and all 4 subscore weights. Structural differences (hours_open_n computed inline upstream, ev_share_local_n via bounded_signal, access_adjustment 1.00/0.35 deliberately not mirrored, .round(1)) are each handled correctly.
 
 **Evidence.** build_sites.py:92-97 {demand 0.45, feasibility 0.30, safety 0.15, equity 0.10} == scoring.py:170-175. build_sites.py:136-174 driver weights 0.18/0.18/0.13/0.11/0.10/0.08/0.07/0.08/0.07 | 0.35/0.25/0.25/0.15 | 0.35/0.35/0.15/0.10/0.05 | 1.00 == scoring.py:140-168 identical coefficients. build_sites.py:322-323 `res["hours_open_n"] = res["hours_open"].clip(lower=0, upper=24) / 24.0` == scoring.py:146 `0.08 * df["hours_open"].clip(lower=0, upper=24) / 24`. build_sites.py:237 applies access_adj to demand only == scoring.py:151.
 
@@ -1385,14 +1385,14 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### I-36 · `incoming/explorer/fcf-3d/CLAUDE.md`
 **Lane:** L10-explorer-python · **Category:** clean-scan · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** No secrets, tokens, AWS account IDs, absolute /Users paths, or the retired 590.2 eGRID factor anywhere in the explorer tree. The 596.3 lb CO2e/MWh factor never appears either — the explorer copies net_co2e_kg out of the contract but never surfaces the grid factor.
+**Claim.** No secrets, tokens, AWS account IDs, absolute /Users paths, or the retired 590.2 eGRID factor anywhere in the explorer tree. The 596.3 lb CO2e/MWh factor never appears either - the explorer copies net_co2e_kg out of the contract but never surfaces the grid factor.
 
 **Evidence.** grep for 590 across the tree: no matches. grep for 596.3: no matches. grep for /Users/ in fcf3d, tests, blender, Makefile, README.md, CLAUDE.md: no matches. grep -inE 'api[_-]?key|secret|AKIA|aws_|bearer |eyJ...' returns only CLAUDE.md:65 (the policy statement), web/app.js:145 (Cesium.Ion.defaultAccessToken = token), and web/index.html:102 (a placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." JWT-header prefix, not a credential). repo contract grid_factor_value = 596.3 on all 120 rows, vintage eGRID2023r2 accessed 2026-07-19.
 
 ### I-37 · `fcf-3d/web/data/sites.geojson`
 **Lane:** L11-explorer-web · **Category:** clean · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** No eGRID emissions factor appears anywhere in the explorer tree — neither the current 596.3 nor the corrected-away 590.2.
+**Claim.** No eGRID emissions factor appears anywhere in the explorer tree - neither the current 596.3 nor the corrected-away 590.2.
 
 **Evidence.** grep -rn -E "596\.3|590\.2|eGRID|egrid|emission" across the entire fcf-3d tree returns zero hits. scenarios[].net_co2e_kg carries only precomputed results (e.g. FFX002 2026 baseline net_co2e_kg = 4180.5).
 
@@ -1427,7 +1427,7 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### I-42 · `dashboard/static/STATIC_DASHBOARD.pdf`
 **Lane:** L12-binaries · **Category:** accessibility · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** dashboard/static/STATIC_DASHBOARD.pdf — the artifact the repo calls the offline fail-safe — has zero text layer and is therefore unsearchable and not screen-reader accessible; its charts are lossily JPEG-recompressed from RGBA PNGs.
+**Claim.** dashboard/static/STATIC_DASHBOARD.pdf - the artifact the repo calls the offline fail-safe - has zero text layer and is therefore unsearchable and not screen-reader accessible; its charts are lossily JPEG-recompressed from RGBA PNGs.
 
 **Evidence.** pypdf extract_text() over all 9 pages returns 0 characters. Each page holds exactly one XObject named image.jpg in mode RGB at full page pixel size (p1 2750x1131 ... p9 2185x1309). Generator scripts/build_static_dashboard.py:219-221 `pngs = sorted(OUT.glob("0*.png")); imgs = [Image.open(p).convert("RGB") ...]; imgs[0].save(OUT / "STATIC_DASHBOARD.pdf", save_all=True, append_images=imgs[1:])`.
 
@@ -1441,13 +1441,13 @@ subset the program lead independently confirmed and the plan for acting on each.
 ### I-44 · `presentation/deck/Future_City_Fellowship_Milestone_2_Final.pptx`
 **Lane:** L12-binaries · **Category:** data-integrity · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** POSITIVE: the deck has not drifted from the repo's PNG assets — all 10 PPTX-embedded images are SHA-256 identical to on-disk files, and the exported PDF matches the PPTX slide-for-slide.
+**Claim.** POSITIVE: the deck has not drifted from the repo's PNG assets - all 10 PPTX-embedded images are SHA-256 identical to on-disk files, and the exported PDF matches the PPTX slide-for-slide.
 
 **Evidence.** ppt/media/image1.png..image10.png hash-match presentation/assets/10_mcda_provisional.png (slide6), dashboard/static/01_readiness_ranking.png (slide8), 09_site_map_offline.png + 02_starter_vs_pathway.png (slide9), 03_ports_three_horizons.png + 04_lifecycle_cost.png (slide11), docs/assets/architecture/integration_architecture.png (slide13), 05_net_co2e.png + 06_avoided_evse.png (slide14), 08_limitations.png (slide15). PDF 17 pages vs PPTX 17 slides, first text line identical on all 17. dashboard/static/07_peak_wait.png is the only dashboard visual unused in the deck.
 
 ### I-45 · `incoming/explorer/fcf-3d/.gitignore`
 **Lane:** L12-binaries · **Category:** deployment-risk · **Confirmed:** not yet re-checked by the lead
 
-**Claim.** The 12 GLBs are gitignored build outputs, not tracked assets — any Phase 3 integration that assumes they travel with the repo will find an empty models directory.
+**Claim.** The 12 GLBs are gitignored build outputs, not tracked assets - any Phase 3 integration that assumes they travel with the repo will find an empty models directory.
 
 **Evidence.** incoming/explorer/fcf-3d/.gitignore:8 `web/models/*.glb`. Makefile:119 `rm -rf web/data/sites.* web/data/manifest.json web/models/*.glb`. Rebuild path is `python -m fcf3d.build_models --sites web/data/sites.geojson --out web/models` (fcf3d/build_models.py docstring).

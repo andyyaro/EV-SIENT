@@ -14,7 +14,7 @@ Producer: `fcf_m2` (Python V3). Consumers: MATLAB/Simulink V3, Excel workbook, T
 | `contract_manifest.json` | version, input/table SHA-256 hashes, generation stamp |
 
 ## Consumer rules
-1. Join on `site_id` only — never on names.
+1. Join on `site_id` only - never on names.
 2. `capacity_basis` is machine-readable placeholder-vs-verified provenance: any consumer using capacity MUST propagate the placeholder label when basis is not `verified_utility`/`verified_facility`.
 3. Presentation numbers cite `contract_version` + `generated_utc` from the manifest.
 4. Validation: `python -m fcf_m2.workflow validate-contract <dir>` re-runs all rules and the RT-10 hash chain.

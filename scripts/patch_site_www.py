@@ -6,7 +6,7 @@ Why this ran three weeks late
 `docs/operations/website-patch-package/` has existed since before this program started, with a
 guide, content, and an acceptance checklist. Measured against the **live** pages, essentially
 none of it had been applied: `/privacy.html` and `/standards.html` were 404, no page carried an
-authority disclaimer or a source-vintage footer, and — the one that matters most —
+authority disclaimer or a source-vintage footer, and - the one that matters most -
 `results.html` presented site rankings and advance/monitor recommendations with **zero**
 mentions of capacity, placeholder, estimate or caveat.
 
@@ -16,7 +16,7 @@ which sites to advance without telling them that nobody has confirmed the electr
 at any of them.
 
 The patches could not be applied as code before now because **the pages were not in the
-repository at all** — they existed only as S3 objects. They are now under `site/www/`, so this
+repository at all** - they existed only as S3 objects. They are now under `site/www/`, so this
 is a reviewable diff instead of a hand-edit of production.
 
 Every factual claim inserted here was checked against `data/contract/v1/` before use: the grid
@@ -52,7 +52,7 @@ VINTAGE_FOOTER = """
   Data: canonical contract v1.0.0 (generated 2026-07-19) · site inputs 2026-06-24 ·
   emissions factor EPA eGRID2023 Rev&nbsp;2, SRVC, 596.3&nbsp;lb&nbsp;CO2e/MWh
   (accessed 2026-07-19; refreshed annually) ·
-  Planning-support prototype — nothing on this site is an approval or an official forecast.
+  Planning-support prototype - nothing on this site is an approval or an official forecast.
   <a href="privacy.html" style="color:#1B4332;">Privacy</a> ·
   <a href="standards.html" style="color:#1B4332;">Standards</a>
 </footer>
@@ -60,13 +60,13 @@ VINTAGE_FOOTER = """
 
 AUTHORITY_DISCLAIMER = """
 <aside class="fcf-authority" role="note" style="background:rgba(176,137,72,.12);border-top:1px solid #B08948;border-bottom:1px solid #B08948;padding:.85rem 1.15rem;font-size:.9rem;line-height:1.55;color:#2b2b2b;">
-  <strong>What this site is — and is not.</strong> This is a Future City Fellowship
+  <strong>What this site is - and is not.</strong> This is a Future City Fellowship
   planning-support prototype. It is <strong>not</strong> engineering advice, a permit or
   code-compliance determination, a utility capacity confirmation, an official forecast, or a
   procurement or construction authorization. Every siting decision remains subject to
   electrical, ADA, fire/AHJ, stormwater and permitting review by the responsible authorities.
   <strong>No site shown here is approved.</strong>
-  <strong>Electrical capacity is an unverified placeholder at all twelve sites</strong> —
+  <strong>Electrical capacity is an unverified placeholder at all twelve sites</strong> -
   nobody has confirmed the service could support chargers.
 </aside>
 """
@@ -76,9 +76,9 @@ AUTHORITY_DISCLAIMER = """
 CAPACITY_CAVEAT = """
 <aside class="fcf-capacity-caveat" role="note" style="background:rgba(179,38,30,.08);border-left:4px solid #b3261e;padding:.85rem 1.15rem;margin:1rem 0;font-size:.92rem;line-height:1.55;">
   <strong>Electrical capacity is a placeholder at all twelve sites.</strong> Nobody has
-  confirmed that the electrical service at any site could support chargers — every row of the
+  confirmed that the electrical service at any site could support chargers - every row of the
   canonical contract reads <code>capacity_basis = placeholder</code>, and
-  <strong>all 12 sites score Low data confidence — none reaches even Medium</strong>. The rankings below compare sites
+  <strong>all 12 sites score Low data confidence - none reaches even Medium</strong>. The rankings below compare sites
   on modelled demand and screening-class cost; they are <em>not</em> a statement that any site
   is electrically feasible. No feasibility claim is permitted on placeholder capacity, and none
   is made here.
@@ -107,7 +107,7 @@ MODE_NOTE = """
   FFX002 led at 58.8. The canonical model uses fixed anchors rather than scoring sites against
   each other, and ranks <strong>FFX004 (Fairfax County Government Center) first at 53.4</strong>,
   with FFX002 second at 51.8. This page has been corrected; the change is recorded rather than
-  made silently. Neither ordering is a feasibility finding — electrical capacity is an
+  made silently. Neither ordering is a feasibility finding - electrical capacity is an
   unverified placeholder at all twelve sites.
 </aside>
 """
@@ -162,14 +162,14 @@ CURRENCY_CORRECTIONS = [
      "<code>reports/</code>.",
      "A planning report is embedded below from an external host; this repository cannot verify "
      "what that host serves. The copy tracked here was generated <strong>2026-06-28 from the "
-     "<code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site "
+     "<code>legacy_v2</code> baseline</strong> - its table is headed &ldquo;Current Site "
      "Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model "
      "mode. Treat it as a dated artifact, not as current model output."),
     ("The full planning analysis from the latest model run is available below as a generated "
      "report.",
      "A planning report is embedded below from an external host; this repository cannot verify "
      "what that host serves. The copy tracked here was generated <strong>2026-06-28 from the "
-     "<code>legacy_v2</code> baseline</strong> — its table is headed &ldquo;Current Site "
+     "<code>legacy_v2</code> baseline</strong> - its table is headed &ldquo;Current Site "
      "Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model "
      "mode. Treat it as a dated artifact, not as current model output."),
     ("carries the same superseded scores as the gallery above, and names no "
@@ -198,7 +198,7 @@ METHODOLOGY_CORRECTIONS = [
     # not what "current" means.
     ("<p>Current scenarios tested include:</p>",
      "<p>Scenarios tested in the <code>legacy_v2</code> sweep. The canonical "
-     "<code>milestone2_v3</code> contract carries four scenario names \u2014 "
+     "<code>milestone2_v3</code> contract carries four scenario names - "
      "<code>baseline</code>, <code>base</code>, <code>high</code>, "
      "<code>stress_combined</code>:</p>"),
     ('<span class="insight-eyebrow">Current results</span>',
@@ -231,18 +231,18 @@ GALLERY_PRESENTATION = {
 #: Card headings for positions after the top two, keyed by the canonical tier text so they
 #: cannot contradict the tier shown beside them.
 TIER_TITLE = {
-    "Tier 1 — advance to site screening": "Strong starter candidate",
+    "Tier 1 - advance to site screening": "Strong starter candidate",
     "High-review candidate": "Useful but high-review",
-    "Tier 2 — promising candidate, refine data": "Promising, needs better data",
-    "Tier 3 — lower priority / monitor": "Monitor before expanding",
+    "Tier 2 - promising candidate, refine data": "Promising, needs better data",
+    "Tier 3 - lower priority / monitor": "Monitor before expanding",
     "Low public-priority / special-use": "Do not advance yet",
 }
 
 TIER_SHORT = {
-    "Tier 1 — advance to site screening": "Tier 1",
+    "Tier 1 - advance to site screening": "Tier 1",
     "High-review candidate": "High-review",
-    "Tier 2 — promising candidate, refine data": "Tier 2",
-    "Tier 3 — lower priority / monitor": "Tier 3",
+    "Tier 2 - promising candidate, refine data": "Tier 2",
+    "Tier 3 - lower priority / monitor": "Tier 3",
     "Low public-priority / special-use": "Special-use",
 }
 
@@ -339,12 +339,12 @@ def replace_block(text: str, css_class: str, block: str) -> str:
 
 
 def insert_after_nav_or_body_open(text: str, block: str) -> str:
-    """Put the disclaimer high on the page — after the whole masthead, before the content.
+    """Put the disclaimer high on the page - after the whole masthead, before the content.
 
     ``</header>`` is tried before ``</nav>`` and that ordering is the entire point. These pages
     wrap the nav in ``<header class="topbar">``, which is a **flex container**; inserting after
     ``</nav>`` put the disclaimer *inside* it, where it became a flex item and rendered as a
-    narrow column squashed against one edge. It was correct, present, and unreadable — which is
+    narrow column squashed against one edge. It was correct, present, and unreadable - which is
     the same "hand-pressed and cut off" failure this project has already shipped once.
     """
     header = re.search(r"</header>", text)
@@ -363,7 +363,7 @@ def build_standalone(title: str, heading: str, body_html: str) -> str:
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title} — Future City GMU</title>
+<title>{title} - Future City GMU</title>
 <style>
 body{{margin:0;background:#f5f2ea;color:#101214;font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}}
 .w{{max-width:46rem;margin:0 auto;padding:2.6rem 1.15rem}}
@@ -387,7 +387,7 @@ li{{margin:.35rem 0}}
 
 
 def markdown_to_html(md: str) -> str:
-    """Deliberately tiny. These two documents are headings, paragraphs, lists and bold — using
+    """Deliberately tiny. These two documents are headings, paragraphs, lists and bold - using
     a Markdown dependency to render them would add a runtime package for two static pages."""
     out, in_list = [], False
     for raw in md.splitlines():
@@ -480,7 +480,7 @@ def main() -> int:
         # them saves a visitor 6.5 MB and removes 6.5 MB of duplicate storage; the rendered
         # page is byte-for-byte the same picture it was before.
         # Also strips the absolute origin the originals carried. An absolute URL means the
-        # page cannot be previewed anywhere but production — the local render showed six
+        # page cannot be previewed anywhere but production - the local render showed six
         # broken images because the browser was dutifully fetching from the live site.
         text = re.sub(r"https?://futurecityfellowship\.andyyaro\.com/top-model-findings-cards-bgs/image[1-6]\.png",
                       "img/card-background.png", text)

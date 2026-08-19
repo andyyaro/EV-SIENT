@@ -1,4 +1,4 @@
-"""Build a frozen, hash-logged milestone archive (PY-10). **INTERNAL — NOT FOR PUBLICATION.**
+"""Build a frozen, hash-logged milestone archive (PY-10). **INTERNAL - NOT FOR PUBLICATION.**
 
 Creates <out>/fcf_m2_v3_release_<date>.zip containing the source snapshot, generated
 outputs, contract, environment record, limitations, and exact reproduction commands,
@@ -6,7 +6,7 @@ plus a SHA-256 manifest. Nothing is pushed or published by this script.
 
 Why the warning is this loud
 ----------------------------
-``INCLUDE`` carries ``data/inputs``, which holds ``real_sites_v2.csv`` — facility-level
+``INCLUDE`` carries ``data/inputs``, which holds ``real_sites_v2.csv`` - facility-level
 electrical and occupancy data for twelve named public buildings in Fairfax City and Prince
 William County. That is deliberate for an *internal* archive: the point of a milestone
 snapshot is that it reproduces the run, and the run needs its inputs.
@@ -18,7 +18,7 @@ the distinction explicit rather than relying on whoever runs it next remembering
 
 The synthetic counterpart now exists (DEC-020): four files under ``data/synthetic/`` are
 substituted for the real inputs, and ``--public`` builds a complete, runnable artifact. It
-still refuses — loudly, deleting the archive — if the finished bundle is found to contain any
+still refuses - loudly, deleting the archive - if the finished bundle is found to contain any
 real facility identifier, which is a check on the OUTPUT rather than a refusal to try.
 
 *(This paragraph previously said no synthetic set existed and that ``--public`` refused
@@ -46,7 +46,7 @@ OUTPUTS = ["data/outputs/v3_run", "data/outputs/legacy_check"]
 
 #: Paths carrying real, non-public site data. Named so the refusal below can say WHICH file
 #: it is protecting rather than failing with a generic message.
-PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facilities' "
+PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv - twelve named public facilities' "
                                 "electrical and occupancy data (DEC-016)"}
 
 
@@ -54,7 +54,7 @@ PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facil
 #:
 #: Swapping the four input files was the obvious approach and it is not close to sufficient.
 #: Inspecting a built artifact showed **87 files leaking 36 distinct real facility
-#: identifiers** — not from the inputs, which had been substituted correctly, but from every
+#: identifiers** - not from the inputs, which had been substituted correctly, but from every
 #: derived artifact: model outputs under data/outputs, the test fixtures, the NFC placement
 #: cards and tag payloads, the contract, and the docs. The real site identities are woven
 #: through everything the study has ever produced.
@@ -69,14 +69,14 @@ PRIVATE_PATHS = {"data/inputs": "real_sites_v2.csv — twelve named public facil
 #: every public archive while the build printed "verified: no real facility identifier appears
 #: in the archive". The whole-string search could not see a distinctive fragment of a name.
 #: The claim is removed rather than repaired, because the guarantee does not come from any
-#: directory having been audited once — it comes from `assert_no_real_identifiers` inspecting
+#: directory having been audited once - it comes from `assert_no_real_identifiers` inspecting
 #: the finished archive on every build, which is the only form of it that cannot go stale.
 PUBLIC_INCLUDE = [
     "src", "data/anchors", "data/observed", "pyproject.toml", "requirements-lock.txt",
     # The platform's hand-written sources. Each was checked for real identifiers before being
     # added; app.js carried one, in a comment showing a deep-link example, and now uses the
     # synthetic id space. The GENERATED surfaces (provenance_v1.json, the contract copies, the
-    # explorer and dashboard) are deliberately absent — they are built from real data. A
+    # explorer and dashboard) are deliberately absent - they are built from real data. A
     # recipient generates their own by running the model on the synthetic inputs.
     "site/platform/index.html", "site/platform/app.js",
     "site/platform/styles.css", "site/platform/field_validate.js",
@@ -87,7 +87,7 @@ PUBLIC_SCRIPTS = [
     "scripts/build_synthetic_inputs.py",
     # scripts/verify.sh is NOT here, and was until a pre-release audit ran it inside a built
     # installer: it failed 36 of its 40 gates with 35 "No such file or directory" lines,
-    # because its gates reach for tests/, docs/, matlab/ and data/contract/ — none of which
+    # because its gates reach for tests/, docs/, matlab/ and data/contract/ - none of which
     # this bundle contains, by design. Nothing in the bundle tells a recipient to run it, so
     # its only possible effect was to make someone who found it conclude the software was
     # broken. An honest absence beats a check that cannot pass.
@@ -122,7 +122,7 @@ def archive_path(path: Path) -> str:
 
     Measured on the packaging workflow's first successful run: the Windows artifact shipped the
     synthetic inputs at their own `data/synthetic/...` paths instead of at the four paths the
-    model reads, so a recipient's first run would have found no inputs at all — and 58 of its 60
+    model reads, so a recipient's first run would have found no inputs at all - and 58 of its 60
     RELEASE_MANIFEST entries carried backslash keys that matched none of the names in the
     archive beside them. The macOS artifact from the same run was correct, which is exactly why
     building on one platform and assuming the other proves nothing.
@@ -148,7 +148,7 @@ def resolve_public(public: bool) -> tuple[dict, list[str]]:
     """Return (substitutions, problems) for a public build.
 
     Refuses rather than degrades. A public artifact that silently omitted an input would ship
-    an installer that starts and fails on first run — the recipient would conclude the model
+    an installer that starts and fails on first run - the recipient would conclude the model
     was broken rather than absent, which is the worse of the two misunderstandings.
     """
     if not public:
@@ -230,7 +230,7 @@ def jurisdiction_words(rows) -> set[str]:
 
     Deliberately NOT protected, and the reasoning is the same one already recorded below for
     city and state: the study is openly about Fairfax City, Fairfax County and Prince William
-    County — it says so in its README, its title and its public website. DEC-016 protects
+    County - it says so in its README, its title and its public website. DEC-016 protects
     *which buildings were assessed and what was found about them*. A jurisdiction reveals
     neither, and searching for one fires on sentences like `config.py`'s "invented data must
     not be able to claim Fairfax City or Prince William County", which is a comment enforcing
@@ -254,14 +254,14 @@ def distinctive_tokens(names, jurisdictions=frozenset()) -> set[str]:
     jurisdiction, and appears in exactly one facility name.
 
     `Neabsco` qualifies. `Commuter`, `Garage` and `Regional` must not, and neither must
-    `Safety` or `Training` — `("safety_subscore", "Safety")` in `build_sites.py` is a scoring
+    `Safety` or `Training` - `("safety_subscore", "Safety")` in `build_sites.py` is a scoring
     label with no facility in it. A guard that fires on ordinary English gets exemptions bolted
     onto it until it stops guarding anything, so the bar for a token is that it could only be a
     name.
 
     **Known limit, stated rather than papered over:** a facility whose name is built entirely
-    from jurisdiction and generic words — `Prince William County Public Safety Training Center`
-    is exactly that — has no distinctive token at all, so token-level protection does nothing
+    from jurisdiction and generic words - `Prince William County Public Safety Training Center`
+    is exactly that - has no distinctive token at all, so token-level protection does nothing
     for it. It is still covered by the full-name, site-id and address searches. This function
     narrows the gap; it does not close it.
     """
@@ -277,7 +277,7 @@ def distinctive_tokens(names, jurisdictions=frozenset()) -> set[str]:
 def assert_no_real_identifiers(zip_path: Path) -> None:
     """Open the finished archive and prove it carries nothing real. Delete it if it does.
 
-    This is the check the requirement actually asks for — *verified by inspecting the built
+    This is the check the requirement actually asks for - *verified by inspecting the built
     package, not by assuming*. It exists because the assumption failed: an artifact whose
     inputs had been correctly substituted still shipped 36 real facility identifiers through
     files nobody had thought of.
@@ -288,7 +288,7 @@ def assert_no_real_identifiers(zip_path: Path) -> None:
     # Building-level identifiers only: the site id, the facility name, the street address.
     #
     # City and state are deliberately NOT searched. The first version included them and fired
-    # on `"Building official / electrical inspector (Fairfax City / PWC)"` in standards.py —
+    # on `"Building official / electrical inspector (Fairfax City / PWC)"` in standards.py -
     # which names the permitting authority for a jurisdiction, not a facility. The study is
     # openly about Fairfax City and Prince William County; that is in its README, its title and
     # its public website. What DEC-016 protects is *which buildings were assessed and what was
@@ -299,12 +299,12 @@ def assert_no_real_identifiers(zip_path: Path) -> None:
     # "(client's Neabsco pattern)" while the build printed "verified: no real facility
     # identifier appears in the archive (36 searched)". `Neabsco` is the distinctive half of
     # PWC002's real name, `Neabsco-Potomac Commuter Garage`, and README.md spells the full name
-    # out — joining the two is trivial for anyone who has both. The check said the archive was
+    # out - joining the two is trivial for anyone who has both. The check said the archive was
     # clean and it was not.
     #
     # So DISTINCTIVE TOKENS of each facility name are searched too. "Distinctive" is doing real
-    # work: a facility name is mostly generic words — Library, Center, Garage, Community,
-    # Regional, Park — and searching those would fire on ordinary prose and train whoever hits
+    # work: a facility name is mostly generic words - Library, Center, Garage, Community,
+    # Regional, Park - and searching those would fire on ordinary prose and train whoever hits
     # it to add exemptions, which is how a guard dies. A token counts only if it is long enough
     # to be a name and appears in no more than one facility.
     real_rows = list(csv.DictReader((ROOT / "data/inputs/real_sites_v2.csv").open()))
@@ -405,7 +405,7 @@ def main(out_dir: str | None = None, public: bool = False) -> Path:
 
 if __name__ == "__main__":
     # Parsed explicitly rather than positionally. The first version took sys.argv[1] as the
-    # output directory, so `--public` was silently treated as a path and the guard never ran —
+    # output directory, so `--public` was silently treated as a path and the guard never ran -
     # it cheerfully created a directory literally named "--public".
     args = [a for a in sys.argv[1:] if a != "--public"]
     main(args[0] if args else None, public="--public" in sys.argv[1:])

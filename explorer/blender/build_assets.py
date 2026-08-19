@@ -1,5 +1,5 @@
 """
-build_assets.py — headless Blender asset factory for ChargeReady NOVA.
+build_assets.py - headless Blender asset factory for ChargeReady NOVA.
 
 Builds the proposed EV charging infrastructure for every candidate site and
 exports one glTF-Binary per site, ready for CesiumJS to place at real-world
@@ -23,7 +23,7 @@ and gives you a .blend you can open and art-direct by hand. Both read their
 geometry from `fcf3d.geometry`, so they cannot drift apart.
 
 Blender is an AUTHORING tool here, not the viewer. It never ships to the
-browser — it produces glTF, and CesiumJS does the delivery.
+browser - it produces glTF, and CesiumJS does the delivery.
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ BEVEL_WIDTH = 0.015
 
 
 def reset_scene() -> None:
-    """Empty the file completely — --factory-startup still ships a default cube."""
+    """Empty the file completely - --factory-startup still ships a default cube."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for block in (bpy.data.meshes, bpy.data.materials, bpy.data.objects):
         for item in list(block):

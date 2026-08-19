@@ -10,7 +10,7 @@ call the model, it invokes the *same command the CLI invokes*.
 So an operation is a **declared command**, not a Python callable. The UI renders this
 registry; the desktop tier runs the command; the web tier renders the same list with the
 desktop-only entries visibly unavailable and says why. There is no second code path to drift,
-which is what makes byte-equivalence provable rather than asserted — see
+which is what makes byte-equivalence provable rather than asserted - see
 ``tests/test_operations.py``.
 
 This module deliberately knows nothing about any UI framework. Whatever shell Phase 7 lands
@@ -59,7 +59,7 @@ class Operation:
     #: Platforms this operation can actually run on. Empty means "anywhere".
     #:
     #: `verify-all` is declared as `bash scripts/verify.sh` and will not run on a stock Windows
-    #: machine. Left undeclared, the platform would offer a button that simply fails there —
+    #: machine. Left undeclared, the platform would offer a button that simply fails there -
     #: and this registry's own rule is that an unavailable capability states WHY rather than
     #: appearing broken. The rule was being applied to tiers and not to platforms.
     platforms: tuple[str, ...] = ()
@@ -114,7 +114,7 @@ OPERATIONS: list[Operation] = [
     # ---------------------------------------------------------------- run the model
     Operation(
         id="run-milestone2-v3",
-        label="Run the model — canonical (milestone2_v3)",
+        label="Run the model - canonical (milestone2_v3)",
         description=(
             "Runs the full Python model in canonical mode and regenerates the contract: "
             "demand, right-sizing, waits, economics, emissions, confidence and triggers."),
@@ -128,7 +128,7 @@ OPERATIONS: list[Operation] = [
     ),
     Operation(
         id="run-legacy-v2",
-        label="Run the model — legacy V2 baseline",
+        label="Run the model - legacy V2 baseline",
         description=(
             "Reproduces the accepted V2 baseline exactly: 25 starter ports, 48 pathway. Kept "
             "runnable so the older published figures stay checkable."),
@@ -147,7 +147,7 @@ OPERATIONS: list[Operation] = [
         id="ingest-observations",
         label="Check what field observations would change",
         description=(
-            "Reads observed capacity and session records and reports what they WOULD change — "
+            "Reads observed capacity and session records and reports what they WOULD change - "
             "which sites upgrade from placeholder capacity, which triggers become evaluable. "
             "It never writes: received values enter the inputs and the model re-runs."),
         tier=TIER_DESKTOP,
@@ -207,7 +207,7 @@ OPERATIONS: list[Operation] = [
         produces=["dashboard/tableau/build/workbook_spec.json"],
         caveat=("Building the .twbx and publishing need Tableau Public installed and a "
                 "signed-in session. Four kinds of presentation feature remain unbuildable, five rows in "
-                "the gap table (the two reference lines are separate sheets) — see "
+                "the gap table (the two reference lines are separate sheets) - see "
                 "dashboard/tableau/CAPABILITY_GAP.md."),
     ),
     Operation(
@@ -240,7 +240,7 @@ OPERATIONS: list[Operation] = [
             "Reads a supplied CSV and reports what intake WOULD do with it: which columns it "
             "would map and which of those are guesses from a name, which fields are absent, "
             "which unit conversions it would apply, and the data confidence the file would "
-            "produce — all before anything is changed or any run starts."),
+            "produce - all before anything is changed or any run starts."),
         tier=TIER_DESKTOP,
         desktop_reason=(
             "Reads a file from your machine. The web tier has no access to your filesystem, "
@@ -258,7 +258,7 @@ OPERATIONS: list[Operation] = [
         id="verify-all",
         label="Run every verification gate",
         description=(
-            "Runs the whole gate suite — contract rules, hash chains, cross-model constants, "
+            "Runs the whole gate suite - contract rules, hash chains, cross-model constants, "
             "published-number checks, secret scan, explorer validity, Tableau and provenance. "
             "This is the check CI runs."),
         tier=TIER_DESKTOP,
@@ -269,7 +269,7 @@ OPERATIONS: list[Operation] = [
         platform_reason=(
             "The gate suite is a bash script, so it does not run on a stock Windows machine. "
             "Windows users can run the same gates under WSL or Git Bash, or read the result of "
-            "the last CI run — CI runs this exact script, so the answer is the same one."),
+            "the last CI run - CI runs this exact script, so the answer is the same one."),
         command=["bash", "scripts/verify.sh"],
     ),
 ]
@@ -300,7 +300,7 @@ def script_present(op: "Operation") -> bool:
     `verify-all` is the case that forced this: `scripts/verify.sh` was removed from the public
     bundle after a pre-release audit ran it there and watched it fail 36 of its 40 gates,
     because those gates reach for tests/, docs/ and matlab/. Without this check the platform
-    would still have offered the button, and pressing it would have produced "no such file" —
+    would still have offered the button, and pressing it would have produced "no such file" -
     an operation appearing broken rather than declaring itself absent, which is the exact rule
     this registry is built on.
     """
@@ -315,7 +315,7 @@ def for_tier(tier: str, platform: str | None = None) -> list[dict]:
     """What a tier shows, including what it CANNOT do and why.
 
     The web tier gets the whole list, not a filtered one. Hiding a capability is how a product
-    quietly becomes less honest than its documentation — a reader who cannot see that
+    quietly becomes less honest than its documentation - a reader who cannot see that
     "Run the model" exists cannot know they need the desktop app for it.
     """
     if tier not in (TIER_BOTH, TIER_DESKTOP):
@@ -328,7 +328,7 @@ def for_tier(tier: str, platform: str | None = None) -> list[dict]:
         available = tier_ok and platform_ok and script_ok
         # THREE different facts, reported most-specific first. Telling a Windows user to install
         # the desktop app is useless advice for an operation the desktop app cannot run there
-        # either — and telling anyone "this is a bash script" is the wrong answer entirely when
+        # either - and telling anyone "this is a bash script" is the wrong answer entirely when
         # the script is simply not part of their installation. Reporting the platform reason for
         # an absent file would be an accurate sentence about the wrong problem, which is this
         # project's most frequent defect.
@@ -336,7 +336,7 @@ def for_tier(tier: str, platform: str | None = None) -> list[dict]:
             reason = (
                 "This operation runs a repository script that is not part of this "
                 "installation. The public installer ships the model and the surfaces it can "
-                "build, not the repository's own verification harness — that harness checks "
+                "build, not the repository's own verification harness - that harness checks "
                 "files (tests, docs, the MATLAB tier, the real contract) which are deliberately "
                 "not distributed, so it could not pass here even if it were included.")
         elif not platform_ok:

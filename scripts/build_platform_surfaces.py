@@ -1,19 +1,19 @@
 """Generate the platform's surface manifest from what is actually on disk.
 
 Every entry is produced by looking for the file. Nothing is listed because it ought to exist,
-and nothing that exists is quietly omitted — a surface manifest written by hand is a promise,
+and nothing that exists is quietly omitted - a surface manifest written by hand is a promise,
 and this project has already shipped one broken promise (a commit message asserting artifacts
 that .gitignore had swallowed).
 
 The deploy set
 --------------
 `site/platform/` is the public bundle. Some surfaces live elsewhere in the repository and are
-COPIED into it at build time — the 3D explorer, the static dashboard images, the contract
+COPIED into it at build time - the 3D explorer, the static dashboard images, the contract
 files offered for download. That copying is explicit and allowlisted here, so a file cannot
 reach the public bundle by being adjacent to one that should.
 
 **The real input data is never copied.** `data/inputs/` is excluded by construction, not by
-convention — see DEC-016.
+convention - see DEC-016.
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ def copy_surfaces() -> dict[str, int]:
             #
             # Refusing outright was right for this repository, where a missing surface means a
             # broken checkout. It is wrong for a public installer, where some surfaces are
-            # deliberately not distributed — the 3D explorer's site data is generated from the
+            # deliberately not distributed - the 3D explorer's site data is generated from the
             # real twelve, so it is excluded, and dying on its absence made the whole platform
             # unreachable rather than merely one card emptier.
             #
@@ -126,7 +126,7 @@ def write_directory_indexes(surfaces: dict) -> list[str]:
         index.write_text(f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title} — Future City Fellowship</title>
+<title>{title} - Future City Fellowship</title>
 <style>
 body{{margin:0;background:#F5F0E6;color:#1a1a1a;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}}
 .w{{max-width:52rem;margin:0 auto;padding:2.5rem 1.15rem}}
@@ -141,7 +141,7 @@ p{{color:#b4b4b4}}li{{border-color:#33383a}}a{{color:#7fbf9a}}}}
 </style></head><body><div class="w">
 <h1>{title}</h1>
 <p>{len(files)} file{"" if len(files) == 1 else "s"}. Listed because this is a plain directory
-of the study's own artifacts — nothing here is generated on request.</p>
+of the study's own artifacts - nothing here is generated on request.</p>
 <ul>
 {rows}
 </ul>
@@ -156,7 +156,7 @@ def build() -> dict:
     counts = copy_surfaces()
 
     # `.glob()` on a missing directory returns empty; `.iterdir()` RAISES. With surfaces now
-    # skippable, that difference decided whether the launcher started at all — the reports
+    # skippable, that difference decided whether the launcher started at all - the reports
     # listing crashed the build one line after the skip message said the directory was absent.
     def listing(relative: str, pattern: str = "*") -> list[str]:
         directory = OUT / relative
@@ -178,7 +178,7 @@ def build() -> dict:
                 "href": "explorer/index.html",
                 "detail": (
                     f"All 12 sites in 3D with {len(models)} building models. Works with no "
-                    f"Cesium account and no token — it falls back to a flat basemap rather "
+                    f"Cesium account and no token - it falls back to a flat basemap rather "
                     f"than requiring a credential."),
                 "count": len(models),
                 "available_on_web": True,
@@ -199,7 +199,7 @@ def build() -> dict:
                 "title": "Tableau workbook",
                 "detail": (
                     "Seven sheets plus a dashboard, published and verified against the "
-                    "canonical contract. Individual sheets render better than the dashboard — "
+                    "canonical contract. Individual sheets render better than the dashboard - "
                     "three charts are narrow inside a dashboard zone, which the authoring "
                     "spec offers no way to control."),
                 "links": [{"label": label, "href": f"{TABLEAU_BASE}/{sheet}{TABLEAU_Q}"}
@@ -211,7 +211,7 @@ def build() -> dict:
                 "id": "contract",
                 "title": "The canonical data contract",
                 "detail": (
-                    "Download the contract itself — every table, the schema, the assumptions "
+                    "Download the contract itself - every table, the schema, the assumptions "
                     "and the manifest with its SHA-256 hash chain. This is the thing every "
                     "number on every surface comes from."),
                 "links": [
@@ -229,7 +229,7 @@ def build() -> dict:
                     f"{len(reports)} documents: the Milestone 2 final report, the risk "
                     f"register, the standards application matrix, the economic and funding "
                     f"brief, and the environment and resilience note. These are the study's "
-                    f"prose — they say what the numbers on this page are for."),
+                    f"prose - they say what the numbers on this page are for."),
                 "items": reports,
                 "count": len(reports),
                 "available_on_web": True,
@@ -248,7 +248,7 @@ def build() -> dict:
         ],
         "deploy_note": (
             "Everything above is copied into the public bundle from an explicit allowlist. "
-            "The real site input data is never copied — not by convention, by construction. "
+            "The real site input data is never copied - not by convention, by construction. "
             "See DEC-016."),
         "never_deployed": NEVER_DEPLOY,
     }
@@ -260,17 +260,17 @@ def mark_absent_surfaces(payload: dict) -> list[str]:
     `build()` writes every surface entry unconditionally, with a fixed `href`. In this
     repository everything is present, so that was invisible. In the **public installer** it was
     not: `copy_surfaces()` deliberately skips the explorer, dashboard, reports, NFC layer and
-    contract v2 — they are generated from the real twelve facilities — yet the manifest still
+    contract v2 - they are generated from the real twelve facilities - yet the manifest still
     carried their hrefs, and `app.js` renders an "Open" anchor for any entry that has one.
 
     Measured on a built public artifact: five cards with dead links, the explorer's reading
     "All 12 sites in 3D with 0 building models" beside a green pill, and Open going to a 404.
     `copy_surfaces()`'s own comment claimed "the manifest still never claims a surface that is
-    not there" — true of that function, false of `build()`, which is where the manifest is
+    not there" - true of that function, false of `build()`, which is where the manifest is
     actually written.
 
     That is worse than an empty card. A recipient sees a capability advertised, clicks, and
-    concludes the software is broken rather than that the surface was never distributed —
+    concludes the software is broken rather than that the surface was never distributed -
     exactly the misreading `docs/INSTALL.md` says this design prevents.
     """
     absent = []
@@ -284,7 +284,7 @@ def mark_absent_surfaces(payload: dict) -> list[str]:
         kept = []
         for link in surface.get("links", []):
             target = link.get("href", "")
-            # http links are someone else's server — Tableau's — and their reachability is not
+            # http links are someone else's server - Tableau's - and their reachability is not
             # something this build can decide. They are kept and the surface counts as present.
             if target.startswith("http") or (OUT / target).exists():
                 kept.append(link)
@@ -294,8 +294,8 @@ def mark_absent_surfaces(payload: dict) -> list[str]:
             surface["links"] = kept
 
         # Present means A READER CAN GET TO SOMETHING: a live href, or at least one live link.
-        # The first version of this only looked at `href`, so the contract card — which has no
-        # href and reaches its downloads entirely through `links` — kept a green "0 items" pill
+        # The first version of this only looked at `href`, so the contract card - which has no
+        # href and reaches its downloads entirely through `links` - kept a green "0 items" pill
         # and the text "Download the contract itself" after both of its links had been stripped.
         # A card offering a download and no way to take it is the same defect one level down.
         surface["present"] = bool(live_href or kept)

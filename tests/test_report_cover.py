@@ -1,13 +1,13 @@
 """The superseded-notice cover must keep telling the truth about the model it corrects.
 
-A cover page that corrects a stale ranking is itself a set of claims — FFX002 at 58.8 under
+A cover page that corrects a stale ranking is itself a set of claims - FFX002 at 58.8 under
 one mode, FFX004 at 53.4 under another, capacity unverified everywhere. Those are exactly the
 kind of hand-written figures that went stale in the document it is stamped onto. If the model
 is ever re-baselined, an unchecked cover becomes a second wrong artifact sitting on top of the
 first.
 
 So every number on the cover is asserted against the canonical fixtures here. The tests read
-`LINES` from the script rather than parsing the PDF, so they run anywhere — CI has neither
+`LINES` from the script rather than parsing the PDF, so they run anywhere - CI has neither
 `qpdf` nor `mutool`, and stamping is deliberately a manual step.
 """
 

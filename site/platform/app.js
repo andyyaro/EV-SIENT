@@ -1,9 +1,9 @@
 /* Platform web tier.
  *
  * Reads two generated files and nothing else:
- *   provenance_v1.json  — every displayed number's lineage, precomputed by
+ *   provenance_v1.json  - every displayed number's lineage, precomputed by
  *                         fcf_m2.provenance.export_all
- *   operations.json     — what the platform can do, from fcf_m2.operations
+ *   operations.json     - what the platform can do, from fcf_m2.operations
  *
  * It computes NOTHING. Not a sum, not a rank, not a derived percentage. The moment this file
  * calculates a displayed value it becomes a second source of truth that can drift from the
@@ -37,7 +37,7 @@ async function loadJSON(path) {
 
 /* Formatting is presentation, never arithmetic. Nothing here changes a value. */
 function formatValue(value, column) {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "-";
   if (typeof value !== "number") return String(value);
   if (column.endsWith("_usd")) {
     return value.toLocaleString(undefined, { style: "currency", currency: "USD",
@@ -48,7 +48,7 @@ function formatValue(value, column) {
 }
 
 /* Reassembles a full record from the normalised export. Mirrors
- * fcf_m2.provenance.entry_to_provenance, and a Python test asserts the two agree — the tiers
+ * fcf_m2.provenance.entry_to_provenance, and a Python test asserts the two agree - the tiers
  * disagreeing about what a number means is the failure this file must not introduce. */
 function resolve(key) {
   const entry = STATE.prov.entries[key];
@@ -96,7 +96,7 @@ function numberCell(siteId, column, { flagPlaceholder = false } = {}) {
   button.textContent = formatValue(p.value, column);
   button.dataset.key = key;
   button.setAttribute("aria-label",
-    `${formatValue(p.value, column)} — ${column} for ${siteId}. Show where this number comes from.`);
+    `${formatValue(p.value, column)} - ${column} for ${siteId}. Show where this number comes from.`);
   button.addEventListener("click", () => openPanel(key));
 
   if (flagPlaceholder && p.capacityBasis === "placeholder") {
@@ -180,7 +180,7 @@ function openPanel(key) {
     none.className = "pv-group";
     none.innerHTML = "<h3>What backs it</h3>" +
       "<p class='pv-rule'>This column has no typed provenance record of its own. It is not " +
-      "attributed to another field's source — an unmapped column says so rather than " +
+      "attributed to another field's source - an unmapped column says so rather than " +
       "borrowing credibility it does not have.</p>";
     body.append(none);
   }
@@ -406,7 +406,7 @@ function renderSimulink() {
 
   const meta = document.createElement("p");
   meta.className = "muted";
-  meta.textContent = `${s.model} — built by MathWorks MATLAB ${s.built_by}, from ${s.from_run}.`;
+  meta.textContent = `${s.model} - built by MathWorks MATLAB ${s.built_by}, from ${s.from_run}.`;
   box.append(meta);
 
   const h = document.createElement("p");
@@ -459,7 +459,7 @@ function renderEngines() {
     const status = document.createElement("strong");
     status.textContent = eng.status;
     const detail = document.createElement("span");
-    detail.textContent = ` — ${eng.detail}`;
+    detail.textContent = ` - ${eng.detail}`;
     body.append(status, detail);
 
     // The single most misreadable fact about this project, stated on every engine.
@@ -702,7 +702,7 @@ document.addEventListener("DOMContentLoaded", main);
  *
  * The form is BUILT FROM `field_schema.json`, which is generated from `observed.py`. Nothing
  * about which fields exist, which values are legal, or which combinations are refused is
- * written here — this file only draws what the schema describes and calls the shared
+ * written here - this file only draws what the schema describes and calls the shared
  * validator. That is the whole point: a hand-written form is a second copy of the model's
  * refusals, and a second copy drifts toward being more permissive than the thing it mirrors.
  *
@@ -740,7 +740,7 @@ function fieldControl(field) {
     input = document.createElement("select");
     const blank = document.createElement("option");
     blank.value = "";
-    blank.textContent = "—";
+    blank.textContent = "-";
     input.append(blank);
     const values = field.type === "site" ? knownSiteIds() : field.values;
     for (const value of values) {
@@ -749,7 +749,7 @@ function fieldControl(field) {
       // The method a person picks caps how strong a claim the value can support. Showing that
       // at the point of choosing is the difference between a dropdown and an explanation.
       const note = field.value_notes && field.value_notes[value];
-      option.textContent = note ? `${value} — ${note}` : value;
+      option.textContent = note ? `${value} - ${note}` : value;
       input.append(option);
     }
     if (field.default) input.value = field.default;
@@ -808,7 +808,7 @@ function showErrors(errors) {
   heading.className = "pv-caveat";
   heading.textContent = errors.length === 1
     ? "This observation was not added:"
-    : `This observation was not added — ${errors.length} problems:`;
+    : `This observation was not added - ${errors.length} problems:`;
   host.append(heading);
 
   const list = document.createElement("ul");

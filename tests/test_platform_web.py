@@ -1,6 +1,6 @@
 """The web tier is wired to what exists, computes nothing, and never drops its caveats.
 
-The web tier is the PRIMARY distribution — most readers will only ever see this. So the
+The web tier is the PRIMARY distribution - most readers will only ever see this. So the
 failures that matter are the quiet ones: a selector pointing at an element that was renamed,
 a fetch for a file that was moved, an arithmetic helper that turns the page into a second
 source of truth, or a caveat that got tidied away in a redesign.
@@ -39,7 +39,7 @@ def js() -> str:
 # ------------------------------------------------------------------ it is wired up
 
 def test_every_selector_in_the_js_exists_in_the_html(html, js):
-    """A selector pointing at a renamed element fails silently — the feature just stops
+    """A selector pointing at a renamed element fails silently - the feature just stops
     working, with no error anyone sees."""
     ids_in_html = set(re.findall(r'id="([^"]+)"', html))
     ids_used = set(re.findall(r'\$\("#([a-zA-Z0-9_-]+)"\)', js))
@@ -59,7 +59,7 @@ def test_the_stylesheet_and_script_are_linked(html):
 
 
 def test_every_class_the_js_sets_is_styled(js):
-    """A class with no rule renders as unstyled text — most visibly, the caveat boxes."""
+    """A class with no rule renders as unstyled text - most visibly, the caveat boxes."""
     css = CSS.read_text()
     used = set(re.findall(r'className = "([a-z0-9 -]+)"', js))
     tokens = {t for group in used for t in group.split()}
@@ -71,7 +71,7 @@ def test_every_class_the_js_sets_is_styled(js):
 
 def test_the_web_tier_does_no_arithmetic_on_displayed_values(js):
     """The moment this page calculates a displayed number it becomes a second source of truth
-    that can drift from the model — the exact failure the contract architecture prevents.
+    that can drift from the model - the exact failure the contract architecture prevents.
 
     Formatting is allowed; aggregation is not.
     """
@@ -156,7 +156,7 @@ def test_there_is_no_unknown_fallback_for_an_unexplained_number(js):
 
 def test_the_tier_is_detected_not_configured(js):
     """One file serves both tiers. A build-time flag would mean two builds, and two builds
-    drift — which is exactly what the single-contract architecture exists to prevent."""
+    drift - which is exactly what the single-contract architecture exists to prevent."""
     assert "async function detectTier" in js
     assert "/api/operations" in js
     # No hardcoded tier constant that a build step would have to set.

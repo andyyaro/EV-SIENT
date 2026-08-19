@@ -2,23 +2,23 @@
 
 Every term this project uses that isn't everyday English, with one honest sentence each.
 
-Where a term carries a limitation, the limitation is part of the definition — not a footnote.
+Where a term carries a limitation, the limitation is part of the definition - not a footnote.
 That's deliberate: a glossary that defines "readiness score" without saying what it can't tell
 you has made the term sound more solid than it is.
 
 ---
 
-### AADT — Annual Average Daily Traffic
+### AADT - Annual Average Daily Traffic
 
 The average number of vehicles passing a point per day over a year, used as one signal of how
 much passing demand a site might see. It is supplied for all twelve sites and ranges widely,
-from 490 to 51 000 vehicles a day — but it comes from the nearest VDOT traffic segment, and the
+from 490 to 51 000 vehicles a day - but it comes from the nearest VDOT traffic segment, and the
 source notes say it should be treated as **screening-level traffic, not site-access
 validation**.
 
-### AHJ — Authority Having Jurisdiction
+### AHJ - Authority Having Jurisdiction
 
-The local official who actually decides whether something is permitted to be built — usually the
+The local official who actually decides whether something is permitted to be built - usually the
 building official, electrical inspector, or fire marshal. Nothing in this project substitutes
 for their decision.
 
@@ -32,8 +32,8 @@ this study.
 ### Data confidence
 
 A score from 0 to 100 for how well-sourced each site's data is, derived only from typed
-provenance fields — never from how good the answer looks. **All 12 sites currently score 33.8,
-which is Low** — not one reaches even Medium.
+provenance fields - never from how good the answer looks. **All 12 sites currently score 33.8,
+which is Low** - not one reaches even Medium.
 
 ### eGRID factor
 
@@ -52,7 +52,7 @@ drives the equity sub-score, which is 10% of the readiness score.
 
 ### Expansion trigger
 
-A predefined condition — on observed utilisation, wait time, reliability and equity — proposed
+A predefined condition - on observed utilisation, wait time, reliability and equity - proposed
 as the gate that should be met before more chargers are energised. It is **proposed
 configuration, not adopted municipal policy**, and because no site has been observed in
 operation, **no trigger has ever been evaluated against real data.**
@@ -72,10 +72,10 @@ across runs; they are not a ranking of all possible sites.
 ### Lifecycle cost / Net present cost
 
 The total modelled cost of a site over the study period, discounted to today's money. These are
-**screening-class estimates for comparing sites** — not budgets, not quotes, and not engineering
+**screening-class estimates for comparing sites** - not budgets, not quotes, and not engineering
 cost estimates.
 
-### MCDA — Multi-Criteria Decision Analysis
+### MCDA - Multi-Criteria Decision Analysis
 
 A method for comparing options across several factors at once when no single number captures
 them all. It produces a defensible comparison, not an objectively correct answer: change the
@@ -84,7 +84,7 @@ weights and the order can change.
 ### Pathway capacity
 
 How many charging ports a site could grow to **if** the civil and electrical groundwork is built
-for it now — conduit, trenching, service headroom. Building the pathway is cheap during initial
+for it now - conduit, trenching, service headroom. Building the pathway is cheap during initial
 construction and expensive afterwards, which is the whole argument for staging.
 
 ### Placeholder
@@ -94,7 +94,7 @@ not a measurement. Every placeholder is labelled as one everywhere it appears.
 
 ### Provenance
 
-The record of where a number came from — which run produced it, from which contract version,
+The record of where a number came from - which run produced it, from which contract version,
 backed by which source, at what confidence. Every number on the platform is clickable, and
 anything that cannot be explained is not shown.
 
@@ -123,8 +123,7 @@ observed data clears the expansion triggers. The strategy this whole project exi
 ### Starter ports
 
 The number of charging ports recommended for immediate installation at a site. Across the
-portfolio it is deliberately smaller than the pathway capacity — 25 now against a pathway for 48
-— though at three of the twelve sites (PWC003, PWC005, PWC008) the two are equal at 2 ports, so
+portfolio it is deliberately smaller than the pathway capacity - 25 now against a pathway for 48 though at three of the twelve sites (PWC003, PWC005, PWC008) the two are equal at 2 ports, so
 "starter" and "pathway" are not always different numbers.
 
 ---

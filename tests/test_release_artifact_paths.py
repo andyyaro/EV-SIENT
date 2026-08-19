@@ -12,7 +12,7 @@ recipient's first run would have found no inputs at all. The same `str()` put ba
 **58 of the 60** RELEASE_MANIFEST keys, which then matched none of the names in the archive
 beside them.
 
-Nothing leaked — both archives were clean of all real facility identifiers — so this is an
+Nothing leaked - both archives were clean of all real facility identifiers - so this is an
 availability failure, not a disclosure one. It is in this file because no test in the repository
 could see it: they all run where the path separator is `/`.
 
@@ -90,7 +90,7 @@ def test_every_substitution_target_is_a_path_the_model_reads():
 def public_archive(tmp_path_factory):
     out = tmp_path_factory.mktemp("public")
     # `main`, not `build`. The first version of this fixture guessed the name, caught
-    # AttributeError and skipped — three green-looking skips that asserted nothing about the
+    # AttributeError and skipped - three green-looking skips that asserted nothing about the
     # artifact. A test that cannot run is not a passing test.
     try:
         zpath = bra.main(str(out), public=True)
@@ -111,7 +111,7 @@ def test_the_public_archive_carries_every_input_the_model_reads(public_archive):
         names = set(z.namelist())
     missing = [real for real in bra.PUBLIC_SUBSTITUTIONS if real not in names]
     assert not missing, (
-        f"the public artifact is missing {missing} — these are the paths the model reads, and "
+        f"the public artifact is missing {missing} - these are the paths the model reads, and "
         f"without them a recipient's first run finds no inputs")
 
 
@@ -124,10 +124,10 @@ def test_every_text_file_in_the_public_archive_is_valid_utf8(public_archive):
     """The third Windows defect from the same green run.
 
     `path.open("w")` uses the interpreter's LOCALE encoding, which is cp1252 on a Windows
-    runner. Every synthetic row carries the note "SYNTHETIC FIXTURE — invented facility", and
+    runner. Every synthetic row carries the note "SYNTHETIC FIXTURE - invented facility", and
     the Windows artifact shipped that em dash as the single byte `0x97`. The file was not valid
-    UTF-8, so a recipient reading it the ordinary way — `pandas.read_csv`, which defaults to
-    UTF-8 — would have hit a UnicodeDecodeError on their first run. The macOS artifact from the
+    UTF-8, so a recipient reading it the ordinary way - `pandas.read_csv`, which defaults to
+    UTF-8 - would have hit a UnicodeDecodeError on their first run. The macOS artifact from the
     same commit was fine, because the locale there is UTF-8.
 
     This asserts the property a recipient depends on, rather than the call that produces it.
@@ -149,7 +149,7 @@ def packaging_scripts() -> list[Path]:
     """Every repo script the packaging workflow runs, read out of the workflow.
 
     Derived rather than hand-listed, because a hand-list is a claim that goes stale the first
-    time a build step is added — and the gap this closes was exactly that shape:
+    time a build step is added - and the gap this closes was exactly that shape:
     `THIRD_PARTY_LICENCES.md` is written by `build_licence_manifest.py` and copied into the
     bundle by the workflow's staging step, so it never passes through
     `build_release_artifact.py` and the archive test above could not see it. The Windows runner
@@ -171,7 +171,7 @@ def packaging_scripts() -> list[Path]:
 
 
 def test_the_packaging_workflow_runs_scripts_this_test_can_see():
-    assert packaging_scripts(), "no build scripts were found in package.yml — has it moved?"
+    assert packaging_scripts(), "no build scripts were found in package.yml - has it moved?"
 
 
 @pytest.mark.parametrize("script", packaging_scripts(), ids=lambda p: p.name)
@@ -183,7 +183,7 @@ def test_no_packaging_script_relies_on_the_platform_encoding(script):
     the default, so the two together cover the case rather than one of them pretending to.
 
     The source is PARSED, not searched. The first version of this test grepped for
-    `.open("w"` and flagged the sentence in `write_csv`'s own docstring that explains the bug —
+    `.open("w"` and flagged the sentence in `write_csv`'s own docstring that explains the bug -
     matching text where meaning was intended, which is the single most common defect this
     repository has produced. An AST walk cannot make that mistake: a docstring is a string
     constant, not a call.

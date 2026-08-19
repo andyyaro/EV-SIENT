@@ -7,13 +7,13 @@ tier as **MODERATE**, with the reason spelled out: the mechanical MATLAB→Octav
 audited and its numerics matched an independent NumPy reference, *"but 'moderate' is the
 honest word until real MATLAB output exists to compare against."*
 
-Real MATLAB output now exists — ``matlab/outputs/run-*/batch_results.csv``, produced by
+Real MATLAB output now exists - ``matlab/outputs/run-*/batch_results.csv``, produced by
 MathWorks MATLAB R2025b Update 5 in CI. So the comparison that was owed can be made, and this
 script makes it. Until now it could not be: the Octave tier had run against the **real**
 canonical CSV while MATLAB ran the **synthetic** fixture, so there were no two runs of the
 same input to compare.
 
-**Every divergence is reported.** Not a pass/fail summary — the actual columns, the actual
+**Every divergence is reported.** Not a pass/fail summary - the actual columns, the actual
 rows, the actual magnitudes. A cross-validation that prints "OK" is worth nothing; the value
 is entirely in what it finds, including finding nothing and saying which cells it checked.
 
@@ -22,7 +22,7 @@ What this can and cannot establish
 Agreement here means the transformed sources compute the same numbers as the MATLAB
 originals **on this input**. It does not make Octave an equivalent engine. FIND-MATLAB-09
 reproduced a case where the fail-closed capacity guard does **not** fire under Octave while it
-does under MATLAB — a safety divergence that no numeric comparison would surface, because
+does under MATLAB - a safety divergence that no numeric comparison would surface, because
 both engines produce numbers, and one of them should have refused.
 
 **GNU Octave is not MathWorks MATLAB. No output of this script may be presented as a MATLAB
@@ -76,7 +76,7 @@ def build_octave_tree(work: Path) -> Path:
 
     Invokes ``transform.py``'s own CLI rather than reaching into its internals, so the tier is
     reproduced by exactly the tool that produced the original evidence. That tool prints a
-    per-rule audit and treats a rule that fired **zero** times as a FAILURE — a transform rule
+    per-rule audit and treats a rule that fired **zero** times as a FAILURE - a transform rule
     that stops matching is how a silent incompatibility creeps back in unnoticed.
     """
     dest = work / "xform"
@@ -201,11 +201,11 @@ def compare(octave_csv: Path, matlab_csv: Path, runtime_errors: list[str]) -> in
     for name, why in EXPECTED_TO_DIFFER.items():
         if name in o.columns and name in m.columns:
             identical = bool((o[name].astype(str) == m[name].astype(str)).all())
-            print(f"  not compared — {name}: {why}"
+            print(f"  not compared - {name}: {why}"
                   f"{'  [text happens to be identical]' if identical else ''}")
 
     if divergences:
-        print(f"\n{len(divergences)} DIVERGENCE(S) — every one is reported, none summarised away:")
+        print(f"\n{len(divergences)} DIVERGENCE(S) - every one is reported, none summarised away:")
         for line in divergences:
             print(f"  {line}")
         return 1
@@ -214,7 +214,7 @@ def compare(octave_csv: Path, matlab_csv: Path, runtime_errors: list[str]) -> in
     print("This means the transformed sources compute the same numbers as the MATLAB")
     print("originals ON THIS INPUT. It does NOT make Octave an equivalent engine:")
     print("FIND-MATLAB-09 reproduced the fail-closed capacity guard NOT firing under Octave")
-    print("while it does fire under MATLAB — a safety divergence no numeric comparison can")
+    print("while it does fire under MATLAB - a safety divergence no numeric comparison can")
     print("surface, because both engines produce numbers and one of them should have refused.")
     return 0
 

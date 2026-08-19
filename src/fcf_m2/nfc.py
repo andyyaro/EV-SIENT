@@ -2,14 +2,14 @@
 
 The hardware is 50 NTAG215 coins: NFC Forum Type 2, ISO/IEC 14443 Type A, **~504 bytes of
 user-writable memory**. That is enough for a URL and nothing else, which decides the design
-before anything else does — the tag is a pointer, never a payload.
+before anything else does - the tag is a pointer, never a payload.
 
 What a tag carries, and what it must never carry
 ------------------------------------------------
 A tag carries one site-scoped URL on a domain we control. It carries **no personal data, no
 identifier for any person, no credential, and nothing that grants access**. An unlocked NDEF
 tag is rewritable by anyone with a phone, so a tag implying a county's endorsement and
-pointing at a phishing URL is a real liability — which is why every tag is locked or
+pointing at a phishing URL is a real liability - which is why every tag is locked or
 password-protected before deployment and why the URL host is checked against an allowlist
 here, in code, rather than trusted to a runbook.
 
@@ -165,7 +165,7 @@ def build_payload(site_id: str, site_name: str, base: str = DEFAULT_BASE) -> Tag
     _validate_url(url)
     ndef = encode_ndef(url)
     payload = TagPayload(site_id=site_id, site_name=site_name, url=url,
-                         ndef_bytes=ndef, label=f"{site_id} — {site_name}")
+                         ndef_bytes=ndef, label=f"{site_id} - {site_name}")
     if not payload.fits:
         raise TagError(
             f"{site_id}: {payload.byte_count} bytes exceeds the NTAG215 user memory of "

@@ -39,7 +39,7 @@ def find_slx(allow_missing: bool = False) -> Path | None:
     Returning None rather than raising is the change a public installer forced, and the
     distinction it preserves is the important one: the view must still be built **from a real
     artifact, never from a description of one**. What changed is only what happens when there
-    is no artifact at all — previously the build died, which on a public install killed the
+    is no artifact at all - previously the build died, which on a public install killed the
     launcher three steps into a first run. Now the surface is emitted empty and says the model
     was never distributed with one.
     """
@@ -91,7 +91,7 @@ def extract(slx: Path) -> dict:
         "status_detail": (
             "This diagram was generated from the model source and opened once by real "
             "MathWorks MATLAB. It has never been run. No number anywhere in this project "
-            "derives from it — every metric comes from the base pipeline, which needs no "
+            "derives from it - every metric comes from the base pipeline, which needs no "
             "Simulink at all."),
         "root": {
             "blocks": root["blocks"],
@@ -107,7 +107,7 @@ def extract(slx: Path) -> dict:
         },
         "topology_note": (
             "Block names and types are read from the .slx itself and match, one for one, the "
-            "topology read out of buildSimulinkModel.m by hand during Phase 0 — the source "
+            "topology read out of buildSimulinkModel.m by hand during Phase 0 - the source "
             "read confirmed by the artifact."),
         "connections_note": (
             "Connection counts are NOT claimed equal to the source. buildSimulinkModel.m "
@@ -121,7 +121,7 @@ def main() -> int:
     allow_missing = "--allow-missing" in sys.argv
     slx = find_slx(allow_missing=allow_missing)
     if slx is None:
-        print("no committed .slx in this installation — emitting an empty Simulink view")
+        print("no committed .slx in this installation - emitting an empty Simulink view")
         # Same defect as the engine record: this emitted model_available/headline/note/blocks
         # while renderSimulink() reads model/status/status_detail/built_by/from_run/inner, so
         # the "honest empty state" rendered as undefined. The keys now match the real payload.

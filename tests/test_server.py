@@ -65,7 +65,7 @@ def test_the_api_refuses_an_empty_token(live):
 
 
 def test_running_an_operation_also_requires_the_token(live):
-    """The read endpoint being protected is not enough — execution is the dangerous one."""
+    """The read endpoint being protected is not enough - execution is the dangerous one."""
     base, _ = live
     status, _ = call(base, "/api/run/validate-contract-v1", None, "POST")
     assert status == 403
@@ -78,7 +78,7 @@ def test_the_token_is_long_enough_to_be_unguessable():
 
 
 def test_two_servers_get_different_tokens():
-    """A fixed or derived token would be as good as none — every session must be its own."""
+    """A fixed or derived token would be as good as none - every session must be its own."""
     a_httpd, _u, a = server.serve(port=0)
     b_httpd, _u2, b = server.serve(port=0)
     a_httpd.shutdown(); b_httpd.shutdown()
@@ -170,7 +170,7 @@ def test_it_depends_on_nothing_outside_the_standard_library():
     """Every dependency here has to be packaged into whatever desktop artifact ships.
 
     Checked by parsing the IMPORTS, not by searching the text. The first version of this test
-    lowercased the file and looked for "flask" — and failed on the docstring sentence "No
+    lowercased the file and looked for "flask" - and failed on the docstring sentence "No
     FastAPI, no Flask, no uvicorn", which is the prose explaining they are *not* used. Sixth
     time in this program a check has matched text where structure was what mattered.
     """

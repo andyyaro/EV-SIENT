@@ -5,7 +5,7 @@
  * -------------------------
  * Phase 9's rule is that approachability is a property of the *path in*. For this feature the
  * path in is a modal that, until it was rewritten, opened by asking a non-technical reader for
- * an API token — a thing they do not have, cannot easily get, and do not need. Everything the
+ * an API token - a thing they do not have, cannot easily get, and do not need. Everything the
  * study contains works without one.
  *
  * That is not a claim a source-reading check can make. Whether the reader's first action is

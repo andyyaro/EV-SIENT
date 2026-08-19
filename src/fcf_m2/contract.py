@@ -3,14 +3,14 @@
 Python is the single producer; MATLAB, Excel, Tableau, static visuals, and the
 presentation are consumers. Contract layout (data/contract/v1/):
 
-    schema.json             — JSON Schema for scenario_table.csv rows
-    scenario_table.csv      — site x horizon x case (long format, all required fields)
-    site_table.csv          — identity dimension (one canonical spelling per site)
-    source_provenance.csv   — field-level provenance (from confidence layer)
-    standards_register.csv  — standards applicability register (from standards.py)
-    assumptions.json        — every labeled assumption with provenance
-    contract_manifest.json  — schema version, input/table hashes, generation stamp
-    README.md               — consumer rules
+    schema.json             - JSON Schema for scenario_table.csv rows
+    scenario_table.csv      - site x horizon x case (long format, all required fields)
+    site_table.csv          - identity dimension (one canonical spelling per site)
+    source_provenance.csv   - field-level provenance (from confidence layer)
+    standards_register.csv  - standards applicability register (from standards.py)
+    assumptions.json        - every labeled assumption with provenance
+    contract_manifest.json  - schema version, input/table hashes, generation stamp
+    README.md               - consumer rules
 
 Validation implements the research reconciliation tests RT-01..RT-05 and RT-07..RT-10
 (RT-06 is not implemented -- see ``validate_scenario_table``) plus the acceptance rules:
@@ -75,7 +75,7 @@ def build_schema(synthetic: bool = False) -> dict:
     Widened, not relaxed. A synthetic run keeps ``SYN000``-style ids and the jurisdiction
     ``synthetic``, so its rows stay distinguishable from real ones at a glance and to any
     downstream consumer. Making synthetic ids match ``^(FFX|PWC)[0-9]{3}$`` would have
-    satisfied the validator by making invented data indistinguishable from the real study's —
+    satisfied the validator by making invented data indistinguishable from the real study's -
     the opposite of what a fixture is for.
     """
     """JSON Schema for one scenario_table row."""
@@ -258,7 +258,7 @@ def run_is_synthetic(provenance: pd.DataFrame) -> bool:
 
     Used to decide whether the RT-04 golden-baseline totals apply. They are the real study's
     accepted figures (25 starter / 48 pathway) and a run on invented inputs cannot reproduce
-    them — nor should it be made to. Tuning a synthetic fixture until it hits the real totals
+    them - nor should it be made to. Tuning a synthetic fixture until it hits the real totals
     would encode the real results inside data labelled as invented, which is both a false
     label and a leak.
 
@@ -381,7 +381,7 @@ def _write_readme(out: Path) -> None:
         "| `assumptions.json` | every labeled assumption with provenance |\n"
         "| `contract_manifest.json` | version, input/table SHA-256 hashes, generation stamp |\n\n"
         "## Consumer rules\n"
-        "1. Join on `site_id` only — never on names.\n"
+        "1. Join on `site_id` only - never on names.\n"
         "2. `capacity_basis` is machine-readable placeholder-vs-verified provenance: any consumer "
         "using capacity MUST propagate the placeholder label when basis is not "
         "`verified_utility`/`verified_facility`.\n"

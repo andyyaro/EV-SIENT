@@ -25,7 +25,7 @@ def _bundle_assembled():
 
     The copied surfaces (explorer, dashboard, contract, nfc) are GENERATED and therefore
     gitignored, so a clean checkout has the manifest but not the files it describes. Without
-    this the tests pass locally — where a previous build left the copies behind — and fail on
+    this the tests pass locally - where a previous build left the copies behind - and fail on
     CI, which is exactly the shape of defect that had CI red for five commits earlier today.
 
     Building rather than skipping: a test that quietly skips on CI is a test that does not
@@ -119,7 +119,7 @@ def test_the_bundle_carries_no_credentials():
         for name, (pattern, label) in scanner.PATTERNS.items():
             for lineno, line in enumerate(path.read_text(errors="replace").splitlines(), 1):
                 if pattern.search(line):
-                    problems.append(f"{path.relative_to(REPO)}:{lineno}: {name} — {label}")
+                    problems.append(f"{path.relative_to(REPO)}:{lineno}: {name} - {label}")
     assert problems == [], problems[:5]
 
 

@@ -1,6 +1,6 @@
-# Client Feedback Form — Client Meeting #2 Follow-Up
+# Client Feedback Form - Client Meeting #2 Follow-Up
 
-*Blank capture form per toolkit §3. Complete during/after the meeting or from verbatim email replies. Verbatim means verbatim — quote, do not paraphrase. All fields intentionally blank until the touchpoint occurs.*
+*Blank capture form per toolkit §3. Complete during/after the meeting or from verbatim email replies. Verbatim means verbatim - quote, do not paraphrase. All fields intentionally blank until the touchpoint occurs.*
 
 - Date / attendees / duration / medium:
 

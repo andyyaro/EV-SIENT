@@ -24,14 +24,14 @@
     "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
     "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
     "scenario": "base escalation, 3% real discount",
-    "assumption": "screening-class benchmarks \u2014 not budgets or quotes",
+    "assumption": "screening-class benchmarks - not budgets or quotes",
     "file": "dashboard/static/04_lifecycle_cost.png"
   },
   {
     "source": "eGRID2023 Rev 2 SRVC 596.3 lb CO2e/MWh + contract energy",
     "source_date": "factor data-year 2023, accessed 2026-07-19; refresh annually",
     "scenario": "V3 canonical horizons",
-    "assumption": "9.5 kWh/session, 0.30 kWh/mi, 400 gCO2/mi displaced \u2014 benchmark assumptions",
+    "assumption": "9.5 kWh/session, 0.30 kWh/mi, 400 gCO2/mi displaced - benchmark assumptions",
     "file": "dashboard/static/05_net_co2e.png"
   },
   {
@@ -45,7 +45,7 @@
     "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
     "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
     "scenario": "2026 baseline, seeded discrete-event simulation (400 days)",
-    "assumption": "demand synthetic/uncalibrated \u2014 screening only",
+    "assumption": "demand synthetic/uncalibrated - screening only",
     "file": "dashboard/static/07_peak_wait.png"
   },
   {

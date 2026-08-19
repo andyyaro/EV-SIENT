@@ -11,7 +11,7 @@ Reproduced on disposable copies of the V1 and V2 legacy code in the pre-publicat
 - `src/compare_v2_to_baseline.py`: all guardrail comparisons **PASS**.
 - `src/build_tableau_exports.py` + `src/check_tableau_exports.py`: **15/15 exports, 12/12 sites, PASSED**.
 
-## Headline metrics — all match expected values exactly
+## Headline metrics - all match expected values exactly
 | Check | Expected | Reproduced |
 |---|---|---|
 | Sites | 12 | 12 |
@@ -26,11 +26,11 @@ Reproduced on disposable copies of the V1 and V2 legacy code in the pre-publicat
 
 ## Offline behavior
 - First full run required internet (TIGER county boundary + basemap tiles downloaded at runtime).
-- A subsequent run of `plot_site_decision_map.py` with all HTTP(S) proxies pointed at a dead port **succeeded**, because the boundary zip was already cached in `data/` and basemap failures degrade gracefully after tile cache warm-up. Cold offline environments still fail — confirming the PY-06 finding that the fix is shipping cached boundaries + a documented offline mode.
+- A subsequent run of `plot_site_decision_map.py` with all HTTP(S) proxies pointed at a dead port **succeeded**, because the boundary zip was already cached in `data/` and basemap failures degrade gracefully after tile cache warm-up. Cold offline environments still fail - confirming the PY-06 finding that the fix is shipping cached boundaries + a documented offline mode.
 
 ## MATLAB/Simulink (`MATLAB-SIMULINK--main-2`)
 - **No MATLAB installation available in this environment. No simulation was executed and none is claimed.**
 - Static inspection only (scripts, CSVs, committed PNG/GIF outputs). Executable `.slx` verification is **blocked**; exact commands for a licensed runner are provided in `matlab/RUN_ON_LICENSED_MATLAB.md`.
 
 ## Output hash freeze
-- `v1_output_hashes.txt` (14 files), `v2_output_hashes.txt` (71 files) — SHA-256 of all CSV/JSON/MD outputs from the reproduced runs.
+- `v1_output_hashes.txt` (14 files), `v2_output_hashes.txt` (71 files) - SHA-256 of all CSV/JSON/MD outputs from the reproduced runs.

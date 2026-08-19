@@ -15,7 +15,7 @@ that shows the correction.
 **What is still not claimed.** The runs used a **SYNTHETIC** fixture, not project data. No
 output in this repository describes a real facility. Capacity remains `placeholder` at all
 twelve real sites, and the executed runs confirm the fail-closed guard refuses to emit a
-feasibility claim from it — which is the single most valuable thing these runs establish.
+feasibility claim from it - which is the single most valuable thing these runs establish.
 
 ---
 
@@ -117,32 +117,32 @@ is claimed.
 
 | Gap | Status | Evidence |
 |---|---|---|
-| MATLAB parser acceptance of every file | **CLOSED** | All `src/*.m` and `tests/*.m` parsed and executed. Four genuine portability defects surfaced and were fixed at source — see "What the runs found". |
+| MATLAB parser acceptance of every file | **CLOSED** | All `src/*.m` and `tests/*.m` parsed and executed. Four genuine portability defects surfaced and were fixed at source - see "What the runs found". |
 | Numerical behavior of the energy-aware scheduler on 120 rows | **PARTIALLY CLOSED** | The 120-row batch completed with `run_status = ok` on every row. But `capacity_basis = placeholder` on all rows, so the guard skipped both managed strategies: `clamp: skipped_no_capacity_defined; energy_aware: skipped_no_capacity_defined`. The scheduler's numerics on *real capacity* remain unexercised, because no real capacity exists. |
 | Creation of the golden regression baseline | **CLOSED** | Written by run 6 and regenerated after the fixture correction. |
-| Simulink model build | **CLOSED** | Built in run `30296650057`. `site_grid_behavior_ev_charging_v3.slx` is a real Simulink package stamped `25.2.0.3177638 / R2025b / Update 5`, and its **11 root blocks match, name for name and type for type, the topology read from `buildSimulinkModel.m` by hand in Phase 0**. Built, **not simulated** — no result anywhere derives from it. |
+| Simulink model build | **CLOSED** | Built in run `30296650057`. `site_grid_behavior_ev_charging_v3.slx` is a real Simulink package stamped `25.2.0.3177638 / R2025b / Update 5`, and its **11 root blocks match, name for name and type for type, the topology read from `buildSimulinkModel.m` by hand in Phase 0**. Built, **not simulated** - no result anywhere derives from it. |
 
 ## Run record
 
 Per `RUN_ON_LICENSED_MATLAB.md`, step 7.
 
-### Run 6 — the first execution of this code, ever
+### Run 6 - the first execution of this code, ever
 
 | Field | Value |
 |---|---|
 | Date (UTC) | 2026-07-27T17:51:15Z |
 | Machine | GitHub-hosted `ubuntu-24.04` runner (Azure northcentralus) |
-| Engine | **MathWorks MATLAB** — not Octave, not a reimplementation |
+| Engine | **MathWorks MATLAB** - not Octave, not a reimplementation |
 | `version()` | `25.2.0.3177638 (R2025b) Update 5` |
 | Simulink | installed and licensed (`ver('simulink')` → `Simulink 25.2`) |
 | Repository | `andyyaro/fcf-matlab-ci` (public harness) |
 | Commit | `b56c6b68c138ea4f2dc499488830634b155bb524` |
 | CI run | `30291108647` |
-| Input | `harness_scenarios_synthetic.csv`, SHA-256 `8e869e11…b99220` — **SYNTHETIC** |
+| Input | `harness_scenarios_synthetic.csv`, SHA-256 `8e869e11…b99220` - **SYNTHETIC** |
 | Test summary | **49 passed, 0 failed, 0 incomplete** |
 | Batch `run_id` | `batch_20260727T175445Z` |
 | Batch result | 120 rows, `run_status = ok` on all 120 |
-| Simulink build | **FAILED** — `buildSimulinkModel:simulinkUnavailable`, on a machine that has Simulink. The guard, not the product, was at fault. |
+| Simulink build | **FAILED** - `buildSimulinkModel:simulinkUnavailable`, on a machine that has Simulink. The guard, not the product, was at fault. |
 
 ### What the runs found
 
@@ -159,7 +159,7 @@ each was fixed at source rather than worked around:
 3. **`DataLines` is a property, not a constructor argument.**
 4. **Three tests carried their own inline import options**, so fixing the loader did not fix
    them. Unified in `scenarioImportOptions.m`.
-5. **A test asserted deferral at a 95 kW cap where the peak is 91.02 kW** — the cap never
+5. **A test asserted deferral at a 95 kW cap where the peak is 91.02 kW** - the cap never
    bound. It had been written against a legacy `ports × charger_kW` peak of 115.2 kW: a
    superseded hypothesis still alive inside a passing test. Cap corrected to 85 kW.
 6. **The first golden had 4 of its 7 columns identically zero.** The regression panel took the
@@ -173,7 +173,7 @@ The batch output is the strongest evidence these runs produced. On all 120 rows:
 - `capacity_basis = placeholder`
 - `service_check = service_capacity_unknown`
 - `skipped_strategies = clamp: skipped_no_capacity_defined; energy_aware: skipped_no_capacity_defined`
-- `peak_clamp_kW` — NaN on every row, i.e. no number was invented
+- `peak_clamp_kW` - NaN on every row, i.e. no number was invented
 - the mandatory planning-placeholder banner present on every row
 
 **This is the opposite of the Octave behaviour.** FIND-MATLAB-09 reproduced a case where the
@@ -185,13 +185,13 @@ may not be used to make a feasibility statement.
 
 | Run | Purpose | Outcome |
 |---|---|---|
-| `30296162570` | Diagnose the Simulink refusal | Answered it — see below |
+| `30296162570` | Diagnose the Simulink refusal | Answered it - see below |
 | `30296566912` | Remove a real per-site value from the synthetic fixture | see `LEDGER.md` |
-| `30296650057` | Fix the Simulink availability guard | **success — Simulink model built.** 49 passed / 0 failed. Artifacts in `matlab/outputs/run-30296650057/`. |
+| `30296650057` | Fix the Simulink availability guard | **success - Simulink model built.** 49 passed / 0 failed. Artifacts in `matlab/outputs/run-30296650057/`. |
 
 ### Determinism, measured rather than assumed
 
-Run `30291108647` and run `30296650057` — different commits, separate runners, hours apart —
+Run `30291108647` and run `30296650057` - different commits, separate runners, hours apart -
 were compared cell by cell across all 120 batch rows. **Exactly 3 rows differ, and they are
 exactly the 3 rows the fixture correction touched, in exactly the 2 columns that depend on
 `sessions_per_day`.** The other 117 rows are identical.
@@ -228,8 +228,8 @@ tests `ver("simulink")` and the license separately.
 MathWorks MATLAB R2025b; the fail-closed capacity guard is verified to fire on real MATLAB;
 the 120-row batch completes.
 
-**May NOT be claimed:** that any simulation describes a real site — every run used a synthetic
-fixture; that electrical feasibility has been shown anywhere — capacity is `placeholder` at
+**May NOT be claimed:** that any simulation describes a real site - every run used a synthetic
+fixture; that electrical feasibility has been shown anywhere - capacity is `placeholder` at
 12/12 real sites and the guard refuses on exactly that basis; that the managed-charging
-numerics are validated against real capacity — no real capacity exists to validate against;
-that a Simulink model has been **simulated** — it has been *built* (run `30296650057`) and never run, and no number anywhere derives from it.
+numerics are validated against real capacity - no real capacity exists to validate against;
+that a Simulink model has been **simulated** - it has been *built* (run `30296650057`) and never run, and no number anywhere derives from it.

@@ -1,17 +1,17 @@
-# DRAFT — PREPARED 2026-07-19 — NOT SENT
+# DRAFT - PREPARED 2026-07-19 - NOT SENT
 
-> Post-meeting template per toolkit §7. Send only after the touchpoint actually occurs. Every [bracketed] slot must be filled with **verbatim** content from the completed feedback form (05) — no paraphrase, no invention. If a slot has no real content, delete the sentence rather than fabricate.
+> Post-meeting template per toolkit §7. Send only after the touchpoint actually occurs. Every [bracketed] slot must be filled with **verbatim** content from the completed feedback form (05) - no paraphrase, no invention. If a slot has no real content, delete the sentence rather than fabricate.
 
 ---
 
 **To:** [client contact]
-**Subject:** Thank you — summary of our follow-up on [DATE]
+**Subject:** Thank you - summary of our follow-up on [DATE]
 
 Dear Mr. [client contact],
 
 Thank you for [meeting with / corresponding with] our Future City Fellowship team on [DATE].
 
-As presented, our narrowed focus is [NARROWED FOCUS AS ACTUALLY PRESENTED — e.g., top-3 site pilot focus, stated in the words used in the meeting].
+As presented, our narrowed focus is [NARROWED FOCUS AS ACTUALLY PRESENTED - e.g., top-3 site pilot focus, stated in the words used in the meeting].
 
 You indicated:
 - Preferred option: "[VERBATIM]"
@@ -19,7 +19,7 @@ You indicated:
 - Approval boundaries: "[VERBATIM]"
 - Priorities ranking: [AS CAPTURED]
 
-Based on your feedback we will [SPECIFIC DESIGN CHANGES FROM 07_WHAT_CHANGED_REGISTER — or state honestly that no changes resulted and why].
+Based on your feedback we will [SPECIFIC DESIGN CHANGES FROM 07_WHAT_CHANGED_REGISTER - or state honestly that no changes resulted and why].
 
 We noted your offer to [DATA / CONTACT OFFERS AS ACTUALLY MADE].
 

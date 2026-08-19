@@ -22,7 +22,7 @@ from fcf_m2 import launcher  # noqa: E402
 
 
 def test_every_generated_artifact_names_a_real_producer():
-    """An artifact whose producer does not exist would fail at the worst moment — mid-launch,
+    """An artifact whose producer does not exist would fail at the worst moment - mid-launch,
     after the user has been told a build is starting.
 
     Two shapes are legal: a script path, and `-m module` for the model run itself. The contract

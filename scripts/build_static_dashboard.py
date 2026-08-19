@@ -56,7 +56,7 @@ def c1_ranking():
     # said Medium in its title, Low on all twelve bars, and "none reaches Medium" in its own
     # footer. Three mutually exclusive statements in one picture. The confidence claim is
     # removed from the title; it is shown per bar and stated in the footer, both from v3.
-    ax.set_title("Site readiness ranking — FFX002 leads at 58.8 (legacy_v2 baseline)", fontsize=12)
+    ax.set_title("Site readiness ranking - FFX002 leads at 58.8 (legacy_v2 baseline)", fontsize=12)
     for y, (s, cl) in enumerate(zip(df["readiness_score"], df["data_confidence_level_v3"])):
         ax.text(s + 0.5, y, f"{cl} (v3)", va="center", fontsize=7, color=BLACK)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "legacy_v2 baseline scores",
@@ -94,7 +94,7 @@ def c3_three_horizons():
     ax.text(2027, 48.6, "48-port pathway ceiling (saturation)", fontsize=8, color=BLACK)
     ax.set_xticks(years)
     ax.set_ylabel("Active ports (portfolio)")
-    ax.set_title("Aspect 1 — ports and utilization capacity at 2036 / 2046 / 2056", fontsize=12)
+    ax.set_title("Aspect 1 - ports and utilization capacity at 2036 / 2046 / 2056", fontsize=12)
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "V3 canonical horizons",
                    "growth multipliers provisional (uncalibrated); trigger-gated activation")
@@ -118,10 +118,10 @@ def c4_costs():
         ax.text(y, top + 0.06, f"avoids ${av:.2f}M", ha="center", fontsize=9, color=BLACK, fontweight="bold")
     ax.set_xticks(years)
     ax.set_ylabel("Portfolio net present cost ($M, screening)")
-    ax.set_title("Aspect 2 — lifecycle cost: staged beats broad at every horizon", fontsize=12)
+    ax.set_title("Aspect 2 - lifecycle cost: staged beats broad at every horizon", fontsize=12)
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "base escalation, 3% real discount",
-                   "screening-class benchmarks — not budgets or quotes")
+                   "screening-class benchmarks - not budgets or quotes")
     visuals.save(fig, OUT / "04_lifecycle_cost.png", LOG, relative_to=REPO)
 
 
@@ -137,12 +137,12 @@ def c5_co2e():
         ax.plot(years, vals, marker="o", color=color, label=f"{case} path")
     ax.set_xticks(years)
     ax.set_ylabel("Net avoided CO2e (t/yr)")
-    ax.set_title("Net avoided CO2e — grows to ≈173–260 t/yr by 2056 (screening)", fontsize=12)
+    ax.set_title("Net avoided CO2e - grows to ≈173–260 t/yr by 2056 (screening)", fontsize=12)
     ax.legend(frameon=False)
     visuals.footer(fig, "eGRID2023 Rev 2 SRVC 596.3 lb CO2e/MWh + contract energy",
                    "factor data-year 2023, accessed 2026-07-19; refresh annually",
                    "V3 canonical horizons",
-                   "9.5 kWh/session, 0.30 kWh/mi, 400 gCO2/mi displaced — benchmark assumptions")
+                   "9.5 kWh/session, 0.30 kWh/mi, 400 gCO2/mi displaced - benchmark assumptions")
     visuals.save(fig, OUT / "05_net_co2e.png", LOG, relative_to=REPO)
 
 
@@ -160,7 +160,7 @@ def c6_avoided_evse():
         ax.text(x, v + 0.3, f"{int(v)} ports\n≈${int(v)}k/yr fees avoided", ha="center", fontsize=9)
     ax.set_xticks(years)
     ax.set_ylabel("Pathway ports not energized (base path)")
-    ax.set_title("Resource management — hardware we deliberately do not install yet", fontsize=12)
+    ax.set_title("Resource management - hardware we deliberately do not install yet", fontsize=12)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "base path",
                    "fee frame ~$1k/port/yr from client operating evidence (screening)")
     visuals.save(fig, OUT / "06_avoided_evse.png", LOG, relative_to=REPO)
@@ -182,12 +182,12 @@ def c7_peak_wait():
     # from a chart showing nothing, which reads as a rendering failure rather than a result.
     # Say what the zero MEANS instead, and label it on the axes.
     ax.set_title("Simulated waits are 0.0 at every site at the 2026 starter build", fontsize=12)
-    ax.text(0.5, 0.55, "Both series are exactly 0.0 — no bars to draw.\n"
+    ax.text(0.5, 0.55, "Both series are exactly 0.0 - no bars to draw.\n"
                        "At 2-3 ports and 6-20% utilisation the queue never forms.",
             transform=ax.transAxes, ha="center", va="center", fontsize=10, color="#4a4a4a")
     ax.legend(frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "2026 baseline, seeded discrete-event simulation (400 days)",
-                   "demand synthetic/uncalibrated — screening only")
+                   "demand synthetic/uncalibrated - screening only")
     visuals.save(fig, OUT / "07_peak_wait.png", LOG, relative_to=REPO)
 
 
@@ -197,13 +197,13 @@ def c8_limitations():
     fig.set_facecolor(BEIGE)
     lines = [
         ("What this analysis is NOT", True),
-        ("• All 12 sites score Low data confidence, none reaching Medium — every electrical value awaits confirmation", False),
+        ("• All 12 sites score Low data confidence, none reaching Medium - every electrical value awaits confirmation", False),
         ("• Capacity is a PLACEHOLDER at 12/12 sites (no utility/facility verification yet)", False),
         ("• Demand model is synthetic and uncalibrated; growth multipliers are provisional", False),
-        ("• Costs are screening-class benchmarks — not budgets, quotes, or engineering estimates", False),
+        ("• Costs are screening-class benchmarks - not budgets, quotes, or engineering estimates", False),
         ("• No site is approved: electrical, ADA, fire, stormwater, and AHJ gates all remain", False),
-        ("• Client Meeting #2 follow-up is prepared but not yet held — nothing implies endorsement", False),
-        ("• MATLAB ran 49/49 on a SYNTHETIC fixture only — never on these twelve sites; "
+        ("• Client Meeting #2 follow-up is prepared but not yet held - nothing implies endorsement", False),
+        ("• MATLAB ran 49/49 on a SYNTHETIC fixture only - never on these twelve sites; "
          "Simulink was built, never simulated", False),
         ("", False),
         ("Why we show this slide", True),

@@ -15,7 +15,7 @@ or as a pre-filled email, and that is a deliberate design rather than a limitati
   is an open door to polluting the data that the whole study rests on. There is no endpoint
   to abuse because there is no endpoint.
 * **A human stays in the loop.** ``04_DATA_FLOW_INTO_MODEL.md`` requires that received
-  values enter the site inputs and the model **re-runs** — never an edit in place. A row
+  values enter the site inputs and the model **re-runs** - never an edit in place. A row
   that arrives by email and is reviewed before ingestion matches that; a silent write does
   not.
 * **No recurring cost.** Static hosting on the existing distribution. No Lambda, no API
@@ -26,7 +26,7 @@ Privacy
 -------
 The form collects **facility** data, not personal data: panel ratings, breaker positions,
 parking counts. The only person-shaped fields are the observer's name and organisation, and
-they exist because ``observed.CapacityObservation`` *refuses* an unattributed record — a
+they exist because ``observed.CapacityObservation`` *refuses* an unattributed record - a
 value with no source cannot upgrade a capacity basis. They are collected as provenance,
 stated as such on the page, and nothing else about the submitter is captured.
 """
@@ -53,7 +53,7 @@ PAGE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Facility information — {name} | Future City Fellowship</title>
+<title>Facility information - {name} | Future City Fellowship</title>
 <meta name="robots" content="noindex">
 <style>
   :root {{ --ink:#1a1a1a; --ink-2:#4a4a4a; --green:#1B4332; --sand:#F5F0E6;
@@ -109,7 +109,7 @@ PAGE = """<!doctype html>
        builds a small text record on your phone that you can email or save. A person reads it
        before anything reaches the model.</p>
     <p><strong>Partial is genuinely useful.</strong> One confirmed number beats none. Skip
-       anything you do not know — leave it blank rather than estimating.</p>
+       anything you do not know - leave it blank rather than estimating.</p>
   </div>
 
   <form id="f" novalidate>
@@ -178,7 +178,7 @@ PAGE = """<!doctype html>
       <span class="hint">Repaving matters: it is the cheapest moment to lay conduit.</span></label>
     <textarea id="works" name="works"></textarea>
 
-    <label for="notes">Anything else — constraints, drainage, easements, fleet vehicles</label>
+    <label for="notes">Anything else - constraints, drainage, easements, fleet vehicles</label>
     <textarea id="notes" name="notes"></textarea>
   </fieldset>
 
@@ -191,7 +191,7 @@ PAGE = """<!doctype html>
   <footer>
     <p><strong>Privacy.</strong> This page stores nothing, sets no cookie, and sends nothing
        anywhere by itself. Your name and organisation are collected only so a value can be
-       attributed to a source — the model refuses records without one. See the
+       attributed to a source - the model refuses records without one. See the
        <a href="/privacy.html">privacy notice</a>.</p>
     <p>Screening-class planning study. Providing information here does not commit you, your
        facility, or any government to anything.</p>
@@ -249,7 +249,7 @@ PAGE = """<!doctype html>
   function build() {{
     var r = collect();
     if (r.error) {{
-      show("Not yet — these are still needed:\\n  " + r.error.join("\\n  "));
+      show("Not yet - these are still needed:\\n  " + r.error.join("\\n  "));
       return null;
     }}
     show(r.csv + "\\nCopy this, or use the email button. A person reviews it before it "

@@ -1,4 +1,4 @@
-# Attendance Record — Client Meeting #2 Follow-Up
+# Attendance Record - Client Meeting #2 Follow-Up
 
 *Blank. Complete on the day of the meeting (or record the email-thread participants and dates if the touchpoint is asynchronous).*
 

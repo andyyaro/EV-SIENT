@@ -2,7 +2,7 @@
 
 Maintainer prerequisite: access to the deployed site bundle (S3 origin) and the assistant's
 prompt/config store. Apply in order; deploy per DEPLOYMENT_RUNBOOK.md. Do not remove any
-existing limitation text — only extend or supersede as directed.
+existing limitation text - only extend or supersede as directed.
 
 ## 1. Landing page (`index.html`)
 - Add the authority-disclaimer block (`content/authority_disclaimer.md`, rendered) directly
@@ -33,7 +33,7 @@ existing limitation text — only extend or supersede as directed.
 
 ## 6. New standards page or section (`standards.html`)
 - Create from `content/standards_summary.md`; the proposed-standard section must keep the
-  "fellowship design concept — not an official UL/ULSE proposal" label verbatim.
+  "fellowship design concept - not an official UL/ULSE proposal" label verbatim.
 
 ## 7. Limitations (wherever `MODEL_LIMITATIONS` content is surfaced)
 - Replace with `content/limitations_update.md`.

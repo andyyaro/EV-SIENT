@@ -4,7 +4,7 @@ The property under test
 -----------------------
 DEC-000's hard constraint is one sentence: **cleaning must never silently improve data
 quality.** Most of this file is that sentence turned into assertions, because the failure it
-describes is invisible by construction — a run that succeeds on data nobody inspected looks
+describes is invisible by construction - a run that succeeds on data nobody inspected looks
 exactly like a run on data somebody did.
 
 The gate (DEC-000): a deliberately messy third-party-shaped fixture runs end to end and
@@ -118,7 +118,7 @@ def test_similar_but_different_fields_do_not_collide():
 
 
 def test_every_inferred_mapping_is_flagged_as_inferred(proposal):
-    """Whenever the supplied name differs from the canonical one, the mapping is a guess —
+    """Whenever the supplied name differs from the canonical one, the mapping is a guess -
     regardless of how confidently it scored. Keying this off the match score alone let alias
     matches score 1.0 and be recorded as a confirmed source."""
     prov = intake.provenance_rows(proposal, ["S1"], "r", "org", "2026-07-28")
@@ -204,8 +204,8 @@ def test_guessed_data_never_outranks_the_real_study():
     """The failure that makes all of this pointless if it happens.
 
     Measured once: accepting the mapping upgraded `unconfirmed` to `public_web_reference` and
-    the messy fixture scored 58.5 (Medium) while the real Northern Virginia study — whose
-    electrical fields are genuinely unverified — scored 33.8 (Low). Guessed data outranked
+    the messy fixture scored 58.5 (Medium) while the real Northern Virginia study - whose
+    electrical fields are genuinely unverified - scored 33.8 (Low). Guessed data outranked
     measured data. Acceptance now confirms the MAPPING only.
     """
     real_prov = pd.read_csv(REPO / "data/provenance/field_provenance_v1.csv")

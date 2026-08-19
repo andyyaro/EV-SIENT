@@ -9,7 +9,7 @@ happened to every class of pre-existing and implementation content. Companion:
 ## Dispositions
 
 ### Retain unchanged (in history and archive branch, not in the new tree)
-- V1 prototype tree (previous `main`) and V2 tree (`v2-expansion-planning` branch) —
+- V1 prototype tree (previous `main`) and V2 tree (`v2-expansion-planning` branch) -
   preserved via full git history, branch `archive/pre-milestone2-v3-20260719`, and
   annotated tag `pre-milestone2-v3-20260719`. Existing tags `v1-demo-scalability-ready`
   and `v1-review-ready` untouched.
@@ -44,9 +44,9 @@ happened to every class of pre-existing and implementation content. Companion:
   ready-to-send email drafts' send logs (the drafts themselves are published as
   templates with no private contact details), virtual environments, caches, release
   ZIP bundles (already fully represented by tracked sources).
-- The full-US TIGER boundary file — replaced by a filtered, simplified extract
+- The full-US TIGER boundary file - replaced by a filtered, simplified extract
   (documented in `data/cache/boundaries/ATTRIBUTION.md`).
-- The legacy Tableau `.twbx` — unverifiable without Tableau Desktop; represented by
+- The legacy Tableau `.twbx` - unverifiable without Tableau Desktop; represented by
   the honest blocker + patch recipe instead.
 
 ### Include as a release artifact instead of source

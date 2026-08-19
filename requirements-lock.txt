@@ -5,7 +5,7 @@
 # which is why a lock generated on 3.14 could not contain it while CI on 3.12 requires it.
 #
 # tzdata added 2026-07-28 for the same reason, one platform over. pandas declares
-# `tzdata; sys_platform == "win32"` — Windows has no system tz database — and this lock was
+# `tzdata; sys_platform == "win32"` - Windows has no system tz database - and this lock was
 # generated on macOS, so every Windows install pulled an unpinned, unhashed tzdata while the
 # lock claimed to be the complete pinned set. Found by the packaging workflow's first real
 # execution on a Windows runner, not by reading the file. No existing pin was changed.

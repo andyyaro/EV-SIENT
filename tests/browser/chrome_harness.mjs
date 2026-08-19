@@ -4,7 +4,7 @@
  * Why this is its own module
  * --------------------------
  * It began inside `field_form.test.mjs`. The moment a second browser test needed it, copying
- * it would have produced two CDP clients that drift apart — and a harness that behaves
+ * it would have produced two CDP clients that drift apart - and a harness that behaves
  * differently in two files is worse than no harness, because a test can then pass for reasons
  * the other file would have caught.
  *
@@ -15,7 +15,7 @@
  * browser harness is not a good reason to break that.
  *
  * Every caller skips rather than fails when Chrome or the server is absent, so CI without a
- * browser stays green — and the skip is loud in the output, never silent.
+ * browser stays green - and the skip is loud in the output, never silent.
  */
 
 import { spawn } from "node:child_process";

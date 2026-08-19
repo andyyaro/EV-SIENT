@@ -1,6 +1,6 @@
-# DRAFT — PREPARED 2026-07-19 — NOT SENT
+# DRAFT - PREPARED 2026-07-19 - NOT SENT
 
-# AHJ Question Set — Prince William County Fire Marshal's Office
+# AHJ Question Set - Prince William County Fire Marshal's Office
 
 *For use in a requested meeting, site visit, or written exchange. Nothing has been sent or asked. Answers are recorded verbatim with respondent name, title, and date; AHJ interpretations govern. Sites in this jurisdiction: PWC006 Bull Run Library (top PWC candidate), and the Neabsco-Potomac Commuter Garage (PWC002) as the county's existing enclosed-garage installation.*
 
@@ -24,11 +24,11 @@
 
 ## D. Apparatus access geometry
 
-8. Clearances between EVSE/pedestals/bollards and fire lanes, hydrants, FDCs, and access paths — surface lots and garage levels.
+8. Clearances between EVSE/pedestals/bollards and fire lanes, hydrants, FDCs, and access paths - surface lots and garage levels.
 
 ## E. Stormwater / firewater runoff
 
-9. Expectations for firewater runoff containment/drainage in a suppression event — surface lots (coordination with PWC Environmental Services as VSMP authority) and garage drainage systems.
+9. Expectations for firewater runoff containment/drainage in a suppression event - surface lots (coordination with PWC Environmental Services as VSMP authority) and garage drainage systems.
 
 ## F. EV-fire pre-planning ([fire-service interviewee] evidence context)
 

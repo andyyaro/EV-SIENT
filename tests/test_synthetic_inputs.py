@@ -2,10 +2,10 @@
 
 Three properties, and the third is the one worth testing hard
 ------------------------------------------------------------
-1. **Usable** — same columns and types as the real inputs, or the model cannot read it.
-2. **Honest** — every site is marked synthetic, and its provenance says so in the vocabulary
+1. **Usable** - same columns and types as the real inputs, or the model cannot read it.
+2. **Honest** - every site is marked synthetic, and its provenance says so in the vocabulary
    the confidence system actually reads.
-3. **Not derived** — this is the property a "synthetic" fixture usually fails. Jittering real
+3. **Not derived** - this is the property a "synthetic" fixture usually fails. Jittering real
    values produces a file that passes any eyeball check and still carries the real
    distribution; with twelve rows and public facility records, that is enough to re-identify
    sites. So the tests below look for *structure* shared with the real data, not just for
@@ -51,7 +51,7 @@ def real():
 # ---------------------------------------------------------------- usable
 
 def test_columns_match_the_real_schema_exactly(synthetic, real):
-    """Not a superset or a subset — identical, in order. The model reads by name, but a
+    """Not a superset or a subset - identical, in order. The model reads by name, but a
     missing column fails at run time rather than here, which is the wrong place to find out."""
     assert list(synthetic[0]) == list(real[0])
 
@@ -62,7 +62,7 @@ def test_same_number_of_sites(synthetic, real):
 
 def test_the_model_can_actually_run_against_it(tmp_path):
     """The point of the whole exercise. A synthetic set the model refuses is no better than no
-    synthetic set — the public installer would still be unbuildable."""
+    synthetic set - the public installer would still be unbuildable."""
     staged = tmp_path / "inputs"
     staged.mkdir()
     for src, dst in [
@@ -97,7 +97,7 @@ def test_no_row_can_be_mistaken_for_a_real_place(synthetic):
 def test_the_electrical_placeholders_are_preserved_not_invented(synthetic):
     """The one direction a fixture must never move.
 
-    `elec_service_rating_amp` and `spare_capacity_kw` are zero in the real data — that is what
+    `elec_service_rating_amp` and `spare_capacity_kw` are zero in the real data - that is what
     makes `capacity_basis` come out `placeholder` everywhere and what the fail-closed capacity
     guard tests. Inventing capacity here would make a synthetic run report MORE confidence than
     the real study, and someone would eventually quote it.
@@ -160,7 +160,7 @@ def test_synthetic_coordinates_are_nowhere_near_the_real_ones(synthetic, real):
 
 def test_the_synthetic_ordering_is_not_the_real_ordering(synthetic, real):
     """The subtle leak. If a fixture is produced by perturbing real values row by row, the
-    RANK ORDER of a column survives the perturbation even when no value matches — and rank
+    RANK ORDER of a column survives the perturbation even when no value matches - and rank
     order over twelve public facilities is re-identifying on its own.
     """
     def ranks(data, column):
@@ -220,7 +220,7 @@ def test_no_categorical_support_shares_its_SHAPE_with_the_real_one():
     """A set that shares no member can still share its structure.
 
     This is the leak that survived the first fix. The replacement spare-capacity set
-    `[42.0, 63.0, 84.0, 168.0]` shared no value with the real `[38.4, 57.6, 76.8, 153.6]` —
+    `[42.0, 63.0, 84.0, 168.0]` shared no value with the real `[38.4, 57.6, 76.8, 153.6]` -
     and was that set scaled by exactly 35/32, every ratio 1.09375, both normalising to the
     multiplier vector {2, 3, 4, 8}. That is perturbation: the relative spacing is preserved
     perfectly, which is what "not perturbed" is supposed to rule out.

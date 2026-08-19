@@ -4,7 +4,7 @@ Producer: Python V3 `fcf_m2.matlab_adapter` (canonical contract 1.0.0, run
 `milestone2_v3_20260719T052322Z`). 120 rows = 12 sites x {2026 baseline;
 2036/2046/2056 x base/high/stress_combined}. **Do not hand-edit; regenerate
 via `make run-v3` at the repository root** (writes repo-root
-`data/outputs/v3_run/matlab_scenarios.csv`; copy it here — see the README
+`data/outputs/v3_run/matlab_scenarios.csv`; copy it here - see the README
 "Regeneration instructions").
 
 Consumer rules inherited from the data contract v1: join on `site_id` only;

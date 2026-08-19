@@ -2,9 +2,9 @@
 
 Adds to (never replaces) the legacy Erlang-C screen:
 
-1. ``peak_window_wait`` — steady-state Erlang-C evaluated at the peak-window arrival
+1. ``peak_window_wait`` - steady-state Erlang-C evaluated at the peak-window arrival
    rate (a configurable share of daily sessions concentrated into a peak window).
-2. ``simulate_waits`` — a seeded discrete-event simulation (M/G/c) with configurable
+2. ``simulate_waits`` - a seeded discrete-event simulation (M/G/c) with configurable
    arrival, dwell, and session-energy distributions, reporting P10/P50/P90 waits for
    the whole day and for the peak window.
 """
@@ -51,7 +51,7 @@ def simulate_waits(expected_sessions_day: float, avg_session_hr: float, hours_op
                    dwell_cv: float = 0.45) -> SimResult:
     """Discrete-event M/G/c queue simulation, deterministic under a fixed seed.
 
-    Arrivals: non-homogeneous Poisson — `peak_share` of daily sessions inside a
+    Arrivals: non-homogeneous Poisson - `peak_share` of daily sessions inside a
     centered peak window, the rest spread over remaining open hours.
     Dwell: lognormal with mean `avg_session_hr` and coefficient of variation `dwell_cv`.
     """

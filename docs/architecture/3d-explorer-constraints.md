@@ -1,4 +1,4 @@
-# 3D Site Explorer — architectural constraints
+# 3D Site Explorer - architectural constraints
 
 *Folded into the repository's documentation during the V4 program's Phase 3, from the
 standalone explorer project's own `CLAUDE.md`. These constraints are binding on
@@ -9,7 +9,7 @@ standalone explorer project's own `CLAUDE.md`. These constraints are binding on
 
 | Constraint | Enforced by |
 |---|---|
-| The map never re-runs or re-implements the model | `tests/test_explorer_drift.py` — the explorer **imports** `fcf_m2.scoring`'s weights rather than copying them |
+| The map never re-runs or re-implements the model | `tests/test_explorer_drift.py` - the explorer **imports** `fcf_m2.scoring`'s weights rather than copying them |
 | Attribution reproduces the model's own score, in **both** modes | `tests/test_explorer_pipeline.py::test_attribution_reproduces_model_score`, now running by default instead of skipping |
 | `geometry.py` keeps zero third-party dependencies (Blender imports it directly) | `tests/test_explorer_pipeline.py` |
 | A field name never carries a horizon its data does not have | `tests/test_explorer_drift.py::test_canonical_mode_never_emits_a_retired_horizon` **gated** |
@@ -24,7 +24,7 @@ standalone explorer project's own `CLAUDE.md`. These constraints are binding on
 
 *What follows is the original constraints document, preserved as written.*
 
-# CLAUDE.md — ChargeReady NOVA 3D Site Explorer
+# CLAUDE.md - ChargeReady NOVA 3D Site Explorer
 
 Project instructions for Claude Code. Read this before touching anything.
 
@@ -35,7 +35,7 @@ Site-Readiness and Right-Sizing Model. It plots every scored candidate site on
 a real-world globe, lets planners inspect and compare rankings, and places
 proposed charging infrastructure massing at each site's actual coordinates.
 
-## Architecture — and the one rule that matters
+## Architecture - and the one rule that matters
 
 **Blender authors. Cesium delivers. Python glues.**
 
@@ -53,7 +53,7 @@ frozen model outputs (CSV)
 
 Blender is **never** the viewer. It is an offline asset factory that emits
 glTF. If a task starts with "make Blender show the map interactively," that is
-the wrong shape — redirect it into the Cesium layer.
+the wrong shape - redirect it into the Cesium layer.
 
 ## Layout
 
@@ -64,7 +64,7 @@ the wrong shape — redirect it into the Cesium layer.
 | `fcf3d/glb.py` | Dependency-free glTF 2.0 writer (the no-Blender path). |
 | `fcf3d/build_models.py` | CLI; routes to `glb.py` or Blender. |
 | `blender/build_assets.py` | Headless `bpy` asset builder. Only importable inside Blender. |
-| `web/` | CesiumJS app. Static — no build step, no bundler. |
+| `web/` | CesiumJS app. Static - no build step, no bundler. |
 | `tests/test_pipeline.py` | 46 tests. Must stay green. |
 
 ## Non-negotiables
@@ -77,7 +77,7 @@ the wrong shape — redirect it into the Cesium layer.
    `fcf_m2/scoring.py`.** They exist so the map can explain *why* a site ranks
    where it does using the model's own arithmetic.
    `test_attribution_reproduces_model_score` guards this. If you change either
-   file, run the tests — a silent drift means the map tells planners a story
+   file, run the tests - a silent drift means the map tells planners a story
    the model never told.
 
 3. **`geometry.py` has zero dependencies and must stay that way.** Blender's
@@ -117,17 +117,17 @@ make data FCF_REPO=/path/to/Future-City-Fellowship
 ## Changing the proposed-build geometry
 
 Edit `fcf3d/geometry.py` only. Both output paths read from it, so they stay in
-sync automatically. Add a test to the geometry section — the existing ones
+sync automatically. Add a test to the geometry section - the existing ones
 check ADA stall provision, canopy clearance, pathway-stall translucency, and
 the ENU→glTF axis conversion.
 
 ## MCP servers worth connecting
 
-- **Blender MCP** (`blender.org/lab/mcp-server`, official; Blender 5.1+) —
+- **Blender MCP** (`blender.org/lab/mcp-server`, official; Blender 5.1+) -
   for interactive art direction of the assets. It executes generated Python
   inside a live Blender session with no sandbox, so run it against a scratch
   scene, not a file you care about.
-- **Filesystem / Git** — normal repo work.
+- **Filesystem / Git** - normal repo work.
 
 For batch asset generation prefer `blender --background --python`, not MCP.
 It is deterministic, reviewable, and runs in CI.

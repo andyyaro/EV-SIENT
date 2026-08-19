@@ -2,9 +2,9 @@
 
 Two explicit model modes:
 
-- ``legacy_v2``      — reproduces the accepted V2 baseline exactly (cohort-relative
+- ``legacy_v2``      - reproduces the accepted V2 baseline exactly (cohort-relative
                        min-max scoring, 2035/2050 horizons, legacy multipliers).
-- ``milestone2_v3``  — canonical 2026 baseline + 2036/2046/2056 horizons, fixed-anchor
+- ``milestone2_v3``  - canonical 2026 baseline + 2036/2046/2056 horizons, fixed-anchor
                        scoring, structured confidence, economics and emissions layers.
 
 Most result-changing constants live here with their provenance labels, and new ones
@@ -50,7 +50,7 @@ LEGACY_GROWTH_MULTIPLIERS = {
     "2050_high": 4.5,
 }
 
-# V3 growth multipliers — provisional planning conventions per research Report 05 §3.
+# V3 growth multipliers - provisional planning conventions per research Report 05 §3.
 # Status: synthetic_uncalibrated. Replace with an adoption-curve model once observed
 # session data and local EV-registration trends are available (see demand.py).
 V3_GROWTH_MULTIPLIERS = {
@@ -110,7 +110,7 @@ EV_EFFICIENCY_KWH_PER_MI = 0.30   # EPA-class light-duty EV benchmark; assumptio
 DISPLACED_GASOLINE_G_CO2_PER_MI = 400.0  # EPA fleet-average-class benchmark for displaced gasoline LDV; assumption label required
 LB_TO_KG = 0.45359237
 
-# Economics (PY-11) — screening/planning estimates, never budgets.
+# Economics (PY-11) - screening/planning estimates, never budgets.
 ECON = {
     "hardware_usd_per_port": 6500.0,        # listed dual-port L2 pedestal per-port hardware benchmark; vendor quote TBV
     "install_soft_cost_share": 0.25,        # NREL: soft costs can exceed 50% on some projects; 25% screening midpoint
@@ -134,7 +134,7 @@ ECON_PROVENANCE = (
     "and vendor fee schedules are required before any budget use."
 )
 
-# Expansion-trigger policy defaults (PY-20) — PROPOSED configuration, not adopted policy.
+# Expansion-trigger policy defaults (PY-20) - PROPOSED configuration, not adopted policy.
 TRIGGER_POLICY = {
     "policy_status": "proposed_default_pending_team_and_client_adoption",
     "utilization_threshold": 0.40,      # sustained average utilization

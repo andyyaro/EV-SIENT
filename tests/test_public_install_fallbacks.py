@@ -12,7 +12,7 @@ read.
   `renderSimulink()` reads `model`, `status`, `status_detail`, `built_by`, `from_run`,
   `root.block_count`, `root.blocks` and `subsystems`.
 
-Nothing caught it because the branch never runs in this repository — the artifacts are present
+Nothing caught it because the branch never runs in this repository - the artifacts are present
 here, so only a recipient of the public installer would have seen it, and only as silent
 `undefined` text rather than an error.
 
@@ -42,7 +42,7 @@ def build_fallback(script: str, target: Path, hide: Path | None = None) -> dict:
 
     `hide` is required in practice: both builders take the empty branch only when the artifact
     they look for is absent, and in THIS repository it is present. Passing `--allow-missing`
-    alone therefore builds the real payload and tests nothing — which is exactly why the
+    alone therefore builds the real payload and tests nothing - which is exactly why the
     defect survived. The artifact is moved aside for the duration and always moved back.
     """
     saved = target.read_text() if target.is_file() else None
@@ -98,7 +98,7 @@ def test_the_empty_engine_record_has_the_shape_the_renderer_reads():
     missing = {k for k in missing if not k.startswith("divergences.")}
     assert not missing, (
         f"the public-install engine record omits {sorted(missing)}, which the platform "
-        f"renders — a recipient sees 'undefined' where the honest empty state should be")
+        f"renders - a recipient sees 'undefined' where the honest empty state should be")
 
 
 @pytest.mark.skipif(not ENGINES.is_file(), reason="engines.json absent")

@@ -8,11 +8,11 @@ is untracked or gitignored, because that file is sitting right there on the deve
 The result is a suite that is green locally and broken for everyone else, and this repository
 has now produced that exact failure **three times**:
 
-* **Phase 1** — `verify.sh` green locally, broken on a clean clone.
-* **FIND-CI-01 root cause A** (2026-07-28T00:45Z) — the Tableau build read `data/outputs/`,
+* **Phase 1** - `verify.sh` green locally, broken on a clean clone.
+* **FIND-CI-01 root cause A** (2026-07-28T00:45Z) - the Tableau build read `data/outputs/`,
   which is gitignored: present on a machine that had run the model, absent everywhere else.
   CI was red for five consecutive commits while gates were reported green.
-* **DEC-021** (2026-07-28T02:10Z) — the commit landed `intake.py`, its tests and its gate, but
+* **DEC-021** (2026-07-28T02:10Z) - the commit landed `intake.py`, its tests and its gate, but
   not `scripts/intake_review.py` or the two files registering it. All 38 gates passed against
   the working tree while the repository declared an operation whose script did not exist in it.
 
@@ -24,7 +24,7 @@ What it checks
 --------------
 1. Every path-like argument of every declared operation, and every repository script referenced
    by `verify.sh`, resolves to a file **tracked by git**.
-2. Untracked is a failure. Gitignored-but-present is a failure, and a nastier one — the file
+2. Untracked is a failure. Gitignored-but-present is a failure, and a nastier one - the file
    exists, so nothing local complains.
 3. Output paths (`--out <dir>`, `data/outputs/...`) are exempt: they are *written*, not read.
    Their absence in a clone is correct.

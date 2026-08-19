@@ -6,9 +6,9 @@ The model now runs in two permanent modes:
   (12 sites; FFX002 top at 58.8; 25 starter / 48 pathway ports; 38 REVIEW + 12 INFO data
   findings; 0 High-confidence sites).
 - **`milestone2_v3`:** the same evidence base extended with (1) canonical 10/20/30-year
-  horizons — 2036/2046/2056 from a 2026 baseline; (2) cohort-independent fixed-anchor
+  horizons - 2036/2046/2056 from a 2026 baseline; (2) cohort-independent fixed-anchor
   scoring (versioned anchor set, migration report published); (3) typed field-level data
-  confidence — wording changes can no longer move confidence scores; (4) peak-window and
+  confidence - wording changes can no longer move confidence scores; (4) peak-window and
   discrete-event wait modeling with P10/P50/P90 bands; (5) a lifecycle-cost layer
   (net present cost, staged vs broad vs defer); (6) a net-CO2e layer with sourced grid
   factor; (7) one canonical cross-model data contract consumed by every downstream

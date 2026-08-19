@@ -11,7 +11,7 @@ who cannot reproduce it from a terminal cannot audit it.
 Why it is read-only
 -------------------
 This prints a proposal. It does not write a canonical frame, does not run the model, and does
-not touch the contract. Applying a proposal is a separate, deliberate act — the whole design of
+not touch the contract. Applying a proposal is a separate, deliberate act - the whole design of
 DEC-021 is that a human sees every finding *before* anything happens to their data.
 
     python scripts/intake_review.py data/intake/fixtures/messy_third_party.csv
@@ -93,7 +93,7 @@ def review(path: Path) -> dict:
 
 def render(payload: dict) -> str:
     lines = [
-        f"Intake review — {payload['file']} ({payload['rows']} rows, "
+        f"Intake review - {payload['file']} ({payload['rows']} rows, "
         f"{len(payload['supplied_columns'])} columns)",
         "",
     ]

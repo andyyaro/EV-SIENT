@@ -10,13 +10,13 @@ deployment with better marketing.
 
 Three constraints, each of which independently argues against a full outdoor rollout:
 
-1. **The material will not survive outdoors.** These are PVC coins with adhesive backing —
+1. **The material will not survive outdoors.** These are PVC coins with adhesive backing -
    an indoor, short-term product. UV, freeze-thaw, and a Northern Virginia summer will
    degrade both the laminate and the adhesive. The listing says not for metal; it does not
    promise weatherproofing either.
 2. **NFC detunes badly on metal.** Charging pedestals, bollards and equipment cabinets are
    metal. Without a ferrite isolation layer a coin stuck to any of them may read
-   intermittently or not at all — and an intermittent tag is worse than none, because the
+   intermittently or not at all - and an intermittent tag is worse than none, because the
    person concludes the project is broken rather than that the sticker is.
 3. **Placement needs permission we do not have.** Attaching anything to a public facility
    requires the facility manager's consent. **That consent has not been sought or given for
@@ -37,7 +37,7 @@ recorded in `docs/human-actions/utility_facility_data/03_TRACKING_REGISTER.md`.
 ## Placement
 
 - **Indoors only.** A lobby noticeboard, a printed sign, or a display stand.
-- **Not on metal**, unless a ferrite layer is fitted and the tag is re-verified in place —
+- **Not on metal**, unless a ferrite layer is fitted and the tag is re-verified in place -
   reading it on a desk proves nothing about reading it on a bollard.
 - **Card beside every tag**, carrying the QR code and the URL in text. NFC is a convenience
   layer, never the only door.
@@ -65,7 +65,7 @@ Stated in advance, so the answer is not negotiated afterwards:
 - **QR scans exceed NFC taps by more than 3:1.** The QR code is doing the work; NFC is
   ornament, and a printed sign would have been the honest answer.
 - **Any tag unreadable, peeled or missing at a monthly check.** The material is not suited
-  to the placement — which is a finding worth having cheaply.
+  to the placement - which is a finding worth having cheaply.
 - **A tag is found rewritten.** The locking procedure failed or was skipped. Pull every
   tag immediately; this is the failure mode with a real liability attached.
 - **Zero capture-form completions.** The strongest use case does not survive contact with

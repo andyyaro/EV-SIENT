@@ -4,7 +4,7 @@
   "from_run": "run-30296650057",
   "built_by": "25.2.0.3177638 R2025b Update 5",
   "status": "BUILT, NEVER SIMULATED",
-  "status_detail": "This diagram was generated from the model source and opened once by real MathWorks MATLAB. It has never been run. No number anywhere in this project derives from it \u2014 every metric comes from the base pipeline, which needs no Simulink at all.",
+  "status_detail": "This diagram was generated from the model source and opened once by real MathWorks MATLAB. It has never been run. No number anywhere in this project derives from it - every metric comes from the base pipeline, which needs no Simulink at all.",
   "root": {
     "blocks": [
       {
@@ -84,6 +84,6 @@
       "line_elements": 4
     }
   },
-  "topology_note": "Block names and types are read from the .slx itself and match, one for one, the topology read out of buildSimulinkModel.m by hand during Phase 0 \u2014 the source read confirmed by the artifact.",
+  "topology_note": "Block names and types are read from the .slx itself and match, one for one, the topology read out of buildSimulinkModel.m by hand during Phase 0 - the source read confirmed by the artifact.",
   "connections_note": "Connection counts are NOT claimed equal to the source. buildSimulinkModel.m calls add_line 15 times; the saved file encodes fan-out as branches, so the counts differ by construction. Asserting they match without checking the graph would be a claim beyond the evidence."
 }

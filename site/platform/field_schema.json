@@ -62,7 +62,7 @@
             "engineering_calculation": "establishes at most: engineering_estimate",
             "comparable_site_proxy": "establishes at most: planning_proxy"
           },
-          "help": "Ordered strongest first. The method caps how strong a claim the value can support \u2014 it can never establish more than what is listed."
+          "help": "Ordered strongest first. The method caps how strong a claim the value can support - it can never establish more than what is listed."
         },
         {
           "name": "service_capacity_kw",

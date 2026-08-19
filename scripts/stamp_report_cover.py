@@ -6,7 +6,7 @@ Why the label had to go INSIDE the document
 `site/www/reports/Public_EV_Charging_Planning_Report.pdf` is served publicly, generated
 2026-06-28, and its page 3 is headed **"Current Site Ranking"** while publishing all twelve
 `legacy_v2` scores with no model mode named anywhere. The linking page on `results.html` was
-annotated first — but the PDF is **independently addressable**: it has its own URL and a direct
+annotated first - but the PDF is **independently addressable**: it has its own URL and a direct
 "open the PDF directly" link, so a warning living on the linking page does not travel with the
 file when someone shares it. A reader who arrives at the URL sees "the latest run" and "the
 strongest current planning signal" with no correction in sight.
@@ -18,7 +18,7 @@ a dated artifact** rather than withdraw it. This script is that stamp.
 Why it is not a build step
 --------------------------
 It needs `qpdf`, which the CI runners do not have, and it modifies a tracked binary. So it runs
-**by hand**, once, and its output is committed — the same treatment as `scripts/vendor_cesium.sh`.
+**by hand**, once, and its output is committed - the same treatment as `scripts/vendor_cesium.sh`.
 Re-running it on an already-stamped file is refused rather than silently producing two covers.
 
 The cover page itself is written here in raw PDF with **no dependencies at all**: one page, US

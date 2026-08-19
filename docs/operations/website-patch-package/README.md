@@ -17,7 +17,7 @@ source-absent path) rather than modified source files.
 | `content/methodology_update.md` | V3 methodology section (modes, anchors, contract, uncalibrated-demand status) |
 | `content/results_2036_2046_2056.md` | Three-horizon results content (contract-derived numbers only) |
 | `content/standards_summary.md` | UL 2594 + UL 3600 + supporting standards + proposed-standard concept summary |
-| `content/limitations_update.md` | Updated limitations (aligned with the repository's model-limitations discipline — root `README.md` "Known limitations") |
+| `content/limitations_update.md` | Updated limitations (aligned with the repository's model-limitations discipline - root `README.md` "Known limitations") |
 | `content/source_vintage_footer.html` | Footer snippet: contract version + generated date + eGRID vintage |
 | `content/assistant_boundaries.md` | Assistant scope/limitation text + governance rules |
 | `DEPLOYMENT_RUNBOOK.md` | Exact deploy + verification + rollback steps (S3/CloudFront) |
@@ -32,7 +32,7 @@ source-absent path) rather than modified source files.
    eGRID2023 Rev 2 SRVC factor).
 5. No secrets, credentials, or internal infrastructure identifiers appear in this package
    or may be added to assistant-readable content.
-6. Authentication boundary (Cognito) for the assistant is preserved — nothing here makes
+6. Authentication boundary (Cognito) for the assistant is preserved - nothing here makes
    the assistant public.
 7. Accessibility: patch guide requires alt text on all new figures, heading hierarchy,
    and contrast ≥ WCAG AA for the new content blocks.

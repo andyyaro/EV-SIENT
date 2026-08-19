@@ -1,7 +1,7 @@
 /* Interpret the generated field schema. Used by the entry forms AND by the parity test.
  *
  * There is exactly one copy of this logic and it is this file. The browser does not carry a
- * second, friendlier version of the model's refusals — that is the failure this whole design
+ * second, friendlier version of the model's refusals - that is the failure this whole design
  * exists to prevent, because a form that accepts what `observed.py` will later reject sends a
  * field worker away believing an observation was recorded when it was not.
  *
@@ -12,7 +12,7 @@
  *
  * Written as a plain script rather than an ES module so the page can load it with a bare
  * <script> tag exactly as it loads app.js, and so node can evaluate it with `vm` in the parity
- * test — the SAME bytes both times, which is the point.
+ * test - the SAME bytes both times, which is the point.
  */
 (function (root) {
   "use strict";
@@ -25,7 +25,7 @@
   /**
    * Parse a number the way the Python side does.
    * Returns {ok, value}. `ok:false` means "present but not a usable number", which is
-   * different from absent — Python raises on `float("abc")` but treats blank as None.
+   * different from absent - Python raises on `float("abc")` but treats blank as None.
    */
   function parseNumber(value) {
     if (isBlank(value)) return { ok: true, value: null };

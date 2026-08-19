@@ -7,7 +7,7 @@ The patch package was built 2026-07-19 and its `tbl_readiness_confidence.csv` ca
 beside them is the v3 value. Checked, not assumed: FFX002 at 58.8 / rank 1 is the legacy
 number; canonically FFX004 leads at 53.4 and FFX002 is second at 51.8. Nothing in the file
 declares the mix, so a workbook built from it would publish the legacy ranking under a v3
-heading — which is the defect Phase 1 corrected in the README and which is **still live** on
+heading - which is the defect Phase 1 corrected in the README and which is **still live** on
 Tableau Public today.
 
 So every sheet here is derived from `data/contract/v1/` and the canonical
@@ -94,7 +94,7 @@ def short_site(name: str, limit: int = 26) -> str:
     """Site names run to 34 characters and Tableau truncated them to '01 Fairfa..'.
 
     Shortened at a word boundary so the label stays a name rather than a fragment. The full
-    name is on the tooltip, and `site_id` is on the tooltip too, so nothing is lost — the
+    name is on the tooltip, and `site_id` is on the tooltip too, so nothing is lost - the
     axis just stops being unreadable.
     """
     if len(name) <= limit:
@@ -353,7 +353,7 @@ def build_spec(paths: dict[str, Path]) -> dict:
                 "label": {"field": "readiness_score", "aggregation": "Sum"},
                 "tooltips": ["site_id", "site_name", "recommendation_tier", "jurisdiction",
                              "model_mode"],
-                "title": "Site readiness ranking — canonical milestone2_v3",
+                "title": "Site readiness ranking - canonical milestone2_v3",
                 "subtitle": "All 12 sites are LOW data confidence; the colour legend has one value on purpose.",
                 "fit": "entire_view",
             },
@@ -391,7 +391,7 @@ def build_spec(paths: dict[str, Path]) -> dict:
                 "tooltips": [{"field": "pathway_capacity", "aggregation": "Sum"},
                              "model_mode"],
                 "title": "Active ports by planning horizon",
-                "subtitle": "48-port pathway ceiling is in the tooltip — no reference line, see CAPABILITY_GAP.md.",
+                "subtitle": "48-port pathway ceiling is in the tooltip - no reference line, see CAPABILITY_GAP.md.",
                 # fit_width, not entire_view: with only four horizon categories
                 # entire_view sizes the viz to its content and it published as a
                 # narrow strip in a full-width zone.

@@ -3,7 +3,7 @@
 
 What this touches, and what it must not
 ---------------------------------------
-The distribution serving the platform **also serves the NFC field layer** — the twelve pages a
+The distribution serving the platform **also serves the NFC field layer** - the twelve pages a
 reader reaches by tapping a coin in a car park, which must stay open to anyone with a phone and
 no account (DEC-006, DEC-017). So this script adds one origin and one cache behaviour, and
 changes nothing else. It *asserts* that rather than intending it: :func:`assert_safe_change`
@@ -11,7 +11,7 @@ compares the config it is about to send against the one it fetched and refuses i
 cache behaviour, the existing origin, the aliases or the certificate moved by so much as a key.
 
 That check exists because ``update-distribution`` is a **whole-config replace**. There is no
-partial update. A script that builds the new config slightly wrong does not fail — it
+partial update. A script that builds the new config slightly wrong does not fail - it
 successfully deploys a broken site.
 
 Why the platform gets its own bucket
@@ -20,7 +20,7 @@ This is the part that is not obvious, and it is the difference between a gate an
 *appearance* of one.
 
 A cache behaviour is selected by matching the request path against ``/platform*``. But
-CloudFront normalises percent-encoding — measured, not assumed: ``/%61ssistant.html`` returns
+CloudFront normalises percent-encoding - measured, not assumed: ``/%61ssistant.html`` returns
 the same 70 378 bytes as ``/assistant.html`` on this distribution today. If path-pattern
 matching happens before that normalisation, then ``/%70latform/index.html`` would miss the
 gated behaviour, fall through to the **default** behaviour, and be served with no
@@ -29,7 +29,7 @@ authentication at all.
 Rather than depend on the order of two internal CloudFront steps, the platform bundle lives in
 a **separate bucket that the default behaviour's origin cannot see**. Any request that evades
 the path pattern lands on the main bucket, which simply has no platform content in it, and gets
-a 404. The guarantee stops being behavioural and becomes structural — the same reasoning that
+a 404. The guarantee stops being behavioural and becomes structural - the same reasoning that
 makes an operation *be* a CLI command rather than merely match one.
 
 Nothing here writes a credential into a tracked file, and the one tracked file it DOES write --
@@ -75,7 +75,7 @@ EDGE_SOURCE = REPO / "infra/edge-auth/index.mjs"
 BUNDLE = REPO / "site/platform"
 
 #: AWS managed cache policy "CachingOptimized". Cookies are deliberately NOT part of the cache
-#: key — they must not be, or every session would get its own cache entry. That is safe here
+#: key - they must not be, or every session would get its own cache entry. That is safe here
 #: precisely because viewer-request runs *before* the cache is consulted, so a cached object is
 #: still unreachable without a valid session. It also means the session cookie is never
 #: forwarded to S3 and never lands in its logs.
@@ -168,7 +168,7 @@ def ensure_managed_login_branding(apply: bool) -> None:
 
     This is not cosmetic and the failure it prevents is not obvious. This pool runs
     **Managed Login (version 2)**, and under version 2 every app client needs its own branding
-    record. A client without one does not fall back to a default page — Cognito serves
+    record. A client without one does not fall back to a default page - Cognito serves
     "Login pages unavailable · Please contact an administrator", with nothing in the app
     client's own configuration to suggest why.
 
@@ -380,7 +380,7 @@ def assert_safe_change(before: dict, after: dict) -> None:
             "REFUSING TO DEPLOY: the DEFAULT behaviour has a Lambda association.\n"
             "  That would gate the public NFC pages. Not what this deploys.")
 
-    # Every origin that existed before must survive untouched — EXCEPT the platform origin,
+    # Every origin that existed before must survive untouched - EXCEPT the platform origin,
     # which this script owns and rewrites on every run. Without that exemption the guard fires
     # on the second deploy of an unchanged config, which is a guard that cries wolf: the useful
     # signal (someone else's origin moved) gets lost in a failure that happens every time.
@@ -395,7 +395,7 @@ def assert_safe_change(before: dict, after: dict) -> None:
         # It may change, but only in ways that keep it pointing at the isolated bucket.
         if after_origins[ORIGIN_ID]["DomainName"] != f"{PLATFORM_BUCKET}.s3.{REGION}.amazonaws.com":
             raise SystemExit("REFUSING TO DEPLOY: the platform origin no longer points at the "
-                             "isolated bucket — that is the whole bypass defence.")
+                             "isolated bucket - that is the whole bypass defence.")
     added = set(after_origins) - set(before_origins)
     if added - {ORIGIN_ID}:
         raise SystemExit(f"REFUSING TO DEPLOY: unexpected new origins {sorted(added)}")
@@ -409,7 +409,7 @@ def assert_safe_change(before: dict, after: dict) -> None:
     gated = after["CacheBehaviors"]["Items"][0]
     if gated["TargetOriginId"] != ORIGIN_ID:
         raise SystemExit("REFUSING TO DEPLOY: the gated behaviour does not target the "
-                         "isolated platform origin — that is the whole bypass defence.")
+                         "isolated platform origin - that is the whole bypass defence.")
 
 
 def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
@@ -421,7 +421,7 @@ def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
     # This used to overwrite `cloudfront-config-before-platform.json` on every run, including
     # dry runs. So the file whose entire purpose is "what the distribution looked like before
     # the platform behaviour existed" was replaced, the first time the script ran, with the
-    # config that HAS the platform behaviour in it — `platform-gated` origin, `/platform*`
+    # config that HAS the platform behaviour in it - `platform-gated` origin, `/platform*`
     # cache behaviour and all. Six commits carried it that way. Restoring from it would have
     # restored the change it exists to undo, and the log line calling it the "original config"
     # made that harder to notice, not easier.
@@ -436,7 +436,7 @@ def deploy_cloudfront(apply: bool, lambda_arn: str, oac_id: str) -> None:
         say("cloudfront", f"rollback snapshot created (account redacted) -> "
                           f"{before.relative_to(REPO)}")
 
-    # The current config is still worth recording — it is just not the rollback target, so it
+    # The current config is still worth recording - it is just not the rollback target, so it
     # gets its own name and says what it is.
     # Written LAST, from a fresh fetch, not from the config read at the top of this function.
     #
@@ -487,7 +487,7 @@ def write_observed(apply: bool) -> None:
 
 def deploy_bundle(apply: bool) -> None:
     if not (BUNDLE / "index.html").is_file():
-        raise SystemExit(f"{BUNDLE} has no index.html — build the bundle first")
+        raise SystemExit(f"{BUNDLE} has no index.html - build the bundle first")
 
     files = sorted(p for p in BUNDLE.rglob("*") if p.is_file())
     oversize = [p for p in files if p.stat().st_size > 25 * 1024 * 1024]
@@ -582,7 +582,7 @@ def deploy_www(apply: bool) -> None:
                        capture_output=True, text=True)
     if apply:
         say("www", f"removed {len(STALE_OBJECTS)} duplicate/orphan object(s) "
-                   f"(recoverable — bucket versioning is enabled)")
+                   f"(recoverable - bucket versioning is enabled)")
         inv = aws("cloudfront", "create-invalidation", "--distribution-id", DISTRIBUTION_ID,
                   "--paths", "/*")
         say("www", f"invalidation {inv['Invalidation']['Id']} created")
@@ -597,8 +597,8 @@ def main() -> int:
                     help="actually deploy; without it the script only reports")
     args = ap.parse_args()
 
-    print(f"\nFuture City Fellowship — platform deploy "
-          f"({'APPLY' if args.apply else 'DRY RUN — nothing will change'})\n")
+    print(f"\nFuture City Fellowship - platform deploy "
+          f"({'APPLY' if args.apply else 'DRY RUN - nothing will change'})\n")
 
     check_identity()
     ensure_managed_login_branding(args.apply)

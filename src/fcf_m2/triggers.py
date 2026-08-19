@@ -1,6 +1,6 @@
 """Equity-aware expansion-trigger policy (PY-20).
 
-The policy is PROPOSED configuration (config.TRIGGER_POLICY) — it is not adopted
+The policy is PROPOSED configuration (config.TRIGGER_POLICY) - it is not adopted
 municipal policy and every evaluation says so. Trigger decisions are explainable:
 each evaluation returns the full rule trace.
 

@@ -10,7 +10,7 @@
 | Fire code edition | 2021 SFPC | | | |
 | EV provisions applied | VCC §406.2.7 | | | |
 | Local amendments affecting EVSE | none known | | | |
-| EV-ready interpretation ("sufficient EV charging", AFDC listing 12646 ambiguity — confirmed by client) | building official interpretation | | | |
+| EV-ready interpretation ("sufficient EV charging", AFDC listing 12646 ambiguity - confirmed by client) | building official interpretation | | | |
 | ADA/accessibility basis for EV spaces | USBC ADA provisions now; Access Board EVSE NPRM (2024-09-03) not final as of 2026-07-19 | | | |
 | Anticipated 2024-cycle changes relevant to EVSE | none assumed | | | |
 

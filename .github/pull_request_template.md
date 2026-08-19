@@ -4,7 +4,7 @@
 
 ## Type of change
 
-- [ ] Model/code change (may alter results — describe below)
+- [ ] Model/code change (may alter results - describe below)
 - [ ] Data update (state source, date, and provenance class)
 - [ ] Documentation
 - [ ] CI / tooling

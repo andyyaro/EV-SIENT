@@ -14,11 +14,11 @@ Fill a row in **as you finish each tag**, not afterwards from memory.
 |---|---|
 | **Written** | NFC Tools reported a successful write |
 | **Verified** | read back with the app **closed**, URL checked character by character against `tag_payloads.csv`, and the page opened correctly |
-| **Locked** | permanently read-only — **irreversible** |
+| **Locked** | permanently read-only - **irreversible** |
 | **Placed** | physically installed, with the facility manager's documented permission |
 
-**Locked is required for deployment, not for testing.** A bench tag — used for a demo, a
-rehearsal, or verifying the pipeline — should stay *unlocked* so it can be re-pointed when a
+**Locked is required for deployment, not for testing.** A bench tag - used for a demo, a
+rehearsal, or verifying the pipeline - should stay *unlocked* so it can be re-pointed when a
 URL changes. Written + Verified + not Locked is a complete and correct state for such a tag,
 and the Purpose column records which kind it is.
 
@@ -28,7 +28,7 @@ A tag must never be **Placed** before it is **Locked**.
 
 | # | site_id | Purpose | Date | Written by | Written | Verified | Locked | Tag UID (last 4) | Placed | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | FFX002 | bench | 2026-07-27 | Andy | ☑ | ☑ | ☐ *(bench — deliberately unlocked)* | | ☐ | First end-to-end walkthrough of the runbook. Write, background read and page load all confirmed. |
+| 1 | FFX002 | bench | 2026-07-27 | Andy | ☑ | ☑ | ☐ *(bench - deliberately unlocked)* | | ☐ | First end-to-end walkthrough of the runbook. Write, background read and page load all confirmed. |
 | 2 | | | | | ☐ | ☐ | ☐ | | ☐ | |
 | 3 | | | | | ☐ | ☐ | ☐ | | ☐ | |
 | 4 | | | | | ☐ | ☐ | ☐ | | ☐ | |
@@ -44,7 +44,7 @@ A tag must never be **Placed** before it is **Locked**.
 ## Dead or discarded tags
 
 Tags that failed to write, or were locked with the wrong content, are recorded here rather
-than silently binned — a locked-wrong tag that reappears in a drawer months later is a
+than silently binned - a locked-wrong tag that reappears in a drawer months later is a
 hazard, not a spare.
 
 | Tag UID (last 4) | Date | What went wrong | Disposal |

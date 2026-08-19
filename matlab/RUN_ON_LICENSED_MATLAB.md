@@ -2,7 +2,7 @@
 
 > **This page is preserved as the first-run procedure. Its opening sentence was true
 > when written and is no longer.** The suite has since been executed on licensed MathWorks
-> R2025b Update 5 — **49 passed / 0 failed** — against a synthetic fixture. See
+> R2025b Update 5 - **49 passed / 0 failed** - against a synthetic fixture. See
 > `EXECUTION_STATUS.md` for the run record. The procedure below remains correct for anyone
 > running it themselves.
 

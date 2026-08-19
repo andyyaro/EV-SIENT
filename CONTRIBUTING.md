@@ -9,7 +9,7 @@ make test             # full suite incl. legacy golden tests; reports coverage (
 make run-legacy       # reproduce the accepted V2 baseline (25 starter / 48 pathway)
 make run-v3           # full V3 run into data/outputs/v3_run/
 make validate         # validate the tracked contract at data/contract/v1
-./scripts/verify.sh   # every repository gate — must pass before you open a PR
+./scripts/verify.sh   # every repository gate - must pass before you open a PR
 ```
 
 Full command reference: [docs/operations/reproduction-guide.md](docs/operations/reproduction-guide.md).
@@ -32,14 +32,14 @@ erode it:
   cost; never present them as budgets, bids, or forecasts.
 - MATLAB has been executed on licensed MathWorks R2025b Update 5 (**49 passed / 0 failed**)
   against a **synthetic fixture only**. No MATLAB output describes a real facility, and the
-  Simulink model was **built, never simulated** — do not claim more than
+  Simulink model was **built, never simulated** - do not claim more than
   `matlab/EXECUTION_STATUS.md` records.
 
 ## Golden-test rule
 
 The legacy fixtures under `tests/` are **frozen**. They encode the accepted
 V2 baseline (FFX002 58.8; 25/48 port totals). A golden-test failure means
-the model changed — investigate it. **Do not regenerate goldens to silence a
+the model changed - investigate it. **Do not regenerate goldens to silence a
 failure.** A deliberate re-baselining requires a documented migration note
 and reviewer sign-off, never a quiet fixture update.
 

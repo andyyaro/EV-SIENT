@@ -1,5 +1,5 @@
 """
-geometry.py — parametric geometry for proposed EV charging infrastructure.
+geometry.py - parametric geometry for proposed EV charging infrastructure.
 
 This module is the single source of truth for what a "proposed site build"
 looks like in 3D. It is imported by BOTH:
@@ -39,7 +39,7 @@ CANOPY_THICKNESS = 0.28
 CANOPY_OVERHANG = 0.55
 
 COLUMN_SIDE = 0.30
-PEDESTAL = (0.50, 0.34, 1.45)  # width, depth, height — L2/DCFC dispenser
+PEDESTAL = (0.50, 0.34, 1.45)  # width, depth, height - L2/DCFC dispenser
 CABINET = (1.60, 0.90, 2.00)  # DCFC power cabinet
 TRANSFORMER = (2.10, 1.60, 1.80)  # pad-mount transformer
 PAD_THICKNESS = 0.06

@@ -3,7 +3,7 @@
 What is deployed, what it cost, what breaks if it goes wrong, and how to undo each piece.
 
 Written for the person who has to change this after the people who built it have moved on.
-Every figure below was measured against the live account, not estimated — where something is
+Every figure below was measured against the live account, not estimated - where something is
 an estimate it says so.
 
 ---
@@ -20,16 +20,16 @@ access rules.
 | everything else | `future-city-fellowship` (private, OAC) | **anyone, no account** |
 
 The second row is the one to be careful about. `/t/FFX001` … `/t/PWC008` are the **NFC landing
-pages** — the twelve pages a reader would reach by tapping a physical coin in a car park, with
+pages** - the twelve pages a reader would reach by tapping a physical coin in a car park, with
 no app and no account. **All twelve pages are live and public; no physical tag has been placed
 at any site, and no placement permission has been sought** (`docs/nfc/README.md`,
 `docs/nfc/PILOT_PLAN.md`). One bench tag was written and read back through iOS background NFC.
-**Any change that gates the default cache behaviour breaks all twelve pages** — and once tags
+**Any change that gates the default cache behaviour breaks all twelve pages** - and once tags
 are placed they are not something that can be un-deployed from a car park.
 
 ### Why the platform has its own bucket
 
-Not tidiness — it is the whole access-control argument.
+Not tidiness - it is the whole access-control argument.
 
 A cache behaviour is chosen by matching the request path against `/platform*`. CloudFront also
 normalises percent-encoding: **measured on this distribution**, `/%61ssistant.html` returns the
@@ -55,10 +55,10 @@ Everything below is reversible. Nothing was created that another project depends
 | CloudFront cache behaviour | `/platform*` | Set `CacheBehaviors.Quantity` to 0. **This alone fully un-gates and un-deploys the platform**, leaving the public site untouched. |
 | Lambda@Edge function | `fcf-platform-edge-auth` (versions 1–5) | Detach from the behaviour first; Lambda@Edge replicas take hours to drain before the function can be deleted. This is normal, not a fault. |
 | IAM role | `fcf-platform-edge-auth-role` | Delete after the function. |
-| Cognito app client | `future-city-platform-edge` | Delete. The **user pool is pre-existing and shared** — do not delete it. |
+| Cognito app client | `future-city-platform-edge` | Delete. The **user pool is pre-existing and shared** - do not delete it. |
 | Cognito managed-login branding | per-client record | Deleting it removes the client's sign-in page entirely (see §5). |
 
-**The fastest full rollback** — platform gone, public site and NFC layer untouched — is to set
+**The fastest full rollback** - platform gone, public site and NFC layer untouched - is to set
 `CacheBehaviors.Quantity` to `0` and re-send the distribution config. Everything else can be
 cleaned up afterwards at leisure.
 
@@ -71,8 +71,8 @@ deploy script.
 ## 3. Cost
 
 **Measured, not projected.** Total spend on the whole AWS account across the last two monthly
-periods, from Cost Explorer: **$0.027** and **$0.386**. The entire account — every project in
-it — costs under forty cents a month.
+periods, from Cost Explorer: **$0.027** and **$0.386**. The entire account - every project in
+it - costs under forty cents a month.
 
 Incremental cost of everything this program added, at on-demand rates, no Free Tier, no credits:
 
@@ -101,12 +101,12 @@ compute is Lambda@Edge, which scales to zero and bills per request.
 
 ```bash
 aws sso login --profile future-city          # the token expires; this is the usual blocker
-python scripts/deploy_platform.py            # DRY RUN — prints its plan, changes nothing
+python scripts/deploy_platform.py            # DRY RUN - prints its plan, changes nothing
 python scripts/deploy_platform.py --apply
 python scripts/verify_deployment.py          # 33 live assertions, both halves
 ```
 
-The script is dry-run by default. It is idempotent — re-running with no changes republishes
+The script is dry-run by default. It is idempotent - re-running with no changes republishes
 identical bytes and reports `0 object(s) written`.
 
 ### The guard that matters
@@ -114,7 +114,7 @@ identical bytes and reports `0 object(s) written`.
 `update-distribution` is a **whole-config replace**; there is no partial update. A script that
 builds the config slightly wrong does not fail, it *successfully deploys a broken site*. So
 `assert_safe_change` refuses to send a config in which the default cache behaviour, the
-existing origin, the aliases or the certificate differ by so much as a key — and refuses if the
+existing origin, the aliases or the certificate differ by so much as a key - and refuses if the
 gated behaviour stops pointing at the isolated bucket.
 
 It has already earned that: it caught a redeploy that would have modified the platform origin
@@ -124,14 +124,14 @@ fails every time is a check people learn to skip.
 ### Deploying from CI
 
 Deliberately **not enabled**. `.github/workflows/deploy.yml` validates the deploy plan with no
-credentials at all — rebuilding every generated artifact from a clean checkout, checking the
+credentials at all - rebuilding every generated artifact from a clean checkout, checking the
 website's caveats and embeds, resolving surface links the way S3 resolves them, and exercising
 the deploy guards against configs that would gate the NFC layer or drop the alias.
 
 The credentialed job runs only on manual dispatch and only if `AWS_DEPLOY_ROLE_ARN` is set. It
 is unset, because configuring it grants **anyone who can dispatch that workflow the ability to
 rewrite the live public site**. That is a standing capability and it belongs to the project
-owner to grant. Long-lived access keys are not an option — the standing rules forbid them, and
+owner to grant. Long-lived access keys are not an option - the standing rules forbid them, and
 they would be worse.
 
 To enable it: create a GitHub OIDC provider in IAM, a role trusting
@@ -146,7 +146,7 @@ and set the secret. No OIDC provider exists in the account today.
 | Risk | Status |
 |---|---|
 | A config change breaks the NFC tags | Guarded by `assert_safe_change`; verified after every deploy by 12 live tag checks |
-| A path spelling evades the gate | Structurally impossible — the main bucket has no platform content. 6 spellings tested |
+| A path spelling evades the gate | Structurally impossible - the main bucket has no platform content. 6 spellings tested |
 | The gate redirects to a sign-in page that does not exist | **Happened.** See below |
 | The website embeds a deleted Tableau workbook | **Happened.** See DEC-019 |
 | Cost overrun | Measured monthly; account total is under $0.40 |
@@ -154,12 +154,12 @@ and set the secret. No OIDC provider exists in the account today.
 **The sign-in page that did not exist.** The gate correctly redirected to Cognito and Cognito
 had no page to serve: this pool runs **Managed Login v2**, where every app client needs its own
 branding record, and a client without one gets *"Login pages unavailable."* All 32 assertions
-passed while the feature was unusable, because they asserted *the gate redirects* — a strictly
+passed while the feature was unusable, because they asserted *the gate redirects* - a strictly
 weaker claim than *a person can sign in*. The verifier now follows the redirect and asserts a
 real password field renders.
 
 **The deleted workbook.** The original Tableau workbook was audited, found wrong, republished
-under a new name, and deleted — and nothing re-pointed the website, so 21 embeds across two
+under a new name, and deleted - and nothing re-pointed the website, so 21 embeds across two
 pages resolved to `resource-not-found`. Note for any future check: **Tableau answers HTTP 302
 for live and deleted views alike**, and both redirect chains end in a 200 carrying the same
 1 442-byte shell. Only the final URL distinguishes them.
@@ -188,7 +188,7 @@ them.
 ## 7. Open items
 
 > **Corrected 2026-07-28.** Every item in this section except the last had been closed and the
-> section never updated — it claimed the synthetic set did not exist, that the public installer
+> section never updated - it claimed the synthetic set did not exist, that the public installer
 > could not be built at all, that Cesium was fetched without a checksum, and that nothing
 > carried `--hash` lines. All four were false when read. Found by the DEC-014 line-by-line
 > audit. The closures are recorded below rather than the section being silently deleted.
@@ -205,6 +205,6 @@ them.
   non-editable install and the packaging build, **and for nothing else**.
 - ~~`verify-all` will not run on Windows~~ **CLOSED as a disclosure, not as a capability.** The
   operation now declares that it cannot run on a stock Windows machine and names WSL and Git
-  Bash as the alternatives (`operations.py`, the `verify-all` operation's `unavailable_reason`). It still does not run there. *(This cited a line number that had already drifted to a different statement — line numbers in prose go stale on the next edit, so it names the thing instead.)*
+  Bash as the alternatives (`operations.py`, the `verify-all` operation's `unavailable_reason`). It still does not run there. *(This cited a line number that had already drifted to a different statement - line numbers in prose go stale on the next edit, so it names the thing instead.)*
 - **No release version scheme.** *Still open.* `pyproject` pins a static `3.0.0` and the
   existing git tags are milestone markers, not versions.

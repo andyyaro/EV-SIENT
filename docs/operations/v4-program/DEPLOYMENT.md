@@ -1,4 +1,4 @@
-# DEPLOYMENT — pointer, not a copy
+# DEPLOYMENT - pointer, not a copy
 
 **The deployment record lives at [`/DEPLOYMENT.md`](../../../DEPLOYMENT.md) in the repository
 root.** It carries everything this slot requires: what is live, every resource created and how
@@ -24,9 +24,9 @@ deep in a program record that will be historical the moment this program lands.
 
 ## What is specific to this program
 
-The deployment work carried out under the V4 program — the two-bucket architecture, the
+The deployment work carried out under the V4 program - the two-bucket architecture, the
 Lambda@Edge Cognito gate, the measured percent-encoding behaviour that made a structural
-guarantee necessary rather than a behavioural one, and the cost figures — is recorded in
+guarantee necessary rather than a behavioural one, and the cost figures - is recorded in
 `/DEPLOYMENT.md` and in the dated rows of [`LEDGER.md`](LEDGER.md). What still needs a person is
 in [`RESIDUAL_RISKS.md`](RESIDUAL_RISKS.md) §4 and §8, and what was actually observed working is
 in [`VERIFICATION.md`](VERIFICATION.md) §5.

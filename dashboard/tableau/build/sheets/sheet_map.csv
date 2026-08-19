@@ -1,13 +1,13 @@
 site_id,site_ranked,site_name,jurisdiction,lat,lon,model_rank,readiness_score,recommendation_tier,data_confidence,ports_pathway_capacity,capacity_basis,model_mode
-FFX004,01 Fairfax County Government…,Fairfax County Government Center,fairfax,38.85404,-77.35706,1,53.4,Tier 1 — advance to site screening,Low,8,placeholder,milestone2_v3
-FFX002,02 City of Fairfax Regional…,City of Fairfax Regional Library,fairfax,38.847072,-77.30363,2,51.8,Tier 1 — advance to site screening,Low,8,placeholder,milestone2_v3
+FFX004,01 Fairfax County Government…,Fairfax County Government Center,fairfax,38.85404,-77.35706,1,53.4,Tier 1 - advance to site screening,Low,8,placeholder,milestone2_v3
+FFX002,02 City of Fairfax Regional…,City of Fairfax Regional Library,fairfax,38.847072,-77.30363,2,51.8,Tier 1 - advance to site screening,Low,8,placeholder,milestone2_v3
 PWC002,03 Neabsco-Potomac Commuter…,Neabsco-Potomac Commuter Garage,pwc,38.631185,-77.288802,3,51.1,High-review candidate,Low,3,placeholder,milestone2_v3
-PWC006,04 Bull Run Library,Bull Run Library,pwc,38.78694,-77.520529,4,50.2,"Tier 2 — promising candidate, refine data",Low,4,placeholder,milestone2_v3
-PWC007,05 Central Library,Central Library,pwc,38.768783,-77.454823,5,49.3,"Tier 2 — promising candidate, refine data",Low,4,placeholder,milestone2_v3
-FFX001,06 Fairfax City Hall or…,Fairfax City Hall or municipal building,fairfax,38.840974,-77.308103,6,48.7,"Tier 2 — promising candidate, refine data",Low,4,placeholder,milestone2_v3
-PWC004,07 Chinn Park Regional…,Chinn Park Regional Library,pwc,38.67034,-77.333127,7,47.5,"Tier 2 — promising candidate, refine data",Low,4,placeholder,milestone2_v3
-PWC001,08 PWC McCoart Government…,PWC McCoart Government Center,pwc,38.679705,-77.352905,8,45.4,"Tier 2 — promising candidate, refine data",Low,3,placeholder,milestone2_v3
-FFX003,09 Pohick Regional Library,Pohick Regional Library,fairfax,38.7749268,-77.2680915,9,44.9,Tier 3 — lower priority / monitor,Low,4,placeholder,milestone2_v3
-PWC008,10 Potomac Library,Potomac Library,pwc,38.632723,-77.2806337,10,41.8,Tier 3 — lower priority / monitor,Low,2,placeholder,milestone2_v3
-PWC005,11 Haymarket Gainesville…,Haymarket Gainesville Library,pwc,38.836588,-77.632135,11,39.0,Tier 3 — lower priority / monitor,Low,2,placeholder,milestone2_v3
+PWC006,04 Bull Run Library,Bull Run Library,pwc,38.78694,-77.520529,4,50.2,"Tier 2 - promising candidate, refine data",Low,4,placeholder,milestone2_v3
+PWC007,05 Central Library,Central Library,pwc,38.768783,-77.454823,5,49.3,"Tier 2 - promising candidate, refine data",Low,4,placeholder,milestone2_v3
+FFX001,06 Fairfax City Hall or…,Fairfax City Hall or municipal building,fairfax,38.840974,-77.308103,6,48.7,"Tier 2 - promising candidate, refine data",Low,4,placeholder,milestone2_v3
+PWC004,07 Chinn Park Regional…,Chinn Park Regional Library,pwc,38.67034,-77.333127,7,47.5,"Tier 2 - promising candidate, refine data",Low,4,placeholder,milestone2_v3
+PWC001,08 PWC McCoart Government…,PWC McCoart Government Center,pwc,38.679705,-77.352905,8,45.4,"Tier 2 - promising candidate, refine data",Low,3,placeholder,milestone2_v3
+FFX003,09 Pohick Regional Library,Pohick Regional Library,fairfax,38.7749268,-77.2680915,9,44.9,Tier 3 - lower priority / monitor,Low,4,placeholder,milestone2_v3
+PWC008,10 Potomac Library,Potomac Library,pwc,38.632723,-77.2806337,10,41.8,Tier 3 - lower priority / monitor,Low,2,placeholder,milestone2_v3
+PWC005,11 Haymarket Gainesville…,Haymarket Gainesville Library,pwc,38.836588,-77.632135,11,39.0,Tier 3 - lower priority / monitor,Low,2,placeholder,milestone2_v3
 PWC003,12 Prince William County…,Prince William County Public Safety Training Center,pwc,38.663726,-77.585658,12,32.8,Low public-priority / special-use,Low,2,placeholder,milestone2_v3

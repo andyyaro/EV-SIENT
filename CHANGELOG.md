@@ -1,30 +1,30 @@
 # Changelog
 
-## Unreleased — V4 platform program, Phases 5–10
+## Unreleased - V4 platform program, Phases 5–10
 
 The study became a running system. Everything below preserves the epistemics: `capacity_basis`
 is still `placeholder` on all 120 contract rows, all 12 sites still score Low data confidence,
 and `legacy_v2` still reproduces 25 starter / 48 pathway bit-exactly.
 
 ### Added
-- **The platform** — one interface, two tiers. The **web tier** shows what the model produced;
+- **The platform** - one interface, two tiers. The **web tier** shows what the model produced;
   the **desktop tier** (`fcf-platform`) also runs it. Every displayed number resolves to the run,
   contract version, source and confidence behind it, and anything that cannot be explained is
   not shown. Deployed at `futurecityfellowship.andyyaro.com/platform/` behind a **Lambda@Edge
-  Cognito gate**, in its own bucket so a percent-encoded path cannot reach it — a structural
+  Cognito gate**, in its own bucket so a percent-encoded path cannot reach it - a structural
   guarantee rather than a behavioural one.
-- **NFC field layer** — 12 landing pages and 12 capture forms, so a correction can come from
+- **NFC field layer** - 12 landing pages and 12 capture forms, so a correction can come from
   someone standing in the car park. **No tag has been placed and no permission sought.**
 - **3D explorer** integrated as a first-class surface, mode-labelled, keyboard-reachable, and
   usable with no Cesium token.
 - **Tableau workbook** rebuilt from the canonical contract, published, and verified by reading
   the published package's own extracts. Four kinds of presentation feature remain unbuildable
   and are named rather than approximated.
-- **Data intake** (DEC-021) — another jurisdiction can bring its own file. It degrades
+- **Data intake** (DEC-021) - another jurisdiction can bring its own file. It degrades
   confidence rather than cleaning data up: absent fields stay absent, guessed mappings are
   reported as guesses, projected coordinates are refused rather than reprojected.
 - **Synthetic input set** (DEC-020) so a public installer can ship without real facility data.
-- **Reader-facing documentation** — a glossary, "what this can and can't tell you", and a
+- **Reader-facing documentation** - a glossary, "what this can and can't tell you", and a
   "start here" page with a reader map and an honest FAQ.
 - **`verify.sh` grew 15 → 40 gates**, every one mutation-tested.
 
@@ -35,8 +35,8 @@ and `legacy_v2` still reproduces 25 starter / 48 pathway bit-exactly.
   painted over by a full-viewport iframe); the results gallery published the **wrong top-ranked
   site**; the live **AWS account id was committed** inside the secret scanner's own test, in the
   list of strings the gate is asserted to ignore; a Tableau deck had been **silently eaten** from
-  7 sheets to 4 by a non-idempotent script; and `guardproof.m` — the proof that the fail-closed
-  capacity guard works — **could not pass as documented**.
+  7 sheets to 4 by a non-idempotent script; and `guardproof.m` - the proof that the fail-closed
+  capacity guard works - **could not pass as documented**.
 
 ### Changed
 - `results.html`'s rotating gallery re-baselined from `legacy_v2` to the canonical
@@ -53,7 +53,7 @@ list, including two dormant model defects pinned as known defects, and
 [`VERIFICATION.md`](docs/operations/v4-program/VERIFICATION.md) for every check that was run and
 what was observed.
 
-## Earlier — V4 platform program, Phase 4: contract v2
+## Earlier - V4 platform program, Phase 4: contract v2
 
 Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
 [docs/migration-from-v3.md](docs/migration-from-v3.md).
@@ -64,9 +64,9 @@ Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
   any unresolved conflict between sources, and **why** a site's data confidence is what it is.
   v1 had nowhere to put any of it, because when v1 was written there was no way to observe
   anything.
-- `scripts/build_contract_v2.py` — builds and `--check`s v2. Refuses to leave a non-additive
+- `scripts/build_contract_v2.py` - builds and `--check`s v2. Refuses to leave a non-additive
   v2 on disk.
-- `observed.CapacityUpgrade.method` — a verified capacity now records *how* it was verified
+- `observed.CapacityUpgrade.method` - a verified capacity now records *how* it was verified
   as a controlled value, not only inside a prose source string.
 - Two gates in `verify.sh` (15 → 17): v2 rebuilds byte-identically from v1 with every shared
   field unchanged, and the tracked v2 passes v1 rules + v2 rules + JSON Schema + RT-10.
@@ -75,14 +75,14 @@ Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
 - **`horizon_label`: `now` → `baseline` in v2.** The one change that can break a consumer:
   a filter on `horizon_label == "now"` silently matches nothing and drops the baseline row
   without erroring. Filter on `horizon_year == 2026` instead. `now` is time-relative text
-  frozen into a dated artifact — read in 2036 it is simply false. **v1 keeps `now` forever.**
+  frozen into a dated artifact - read in 2036 it is simply false. **v1 keeps `now` forever.**
 - `validate-contract` is version-aware, reading the version from the artifact's manifest
   rather than a flag, so a v2 directory cannot be checked under v1's weaker rules.
 
 ### Frozen
 - **`data/contract/v1/` is immutable.** `tests/test_contract_v2.py` pins its manifest
   SHA-256; anything that regenerates or edits v1 fails that test. The correct response is to
-  revert or route the change into v2 — never to update the constant.
+  revert or route the change into v2 - never to update the constant.
 
 ### Enforced, not documented
 - A row cannot carry an observed value while reporting `awaiting_observed_data`.
@@ -95,7 +95,7 @@ Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
   value as the **non-empty** string `"<NA>"`. The orphaned-observation rule would have fired
   on all 120 correct rows. Empty is now `None` end to end and the emptiness test is NaN-aware.
 - A column of nothing but empty cells reads back from CSV as `float64`, so writing
-  `"2026-05-04"` into it raises instead of upcasting — the run receiving the project's first
+  `"2026-05-04"` into it raises instead of upcasting - the run receiving the project's first
   real utility record would have been the run that crashed.
 
 ### Unchanged
@@ -108,7 +108,7 @@ Contract **v2** at `data/contract/v2/`, additive over a now-frozen v1. See
 
 ---
 
-## Unreleased — V4 platform program, Phase 1: repair the base
+## Unreleased - V4 platform program, Phase 1: repair the base
 
 Defects found by a full audit of the repository and fixed before any new work was
 built on top. No model logic changed and no number moved except where a published
@@ -122,7 +122,7 @@ figure disagreed with the contract, in which case the contract won.
 - **The headline site claim.** `README.md` named FFX002 top-ranked at 58.8 with
   "Medium confidence" under a heading asserting canonical provenance. 58.8 is the
   `legacy_v2` score; canonically FFX004 leads at 53.4 and FFX002 is second at 51.8.
-  No output produces "Medium" for any site — **all 12 are Low**.
+  No output produces "Medium" for any site - **all 12 are Low**.
 - **Avoided pathway ports** were published as "13–23"; the metric gives 23 at the 2026
   baseline, 13 by 2036, and 4 by 2046 and 2056.
 - **MCDA arithmetic** (`docs/human-actions/team_alternatives_session/`): alternative G
@@ -170,22 +170,22 @@ Fairfax City and Prince William County.
   ports); `milestone2_v3` is the canonical Milestone 2 model.
 - **Canonical data contract** (`data/contract/v1`): one validated
   site x horizon x case table (120 rows) consumed by MATLAB, Excel, the
-  dashboard, reports, and the deck — with schema, provenance, assumptions,
+  dashboard, reports, and the deck - with schema, provenance, assumptions,
   and a manifest hash chain.
 - **Canonical horizons** 2036 / 2046 / 2056 (10/20/30 years from a 2026
   baseline), replacing the mixed Now/2035/2050 conventions.
 - **Fixed-anchor readiness scoring** (cohort-independent) with **typed data
-  confidence** per site — 0 of 12 sites reach High confidence, and
+  confidence** per site - 0 of 12 sites reach High confidence, and
   electrical capacity remains a labeled placeholder at all 12 sites.
 - **Peak-window and discrete-event-simulation wait models**, **lifecycle
   economics** (screening-class net present cost, never budgets), and
   **emissions** using the EPA eGRID2023 Rev 2 SRVC factor of
-  **596.3 lb CO2e/MWh** — correcting the 590.2 figure used earlier.
+  **596.3 lb CO2e/MWh** - correcting the 590.2 figure used earlier.
 
 ### Artifacts
 - **MATLAB V3 rewrite** (`matlab/`): session-based site-load model with
   capacity guard and managed charging, driven by the contract-generated CSV.
-  Statically checked only — **never executed** (no license was available);
+  Statically checked only - **never executed** (no license was available);
   see `matlab/EXECUTION_STATUS.md`.
 - **Excel workbook update** (`excel/`): repaired pie chart, labeled proxies,
   2056 extension, lifecycle + CO2e sheets, live reconciliation checks.

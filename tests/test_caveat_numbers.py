@@ -5,20 +5,20 @@ Why this exists
 `CAVEAT_TEXT["wait_simulated"]` was revised **four times in one session**. Each revision fixed
 a real error and introduced a smaller one:
 
-1. "The p50 and p90 are 0.0 at every site" — true of a *different statistic* in a *different
+1. "The p50 and p90 are 0.0 at every site" - true of a *different statistic* in a *different
    table* at *one horizon*, while attached to columns reaching 215.35.
-2. "it is not nil" — false on the 8 rows where the wait is exactly 0.00.
-3. "it ... reaches 215 minutes ... blank on 5 rows" — true of `peak_wait_minutes`, false of
+2. "it is not nil" - false on the 8 rows where the wait is exactly 0.00.
+3. "it ... reaches 215 minutes ... blank on 5 rows" - true of `peak_wait_minutes`, false of
    `average_wait_minutes`, which tops out at 68.72 with no blanks.
-4. "69 minutes and 215 ... both at PWC002" — the average maximum is at PWC008; and "0.00 from
+4. "69 minutes and 215 ... both at PWC002" - the average maximum is at PWC008; and "0.00 from
    2036 onward" missed two non-zero rows.
 
 The pattern is the point. A sentence carrying four numbers, about two columns, across four
 horizons, cannot be reliably checked by reading it. Prose drifts silently; a test does not.
 
 So the numbers in the caveat are asserted against the contract here. If the data changes or
-someone edits the sentence, this fails and names the clause. It does not check the *wording* —
-that is a human judgement — only that every quantity the sentence asserts is still true.
+someone edits the sentence, this fails and names the clause. It does not check the *wording* -
+that is a human judgement - only that every quantity the sentence asserts is still true.
 """
 
 from __future__ import annotations

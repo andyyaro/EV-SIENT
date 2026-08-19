@@ -21,7 +21,7 @@ Why the session schema is wider than the shipped template
 ---------------------------------------------------------
 ``data/observed/observed_sessions_template.csv`` offers six fields: site, date, sessions,
 energy, mean dwell, visitors. The trigger policy in ``assumptions.json`` gates on average
-utilisation, p90 wait, uptime and equity percentile — and ``triggers.evaluate`` checks
+utilisation, p90 wait, uptime and equity percentile - and ``triggers.evaluate`` checks
 **uptime first**, refusing to trust utilisation until reliability clears. Of those four,
 utilisation is only derivable if port count and open hours are joined in, p90 wait needs
 per-session timing rather than a daily dwell mean, and uptime has no corresponding field at
@@ -126,7 +126,7 @@ class CapacityObservation:
     def __post_init__(self) -> None:
         if not str(self.site_id).strip():
             # An observation that names no site cannot be attributed to one. Left unchecked it
-            # does not fail — `resolve_capacity` groups by site_id, so it quietly creates a
+            # does not fail - `resolve_capacity` groups by site_id, so it quietly creates a
             # phantom site keyed on the empty string, whose "confirmed" capacity belongs to
             # nowhere. Refused for the same reason as a missing source document.
             raise ObservationError(
@@ -228,7 +228,7 @@ def _optional_float(row: pd.Series, name: str) -> float | None:
 
 
 def _as_text(row: pd.Series, name: str, default: str = "") -> str:
-    """Read a text cell, treating a missing/blank cell as empty — never as the word "nan".
+    """Read a text cell, treating a missing/blank cell as empty - never as the word "nan".
 
     This exists because of a defect that defeated the project's central provenance guarantee
     for as long as the V4 loop has existed.
@@ -240,13 +240,13 @@ def _as_text(row: pd.Series, name: str, default: str = "") -> str:
     check as the four-character string ``'nan'``. Non-empty. Check passes.
 
     The consequence was not cosmetic. A row with no attribution at all was accepted, reported
-    ``implied_basis == 'verified_utility'`` — the strongest basis available — and produced the
+    ``implied_basis == 'verified_utility'`` - the strongest basis available - and produced the
     provenance string ``"verified_utility via utility_load_study: nan (...), recorded by nan
     on 2026-07-01"``. That is precisely the state the fail-closed capacity guard exists to
     prevent: a feasibility claim resting on evidence nobody supplied.
 
     Found by ``tests/test_field_schema_parity.py`` while checking a *browser form* against the
-    model — the form refused the blank row, the model accepted it, and the disagreement was the
+    model - the form refused the blank row, the model accepted it, and the disagreement was the
     signal. Nothing was looking for this.
     """
     value = row.get(name, default)

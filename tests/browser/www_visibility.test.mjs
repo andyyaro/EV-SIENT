@@ -9,7 +9,7 @@
  *
  * The home page is a full-viewport `<iframe>` onto a third-party host. The iframe was
  * `position:absolute; top:0` over the whole viewport, so it painted straight over the
- * disclaimer — `document.elementFromPoint` at the disclaimer's own centre returned the IFRAME —
+ * disclaimer - `document.elementFromPoint` at the disclaimer's own centre returned the IFRAME -
  * and `body{overflow:hidden}` meant the footer below it could not be scrolled to. The study's
  * single most important limitation was in the bytes and invisible on the screen.
  *
@@ -66,7 +66,7 @@ for (const page of PAGES) {
       assert.ok(Number(seen.opacity) > 0.5, `${page}: disclaimer is transparent`);
       assert.ok(seen.height > 0 && seen.width > 0, `${page}: disclaimer has no area`);
       assert.equal(seen.covered, false,
-        `${page}: the disclaimer is painted over by ${seen.coveredBy} — a reader cannot see it`);
+        `${page}: the disclaimer is painted over by ${seen.coveredBy} - a reader cannot see it`);
     } finally {
       await chrome.close();
     }

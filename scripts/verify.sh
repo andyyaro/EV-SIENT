@@ -18,7 +18,7 @@ gate () {
   fi
 }
 
-echo "=== Future City Fellowship — repository verification ($(date)) ==="
+echo "=== Future City Fellowship - repository verification ($(date)) ==="
 
 gate "python: test suite with coverage gate (incl. legacy golden + cohort invariance + contract + offline GIS)" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/ -q --cov=fcf_m2 --cov-fail-under=80"
@@ -196,7 +196,7 @@ gate "3d: viewer JS parses and every CDN reference is version-pinned" \
 gate "matlab: nothing destined for the PUBLIC harness carries site-identifying data" \
   bash -c "cd '$REPO' && '$PY' scripts/check_harness_exposure.py"
 
-# The field-entry form must never accept an observation the model will refuse — otherwise a
+# The field-entry form must never accept an observation the model will refuse - otherwise a
 # field worker is told a record was saved when it was not. The schema is generated from
 # observed.py and this gate runs the same candidate rows through the browser validator and the
 # real CSV readers. It has already earned its place: it found blank attribution surviving as
@@ -243,7 +243,7 @@ gate "intake: a messy third-party file degrades confidence rather than being cle
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_intake.py -q"
 
 # A public installer ships invented inputs (DEC-016). This gate checks the synthetic set is
-# usable, honest, and NOT a disguised copy — including the subtle failure, where a fixture
+# usable, honest, and NOT a disguised copy - including the subtle failure, where a fixture
 # produced by perturbing real values preserves the rank order and re-identifies sites anyway.
 # It also builds the public artifact and INSPECTS IT, because an artifact whose inputs were
 # correctly substituted still shipped 36 real facility identifiers through files nobody had
@@ -257,7 +257,7 @@ gate "synthetic: the public input set is usable, honest, and not a disguised cop
 gate "website: public pages carry their caveats and embed only the canonical workbook" \
   bash -c "cd '$REPO' && '$PY' scripts/patch_site_www.py >/dev/null && '$PY' scripts/retarget_tableau_embeds.py >/dev/null && '$PY' scripts/check_site_www.py"
 
-# Drives the entry form in a real headless Chrome — the only check that sees what a person
+# Drives the entry form in a real headless Chrome - the only check that sees what a person
 # sees. It exists because this program has twice shipped a feature that passed every test and
 # was unusable: two blank Tableau sheets, and a sign-in page that did not exist. Both times the
 # check verified the step under our control rather than the outcome the reader experiences.
@@ -278,7 +278,7 @@ gate "browser: caveats are VISIBLE, the form refuses visibly, and the explorer a
 
 # The edge authoriser is the only thing standing between an anonymous request and the study's
 # full lineage, so its tests run here rather than only in the deploy path. They exercise the
-# REAL handler with REAL RSA keys — only the network is stubbed — so a regression in token
+# REAL handler with REAL RSA keys - only the network is stubbed - so a regression in token
 # verification fails the repository gates, not just a deployment nobody re-ran.
 gate "edge-auth: only a verified id_token for the granted account reaches the origin" \
   bash -c "cd '$REPO' && if command -v node >/dev/null; then node --test 'tests/edge_auth/*.test.mjs'; else echo 'node absent - edge auth tests SKIPPED (deploy path still runs them)'; fi"

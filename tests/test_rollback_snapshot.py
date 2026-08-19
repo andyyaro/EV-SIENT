@@ -2,7 +2,7 @@
 
 `docs/operations/v4-program/cloudfront-config-before-platform.json` exists so the CloudFront
 change that put the platform behind a Cognito gate can be undone. `deploy_platform.py`
-overwrote it with the CURRENT config on every run, including dry runs — so the first run after
+overwrote it with the CURRENT config on every run, including dry runs - so the first run after
 the change replaced the pre-change state with the post-change state, and six commits carried a
 file that named itself `before-platform` while containing the `platform-gated` origin and the
 `/platform*` cache behaviour. Restoring from it would have restored the change it exists to
@@ -40,7 +40,7 @@ def test_the_before_snapshot_predates_the_platform():
     cfg = config_of(BEFORE)
     origins = [o["Id"] for o in cfg.get("Origins", {}).get("Items", [])]
     assert not any("platform" in o.lower() for o in origins), (
-        f"the file named 'before-platform' contains a platform origin {origins} — it is a "
+        f"the file named 'before-platform' contains a platform origin {origins} - it is a "
         f"snapshot of the state AFTER the change, so rolling back to it would reapply the "
         f"change rather than undo it")
 

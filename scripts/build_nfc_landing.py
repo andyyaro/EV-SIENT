@@ -7,11 +7,11 @@ it does not claim, nothing else on the page matters.
 
 Two obligations pull against each other and both are met rather than traded:
 
-*Approachability* — plain sentences, short paragraphs, no acronym unexpanded, no jargon
+*Approachability* - plain sentences, short paragraphs, no acronym unexpanded, no jargon
 before its explanation, and the honest answer to "is something being built here?" placed
 first because it is the question they actually have.
 
-*Identical epistemics* — every number comes from the contract, every caveat that appears in
+*Identical epistemics* - every number comes from the contract, every caveat that appears in
 the reports appears here, and nothing reads as more certain, more finished, or more official
 than it is. Warm copy that quietly upgrades a placeholder into a fact would be a defect, not
 a style choice.
@@ -48,7 +48,7 @@ PAGE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{name} — EV charging study | Future City Fellowship</title>
+<title>{name} - EV charging study | Future City Fellowship</title>
 <meta name="description" content="{name} is one of twelve sites being studied for possible public EV charging. Nothing has been approved or funded.">
 <meta name="robots" content="index, follow">
 <style>
@@ -124,7 +124,7 @@ PAGE = """<!doctype html>
     <p>Nothing is being built here.</p>
     <p>This site is one of twelve being <strong>studied</strong> for whether public electric
        vehicle charging could work here one day. No charger has been approved, funded,
-       designed, or scheduled — and this study cannot approve one.</p>
+       designed, or scheduled - and this study cannot approve one.</p>
     <p>You tapped a tag placed by a George Mason University student fellowship team doing
        that study.</p>
   </div>
@@ -140,7 +140,7 @@ PAGE = """<!doctype html>
   <div class="caveat">
     <strong>The most important thing on this page:</strong> nobody has confirmed that the
     electrical service here could actually support chargers. That figure is a
-    <strong>placeholder</strong> — a stand-in used so the study could be completed — and it
+    <strong>placeholder</strong> - a stand-in used so the study could be completed - and it
     is a placeholder at <strong>all twelve</strong> sites. Confirming it needs the building's
     electrical records and the utility, and that work has not been done.
   </div>
@@ -163,7 +163,7 @@ PAGE = """<!doctype html>
   <h2>Why a site gets looked at at all</h2>
   <p>The team's starting point was a real local lesson: a nearby garage had 70 charging
      ports installed, and 17 stations were later switched off. Building ahead of demand is
-     expensive and wasteful. So this study asks a narrower question — where might a
+     expensive and wasteful. So this study asks a narrower question - where might a
      <em>small</em> number of chargers be justified now, while leaving room to add more only
      once real use justifies it?</p>
 
@@ -184,7 +184,7 @@ PAGE = """<!doctype html>
 
 
 def capacity_answer(basis: str) -> str:
-    return "No — placeholder" if basis == "placeholder" else html.escape(basis)
+    return "No - placeholder" if basis == "placeholder" else html.escape(basis)
 
 
 def confidence_answer(level: str) -> str:

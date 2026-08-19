@@ -1,4 +1,4 @@
-# `reports/` — final Milestone 2 documents
+# `reports/` - final Milestone 2 documents
 
 [← repository root](../README.md)
 

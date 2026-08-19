@@ -8,13 +8,13 @@ you will see and exactly what to click.
 **Do not disable Gatekeeper or SmartScreen system-wide.** You will find advice online telling
 you to run `sudo spctl --master-disable` or to turn SmartScreen off. That advice would make
 every future download on your machine less safe in order to open one file, and it is not
-necessary — the per-application steps below are enough. This guide will never ask you to do it.
+necessary - the per-application steps below are enough. This guide will never ask you to do it.
 
 ---
 
 ## What you are installing
 
-A portable directory and a run script. Not an application bundle — the platform is a local
+A portable directory and a run script. Not an application bundle - the platform is a local
 web server you start from a script and view in your browser (DEC-015).
 
 **It ships synthetic data.** Every site in it is invented and describes no real building
@@ -24,8 +24,8 @@ web server you start from a script and view in your browser (DEC-015).
 **You need Python 3.11 or newer** already installed. The run script checks both that a `python3`
 exists **and that it is new enough**, and names the version it found if it is not.
 
-**macOS users read this bit.** The `python3` Apple ships at `/usr/bin/python3` is **3.9.6** —
-measured on macOS 26.5.1 — and it is what `python3` resolves to unless you have installed
+**macOS users read this bit.** The `python3` Apple ships at `/usr/bin/python3` is **3.9.6** -
+measured on macOS 26.5.1 - and it is what `python3` resolves to unless you have installed
 another. It is too old: its pip cannot perform the editable install this package needs, and
 before the version check existed the only thing a recipient saw was *"Dependency install
 failed"*. Install a current Python from [python.org](https://www.python.org/downloads/) or
@@ -43,9 +43,9 @@ what the current one does.
    ```bash
    shasum -a 256 -c fcf-platform-<version>-macos.zip.sha256
    ```
-   It should print `OK`. If it does not, stop — the download is not what was published.
+   It should print `OK`. If it does not, stop - the download is not what was published.
 3. Unzip it. Double-click **`run-platform.command`**.
-4. **macOS will refuse it.** You will see a dialog saying it *"Not Opened — Apple could not
+4. **macOS will refuse it.** You will see a dialog saying it *"Not Opened - Apple could not
    verify … is free of malware."* with **Move to Trash** and **Done**. Click **Done**. Do not
    click Move to Trash.
 5. Open **System Settings → Privacy & Security**. Scroll to the **Security** section. There
@@ -56,7 +56,7 @@ what the current one does.
 
 ### Why it does that, stated plainly
 
-Apple's Gatekeeper allows apps from identified developers — meaning a paid Apple Developer
+Apple's Gatekeeper allows apps from identified developers - meaning a paid Apple Developer
 account and a notarization step where Apple scans the artifact. **This project has neither.**
 
 **The artifact you download carries no signature at all.** This guide previously said it was
@@ -64,7 +64,7 @@ ad-hoc signed. It is not, and the correction is worth stating precisely because 
 sentence was a claim about the artifact rather than a measurement of it.
 
 The packaging job did run `codesign -s -`, but ad-hoc signing a *shell script* stores the
-signature in extended attributes rather than inside the file, and the very next step — `zip` —
+signature in extended attributes rather than inside the file, and the very next step - `zip` -
 discards extended attributes. Measured on macOS 26.5.1 by building the release artifact and
 extracting it the way a recipient does: the staging file carries
 `com.apple.cs.CodeDirectory`/`CodeRequirements`/`CodeSignature`; after `zip` and `unzip` it
@@ -72,7 +72,7 @@ carries none of them and `codesign -dv` reports *"code object is not signed at a
 signing step destroyed its own output one line later, so no release ever shipped a signed file.
 
 **None of that changes what you experience**, which is the reason it went unnoticed. `spctl -a
--t exec` exits **3** on both — on the signed staging file and on the unsigned extracted one.
+-t exec` exits **3** on both - on the signed staging file and on the unsigned extracted one.
 Ad-hoc signing was never going to make macOS trust this, so the step has been removed rather
 than repaired: keeping it would have meant preserving a signature that buys nothing and only
 survives if you happen to extract with `ditto` instead of double-clicking.
@@ -94,7 +94,7 @@ than forgotten.
    ```
    certutil -hashfile fcf-platform-<version>-windows.zip SHA256
    ```
-   The `.sha256` file holds one line — the digest, two spaces, the filename — written by the
+   The `.sha256` file holds one line - the digest, two spaces, the filename - written by the
    same code on both platforms, so the hash you compare against looks identical to the one a
    macOS reader sees. Compare the hash certutil prints to the digest in that file, ignoring
    any spaces certutil inserts. If they differ, stop.
@@ -102,7 +102,7 @@ than forgotten.
    tick it and click OK. This clears the mark-of-the-web on the whole archive and saves
    unblocking each file inside it.
 4. Extract it. Double-click **`run-platform.cmd`**.
-5. **SmartScreen may warn** with *"Windows protected your PC — unrecognised publisher."* Click
+5. **SmartScreen may warn** with *"Windows protected your PC - unrecognised publisher."* Click
    **More info**, then **Run anyway**.
 
 ### Why it does that
@@ -124,7 +124,7 @@ against whichever Python is on your `PATH`. That writes into **that interpreter'
 site-packages**, not into the extracted folder: a `__editable__.fcf_m2-3.0.0.pth` file, an
 `fcf_m2-3.0.0.dist-info` directory, and roughly twenty third-party packages (numpy, pandas,
 matplotlib, jsonschema, pillow and their dependencies). pip also caches downloads under your
-home directory. **No virtual environment is created** — an earlier version of this section said
+home directory. **No virtual environment is created** - an earlier version of this section said
 one was, and deleting the folder would then have left a dangling editable install pointing at a
 path that no longer exists.
 
@@ -139,11 +139,11 @@ really does remove all of it.
 
 **macOS and Windows:**
 
-1. `pip uninstall fcf-m2` — removes the editable install. The third-party dependencies stay,
+1. `pip uninstall fcf-m2` - removes the editable install. The third-party dependencies stay,
    because other things on your machine may be using them; `pip uninstall` each if you want
    them gone.
 2. Delete the extracted folder.
-3. macOS only: to also forget the security exception you granted, there is nothing to do — the
+3. macOS only: to also forget the security exception you granted, there is nothing to do - the
    exception is tied to the file, which you have deleted.
 
 While running, the platform binds to **loopback only**. It opens no ports to your network and
@@ -155,10 +155,10 @@ writes nothing to your system folders.
 
 The run script reports what is missing rather than failing silently. The two common cases:
 
-**"Python 3.11+ is required and was not found"** — install Python from python.org, then run the
+**"Python 3.11+ is required and was not found"** - install Python from python.org, then run the
 script again.
 
-**A build step fails on first run** — the first start builds the model surfaces from the
+**A build step fails on first run** - the first start builds the model surfaces from the
 synthetic inputs, which takes about a minute. If a step fails, the script prints the real
 output of the failing command rather than swallowing it. That output is what to report.
 
@@ -168,14 +168,14 @@ output of the failing command rather than swallowing it. That output is what to 
 
 Stated because a capability that is quietly absent looks like a capability that is broken.
 
-- **No MATLAB or Simulink results.** Not because they describe real sites — they do not; every
+- **No MATLAB or Simulink results.** Not because they describe real sites - they do not; every
   MATLAB run used a synthetic fixture. They are excluded because they are **received CI
   artifacts from a separate harness repository**, not something this installer can produce or
   reproduce. The platform's engine surface says so explicitly rather than appearing empty.
 **Five surfaces are not distributed at all**, because each is generated from the real twelve
 facilities: the **3D explorer**, the **static dashboard**, the **written reports**, the **NFC
 field layer**, and the **downloadable contract**. In the platform each appears as a card
-labelled *"not in this installation"*, with **no Open link** — deliberately, so that a
+labelled *"not in this installation"*, with **no Open link** - deliberately, so that a
 capability which was never shipped cannot be mistaken for one that is broken.
 
 That behaviour is newer than this guide. Until a pre-release audit measured it, the manifest
@@ -186,4 +186,4 @@ than shown broken"; they were shown broken.
 **What you do get** is the Tableau workbook links, which point at Tableau Public and work, and
 everything the model itself produces when you run it on the synthetic inputs.
 
-- **No real site data at all.** That is the point — see DEC-016.
+- **No real site data at all.** That is the point - see DEC-016.

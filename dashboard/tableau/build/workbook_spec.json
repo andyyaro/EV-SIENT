@@ -67,7 +67,7 @@
         "jurisdiction",
         "model_mode"
       ],
-      "title": "Site readiness ranking \u2014 canonical milestone2_v3",
+      "title": "Site readiness ranking - canonical milestone2_v3",
       "subtitle": "All 12 sites are LOW data confidence; the colour legend has one value on purpose.",
       "fit": "entire_view"
     },
@@ -125,7 +125,7 @@
         "model_mode"
       ],
       "title": "Active ports by planning horizon",
-      "subtitle": "48-port pathway ceiling is in the tooltip \u2014 no reference line, see CAPABILITY_GAP.md.",
+      "subtitle": "48-port pathway ceiling is in the tooltip - no reference line, see CAPABILITY_GAP.md.",
       "fit": "fit_width"
     },
     {

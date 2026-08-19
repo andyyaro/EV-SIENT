@@ -107,7 +107,7 @@ def main() -> int:
                 if card.get("score") != expected:
                     problems.append(
                         f"results.html: gallery shows {site} at {card.get('score')}, "
-                        f"canonically {expected} — the gallery has drifted from the model")
+                        f"canonically {expected} - the gallery has drifted from the model")
             ranks = [int(canonical[c["code"]]["model_rank"]) for c in gallery
                      if c.get("code") in canonical]
             if ranks != sorted(ranks):
@@ -179,7 +179,7 @@ def main() -> int:
 
     # --- Tableau embeds -------------------------------------------------------------
     # The original workbook was audited, found wrong (DEC-013), republished under a new name,
-    # and the original deleted — but nothing re-pointed the website, so every embed resolved to
+    # and the original deleted - but nothing re-pointed the website, so every embed resolved to
     # `public.tableau.com/app/resource-not-found`. Note that Tableau answers 302 for live and
     # dead views alike, so a status check proves nothing; this gate checks the NAME.
     DELETED_WORKBOOK = "EV_Charging_Site_Readiness_Workbook"
@@ -217,7 +217,7 @@ def main() -> int:
                     if stale in title.group(1):
                         problems.append(
                             f"{page}: a slide is still titled {stale!r} but now shows "
-                            f"{sheet.group(1)} — the caption describes a chart that is gone")
+                            f"{sheet.group(1)} - the caption describes a chart that is gone")
 
     if problems:
         print(f"{len(problems)} problem(s) with the public website:")

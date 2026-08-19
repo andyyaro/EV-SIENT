@@ -5,7 +5,7 @@ The asymmetry this tests, and why it is not symmetric
 Two ways the form and the model can disagree, and they are not equally bad:
 
 * **The form accepts, the model rejects.** This is the serious one. A field worker fills in an
-  observation, the page says it is fine, and the row dies later at ingestion — or, worse, is
+  observation, the page says it is fine, and the row dies later at ingestion - or, worse, is
   quietly dropped. The person believes they recorded something they did not. **Any instance of
   this fails the test.**
 * **The form rejects, the model accepts.** Less serious but not free: it blocks a legitimate
@@ -15,12 +15,12 @@ Two ways the form and the model can disagree, and they are not equally bad:
 Testing the real pipeline, not the dataclass
 --------------------------------------------
 The Python side writes a CSV and calls ``read_capacity_observations`` /
-``read_session_observations`` — the functions the actual ingest step calls. Constructing the
+``read_session_observations`` - the functions the actual ingest step calls. Constructing the
 dataclass directly would test a layer the CSV never touches, and would miss the parsing that
 happens on the way in. That distinction is not academic: several of the asymmetries recorded
 below live in the CSV layer, not in ``__post_init__``.
 
-The JS side evaluates ``site/platform/field_validate.js`` — the same bytes the browser loads,
+The JS side evaluates ``site/platform/field_validate.js`` - the same bytes the browser loads,
 via ``node:vm``. Not a port of it.
 """
 
@@ -54,7 +54,7 @@ pytestmark = pytest.mark.skipif(shutil.which("node") is None,
 #: is more permissive than it probably should be.
 #: Currently empty, and that is the interesting part.
 #:
-#: The first run of this test had three entries — places where the browser refused a row the
+#: The first run of this test had three entries - places where the browser refused a row the
 #: model would happily ingest. Every one turned out to be a defect in the *model*, not an
 #: over-strict form, and the most serious of them (blank attribution surviving as the string
 #: "nan") had been live for the entire life of the V4 loop. They were fixed rather than
@@ -223,7 +223,7 @@ def test_the_form_never_accepts_what_the_model_rejects(verdicts):
     for form_id, rows in verdicts.items():
         for name, js_ok, py_ok in rows:
             if js_ok and not py_ok:
-                violations.append(f"{form_id}: {name!r} — form ACCEPTS, model REJECTS")
+                violations.append(f"{form_id}: {name!r} - form ACCEPTS, model REJECTS")
     assert violations == [], (
         "The browser form is more permissive than the model. Someone would fill this in, be "
         "told it is fine, and have it refused later:\n  " + "\n  ".join(violations))
@@ -277,4 +277,4 @@ def test_the_schema_is_generated_from_the_model_not_hand_written():
     assert schema["source_of_truth"] == "src/fcf_m2/observed.py"
     from fcf_m2.observed import METHOD_TO_BASIS
     assert schema["method_to_basis"] == METHOD_TO_BASIS, (
-        "field_schema.json has drifted from observed.py — re-run scripts/build_field_schema.py")
+        "field_schema.json has drifted from observed.py - re-run scripts/build_field_schema.py")

@@ -7,7 +7,7 @@ engine state, so building the same spec twice produces different archive digests
 inside it **is** deterministic for an identical spec.
 
 This repository gates generated artifacts on drift, so pinning the package digest would fail
-CI on every single run for no reason at all, and the gate would be deleted within a week —
+CI on every single run for no reason at all, and the gate would be deleted within a week -
 taking the real check with it. **If you are here to "fix" a flaky Tableau digest test: this
 is why it gates the `.twb`. Do not add a `.twbx` digest assertion.**
 
@@ -21,7 +21,7 @@ What the sheet data must satisfy
 --------------------------------
 The workbook's whole purpose is to present the contract, so its inputs are checked against
 the contract rather than against a snapshot of themselves. A snapshot test would happily
-freeze a wrong number — which is exactly what happened to the live published workbook, whose
+freeze a wrong number - which is exactly what happened to the live published workbook, whose
 readiness scores are `legacy_v2` values sitting under a v3 heading.
 """
 

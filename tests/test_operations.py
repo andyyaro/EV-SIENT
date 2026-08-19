@@ -4,7 +4,7 @@ Two Phase 7 requirements are enforced here, both of which are easy to satisfy on
 easy to lose later:
 
 1. **Everything the platform generates is byte-identical to what the CLI generates.** Held by
-   construction — an operation *is* a declared command — and checked by actually running one
+   construction - an operation *is* a declared command - and checked by actually running one
    both ways and comparing bytes.
 2. **The web tier states plainly which capabilities require the desktop app rather than
    hiding or faking them.** So the web tier gets the whole list with reasons, not a filtered
@@ -34,7 +34,7 @@ def test_operation_ids_are_unique():
 
 def test_every_desktop_operation_states_why():
     """An unexplained disabled control is indistinguishable from a broken one, and the web
-    tier is the primary distribution — most readers will only ever see it."""
+    tier is the primary distribution - most readers will only ever see it."""
     for op in ops.OPERATIONS:
         if op.tier == ops.TIER_DESKTOP:
             assert op.desktop_reason, f"{op.id} is desktop-only with no stated reason"
@@ -159,7 +159,7 @@ def test_a_platform_restriction_must_state_its_reason():
 
     An operation that is unavailable without an explanation is indistinguishable from a broken
     button, and the registry's own docstring says so. That rule was enforced for tiers and not
-    for platforms, so `verify-all` — declared as `bash scripts/verify.sh` — would simply fail
+    for platforms, so `verify-all` - declared as `bash scripts/verify.sh` - would simply fail
     on Windows with no explanation offered anywhere.
     """
     import dataclasses

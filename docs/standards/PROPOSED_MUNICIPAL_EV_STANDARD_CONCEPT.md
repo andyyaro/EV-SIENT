@@ -1,9 +1,9 @@
-# Proposed Standard Concept — "Municipal EV Charging Site Readiness and Emergency Access Standard"
+# Proposed Standard Concept - "Municipal EV Charging Site Readiness and Emergency Access Standard"
 
 > **Label required on every use:** This is a **Future City Fellowship design exercise, not an official UL/ULSE proposal.** It has no regulatory force. Every provisional parameter marked **TBV** requires validation by ULSE, the manufacturer, the adopted code, or the local AHJ before any real-world use.
 
-**Project:** Future City Fellowship — Milestone 2 (Fairfax City + Prince William County, VA) · **Date:** 2026-07-19
-**Basis:** Report 06 §4 (merged MCDA concept C2+C1); appendix `PROPOSED_STANDARD_RESEARCH_SPECIFICATION.md` (**cited but never produced — no such file exists in this repository or its history; noted 2026-07-28 rather than the citation being quietly deleted, because a reader following it deserves to know it leads nowhere**); fellowship requirement for one proposed standard with tests (EX01, IM-09).
+**Project:** Future City Fellowship - Milestone 2 (Fairfax City + Prince William County, VA) · **Date:** 2026-07-19
+**Basis:** Report 06 §4 (merged MCDA concept C2+C1); appendix `PROPOSED_STANDARD_RESEARCH_SPECIFICATION.md` (**cited but never produced - no such file exists in this repository or its history; noted 2026-07-28 rather than the citation being quietly deleted, because a reader following it deserves to know it leads nowhere**); fellowship requirement for one proposed standard with tests (EX01, IM-09).
 **Integrity rule:** No numeric safety limit is invented in this document. Sourced parameters cite the adopted code by name and edition; everything else is marked **TBV by ULSE/AHJ/manufacturer/adopted code**.
 
 ---
@@ -20,64 +20,64 @@ Municipal charging sites fail for reasons existing product standards do not test
 
 ## 3. Modules and test/verification tables
 
-### Module 1 — Emergency access and disconnect (flagship)
+### Module 1 - Emergency access and disconnect (flagship)
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
-| Apparatus approach | Measured approach route to each EVSE cluster | Dimensions per adopted fire-code access provisions — **sourced: 2021 Virginia SFPC as adopted (eff. 2024-01-18)**; cite the adopted edition in force at test time |
-| Disconnect location and labeling | Visual inspection + label legibility at distance | Disconnect provisions — **sourced: NEC Article 625 as adopted in Virginia (2020 NEC via 2021 USBC)**; legibility distance **TBV by ULSE/AHJ** |
+| Apparatus approach | Measured approach route to each EVSE cluster | Dimensions per adopted fire-code access provisions - **sourced: 2021 Virginia SFPC as adopted (eff. 2024-01-18)**; cite the adopted edition in force at test time |
+| Disconnect location and labeling | Visual inspection + label legibility at distance | Disconnect provisions - **sourced: NEC Article 625 as adopted in Virginia (2020 NEC via 2021 USBC)**; legibility distance **TBV by ULSE/AHJ** |
 | Disconnect operation | Timed operation drill by a non-specialist responder | Target time **TBV by ULSE/AHJ** (responder time-study literature identified as pre-maturation research need) |
 | Illumination of disconnect and signage | Light-level measurement at night | Level **TBV by ULSE/AHJ**; reference existing egress-lighting practice in the adopted code, do not invent a lux value |
 | Responder information placard | On-site placard audit: system type, power, shutdown steps, 24/7 contact | Content checklist **sourced from fire-department pre-plan practice**; format **TBV by ULSE/AHJ** |
 
-### Module 2 — Expandability and right-sizing documentation
+### Module 2 - Expandability and right-sizing documentation
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
-| Pathway capacity declaration | Documented conduit/panel/space capacity vs. active ports, on file and current | Engineering documentation review — no numeric threshold invented |
-| Utilization monitoring capability | Site demonstrates per-port session/energy reporting (OCPP data export) | **Sourced protocol (OCPP — not a ULSE standard)**; data minimums **TBV** (benchmark against federal NEVI uptime/reporting practice before maturation) |
-| Expansion triggers | Written, measurable trigger policy exists, including an equity override | Policy audit — trigger values are **municipality-set**, not standard-set |
+| Pathway capacity declaration | Documented conduit/panel/space capacity vs. active ports, on file and current | Engineering documentation review - no numeric threshold invented |
+| Utilization monitoring capability | Site demonstrates per-port session/energy reporting (OCPP data export) | **Sourced protocol (OCPP - not a ULSE standard)**; data minimums **TBV** (benchmark against federal NEVI uptime/reporting practice before maturation) |
+| Expansion triggers | Written, measurable trigger policy exists, including an equity override | Policy audit - trigger values are **municipality-set**, not standard-set |
 | Overload protection coordination | Service-capacity documentation vs. total EVSE rating | **Sourced: NEC load-calculation provisions as adopted (2020 NEC via 2021 USBC)** |
 
-### Module 3 — Accessibility and site-condition cross-references
+### Module 3 - Accessibility and site-condition cross-references
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
-| Accessible route/space/reach | Dimensional check | **By reference to US Access Board EVSE guidance (TA 2022; NPRM 2024-09-03, still at NPRM as of 2026-07-19 — IM-02) and VA USBC ADA provisions in force** — no duplicate scoping |
+| Accessible route/space/reach | Dimensional check | **By reference to US Access Board EVSE guidance (TA 2022; NPRM 2024-09-03, still at NPRM as of 2026-07-19 - IM-02) and VA USBC ADA provisions in force** - no duplicate scoping |
 | Impact protection | Bollard/wheel-stop placement inspection | **Sourced: adopted code provisions**; no dimensions invented |
-| Enclosure/garage conditions | Ventilation/access review trigger for enclosed sites | Defer to AHJ review — checklist only (one enclosed candidate: PWC002 Neabsco) |
+| Enclosure/garage conditions | Ventilation/access review trigger for enclosed sites | Defer to AHJ review - checklist only (one enclosed candidate: PWC002 Neabsco) |
 | Stormwater/firewater | Drainage/containment plan on file | **Sourced locally: VSMP-delegated local stormwater program requirements** |
 
-### Module 4 — Monitoring and expansion triggers
+### Module 4 - Monitoring and expansion triggers
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
 | Dual-path data logging | Network data and independent local meter both operating; monthly export to municipality-owned storage demonstrated | Governance practice (Report 07 mitigation #4); retention period **TBV by municipality records rules** |
-| Trigger evidence chain | Each expansion decision on file traces to observed utilization data | Decision-log audit — process requirement, no thresholds |
+| Trigger evidence chain | Each expansion decision on file traces to observed utilization data | Decision-log audit - process requirement, no thresholds |
 | Data staleness control | Every published figure carries source date; refresh checklist executed | Documentation audit; refresh interval **TBV by municipality** (annual minimum recommended for grid factors) |
 
-### Module 5 — Managed-charging fail-safe
+### Module 5 - Managed-charging fail-safe
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
-| Comms-loss behavior | Disconnect network link; observe EVSE output settles to documented default-safe profile | Functional test; safe-state output value **TBV by manufacturer/adopted code** — never exceeding the NEC-calculated circuit limit (**sourced: 2020 NEC as adopted**) |
-| Hardwired protection independence | Overcurrent protection operates with all software/network disabled | **Sourced: NEC baseline requirement (2020 NEC as adopted)** — non-negotiable |
+| Comms-loss behavior | Disconnect network link; observe EVSE output settles to documented default-safe profile | Functional test; safe-state output value **TBV by manufacturer/adopted code** - never exceeding the NEC-calculated circuit limit (**sourced: 2020 NEC as adopted**) |
+| Hardwired protection independence | Overcurrent protection operates with all software/network disabled | **Sourced: NEC baseline requirement (2020 NEC as adopted)** - non-negotiable |
 | Local fallback service | Non-networked minimum charging service demonstrated | Vendor capability test; service level **TBV by manufacturer** |
 
-### Module 6 — Commissioning and evidence package
+### Module 6 - Commissioning and evidence package
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
 | Listing verification | UL 2594 listing marks and UL 2231 personnel-protection scope confirmed on installed units | **Sourced: UL 2594 3rd ed. (2022-12-15); UL 2231-1/-2 2021 eds.** |
 | Inspection records | Permit + passed electrical inspection + fire review sign-off on file | **Sourced: 2021 Virginia USBC/SFPC process** |
-| Module test records | M1–M5 verification results compiled in a single site evidence package | Checklist — completeness, not thresholds |
+| Module test records | M1–M5 verification results compiled in a single site evidence package | Checklist - completeness, not thresholds |
 | Fire-department pre-plan | Walkthrough with Fire Marshal completed and documented | Fire-service practice; scheduling **TBV by AHJ** |
 
-### Module 7 — Materials, take-back, and end of life
+### Module 7 - Materials, take-back, and end of life
 
 | Test category | Verification method | Parameter basis |
 |---|---|---|
-| Circularity disclosure | Vendor disclosure on file: recycled content, repairability, spare-part availability, warranty, take-back | **Sourced framing: UL 3600 (1st ed., 2023-01-09)** — reporting categories, not invented thresholds |
+| Circularity disclosure | Vendor disclosure on file: recycled content, repairability, spare-part availability, warranty, take-back | **Sourced framing: UL 3600 (1st ed., 2023-01-09)** - reporting categories, not invented thresholds |
 | Take-back/recycling route | Documented route for EVSE electronics e-waste | Documentation review |
 | Replacement planning | ~10-year electronics refresh horizon documented (industry practice benchmark, EX15 class); pathway designed to outlive electronics | Planning-document review; exact interval **TBV by manufacturer** |
 | Decommissioning plan | Removal, circuit decommissioning per code, site restoration plan on file | **Sourced: NEC as adopted** for circuits; template: the county's own 17-station decommissioning experience |
@@ -92,7 +92,7 @@ Municipal charging sites fail for reasons existing product standards do not test
 
 The staged pilot targets **Ready-Managed** at pilot sites, because the pilot's decision value depends on monitoring continuity (Report 07 §3).
 
-## 5. Inspection intervals (provisional — TBV by ULSE/AHJ)
+## 5. Inspection intervals (provisional - TBV by ULSE/AHJ)
 
 | Event / interval | Scope |
 |---|---|
@@ -103,9 +103,9 @@ The staged pilot targets **Ready-Managed** at pilot sites, because the pilot's d
 
 ## 6. Research still needed before this concept could mature
 
-1. Adopted-edition citation compilation per jurisdiction (the 2024 Virginia cycle will change the base ≈2027 — IM-03).
+1. Adopted-edition citation compilation per jurisdiction (the 2024 Virginia cycle will change the base ≈2027 - IM-03).
 2. Responder time-study literature to ground the Module 1 disconnect-operation target.
 3. Monitoring-data minimums benchmarked against federal NEVI uptime/reporting requirements.
-4. ULSE feedback channel (Standards Academy contact) on concept viability — **as a fellowship learning exercise, not a submission.**
+4. ULSE feedback channel (Standards Academy contact) on concept viability - **as a fellowship learning exercise, not a submission.**
 
 > **Repeat label:** This is a Future City Fellowship design exercise, not an official UL/ULSE proposal. All TBV parameters require validation by ULSE, the AHJ, the manufacturer, or the adopted code.

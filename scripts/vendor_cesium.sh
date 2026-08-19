@@ -37,11 +37,11 @@ fi
 #
 # A pinned VERSION says WHICH release to fetch; it says nothing about whether the bytes that
 # arrived are that release. Without this, "reproducible on demand" was a claim about a URL
-# rather than about content, and 20 MB of third-party JavaScript entered the viewer — and any
-# desktop package built from it — unverified.
+# rather than about content, and 20 MB of third-party JavaScript entered the viewer - and any
+# desktop package built from it - unverified.
 #
 # Written as a `case` rather than an associative array on purpose: macOS ships **bash 3.2**,
-# which has no `declare -A`. The first version of this used one, and bash did not refuse it —
+# which has no `declare -A`. The first version of this used one, and bash did not refuse it -
 # it parsed the dotted version key as an arithmetic expression and produced
 # "syntax error: invalid arithmetic operator", leaving EXPECTED unset. A verification step
 # that fails open is worse than none, because it reads as protection.
@@ -86,11 +86,11 @@ for f in LICENSE.md LICENSE; do
 done
 
 cat > "$DEST/README.md" <<INNER
-# Vendored third-party assets — not tracked
+# Vendored third-party assets - not tracked
 
 Fetched by \`scripts/vendor_cesium.sh\`, gitignored, reproducible on demand.
 
-- **CesiumJS $VERSION** — Apache-2.0. Full licence in \`LICENSE-CesiumJS.txt\`.
+- **CesiumJS $VERSION** - Apache-2.0. Full licence in \`LICENSE-CesiumJS.txt\`.
 
 The version is pinned to match the CDN reference in \`explorer/web/index.html\`; the fetch
 script refuses to run if the two disagree. Re-fetch with \`make explorer-vendor\`.

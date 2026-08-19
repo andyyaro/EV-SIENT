@@ -3,7 +3,7 @@
 Why this needs its own file
 ---------------------------
 The claim was previously supported by one read-only operation's **stdout** matching. That is
-the easy half. The half that matters is the **produced files** — if the platform and the CLI
+the easy half. The half that matters is the **produced files** - if the platform and the CLI
 ever wrote different bytes, every downstream surface would disagree with the terminal, and the
 disagreement would surface as an inexplicable number rather than as an error.
 
@@ -19,7 +19,7 @@ Determinism is the precondition
 -------------------------------
 An artifact can only be compared if generating it twice gives the same bytes. Several here do
 not: a run stamps a timestamp and a fresh ``run_id``. Those are compared **after normalising
-the fields that are defined to vary**, and every normalised field is named — a comparison that
+the fields that are defined to vary**, and every normalised field is named - a comparison that
 quietly ignores a difference is worse than none.
 """
 
@@ -133,7 +133,7 @@ def test_platform_and_cli_produce_identical_artifacts(operation_id, tmp_path):
 @pytest.mark.parametrize("operation_id", SAFE_TO_REGENERATE)
 def test_the_headline_numbers_survive_both_paths(operation_id):
     """A byte comparison after normalisation could in principle pass while a number moved, if
-    the number lived in a normalised field. It does not — checked explicitly."""
+    the number lived in a normalised field. It does not - checked explicitly."""
     op = ops.OPERATIONS_BY_ID[operation_id]
     summary_path = next((REPO / p for p in op.produces if p.endswith("run_summary.json")), None)
     if summary_path is None or not summary_path.is_file():

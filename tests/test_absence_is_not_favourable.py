@@ -1,7 +1,7 @@
 """Missing data must never make a site look better than measured data.
 
-Three places where it currently can. All three were found while designing Phase 6B — which
-exists precisely to let a jurisdiction bring incomplete data — and all three were reproduced
+Three places where it currently can. All three were found while designing Phase 6B - which
+exists precisely to let a jurisdiction bring incomplete data - and all three were reproduced
 by execution before being written down.
 
 **None of them changes a published number today.** All 12 real sites carry strictly `0`/`1`
@@ -82,7 +82,7 @@ def test_KNOWN_DEFECT_absent_parking_is_more_permissive_than_a_real_lot():
     """`site_capacity_cap` returns **6** when `parking_spaces <= 0`, and **2** for a real
     40-space lot. A site nobody counted is allowed three times the ports of one somebody did.
 
-    Pinned, not fixed. The correct neutral is a design decision with a visible consequence —
+    Pinned, not fixed. The correct neutral is a design decision with a visible consequence -
     the conservative choice (cap 2 on absence) would lower port targets for any jurisdiction
     that omits the column, and that trade belongs to the project owner, not to this test.
     Phase 6B is where absence handling is decided; DEC-011 records it as open.
@@ -101,7 +101,7 @@ def test_KNOWN_DEFECT_absent_parking_is_more_permissive_than_a_real_lot():
 @pytest.mark.parametrize("field", ["garage_enclosed", "stormwater_risk"])
 def test_KNOWN_DEFECT_absent_inverted_flags_score_as_the_best_possible_case(field):
     """Both are in `INVERTED_DRIVERS`, so the formula uses `(1 - x)`. An absent value becomes
-    `0.0`, and `1 - 0 = 1.0` — the maximum contribution.
+    `0.0`, and `1 - 0 = 1.0` - the maximum contribution.
 
     In plain terms: a site with no stormwater assessment scores as though an assessment had
     been done and found no risk. That is an affirmative safety claim manufactured from no

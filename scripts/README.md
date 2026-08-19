@@ -1,4 +1,4 @@
-# `scripts/` — verification and artifact builders
+# `scripts/` - verification and artifact builders
 
 [← repository root](../README.md)
 

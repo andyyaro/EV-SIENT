@@ -1,4 +1,4 @@
-# Acceptance Checklist — Client Meeting #2 Evidence Record
+# Acceptance Checklist - Client Meeting #2 Evidence Record
 
 *Per toolkit §5. CM2 (criteria A1–A4, G5) is closed only when this checklist is satisfied by real artifacts. Check boxes only when the artifact exists; attach or reference each.*
 
@@ -25,7 +25,7 @@ If the touchpoint is asynchronous (email exchange), the meeting-specific items a
 
 ## Classification gate
 
-- [ ] Team has confirmed (with fellowship staff — see `../fellowship_confirmation/`) whether this touchpoint completes Client Meeting #2, and recorded the answer here: ____________
+- [ ] Team has confirmed (with fellowship staff - see `../fellowship_confirmation/`) whether this touchpoint completes Client Meeting #2, and recorded the answer here: ____________
 - [ ] A1 status updated in the compliance tracking only after the above: prior interview = strong client evidence; interview + this documented touchpoint = CM2 complete.
 
-**Integrity note:** if the touchpoint does not occur before July 21, the presentation states honestly that CM2 completion is scheduled/requested and shows these instruments as process evidence — it does not claim the meeting happened.
+**Integrity note:** if the touchpoint does not occur before July 21, the presentation states honestly that CM2 completion is scheduled/requested and shows these instruments as process evidence - it does not claim the meeting happened.

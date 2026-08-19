@@ -6,13 +6,13 @@ They look interchangeable and are not:
 
 | Form | Use it for | Do NOT use it for |
 |---|---|---|
-| `https://public.tableau.com/views/<workbook>/<Sheet>` | **embedding**, sharing, the static-image endpoint | — |
-| `https://public.tableau.com/app/profile/<profile>/viz/<workbook>/<Sheet>` | a human clicking through from the profile | **embedding** — it is the profile-app wrapper |
+| `https://public.tableau.com/views/<workbook>/<Sheet>` | **embedding**, sharing, the static-image endpoint | - |
+| `https://public.tableau.com/app/profile/<profile>/viz/<workbook>/<Sheet>` | a human clicking through from the profile | **embedding** - it is the profile-app wrapper |
 
 Both return HTTP 200 and both return the same ~1.4 KB JavaScript shell, because Tableau
 Public is a single-page app. **A status-code check cannot tell them apart and cannot confirm
 anything rendered.** To verify a view genuinely works, fetch its static image (below) and
-check the dimensions: a healthy sheet here is ~792×681, and a broken one is ~792×90 — title
+check the dimensions: a healthy sheet here is ~792×681, and a broken one is ~792×90 - title
 and subtitle with no chart under them. That is exactly how two blank charts were caught after
 they had already been published.
 
@@ -50,7 +50,7 @@ https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/<Sheet>
 
 ```html
 <iframe
-  title="EV charging site readiness — screening study, not an approval"
+  title="EV charging site readiness - screening study, not an approval"
   src="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite?:embed=y&:showVizHome=no&:display_count=n&:origin=viz_share_link&:toolbar=bottom"
   width="100%" height="720" frameborder="0" loading="lazy"
   style="border:0;max-width:100%"></iframe>
@@ -69,7 +69,7 @@ https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/<Sheet>
 
 ## Prefer individual sheets over the dashboard when presenting
 
-Three of the seven — `PortsAcrossHorizons`, `LifecycleCostbyHorizon`, `NetCO2ebyHorizon` —
+Three of the seven - `PortsAcrossHorizons`, `LifecycleCostbyHorizon`, `NetCO2ebyHorizon` -
 render as a **narrow strip inside the dashboard**, because they have only four horizon
 categories and the authoring spec offers no control over dashboard zone sizing
 (see [`CAPABILITY_GAP.md`](CAPABILITY_GAP.md), residual blocker 5).
@@ -86,7 +86,7 @@ screenshotted or scrolled past. Whatever page hosts one of these must also carry
 text:
 
 > Screening-class planning study. **Electrical capacity is a placeholder at all twelve sites**
-> — not evidence of feasibility. Demand is modelled, not measured. Costs are screening
+> - not evidence of feasibility. Demand is modelled, not measured. Costs are screening
 > estimates for comparison, never budgets or quotes. Nothing here is approved, funded or
 > permitted.
 

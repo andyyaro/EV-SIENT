@@ -8,8 +8,7 @@ Python-native angle's entire answer, the sidecar for a Tauri or Electron shell, 
 "companion" for the web-first angle. So it is built first, before the shell is chosen, and
 none of that work is wasted whichever wins.
 
-**One UI, two tiers.** The files served here are byte-identical to the ones deployed publicly
-— ``site/platform/``. The only difference is that this server answers ``/api/*``, so the same
+**One UI, two tiers.** The files served here are byte-identical to the ones deployed publicly ``site/platform/``. The only difference is that this server answers ``/api/*``, so the same
 page shows the same operations list with the desktop-only entries *enabled*.
 
 Security posture, and why it is what it is
@@ -21,7 +20,7 @@ execute commands. So:
 * **Ephemeral port**, printed at start. Not a well-known port another process can squat.
 * **A per-session token**, generated at start and required on every ``/api/*`` request. Without
   it a browser tab you happen to have open on some other site cannot drive this server, which
-  is the actual threat — a local server with no token is reachable by any page you visit.
+  is the actual threat - a local server with no token is reachable by any page you visit.
 * **No CORS headers.** The UI is same-origin; a cross-origin caller has no business here.
 * **Operations only.** It can run what the registry declares and nothing else. There is no
   "run arbitrary command" endpoint, because there is no honest reason for one.
@@ -169,7 +168,7 @@ def main() -> int:
     args = ap.parse_args()
 
     httpd, url, _token = serve(port=args.port, open_browser=args.open)
-    print("Future City Fellowship — platform, desktop tier")
+    print("Future City Fellowship - platform, desktop tier")
     print(f"  serving {WEB_ROOT.relative_to(REPO)}")
     print(f"  {url}")
     print("  bound to loopback only; the token above is required for every API call")

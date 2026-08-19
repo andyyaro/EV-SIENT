@@ -1,6 +1,6 @@
-# DRAFT — PREPARED 2026-07-19 — NOT SENT / NOT DEPLOYED
+# DRAFT - PREPARED 2026-07-19 - NOT SENT / NOT DEPLOYED
 
-# Intercept / Online Survey — Top-3 Candidate Sites
+# Intercept / Online Survey - Top-3 Candidate Sites
 
 *Per toolkit §8: 8 questions max. For deployment at/for City of Fairfax Regional Library, Fairfax County Government Center, and Bull Run Library (intercept cards + QR to an online form). Spanish version required before deployment (see 04_LANGUAGE_ACCESS_PLAN.md). No PII is required; see 05_PRIVACY_NOTICE.md, which is printed on the form.*
 

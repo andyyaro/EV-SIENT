@@ -198,7 +198,7 @@ def main() -> int:
     path = write(Path(args.out), args.seed)
     data = rows(args.seed)
     lows = sum(1 for r in data if float(r["sessions_per_day"]) < 1)
-    print(f"wrote {path} — {len(data)} rows, {len({r['site_id'] for r in data})} synthetic sites")
+    print(f"wrote {path} - {len(data)} rows, {len({r['site_id'] for r in data})} synthetic sites")
     print(f"  sessions_per_day: {min(float(r['sessions_per_day']) for r in data)} - "
           f"{max(float(r['sessions_per_day']) for r in data)}  ({lows} rows below 1.0)")
     print(f"  dwell_hr values : {sorted({float(r['dwell_hr']) for r in data})}")

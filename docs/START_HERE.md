@@ -1,7 +1,7 @@
 # Start here
 
 This project studies where to put public EV chargers at twelve public buildings in **Fairfax
-City**, **Fairfax County** and **Prince William County**, Virginia — and, more importantly,
+City**, **Fairfax County** and **Prince William County**, Virginia - and, more importantly,
 *how many* to put there.
 
 If you have five minutes, read this page. Everything it links to is optional.
@@ -14,14 +14,14 @@ A commuter garage in Prince William County has 70 charging ports. Seventeen were
 offline: not enough people used them, and they cost roughly $1,000 per station per year to
 keep. At another county site, a ten-port install ran over budget on trenching. Overbuild and
 you pay for chargers nobody uses; underbuild and expanding later means digging up ground you
-already paid to close. This project is about finding the middle — **install 25 ports now, build
+already paid to close. This project is about finding the middle - **install 25 ports now, build
 the underground pathway for 48, and energise the rest only when real usage data says to.**
 
 ## The one caveat that governs everything
 
 **Nobody has confirmed the electrical capacity at any of these twelve sites.**
 
-Not one. The capacity number the model uses is a labelled placeholder — a value it needs in
+Not one. The capacity number the model uses is a labelled placeholder - a value it needs in
 order to run that nobody has checked. So this study can compare sites, and it can argue for
 staging, but it **cannot** tell you whether a site is electrically able to host chargers. The
 software refuses to make that claim rather than quietly leaving it out.
@@ -36,19 +36,18 @@ Everything else on this page sits underneath that sentence.
 
 Nothing is being built yet. This is a study of where charging *could* go, and no approval,
 permit, funding, or utility sign-off exists for any of it. Each site also has its own page,
-reachable by a tap-to-open tag — though **no tag has actually been placed at any site yet**.
+reachable by a tap-to-open tag - though **no tag has actually been placed at any site yet**.
 
 → [What this can and can't tell you](WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md)
 
 ### I'm on a council or a board and have to decide something
 
 Read the limits before the numbers, because the limits are the finding. The comparison
-between sites is screening-class — good enough to decide what to study next, not what to build
-— and the feasibility question is open at every site. No number here is a budget.
+between sites is screening-class - good enough to decide what to study next, not what to build and the feasibility question is open at every site. No number here is a budget.
 
 → [What this can and can't tell you](WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md)
 → [Final Milestone 2 report](../reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md)
-→ [Open human actions](operations/open-human-actions.md) — what still needs a person
+→ [Open human actions](operations/open-human-actions.md) - what still needs a person
 
 ### I manage one of these facilities
 
@@ -73,7 +72,7 @@ heading "Current Site Ranking"; and the dated Milestone 2 deck, left unedited be
 records what was actually presented.
 
 → [Methodology](methodology/) · [Standards matrix](standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)
-→ [Migration from V2](migration-from-v2.md) — why two modes exist and what moved
+→ [Migration from V2](migration-from-v2.md) - why two modes exist and what moved
 
 ### I want to run or read the code
 
@@ -94,7 +93,7 @@ a decision, and the ranking depends on weights that reasonable people can set di
 
 **Can these sites actually support chargers?**
 Unknown at all twelve, and that is the study's central limitation rather than an oversight. The
-electrical fields — service rating, spare capacity, disconnect visibility — are unconfirmed
+electrical fields - service rating, spare capacity, disconnect visibility - are unconfirmed
 everywhere. See [capacity basis](GLOSSARY.md#capacity-basis).
 
 **The costs look precise. Are they?**
@@ -109,8 +108,8 @@ conventions rather than forecasts.
 
 **Why does one site rank first in one place and second in another?**
 Two model modes exist. `legacy_v2` reproduces an earlier accepted baseline exactly, and
-`milestone2_v3` is the current canonical model. They disagree about the top site — FFX002 under
-the old mode, FFX004 under the current one — so anything generated from the contract
+`milestone2_v3` is the current canonical model. They disagree about the top site - FFX002 under
+the old mode, FFX004 under the current one - so anything generated from the contract
 **names the mode** wherever a rank appears. They are not interchangeable. **Four** older
 artifacts predate that rule and still show `legacy_v2` ranks: the superseded Tableau workbook (queued for removal),
 this project's own results gallery (now labelled on the page), a 2026-06-28 planning-report PDF
@@ -131,14 +130,14 @@ interviewees. It carries no authority and asserts none.
 No. There is no battery storage in the plan and no resilience claim anywhere.
 
 **Who decides what's actually allowed?**
-The local Authority Having Jurisdiction — the building official, electrical inspector, or fire
+The local Authority Having Jurisdiction - the building official, electrical inspector, or fire
 marshal. Every permit, disconnect-placement, access, and code-edition determination rests with
 them, not with this study.
 
 **Something here is wrong. Can I correct it?**
 Yes, and that is a designed-for case rather than a courtesy. Each site has a correction form
-that feeds observations back into the model — reachable by tag once tags are placed, and by link
-in the meantime — and there is a documented path for another jurisdiction to bring its own data
+that feeds observations back into the model - reachable by tag once tags are placed, and by link
+in the meantime - and there is a documented path for another jurisdiction to bring its own data
 file.
 
 ---

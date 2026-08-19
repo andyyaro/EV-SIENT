@@ -16,7 +16,7 @@ name: package
 # What is built
 # -------------
 # DEC-015 chose a Python-native local server over a packaged native shell, so the artifact is
-# a portable directory plus a run script — not a signed .app or .exe. `build_release_artifact.py
+# a portable directory plus a run script - not a signed .app or .exe. `build_release_artifact.py
 # --public` produces it, ships SYNTHETIC inputs per DEC-016, and refuses to emit an archive
 # that contains any real facility identifier.
 #
@@ -24,7 +24,7 @@ name: package
 # -------------------
 # **Nothing here is notarized, and nothing here is signed.** There is no Apple Developer
 # account. There was an ad-hoc signing step; it was removed once measurement showed the `zip`
-# on the following line destroyed its output — see the note above the repackage step. Neither
+# on the following line destroyed its output - see the note above the repackage step. Neither
 # state satisfies Gatekeeper: measured on macOS 26.5.1, `spctl -a -t exec` exits 3 on the
 # ad-hoc-signed file and on the unsigned one alike. The friction that causes is documented in
 # docs/INSTALL.md rather than papered over, and this workflow does not print anything
@@ -67,7 +67,7 @@ jobs:
         # A hosted runner's Python is not empty. macOS carries `certifi`; Windows carries
         # argcomplete, click, colorama, pipx, platformdirs, tzdata and userpath. Installing on
         # top of that meant every step below ran against packages the release artifact does not
-        # ship — and `build_licence_manifest.py`, which enumerates the interpreter, would have
+        # ship - and `build_licence_manifest.py`, which enumerates the interpreter, would have
         # ATTRIBUTED them. Measured on both runners; it is what turned this job red the first
         # two times it ever ran.
         #
@@ -169,7 +169,7 @@ jobs:
       #
       # `codesign -s - staging/run-platform.command` ran here and appeared to work. Ad-hoc
       # signing a shell script stores the signature in extended attributes rather than inside
-      # the file, and the `zip` on the very next line discards extended attributes — so the
+      # the file, and the `zip` on the very next line discards extended attributes - so the
       # step destroyed its own output and no build ever produced a signed artifact. Measured
       # on macOS 26.5.1 by running these steps by hand: the staging file carries
       # com.apple.cs.CodeDirectory/CodeRequirements/CodeSignature, and after zip+unzip
@@ -184,12 +184,12 @@ jobs:
       - name: Repackage with checksums
         shell: bash
         # Python rather than `zip`, because the Windows runner's git-bash has `unzip` and NOT
-        # `zip` — measured: "line 3: zip: command not found", exit 127, on the first Windows
+        # `zip` - measured: "line 3: zip: command not found", exit 127, on the first Windows
         # run this workflow ever had. The shasum/certutil branch went with it, because the two
         # tools do not write the same thing: the macOS artifact shipped a `<digest>  <file>`
         # line and the Windows one shipped whatever certutil prints. One format, produced by
         # one implementation, is what lets `docs/INSTALL.md` describe the file the same way on
-        # both platforms. (Not a measured claim about certutil's exact layout — it has not been
+        # both platforms. (Not a measured claim about certutil's exact layout - it has not been
         # run here; the point is that it was a second implementation, and now there is one.)
         run: |
           NAME="fcf-platform-${FCF_VERSION}-${{ matrix.platform }}"
@@ -295,7 +295,7 @@ jobs:
 
             **Marked pre-release, and here is the specific reason.** The macOS build has
             been installed from CI and launched, and serves every platform surface. The
-            **Windows build has never been run on Windows by anyone** — this project has
+            **Windows build has never been run on Windows by anyone** - this project has
             no Windows machine, so CI builds that artifact and nothing has ever executed
             it. The software is not known to be unstable; it is simply less exercised on
             one platform than "latest release" would imply.
@@ -309,7 +309,7 @@ jobs:
             Apple Developer account and no Windows code-signing certificate. macOS will refuse
             to open the run script until you allow it in System Settings, and Windows
             SmartScreen will warn about an unrecognised publisher. See `INSTALL.md`, included
-            beside this archive's run script, for the exact click-paths. Do not disable Gatekeeper or SmartScreen system-wide —
+            beside this archive's run script, for the exact click-paths. Do not disable Gatekeeper or SmartScreen system-wide -
             neither is necessary and both make your machine less safe.
 
             Verify your download against the `.sha256` file beside it.

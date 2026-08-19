@@ -3,7 +3,7 @@
  *
  * Why this exists at the edge rather than in the page
  * ---------------------------------------------------
- * The platform is a *static bundle*. Its bytes are the asset — there is no server behind it
+ * The platform is a *static bundle*. Its bytes are the asset - there is no server behind it
  * that could enforce anything. A browser-side sign-in over static files cannot protect them;
  * it can only hide what CloudFront has already delivered. Viewer-request runs on every
  * request **before the cache is consulted**, so an unauthenticated caller never receives a
@@ -12,7 +12,7 @@
  * Why there is no secret in this file
  * -----------------------------------
  * Lambda@Edge cannot use environment variables, so any secret would have to be baked into the
- * deployed bundle — which the program's standing rules forbid outright. So the design removes
+ * deployed bundle - which the program's standing rules forbid outright. So the design removes
  * the secret rather than hiding it:
  *
  *   * the Cognito app client is **public** and the flow uses **PKCE**, so no client secret
@@ -20,7 +20,7 @@
  *   * the session cookie holds the Cognito `id_token`, verified on each request against the
  *     pool's **public** JWKS.
  *
- * Every constant below is a public identifier — a user-pool id, a public app-client id, a
+ * Every constant below is a public identifier - a user-pool id, a public app-client id, a
  * hosted-UI hostname, an email address the owner supplied. None is a credential. There is no
  * AWS account id or ARN here, deliberately.
  *
@@ -32,7 +32,7 @@
  * it. For a private planning page that is the correct trade, and it matches the fail-closed
  * capacity guard the rest of this project already runs on.
  *
- * Node 22 (Lambda@Edge's newest runtime), zero dependencies — `node:crypto` and global
+ * Node 22 (Lambda@Edge's newest runtime), zero dependencies - `node:crypto` and global
  * `fetch` only. Nothing here needs `npm install`, so there is no lockfile to drift and no
  * transitive dependency inside a security boundary.
  */
@@ -62,7 +62,7 @@ const LANDING = `${PREFIX}/index.html`;
  * Cookie names carry the `__Host-` prefix, which is load-bearing rather than decorative.
  *
  * A browser will only accept a `__Host-` cookie when it is `Secure`, has `Path=/`, and has
- * **no `Domain` attribute** — which means it can be set only by this exact host. A sibling
+ * **no `Domain` attribute** - which means it can be set only by this exact host. A sibling
  * host under `andyyaro.com` therefore cannot write one, and that closes a real attack:
  * without the prefix, any other subdomain could set a second `fcf_session` for the parent
  * domain, and since duplicate cookies are refused (see `oneCookie`, which fails closed) that
@@ -70,7 +70,7 @@ const LANDING = `${PREFIX}/index.html`;
  * planting a forged PKCE stash to force a sign-in into someone else's account.
  *
  * The cost of `__Host-` is `Path=/`: the cookie rides along on requests to the public NFC
- * pages too, rather than being scoped to `/platform`. That is acceptable — the cache policy
+ * pages too, rather than being scoped to `/platform`. That is acceptable - the cache policy
  * does not forward cookies to the origin, so they are never seen by S3 or written to its logs,
  * and `HttpOnly` keeps them away from page scripts. A narrower path that a sibling host can
  * poison is the worse trade.
@@ -82,14 +82,14 @@ const COOKIE_ATTRS = "Path=/; HttpOnly; Secure; SameSite=Lax";
 /**
  * Who may read the platform.
  *
- * Matched on **`sub`** — Cognito's immutable per-user identifier, the tightest available
- * expression of "that user specifically" — *and* on `email`, which in this pool is also the
+ * Matched on **`sub`** - Cognito's immutable per-user identifier, the tightest available
+ * expression of "that user specifically" - *and* on `email`, which in this pool is also the
  * username and therefore unique.
  *
  * `email_verified` is deliberately NOT required, and that is not an oversight. This user was
  * created administratively and carries no `email_verified` attribute at all (`admin-get-user`
  * returns only `email` and `sub`). The textbook check would therefore have produced a gate
- * that could never open for the one account it exists to admit — a failure invisible from the
+ * that could never open for the one account it exists to admit - a failure invisible from the
  * deploying side, because confirming it needs that user's password. Matching on the immutable
  * `sub` is strictly stronger than an `email_verified` flag anyway.
  */
@@ -97,7 +97,7 @@ const GRANTED = [
   { sub: "00000000-0000-4000-8000-000000000003", email: "redacted-3@example.org" },
   // Added at the owner's request after the first deployment. The bytechisel account is
   // CONFIRMED but carries no `email_verified`, and this pool's recovery mechanisms are
-  // `verified_email` then `verified_phone_number` — so "Forgot your password?" cannot deliver
+  // `verified_email` then `verified_phone_number` - so "Forgot your password?" cannot deliver
   // to it. Granting an account whose credentials the owner already holds is the route that
   // does not require the assistant to touch a password.
   { sub: "00000000-0000-4000-8000-000000000004", email: "redacted-6@example.org" },
@@ -112,8 +112,8 @@ const b64uDecode = (str) => Buffer.from(str, "base64url");
  * Parse cookies into name -> list-of-values.
  *
  * Values are collected as a LIST rather than collapsed, so a duplicated cookie can be
- * detected. A request carrying two `fcf_session` cookies is anomalous — it is what cookie
- * shadowing looks like — and `oneCookie` refuses it rather than picking a winner. Picking
+ * detected. A request carrying two `fcf_session` cookies is anomalous - it is what cookie
+ * shadowing looks like - and `oneCookie` refuses it rather than picking a winner. Picking
  * either "first" or "last" would be choosing an attacker's preferred semantics at random.
  */
 function parseCookies(headers) {
@@ -177,7 +177,7 @@ const NO_STORE = "no-store, no-cache, must-revalidate, private";
  * Escape before interpolating ANYTHING into a response body.
  *
  * Not optional politeness. The first draft of this file interpolated Cognito's `error` query
- * parameter raw — an attacker-controlled value straight off the URL — which is reflected XSS
+ * parameter raw - an attacker-controlled value straight off the URL - which is reflected XSS
  * on this site's own origin. Escaping is centralised here so no call site has to remember.
  */
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({
@@ -212,7 +212,7 @@ p{margin:0 0 .9rem}.m{color:#4a4a4a;font-size:.92rem}
 a{color:#1B4332}code{background:rgba(127,127,127,.13);padding:.1em .35em;border-radius:3px;font-size:.9em}
 @media(prefers-color-scheme:dark){body{background:#16191a;color:#ececec}h1{color:#7fbf9a}.m{color:#b4b4b4}a{color:#7fbf9a}}
 </style></head><body><div class="w"><h1>${escapeHtml(title)}</h1>${detail}
-<p class="m">Future City Fellowship — EV charging site readiness. This is a private planning
+<p class="m">Future City Fellowship - EV charging site readiness. This is a private planning
 platform. The public field pages reached by tapping an NFC tag are unaffected and need no
 account.</p></div></body></html>`;
   const headers = {
@@ -231,11 +231,11 @@ const expireCookie = (name) => `${name}=; ${COOKIE_ATTRS}; Max-Age=0`;
 /**
  * Is this a real top-level navigation, rather than a subresource load?
  *
- * Signing out clears cookies, so it changes state — which makes a bare `GET /…/logout`
+ * Signing out clears cookies, so it changes state - which makes a bare `GET /…/logout`
  * forgeable: any page the signed-in user visits can embed
  * `<img src="https://…/platform/_auth/logout">` and the `Set-Cookie: Max-Age=0` headers still
  * apply, logging them out. `SameSite=Lax` does not help, because the attack does not need the
- * victim's cookie to be *sent* — only the response's cookie to be *stored*.
+ * victim's cookie to be *sent* - only the response's cookie to be *stored*.
  *
  * The impact is nuisance rather than breach, so the defence is proportionate: browsers label
  * subresource requests with `Sec-Fetch-Dest`, and only `document` is a navigation. A client
@@ -275,18 +275,18 @@ async function jwkFor(kid) {
 }
 
 /**
- * Verify a Cognito id_token. Returns its claims, or null — never throws a decision.
+ * Verify a Cognito id_token. Returns its claims, or null - never throws a decision.
  *
  * The checks are ordered so that nothing derived from the token is trusted before the
  * signature over it is proven:
  *
  *   * `alg` must be exactly `RS256`. This rejects `none`, and it rejects the HS256 confusion
- *     attack where a forger signs with the *public* key as an HMAC secret — impossible here
+ *     attack where a forger signs with the *public* key as an HMAC secret - impossible here
  *     anyway, since verification only ever uses `createVerify` with an RSA public key.
  *   * `token_use` must be `id`. Without this, an **access token** for the same pool would be
  *     accepted as proof of identity; access tokens carry no verified `email`, so the allowlist
  *     would be comparing against `undefined`.
- *   * `aud` must be this app client, and `iss` this pool — so a token minted for a different
+ *   * `aud` must be this app client, and `iss` this pool - so a token minted for a different
  *     client in the same account is not currency here.
  */
 async function verifyIdToken(jwt) {
@@ -381,7 +381,7 @@ async function handleCallback(query, jar) {
   const state = query.get("state");
   const stash = oneCookie(jar, PKCE_COOKIE);
   // No stash means the 10-minute window lapsed or the cookie was dropped. Restart cleanly
-  // rather than erroring — the user did nothing wrong.
+  // rather than erroring - the user did nothing wrong.
   if (!code || !state || !stash) return startLogin(LANDING, "");
 
   let saved;

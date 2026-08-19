@@ -47,7 +47,7 @@ explorer:
 explorer-legacy:
 	$(PY) -m fcf3d.build_sites --repo . --mode legacy_v2 --out explorer/web/data-legacy_v2
 
-## explorer-vendor — fetch CesiumJS locally so the viewer runs with no network
+## explorer-vendor - fetch CesiumJS locally so the viewer runs with no network
 explorer-vendor:
 	./scripts/vendor_cesium.sh
 
@@ -57,7 +57,7 @@ explorer-serve: explorer
 
 PORT ?= 8080
 
-## nfc — regenerate tag payloads, QR fallbacks, placement cards and landing pages
+## nfc - regenerate tag payloads, QR fallbacks, placement cards and landing pages
 nfc:
 	$(PY) scripts/build_nfc_tags.py
 	$(PY) scripts/build_nfc_landing.py

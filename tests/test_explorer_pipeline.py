@@ -151,7 +151,7 @@ def test_coordinates_are_in_northern_virginia(result):
 
 @needs_repo
 def test_output_is_strict_json(result, tmp_path):
-    """No NaN/Infinity — those are valid Python but invalid JSON, and they
+    """No NaN/Infinity - those are valid Python but invalid JSON, and they
     silently break JSON.parse in the browser."""
     paths = bs.write(result, str(tmp_path))
     with open(paths["geojson"]) as fh:
@@ -218,9 +218,9 @@ def test_split_sentences(raw, expected):
 @pytest.mark.parametrize(
     "tier,expected",
     [
-        ("Tier 1 — advance to site screening", 1),
-        ("Tier 2 — promising candidate, refine data", 2),
-        ("Tier 3 — lower priority / monitor", 3),
+        ("Tier 1 - advance to site screening", 1),
+        ("Tier 2 - promising candidate, refine data", 2),
+        ("Tier 3 - lower priority / monitor", 3),
         ("High-review candidate", 2),
         ("Low public-priority / special-use", 4),
         ("something else", 9),

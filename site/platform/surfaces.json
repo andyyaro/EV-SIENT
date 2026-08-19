@@ -5,7 +5,7 @@
       "id": "explorer",
       "title": "3D site explorer",
       "href": "explorer/index.html",
-      "detail": "All 12 sites in 3D with 12 building models. Works with no Cesium account and no token \u2014 it falls back to a flat basemap rather than requiring a credential.",
+      "detail": "All 12 sites in 3D with 12 building models. Works with no Cesium account and no token - it falls back to a flat basemap rather than requiring a credential.",
       "count": 12,
       "available_on_web": true,
       "present": true
@@ -33,7 +33,7 @@
     {
       "id": "tableau",
       "title": "Tableau workbook",
-      "detail": "Seven sheets plus a dashboard, published and verified against the canonical contract. Individual sheets render better than the dashboard \u2014 three charts are narrow inside a dashboard zone, which the authoring spec offers no way to control.",
+      "detail": "Seven sheets plus a dashboard, published and verified against the canonical contract. Individual sheets render better than the dashboard - three charts are narrow inside a dashboard zone, which the authoring spec offers no way to control.",
       "links": [
         {
           "label": "Site readiness ranking",
@@ -71,7 +71,7 @@
     {
       "id": "contract",
       "title": "The canonical data contract",
-      "detail": "Download the contract itself \u2014 every table, the schema, the assumptions and the manifest with its SHA-256 hash chain. This is the thing every number on every surface comes from.",
+      "detail": "Download the contract itself - every table, the schema, the assumptions and the manifest with its SHA-256 hash chain. This is the thing every number on every surface comes from.",
       "links": [
         {
           "label": "v1 (frozen)",
@@ -90,7 +90,7 @@
       "id": "reports",
       "title": "Written reports",
       "href": "reports/",
-      "detail": "12 documents: the Milestone 2 final report, the risk register, the standards application matrix, the economic and funding brief, and the environment and resilience note. These are the study's prose \u2014 they say what the numbers on this page are for.",
+      "detail": "12 documents: the Milestone 2 final report, the risk register, the standards application matrix, the economic and funding brief, and the environment and resilience note. These are the study's prose - they say what the numbers on this page are for.",
       "items": [
         "ECONOMIC_AND_FUNDING_BRIEF.md",
         "ENVIRONMENT_AND_RESILIENCE.md",
@@ -119,7 +119,7 @@
       "present": true
     }
   ],
-  "deploy_note": "Everything above is copied into the public bundle from an explicit allowlist. The real site input data is never copied \u2014 not by convention, by construction. See DEC-016.",
+  "deploy_note": "Everything above is copied into the public bundle from an explicit allowlist. The real site input data is never copied - not by convention, by construction. See DEC-016.",
   "never_deployed": [
     "data/inputs",
     "data/provenance",

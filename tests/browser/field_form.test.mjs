@@ -10,7 +10,7 @@
  * the page still claims "no field observations have been received" after you have typed one
  * in. Those are the failures a user would hit first, and only a browser can see them.
  *
- * The Chrome-over-DevTools-Protocol client lives in `./chrome_harness.mjs` — zero
+ * The Chrome-over-DevTools-Protocol client lives in `./chrome_harness.mjs` - zero
  * dependencies, and shared so two browser suites cannot drift apart. Skips rather than fails
  * when Chrome or the server is absent, so CI without a browser stays green; the skip is loud.
  */

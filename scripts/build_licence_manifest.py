@@ -4,7 +4,7 @@
 Why this is generated rather than hand-listed
 ---------------------------------------------
 A hand-written attribution file is a claim about a dependency set that changes without it. This
-reads the **installed distribution metadata** — the same metadata pip resolved — so the list
+reads the **installed distribution metadata** - the same metadata pip resolved - so the list
 cannot silently fall behind `requirements-lock.txt`.
 
 That guarantee holds only if the interpreter running this script is the project's. It reads
@@ -21,7 +21,7 @@ It demanded that the environment **equal** `requirements-lock.txt`, and that fai
 packaging runners on the first real run: the workflow installs with `pip install -e . -c
 requirements-lock.txt`, and a lock used as a *constraints* file pins versions without
 installing every line, so a correct release environment legitimately lacks the test-only and
-extra-only pins. The rule is a **subset**, not an equality — nothing installed that the lock
+extra-only pins. The rule is a **subset**, not an equality - nothing installed that the lock
 does not pin, and at least what `pip install -e .` puts there.
 
 What it does NOT do is guess. Modern packaging moved licence information from the `License:`
@@ -33,14 +33,14 @@ listed as such, loudly, so a human closes it rather than a script papering over 
 Two attributions cannot come from Python metadata at all and are stated explicitly, with the
 reason each applies:
 
-* **CesiumJS** — Apache-2.0, vendored into the explorer by `scripts/vendor_cesium.sh`.
-* **OpenStreetMap** — ODbL, because the explorer's fallback basemap is OSM-derived.
-* **Google Photorealistic 3D Tiles** — Terms of Service, not a licence, and they bind whoever
+* **CesiumJS** - Apache-2.0, vendored into the explorer by `scripts/vendor_cesium.sh`.
+* **OpenStreetMap** - ODbL, because the explorer's fallback basemap is OSM-derived.
+* **Google Photorealistic 3D Tiles** - Terms of Service, not a licence, and they bind whoever
   supplies the API key rather than this repository. Stated because the explorer can consume
   them, not because it ships them.
 
 **GNU Octave is deliberately NOT listed as a bundled dependency.** `matlab/octave/` holds 19
-files of *this project's own* `.m` shims, written to run under Octave — no Octave binary or
+files of *this project's own* `.m` shims, written to run under Octave - no Octave binary or
 source is distributed, so its GPL does not attach to anything here. A user who wants that path
 installs Octave themselves. Saying otherwise would over-claim an obligation, which is its own
 kind of inaccuracy.
@@ -141,14 +141,14 @@ def locked_requirements(lock_text: str) -> list[tuple[str, str | None]]:
     return out
 
 
-#: Present in every environment pip builds and in none of them by request. They are reported —
-#: `pip` has always been in this manifest — but their presence is not evidence of anything, so
+#: Present in every environment pip builds and in none of them by request. They are reported -
+#: `pip` has always been in this manifest - but their presence is not evidence of anything, so
 #: they are not treated as an unexplained extra.
 ENVIRONMENT_PACKAGES = {"pip", "setuptools", "wheel"}
 
 
 def declared_runtime_dependencies() -> set[str]:
-    """The `[project] dependencies` of this package — what `pip install -e .` actually installs.
+    """The `[project] dependencies` of this package - what `pip install -e .` actually installs.
 
     Deliberately NOT the whole lock. The lock is a **constraints** file: `pip install -e . -c
     requirements-lock.txt` pins versions for whatever gets installed, it does not install every
@@ -171,29 +171,29 @@ def declared_runtime_dependencies() -> set[str]:
 
 def check_environment(lock_text: str, installed: set[str],
                       required: set[str] | None = None) -> tuple[list[str], list[str]]:
-    """(missing, unexpected) — how this interpreter differs from what the project declares.
+    """(missing, unexpected) - how this interpreter differs from what the project declares.
 
     Two different errors, and they are not symmetric.
 
-    *Missing* — a package the project declares as a runtime dependency is not installed. Then
+    *Missing* - a package the project declares as a runtime dependency is not installed. Then
     this is not the project's environment at all and every licence reported would describe
     other software.
 
-    *Unexpected* — a package is installed that the lock does not pin. That one is the likelier
+    *Unexpected* - a package is installed that the lock does not pin. That one is the likelier
     failure and just as wrong: a manifest naming software the artifact does not carry is a
     false statement about what was distributed. This repository's own venv had accumulated
     Markdown, markdown-it-py and mdurl; the ambient macOS interpreter had playwright, PyQt6 and
     CairoSVG. Both would have been published as attributions.
 
-    The asymmetry is deliberate. The environment must be a **subset** of the lock — never
-    more — and must contain at least what `pip install -e .` puts there. Requiring equality
+    The asymmetry is deliberate. The environment must be a **subset** of the lock - never
+    more - and must contain at least what `pip install -e .` puts there. Requiring equality
     was wrong: it failed the macOS and Windows packaging jobs, which install with the lock as
     a *constraints* file and therefore correctly carry only the runtime closure.
     """
     try:
         from packaging.markers import Marker
     except ImportError:  # packaging is itself a locked dependency
-        return (["packaging (import failed — this is not the project environment)"], [])
+        return (["packaging (import failed - this is not the project environment)"], [])
 
     permitted = set()
     for name, marker in locked_requirements(lock_text):
@@ -238,8 +238,8 @@ def main() -> int:
         name = dist.metadata.get("Name")
         if not name:
             continue
-        # This project is not a third-party dependency of itself. It appeared twice — once as
-        # the editable install and once as its dist-info — and as UNRESOLVED, which was true
+        # This project is not a third-party dependency of itself. It appeared twice - once as
+        # the editable install and once as its dist-info - and as UNRESOLVED, which was true
         # but reported in the wrong section: the repository has no licence, and that is a
         # decision for its owner, not a gap in a dependency audit.
         if name.lower().replace("_", "-") == "fcf-m2":
@@ -291,7 +291,7 @@ def main() -> int:
         "other_components": NON_PYTHON,
         "unresolved_count": len(unresolved),
         "this_project_licence": ("NOT STATED. The repository declares no licence and one has "
-                                 "deliberately not been invented — choosing it is the owner's "
+                                 "deliberately not been invented - choosing it is the owner's "
                                  "decision. Until it is chosen, no artifact should claim a "
                                  "licence for this project's own code."),
     }
@@ -306,7 +306,7 @@ def main() -> int:
         "# Third-party licences",
         "",
         "Generated by `scripts/build_licence_manifest.py` from installed distribution",
-        "metadata. **Nothing here is guessed** — a dependency whose licence the metadata does",
+        "metadata. **Nothing here is guessed** - a dependency whose licence the metadata does",
         "not state is reported `UNRESOLVED` rather than assumed to be permissive.",
         "",
         "**GNU Octave is not bundled.** `matlab/octave/` holds this project's own `.m` shims,",

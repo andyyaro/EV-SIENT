@@ -44,7 +44,7 @@ def test_it_records_which_matlab_built_it(view):
 
 def test_the_topology_matches_the_source_that_generated_it(view):
     """Phase 0 read buildSimulinkModel.m by hand and recorded 11 blocks with these names.
-    The artifact confirms the source read — that is the point of extracting rather than
+    The artifact confirms the source read - that is the point of extracting rather than
     screenshotting."""
     names = {b["name"] for b in view["root"]["blocks"]}
     expected = {

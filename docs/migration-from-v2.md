@@ -14,14 +14,14 @@ this codebase's `legacy_v2` mode (golden-tested).
 | Area | V1/V2 (before) | V3 (now) |
 |---|---|---|
 | Package | loose scripts in `src/` (`run_all.py`, `run_v2.py`, 25-step subprocess chain) | installable package `src/fcf_m2/` with one orchestrator (`fcf_m2.workflow`) |
-| Horizons | 2035/2050 labels (Python), 2026–2046 (Excel), Now/2035/2050 (MATLAB) — three truths | one canonical set: 2026 baseline + **2036/2046/2056**, identical in every artifact |
+| Horizons | 2035/2050 labels (Python), 2026–2046 (Excel), Now/2035/2050 (MATLAB) - three truths | one canonical set: 2026 baseline + **2036/2046/2056**, identical in every artifact |
 | Scoring | cohort-relative min-max (adding a site changed every score) | fixed benchmark anchors (`data/anchors/anchor_set_v1.json`), cohort-independent; legacy behavior retained in `legacy_v2` mode |
 | Data confidence | note-keyword heuristics ("official" +5) | typed field-level provenance (`data/provenance/`); prose cannot change scores |
 | Waits | steady-state Erlang-C only | + peak-window Erlang + seeded discrete-event simulation (P10/P50/P90) |
 | Economics / emissions | none | lifecycle NPC (staged/overbuild/defer) + net CO2e with sourced factor |
 | Cross-model | hand-built MATLAB adapter CSV (port mismatches) | generated adapter from the validated contract; `capacity_basis` on every row |
 | Tests | output checkers only | full pytest suite incl. golden legacy fixtures; CI coverage gate |
-| GIS | live TIGER/basemap downloads (failed offline) | cached, filtered boundary GeoJSON — fully offline |
+| GIS | live TIGER/basemap downloads (failed offline) | cached, filtered boundary GeoJSON - fully offline |
 
 ## Old commands → new commands
 
@@ -37,16 +37,16 @@ this codebase's `legacy_v2` mode (golden-tested).
 
 | Old | New |
 |---|---|
-| `src/*.py` (V2 scripts) | `src/fcf_m2/*.py` (modules) — legacy scripts remain in history and on the archive branch |
+| `src/*.py` (V2 scripts) | `src/fcf_m2/*.py` (modules) - legacy scripts remain in history and on the archive branch |
 | `data/inputs/real_sites_v2.csv` (V2 branch) | `data/inputs/real_sites_v2.csv` (unchanged content) |
-| `data/outputs/v2_*.csv` | `data/outputs/` (gitignored; regenerated) — frozen goldens in `tests/` |
+| `data/outputs/v2_*.csv` | `data/outputs/` (gitignored; regenerated) - frozen goldens in `tests/` |
 | `tableau/EV_Charging_Site_Readiness_Workbook.twbx` | not carried (unverifiable without Tableau Desktop); recipe in `dashboard/tableau/` |
 | MATLAB `file1_phase2/*.m` | `matlab/src/*.m` (merged, rewritten); originals archived in `matlab/legacy_archive/` |
 
 ## Legacy results vs V3 results
 
 `legacy_v2` mode reproduces the accepted baseline **bit-for-bit** (FFX002 top at 58.8;
-25 starter / 48 pathway ports; identical per-site scores, ranks, and strategies —
+25 starter / 48 pathway ports; identical per-site scores, ranks, and strategies -
 asserted by `tests/test_legacy_golden.py` against frozen fixtures).
 
 `milestone2_v3` anchor scores differ from legacy scores *by design* (fixed anchors
@@ -59,7 +59,7 @@ provisional planning conventions, not calibrated forecasts.
 ## Known breaking changes
 
 1. The V2 script entry points (`run_v2.py`, `check_outputs_v2.py`, …) no longer exist
-   in the working tree — use the archive branch to run them verbatim.
+   in the working tree - use the archive branch to run them verbatim.
 2. Outputs are no longer committed; regenerate locally (`make run-v3`).
 3. The 2035/2050 column names are replaced by horizon-year columns in the contract.
 4. The hand-built MATLAB adapter CSV is gone; regenerating the contract regenerates
@@ -68,7 +68,7 @@ provisional planning conventions, not calibrated forecasts.
 
 ## How to reproduce each behavior
 
-- **Legacy:** `make run-legacy` (this codebase) — or check out
+- **Legacy:** `make run-legacy` (this codebase) - or check out
   `archive/pre-milestone2-v3-20260719` / branch `v2-expansion-planning` for the
   original scripts.
 - **V3:** `make run-v3 && make validate`.

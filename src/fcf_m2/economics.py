@@ -122,7 +122,7 @@ def annual_cash_flows(case: str, inputs: SiteCostInputs, esc: float) -> pd.DataF
         # This term is not hypothetical: it models an observed pattern at one of the study's own
         # commuter-garage sites, where a large early installation was later cut back because the
         # ports cost roughly $1,000 per station per year to keep and demand never arrived. The
-        # facility is deliberately not named here — `src/` ships inside the public installer, and
+        # facility is deliberately not named here - `src/` ships inside the public installer, and
         # DEC-016 forbids a real facility identifier from appearing in it. It was named in this
         # comment until a pre-release audit found it in a built archive.
         decomm = 0.0

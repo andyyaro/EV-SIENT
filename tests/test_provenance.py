@@ -7,7 +7,7 @@ Two ways that promise can fail quietly, and both are pinned here:
    like an answer. `resolve()` raises instead.
 2. **The two tiers disagree.** The desktop tier calls `resolve()`; the web tier reads the
    precomputed JSON. If those ever differ, the same number means two things depending on
-   which tier you opened — which is worse than either being wrong on its own, because nobody
+   which tier you opened - which is worse than either being wrong on its own, because nobody
    would think to check.
 """
 
@@ -42,7 +42,7 @@ def scenarios() -> pd.DataFrame:
 # ------------------------------------------------------------------ it resolves
 
 def test_the_worked_example_resolves_completely(index):
-    """ports_active of FFX004 at 2036 base — the example the platform brief must satisfy."""
+    """ports_active of FFX004 at 2036 base - the example the platform brief must satisfy."""
     p = pv.resolve(index, "FFX004", 2036, "base", "ports_active")
     assert p.value == 4
     assert p.contract_version == config.SCHEMA_VERSION
@@ -75,7 +75,7 @@ def test_every_exportable_column_resolves_for_every_row(index, scenarios):
 
 
 def test_the_engine_is_stated_and_is_never_matlab(index, scenarios):
-    """Real MathWorks MATLAB has run this model, but only on a SYNTHETIC fixture — it has
+    """Real MathWorks MATLAB has run this model, but only on a SYNTHETIC fixture - it has
     never seen the real sites. Attributing a contract number to it would be a false claim,
     and GNU Octave is not MATLAB either."""
     for column in ["ports_active", "net_co2e_kg", "lifecycle_cost_npv_usd"]:
@@ -103,7 +103,7 @@ def test_a_directory_that_is_not_a_contract_is_refused(tmp_path):
 
 def test_a_column_with_no_field_group_says_so_rather_than_borrowing_one(index):
     """`run_id` has no provenance field group. It must resolve with None, not with whichever
-    group happened to sort first — a number must never borrow another field's credibility."""
+    group happened to sort first - a number must never borrow another field's credibility."""
     assert "run_id" not in pv.FIELD_GROUP_FOR_COLUMN
     p = pv.resolve(index, "FFX004", 2036, "base", "run_id")
     assert p.field_provenance is None
@@ -215,7 +215,7 @@ def test_the_export_is_STRICT_json_that_a_browser_can_parse():
 
     numpy.float64 subclasses float, so an isinstance shortcut let NaN through, and json.dumps
     happily wrote `NaN` literals. Python re-reads them without complaint. A browser's
-    JSON.parse rejects them outright — so the entire web tier would have failed to load, and
+    JSON.parse rejects them outright - so the entire web tier would have failed to load, and
     every Python-side check would have said the file was fine.
 
     `parse_constant` is how you make Python as strict as a browser.
@@ -232,7 +232,7 @@ def test_the_export_is_STRICT_json_that_a_browser_can_parse():
 
 
 def test_a_missing_value_is_null_not_a_string(export):
-    """spare_capacity_kw is absent at every site. It must export as JSON null — not as the
+    """spare_capacity_kw is absent at every site. It must export as JSON null - not as the
     string "nan", which reads as a value, and not as a bare NaN, which will not parse."""
     entry = export["entries"]["FFX004|2036|base|spare_capacity_kw"]
     assert entry["v"] is None

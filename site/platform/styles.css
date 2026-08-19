@@ -269,7 +269,7 @@ a.run { display: inline-block; text-decoration: none; }
 .fieldrow input:focus-visible, .fieldrow select:focus-visible, .fieldrow textarea:focus-visible {
   outline: 3px solid var(--focus); outline-offset: 1px;
 }
-/* A refused field is marked in the field itself, not only in the summary above it — a person
+/* A refused field is marked in the field itself, not only in the summary above it - a person
  * fixing four problems should not have to hold four field names in their head. */
 .fieldrow [aria-invalid="true"] { border-color: #b3261e; border-width: 2px; }
 .fieldhelp { margin: .1rem 0 0; font-size: .84rem; }

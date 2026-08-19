@@ -4,19 +4,19 @@
  * What makes this test worth trusting
  * -----------------------------------
  * It imports and calls the **actual handler** that gets deployed, with **real RSA keys** and
- * real signature verification. Only the network is stubbed — the JWKS endpoint and Cognito's
- * token endpoint — because those are the only parts that cannot run locally. Nothing about the
+ * real signature verification. Only the network is stubbed - the JWKS endpoint and Cognito's
+ * token endpoint - because those are the only parts that cannot run locally. Nothing about the
  * verification logic is reimplemented here, so a bug in the authoriser cannot be papered over
  * by a matching bug in the test.
  *
  * The pool identifiers below are duplicated from the module on purpose. If someone changes the
- * client id or issuer in `index.mjs` without changing them here, these tests **fail loudly** —
+ * client id or issuer in `index.mjs` without changing them here, these tests **fail loudly** -
  * which is the direction a drift failure should point.
  *
  * The bar being tested is one sentence: **no request reaches the S3 origin unless it carries a
  * signature-verified, unexpired Cognito id_token for the one granted account.** Everything
- * else — expired, wrong audience, wrong pool, an access token, a forged algorithm, a duplicate
- * cookie, an unreachable JWKS — must deny.
+ * else - expired, wrong audience, wrong pool, an access token, a forged algorithm, a duplicate
+ * cookie, an unreachable JWKS - must deny.
  *
  * Run: node --test tests/edge_auth/
  */
@@ -224,7 +224,7 @@ test("every cookie satisfies the __Host- prefix rules a browser enforces", async
 });
 
 test("a sibling subdomain cannot shadow the session (this is what __Host- buys)", () => {
-  // Not assertable from inside the handler — it is a browser rule. Pinned so that renaming
+  // Not assertable from inside the handler - it is a browser rule. Pinned so that renaming
   // the cookies without the prefix is a test failure rather than a silent reintroduction of
   // the permanent-lockout attack.
   //
@@ -242,7 +242,7 @@ test("a sibling subdomain cannot shadow the session (this is what __Host- buys)"
   }
 });
 
-test("SameSite is Lax, not Strict — Strict would break the Cognito callback", async () => {
+test("SameSite is Lax, not Strict - Strict would break the Cognito callback", async () => {
   const r = await handler(ev("/platform/index.html"));
   assert.ok(!cookiesOf(r).some((c) => /SameSite=Strict/.test(c)));
 });
@@ -357,7 +357,7 @@ test("generated responses are never cacheable", async () => {
   for (const uri of ["/platform/index.html", "/platform/_auth/signed-out", "/platform"]) {
     const r = await handler(ev(uri));
     const cc = r.headers["cache-control"]?.[0]?.value || "";
-    assert.match(cc, /no-store/, `${uri} must not be cacheable — it carries per-user state`);
+    assert.match(cc, /no-store/, `${uri} must not be cacheable - it carries per-user state`);
   }
 });
 
@@ -371,7 +371,7 @@ test("the authoriser is only ever reasoned about for /platform paths", async () 
   assert.match(source, /const PREFIX = "\/platform"/);
   const r = await handler(ev("/t/FFX001"));
   assert.ok(!isAllow(r),
-    "attached to the wrong behaviour this WOULD gate the NFC tags — the deploy script must " +
+    "attached to the wrong behaviour this WOULD gate the NFC tags - the deploy script must " +
     "scope it to /platform*, and does");
 });
 
@@ -417,7 +417,7 @@ test("the second granted account also reaches the origin", async () => {
 test("DENIED: one account's sub paired with the other's email", async () => {
   // The allowlist requires both fields to match the SAME entry. Checking them independently
   // ("is this sub known?" and "is this email known?") would let a token that mixes two real
-  // accounts through — and with two entries that stops being hypothetical.
+  // accounts through - and with two entries that stops being hypothetical.
   for (const [sub, email] of [[GRANTED_SUB, GRANTED2_EMAIL], [GRANTED2_SUB, GRANTED_EMAIL]]) {
     const r = await handler(ev("/platform/index.html", { cookies: [session(idToken({ sub, email }))] }));
     assert.ok(!isAllow(r), `sub ${sub.slice(0, 8)} + ${email} must be refused`);

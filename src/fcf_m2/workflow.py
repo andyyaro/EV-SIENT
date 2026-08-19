@@ -50,11 +50,11 @@ STEPS = [
 
 
 def generate_docs() -> str:
-    lines = ["# V3 Workflow Steps (generated from fcf_m2.workflow.STEPS — do not edit by hand)", ""]
+    lines = ["# V3 Workflow Steps (generated from fcf_m2.workflow.STEPS - do not edit by hand)", ""]
     lines.append(f"Step count: **{len(STEPS)}**")
     lines.append("")
     for i, (name, desc) in enumerate(STEPS, 1):
-        lines.append(f"{i}. **{name}** — {desc}")
+        lines.append(f"{i}. **{name}** - {desc}")
     lines.append("")
     return "\n".join(lines)
 
@@ -101,7 +101,7 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None) -> dict:
 
     # Right-sizing (ports/pathway) is always anchored to the ACCEPTED legacy baseline
     # (RT-04: 25 starter / 48 pathway must reconcile). V3 fixed-anchor scores are
-    # reported alongside with a migration report — they do not silently re-baseline
+    # reported alongside with a migration report - they do not silently re-baseline
     # the port structure (PY-02 deliberate-migration rule).
     scored_legacy = enrich_and_score(sites, mode=MODE_LEGACY)
     scored_legacy = scored_legacy.merge(risk[["site_id", "electrical_risk_level"]], on="site_id", how="left")
@@ -381,7 +381,7 @@ def _ingest_observations(args) -> int:
             print(f"CAPACITY FILE REJECTED\n  {err}")
             return 1
         upgrades = observed.resolve_capacity(records)
-        print(f"CAPACITY — {len(records)} observation(s) across {len(upgrades)} site(s)\n")
+        print(f"CAPACITY - {len(records)} observation(s) across {len(upgrades)} site(s)\n")
         for site_id, upgrade in upgrades.items():
             arrow = "->" if upgrade.upgraded else "unchanged,"
             print(f"  {site_id}: {upgrade.previous_basis} {arrow} {upgrade.new_basis}")
@@ -402,7 +402,7 @@ def _ingest_observations(args) -> int:
             print(f"SESSION FILE REJECTED\n  {err}")
             return 1
         summaries = observed.summarise_sessions(rows)
-        print(f"SESSIONS — {len(rows)} site-day(s) across {len(summaries)} site(s)\n")
+        print(f"SESSIONS - {len(rows)} site-day(s) across {len(summaries)} site(s)\n")
         for site_id, summary in summaries.items():
             print(f"  {site_id}: {summary.days_observed} days "
                   f"({summary.months_observed} months observed)")

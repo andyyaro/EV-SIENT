@@ -1,8 +1,8 @@
 """Resolve any displayed number to its full lineage.
 
 The platform's central promise is that **no number appears without its provenance available**.
-This module is what makes that promise keepable: given a cell reference — a table, a row key
-and a column — it returns everything that can truthfully be said about where that number came
+This module is what makes that promise keepable: given a cell reference - a table, a row key
+and a column - it returns everything that can truthfully be said about where that number came
 from, and refuses when it cannot.
 
 Architecture-independent on purpose
@@ -26,7 +26,7 @@ What "truthfully" excludes
 The refusal that matters
 ------------------------
 ``resolve()`` raises on an unknown column or a row that does not exist. A provenance panel
-that renders "unknown" for a number it cannot explain is worse than one that refuses — the
+that renders "unknown" for a number it cannot explain is worse than one that refuses - the
 first looks like an answer.
 """
 
@@ -376,10 +376,10 @@ def export_all(contract_dir: str | Path, out_path: str | Path) -> dict:
     """Precompute provenance for every (row, exportable column) as NORMALISED JSON.
 
     This is what the web tier serves. It cannot execute anything, so it must be handed the
-    same answers the desktop tier computes — identical by construction, because both come from
+    same answers the desktop tier computes - identical by construction, because both come from
     this module.
 
-    **Normalised, not flattened.** The naive form — one self-contained record per cell —
+    **Normalised, not flattened.** The naive form - one self-contained record per cell -
     repeated the caveat prose, the consumer rules and the run metadata across 3 720 entries
     and came to **6.76 MB**, which is a real cost to every visitor for information that is
     identical on every entry. Everything shared is hoisted; an entry carries only what varies,
@@ -449,7 +449,7 @@ def entry_to_provenance(payload: dict, key: str) -> dict:
     """Reassemble a full provenance record from the normalised export.
 
     The reference implementation of what the web tier's JavaScript does. Kept here in Python
-    so a test can assert that the normalised export and ``resolve()`` agree — the two tiers
+    so a test can assert that the normalised export and ``resolve()`` agree - the two tiers
     disagreeing about what a number means is the failure this whole module exists to prevent.
     """
     entry = payload["entries"][key]

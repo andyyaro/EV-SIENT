@@ -6,7 +6,7 @@ Why this was necessary
 The original workbook `EV_Charging_Site_Readiness_Workbook` was audited and found wrong on
 three counts (DEC-013), a corrected workbook was published under a new name, and the original
 was then deleted. **Nothing re-pointed the website.** Its embeds still named the deleted
-workbook, so every one of them resolved to `public.tableau.com/app/resource-not-found` —
+workbook, so every one of them resolved to `public.tableau.com/app/resource-not-found` -
 verified by following the redirect, because Tableau answers 302 for live and dead views alike
 and the status code alone distinguishes nothing.
 
@@ -15,14 +15,14 @@ That dependency was never traced when the deletion was requested. This script is
 Why it is not a find-and-replace
 --------------------------------
 The deleted workbook had 12 sheets; the canonical one has 7, and they are different analyses.
-Four map cleanly. The rest — review burden, per-dimension subscores, profile readiness, rank
-stability — came from the **old scoring model**, whose fields the canonical contract does not
+Four map cleanly. The rest - review burden, per-dimension subscores, profile readiness, rank
+stability - came from the **old scoring model**, whose fields the canonical contract does not
 carry. They cannot be rebuilt without inventing the numbers underneath them, so they are
 removed rather than faked or silently pointed at some unrelated chart.
 
 More importantly, every embed sits inside a slide with a title, tab labels and explanatory copy
 describing *that specific old chart*. Swapping only the URLs would leave the page describing
-charts it no longer shows — replacing a broken embed with a **false** one, which is worse. So
+charts it no longer shows - replacing a broken embed with a **false** one, which is worse. So
 the surrounding copy is rewritten with the URL.
 
 The slide order was chosen so this script only ever DELETES markup, never synthesises it: the
@@ -61,7 +61,7 @@ DELETE_CHIP_SHEETS = ["Range-ProfileRankStabilitybySite", "Lollipop-DataConfiden
 #: (old slide title, new slide title, new info-bar line)
 RETITLE = [
     ("Model Transparency", "Cost and Emissions",
-     "Screening-class figures for comparison between sites — never budgets or quotes."),
+     "Screening-class figures for comparison between sites - never budgets or quotes."),
     ("Scenario Stress Testing", "Waiting Times",
      "Modelled waits, not measured ones. No site has been observed in operation."),
 ]
@@ -84,7 +84,7 @@ CHIP_COPY = {
     "LifecycleCostbyHorizon": dict(
         label="Lifecycle cost",
         title="Tableau visualization: Lifecycle Cost NPV by Horizon",
-        info="Screening-class estimates for comparison — not budgets, quotes, or engineering costs.",
+        info="Screening-class estimates for comparison - not budgets, quotes, or engineering costs.",
         note="Net present value across the study horizons, on published benchmark assumptions.",
         what="Lifecycle cost NPV per site at each horizon.",
         why="It allows sites to be compared on cost without implying any figure is a quote."),
@@ -100,7 +100,7 @@ CHIP_COPY = {
 
 
 #: `results.html` uses inline `switchTableau(...)` chips rather than data-attributes. Its two
-#: dead tabs are re-pointed at canonical sheets and RELABELLED — leaving a lone tab would look
+#: dead tabs are re-pointed at canonical sheets and RELABELLED - leaving a lone tab would look
 #: broken, and keeping the old labels over new charts would be a false caption.
 RESULTS_CHIPS = {
     "Bar-ReviewBurdenbySite": ("StartervsPathwayPorts", "Starter vs Pathway Ports", "Starter vs pathway"),
@@ -124,19 +124,19 @@ def retarget_results_chips(text: str) -> str:
 
 
 
-#: Literal copy that survives elsewhere in the markup — a chip label with no data-url, and the
+#: Literal copy that survives elsewhere in the markup - a chip label with no data-url, and the
 #: info bars beneath the two repurposed slides. Left alone these describe the OLD chart while
 #: the NEW one is on screen, which is a false caption rather than a stale one.
 LITERAL_COPY = [
     (">Scenario gaps</button>", ">Queue wait</button>"),
     ("Use this to find where future-ready capacity may break under stress.",
-     "Modelled waits under the base case — no site has been observed in operation."),
+     "Modelled waits under the base case - no site has been observed in operation."),
     ("Stable strong sites are easier to explain to stakeholders.",
-     "Screening-class figures for comparing sites — never budgets, quotes, or engineering estimates."),
+     "Screening-class figures for comparing sites - never budgets, quotes, or engineering estimates."),
     ("Tableau visualization: HeatMap - Port Sizing Scenario Gaps",
      "Tableau visualization: Queue Wait, Minutes"),
-    ("Start here — compare Tier 1 and high-review sites first.",
-     "Start here — compare sites before anything else. Every one rests on placeholder capacity."),
+    ("Start here - compare Tier 1 and high-review sites first.",
+     "Start here - compare sites before anything else. Every one rests on placeholder capacity."),
 ]
 
 

@@ -221,7 +221,7 @@ class TestLandingPages:
             row = scen[(scen.site_id == site_id) & (scen.horizon_year == 2026)].iloc[0]
             page = (LANDING / site_id).read_text()
             if row.capacity_basis == "placeholder":
-                assert "No — placeholder" in page, f"{site_id} does not say capacity is unconfirmed"
+                assert "No - placeholder" in page, f"{site_id} does not say capacity is unconfirmed"
 
     def test_no_page_claims_a_confidence_the_data_lacks(self, contract):
         _, scen = contract

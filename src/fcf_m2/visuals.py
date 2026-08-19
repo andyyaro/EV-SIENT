@@ -71,7 +71,7 @@ def log_path_for(path: str | Path, relative_to: str | Path | None = None) -> str
     path of whichever machine built it: that leaks a local directory layout and
     trips the repository's no-absolute-paths hygiene gate. Paths are recorded
     relative to ``relative_to`` (the repo root) when they sit underneath it, and
-    otherwise fall back to the bare filename — never an absolute path.
+    otherwise fall back to the bare filename - never an absolute path.
     """
     path = Path(path)
     if relative_to is not None:

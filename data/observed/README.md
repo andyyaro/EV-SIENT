@@ -1,11 +1,11 @@
-# `data/observed/` — field observations
+# `data/observed/` - field observations
 
 **This directory contains ZERO real observations, and that is the correct state.**
 
 Nothing here describes any real facility. It holds two templates and, under
 `fixtures/`, clearly-marked synthetic data used to exercise the ingestion path in tests.
 Until a facility manager or the utility actually sends something, that is what belongs
-here — the V4 work ships the *pipeline*, never invented data.
+here - the V4 work ships the *pipeline*, never invented data.
 
 ## Why this directory matters
 
@@ -28,7 +28,7 @@ before entering real data; `EXAMPLE001` is not a project site id.
 
 It shipped with six: site, date, sessions, energy, mean dwell, visitors. The expansion
 trigger policy in `data/contract/v1/assumptions.json` gates on **average utilisation, p90
-wait, uptime and equity percentile** — and `triggers.evaluate` checks **uptime first**,
+wait, uptime and equity percentile** - and `triggers.evaluate` checks **uptime first**,
 refusing to trust utilisation until reliability clears.
 
 Of those four, utilisation was only derivable by joining in port counts and open hours,
@@ -38,10 +38,10 @@ template could not supply, so the loop it exists to feed could not have been clo
 
 The added columns are all things a networked EVSE actually reports:
 
-- `ports_in_service` — how many ports existed that day
-- `port_hours_available` / `port_hours_possible` — availability, which gives **uptime**
-- `sessions_delayed`, `wait_p90_min` — queueing, which gives **p90 wait**
-- `observer`, `source_system` — provenance, because an unattributed number cannot upgrade anything
+- `ports_in_service` - how many ports existed that day
+- `port_hours_available` / `port_hours_possible` - availability, which gives **uptime**
+- `sessions_delayed`, `wait_p90_min` - queueing, which gives **p90 wait**
+- `observer`, `source_system` - provenance, because an unattributed number cannot upgrade anything
 
 ## Rules that are enforced, not merely stated
 
@@ -52,7 +52,7 @@ The added columns are all things a networked EVSE actually reports:
    value requires.
 3. **Evidence caps the claim.** A walkthrough can justify `verified_facility`; only a
    utility record justifies `verified_utility`. An assumed value can never upgrade
-   provenance — it can only sit alongside unverified data.
+   provenance - it can only sit alongside unverified data.
 4. **Conflicts are surfaced, not resolved.** Where facility and utility values disagree,
    both are kept in `capacity_source`, the **more conservative** value is used for
    screening, and the conflict is flagged for a human.

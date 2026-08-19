@@ -1,4 +1,4 @@
-# LANE L03 — MATLAB SOURCE (`matlab/src/`)
+# LANE L03 - MATLAB SOURCE (`matlab/src/`)
 
 Ground-truth inventory. All 9 assigned files read end-to-end (2001 lines total).
 Repo root for all relative paths below: `/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo`.
@@ -17,7 +17,7 @@ Line counts as read:
 | `matlab/src/run_all_scenarios.m` | 198 |
 | `matlab/src/runScenario.m` | 185 |
 
-`matlab/src/` is flat — no `+namespace` directories, no `@class` directories, no subfolders
+`matlab/src/` is flat - no `+namespace` directories, no `@class` directories, no subfolders
 (verified: directory holds exactly the 9 `.m` files).
 
 **Global context that governs this whole lane:** `matlab/EXECUTION_STATUS.md:3` declares
@@ -59,7 +59,7 @@ this inventory is therefore a claim about *authored source*, never about observe
     `:badArrivalWindow`, `:noMatch`, `:columnType`, `:badValue` (7 distinct).
   - Numeric sanity predicates (`:113-120`): `ports >= 0`, `charger_power_kW > 0`, `dwell_hr > 0`,
     `sessions_per_day >= 0`, `energy_per_session_kWh >= 0`; plus
-    `arrival_end_hr > arrival_start_hr` (`:122-130`). NaN values are *exempt* — `:176`
+    `arrival_end_hr > arrival_start_hr` (`:122-130`). NaN values are *exempt* - `:176`
     `ok = isnan(v) | predicate(v)`.
   - Provenance metadata attached (`:160-166`): `T.Properties.Description =
     "Canonical MATLAB scenario table (auto-generated adapter)"`; `T.Properties.UserData` struct with
@@ -67,12 +67,12 @@ this inventory is therefore a claim about *authored source*, never about observe
   - Local function `localAssertNumeric(T, colName, predicate, message)` (`:169`).
 - **Notes:**
   - Docstring `:11-14` states explicitly "Horizons are read FROM THE DATA; no year list is
-    hard-coded anywhere in this repository (ML-06)". Verified true — zero hard-coded years appear
+    hard-coded anywhere in this repository (ML-06)". Verified true - zero hard-coded years appear
     anywhere in the 9 files (grep for 2026/2030/2035/2036/2040/2046/2050/2056 returns nothing).
   - The actual CSV (`matlab/data/canonical/matlab_scenarios.csv`, header row read) has **22**
     columns; the 19 required are all present, plus `model_rank`, `electrical_risk_level`,
     `source_note`. 120 data rows. Distinct `horizon_year` values in the file: **2026, 2036, 2046,
-    2056** — canonical, no violation.
+    2056** - canonical, no violation.
   - `T.Properties.UserData` is set but **no consumer in `src/` ever reads it** (`run_all_scenarios`
     recomputes `unique(T.horizon_year)` itself at `:81`). Dead provenance channel.
 
@@ -127,7 +127,7 @@ this inventory is therefore a claim about *authored source*, never about observe
     `data/contract/v1/`); flagged as a finding for cross-check.
   - Docstring's "Returned struct fields" list (`:33-42`) omits `scenario_id` and `allowed_bases`,
     which the code does return (`:144`, `:153`). Minor doc drift.
-  - `localNumericOrNaN` accepts char/string and parses with `str2double` — so a text `"250"` in the
+  - `localNumericOrNaN` accepts char/string and parses with `str2double` - so a text `"250"` in the
     CSV still yields a numeric capacity. Silent type coercion; worth knowing for a Python port.
 
 ---
@@ -154,7 +154,7 @@ this inventory is therefore a claim about *authored source*, never about observe
     | `TimeStepMinutes` | `5` | numeric scalar `> 0` |
   - **Time axis** (`:87-89`): `dt_hr = TimeStepMinutes/60` (= 1/12 h at default);
     `t_hr = (0:dt_hr:24).'` → **289 points** at the default 5-minute step.
-  - **Base-load shape constants** (`:95-101`) — these are the load-bearing magic numbers:
+  - **Base-load shape constants** (`:95-101`) - these are the load-bearing magic numbers:
     - daytime: `exp(-0.5*((t-14)/4.5)^2)`
     - morning: `0.25 * exp(-0.5*((t-8)/1.7)^2)`
     - evening: `0.15 * exp(-0.5*((t-19)/2.0)^2)`
@@ -173,14 +173,14 @@ this inventory is therefore a claim about *authored source*, never about observe
     (`localEvenArrivals`, `:266-270`).
   - **stochastic** (`:123-129`): `rng(Seed, "twister")`; `nSessions ~ Poisson(sessions_per_day)`
     via Knuth (`localPoissonDraw`, `:231-245`); weights all 1; arrivals from `localDrawArrivals`
-    (`:247-264`) — uniform, or symmetric triangular with `c = 0.5` by inverse-CDF; sorted ascending.
+    (`:247-264`) - uniform, or symmetric triangular with `c = 0.5` by inverse-CDF; sorted ascending.
   - **Session table schema** (`:154-161` and the empty-table twin `:293-303`), 9 columns in order:
     `session_id, arrival_hr, departure_hr, dwell_hr, energy_required_kWh,
     energy_required_grid_kWh, max_power_kW, weight, priority_class`.
-    - `departure = min(arrival + dwell_hr, 24)` (`:149`) — clipped at midnight.
+    - `departure = min(arrival + dwell_hr, 24)` (`:149`) - clipped at midnight.
     - `dwell_hr` column is `departure - arrivals` (post-clip), not the raw input.
     - `energy_required_kWh` = battery side; `energy_required_grid_kWh = eBatt / eta` (`:151`).
-    - `priority_class` is hard-set to `1` for every session (`:157` `ones(nSessions,1)`) — the
+    - `priority_class` is hard-set to `1` for every session (`:157` `ones(nSessions,1)`) - the
       priority tier in the scheduler is therefore inert in the current code.
   - **Request construction** (`:166-175`): per session,
     `chargeDuration = min(eGrid/pMax, departure-arrival)`; the pulse target energy is
@@ -207,7 +207,7 @@ this inventory is therefore a claim about *authored source*, never about observe
   - `DiversityFactor` scales the aggregate curve but **not** the `sessions` table. See the
     cross-file defect noted under `managedCharging.m`.
   - `ports` is a *required* field but is only used in `legacy_gaussian` mode (`:120`). In the
-    session-based modes the number of concurrent chargers is never enforced — nothing caps
+    session-based modes the number of concurrent chargers is never enforced - nothing caps
     simultaneous sessions at `ports`. This is a real modelling gap for a Python reimplementation.
 
 ---
@@ -249,23 +249,23 @@ this inventory is therefore a claim about *authored source*, never about observe
     comms_loss, notes, guard` (19 counting `guard`).
   - `overload_kW = max(total - siteCap, 0)` when capacity finite, else `nan(nT,1)` (`:165-169`).
   - Error ids: `:badStrategy`, `:sessionsRequired`, `:energyBalance`, `:capacityUndefined` (4).
-  - `localRequireCapacity(siteCap_kW, strategy)` (`:197-208`) — clamp and energy_aware refuse to
+  - `localRequireCapacity(siteCap_kW, strategy)` (`:197-208`) - clamp and energy_aware refuse to
     run without a finite capacity.
   - **`localEnergyAwareSchedule(sessions, t_hr, dt_hr, baseLoad_kW, siteCap_kW, commsLoss,
     failSafeFraction)`** (`:210`) returns `[ev_kW, perVehicle, notes]`:
     - Per-session request basis (`:230-236`):
       `reqPerSession(k) = weight(k) * min(energy_required_grid_kWh(k),
-      (departure_hr(k)-arrival_hr(k)) * max_power_kW(k))` — **identical basis to the pulse target
+      (departure_hr(k)-arrival_hr(k)) * max_power_kW(k))` - **identical basis to the pulse target
       in `makeSessionProfiles:172-174`**, which is why the two `requested_kWh` numbers agree.
     - Active set per step (`:251-253`):
       `arrival_hr <= tNow & departure_hr > tNow & remaining_kWh > 1e-12`.
     - Normal path (`:268-288`): `headroom = max(siteCap - baseLoad(i), 0)`; queue sorted by
-      `sortrows([priority_class, departure_hr, arrival_hr])` — priority ascending (1 = highest),
+      `sortrows([priority_class, departure_hr, arrival_hr])` - priority ascending (1 = highest),
       then earliest departure (EDF), then earliest arrival; grant
       `p = min([max_power_kW*weight, headroom, remaining/dt_hr])`; break when
       `headroom <= 1e-12`.
     - Comms-loss path (`:258-267`): static per-vehicle limit
-      `failSafeFraction * max_power_kW * weight`, **no headroom enforcement at all** — site cap is
+      `failSafeFraction * max_power_kW * weight`, **no headroom enforcement at all** - site cap is
       deliberately not applied (note text at `:242-246`).
     - `perVehicle` = the sessions table plus 4 appended columns: `requested_kWh`, `delivered_kWh`,
       `unmet_kWh`, `fully_served` (`:294-299`). `fully_served` threshold:
@@ -286,7 +286,7 @@ this inventory is therefore a claim about *authored source*, never about observe
     unscaled dispatch, making it meaningless. Default is `1.0`, so the shipped batch is unaffected,
     but the option is exposed all the way up through `runScenario` (`:56-57`).
   - `priority_class` is always 1 (set in `makeSessionProfiles:157`), so the first sort key never
-    discriminates — the scheduler is effectively pure EDF today.
+    discriminates - the scheduler is effectively pure EDF today.
   - Docstring's result-field list (`:50-53`) omits `site_capacity_kW`, `peak_ev_kW`,
     `max_overload_kW`, `comms_loss`. Doc drift.
 
@@ -295,7 +295,7 @@ this inventory is therefore a claim about *authored source*, never about observe
 ### matlab/src/electricalEconomics.m
 
 - **Role:** Compares an unmanaged and a managed result: apparent power, a service/transformer
-  constraint verdict with provenance labelling, and demand-charge/energy cost — only if a tariff is
+  constraint verdict with provenance labelling, and demand-charge/energy cost - only if a tariff is
   actually supplied.
 - **Kind:** authored
 - **Reads:** two `managedCharging` result structs. No file I/O.
@@ -309,7 +309,7 @@ this inventory is therefore a claim about *authored source*, never about observe
     `ServiceCapacity_kW` (default `NaN`), `Guard` (default `struct.empty`),
     `Tariff` (default `struct.empty`).
   - `kVA = kW / powerFactor` (`:77-78`).
-  - Service check (`:99-118`): three verdicts — `"service_capacity_unknown"` (capacity not finite),
+  - Service check (`:99-118`): three verdicts - `"service_capacity_unknown"` (capacity not finite),
     `"within_service"` (`peakMg <= cap`), `"exceeds_service"`. `service_check_note` is
     `"Checked against VERIFIED service capacity."` only when `Guard.is_verified`; otherwise
     `"Checked against NON-VERIFIED capacity (placeholder/proxy). Planning illustration only - no
@@ -327,9 +327,9 @@ this inventory is therefore a claim about *authored source*, never about observe
     demand_charge_usd_month_unmanaged, demand_charge_usd_month_managed,
     demand_charge_savings_usd_month, energy_cost_usd_day_unmanaged,
     energy_cost_usd_day_managed, cost_status, tariff`.
-  - No `error()` calls at all — this is the one non-fail-closed module.
+  - No `error()` calls at all - this is the one non-fail-closed module.
 - **Notes:**
-  - `PowerFactor` is **not exposed by `runScenario` or `run_all_scenarios`** — the batch always uses
+  - `PowerFactor` is **not exposed by `runScenario` or `run_all_scenarios`** - the batch always uses
     0.95, and neither `peak_kVA_*` nor `peak_reduction_kW` nor the absolute demand-charge figures
     reach `results.csv` (only `demand_charge_savings_usd_month` does, `runScenario.m:159-160`).
     The ML-11 apparent-power work is computed and then dropped on the floor at batch level.
@@ -350,7 +350,7 @@ this inventory is therefore a claim about *authored source*, never about observe
   struct is the input to `plotScenario.m` and `buildSimulinkModel.m`.
 - **Key contents:**
   - Signature: `function out = runScenario(scenarioRow, varargin)` (`:1`).
-  - Options (`:44-61`), 8: `GuardMode` (default **`"planning_illustration"`** — note this is the
+  - Options (`:44-61`), 8: `GuardMode` (default **`"planning_illustration"`** - note this is the
     *opposite* of `capacityGuard`'s own default of `"feasibility"`), `AssumedSiteCapacity_kW`
     (`NaN`), `ProfileMode` (`"deterministic_sessions"`), `Seed` (`42`), `ChargerEfficiency`
     (`0.93`), `DiversityFactor` (`1.0`), `Tariff` (`struct.empty`), `CommsLoss` (`false`).
@@ -363,7 +363,7 @@ this inventory is therefore a claim about *authored source*, never about observe
     `"energy_aware: skipped_no_capacity_defined"` (`:104`).
   - Managed-result selection for economics (`:111-117`): `energy_aware` if present, else `clamp`,
     else `unmanaged`-vs-itself (zero reduction).
-  - **`metrics` struct — 21 fields, this is the `results.csv` schema** (`:128-165`):
+  - **`metrics` struct - 21 fields, this is the `results.csv` schema** (`:128-165`):
     `scenario_id, site_id, horizon_year, case_label, profile_mode, capacity_basis,
     capacity_verified, capacity_kW, energy_requested_kWh, peak_base_kW, peak_unmanaged_kW,
     peak_clamp_kW, curtailed_clamp_kWh, peak_energy_aware_kW, unmet_energy_aware_kWh,
@@ -374,12 +374,12 @@ this inventory is therefore a claim about *authored source*, never about observe
   - `out` fields (`:167-175`), 8: `scenario, guard, profiles, results, econ, metrics,
     skipped_strategies, options`.
   - Local: `localFieldOr(s, fieldName, defaultValue)` (`:178`).
-  - No `error()` calls of its own — all errors bubble up from the callees.
+  - No `error()` calls of its own - all errors bubble up from the callees.
 - **Notes:**
   - The default `GuardMode` flip to `"planning_illustration"` means the *default* path never
     fail-closes. Fail-closed only happens if a caller explicitly asks for `"feasibility"`. This is
     documented at `:16-18` but is a genuine footgun worth calling out.
-  - `out.options` stores the raw `inputParser` Results struct — carries `Tariff` verbatim, so a
+  - `out.options` stores the raw `inputParser` Results struct - carries `Tariff` verbatim, so a
     tariff with sensitive commercial terms would end up in any saved `out`.
 
 ---
@@ -401,12 +401,12 @@ this inventory is therefore a claim about *authored source*, never about observe
     (`"deterministic_sessions"`), `Seed` (`42`), `Tariff` (`struct.empty`),
     `AssumedSiteCapacity_kW` (`NaN`), `SavePlots` (`false`).
   - Path derivation (`:40-41`): `thisDir = fileparts(mfilename("fullpath"))`;
-    `repoRoot = fileparts(thisDir)`. **`repoRoot` is `matlab/`, not the git repo root** — the
+    `repoRoot = fileparts(thisDir)`. **`repoRoot` is `matlab/`, not the git repo root** - the
     variable name is misleading but the resolved paths (`matlab/data/canonical/…`,
     `matlab/outputs/`) are correct and both exist.
   - `run_id = "batch_" + <UTC yyyyMMdd'T'HHmmss'Z'>` (`:65-67`); output dir
     `<OutputRoot>/<run_id>`.
-  - Per-row call **hard-codes** `"GuardMode", "planning_illustration"` (`:91`) — there is no way to
+  - Per-row call **hard-codes** `"GuardMode", "planning_illustration"` (`:91`) - there is no way to
     run the batch in feasibility mode. Deliberate, and it is why every batch row carries the
     placeholder banner.
   - Failure handling (`:103-106`): a throwing scenario is caught and recorded, never dropped;
@@ -428,10 +428,10 @@ this inventory is therefore a claim about *authored source*, never about observe
 - **Notes:**
   - The SHA-256 path depends on the **Java bridge**. `matlab -nojvm` would break it, and Octave
     has no `java.*` by default. This is a named Tier-2 blocker.
-  - `matlab/outputs/` contains only `.gitkeep` — no batch has ever produced output, consistent with
+  - `matlab/outputs/` contains only `.gitkeep` - no batch has ever produced output, consistent with
     `EXECUTION_STATUS.md:14-16`.
   - The manifest records `assumed_site_capacity_kW` but not `ChargerEfficiency`,
-    `DiversityFactor`, `PowerFactor`, or `CommsLoss` — the run record is not sufficient to
+    `DiversityFactor`, `PowerFactor`, or `CommsLoss` - the run record is not sufficient to
     reproduce a run that varied those (they are not even exposed here).
 
 ---
@@ -459,7 +459,7 @@ this inventory is therefore a claim about *authored source*, never about observe
   - Tile titles: `"24-Hour Site Load Profile"`, `"EV Request vs Managed Output"`,
     `"Scenario Summary Metrics"`.
   - **Capacity-line rule** (`:94-101`): the legend entry is always
-    `sprintf("Capacity limit [basis: %s]", guard.capacity_basis)` — provenance is baked into the
+    `sprintf("Capacity limit [basis: %s]", guard.capacity_basis)` - provenance is baked into the
     label, cannot be suppressed.
   - **Mandatory banner** (`:164-173`): rendered whenever `strlength(guard.placeholder_banner) > 0`;
     `annotation("textbox", [0.05 0.955 0.90 0.040])`, text uppercased,
@@ -480,9 +480,9 @@ this inventory is therefore a claim about *authored source*, never about observe
     rather than echoing the actual `CsvFile` that was used. If a batch is run with a different
     `CsvFile`, **every figure will state a source it did not use.** That is a provenance defect in
     a file whose entire stated purpose is provenance labelling.
-  - The bar chart mixes kW and kWh on one axis (`ylabel "kW / kWh"`, `:157`) — dimensionally
+  - The bar chart mixes kW and kWh on one axis (`ylabel "kW / kWh"`, `:157`) - dimensionally
     incoherent by design; if these figures are reused in the platform, this should not be copied.
-  - Uses `tiledlayout`/`nexttile`/`subtitle`/`exportgraphics`/`reordercats` — the most
+  - Uses `tiledlayout`/`nexttile`/`subtitle`/`exportgraphics`/`reordercats` - the most
     MATLAB-locked file in the lane.
 
 ---
@@ -491,7 +491,7 @@ this inventory is therefore a claim about *authored source*, never about observe
 
 - **Role:** Optional, explicitly illustrative Simulink visualization layer; builds the `.slx` once
   and never rebuilds, and externalizes scenario parameters to a data dictionary and a `.mat`.
-- **Kind:** authored (its *product*, the `.slx`, would be generated — and does not exist)
+- **Kind:** authored (its *product*, the `.slx`, would be generated - and does not exist)
 - **Reads:** the `out` struct from `runScenario`. Writes
   `<ModelFolder>/<ModelName>_params.mat` (always), `<ModelFolder>/<ModelName>_params.sldd`
   (best-effort), `<ModelFolder>/<ModelName>.slx` (once). Assigns 3 timeseries into the **base
@@ -502,7 +502,7 @@ this inventory is therefore a claim about *authored source*, never about observe
   - `MODEL_VERSION = "3.0.0"` (`:38`).
   - Options (`:40-50`), 2: `ModelName` (default `"site_grid_behavior_ev_charging_v3"`),
     `ModelFolder` (default `fullfile(repoRoot,"simulink")` where `repoRoot = matlab/`, i.e.
-    `matlab/simulink` — **this directory does not exist in the repo**, consistent with the model
+    `matlab/simulink` - **this directory does not exist in the repo**, consistent with the model
     never having been built).
   - Availability guard (`:55-61`): `exist("new_system","file") ~= 2 || ~license("test","Simulink")`
     → error id `buildSimulinkModel:simulinkUnavailable`.
@@ -514,17 +514,17 @@ this inventory is therefore a claim about *authored source*, never about observe
     not by this model."`
   - Data-dictionary path is best-effort inside `try/catch`; failure only warns
     (`buildSimulinkModel:dictionarySkipped`, `:113`).
-  - Base-workspace variables (`:122-131`): `baseLoad_ts`, `evRequest_ts`, `capacity_ts` —
+  - Base-workspace variables (`:122-131`): `baseLoad_ts`, `evRequest_ts`, `capacity_ts` -
     `timeseries` objects on `t_sec = t_hr*3600`. When `~guard.capacity_defined`, `capacity_ts`
     is **NaN-filled on purpose** (`:126-130`) so the scope shows the absence rather than implying a
     limit.
-  - **Build-once policy** (`:136-141`): if the `.slx` exists, print and `return` — never delete,
+  - **Build-once policy** (`:136-141`): if the `.slx` exists, print and `return` - never delete,
     never rebuild. Docstring `:6-8` says this "reverses the legacy delete/rebuild behavior,
     hypothesis H8, which destroyed traceability on every run."
   - Model params: `StopTime = "86400"`, `Solver = "ode3"`, `FixedStep = "300"` (`:147-149`).
   - Full block/line topology: see **SIMULINK TOPOLOGY** below.
 - **Notes:**
-  - `exist("new_system","file") ~= 2` is a fragile availability test — `exist(...,"file")` does not
+  - `exist("new_system","file") ~= 2` is a fragile availability test - `exist(...,"file")` does not
     reliably return 2 for built-ins/P-code, so this can produce a false "Simulink unavailable"
     error on a properly licensed machine. **Uncertain** (untestable without MATLAB), but it is the
     single gate on the whole file and should be checked on the first licensed run.
@@ -534,7 +534,7 @@ this inventory is therefore a claim about *authored source*, never about observe
 
 ## SIMULINK TOPOLOGY
 
-Extracted verbatim from `matlab/src/buildSimulinkModel.m`. This is the complete, exact set — there
+Extracted verbatim from `matlab/src/buildSimulinkModel.m`. This is the complete, exact set - there
 are **11 blocks, 15 lines, and 0 annotation objects**.
 
 ### Verbatim scope statement (illustrative, not load-bearing)
@@ -676,11 +676,11 @@ uses `inputParser` instead. This is the single biggest piece of good news for po
 | **total** | **9** | **41** |
 
 Octave **does** ship `inputParser` in core (Octave ≥ 4.0), including `addParameter`,
-`FunctionName`, and `Results`. **Not a blocker** — but every validator is an anonymous function
+`FunctionName`, and `Results`. **Not a blocker** - but every validator is an anonymous function
 that itself uses `string()`/`ismember` on string arrays (see §4), so the validators break for the
 reasons below, not because of `inputParser`.
 
-### 3. The `table` type — Octave has **no** table type at all
+### 3. The `table` type - Octave has **no** table type at all
 
 | construct | occurrences | file:line |
 |---|---|---|
@@ -702,8 +702,8 @@ reasons below, not because of `inputParser`.
 | table row-subscript `T(idx, :)` | 2 | `loadScenarios.m:150`; `run_all_scenarios.m:88` |
 | `T.Var` dot-access on a table | **~45** across `loadScenarios.m` (`:99,107,122,122,128,129,129,138,141,144,147,165,166,171,181`), `managedCharging.m` (`:122,127,131,137,138,139,232,233,233,234,235,251,251,261,261,272,273,274,281,281,295,296,297,298,301`), `run_all_scenarios.m` (`:112,161,162,163,164,166`) | |
 | new-column-by-assignment on a table | 4 | `managedCharging.m:295,296,297,298` |
-| `rowfun` / `varfun` | **0** | — |
-| `sortrows` | 1 (`managedCharging.m:272`) — applied to a **numeric matrix**, not a table; Octave supports this form | |
+| `rowfun` / `varfun` | **0** | - |
+| `sortrows` | 1 (`managedCharging.m:272`) - applied to a **numeric matrix**, not a table; Octave supports this form | |
 
 `table` appears in **6 of 9 files** (`loadScenarios`, `capacityGuard`, `makeSessionProfiles`,
 `managedCharging`, `run_all_scenarios`; `plotScenario`/`runScenario` touch tables only indirectly
@@ -723,8 +723,8 @@ a wrong answer**, not with an error.
 | `string.empty` | 3 | `loadScenarios.m:39,41,42` |
 | `struct.empty` | 6 | `electricalEconomics.m:60,61,156`; `managedCharging.m:69`; `runScenario.m:58`; `run_all_scenarios.m:54` |
 | `isstring` | 9 | `capacityGuard.m:191`; `buildSimulinkModel.m:43,47`; `plotScenario.m:33`; `loadScenarios.m:39,41,42`; `run_all_scenarios.m:47,49` |
-| **`+` string concatenation** | **57** | capacityGuard 13, electricalEconomics 4, buildSimulinkModel 10, loadScenarios 10, managedCharging 16, plotScenario 3, run_all_scenarios 1 (`makeSessionProfiles` 0, `runScenario` 0). In Octave `"a" + "b"` is **elementwise numeric addition of char codes** — silent garbage, or a size-mismatch error when the operand lengths differ. Every one of these 57 sites is inside an `error()`/`sprintf()`/`fprintf()`/assignment. |
-| **`["a","b", ...]` string-array literals** | **14** | `capacityGuard.m:53,60,84`; `loadScenarios.m:62,81`; `makeSessionProfiles.m:68,71,158,219,299`; `managedCharging.m:57`; `run_all_scenarios.m:51`; `runScenario.m:47,51`. In Octave these become a **single concatenated char row** — e.g. `allowedBases` at `capacityGuard.m:53` becomes one 100-ish-char string, so `ismember(basis, allowedBases)` at `:76` compares characters and the entire controlled-vocabulary gate collapses. **Silent wrong answer, in the fail-closed safety gate.** |
+| **`+` string concatenation** | **57** | capacityGuard 13, electricalEconomics 4, buildSimulinkModel 10, loadScenarios 10, managedCharging 16, plotScenario 3, run_all_scenarios 1 (`makeSessionProfiles` 0, `runScenario` 0). In Octave `"a" + "b"` is **elementwise numeric addition of char codes** - silent garbage, or a size-mismatch error when the operand lengths differ. Every one of these 57 sites is inside an `error()`/`sprintf()`/`fprintf()`/assignment. |
+| **`["a","b", ...]` string-array literals** | **14** | `capacityGuard.m:53,60,84`; `loadScenarios.m:62,81`; `makeSessionProfiles.m:68,71,158,219,299`; `managedCharging.m:57`; `run_all_scenarios.m:51`; `runScenario.m:47,51`. In Octave these become a **single concatenated char row** - e.g. `allowedBases` at `capacityGuard.m:53` becomes one 100-ish-char string, so `ismember(basis, allowedBases)` at `:76` compares characters and the entire controlled-vocabulary gate collapses. **Silent wrong answer, in the fail-closed safety gate.** |
 | **`== "literal"` string equality** | **9** | `loadScenarios.m:100`; `capacityGuard.m:73,89`; `makeSessionProfiles.m:112,123`; `plotScenario.m:194`; `managedCharging.m:121`; `runScenario.m:93,163`. With char arrays these are elementwise comparisons: `basis == ""` yields `[]` (falsy) and `mode == "feasibility"` errors on length mismatch. |
 | `ismember(...)` with string args | 14 lines | `makeSessionProfiles.m:68,71`; `capacityGuard.m:60,76,84`; `runScenario.m:47,51`; `loadScenarios.m:74,138,141,144,147`; `managedCharging.m:59`; `run_all_scenarios.m:51` |
 | `setdiff` / `intersect` on strings | 3 | `loadScenarios.m:66,89`; `makeSessionProfiles.m:223` |
@@ -746,15 +746,15 @@ a wrong answer**, not with an error.
 | `datetime(` | 5 | `buildSimulinkModel.m:87`; `loadScenarios.m:163`; `plotScenario.m:178,201`; `run_all_scenarios.m:65` | **No `datetime` class.** All 5 use `"TimeZone","UTC"` + a `"Format"` string. Shimmable with `strftime`/`datestr`, but the `'T'`/`'Z'` literal-quoting syntax is MATLAB-specific. |
 | `categorical` / `reordercats` | 2 | `plotScenario.m:154,155` | **No categorical type.** |
 | `cellstr` | 1 | `plotScenario.m:155` | available |
-| `timetable` | 0 | — | — |
-| `validateattributes` | 0 | — | — |
-| `mustBe*` validators | 0 | — | — |
-| `classdef` | 0 | — | — |
-| `+namespace` dirs | 0 | flat `src/` | — |
-| `arrayfun` / `cellfun` / `UniformOutput` | 0 | — | — |
+| `timetable` | 0 | - | - |
+| `validateattributes` | 0 | - | - |
+| `mustBe*` validators | 0 | - | - |
+| `classdef` | 0 | - | - |
+| `+namespace` dirs | 0 | flat `src/` | - |
+| `arrayfun` / `cellfun` / `UniformOutput` | 0 | - | - |
 | `~` output suppression `[~, x] = ...` | 1 | `managedCharging.m:272` | supported |
 | `.'` transpose | 9 | `makeSessionProfiles.m:88,155,268`; `managedCharging.m:260,277`; `loadScenarios.m:165,166`; `run_all_scenarios.m:115,197` | supported |
-| `...` line continuation | pervasive (every file) | — | supported |
+| `...` line continuation | pervasive (every file) | - | supported |
 | struct dynamic field `s.(name)` | 4 | `capacityGuard.m:188`; `loadScenarios.m:171`; `plotScenario.m:218`; `runScenario.m:181` | supported |
 | local functions in a function file | 12 locals across 7 files | `capacityGuard` 2, `loadScenarios` 1, `makeSessionProfiles` 5, `managedCharging` 2, `plotScenario` 2, `runScenario` 1, `run_all_scenarios` 2 | supported (all files are function files, not scripts) |
 | `trapz` / `cumtrapz` | 5 / 2 | `makeSessionProfiles.m:190,287`; `managedCharging.m:97,109,110,144,145` | both available |
@@ -768,10 +768,10 @@ a wrong answer**, not with an error.
 | `mfilename("fullpath")` | 2 | `buildSimulinkModel.m:44`; `run_all_scenarios.m:40` | available |
 | `assignin("base", ...)` | 3 | `buildSimulinkModel.m:122,123,131` | available |
 | `timeseries(` | 3 | `buildSimulinkModel.m:122,123,131` | **No `timeseries` class.** |
-| `license("test","Simulink")`, `new_system`, `set_param`, `add_block`, `add_line`, `save_system`, `close_system`, `sfroot`, `Simulink.data.dictionary.*` | 24 call sites across `buildSimulinkModel.m:55-235` | — | **No Simulink. No equivalent. Not shimmable.** |
+| `license("test","Simulink")`, `new_system`, `set_param`, `add_block`, `add_line`, `save_system`, `close_system`, `sfroot`, `Simulink.data.dictionary.*` | 24 call sites across `buildSimulinkModel.m:55-235` | - | **No Simulink. No equivalent. Not shimmable.** |
 | `tiledlayout` / `nexttile` / `subtitle` / `exportgraphics` / `xtickangle` / `annotation` / `xticks` | 12 | `plotScenario.m:62,67,76,113,106,130,136,159,165,184,207` | Octave has **none** of `tiledlayout`, `nexttile`, `subtitle`, `exportgraphics`; `annotation` is absent/incomplete; `xticks`/`xtickangle` only in recent versions |
 | `struct("field", <string array>)` | 1 | `capacityGuard.m:143-153` (`"allowed_bases", allowedBases`) | In MATLAB this stores a 1×6 string in a 1×1 struct. Under a cellstr-based Octave shim, `struct()` would **replicate into a 1×6 struct array** and the guard would silently return the wrong shape. Named shim hazard. |
-| implicit expansion | used at `makeSessionProfiles.m:100-101` (scalar + vector) and `managedCharging.m:107,149,166` | — | Octave supports broadcasting; no issue |
+| implicit expansion | used at `makeSessionProfiles.m:100-101` (scalar + vector) and `managedCharging.m:107,149,166` | - | Octave supports broadcasting; no issue |
 
 ### REASONED VERDICT
 
@@ -781,7 +781,7 @@ severity:
 1. **`readtable` / `writetable` / `detectImportOptions` / `setvartype` / `renamevars` /
    `T.Properties.*` do not exist in Octave.** `loadScenarios.m` is the sole ingestion path and it
    is built entirely on the table type (`:59-75`, `:160-166`). Nothing downstream can start.
-2. **`java.security.MessageDigest`** at `run_all_scenarios.m:194` — no Java bridge in stock
+2. **`java.security.MessageDigest`** at `run_all_scenarios.m:194` - no Java bridge in stock
    Octave, so `hashes.txt`, an explicitly named deliverable (`run_all_scenarios.m:19-21`), cannot
    be produced.
 3. **14 `["a","b"]` string-array literals** silently degrade to single concatenated char rows.
@@ -794,7 +794,7 @@ severity:
 5. **9 `== "literal"` comparisons** change semantics (`basis == ""` → `[]` → falsy; length-mismatch
    errors elsewhere).
 6. `datetime` (5), `categorical`/`reordercats` (2), `timeseries` (3), `strlength` (1),
-   `ismissing` (2), `max(...,"omitnan")` (1), `version("-release")` (1) — none exist.
+   `ismissing` (2), `max(...,"omitnan")` (1), `version("-release")` (1) - none exist.
 7. `plotScenario.m` and `buildSimulinkModel.m` are wholesale unrunnable (tiledlayout family;
    Simulink API).
 
@@ -802,13 +802,13 @@ severity:
 word.** What *is* genuinely portable is meaningful and should be stated: `arguments` blocks are
 **zero**, `containers.Map` is **zero**, `classdef` is **zero**, `validateattributes`/`mustBe*` are
 **zero**, `arrayfun`-with-`UniformOutput` is **zero**, `+namespaces` are **zero**, and
-`inputParser` (9 instances, 41 parameters) is supported natively by Octave. The numerics —
+`inputParser` (9 instances, 41 parameters) is supported natively by Octave. The numerics -
 `trapz`, `cumtrapz`, `linspace`, `sortrows` on a numeric matrix, broadcasting, `.'`, `[~,x]=`,
-dynamic fields, local functions — all work. The algorithmic content of `makeSessionProfiles`,
+dynamic fields, local functions - all work. The algorithmic content of `makeSessionProfiles`,
 `managedCharging`, `capacityGuard`, and `electricalEconomics` is plain array math.
 
 But a shim would have to supply, at minimum: (a) a `string` class or a global rewrite of ~711
-double-quoted literals plus 57 `+` concatenations, 14 array literals and 9 `==` comparisons —
+double-quoted literals plus 57 `+` concatenations, 14 array literals and 9 `==` comparisons -
 which is a *source rewrite*, not a shim; (b) a `table` replacement covering constructor,
 `height`, `istable`, `table2struct`, `struct2table`, `readtable`, `writetable`,
 `detectImportOptions`, `setvartype`, `renamevars`, `Properties.{VariableNames,Description,UserData}`,
@@ -820,7 +820,7 @@ first** (i.e. Tier 2 costs a mechanical but repo-wide edit of ~800 sites), and i
 for `plotScenario.m` or `buildSimulinkModel.m`**.
 
 **Tier 3 (Python reimplementation): the only tier that reaches the full pipeline including plots.**
-And the cost is lower than it looks — the whole numeric core is ~700 lines of array math over a
+And the cost is lower than it looks - the whole numeric core is ~700 lines of array math over a
 289-point time grid and a 9-column session table, with no toolboxes (the code deliberately avoids
 Statistics Toolbox: `localPoissonDraw` at `makeSessionProfiles.m:231-245` implements Knuth's
 algorithm by hand precisely so it stays base-MATLAB). pandas/numpy/matplotlib map onto
@@ -831,7 +831,7 @@ Tier 2 as viable only as "Octave-compatible fork of the four numeric modules", w
 mechanical string/table de-MATLAB-ification pass and still leaves visuals and Simulink behind; and
 size Tier 3 as the default for anything the platform must render itself. The decisive datum is
 that **the code has never been executed at all** (`matlab/EXECUTION_STATUS.md:9-10`), so there is
-no observed-behaviour baseline to preserve — a Python reference implementation has nothing to
+no observed-behaviour baseline to preserve - a Python reference implementation has nothing to
 regress against except the source semantics documented here.
 
 ---
@@ -879,7 +879,7 @@ run_all_scenarios
 
 Five sequential stages. Data flowing between them:
 
-**Stage 1 — `capacityGuard(row, Mode, AssumedSiteCapacity_kW)` → `guard`**
+**Stage 1 - `capacityGuard(row, Mode, AssumedSiteCapacity_kW)` → `guard`**
 
 Input: the one-row table (or an equivalent struct with at least `capacity_basis`; `scenario_id`
 defaults to `"unspecified_scenario"` if absent).
@@ -902,7 +902,7 @@ capacity_defined = isfinite(capacity_kW)
 placeholder_banner = "" if is_verified else <banner template with basis interpolated>
 ```
 
-**Stage 2 — `makeSessionProfiles(row, Mode, Seed, ChargerEfficiency, DiversityFactor)` → `profiles`**
+**Stage 2 - `makeSessionProfiles(row, Mode, Seed, ChargerEfficiency, DiversityFactor)` → `profiles`**
 
 Input: the same row. Output `profiles` (11 fields): `t_hr, dt_hr, baseLoad_kW, evRequest_kW,
 sessions, energyRequested_kWh, mode, params, scenario, charger_efficiency, label`.
@@ -968,7 +968,7 @@ energyRequested_kWh = trapz(t_hr, evRequest_kW)
 #   if eNow > 0 and eTarget > 0: prof *= eTarget/eNow      # exact energy pinning
 ```
 
-**Stage 3 — `managedCharging(profiles, strategy, SiteCapacity_kW, Guard, CommsLoss, FailSafeFraction)`
+**Stage 3 - `managedCharging(profiles, strategy, SiteCapacity_kW, Guard, CommsLoss, FailSafeFraction)`
 → `result` (called 1-3 times)**
 
 Call order in `runScenario`:
@@ -1049,7 +1049,7 @@ closes because `req[k]` and the pulse `eTarget` use the *same* `min(eGrid, dwell
 (`makeSessionProfiles.m:172-174` vs `managedCharging.m:232-235`) and `pulse_profile` pins each
 pulse's trapz energy exactly to that value.
 
-**Stage 4 — `electricalEconomics(results.unmanaged, managedResult, ChargerEfficiency, Guard, Tariff)`
+**Stage 4 - `electricalEconomics(results.unmanaged, managedResult, ChargerEfficiency, Guard, Tariff)`
 → `econ`**
 
 `managedResult` = `energy_aware` if present, else `clamp`, else `unmanaged` (self-comparison).
@@ -1075,15 +1075,15 @@ else:
     all five cost fields = NaN ; cost_status = "tariff_not_supplied"
 ```
 
-**Stage 5 — flat `metrics` (21 fields)** — see the `runScenario.m` entry above for the exact list
+**Stage 5 - flat `metrics` (21 fields)** - see the `runScenario.m` entry above for the exact list
 and order. This is the `results.csv` schema (plus `run_status`, `run_error`, `run_id`, then
 alphabetized by `orderfields`).
 
 ### Side branches (not in the metric path)
 
-- `plotScenario(out, ...)` — pure rendering; called only from `run_all_scenarios` when
+- `plotScenario(out, ...)` - pure rendering; called only from `run_all_scenarios` when
   `SavePlots=true`. Reads `out.scenario`, `out.guard`, `out.profiles`, `out.results`.
-- `buildSimulinkModel(out, ...)` — never called from anywhere in `src/`; manual entry point;
+- `buildSimulinkModel(out, ...)` - never called from anywhere in `src/`; manual entry point;
   reads `out.scenario`, `out.profiles`, `out.guard`. Illustrative only (see topology section).
 
 ### Constants a Python reference must carry
@@ -1106,7 +1106,7 @@ alphabetized by `orderfields`).
 
 **No emissions factor, no eGRID value, no CO2 coefficient, and no horizon-year literal appears
 anywhere in these 9 files.** Confirmed by grep for `596.3`, `590.2`, `egrid`, `co2`, `emission`,
-and for `2026|2030|2035|2036|2040|2046|2050|2056`, `10-year`, `20-year`, `30-year`, `"Now"` — all
+and for `2026|2030|2035|2036|2040|2046|2050|2056`, `10-year`, `20-year`, `30-year`, `"Now"` - all
 return zero matches in `matlab/src/`. Horizons are read from the CSV column `horizon_year`
 (`loadScenarios.m:141, 165`; `run_all_scenarios.m:81`), and the CSV contains exactly
 2026 / 2036 / 2046 / 2056.
@@ -1119,16 +1119,16 @@ return zero matches in `matlab/src/`. Horizons are read from the CSV column `hor
   `mfilename("fullpath")`.
 - **No secrets, tokens, AWS account IDs, or API keys** in the 9 files.
 - **Backlog-item coverage:** `ML-01, ML-03, ML-04, ML-05, ML-06, ML-07, ML-08, ML-11, ML-12` are
-  referenced in `src/`. **`ML-02`, `ML-09`, `ML-10` are never referenced in `src/`** — either they
+  referenced in `src/`. **`ML-02`, `ML-09`, `ML-10` are never referenced in `src/`** - either they
   live in `tests/`/docs or they are uncovered. Flagged for Phase 1 cross-check.
 - **Hypothesis references:** `H1`, `H2`, `H5` (`makeSessionProfiles.m:9`, `:165`), `H3`
   (`capacityGuard.m:2`), `H4` (`managedCharging.m:12`, `:115`), `H8` (`buildSimulinkModel.m:8`).
-  `EXECUTION_STATUS.md:29` references "H1-H15" — H6, H7, H9-H15 are not referenced from `src/`.
+  `EXECUTION_STATUS.md:29` references "H1-H15" - H6, H7, H9-H15 are not referenced from `src/`.
 - **`EXECUTION_STATUS.md` static-check table spot-verified.** Its claimed block-opener counts of
   16 for `capacityGuard.m` and 7 for `run_all_scenarios.m` were independently recounted by hand
   and both match. The static-check artifact does not appear to have drifted from the source.
 - **Referenced paths that exist:** `matlab/data/canonical/matlab_scenarios.csv` ✔,
   `matlab/outputs/` ✔ (contains only `.gitkeep`).
   **Referenced paths that do not exist:** `matlab/simulink/` (default `ModelFolder`,
-  `buildSimulinkModel.m:46`) — created on demand at `:63-65`, so not a defect, and its absence
+  `buildSimulinkModel.m:46`) - created on demand at `:63-65`, so not a defect, and its absence
   corroborates that no model was ever built.

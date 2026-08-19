@@ -3,7 +3,7 @@
 Keyed by site x standard x lifecycle stage, with evidence, authority, adopted vs
 latest edition, and open AHJ questions. Conditional standards (DCFC, BESS) are
 emitted with applicability='conditional_out_of_scope' and are excluded from
-active-scope views — they must never be shown as active when no DCFC/BESS exists.
+active-scope views - they must never be shown as active when no DCFC/BESS exists.
 
 Editions verified 2026-07-19 (see docs/methodology/current-facts-source-register.md).
 """
@@ -27,7 +27,7 @@ STANDARDS = [
             "commissioning": "Verify listing marks and personnel-protection function",
             "operation": "Maintain per listing conditions",
             "emergency_response": "Listed equipment supports predictable de-energization behavior",
-            "end_of_life": "—",
+            "end_of_life": "-",
         },
         "evidence_required": "Certification/listing records in procurement file; inspection sign-off",
         "authority": "Manufacturer listing (NRTL) + local building official",
@@ -43,10 +43,10 @@ STANDARDS = [
         "stages": {
             "design": "Materials/repairability considered in equipment selection",
             "procurement": "Vendor circularity disclosure (recycled content, repairability, take-back)",
-            "installation": "—",
+            "installation": "-",
             "commissioning": "Baseline circularity reporting sheet opened per site",
             "operation": "Annual circularity reporting for the charging program",
-            "emergency_response": "—",
+            "emergency_response": "-",
             "end_of_life": "Take-back/recycling route documented and executed",
         },
         "evidence_required": "UL 3600-style circularity reporting sheet per site/program",
@@ -63,11 +63,11 @@ STANDARDS = [
         "stages": {
             "design": "Embedded in listed EVSE per NEC listing practice",
             "procurement": "Confirm EVSE listing includes UL 2231 personnel protection",
-            "installation": "—",
+            "installation": "-",
             "commissioning": "GFCI/CCID protection functional verification",
             "operation": "Periodic protection test per maintenance plan",
-            "emergency_response": "—",
-            "end_of_life": "—",
+            "emergency_response": "-",
+            "end_of_life": "-",
         },
         "evidence_required": "Listing detail; commissioning functional test record",
         "authority": "NRTL listing + electrical inspector",
@@ -82,10 +82,10 @@ STANDARDS = [
         "applicability": "active",
         "stages": {
             "design": "Load calculations, disconnect provisions, circuit design",
-            "procurement": "—",
+            "procurement": "-",
             "installation": "Installation law for every EVSE circuit",
             "commissioning": "Electrical inspection approval",
-            "operation": "—",
+            "operation": "-",
             "emergency_response": "Disconnect location/labeling per adopted provisions",
             "end_of_life": "Circuit decommissioning per code",
         },
@@ -102,12 +102,12 @@ STANDARDS = [
         "applicability": "active",
         "stages": {
             "design": "Building/fire review lanes; EV-ready provisions (VCC 406.2.7 class)",
-            "procurement": "—",
+            "procurement": "-",
             "installation": "Permits under 2021 USBC",
             "commissioning": "Fire review sign-off where triggered",
             "operation": "Fire access maintained",
             "emergency_response": "Apparatus access; pre-plan with Fire Marshal",
-            "end_of_life": "—",
+            "end_of_life": "-",
         },
         "evidence_required": "Permit records; Fire Marshal review notes",
         "authority": "City/County building official + Fire Marshal",
@@ -126,8 +126,8 @@ STANDARDS = [
             "installation": "Accessible route/space/reach construction",
             "commissioning": "Dimensional verification",
             "operation": "Access maintained",
-            "emergency_response": "—",
-            "end_of_life": "—",
+            "emergency_response": "-",
+            "end_of_life": "-",
         },
         "evidence_required": "Dimensional check records; design drawings",
         "authority": "Building official + ADA coordinator; future DOJ standards",
@@ -143,11 +143,11 @@ STANDARDS = [
         "stages": {
             "design": "Managed-charging architecture",
             "procurement": "Require OCPP compliance to avoid network lock-in; no-app payment capability",
-            "installation": "—",
+            "installation": "-",
             "commissioning": "Comms + fail-safe behavior test",
             "operation": "Utilization data export for triggers",
             "emergency_response": "Fail-safe on comms loss",
-            "end_of_life": "—",
+            "end_of_life": "-",
         },
         "evidence_required": "Vendor protocol conformance statement; commissioning comms test",
         "authority": "Program owner / vendor contract",
@@ -161,8 +161,8 @@ STANDARDS = [
         "latest_edition": "2022 edition",
         "applicability": "conditional_out_of_scope",
         "condition": "Applies ONLY if DC fast charging enters scope. No DCFC in the current plan.",
-        "stages": {}, "evidence_required": "—", "authority": "—",
-        "open_ahj_question": "—",
+        "stages": {}, "evidence_required": "-", "authority": "-",
+        "open_ahj_question": "-",
     },
     {
         "standard_id": "UL9540-9540A-NFPA855",
@@ -172,8 +172,8 @@ STANDARDS = [
         "latest_edition": "UL 9540A 6th-ed. activity 2026",
         "applicability": "conditional_out_of_scope",
         "condition": "Applies ONLY if battery storage enters scope. battery_storage_flag=0 at all 12 sites.",
-        "stages": {}, "evidence_required": "—", "authority": "—",
-        "open_ahj_question": "—",
+        "stages": {}, "evidence_required": "-", "authority": "-",
+        "open_ahj_question": "-",
     },
 ]
 
@@ -198,14 +198,14 @@ def build_register(site_table: pd.DataFrame) -> pd.DataFrame:
                     "adopted_edition": std["adopted_edition"],
                     "latest_edition": std["latest_edition"],
                     "applicability": std["applicability"],
-                    "evidence_required": "—",
-                    "authority": "—",
-                    "open_ahj_question": "—",
+                    "evidence_required": "-",
+                    "authority": "-",
+                    "open_ahj_question": "-",
                 })
                 continue
             for stage in STAGES:
-                req = std["stages"].get(stage, "—")
-                if req == "—":
+                req = std["stages"].get(stage, "-")
+                if req == "-":
                     continue
                 rows.append({
                     "site_id": site["site_id"],

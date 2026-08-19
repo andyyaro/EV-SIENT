@@ -1,5 +1,5 @@
 /*
- * ChargeReady NOVA — 3D Site Explorer
+ * ChargeReady NOVA - 3D Site Explorer
  *
  * Renders every candidate site from the readiness model onto a real-world 3D
  * globe, with click-to-inspect scoring, side-by-side comparison, and proposed
@@ -16,9 +16,9 @@
 const NOVA_HOME = { lon: -77.34, lat: 38.72, height: 42000 };
 
 const TIER_COLOR = {
-  1: '#16b48b',   // Tier 1 — advance
-  2: '#d9a23e',   // Tier 2 — refine / high-review
-  3: '#7b8494',   // Tier 3 — monitor
+  1: '#16b48b',   // Tier 1 - advance
+  2: '#d9a23e',   // Tier 2 - refine / high-review
+  3: '#7b8494',   // Tier 3 - monitor
   4: '#d9534f',   // special-use
   9: '#7b8494',
 };
@@ -61,9 +61,9 @@ const el = (tag, cls, html) => {
 };
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const num = (v, d = 1) => (v == null || Number.isNaN(v) ? '—' : Number(v).toFixed(d));
-const usd = (v) => (v == null ? '—' : '$' + Math.round(v).toLocaleString());
-const int = (v) => (v == null ? '—' : Math.round(v).toLocaleString());
+const num = (v, d = 1) => (v == null || Number.isNaN(v) ? '-' : Number(v).toFixed(d));
+const usd = (v) => (v == null ? '-' : '$' + Math.round(v).toLocaleString());
+const int = (v) => (v == null ? '-' : Math.round(v).toLocaleString());
 
 function tierClass(t) { return 't' + (t || 9); }
 
@@ -147,7 +147,7 @@ function renderModeBadge(manifest) {
   el.className = 'mode-badge ' + (canonical ? 'is-canonical' : 'is-legacy');
   el.innerHTML =
     `<span class="mode-label"><span class="mode-dot"></span>` +
-    `${canonical ? '' : 'SUPERSEDED — '}${esc(manifest.mode)}</span>` +
+    `${canonical ? '' : 'SUPERSEDED - '}${esc(manifest.mode)}</span>` +
     (horizons ? `<span style="opacity:.75;font-weight:500">${esc(horizons)}</span>` : '') +
     ` <button class="mode-why" type="button" aria-label="What this mode means">what's this?</button>`;
 
@@ -686,7 +686,7 @@ function renderPanel(p) {
       ${p.coordinate_provenance ? `
       <h4 class="sec">Coordinate provenance</h4>
       <p style="font-size:11.5px;color:var(--ink-3);line-height:1.5">
-        ${esc(p.coordinate_provenance.source_quality)} —
+        ${esc(p.coordinate_provenance.source_quality)} -
         ${esc(p.coordinate_provenance.source_dataset)}<br>
         <em>${esc(p.coordinate_provenance.source_owner)}</em>
       </p>` : ''}
@@ -701,7 +701,7 @@ function renderPanel(p) {
       ${subscoreBlock(p)}
       <p style="font-size:11px;color:var(--ink-3);font-family:var(--mono)">
         ${(() => {
-          // This used to print "these add up to X — the readiness score ✓" unconditionally.
+          // This used to print "these add up to X - the readiness score ✓" unconditionally.
           // The reconstruction sums subscores that are themselves rounded, so at FFX001
           // (48.8 vs 48.7) and PWC008 (41.9 vs 41.8) the number beside the tick was NOT the
           // score at the top of the same panel. A tick asserting an equality that fails at
@@ -709,21 +709,21 @@ function renderPanel(p) {
           const recon = p.score_reconstructed, score = p.readiness_score;
           if (recon == null) return `readiness score ${num(score, 1)}`;
           return Math.abs(recon - score) < 0.05
-            ? `these add up to ${num(recon, 1)} — the readiness score ✓`
+            ? `these add up to ${num(recon, 1)} - the readiness score ✓`
             : `these add up to ${num(recon, 1)}; the readiness score is ${num(score, 1)} ` +
-              `— the ${num(Math.abs(recon - score), 1)} gap is rounding in the parts, not a ` +
+              `- the ${num(Math.abs(recon - score), 1)} gap is rounding in the parts, not a ` +
               `disagreement about the total`;
         })()}
       </p>
 
-      <h4 class="sec">What helped — points this site earned</h4>
+      <h4 class="sec">What helped - points this site earned</h4>
       ${driverList(p.strengths, 'pos')}
 
-      <h4 class="sec">What held it back — points it did not earn</h4>
+      <h4 class="sec">What held it back - points it did not earn</h4>
       ${driverList(p.constraints, 'neg')}
 
       <p class="callout">A readiness score compares sites on what is known about them. It is
-      <strong>not</strong> a statement that a site is electrically feasible — nobody has
+      <strong>not</strong> a statement that a site is electrically feasible - nobody has
       confirmed the electrical capacity at any of these twelve sites.</p>
     </div>
 
@@ -760,13 +760,13 @@ function renderPanel(p) {
 
     <div class="tab-body hidden" data-body="risk">
       ${p.electrical ? `
-        <h4 class="sec">Electrical risk — ${esc(p.electrical.risk_level)}</h4>
+        <h4 class="sec">Electrical risk - ${esc(p.electrical.risk_level)}</h4>
         <p class="callout ${p.electrical.risk_level === 'high' ? 'risk' : 'warn'}">
           ${p.electrical.risk_reason.map(esc).join('<br>')}
         </p>
         <p class="callout">These ranks come from the frozen <code>legacy_v2</code> electrical
         risk file, which has no <code>milestone2_v3</code> counterpart. <strong>It is a
-        different ordering from the readiness rank on the Score tab</strong> — ${
+        different ordering from the readiness rank on the Score tab</strong> - ${
           // The two orderings differ overall, but they COINCIDE at two sites (PWC007 and
           // PWC003). A flat "this site is electrical rank X and readiness rank Y" then read
           // as a contradiction: "a different ordering ... rank 5 and rank 5".
@@ -777,9 +777,9 @@ function renderPanel(p) {
         }. Neither is a feasibility finding: capacity is an unverified
         placeholder at all twelve sites.</p>
         <dl class="kv" style="margin-top:11px">
-          <dt>Electrical rank — optimistic <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_optimistic)}</dd>
-          <dt>Electrical rank — expected <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_expected)}</dd>
-          <dt>Electrical rank — conservative <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_conservative)}</dd>
+          <dt>Electrical rank - optimistic <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_optimistic)}</dd>
+          <dt>Electrical rank - expected <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_expected)}</dd>
+          <dt>Electrical rank - conservative <span class="wt">legacy_v2</span></dt><dd>${int(p.electrical.rank_conservative)}</dd>
           <dt>Worst-case rank change</dt><dd>${int(p.electrical.worst_case_rank_change)}</dd>
         </dl>` : ''}
 
@@ -787,7 +787,7 @@ function renderPanel(p) {
         <h4 class="sec">AHJ review triggers</h4>
         <ul class="notes">${p.review_reasons.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
 
-      <h4 class="sec">Data confidence — ${esc(p.data_confidence_level)} (${num(p.data_confidence_score, 0)})</h4>
+      <h4 class="sec">Data confidence - ${esc(p.data_confidence_level)} (${num(p.data_confidence_score, 0)})</h4>
       <p style="font-size:11.5px;color:var(--ink-3);line-height:1.5">${esc(p.data_confidence_reason)}</p>
 
       <h4 class="sec">Data needed next</h4>
@@ -862,7 +862,7 @@ function wirePanel(p) {
         toast('Placement JSON copied to clipboard');
       } catch {
         console.log(json);
-        toast('Clipboard blocked — placement JSON logged to console');
+        toast('Clipboard blocked - placement JSON logged to console');
       }
     };
   }
@@ -931,7 +931,7 @@ const compareRows = () => [
   ['Safety', (p) => num(p.subscores.safety_subscore, 1)],
   ['Equity', (p) => num(p.subscores.equity_subscore, 1)],
   ['Data confidence', (p) => `${p.data_confidence_level} (${num(p.data_confidence_score, 0)})`, true],
-  ['Electrical risk', (p) => p.electrical?.risk_level ?? '—', true],
+  ['Electrical risk', (p) => p.electrical?.risk_level ?? '-', true],
   ['Worst-case rank change', (p) => int(p.electrical?.worst_case_rank_change), false, 'lower'],
   // Horizon columns are generated from the manifest's vocabulary, not named here.
   ...horizonColumns(),
@@ -941,8 +941,8 @@ const compareRows = () => [
   ['Mean wait (min)', (p) => num(p.mean_wait_min, 2), false, 'lower'],
   ['Install cost (screening)', (p) => usd(p.install_cost_est_usd), false, 'lower'],
   ['Parking spaces', (p) => int(p.parking_spaces)],
-  ['Top strength', (p) => p.strengths?.[0]?.driver ?? '—', true],
-  ['Largest constraint', (p) => p.constraints?.find((c) => c.points_forgone)?.driver ?? '—', true],
+  ['Top strength', (p) => p.strengths?.[0]?.driver ?? '-', true],
+  ['Largest constraint', (p) => p.constraints?.find((c) => c.points_forgone)?.driver ?? '-', true],
 ];
 
 function openCompare() {
@@ -966,11 +966,11 @@ function openCompare() {
 
   $('#modalBody').innerHTML = `
     <h3>Side-by-side comparison</h3>
-    <p class="sub-t">${sites.length} candidate sites · green marks the best value in each numeric row — the lowest where lower is better</p>
+    <p class="sub-t">${sites.length} candidate sites · green marks the best value in each numeric row - the lowest where lower is better</p>
     <table class="grid"><thead><tr><th>Metric</th>${head}</tr></thead><tbody>${body}</tbody></table>
     <p class="sub-t" style="margin-top:18px">
       Screening-class planning estimates. Electrical service capacity is
-      unconfirmed for every site pending utility and facility review — treat
+      unconfirmed for every site pending utility and facility review - treat
       feasibility subscores as provisional.
     </p>`;
   $('#modal').classList.remove('hidden');
@@ -1056,7 +1056,7 @@ async function start(token) {
   // absent entirely. A 3D render is the most persuasive surface this project has, so it
   // is the last place that should be quiet about what the data cannot support.
   $('#railFoot').innerHTML =
-    `${meta.site_count ?? state.sites.length} sites · schema ${esc(meta.schema_version ?? '—')}` +
+    `${meta.site_count ?? state.sites.length} sites · schema ${esc(meta.schema_version ?? '-')}` +
     (manifest && manifest.mode ? ` · mode ${esc(manifest.mode)}` : '') + `<br>` +
     `<ul class="standing-caveats">` +
       `<li><strong>Screening-class only.</strong> Not an engineering, permitting, or procurement tool.</li>` +

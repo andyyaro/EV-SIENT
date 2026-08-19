@@ -5,7 +5,7 @@
 Every one of v1's 48 fields appears here with identical
 semantics and identical values for the same run, so a consumer written against v1 reads a v2
 row and gets the same answers. v2 adds 12 fields carrying what the V4
-field-data loop produces — information v1 had nowhere to put, because when v1 was written
+field-data loop produces - information v1 had nowhere to put, because when v1 was written
 there was no way to observe anything.
 
 ## What v2 adds
@@ -30,7 +30,7 @@ there was no way to observe anything.
 `horizon_label` used `now` for the baseline year. v2 uses `baseline`. `now` is
 time-relative text frozen into a dated artifact: read a year later it is simply false, and it
 is the one horizon word this program names as prohibited. **v1 keeps `now` forever**, because
-v1 is frozen — which is precisely the situation an immutable contract plus an additive
+v1 is frozen - which is precisely the situation an immutable contract plus an additive
 successor exists to handle.
 
 ## What is in it today
@@ -47,7 +47,7 @@ of 1.0 would walk straight past the reliability gate that exists to catch exactl
 
 1. `contract_version` is `2.0.0` on every row.
 2. The retired `now` vocabulary may not appear.
-3. A row reporting `awaiting_observed_data` may not carry an observed value — that would be
+3. A row reporting `awaiting_observed_data` may not carry an observed value - that would be
    a number with no observation behind it.
 4. A `verified_*` capacity basis must name the date it was verified. Verification with no
    date is not verification.

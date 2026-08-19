@@ -4,7 +4,7 @@ What this is for
 ----------------
 Today the model reads five files whose column names, units and coordinate frame are those of
 one Northern Virginia study. `scoring.enrich_and_score` indexes 27 columns directly, so a file
-missing one raises `KeyError: 'aadt_nearest'` — measured, not assumed. That is what makes this
+missing one raises `KeyError: 'aadt_nearest'` - measured, not assumed. That is what makes this
 a study rather than a product (DEC-000).
 
 This module inserts one stage in front of the existing pipeline. A jurisdiction supplies
@@ -18,7 +18,7 @@ The rule that shapes all of it
 
 Every inferred mapping, unit conversion, imputation, dropped row and substituted default is
 recorded with its reason and surfaced in provenance. A transformation that cannot be explained
-to the user in one sentence does not ship — so each one below carries that sentence, and the
+to the user in one sentence does not ship - so each one below carries that sentence, and the
 `Finding.explain` field is not documentation, it is the thing shown to the person deciding.
 
 The failure this guards against is not a crash. It is a run that succeeds on data nobody
@@ -57,7 +57,7 @@ IDENTITY_FIELDS = ["site_id", "site_name", "site_type", "lat", "lon"]
 #: visible, the bad match silently answers a question with the wrong column.
 MATCH_FLOOR = 0.62
 
-#: Known aliases per canonical field. Deliberately hand-written rather than inferred — a
+#: Known aliases per canonical field. Deliberately hand-written rather than inferred - a
 #: fuzzy matcher that invents its own synonyms is a matcher nobody can audit.
 ALIASES: dict[str, list[str]] = {
     "site_id": ["id", "siteid", "site_code", "facility_id", "asset_id"],
@@ -95,7 +95,7 @@ ALIASES: dict[str, list[str]] = {
 }
 
 #: Unit suffixes we can convert, and the factor to the canonical unit. Every conversion here
-#: is a multiplication anyone can check — nothing that needs a projection or a lookup table.
+#: is a multiplication anyone can check - nothing that needs a projection or a lookup table.
 UNIT_CONVERSIONS: dict[str, dict[str, float]] = {
     "distance_to_service_ft": {"_m": 3.280839895, "_metres": 3.280839895, "_meters": 3.280839895},
     "trenching_ft": {"_m": 3.280839895, "_metres": 3.280839895, "_meters": 3.280839895},
@@ -111,7 +111,7 @@ UNIT_CONVERSIONS: dict[str, dict[str, float]] = {
 #: output* columns and knows only 3 of the 32 fields read here, so relying on it put 29 fields
 #: into `site_use_and_demand` by default. That group then inherited `missing` from the one
 #: genuinely absent field and scored 0, while four other groups scored 0 for having no fields
-#: at all. The overall verdict came out "Low", which was correct — and correct by accident,
+#: at all. The overall verdict came out "Low", which was correct - and correct by accident,
 #: which is not the same thing and would have hidden the next mistake.
 FIELD_GROUP_FOR_INPUT: dict[str, str] = {
     # identity and access
@@ -224,7 +224,7 @@ def _normalise(name: str) -> str:
 #: in wrecks the comparison: `trench_length_m` against `trenching_ft` shares one token out of
 #: five because `_m` and `_ft` are both counted as meaningful. Measured on the messy fixture,
 #: `dwell_hr` failed to match `avg_dwell_min` at all and was reported absent while the file
-#: plainly supplied it — an honest failure, but an avoidable one.
+#: plainly supplied it - an honest failure, but an avoidable one.
 #:
 #: Stripped for MATCHING only. The original name is still what the unit conversion is detected
 #: from, so removing the suffix here cannot lose the conversion.
@@ -381,7 +381,7 @@ def _check_coordinates(frame: pd.DataFrame, proposal: Proposal) -> None:
         proposal.findings.append(Finding(
             "refusal", "lat/lon",
             "These coordinates are outside the range of latitude and longitude, so the file is "
-            "in a projected coordinate system this tool will not convert — reprojecting it "
+            "in a projected coordinate system this tool will not convert - reprojecting it "
             "here would move every site by an amount nobody could check.",
             detail=(f"lat range [{lat.min():.1f}, {lat.max():.1f}], "
                     f"lon range [{lon.min():.1f}, {lon.max():.1f}]")))
@@ -445,13 +445,13 @@ def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
     """Typed provenance for the confidence system that already exists.
 
     Keyed per **site x field_group**, which is the shape `confidence.build_confidence` reads.
-    Intake's decisions are column-level, so every site in one file gets the same assessment —
+    Intake's decisions are column-level, so every site in one file gets the same assessment -
     that is correct, because the mapping that was guessed was guessed for all of them.
 
     Aggregated **pessimistically**: a field group takes the weakest source_class among its
     fields. A group containing one missing field cannot honestly claim to be fully sourced, and
     averaging would let a well-sourced field disguise an absent one. The same reasoning as the
-    fail-closed capacity guard — the weakest evidence sets the claim.
+    fail-closed capacity guard - the weakest evidence sets the claim.
 
     Absent fields are emitted as `missing`, never omitted. A field simply left out of the
     provenance table scores as though it had never been expected, which would make an
@@ -503,7 +503,7 @@ def accept(provenance: pd.DataFrame) -> pd.DataFrame:
 
     What acceptance means, and the distinction that matters
     ------------------------------------------------------
-    Accepting a proposal confirms **the mapping** — that `staff` really is the employee count
+    Accepting a proposal confirms **the mapping** - that `staff` really is the employee count
     this model means by `employees_day`. It says nothing whatever about **the data**: whether
     that count is accurate, current, or came from anywhere better than a guess.
 
@@ -515,7 +515,7 @@ def accept(provenance: pd.DataFrame) -> pd.DataFrame:
 
     The first version did upgrade it, from `unconfirmed` to `public_web_reference`. Measured
     consequence: a messy third-party file with one missing field scored **58.5 (Medium)** while
-    the real Northern Virginia study — whose electrical fields are genuinely unverified —
+    the real Northern Virginia study - whose electrical fields are genuinely unverified -
     scored **33.8 (Low)**. Guessed data outranked measured data. A jurisdiction wanting a
     higher rating must supply provenance for its own figures; there is no path to one through
     this function.

@@ -1,8 +1,8 @@
-# Data-Request Tracking Register — BLANK until requests are actually sent
+# Data-Request Tracking Register - BLANK until requests are actually sent
 
 *One row per site × field. Status values: `not_requested` / `requested` / `received` / `partial` / `declined`. All rows start `not_requested` because nothing has been sent. Dates are real dates only.*
 
-## FFX002 — City of Fairfax Regional Library
+## FFX002 - City of Fairfax Regional Library
 
 | Field | Source (Dominion / Facility) | Status | Date requested | Date received | Received value / doc reference |
 |---|---|---|---|---|---|
@@ -18,7 +18,7 @@
 | Fleet duty cycles (if any) | Facility | not_requested | | | |
 | Planned capital projects | Facility | not_requested | | | |
 
-## FFX004 — Fairfax County Government Center
+## FFX004 - Fairfax County Government Center
 
 | Field | Source | Status | Date requested | Date received | Received value / doc reference |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@
 | Fleet duty cycles (if any) | Facility | not_requested | | | |
 | Planned capital projects | Facility | not_requested | | | |
 
-## PWC006 — Bull Run Library
+## PWC006 - Bull Run Library
 
 | Field | Source | Status | Date requested | Date received | Received value / doc reference |
 |---|---|---|---|---|---|

@@ -4,7 +4,7 @@
 
 Every command below was verified on macOS (Apple Silicon) with Python 3.14 on
 2026-07-19. Python 3.11+ is supported. All commands run from the **repository
-root** unless noted. No internet access is required for any step — GIS
+root** unless noted. No internet access is required for any step - GIS
 boundaries are cached in `data/cache/`.
 
 ## 0. Environment
@@ -68,7 +68,7 @@ CSV, workflow-docs consistency, dashboard footer QA, secret scan, local-path
 scan, file-size limit, and Markdown link check. CI runs the same gates
 ([.github/workflows/tests.yml](../../.github/workflows/tests.yml)).
 
-## 6. MATLAB (requires licensed R2025b — never executed in the authoring environment)
+## 6. MATLAB (requires licensed R2025b - never executed in the authoring environment)
 
 Run from the `matlab/` directory:
 
@@ -82,7 +82,7 @@ See [matlab/RUN_ON_LICENSED_MATLAB.md](../../matlab/RUN_ON_LICENSED_MATLAB.md)
 for the full first-run procedure and expected outputs, and
 [matlab/EXECUTION_STATUS.md](../../matlab/EXECUTION_STATUS.md) for what has
 and has not been executed. **The suite has since run on licensed MathWorks
-R2025b Update 5: 49 passed / 0 failed** — but against a *synthetic* fixture only.
+R2025b Update 5: 49 passed / 0 failed** - but against a *synthetic* fixture only.
 No MATLAB output describes a real facility.
 
 ## Expected results summary
@@ -99,6 +99,6 @@ No MATLAB output describes a real facility.
 - All simulations are seeded: `SIM_RANDOM_SEED = 20260719`
   (`src/fcf_m2/config.py`), so repeated runs produce identical numbers.
 - The contract `run_id` / `generated_at` are timestamps, and the table hashes
-  in `contract_manifest.json` change per run **by design** — the RT-10 hash
+  in `contract_manifest.json` change per run **by design** - the RT-10 hash
   chain exists to prevent quoting a stale contract against fresh tables.
 - Every step is fully offline; there is no first-run download.

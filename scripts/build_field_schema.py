@@ -5,12 +5,12 @@ Why this is generated rather than written
 -----------------------------------------
 ``observed.py`` refuses observations it cannot trust: an unattributed record, a capacity row
 that confirms nothing, availability that exceeds what was possible. Those refusals are the
-V4 loop's whole point — they are why a site cannot become "verified" on evidence nobody
+V4 loop's whole point - they are why a site cannot become "verified" on evidence nobody
 checked.
 
 A hand-written browser form is a **second copy of those rules**, and a second copy drifts. It
 drifts in one direction in particular: the form ends up *more permissive* than the model, so a
-field worker fills in a row the page accepts and the ingest step later rejects — or worse, the
+field worker fills in a row the page accepts and the ingest step later rejects - or worse, the
 form is stricter and quietly discourages a legitimate observation.
 
 So the vocabularies, the columns and the rules are read out of ``observed.py`` here and
@@ -38,7 +38,7 @@ from fcf_m2.observed import (                                    # noqa: E402
 
 OUT = REPO / "site/platform/field_schema.json"
 
-#: The rule vocabulary both interpreters understand. Kept deliberately tiny — every entry is
+#: The rule vocabulary both interpreters understand. Kept deliberately tiny - every entry is
 #: a rule that exists in ``observed.py``'s ``__post_init__``, and nothing here is a rule the
 #: model does not enforce. Adding a rule the model lacks would make the form lie about what
 #: will be accepted.
@@ -67,7 +67,7 @@ def capacity_form() -> dict:
              "required": True, "values": CAPACITY_METHOD_PRECEDENCE,
              "value_notes": {m: f"establishes at most: {b}" for m, b in METHOD_TO_BASIS.items()},
              "help": ("Ordered strongest first. The method caps how strong a claim the value "
-                      "can support — it can never establish more than what is listed.")},
+                      "can support - it can never establish more than what is listed.")},
             {"name": "service_capacity_kw", "label": "Service capacity (kW)", "type": "number",
              "required": False},
             {"name": "spare_capacity_kw", "label": "Spare capacity (kW)", "type": "number",
@@ -181,7 +181,7 @@ def main() -> int:
     OUT.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n")
     forms = ", ".join(f"{f['id']} ({len(f['fields'])} fields, {len(f['rules'])} rules)"
                       for f in payload["forms"])
-    print(f"wrote {OUT.relative_to(REPO)}  — {forms}")
+    print(f"wrote {OUT.relative_to(REPO)}  - {forms}")
     return 0
 
 

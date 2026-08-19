@@ -1,7 +1,7 @@
-# LANE L10 — The 3D Explorer: Python, Build, Tests
+# LANE L10 - The 3D Explorer: Python, Build, Tests
 
 **Tree:** `/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/incoming/explorer/fcf-3d`
-(NOT in the repo; not a git working tree — `git rev-parse --is-inside-work-tree` returns
+(NOT in the repo; not a git working tree - `git rev-parse --is-inside-work-tree` returns
 `fatal: not a git repository`, and there is no `.git` directory.)
 
 **Repo under comparison:** `/Users/andyyaro/Downloads/Future-City-Fellowship-MapUpdate/repo` (branch `v4-platform`).
@@ -11,7 +11,7 @@ unless prefixed `repo/`.
 
 ---
 
-## THE GOVERNING FINDING OF PHASE 3 — independent verification
+## THE GOVERNING FINDING OF PHASE 3 - independent verification
 
 **Verdict: the claim HOLDS, with one material qualification that Phase 3 must know.**
 
@@ -39,7 +39,7 @@ unless prefixed `repo/`.
 (line 71: `raise SourceMissing(f"required table missing: {rel}")`) and silently skips
 any missing OPTIONAL table (lines 73–76).
 
-**Qualification (important):** the canonical contract IS read — but only as an *optional*
+**Qualification (important):** the canonical contract IS read - but only as an *optional*
 side table. Line 53 loads `data/contract/v1/scenario_table.csv` into `frames["scenarios"]`,
 consumed by `build_scenarios()` (lines 278–303) and attached at line 513 as
 `props["scenarios"]`. That block is fully canonical: I confirmed the generated
@@ -79,8 +79,8 @@ neither of them labelled.
 
 Two downstream consumers also key off `ports_2050`:
 
-- `fcf3d/build_models.py:43` — `ports_pathway=asset.get("pathway_ports", props.get("ports_2050") or 2),`
-- `blender/build_assets.py:184` — `ports_pathway = int(asset.get("pathway_ports") or props.get("ports_2050") or ports_now)`
+- `fcf3d/build_models.py:43` - `ports_pathway=asset.get("pathway_ports", props.get("ports_2050") or 2),`
+- `blender/build_assets.py:184` - `ports_pathway = int(asset.get("pathway_ports") or props.get("ports_2050") or ports_now)`
 
 Nowhere in the Python, Makefile, or tests is the string `legacy_v2` used as a *mode label* on
 output. The only appearances of "legacy_v2" are inside the input filenames themselves
@@ -96,7 +96,7 @@ output. The only appearances of "legacy_v2" are inside the input filenames thems
 **Feature** (lines 516–521): `type` (`"Feature"`), `id` (= site_id), `geometry`
 (`{"type":"Point","coordinates":[lon,lat,0.0]}`), `properties`.
 
-**`properties`, in emission order** (lines 395–513) — 47 top-level keys:
+**`properties`, in emission order** (lines 395–513) - 47 top-level keys:
 
 1. `site_id`
 2. `site_name`
@@ -105,22 +105,22 @@ output. The only appearances of "legacy_v2" are inside the input filenames thems
 5. `city`
 6. `state`
 7. `zip` (coerced `str()`, line 403)
-8. `jurisdiction` — derived: `"fairfax" if str(sid).startswith("FFX") else "prince_william"` (line 404)
+8. `jurisdiction` - derived: `"fairfax" if str(sid).startswith("FFX") else "prince_william"` (line 404)
 9. `public_access` (bool)
 10. `garage_enclosed` (bool)
 11. `model_rank` (int)
 12. `readiness_score`
-13. `readiness_score_pct` — cohort-relative rescale to 0–100 across `score_min..score_max` (lines 410–415)
+13. `readiness_score_pct` - cohort-relative rescale to 0–100 across `score_min..score_max` (lines 410–415)
 14. `recommendation_tier`
-15. `tier_key` — via `TIER_RANK` (lines 176–189)
+15. `tier_key` - via `TIER_RANK` (lines 176–189)
 16. `readiness_band`
 17. `confidence_band`
 18. `action_label`
 19. `action_detail`
 20. `planning_recommendation`
 21. `priority_reason`
-22. `subscores` — dict of the four `*_subscore` values
-23. `subscore_labels` — dict `{demand_subscore: "Demand", ...}`
+22. `subscores` - dict of the four `*_subscore` values
+23. `subscore_labels` - dict `{demand_subscore: "Demand", ...}`
 24. `data_confidence_score`
 25. `data_confidence_level`
 26. `data_confidence_reason`
@@ -139,13 +139,13 @@ output. The only appearances of "legacy_v2" are inside the input filenames thems
 39. `score_reconstructed`
 40. `ahj_review_flag` (int)
 41. `review_reasons` (list)
-42. `asset` — `{model:"evse_canopy", heading_deg, offset_east_m, offset_north_m, clamp_to_ground}` plus `ports` and `pathway_ports` added at lines 472–478
-43. `right_sizing` (conditional) — the 9 keys quoted above, incl. **`ports_2035_base/high`, `ports_2050_base/high`**
-44. `electrical` (conditional) — `risk_level`, `risk_points`, `risk_reason`, `data_needed_next`, `rank_optimistic`, `rank_expected`, `rank_conservative`, `worst_case_rank_change`
-45. `queueing` (conditional) — `ports`, `mean_wait_min`, `p90_wait_min`, `peak_p90_wait_min`, `peak_erlang_wait_min`, `sim_utilization`
-46. `coordinate_provenance` (conditional) — `source_dataset`, `source_owner`, `source_quality`, `notes`
-47. `avoided_overbuild` (conditional) — `avoided_active_evse_ports`, `avoided_network_fee_usd_yr`
-48. `scenarios` — list of dicts with `scenario_id`, `horizon_year`, `horizon_label`, `scenario_name`, `ports_active`, `ports_pathway_capacity`, `evse_power_kw`, `sessions_per_day`, `energy_required_kwh_day`, `utilization`, `peak_wait_minutes`, `lifecycle_cost_npv_usd`, `avoided_overbuild_cost_usd`, `net_co2e_kg`
+42. `asset` - `{model:"evse_canopy", heading_deg, offset_east_m, offset_north_m, clamp_to_ground}` plus `ports` and `pathway_ports` added at lines 472–478
+43. `right_sizing` (conditional) - the 9 keys quoted above, incl. **`ports_2035_base/high`, `ports_2050_base/high`**
+44. `electrical` (conditional) - `risk_level`, `risk_points`, `risk_reason`, `data_needed_next`, `rank_optimistic`, `rank_expected`, `rank_conservative`, `worst_case_rank_change`
+45. `queueing` (conditional) - `ports`, `mean_wait_min`, `p90_wait_min`, `peak_p90_wait_min`, `peak_erlang_wait_min`, `sim_utilization`
+46. `coordinate_provenance` (conditional) - `source_dataset`, `source_owner`, `source_quality`, `notes`
+47. `avoided_overbuild` (conditional) - `avoided_active_evse_ports`, `avoided_network_fee_usd_yr`
+48. `scenarios` - list of dicts with `scenario_id`, `horizon_year`, `horizon_label`, `scenario_name`, `ports_active`, `ports_pathway_capacity`, `evse_power_kw`, `sessions_per_day`, `energy_required_kwh_day`, `utilization`, `peak_wait_minutes`, `lifecycle_cost_npv_usd`, `avoided_overbuild_cost_usd`, `net_co2e_kg`
 
 *(I verified against the generated `web/data/sites.geojson`: all 47 keys present, 12 features,
 FFX002 first at rank 1 / 58.8, 10 scenarios per site.)*
@@ -171,7 +171,7 @@ FFX002 first at rank 1 / 58.8, 10 scenarios per site.)*
   `milestone2_v3` on all 120 rows, `run_id` = `milestone2_v3_20260719T052322Z`,
   `contract_version` = `1.0.0`, horizons `2026`×12 / `2036`×36 / `2046`×36 / `2056`×36.
 
-### The 15-column gap — Phase 3 cannot simply repoint the `--repo` path
+### The 15-column gap - Phase 3 cannot simply repoint the `--repo` path
 
 `tests/fixture_legacy_v2_site_results.csv` has 83 columns. Both
 `site_results_milestone2_v3.csv` and `site_results_legacy_v2.csv` in `data/outputs/v3_run/`
@@ -191,7 +191,7 @@ output would silently blank all of them (every one is fetched with `.get()`, so 
 raised). Phase 3 needs either a V3 enrichment step that re-emits these columns, or a
 documented join against `tbl_readiness_confidence.csv` + the confidence/triggers modules.
 
-### Good news for Phase 3 — the massing does not need to change
+### Good news for Phase 3 - the massing does not need to change
 
 `props["asset"]["pathway_ports"]` comes from the legacy `future_ready_capacity`
 (line 473–475), **not** from `ports_2050`. I compared legacy `future_ready_capacity` against
@@ -203,7 +203,7 @@ contract. Only the *names and labels* are wrong, not the shapes.
 
 ---
 
-## SUBSCORE_WEIGHTS / DRIVERS drift gate — line-by-line comparison
+## SUBSCORE_WEIGHTS / DRIVERS drift gate - line-by-line comparison
 
 ### The mirrored values, verbatim
 
@@ -247,7 +247,7 @@ contract. Only the *names and labels* are wrong, not the shapes.
 | 18 | 170 | `stormwater_risk` | 0.05 | safety | **yes** |
 | 19 | 172 | `equity_gap_index_n` | 1.00 | equity | no |
 
-### `repo/src/fcf_m2/scoring.py` — the authority
+### `repo/src/fcf_m2/scoring.py` - the authority
 
 ```python
 140  df["demand_subscore"] = 100 * (
@@ -296,19 +296,19 @@ correctly handled:
 
 1. **`hours_open_n` does not exist as a persisted column.** scoring.py computes it inline
    (line 146). `build_sites.prepare()` lines 322–323 recreates it:
-   `res["hours_open_n"] = res["hours_open"].clip(lower=0, upper=24) / 24.0` — an exact match.
-   *(It does exist in the fixture CSV? No — I confirmed `hours_open_n` is NOT among the
+   `res["hours_open_n"] = res["hours_open"].clip(lower=0, upper=24) / 24.0` - an exact match.
+   *(It does exist in the fixture CSV? No - I confirmed `hours_open_n` is NOT among the
    fixture's 83 columns; `prepare()` is doing real work, not a no-op.)*
 2. **`readiness_access_adjustment`.** scoring.py:132 `np.where(public_access >= 1, 1.00, 0.65)`.
    build_sites `prepare()` lines 325–327 uses the same 1.00/0.65 split as a fallback; the
    fixture already carries the column so the fallback is dormant. `attribute_drivers()`
-   line 237 applies it to demand drivers only — matching scoring.py:151, which multiplies
+   line 237 applies it to demand drivers only - matching scoring.py:151, which multiplies
    only `demand_subscore`.
 3. **`access_adjustment` (1.00/0.35, scoring.py:131) is deliberately NOT mirrored.** It does
    not feed `readiness_score`. Correct omission.
 4. **`ev_share_local_n` is produced by `bounded_signal(x, EV_SHARE_HIGH_BENCHMARK=0.10)`**
    (scoring.py:26, 138) rather than min-max. build_sites reads the persisted column, so it
-   inherits whichever regime produced the CSV. Mode-agnostic — correct.
+   inherits whichever regime produced the CSV. Mode-agnostic - correct.
 5. **`.round(1)` on `readiness_score`** (scoring.py:175) vs. the map's per-driver
    `round(..., 2)` accumulation. This is why the gate is a ±0.15 tolerance, not equality.
 
@@ -336,14 +336,14 @@ The honest gate is a direct read of the source of truth, not a re-listing. Sugge
 check: import `fcf_m2.scoring`, parse the four subscore coefficients out of
 `enrich_and_score` (or better, refactor scoring.py to expose them as module constants and
 have `build_sites` import them), and assert equality against `SUBSCORE_WEIGHTS`/`DRIVERS`.
-Today nothing structurally prevents drift — `test_attribution_reproduces_model_score` only
+Today nothing structurally prevents drift - `test_attribution_reproduces_model_score` only
 compares against a *frozen CSV*, so if someone reweights `scoring.py` and does not re-freeze,
 the test stays green and the map keeps telling the old story. **The guard is weaker than
 CLAUDE.md non-negotiable #2 claims.**
 
 ---
 
-## `test_attribution_reproduces_model_score` — full quote and what it proves
+## `test_attribution_reproduces_model_score` - full quote and what it proves
 
 `tests/test_pipeline.py`, lines 88–102:
 
@@ -369,7 +369,7 @@ CLAUDE.md non-negotiable #2 claims.**
 `results`, the sum of the 19 `points_earned` values from `DRIVERS` lands within 0.15 of that
 row's own `readiness_score` column.
 
-**What it does NOT prove — and this matters:**
+**What it does NOT prove - and this matters:**
 1. It **never imports `fcf_m2.scoring`.** It compares the map's weights to a *frozen CSV*,
    not to the live model code. If `scoring.py` is reweighted and the fixture is not
    re-frozen, this test still passes. CLAUDE.md line 53 (*"`test_attribution_reproduces_model_score`
@@ -381,16 +381,16 @@ row's own `readiness_score` column.
    without that exact directory and without `FCF_REPO` set, this test silently SKIPS.**
    15 of 31 test functions carry `@needs_repo`.
 3. It runs against `bs.prepare()`, so it also exercises the `hours_open_n` reconstruction
-   (lines 322–323) — a genuine part of the mirror.
+   (lines 322–323) - a genuine part of the mirror.
 4. It cannot catch a *label* error: swapping two driver `label` strings leaves the arithmetic
    intact and the test green, while the map would attribute points to the wrong thing.
 
 Companion guards that partly close the gap:
-- `test_driver_weights_sum_to_one_per_subscore` (lines 77–85) — each subscore's driver
+- `test_driver_weights_sum_to_one_per_subscore` (lines 77–85) - each subscore's driver
   weights sum to 1.0.
 - `test_subscore_weights_sum_to_one` (lines 88–90).
-- `test_invert_flags_match_scoring_module` (lines 111–122) — pins the exact inverted set.
-- `test_build_emits_no_drift_warnings` (lines 105–108) — asserts `build()` produced no
+- `test_invert_flags_match_scoring_module` (lines 111–122) - pins the exact inverted set.
+- `test_build_emits_no_drift_warnings` (lines 105–108) - asserts `build()` produced no
   warning containing `"attribution"` (the runtime version of the same check,
   build_sites.py lines 366–372).
 
@@ -404,83 +404,83 @@ Companion guards that partly close the gap:
 - **Reads:** n/a (prose).
 - **Written by / read by:** read by any agent operating in `fcf-3d`. Cross-references `fcf3d/build_sites.py`, `fcf3d/geometry.py`, `fcf3d/glb.py`, `fcf3d/build_models.py`, `blender/build_assets.py`, `web/`, `tests/test_pipeline.py`, `fcf_m2/scoring.py`, `app.js::renderPanel()`, `COMPARE_ROWS`.
 - **Key contents:** see the verbatim constraint list below.
-- **Notes:** the "46 tests" claim (line 42) is **correct** — I counted 31 `def test_*`, of which three are parametrized (5 + 6 + 7 cases), giving 28 + 18 = 46. Line 74 gives a macOS-specific Blender path as an example (`/Applications/Blender.app/Contents/MacOS/Blender`), which is illustrative, not a hardcoded dependency.
+- **Notes:** the "46 tests" claim (line 42) is **correct** - I counted 31 `def test_*`, of which three are parametrized (5 + 6 + 7 cases), giving 28 + 18 = 46. Line 74 gives a macOS-specific Blender path as an example (`/Applications/Blender.app/Contents/MacOS/Blender`), which is illustrative, not a hardcoded dependency.
 
 #### EVERY architectural constraint in CLAUDE.md, verbatim and numbered
 
-**C1 — the architecture rule (line 14):**
+**C1 - the architecture rule (line 14):**
 > **Blender authors. Cesium delivers. Python glues.**
 
-**C2 — Blender is not the viewer (lines 28–30):**
+**C2 - Blender is not the viewer (lines 28–30):**
 > Blender is **never** the viewer. It is an offline asset factory that emits
 > glTF. If a task starts with "make Blender show the map interactively," that is
-> the wrong shape — redirect it into the Cesium layer.
+> the wrong shape - redirect it into the Cesium layer.
 
-**C3 — the layout table's role assignments (lines 36–42):**
+**C3 - the layout table's role assignments (lines 36–42):**
 > | `fcf3d/build_sites.py` | ETL. Joins model CSVs → GeoJSON. **Read-only on the source repo.** |
 > | `fcf3d/geometry.py` | Parametric infrastructure massing. Single source of truth. |
 > | `fcf3d/glb.py` | Dependency-free glTF 2.0 writer (the no-Blender path). |
 > | `fcf3d/build_models.py` | CLI; routes to `glb.py` or Blender. |
 > | `blender/build_assets.py` | Headless `bpy` asset builder. Only importable inside Blender. |
-> | `web/` | CesiumJS app. Static — no build step, no bundler. |
+> | `web/` | CesiumJS app. Static - no build step, no bundler. |
 > | `tests/test_pipeline.py` | 46 tests. Must stay green. |
 
-**C4 — never re-run the model (non-negotiable 1, lines 46–48):**
+**C4 - never re-run the model (non-negotiable 1, lines 46–48):**
 > 1. **Never re-run or re-implement the scoring model here.** This repo is a
 >    *projection* of frozen outputs. If a number looks wrong, fix it upstream in
 >    `fcf_m2`, re-freeze, and re-run `make data`.
 
-**C5 — the weight mirror (non-negotiable 2, lines 50–55):**
+**C5 - the weight mirror (non-negotiable 2, lines 50–55):**
 > 2. **`SUBSCORE_WEIGHTS` and `DRIVERS` in `build_sites.py` mirror
 >    `fcf_m2/scoring.py`.** They exist so the map can explain *why* a site ranks
 >    where it does using the model's own arithmetic.
 >    `test_attribution_reproduces_model_score` guards this. If you change either
->    file, run the tests — a silent drift means the map tells planners a story
+>    file, run the tests - a silent drift means the map tells planners a story
 >    the model never told.
 
-**C6 — geometry.py has zero dependencies (non-negotiable 3, lines 57–58):**
+**C6 - geometry.py has zero dependencies (non-negotiable 3, lines 57–58):**
 > 3. **`geometry.py` has zero dependencies and must stay that way.** Blender's
 >    bundled Python imports it directly; anything exotic breaks the Blender path.
 
-**C7 — the disclaimer (non-negotiable 4, lines 60–63):**
+**C7 - the disclaimer (non-negotiable 4, lines 60–63):**
 > 4. **Keep the disclaimer visible.** Every surface says screening-class
 >    planning estimates, not engineering. Electrical service capacity is
 >    unconfirmed for all 12 sites. Do not let UI polish imply more certainty
 >    than the data supports.
 
-**C8 — no secrets / the Cesium ion token (non-negotiable 5, lines 65–66):**
+**C8 - no secrets / the Cesium ion token (non-negotiable 5, lines 65–66):**
 > 5. **No secrets in the repo.** The Cesium ion token is entered at runtime and
 >    held in the browser only.
 
-**C9 — the procedure for adding a field to the map (lines 85–89):**
+**C9 - the procedure for adding a field to the map (lines 85–89):**
 > 1. Add it to the properties dict in `build_sites.py::build()`.
 > 2. Add a key assertion to `test_all_expected_keys_present`.
 > 3. Render it in `app.js::renderPanel()` and, if comparable, add a row to
 >    `COMPARE_ROWS`.
 > 4. `make data && make test`.
 
-**C10 — geometry changes go in one place (lines 93–96):**
+**C10 - geometry changes go in one place (lines 93–96):**
 > Edit `fcf3d/geometry.py` only. Both output paths read from it, so they stay in
-> sync automatically. Add a test to the geometry section — the existing ones
+> sync automatically. Add a test to the geometry section - the existing ones
 > check ADA stall provision, canopy clearance, pathway-stall translucency, and
 > the ENU→glTF axis conversion.
 
-**C11 — Blender MCP sandbox warning (lines 100–103):**
-> - **Blender MCP** (`blender.org/lab/mcp-server`, official; Blender 5.1+) —
+**C11 - Blender MCP sandbox warning (lines 100–103):**
+> - **Blender MCP** (`blender.org/lab/mcp-server`, official; Blender 5.1+) -
 >   for interactive art direction of the assets. It executes generated Python
 >   inside a live Blender session with no sandbox, so run it against a scratch
 >   scene, not a file you care about.
 
-**C12 — batch generation over MCP (lines 106–107):**
+**C12 - batch generation over MCP (lines 106–107):**
 > For batch asset generation prefer `blender --background --python`, not MCP.
 > It is deterministic, reviewable, and runs in CI.
 
-**C13 — style (lines 111–113):**
+**C13 - style (lines 111–113):**
 > - Python: 3.11+, type hints, module docstrings that say *why*.
 > - JS: plain ES modules, no framework, no bundler. Keep it that way.
 > - Comments explain intent and constraints, not syntax.
 
-**Attribution obligations** are stated in README.md, not CLAUDE.md — see below (A1/A2).
+**Attribution obligations** are stated in README.md, not CLAUDE.md - see below (A1/A2).
 
 ---
 
@@ -494,11 +494,11 @@ Companion guards that partly close the gap:
   - "`build_sites.py` is read-only on the Fellowship repo. It joins **seven** frozen model tables on `site_id`" (lines 66–67).
   - The worked FFX002 example (lines 77–79) and "Those numbers sum back to 58.8 exactly, for all 12 sites" (line 81).
   - Setup: `make setup && make all FCF_REPO=... && make serve`; `make candidates`; `make doctor`; the `~/` expansion rationale (lines 122–143).
-  - **A1 — Google attribution obligation (lines 154–156):** *"Google requires that its logo and the data attribution stay visible; the app leaves Cesium's credit widget in place, so don't remove it."*
-  - **A2 — licence block (lines 231–234):** *"CesiumJS is Apache-2.0. Google Photorealistic 3D Tiles are governed by the Google Maps Platform Terms of Service and require visible brand and data attribution. OpenStreetMap imagery and building data are ODbL. Blender is GPL — that covers the application, not the glTF it exports."*
+  - **A1 - Google attribution obligation (lines 154–156):** *"Google requires that its logo and the data attribution stay visible; the app leaves Cesium's credit widget in place, so don't remove it."*
+  - **A2 - licence block (lines 231–234):** *"CesiumJS is Apache-2.0. Google Photorealistic 3D Tiles are governed by the Google Maps Platform Terms of Service and require visible brand and data attribution. OpenStreetMap imagery and building data are ODbL. Blender is GPL - that covers the application, not the glTF it exports."*
   - Cesium ion token guidance (lines 147–159): free token, pasted into an in-page gate, "stored in your browser only"; without a token the viewer falls back to *Flat* mode on OSM imagery.
-  - "Honest limits" (lines 211–225): screening-class only; electrical capacity unconfirmed for all 12 sites; the massing is not a design; ADA provision is a rule of thumb — confirm against the AHJ; placement offsets are eyeballed; photorealistic tiles are a dated snapshot.
-- **Notes:** I verified the FFX002 attribution numbers by recomputing them from the fixture — **+8.11 / +7.50 / +7.50 earned and −10.50 / −4.52 / −4.08 forgone reproduce exactly**. But those are *legacy_v2* numbers (see findings). Line 80 calls `distance_to_service_ft` "short service run" whereas the code's label (build_sites.py:157) is "Distance to electrical service" — prose/code label mismatch. Line 81's "exactly" is a slight overclaim (PWC005 is off by 0.1). Line 66 says "seven" tables; the code resolves eight.
+  - "Honest limits" (lines 211–225): screening-class only; electrical capacity unconfirmed for all 12 sites; the massing is not a design; ADA provision is a rule of thumb - confirm against the AHJ; placement offsets are eyeballed; photorealistic tiles are a dated snapshot.
+- **Notes:** I verified the FFX002 attribution numbers by recomputing them from the fixture - **+8.11 / +7.50 / +7.50 earned and −10.50 / −4.52 / −4.08 forgone reproduce exactly**. But those are *legacy_v2* numbers (see findings). Line 80 calls `distance_to_service_ft` "short service run" whereas the code's label (build_sites.py:157) is "Distance to electrical service" - prose/code label mismatch. Line 81's "exactly" is a slight overclaim (PWC005 is off by 0.1). Line 66 says "seven" tables; the code resolves eight.
 
 ---
 
@@ -543,7 +543,7 @@ Companion guards that partly close the gap:
 - **Role:** Excludes Python bytecode and every generated artifact.
 - **Kind:** authored (9 lines).
 - **Reads:** n/a.
-- **Key contents — the file in full:**
+- **Key contents - the file in full:**
 ```
 1  __pycache__/
 2  *.pyc
@@ -555,12 +555,12 @@ Companion guards that partly close the gap:
 8  web/models/*.glb
 9  *.blend1
 ```
-- **Answering the assigned question precisely:** it does **NOT** use a `web/data/*` glob — it
+- **Answering the assigned question precisely:** it does **NOT** use a `web/data/*` glob - it
   enumerates the four generated files by name (lines 4–7). It **does** exclude
   `web/models/*.glb` (line 8, exact string). Any *new* file the ETL writes into `web/data/`
   would not be ignored.
 - **Notes:** `venv/` is **not** ignored, even though `make setup` (Makefile:31) creates
-  `venv/` in the tree. Also `*.blend` is not ignored — only `*.blend1` — while
+  `venv/` in the tree. Also `*.blend` is not ignored - only `*.blend1` - while
   `blender/build_assets.py:192` writes `<sid>.blend` files when `--blend` is passed.
   Both are real gaps for Phase 3's `git add`.
 
@@ -570,7 +570,7 @@ Companion guards that partly close the gap:
 - **Role:** Marks `fcf3d` as a package so `python -m fcf3d.build_sites` works.
 - **Kind:** authored. **0 bytes / 0 lines.**
 - **Reads:** n/a. **Read by:** the Python import machinery.
-- **Key contents:** none — the file is empty.
+- **Key contents:** none - the file is empty.
 - **Notes:** no `__version__`. The GLB `asset.generator` string and `SCHEMA_VERSION` are the
   only version markers in the package.
 
@@ -583,7 +583,7 @@ Companion guards that partly close the gap:
 - **Written by / read by:** invoked by `Makefile:42`; its output is read by `fcf3d/build_models.py`, `blender/build_assets.py`, `web/app.js`, and `tests/test_pipeline.py`.
 - **Key contents:**
   - `SCHEMA_VERSION = "fcf3d/1.0.0"` (line 40).
-  - `REQUIRED` / `OPTIONAL` / `ELECTRICAL_GLOB` (46–58); `SourceMissing` (61–62); `resolve_sources()` (65–80) — takes `matches[-1]` of the sorted electrical glob, commented "newest freeze".
+  - `REQUIRED` / `OPTIONAL` / `ELECTRICAL_GLOB` (46–58); `SourceMissing` (61–62); `resolve_sources()` (65–80) - takes `matches[-1]` of the sorted electrical glob, commented "newest freeze".
   - `SUBSCORE_WEIGHTS` (92–97), `SUBSCORES` (99–104), `Driver` dataclass (107–131), `DRIVERS` (134–174).
   - `TIER_RANK` (176–182): `{"Tier 1":1, "Tier 2":2, "Tier 3":3, "High-review":2, "Low public-priority":4}`; `tier_key()` prefix match, default **9** (185–189).
   - `_clean()` (192–204): NaN/inf → `None`, floats `round(..., 6)`.
@@ -595,7 +595,7 @@ Companion guards that partly close the gap:
   - `prepare()` (318–328); `load()` (331–335); `build()` (338–538); `write()` (541–574); `main()` (577–593).
   - Drift warning at runtime: `abs(rebuilt - actual) > 0.15` → warning string *"(fcf3d.build_sites DRIVERS may have drifted from fcf_m2.scoring)"* (lines 368–372).
   - Coordinate sanity gate: `-180 <= lon <= 180 and -90 <= lat <= 90`, else warn + `continue` (lines 359–361).
-  - `sites.inline.js` header: `/* generated by fcf3d.build_sites — do not edit */` then `window.__FCF_SITES__ = <json>;` (lines 570–573). Rationale comment at 566–567: `fetch()` of a local JSON file is blocked by CORS on `file://`.
+  - `sites.inline.js` header: `/* generated by fcf3d.build_sites - do not edit */` then `window.__FCF_SITES__ = <json>;` (lines 570–573). Rationale comment at 566–567: `fetch()` of a local JSON file is blocked by CORS on `file://`.
   - Manifest disclaimer, verbatim (531–535): *"Planning prototype only. Screening-class estimates; not an engineering, permitting, or procurement tool. Electrical service capacity is unconfirmed for all sites pending utility/facility review."*
 - **Notes:**
   - `readiness_conf` (line 55) is resolved and `load()`ed into a DataFrame, but `build()`
@@ -604,7 +604,7 @@ Companion guards that partly close the gap:
   - Line 89 comment names `test_build_sites.py`; the actual test file is `tests/test_pipeline.py`.
   - Line 388 filters `avoided_evse` on `horizon_year == 2026` only and then takes
     `m.iloc[0]` with no filter on the table's `case` column. Today `tbl_avoided_evse.csv`
-    has exactly 12 rows at 2026, all `case == 'baseline'`, so it is deterministic — but it
+    has exactly 12 rows at 2026, all `case == 'baseline'`, so it is deterministic - but it
     is one contract change away from silently picking an arbitrary case.
   - `readiness_score_pct` (410–415) is a **cohort-relative** rescale over the 12 sites in the
     run. It is not the model's score and will move if the cohort changes.
@@ -619,14 +619,14 @@ Companion guards that partly close the gap:
 - **Reads:** `--sites` (default `web/data/sites.geojson`); writes `--out` (default `web/models`).
 - **Written by / read by:** invoked by `Makefile:46` and `Makefile:51`; imports `.geometry.build_site` and `.glb.write_glb` (lines 23–24); shells out to `blender/build_assets.py`.
 - **Key contents:**
-  - `load_sites()` (27–30) — accepts either a FeatureCollection or a bare list.
-  - `run_pure_python()` (33–48) — `build_site(sid, ports_now=asset.get("ports", props.get("ports_now") or 2), ports_pathway=asset.get("pathway_ports", props.get("ports_2050") or 2))`.
-  - `run_blender()` (51–58) — `[blender, "--background", "--factory-startup", "--python", script, "--", "--sites", sites_path, "--out", out_dir]`; script path resolved as `<pkg parent>/blender/build_assets.py`.
-  - `main()` (61–77) — args `--sites`, `--out`, `--blender`; prints a per-site size table.
+  - `load_sites()` (27–30) - accepts either a FeatureCollection or a bare list.
+  - `run_pure_python()` (33–48) - `build_site(sid, ports_now=asset.get("ports", props.get("ports_now") or 2), ports_pathway=asset.get("pathway_ports", props.get("ports_2050") or 2))`.
+  - `run_blender()` (51–58) - `[blender, "--background", "--factory-startup", "--python", script, "--", "--sites", sites_path, "--out", out_dir]`; script path resolved as `<pkg parent>/blender/build_assets.py`.
+  - `main()` (61–77) - args `--sites`, `--out`, `--blender`; prints a per-site size table.
 - **Notes:** line 43's `props.get("ports_2050")` fallback is a legacy-horizon reference. In
   practice it is dead for real runs, because `build_sites` always sets `asset.pathway_ports`
   (lines 474/478). `asset.get("ports", ...)` uses `dict.get` with a default rather than
-  `or`, so an explicit `0` in `asset["ports"]` would pass through — but `build_site` clamps
+  `or`, so an explicit `0` in `asset["ports"]` would pass through - but `build_site` clamps
   with `max(1, ...)` (geometry.py:136).
 
 ---
@@ -634,10 +634,10 @@ Companion guards that partly close the gap:
 ### `fcf3d/geometry.py`
 - **Role:** The single parametric definition of a proposed site build, shared by the pure-Python and Blender asset paths.
 - **Kind:** authored (268 lines).
-- **Reads:** nothing — pure computation.
+- **Reads:** nothing - pure computation.
 - **Written by / read by:** imported by `fcf3d/glb.py:20` (`MATERIALS, Box, SiteBuild`), `blender/build_assets.py:44` (`MATERIALS, build_site`), `fcf3d/build_models.py:23` (`build_site`), `tests/test_pipeline.py:26–32`.
 
-#### C6 verified — EVERY import statement in `geometry.py`
+#### C6 verified - EVERY import statement in `geometry.py`
 
 ```python
 25  from __future__ import annotations
@@ -646,7 +646,7 @@ Companion guards that partly close the gap:
 28  from dataclasses import dataclass
 ```
 
-That is the complete list — three statements, lines 25–28. `__future__`, `math`, and
+That is the complete list - three statements, lines 25–28. `__future__`, `math`, and
 `dataclasses` are all Python standard library. **Confirmed: zero third-party imports.**
 The constraint holds.
 
@@ -656,14 +656,14 @@ The constraint holds.
   `COLUMN_SIDE = 0.30`, `PEDESTAL = (0.50, 0.34, 1.45)`, `CABINET = (1.60, 0.90, 2.00)`,
   `TRANSFORMER = (2.10, 1.60, 1.80)`, `PAD_THICKNESS = 0.06` (lines 32–45).
   - `MATERIALS` (49–59), 9 entries `(RGBA, metallic, roughness)`. Only
-    `stall_future` is translucent: `((0.784, 0.639, 0.243, 0.45), 0.00, 0.80)` — alpha 0.45.
+    `stall_future` is translucent: `((0.784, 0.639, 0.243, 0.45), 0.00, 0.80)` - alpha 0.45.
     `pedestal` is commented "ChargeReady green" `(0.086, 0.478, 0.408, 1.00)`.
   - `Box` frozen dataclass (62–88): `center`, `size`, `material`, `yaw_deg=0.0`, `name="part"`;
     `corners_enu()` emits 8 corners in `(sx, sy, sz)` order with `sx` outermost;
     **`enu_to_gltf((x,y,z)) -> (x, z, -y)`** (lines 85–88).
   - `SiteBuild` frozen dataclass (91–105): `site_id`, `ports_now`, `ports_pathway`, `boxes`,
     `footprint_m`, `ada_stalls`, plus `part_count` property.
-  - `ada_stall_count()` (113–119): `max(1, ceil(total/25))` for `total > 0`, else 0 —
+  - `ada_stall_count()` (113–119): `max(1, ceil(total/25))` for `total > 0`, else 0 -
     docstring explicitly calls it a *"screening rule of thumb ... Confirm against the AHJ's
     adopted accessibility code before using in design."*
   - `build_site()` (122–268): clamps `ports_now = max(1, int(...))` and
@@ -684,7 +684,7 @@ The constraint holds.
 ---
 
 ### `fcf3d/glb.py`
-- **Role:** Dependency-free binary glTF 2.0 writer — the no-Blender output path.
+- **Role:** Dependency-free binary glTF 2.0 writer - the no-Blender output path.
 - **Kind:** authored (222 lines). Generator of `web/models/*.glb`.
 - **Reads:** `MATERIALS, Box, SiteBuild` from `.geometry` (line 20). Writes to a path given by the caller.
 - **Written by / read by:** called by `fcf3d/build_models.py:24,46`; exercised by `tests/test_pipeline.py:299–364`; its output is loaded by `web/app.js` in Cesium.
@@ -701,7 +701,7 @@ at lines 30–31. Normals come from `_normal()` (42–47), a normalized cross pr
 `or 1.0` divide-by-zero guard.
 
 **Binary layout.** `add_view()` (100–108) appends a payload, records
-`{buffer:0, byteOffset, byteLength, target}`, then pads the *buffer* to a 4-byte boundary —
+`{buffer:0, byteOffset, byteLength, target}`, then pads the *buffer* to a 4-byte boundary -
 so every subsequent `byteOffset` is 4-aligned while `byteLength` stays exact. Three views
 per material: POSITION (`ARRAY_BUFFER` 34962), NORMAL (34962), indices
 (`ELEMENT_ARRAY_BUFFER` 34963). Component types: `FLOAT = 5126` for attributes,
@@ -709,20 +709,20 @@ per material: POSITION (`ARRAY_BUFFER` 34962), NORMAL (34962), indices
 
 **Spec guarantees it makes:**
 1. `asset.version == "2.0"` and a `generator` string (173–176): `"fcf3d.glb (Future City Fellowship / ChargeReady NOVA)"`.
-2. **POSITION accessors carry `min`/`max`** (129–131, 138–139) — required by the glTF 2.0 spec for POSITION; normals and indices correctly omit them.
+2. **POSITION accessors carry `min`/`max`** (129–131, 138–139) - required by the glTF 2.0 spec for POSITION; normals and indices correctly omit them.
 3. Coordinate system: every position goes through `Box.enu_to_gltf` (line 52) so the file is **Y-up**, as the spec requires.
 4. Accessor `byteOffset` alignment is satisfied by the 4-byte buffer padding; all component types are 4 bytes.
-5. `buffers[0].byteLength == len(buffer)` (line 184) — the test asserts this equality (test line 307).
+5. `buffers[0].byteLength == len(buffer)` (line 184) - the test asserts this equality (test line 307).
 6. **Alpha handling:** `alphaMode: "BLEND"` is set iff `colour[3] < 1.0` (91–92), so only `stall_future` is blended. `doubleSided: False` on every material.
 7. **GLB container** (`write_glb`, 198–211): 12-byte header `struct.pack("<4sII", b"glTF", 2, total)`; JSON chunk padded with **spaces** (`_pad4(..., b" ")`, line 201) as the spec requires; BIN chunk padded with **zeros** (line 202); `total = 12 + 8 + len(json_chunk) + 8 + len(bin_chunk)` (line 204). Both chunk lengths are therefore multiples of 4 and the declared total equals the real file length.
-8. `extras` (185–193) carries `site_id`, `ports_now`, `ports_pathway`, `ada_stalls`, `footprint_m`, `part_count`, and a `note`: *"Screening-level massing for siting discussion. Not a design."* — the disclaimer travels inside the binary asset.
+8. `extras` (185–193) carries `site_id`, `ports_now`, `ports_pathway`, `ada_stalls`, `footprint_m`, `part_count`, and a `note`: *"Screening-level massing for siting discussion. Not a design."* - the disclaimer travels inside the binary asset.
 
 **What it does not guarantee:** no `byteStride` (fine for tightly packed VEC3), no
 `bufferView.name`, no UVs or tangents, no textures, no `KHR_materials_*` extensions, no
 Draco compression. `UNSIGNED_INT` indices are legal in core glTF 2.0 but need
 `OES_element_index_uint` on WebGL1-only renderers.
 
-- **Also:** `to_data_uri()` (214–222) emits a base64 `model/gltf+json` data URI with the buffer inlined as a `data:application/octet-stream;base64,...` URI. It is **not referenced anywhere else in the tree** — dead but harmless.
+- **Also:** `to_data_uri()` (214–222) emits a base64 `model/gltf+json` data URI with the buffer inlined as a `data:application/octet-stream;base64,...` URI. It is **not referenced anywhere else in the tree** - dead but harmless.
 - **Verified against the shipped artifacts:** all 12 `web/models/*.glb` begin with the magic
   `glTF`, and each file's `extras.ports_now` / `extras.ports_pathway` matches the
   corresponding `asset.ports` / `asset.pathway_ports` in `web/data/sites.geojson` exactly.
@@ -731,25 +731,25 @@ Draco compression. `UNSIGNED_INT` indices are legal in core glTF 2.0 but need
 ---
 
 ### `blender/build_assets.py`
-- **Role:** Headless `bpy` asset factory — the presentation-fidelity twin of `glb.py`.
+- **Role:** Headless `bpy` asset factory - the presentation-fidelity twin of `glb.py`.
 - **Kind:** authored (198 lines). Only importable inside Blender's Python.
 - **Reads:** `--sites` (default `web/data/sites.geojson`); writes `--out` (default `web/models`) and optionally `--blend <dir>`.
 - **Written by / read by:** launched as a subprocess by `fcf3d/build_models.py:51–58`, i.e. by `make models-blender`. Imports `fcf3d.geometry` (line 44) after inserting the repo root into `sys.path` (lines 40–42).
 - **Key contents:**
   - Imports `bpy` (line 36, `# noqa: F401  (only resolvable inside Blender)`) and `bmesh` (37).
   - `BEVEL_WIDTH = 0.015` (line 46).
-  - `reset_scene()` (54–59) — `bpy.ops.wm.read_factory_settings(use_empty=True)` then explicitly purges meshes/materials/objects; comment: *"--factory-startup still ships a default cube."*
-  - `get_material()` (62–79) — builds a Principled BSDF from the shared `MATERIALS` palette; sets `Alpha` and `blend_method = "BLEND"` when `colour[3] < 1.0`.
-  - `make_box()` (82–111) — `bmesh.ops.create_cube(size=1.0)` → `scale(vec=box.size)` → bevel with `offset = min(BEVEL_WIDTH, min(box.size) * 0.2)`, `segments=2`, `profile=0.7`, `affect="EDGES"`, skipped if the result would be ≤ 1e-4. Sets `obj.location = box.center`, `rotation_euler = (0, 0, radians(yaw_deg))`, and forces `use_smooth = False` on every polygon.
-  - `build_blender_site()` (114–130) — one root collection `<sid>_build` with sub-collections named from the part-name prefix (`stall`, `stripe`, `dispenser`, `canopy`, `column`, `power`, `pad`, `transformer`).
-  - `export_glb()` (133–150) — `bpy.ops.export_scene.gltf(export_format="GLB", export_yup=True, export_apply=True, export_materials="EXPORT", export_cameras=False, export_lights=False, export_extras=True, use_selection=False)`.
-  - `parse_args()` (158–169) — reads args after the bare `--`; keys `sites`, `out`, `blend`.
-  - `main()` (172–194) — per feature: `ports_now = int(asset.get("ports") or props.get("ports_now") or 2)`, `ports_pathway = int(asset.get("pathway_ports") or props.get("ports_2050") or ports_now)`, reset scene, build, export, optionally `bpy.ops.wm.save_as_mainfile`.
+  - `reset_scene()` (54–59) - `bpy.ops.wm.read_factory_settings(use_empty=True)` then explicitly purges meshes/materials/objects; comment: *"--factory-startup still ships a default cube."*
+  - `get_material()` (62–79) - builds a Principled BSDF from the shared `MATERIALS` palette; sets `Alpha` and `blend_method = "BLEND"` when `colour[3] < 1.0`.
+  - `make_box()` (82–111) - `bmesh.ops.create_cube(size=1.0)` → `scale(vec=box.size)` → bevel with `offset = min(BEVEL_WIDTH, min(box.size) * 0.2)`, `segments=2`, `profile=0.7`, `affect="EDGES"`, skipped if the result would be ≤ 1e-4. Sets `obj.location = box.center`, `rotation_euler = (0, 0, radians(yaw_deg))`, and forces `use_smooth = False` on every polygon.
+  - `build_blender_site()` (114–130) - one root collection `<sid>_build` with sub-collections named from the part-name prefix (`stall`, `stripe`, `dispenser`, `canopy`, `column`, `power`, `pad`, `transformer`).
+  - `export_glb()` (133–150) - `bpy.ops.export_scene.gltf(export_format="GLB", export_yup=True, export_apply=True, export_materials="EXPORT", export_cameras=False, export_lights=False, export_extras=True, use_selection=False)`.
+  - `parse_args()` (158–169) - reads args after the bare `--`; keys `sites`, `out`, `blend`.
+  - `main()` (172–194) - per feature: `ports_now = int(asset.get("ports") or props.get("ports_now") or 2)`, `ports_pathway = int(asset.get("pathway_ports") or props.get("ports_2050") or ports_now)`, reset scene, build, export, optionally `bpy.ops.wm.save_as_mainfile`.
 - **Notes:**
-  - Docstring lines 25–26 restate C2 verbatim in a second place: *"Blender is an AUTHORING tool here, not the viewer. It never ships to the browser — it produces glTF, and CesiumJS does the delivery."*
+  - Docstring lines 25–26 restate C2 verbatim in a second place: *"Blender is an AUTHORING tool here, not the viewer. It never ships to the browser - it produces glTF, and CesiumJS does the delivery."*
   - Line 184 is the second `ports_2050` reference outside `build_sites.py`.
-  - `export_glb` passes `filepath=path` but `use_selection=False` and never selects — it exports the whole scene, which is correct because `reset_scene()` runs per site.
-  - `bpy.ops.export_scene.gltf` keyword names (`export_yup`, `export_apply`, `export_materials`) are Blender-version-sensitive; CLAUDE.md line 100 targets Blender 5.1+ for MCP but nothing pins a version for this script. **Uncertain** whether these kwargs are valid on the reader's Blender — I could not execute Blender here.
+  - `export_glb` passes `filepath=path` but `use_selection=False` and never selects - it exports the whole scene, which is correct because `reset_scene()` runs per site.
+  - `bpy.ops.export_scene.gltf` keyword names (`export_yup`, `export_apply`, `export_materials`) are Blender-version-sensitive; CLAUDE.md line 100 targets Blender 5.1+ for MCP but nothing pins a version for this script. **Uncertain** whether these kwargs are valid on the reader's Blender - I could not execute Blender here.
   - There is **no test coverage of this file at all** (it cannot be imported outside Blender). The "cannot drift" guarantee in the docstring (line 23) rests entirely on both paths importing `fcf3d.geometry`, which is true, but the *rendering* of that geometry is untested.
 
 ---
@@ -759,27 +759,27 @@ Draco compression. `UNSIGNED_INT` indices are legal in core glTF 2.0 but need
 - **Kind:** authored (382 lines).
 - **Reads:** `os.environ["FCF_REPO"]`, default `os.path.expanduser("~/fcf/Future-City-Fellowship--main-2")` (line 35). Inserts the repo root on `sys.path` (line 23).
 - **Written by / read by:** run by `Makefile:63` as `FCF_REPO="$(FCF)" $(PY) -m pytest tests/ -q`.
-- **Key contents — 31 `def test_*`, 46 collected cases:**
+- **Key contents - 31 `def test_*`, 46 collected cases:**
   - Fixtures `sources` / `frames` / `result`, all `scope="module"` (44–56).
   - `needs_repo = pytest.mark.skipif(not os.path.isdir(REPO), ...)` (36–38). **15 tests carry it.**
-  - Source layer: `test_required_sources_resolve` (63), `test_missing_repo_raises` (69, no `@needs_repo` — the only source test that always runs).
+  - Source layer: `test_required_sources_resolve` (63), `test_missing_repo_raises` (69, no `@needs_repo` - the only source test that always runs).
   - Weight fidelity: `test_driver_weights_sum_to_one_per_subscore` (78), `test_subscore_weights_sum_to_one` (89), `test_attribution_reproduces_model_score` (94), `test_build_emits_no_drift_warnings` (106), `test_invert_flags_match_scoring_module` (112).
-  - Output shape: `test_every_site_becomes_a_feature` (129), `test_ranks_are_dense_and_unique` (134), `test_coordinates_are_in_northern_virginia` (140) — **bbox `-78.5 < lon < -76.8`, `38.4 < lat < 39.2`**, `test_output_is_strict_json` (148) — asserts no `"NaN"`/`"Infinity"` substrings, `test_all_expected_keys_present` (159) — the 12-key required set, `test_asset_ports_are_sane` (171), `test_strengths_and_constraints_are_ordered` (179), `test_writes_inline_bundle` (189).
-  - Utilities: `test_split_sentences` (5 params), `test_tier_key` (6 params, incl. the exact tier strings `"Tier 1 — advance to site screening"`, `"Tier 2 — promising candidate, refine data"`, `"Tier 3 — lower priority / monitor"`, `"High-review candidate"`, `"Low public-priority / special-use"` → 1/2/3/2/4, and `"something else"` → 9), `test_clean_strips_non_finite`.
+  - Output shape: `test_every_site_becomes_a_feature` (129), `test_ranks_are_dense_and_unique` (134), `test_coordinates_are_in_northern_virginia` (140) - **bbox `-78.5 < lon < -76.8`, `38.4 < lat < 39.2`**, `test_output_is_strict_json` (148) - asserts no `"NaN"`/`"Infinity"` substrings, `test_all_expected_keys_present` (159) - the 12-key required set, `test_asset_ports_are_sane` (171), `test_strengths_and_constraints_are_ordered` (179), `test_writes_inline_bundle` (189).
+  - Utilities: `test_split_sentences` (5 params), `test_tier_key` (6 params, incl. the exact tier strings `"Tier 1 - advance to site screening"`, `"Tier 2 - promising candidate, refine data"`, `"Tier 3 - lower priority / monitor"`, `"High-review candidate"`, `"Low public-priority / special-use"` → 1/2/3/2/4, and `"something else"` → 9), `test_clean_strips_non_finite`.
   - Geometry: `test_ada_stall_count` (7 params: 0→0, 1→1, 8→1, 25→1, 26→2, 50→2, 51→3), `test_build_site_scales_with_ports`, `test_pathway_stalls_are_translucent`, `test_first_stall_is_ada_width` (asserts `ADA_STALL_WIDTH - 0.12`), `test_ports_pathway_never_below_ports_now`, `test_canopy_sits_above_every_dispenser`, `test_enu_to_gltf_conversion`, `test_box_corners_count_and_yaw`.
   - GLB: `test_gltf_structure_is_valid` (asserts `pos["count"] % 24 == 0`, i.e. 6 faces × 4 verts per box), `test_glb_header_is_well_formed` (magic/version/length/chunk alignment/`extras.site_id`), `test_translucent_material_gets_blend_mode`, `test_normals_are_unit_length`.
-  - `test_end_to_end` (368–382) — writes via `bs.write`, then `run_pure_python`, asserts each GLB `> 1000` bytes and starts with `b"glTF"`.
+  - `test_end_to_end` (368–382) - writes via `bs.write`, then `run_pure_python`, asserts each GLB `> 1000` bytes and starts with `b"glTF"`.
 - **Notes:**
   - The 12-key set in `test_all_expected_keys_present` (161–164) does **not** include `ports_2035`/`ports_2050`/`right_sizing`/`scenarios`, so removing or renaming those fields would not fail the suite. That is convenient for Phase 3's rename but means the suite provides no schema lock on the horizon fields.
   - `test_invert_flags_match_scoring_module`'s docstring says *"These four drivers are the ones fcf_m2.scoring wraps in (1 - x)"* (line 113) while the assertion lists **six** columns (115–122). Docstring/assert contradiction.
-  - `test_missing_repo_raises` (69–71) asserts `SourceMissing` for `"/nonexistent/path/xyz"` — that path does not exist, so `os.path.isfile` fails on the first REQUIRED entry. Correct, but it only proves the required-table branch, not that a *V3-only* repo is rejected.
+  - `test_missing_repo_raises` (69–71) asserts `SourceMissing` for `"/nonexistent/path/xyz"` - that path does not exist, so `os.path.isfile` fails on the first REQUIRED entry. Correct, but it only proves the required-table branch, not that a *V3-only* repo is rejected.
   - No test asserts the GeoJSON `crs`, the `schema_version`, or the manifest `disclaimer`.
 
 ---
 
 ## `requirements.txt` vs `repo/pyproject.toml` and `repo/requirements-lock.txt`
 
-**`repo/pyproject.toml`** — `name = "fcf-m2"`, `version = "3.0.0"`, `requires-python = ">=3.11"`.
+**`repo/pyproject.toml`** - `name = "fcf-m2"`, `version = "3.0.0"`, `requires-python = ">=3.11"`.
 Core deps: `numpy>=1.26`, `pandas>=2.1`, `matplotlib>=3.8`, `jsonschema>=4.20`.
 Extras: `gis = ["geopandas>=0.14", "contextily>=1.5", "xyzservices>=2024.0"]`,
 `test = ["pytest>=8.0", "pytest-cov>=4.1"]`,
@@ -787,7 +787,7 @@ Extras: `gis = ["geopandas>=0.14", "contextily>=1.5", "xyzservices>=2024.0"]`,
 `[tool.setuptools.packages.find] where = ["src"]`.
 `[tool.pytest.ini_options] testpaths = ["tests"]`, `addopts = "-q"`.
 
-**`repo/requirements-lock.txt`** — header: *"Lock generated 2026-07-19 from Python 3.14.6 arm64
+**`repo/requirements-lock.txt`** - header: *"Lock generated 2026-07-19 from Python 3.14.6 arm64
 venv used for all V3 verification runs"*. Relevant pins: `pandas==3.0.3`, `numpy==2.5.1`,
 `pytest==9.1.1`, `pytest-cov==7.1.0`, `matplotlib==3.11.1`, `jsonschema==4.26.0`.
 
@@ -796,7 +796,7 @@ venv used for all V3 verification runs"*. Relevant pins: `pandas==3.0.3`, `numpy
 explorer's requirements is incompatible with a pinned lock.
 
 **What would need to become an optional extra:**
-- The explorer's *runtime* need is `pandas` only — already a **core** dependency of `fcf-m2`.
+- The explorer's *runtime* need is `pandas` only - already a **core** dependency of `fcf-m2`.
   So an `explorer` extra would add **zero new runtime packages**. Merging is cheap.
 - `pytest` → already covered by the existing `test` extra.
 - `py3dep>=0.16` (commented out, requirements.txt line 9) is the **one genuinely new**
@@ -807,11 +807,11 @@ explorer's requirements is incompatible with a pinned lock.
 
 **Packaging friction Phase 3 must plan for:**
 1. `pyproject.toml` uses a **src layout** (`where = ["src"]`). The explorer's package sits at
-   `fcf-3d/fcf3d/`, a flat layout. It must move to `repo/src/fcf3d/` to be discovered — and
+   `fcf-3d/fcf3d/`, a flat layout. It must move to `repo/src/fcf3d/` to be discovered - and
    that changes `blender/build_assets.py:40–42`, which computes `_REPO` as
    `dirname(dirname(abspath(__file__)))` and inserts it on `sys.path`.
 2. `[tool.pytest.ini_options] testpaths = ["tests"]` is repo-wide, so the explorer's tests
-   would join the main run — meaning **`REPO`/`FCF_REPO` and the 15 `@needs_repo` skips
+   would join the main run - meaning **`REPO`/`FCF_REPO` and the 15 `@needs_repo` skips
    become part of the repo's CI story.** Once in-tree, `FCF_REPO` should simply be the repo
    root and the skip should be deleted, or the skips will hide real failures.
 3. Python floor: pyproject says `>=3.11`, the lock was built on 3.14.6, CLAUDE.md line 111
@@ -823,11 +823,11 @@ explorer's requirements is incompatible with a pinned lock.
 
 | check | result |
 |---|---|
-| `590.2` (the corrected-away eGRID factor) anywhere in the explorer tree | **not found** — clean |
-| `596.3` anywhere in the explorer tree | **not found** — the explorer never surfaces the emissions factor at all, even though it copies `net_co2e_kg` out of the contract (`build_sites.py:299`). The contract's `grid_factor_value` is `596.3`, units `lb CO2e/MWh`, vintage `eGRID2023r2, accessed 2026-07-19` on all 120 rows. |
+| `590.2` (the corrected-away eGRID factor) anywhere in the explorer tree | **not found** - clean |
+| `596.3` anywhere in the explorer tree | **not found** - the explorer never surfaces the emissions factor at all, even though it copies `net_co2e_kg` out of the contract (`build_sites.py:299`). The contract's `grid_factor_value` is `596.3`, units `lb CO2e/MWh`, vintage `eGRID2023r2, accessed 2026-07-19` on all 120 rows. |
 | absolute `/Users/...` paths in the Python, Makefile, or docs | **none** |
 | secrets / tokens / AWS account IDs / `AKIA` | **none.** `web/index.html:102` contains `placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."`, which is only the generic JWT header prefix used as an input placeholder, not a credential. (That file is L11's lane; noted here as corroboration of constraint C8.) |
-| generator vs artifact drift (`web/models/*.glb` vs `web/data/sites.geojson`) | **none** — all 12 match on `ports_now`/`ports_pathway` |
+| generator vs artifact drift (`web/models/*.glb` vs `web/data/sites.geojson`) | **none** - all 12 match on `ports_now`/`ports_pathway` |
 | `web/data/manifest.json` provenance | `schema_version: fcf3d/1.0.0`, `generated_at: 2026-07-26T04:27:14.192759+00:00`, `site_count: 12`, `score_min: 29.6`, `score_max: 58.8`, `warnings: []`, and an eight-entry `sources` block naming both `fixture_legacy_v2_*.csv` files. **The ETL demonstrably ran, cleanly, against the legacy fixture.** |
 | test count claim ("46 tests", CLAUDE.md:42, README:61) | **correct** |
 
@@ -840,49 +840,49 @@ standalone re-implementation in the scratchpad.
 
 ## Findings summary (severity-ordered)
 
-1. **HIGH — legacy_v2 spine, unlabelled.** `build_sites.py:47–48` requires
+1. **HIGH - legacy_v2 spine, unlabelled.** `build_sites.py:47–48` requires
    `tests/fixture_legacy_v2_*.csv`; `:436–437` and `:463–466` emit `ports_2035`,
    `ports_2050`, `ports_2035_base/high`, `ports_2050_base/high`; `build_models.py:43` and
    `build_assets.py:184` consume `ports_2050`. Nothing labels any of it `legacy_v2`.
    Canonical is 2026/2036/2046/2056.
-2. **HIGH — two horizon conventions in one Feature.** The same `properties` object carries
+2. **HIGH - two horizon conventions in one Feature.** The same `properties` object carries
    `ports_2035`/`ports_2050` (legacy) and a `scenarios` list at 2026/2036/2046/2056
    (canonical, from `data/contract/v1/scenario_table.csv` via `build_sites.py:53,513`).
-3. **HIGH — README.md:199** *"the 2026 → 2036 → 2050 horizons"*: mangled, neither convention.
+3. **HIGH - README.md:199** *"the 2026 → 2036 → 2050 horizons"*: mangled, neither convention.
    Should read 2026 → 2036 → 2046 → 2056.
-4. **HIGH — README.md:77–81** headline numbers (FFX002 *"ranks #1 at 58.8"*) are legacy_v2.
+4. **HIGH - README.md:77–81** headline numbers (FFX002 *"ranks #1 at 58.8"*) are legacy_v2.
    Under `milestone2_v3` the same site scores **51.8 at rank #2**, and **FFX004 is #1 at 53.4**
    (`repo/data/outputs/v3_run/site_results_milestone2_v3.csv`). The arithmetic reproduces
    exactly; the *regime* is unlabelled.
-5. **HIGH — the drift guard is weaker than advertised.** `test_attribution_reproduces_model_score`
+5. **HIGH - the drift guard is weaker than advertised.** `test_attribution_reproduces_model_score`
    never imports `fcf_m2.scoring`; it compares against a frozen CSV. CLAUDE.md:53 and
    README:82–84 claim it "fails the build if anyone reweights the model."
-6. **HIGH — Phase 3 blocker: the 15-column gap.** The fixture carries 15 narrative/banding
+6. **HIGH - Phase 3 blocker: the 15-column gap.** The fixture carries 15 narrative/banding
    columns that neither `site_results_milestone2_v3.csv` nor `site_results_legacy_v2.csv`
    has. Every one is read with `.get()`, so repointing the ETL fails **silently**.
-7. **MEDIUM — the Makefile defines "the model repo" as "contains
+7. **MEDIUM - the Makefile defines "the model repo" as "contains
    `tests/fixture_legacy_v2_site_results.csv`"** (`Makefile:77,80,92`). A V3-only checkout is
    rejected with *"so it is not the model repo."*
-8. **MEDIUM — 15 of 46 tests silently skip** unless `FCF_REPO` points at a real directory
+8. **MEDIUM - 15 of 46 tests silently skip** unless `FCF_REPO` points at a real directory
    (`test_pipeline.py:35–38`), including the load-bearing attribution test. The default is a
    machine-specific `~/fcf/Future-City-Fellowship--main-2`.
-9. **MEDIUM — `readiness_conf` is resolved and loaded but never used** (`build_sites.py:55`
+9. **MEDIUM - `readiness_conf` is resolved and loaded but never used** (`build_sites.py:55`
    vs. `build()` 338–538). It inflates the manifest `sources` block, and is the likely origin
    of README:66's "seven tables" (the code resolves eight).
-10. **LOW — `build_sites.py:89`** references `test_build_sites.py`; the file is
+10. **LOW - `build_sites.py:89`** references `test_build_sites.py`; the file is
     `tests/test_pipeline.py`.
-11. **LOW — `test_pipeline.py:113`** docstring says *"These four drivers"*; the assertion
+11. **LOW - `test_pipeline.py:113`** docstring says *"These four drivers"*; the assertion
     lists six columns.
-12. **LOW — README.md:81** *"sum back to 58.8 exactly, for all 12 sites"* — PWC005 is off by
+12. **LOW - README.md:81** *"sum back to 58.8 exactly, for all 12 sites"* - PWC005 is off by
     0.1 (37.0 rebuilt vs 36.9 model). The gate is ±0.15, not exact.
-13. **LOW — README.md:80** calls the driver *"short service run"*; the code label
+13. **LOW - README.md:80** calls the driver *"short service run"*; the code label
     (`build_sites.py:157`) is *"Distance to electrical service"*.
-14. **LOW — `.gitignore` does not exclude `venv/`** (created by `Makefile:31`) nor `*.blend`
+14. **LOW - `.gitignore` does not exclude `venv/`** (created by `Makefile:31`) nor `*.blend`
     (written by `build_assets.py:192`); it ignores only `*.blend1`.
-15. **LOW — `build_sites.py:388`** filters `tbl_avoided_evse.csv` on `horizon_year == 2026`
+15. **LOW - `build_sites.py:388`** filters `tbl_avoided_evse.csv` on `horizon_year == 2026`
     but not on `case`, then takes `iloc[0]`. Deterministic today (12 rows, all `baseline`),
     fragile to a contract change.
-16. **INFO — good news for Phase 3:** the mirrored weights reproduce **milestone2_v3** scores
+16. **INFO - good news for Phase 3:** the mirrored weights reproduce **milestone2_v3** scores
     just as well as legacy_v2 (worst delta 0.100 on both), and the legacy
     `future_ready_capacity` equals the canonical max `ports_pathway_capacity` for all 12
     sites. Neither the weight table nor the GLB geometry needs to change.

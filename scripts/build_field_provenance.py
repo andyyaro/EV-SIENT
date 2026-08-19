@@ -1,14 +1,14 @@
 """Build data/provenance/field_provenance_v1.csv from the site table and the legacy
 source-confidence tracker.
 
-Derivation rules (documented, deterministic — commit the output):
+Derivation rules (documented, deterministic - commit the output):
 - electrical_service: every site with elec_service_rating_amp==0 or spare_capacity_kw==0
   → unconfirmed + unresolved (this is the audited truth: 12/12 unconfirmed).
 - safety_review_fields: emergency_disconnect_visible==0 → unconfirmed; else planning_assumption
   (flags are team site-visit assessments, not AHJ determinations).
 - site_use_and_demand: visitors/employees present → derived_public_data (facility websites,
   ACS/LODES-class extracts); else planning_assumption.
-- address_and_public_access: official_source (facility/branch pages — matches legacy tracker).
+- address_and_public_access: official_source (facility/branch pages - matches legacy tracker).
 - coordinates: public_web_reference (legacy tracker: replace with official GIS later).
 - parking_and_layout: planning_assumption (counted from imagery/visits, unverified).
 - equity_and_context: derived_public_data (ACS/LODES-derived index).

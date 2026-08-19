@@ -3,7 +3,7 @@
 
 The defect this exists to prevent
 ---------------------------------
-Five of the platform's six surfaces linked to a **directory** — `dashboard/`, `contract/v1/`,
+Five of the platform's six surfaces linked to a **directory** - `dashboard/`, `contract/v1/`,
 `contract/v2/`, `nfc/`, `reports/`. There is no such thing as a directory in S3, so every one
 of those links was a 404 for anyone using the deployed site.
 
@@ -14,7 +14,7 @@ passed. Only the web tier was broken, and only for a reader who clicked.
 
 That is the same shape as the two blank Tableau sheets and the missing Cognito sign-in page:
 the thing under our control behaved, and the thing the reader touches did not. So this check
-resolves links **the way S3 resolves them** — a trailing slash means `index.html`, and nothing
+resolves links **the way S3 resolves them** - a trailing slash means `index.html`, and nothing
 is generated on demand.
 
 Run: python scripts/check_surface_links.py
@@ -47,7 +47,7 @@ def resolve_like_s3(href: str) -> Path:
     """Map an href to the object S3 would be asked for.
 
     A trailing slash is the whole point: CloudFront's default root object only applies at `/`,
-    so `contract/v1/` reaches the origin as the key `contract/v1/` — which does not exist. The
+    so `contract/v1/` reaches the origin as the key `contract/v1/` - which does not exist. The
     edge function rewrites it to `contract/v1/index.html`, and that file has to be real.
     """
     path = href.split("?")[0].split("#")[0]
@@ -58,7 +58,7 @@ def resolve_like_s3(href: str) -> Path:
 
 def main() -> int:
     if not MANIFEST.is_file():
-        print(f"{MANIFEST} is missing — run scripts/build_platform_surfaces.py first")
+        print(f"{MANIFEST} is missing - run scripts/build_platform_surfaces.py first")
         return 1
 
     manifest = json.loads(MANIFEST.read_text())
@@ -87,7 +87,7 @@ def main() -> int:
             broken.append(f"page requires {required}, which is not in the bundle")
 
     if broken:
-        print(f"{len(broken)} broken link(s) — these are 404s for every reader on the web tier:")
+        print(f"{len(broken)} broken link(s) - these are 404s for every reader on the web tier:")
         for item in broken:
             print(f"  {item}")
         print("\nNote: these can still WORK locally. Python's http.server generates directory\n"

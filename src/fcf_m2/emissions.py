@@ -3,7 +3,7 @@
 Net CO2e = displaced gasoline emissions − charging grid emissions, with every factor
 carrying source + vintage. Also computes the avoided-EVSE resource metric (M4) and an
 optional renewable-matched scenario. Negative or counterintuitive values are reported
-as computed — never clipped.
+as computed - never clipped.
 
 Baseline definition (required for any 'avoided' claim): each kWh delivered displaces
 gasoline miles at EV_EFFICIENCY_KWH_PER_MI driven instead of a gasoline LDV emitting

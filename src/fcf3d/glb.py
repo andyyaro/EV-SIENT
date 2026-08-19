@@ -1,5 +1,5 @@
 """
-glb.py — write a SiteBuild to a binary glTF 2.0 (.glb) file.
+glb.py - write a SiteBuild to a binary glTF 2.0 (.glb) file.
 
 Zero dependencies, pure stdlib. This exists so the pipeline is runnable and
 testable in CI without a Blender install; `blender/build_assets.py` produces

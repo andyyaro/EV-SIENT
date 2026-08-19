@@ -1,5 +1,5 @@
 """
-build_models.py — generate one proposed-build GLB per candidate site.
+build_models.py - generate one proposed-build GLB per candidate site.
 
 Reads web/data/sites.geojson (produced by fcf3d.build_sites), and for each
 site emits web/models/<SITE_ID>.glb sized to that site's own right-sizing

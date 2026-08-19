@@ -4,13 +4,13 @@ Two Phase 7 rules are enforced here:
 
   "The platform never conflates engines. Python, Octave, real MATLAB, and the native
    Simulink view are always distinguishable on screen."
-  "MATLAB runner — results shown beside the Python results with divergences SURFACED,
+  "MATLAB runner - results shown beside the Python results with divergences SURFACED,
    not hidden."
 
 The awkward fact this has to handle honestly: the two engines have never run on the same
 data. Real MATLAB has only ever executed against a synthetic fixture, because the public
 harness must never carry project data. So a row-by-row comparison of the twelve real sites
-does not exist — and the record must say so rather than quietly showing something else.
+does not exist - and the record must say so rather than quietly showing something else.
 """
 
 from __future__ import annotations

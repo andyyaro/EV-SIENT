@@ -304,7 +304,7 @@ def test_a_blank_attribution_cell_is_refused_not_read_as_the_word_nan(tmp_path, 
     `__post_init__` refuses an observation whose source_document or observer is blank, because
     an unattributed record must not upgrade a site's capacity_basis. The refusal never fired:
     pandas reads a blank cell as NaN and the reader did `str(NaN).strip()`, delivering the
-    four-character string 'nan' — non-empty, so the check passed.
+    four-character string 'nan' - non-empty, so the check passed.
 
     The result was not cosmetic. The row was accepted, reported implied_basis
     'verified_utility' (the strongest available), and produced the provenance string
@@ -330,7 +330,7 @@ def test_no_text_field_can_ever_arrive_as_the_string_nan(tmp_path):
     """The general form of the bug, not just the two fields that were checked.
 
     A blank cell in ANY text column must arrive as empty, never as 'nan'. Left unfixed,
-    source_org would print 'nan' inside the provenance string that travels into the contract —
+    source_org would print 'nan' inside the provenance string that travels into the contract -
     a fabricated-looking source on a row that is otherwise legitimate.
     """
     row = dict(CAPACITY_ROW, source_org="", notes="")
@@ -344,7 +344,7 @@ def test_no_text_field_can_ever_arrive_as_the_string_nan(tmp_path):
 
 
 def test_an_observation_with_no_site_id_is_refused(tmp_path):
-    """Unchecked this does not fail — resolve_capacity groups by site_id, so it creates a
+    """Unchecked this does not fail - resolve_capacity groups by site_id, so it creates a
     phantom site keyed on the empty string whose confirmed capacity belongs to nowhere."""
     path = _write_csv(tmp_path, observed.CAPACITY_COLUMNS, dict(CAPACITY_ROW, site_id=""))
     with pytest.raises(observed.ObservationError, match="site_id"):

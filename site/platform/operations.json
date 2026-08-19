@@ -24,7 +24,7 @@
     },
     {
       "id": "run-milestone2-v3",
-      "label": "Run the model \u2014 canonical (milestone2_v3)",
+      "label": "Run the model - canonical (milestone2_v3)",
       "description": "Runs the full Python model in canonical mode and regenerates the contract: demand, right-sizing, waits, economics, emissions, confidence and triggers.",
       "available": false,
       "unavailable_reason": "Running the model executes Python on your machine. The web tier serves precomputed results and cannot execute anything.",
@@ -36,7 +36,7 @@
     },
     {
       "id": "run-legacy-v2",
-      "label": "Run the model \u2014 legacy V2 baseline",
+      "label": "Run the model - legacy V2 baseline",
       "description": "Reproduces the accepted V2 baseline exactly: 25 starter ports, 48 pathway. Kept runnable so the older published figures stay checkable.",
       "available": false,
       "unavailable_reason": "Running the model executes Python on your machine. The web tier serves precomputed results and cannot execute anything.",
@@ -49,7 +49,7 @@
     {
       "id": "ingest-observations",
       "label": "Check what field observations would change",
-      "description": "Reads observed capacity and session records and reports what they WOULD change \u2014 which sites upgrade from placeholder capacity, which triggers become evaluable. It never writes: received values enter the inputs and the model re-runs.",
+      "description": "Reads observed capacity and session records and reports what they WOULD change - which sites upgrade from placeholder capacity, which triggers become evaluable. It never writes: received values enter the inputs and the model re-runs.",
       "available": false,
       "unavailable_reason": "Reads observation files from your machine. The web tier has no access to your files and cannot run the ingestion.",
       "unavailable_because": "tier",
@@ -87,7 +87,7 @@
       "available": false,
       "unavailable_reason": "Writes data files, and publishing drives the Tableau Public desktop\n                        application with real keystrokes. Neither is possible in a browser.",
       "unavailable_because": "tier",
-      "caveat": "Building the .twbx and publishing need Tableau Public installed and a signed-in session. Four kinds of presentation feature remain unbuildable, five rows in the gap table (the two reference lines are separate sheets) \u2014 see dashboard/tableau/CAPABILITY_GAP.md.",
+      "caveat": "Building the .twbx and publishing need Tableau Public installed and a signed-in session. Four kinds of presentation feature remain unbuildable, five rows in the gap table (the two reference lines are separate sheets) - see dashboard/tableau/CAPABILITY_GAP.md.",
       "produces": [
         "dashboard/tableau/build/workbook_spec.json"
       ]
@@ -119,7 +119,7 @@
     {
       "id": "intake-review",
       "label": "Review a jurisdiction's own data file",
-      "description": "Reads a supplied CSV and reports what intake WOULD do with it: which columns it would map and which of those are guesses from a name, which fields are absent, which unit conversions it would apply, and the data confidence the file would produce \u2014 all before anything is changed or any run starts.",
+      "description": "Reads a supplied CSV and reports what intake WOULD do with it: which columns it would map and which of those are guesses from a name, which fields are absent, which unit conversions it would apply, and the data confidence the file would produce - all before anything is changed or any run starts.",
       "available": false,
       "unavailable_reason": "Reads a file from your machine. The web tier has no access to your filesystem, and uploading planning data to a server this project does not run would be a worse answer than not offering the button.",
       "unavailable_because": "tier",
@@ -129,7 +129,7 @@
     {
       "id": "verify-all",
       "label": "Run every verification gate",
-      "description": "Runs the whole gate suite \u2014 contract rules, hash chains, cross-model constants, published-number checks, secret scan, explorer validity, Tableau and provenance. This is the check CI runs.",
+      "description": "Runs the whole gate suite - contract rules, hash chains, cross-model constants, published-number checks, secret scan, explorer validity, Tableau and provenance. This is the check CI runs.",
       "available": false,
       "unavailable_reason": "Executes the full test suite and model runs on your machine. The web tier serves the result of the last CI run instead.",
       "unavailable_because": "tier",

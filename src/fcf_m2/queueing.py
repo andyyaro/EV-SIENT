@@ -1,4 +1,4 @@
-"""Erlang-C queueing screen — exact port of the accepted legacy V2 implementation.
+"""Erlang-C queueing screen - exact port of the accepted legacy V2 implementation.
 
 The steady-state M/M/c screen is intentionally preserved unchanged (PY-04 requires
 adding peak modeling alongside it, not replacing it). See peak_wait.py for the

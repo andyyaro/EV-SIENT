@@ -1,8 +1,8 @@
-# DRAFT — PREPARED 2026-07-19 — NOT SENT
+# DRAFT - PREPARED 2026-07-19 - NOT SENT
 
-# AHJ Question Set — Fairfax City Fire Marshal (Fairfax City Fire & Rescue)
+# AHJ Question Set - Fairfax City Fire Marshal (Fairfax City Fire & Rescue)
 
-*For use in a requested meeting, site visit, or written exchange. Nothing has been sent or asked. Answers are recorded verbatim with respondent name, title, and date; interpretations by the AHJ govern over any code reading in our documents. Sites in this jurisdiction: FFX002 City of Fairfax Regional Library (**rank 2** under the canonical `milestone2_v3` model), FFX004 Fairfax County Government Center (**rank 1**, the strongest candidate — confirm whether county facilities within city limits fall under city or county fire review), FFX001 Fairfax City Hall. *(Ranks corrected 2026-07-28: this previously showed the `legacy_v2` order, FFX002 first.)*
+*For use in a requested meeting, site visit, or written exchange. Nothing has been sent or asked. Answers are recorded verbatim with respondent name, title, and date; interpretations by the AHJ govern over any code reading in our documents. Sites in this jurisdiction: FFX002 City of Fairfax Regional Library (**rank 2** under the canonical `milestone2_v3` model), FFX004 Fairfax County Government Center (**rank 1**, the strongest candidate - confirm whether county facilities within city limits fall under city or county fire review), FFX001 Fairfax City Hall. *(Ranks corrected 2026-07-28: this previously showed the `legacy_v2` order, FFX002 first.)*
 
 ## A. Code basis
 
@@ -11,7 +11,7 @@
 
 ## B. Disconnect location, labeling, illumination
 
-3. For public Level 2 EVSE (≤19.2 kW AC pedestal units), where do you want the emergency/service disconnect located relative to the equipment — and is a single remote disconnect for a bank of ports acceptable?
+3. For public Level 2 EVSE (≤19.2 kW AC pedestal units), where do you want the emergency/service disconnect located relative to the equipment - and is a single remote disconnect for a bank of ports acceptable?
 4. What labeling do you require or prefer at the disconnect and at the equipment (wording, size, reflectivity, photoluminescence)?
 5. Do you require the disconnect and its signage to be illuminated or visible at night, and to what acceptance test?
 

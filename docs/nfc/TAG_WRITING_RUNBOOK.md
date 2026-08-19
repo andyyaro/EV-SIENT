@@ -10,7 +10,7 @@ reader, no prior NFC experience. Roughly 3 minutes per tag once you have the rhy
 >
 > That is why step 5 (verify) comes before step 6 (lock), and why the verify step asks you
 > to read the tag with a *different* mechanism than the one that wrote it. Do not lock a
-> tag you have not read back. If you are unsure, stop and leave it unlocked — an unlocked
+> tag you have not read back. If you are unsure, stop and leave it unlocked - an unlocked
 > tag can be fixed tomorrow; a wrongly locked one cannot be fixed at all.
 
 ---
@@ -20,9 +20,9 @@ reader, no prior NFC experience. Roughly 3 minutes per tag once you have the rhy
 | | |
 |---|---|
 | **Phone** | iPhone XS or later, or a recent Android. Confirmed for this project: **iPhone 17 Pro**. |
-| **App** | **NFC Tools** (free) — App Store or Play Store. Used only for *writing*. |
+| **App** | **NFC Tools** (free) - App Store or Play Store. Used only for *writing*. |
 | **Tags** | NTAG215 coins, 25 mm, white PVC, adhesive. 50 on hand. |
-| **The list** | `docs/nfc/tag_payloads.csv` — one row per site, with the exact URL. Print it or open it on a laptop. |
+| **The list** | `docs/nfc/tag_payloads.csv` - one row per site, with the exact URL. Print it or open it on a laptop. |
 
 **People reading the tags need none of this.** An iPhone XS or later reads a tag in the
 background with no app at all: tap, a banner drops down, tap the banner, Safari opens. That
@@ -69,15 +69,15 @@ very different, you have typed the URL wrong.
 3. Hold still for two seconds. NFC Tools will say **Write successful**.
 
 If it fails: reposition and try again. PVC coins are thin and the antenna sweet spot is
-small. Repeated failure on one coin, when others work, means a dead tag — set it aside and
+small. Repeated failure on one coin, when others work, means a dead tag - set it aside and
 label it dead rather than fighting it.
 
 ### 4. Close the app
 
-Genuinely close it — swipe it away. The next step must not be done by the app that just
+Genuinely close it - swipe it away. The next step must not be done by the app that just
 wrote the tag, or you are checking your own homework.
 
-### 5. Verify — the step that protects you
+### 5. Verify - the step that protects you
 
 1. With NFC Tools **closed**, tap the coin on the back of your phone.
 2. A notification banner appears at the top of the screen showing the URL.
@@ -88,23 +88,23 @@ wrote the tag, or you are checking your own homework.
 This is a real read through the operating system, not a readback through the app that just
 wrote it. If it does not match, rewrite it. **Do not proceed to lock.**
 
-### 6. Lock — irreversible, and only for tags that are going out
+### 6. Lock - irreversible, and only for tags that are going out
 
 **Locking is not always the right answer. Decide which kind of tag this is first.**
 
 | This tag is... | Lock it? |
 |---|---|
-| **Going out** — placed at a site, in public, where strangers can reach it | **Yes.** This is the whole reason locking exists. |
-| **A bench tag** — testing, a demo, a walkthrough rehearsal, something that lives in a drawer | **No.** Leave it writable. |
+| **Going out** - placed at a site, in public, where strangers can reach it | **Yes.** This is the whole reason locking exists. |
+| **A bench tag** - testing, a demo, a walkthrough rehearsal, something that lives in a drawer | **No.** Leave it writable. |
 
 The threat locking defends against is a stranger rewriting a tag that carries the project's
-implicit endorsement — redirecting it to a phishing page under apparent county authority.
+implicit endorsement - redirecting it to a phishing page under apparent county authority.
 That threat only exists once a tag is somewhere a stranger can reach it. A tag on your desk
 is not exposed to it, and locking one costs you the ability to re-point it when a URL
 changes. There are 50 coins and 12 sites; spares are free, so there is no reason to lock one
 you might want to reuse.
 
-**If this is a bench tag, stop here.** Skip to step 7 and log it as verified but not locked —
+**If this is a bench tag, stop here.** Skip to step 7 and log it as verified but not locked -
 that is a complete, correct outcome, not a job half done.
 
 **If this tag is going out**, and only after step 5 has passed on this specific coin:
@@ -124,7 +124,7 @@ which is the entire point.
 ### 7. Log it
 
 Add a row to `docs/nfc/TAG_VERIFICATION_LOG.md`: site id, date, who wrote it, verified yes,
-**locked yes *or* no — record what you actually did**, and the last 4 characters of the tag's
+**locked yes *or* no - record what you actually did**, and the last 4 characters of the tag's
 UID if NFC Tools shows it.
 
 *(This said "locked yes" unconditionally, which contradicts step 6 nineteen lines above: bench
@@ -140,7 +140,7 @@ An unlogged tag is an unknown tag.
 | What happened | What to do |
 |---|---|
 | Wrote the wrong URL, **not yet locked** | Just write again. Writing overwrites; there is nothing to undo. |
-| Need to change the URL on a **locked** tag | Not possible. That is the trade locking makes. Use a fresh coin — which is why bench tags stay unlocked. |
+| Need to change the URL on a **locked** tag | Not possible. That is the trade locking makes. Use a fresh coin - which is why bench tags stay unlocked. |
 | Wrote the wrong URL, **already locked** | The tag is unusable. Mark it, bin it, use a new one. Do not deploy it. |
 | Tag will not write, others do | Dead tag. Label it and set it aside. |
 | Banner does not appear on tap | NFC background reading is off, or the phone is in Low Power Mode, or it is not an iPhone XS or later. Check Low Power Mode first. |
@@ -151,7 +151,7 @@ An unlogged tag is an unknown tag.
 ## Doing all twelve
 
 Write, verify and (for tags going out) lock **one tag completely** before starting the next. Batching the writes
-and verifying later is how a mislabelled tag gets locked — and one mislabelled locked tag
+and verifying later is how a mislabelled tag gets locked - and one mislabelled locked tag
 means one site's visitors get another site's information, which is worse than no tag.
 
 Expect around 40 minutes for twelve tags including logging.
@@ -162,7 +162,6 @@ Expect around 40 minutes for twelve tags including logging.
 
 - **No instruction to disable any phone security setting.** Nothing in this process needs it.
 - **No password protection.** NTAG215 supports a 32-bit password, but a password shared
-  across a team on printed paper is security theatre, and locking achieves the actual goal
-  — permanent read-only — without a secret to leak. Recorded as a decision, not an oversight.
+  across a team on printed paper is security theatre, and locking achieves the actual goal permanent read-only - without a secret to leak. Recorded as a decision, not an oversight.
 - **No tag carries anything except a URL.** No name, no credential, no identifier for any
   person. Nothing on a tag is secret, so a lost tag discloses nothing.

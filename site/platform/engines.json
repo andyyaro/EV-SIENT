@@ -14,7 +14,7 @@
       "id": "matlab",
       "name": "MathWorks MATLAB",
       "role": "Independent execution of the same model",
-      "status": "executed \u2014 25.2.0.3177638 (R2025b) Update 5",
+      "status": "executed - 25.2.0.3177638 (R2025b) Update 5",
       "detail": "Runs the .m implementation in public CI. It has executed and passed, but ONLY against a synthetic fixture: the harness is public and must never carry project data. It has never seen the twelve real sites, so no number here is a MATLAB result.",
       "ran_on_real_sites": false,
       "evidence": {
@@ -47,7 +47,7 @@
   ],
   "guard_evidence": {
     "title": "The fail-closed capacity guard, verified on real MATLAB",
-    "why_it_matters": "This is the most valuable thing the MATLAB runs establish. The guard refuses to emit a feasibility claim from placeholder capacity \u2014 and it fires.",
+    "why_it_matters": "This is the most valuable thing the MATLAB runs establish. The guard refuses to emit a feasibility claim from placeholder capacity - and it fires.",
     "from_run": "run-30296650057",
     "rows": 120,
     "run_status_ok": 120,
@@ -79,12 +79,12 @@
     {
       "id": "charger-efficiency",
       "between": "Python vs MATLAB",
-      "finding": "Charger efficiency was 0.92 in Python and 0.93 in three MATLAB files \u2014 one physical assumption, two values. Every MATLAB energy figure ran about 1.1% high.",
+      "finding": "Charger efficiency was 0.92 in Python and 0.93 in three MATLAB files - one physical assumption, two values. Every MATLAB energy figure ran about 1.1% high.",
       "severity": "FIXED",
       "surfaced": true,
       "how_found": "By running the reconciliation instead of assuming agreement. Identity reconciled 120/120; energy did not, and the implied efficiency measured 0.9300 across all 120 rows.",
-      "why_it_survived": "Charger efficiency is not a contract field, so there was nothing to reconcile it against \u2014 the drift was hiding in the one place the anti-drift mechanism does not reach."
+      "why_it_survived": "Charger efficiency is not a contract field, so there was nothing to reconcile it against - the drift was hiding in the one place the anti-drift mechanism does not reach."
     }
   ],
-  "what_cannot_be_shown": "A row-by-row Python-vs-MATLAB comparison of the twelve real sites. Real MATLAB has only ever run against a synthetic fixture, so that comparison does not exist \u2014 and it will not be fabricated to fill the space."
+  "what_cannot_be_shown": "A row-by-row Python-vs-MATLAB comparison of the twelve real sites. Real MATLAB has only ever run against a synthetic fixture, so that comparison does not exist - and it will not be fabricated to fill the space."
 }

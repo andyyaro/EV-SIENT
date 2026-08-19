@@ -1,13 +1,13 @@
-# INVENTORY.md — every file in all three trees
+# INVENTORY.md - every file in all three trees
 
 **Phase 0.3 deliverable.** Every text file below was **read end to end**, not skimmed; every binary was
 opened and checked for corruption, for being referenced by something, and for matching what its name and
 documentation claim. Produced by twelve non-overlapping reader lanes plus an independent coverage verifier,
 with the load-bearing MATLAB and 3D-explorer sources additionally read line by line by the program lead.
 
-- **229 files** — 198 tracked in `repo/`, 31 in `incoming/explorer/fcf-3d/`
+- **229 files** - 198 tracked in `repo/`, 31 in `incoming/explorer/fcf-3d/`
 - The snapshot tree (`incoming/snapshot/Future-City-Fellowship--main-2/`) is **byte-identical** to
-  `origin/main` across all 198 files and so is not enumerated separately — see `RECONCILIATION.md`.
+  `origin/main` across all 198 files and so is not enumerated separately - see `RECONCILIATION.md`.
 - Full per-file detail lives in [`inventory/`](inventory/), one file per lane. This page is the index.
 
 ## How to read this
@@ -23,35 +23,35 @@ with the load-bearing MATLAB and 3D-explorer sources additionally read line by l
 
 | Lane | Scope | Detail |
 |---|---|---|
-| L01 | The Python model — `src/fcf_m2/` (the single scorer) | [`inventory/L01-model-core.md`](inventory/L01-model-core.md) |
-| L02 | Tests and build scripts — `tests/`, `scripts/` | [`inventory/L02-tests-scripts.md`](inventory/L02-tests-scripts.md) |
-| L03 | MATLAB source — `matlab/src/` (9 files) incl. Simulink topology and Octave inventory | [`inventory/L03-matlab-src.md`](inventory/L03-matlab-src.md) |
+| L01 | The Python model - `src/fcf_m2/` (the single scorer) | [`inventory/L01-model-core.md`](inventory/L01-model-core.md) |
+| L02 | Tests and build scripts - `tests/`, `scripts/` | [`inventory/L02-tests-scripts.md`](inventory/L02-tests-scripts.md) |
+| L03 | MATLAB source - `matlab/src/` (9 files) incl. Simulink topology and Octave inventory | [`inventory/L03-matlab-src.md`](inventory/L03-matlab-src.md) |
 | L04 | MATLAB tests, docs, legacy archive, canonical CSV, exposure classification | [`inventory/L04-matlab-tests-docs.md`](inventory/L04-matlab-tests-docs.md) |
-| L05 | Data and the canonical contract — `data/` incl. the RT-10 hash chain | [`inventory/L05-data-contract.md`](inventory/L05-data-contract.md) |
-| L06 | Root files and CI — `README`, `CHANGELOG`, `Makefile`, `pyproject`, `.github/` | [`inventory/L06-root-ci.md`](inventory/L06-root-ci.md) |
-| L07 | Core documentation — `docs/` incl. the website patch package | [`inventory/L07-docs-core.md`](inventory/L07-docs-core.md) |
-| L08 | Human-action packages — `docs/human-actions/` (37 files) | [`inventory/L08-human-actions.md`](inventory/L08-human-actions.md) |
-| L09 | Deliverables — `dashboard/`, `excel/`, `presentation/`, `reports/` | [`inventory/L09-deliverables.md`](inventory/L09-deliverables.md) |
-| L10 | 3D explorer — Python ETL, build, tests | [`inventory/L10-explorer-python.md`](inventory/L10-explorer-python.md) |
-| L11 | 3D explorer — web viewer and built data | [`inventory/L11-explorer-web.md`](inventory/L11-explorer-web.md) |
-| L12 | Binary verification — PDFs, PPTX, DOCX, XLSX, PNGs, GLBs | [`inventory/L12-binaries.md`](inventory/L12-binaries.md) |
+| L05 | Data and the canonical contract - `data/` incl. the RT-10 hash chain | [`inventory/L05-data-contract.md`](inventory/L05-data-contract.md) |
+| L06 | Root files and CI - `README`, `CHANGELOG`, `Makefile`, `pyproject`, `.github/` | [`inventory/L06-root-ci.md`](inventory/L06-root-ci.md) |
+| L07 | Core documentation - `docs/` incl. the website patch package | [`inventory/L07-docs-core.md`](inventory/L07-docs-core.md) |
+| L08 | Human-action packages - `docs/human-actions/` (37 files) | [`inventory/L08-human-actions.md`](inventory/L08-human-actions.md) |
+| L09 | Deliverables - `dashboard/`, `excel/`, `presentation/`, `reports/` | [`inventory/L09-deliverables.md`](inventory/L09-deliverables.md) |
+| L10 | 3D explorer - Python ETL, build, tests | [`inventory/L10-explorer-python.md`](inventory/L10-explorer-python.md) |
+| L11 | 3D explorer - web viewer and built data | [`inventory/L11-explorer-web.md`](inventory/L11-explorer-web.md) |
+| L12 | Binary verification - PDFs, PPTX, DOCX, XLSX, PNGs, GLBs | [`inventory/L12-binaries.md`](inventory/L12-binaries.md) |
 
 ## The shape of the repository, in one paragraph
 
 `src/fcf_m2/` is the **only** scorer; nothing else in the project may re-derive a number. It runs in eleven
-declared steps (`workflow.STEPS`) under one of two modes — `legacy_v2` (bit-exact reproduction of the
-accepted V2 baseline) or `milestone2_v3` (canonical, fixed-anchor, cohort-independent) — and its terminal
+declared steps (`workflow.STEPS`) under one of two modes - `legacy_v2` (bit-exact reproduction of the
+accepted V2 baseline) or `milestone2_v3` (canonical, fixed-anchor, cohort-independent) - and its terminal
 product is the **canonical data contract** at `data/contract/v1/`: six tables plus a manifest carrying a
 SHA-256 chain over five inputs and six outputs. Every other artifact in the repository is a **consumer** of
 that contract: the MATLAB layer reads a generated adapter CSV, the Excel workbook and static dashboard and
 reports are built from it, and the Tableau patch package quotes it. `tests/` guards the legacy goldens and
 the contract; `scripts/verify.sh` is the local gate harness and `.github/workflows/tests.yml` the CI one.
-The 3D explorer sits outside all of this — it was never in the repository, and it reads the *legacy* fixtures
+The 3D explorer sits outside all of this - it was never in the repository, and it reads the *legacy* fixtures
 rather than the canonical contract, which is the defect Phase 3 exists to fix.
 
 ## Complete file table
 
-### Tree: `repo` — 198 files
+### Tree: `repo` - 198 files
 
 | File | Size | Kind | Lane |
 |---|---:|---|---|
@@ -64,17 +64,17 @@ rather than the canonical contract, which is the defect Phase 3 exists to fix.
 | `Makefile` | 626 B | authored | [L06](inventory/) |
 | `README.md` | 8.8 KB | authored | [L06](inventory/) |
 | `dashboard/README.md` | 1.0 KB | authored | [L09](inventory/) |
-| `dashboard/static/01_readiness_ranking.png` | 178.9 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/02_starter_vs_pathway.png` | 98.4 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/03_ports_three_horizons.png` | 126.6 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/04_lifecycle_cost.png` | 103.7 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/05_net_co2e.png` | 133.5 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/06_avoided_evse.png` | 103.2 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/07_peak_wait.png` | 85.0 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/08_limitations.png` | 166.8 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
-| `dashboard/static/09_site_map_offline.png` | 184.1 KB | generated — `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/01_readiness_ranking.png` | 178.9 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/02_starter_vs_pathway.png` | 98.4 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/03_ports_three_horizons.png` | 126.6 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/04_lifecycle_cost.png` | 103.7 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/05_net_co2e.png` | 133.5 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/06_avoided_evse.png` | 103.2 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/07_peak_wait.png` | 85.0 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/08_limitations.png` | 166.8 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
+| `dashboard/static/09_site_map_offline.png` | 184.1 KB | generated - `scripts/build_static_dashboard.py` | [L09, L12](inventory/) |
 | `dashboard/static/STATIC_DASHBOARD.pdf` | 1.1 MB | binary | [L09, L12](inventory/) |
-| `dashboard/static/footer_log.json` | 3.5 KB | generated — `scripts/build_static_dashboard.py` | [L09](inventory/) |
+| `dashboard/static/footer_log.json` | 3.5 KB | generated - `scripts/build_static_dashboard.py` | [L09](inventory/) |
 | `dashboard/tableau/TABLEAU_IMPLEMENTATION_BLOCKER.md` | 3.6 KB | authored | [L09](inventory/) |
 | `dashboard/tableau/patch_package/tbl_avoided_evse.csv` | 23.1 KB | authored | [L09](inventory/) |
 | `dashboard/tableau/patch_package/tbl_canonical_scenarios.csv` | 98.0 KB | authored | [L09](inventory/) |
@@ -87,22 +87,22 @@ rather than the canonical contract, which is the defect Phase 3 exists to fix.
 | `data/cache/boundaries/ATTRIBUTION.md` | 722 B | authored | [L05](inventory/) |
 | `data/cache/boundaries/tl_2024_va_counties.geojson` | 168.0 KB | authored | [L05](inventory/) |
 | `data/contract/v1/README.md` | 1.3 KB | authored | [L05](inventory/) |
-| `data/contract/v1/assumptions.json` | 4.0 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
-| `data/contract/v1/contract_manifest.json` | 2.1 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
-| `data/contract/v1/scenario_table.csv` | 98.0 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
-| `data/contract/v1/schema.json` | 5.6 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
-| `data/contract/v1/site_table.csv` | 1.4 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
-| `data/contract/v1/source_provenance.csv` | 11.1 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
-| `data/contract/v1/standards_register.csv` | 176.8 KB | generated — `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/assumptions.json` | 4.0 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/contract_manifest.json` | 2.1 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/scenario_table.csv` | 98.0 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/schema.json` | 5.6 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/site_table.csv` | 1.4 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/source_provenance.csv` | 11.1 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
+| `data/contract/v1/standards_register.csv` | 176.8 KB | generated - `fcf_m2.contract` (`make run-v3`) | [L05](inventory/) |
 | `data/inputs/legacy_matlab_site_meta.csv` | 2.0 KB | authored | [L05](inventory/) |
 | `data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv` | 4.3 KB | authored | [L05](inventory/) |
 | `data/inputs/real_sites_v2.csv` | 10.6 KB | authored | [L05](inventory/) |
 | `data/observed/observed_sessions_template.csv` | 102 B | authored | [L05](inventory/) |
-| `data/provenance/field_provenance_v1.csv` | 11.2 KB | generated — `scripts/build_field_provenance.py` | [L05](inventory/) |
+| `data/provenance/field_provenance_v1.csv` | 11.2 KB | generated - `scripts/build_field_provenance.py` | [L05](inventory/) |
 | `data/provenance/site_coordinate_sources.csv` | 1.7 KB | authored | [L05](inventory/) |
 | `data/provenance/v2_source_confidence_tracker.csv` | 4.2 KB | authored | [L05](inventory/) |
 | `docs/README.md` | 2.2 KB | authored | [L07](inventory/) |
-| `docs/WORKFLOW_STEPS.md` | 1.1 KB | generated — `fcf_m2.workflow` STEPS (`make docs`) | [L07](inventory/) |
+| `docs/WORKFLOW_STEPS.md` | 1.1 KB | generated - `fcf_m2.workflow` STEPS (`make docs`) | [L07](inventory/) |
 | `docs/architecture/TECHNICAL_INTEGRATION_ARCHITECTURE.md` | 6.0 KB | authored | [L07](inventory/) |
 | `docs/assets/architecture/integration_architecture.png` | 388.0 KB | binary | [L07, L12](inventory/) |
 | `docs/assets/readme/project-overview.png` | 123.3 KB | binary | [L07, L12](inventory/) |
@@ -166,13 +166,13 @@ rather than the canonical contract, which is the defect Phase 3 exists to fix.
 | `docs/repository-migration-plan.md` | 3.5 KB | authored | [L07](inventory/) |
 | `docs/standards/FINAL_STANDARDS_APPLICATION_MATRIX.md` | 12.6 KB | authored | [L07](inventory/) |
 | `docs/standards/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.md` | 9.8 KB | authored | [L07](inventory/) |
-| `excel/Electric_Data_Milestone_2_Updated.xlsx` | 54.8 KB | generated — `scripts/build_excel_workbook.py` | [L09, L12](inventory/) |
+| `excel/Electric_Data_Milestone_2_Updated.xlsx` | 54.8 KB | generated - `scripts/build_excel_workbook.py` | [L09, L12](inventory/) |
 | `excel/README.md` | 1.2 KB | authored | [L09](inventory/) |
 | `matlab/DATA_DICTIONARY.md` | 4.9 KB | authored | [L04](inventory/) |
 | `matlab/EXECUTION_STATUS.md` | 4.2 KB | authored | [L04](inventory/) |
 | `matlab/README.md` | 10.4 KB | authored | [L04](inventory/) |
 | `matlab/RUN_ON_LICENSED_MATLAB.md` | 5.1 KB | authored | [L04](inventory/) |
-| `matlab/data/canonical/matlab_scenarios.csv` | 52.5 KB | generated — `fcf_m2.matlab_adapter` (`make run-v3`) | [L04](inventory/) |
+| `matlab/data/canonical/matlab_scenarios.csv` | 52.5 KB | generated - `fcf_m2.matlab_adapter` (`make run-v3`) | [L04](inventory/) |
 | `matlab/legacy_archive/MIGRATION_NOTE.md` | 4.6 KB | authored | [L04](inventory/) |
 | `matlab/legacy_archive/build_and_run_site_grid_behavior_model.m` | 12.9 KB | authored | [L04](inventory/) |
 | `matlab/legacy_archive/untitled.m` | 32.2 KB | authored | [L04](inventory/) |
@@ -203,13 +203,13 @@ rather than the canonical contract, which is the defect Phase 3 exists to fix.
 | `reports/README.md` | 1.2 KB | authored | [L09](inventory/) |
 | `reports/milestone-2/ECONOMIC_AND_FUNDING_BRIEF.md` | 5.9 KB | authored | [L09](inventory/) |
 | `reports/milestone-2/ENVIRONMENT_AND_RESILIENCE.md` | 6.0 KB | authored | [L09](inventory/) |
-| `reports/milestone-2/FINAL_STANDARDS_APPLICATION_MATRIX.docx` | 42.8 KB | generated — `scripts/md_to_docx.py` | [L09, L12](inventory/) |
-| `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.docx` | 46.9 KB | generated — `scripts/md_to_docx.py` | [L09, L12](inventory/) |
+| `reports/milestone-2/FINAL_STANDARDS_APPLICATION_MATRIX.docx` | 42.8 KB | generated - `scripts/md_to_docx.py` | [L09, L12](inventory/) |
+| `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.docx` | 46.9 KB | generated - `scripts/md_to_docx.py` | [L09, L12](inventory/) |
 | `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md` | 21.7 KB | authored | [L09](inventory/) |
 | `reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.pdf` | 184.0 KB | binary | [L09, L12](inventory/) |
-| `reports/milestone-2/Milestone_2_Gap_Closure_Status.docx` | 42.5 KB | generated — `scripts/md_to_docx.py` | [L09, L12](inventory/) |
+| `reports/milestone-2/Milestone_2_Gap_Closure_Status.docx` | 42.5 KB | generated - `scripts/md_to_docx.py` | [L09, L12](inventory/) |
 | `reports/milestone-2/Milestone_2_Gap_Closure_Status.md` | 12.9 KB | authored | [L09](inventory/) |
-| `reports/milestone-2/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.docx` | 41.9 KB | generated — `scripts/md_to_docx.py` | [L09, L12](inventory/) |
+| `reports/milestone-2/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.docx` | 41.9 KB | generated - `scripts/md_to_docx.py` | [L09, L12](inventory/) |
 | `reports/milestone-2/REGULATORY_STAKEHOLDER_MAP.md` | 5.0 KB | authored | [L09](inventory/) |
 | `reports/milestone-2/RISK_REGISTER.csv` | 9.3 KB | authored | [L09](inventory/) |
 | `reports/milestone-2/RISK_REGISTER.md` | 7.6 KB | authored | [L09](inventory/) |
@@ -254,7 +254,7 @@ rather than the canonical contract, which is the defect Phase 3 exists to fix.
 | `tests/test_modules.py` | 9.7 KB | authored | [L02](inventory/) |
 | `tests/test_scoring_and_queueing.py` | 3.5 KB | authored | [L02](inventory/) |
 
-### Tree: `fcf-3d` — 31 files
+### Tree: `fcf-3d` - 31 files
 
 | File | Size | Kind | Lane |
 |---|---:|---|---|

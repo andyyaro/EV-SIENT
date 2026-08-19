@@ -5,7 +5,7 @@
 **Short version: you probably do not have to do anything.**
 
 Contract v2 is additive. Every one of v1's 48 fields is present in v2 with identical
-semantics and — for the same run — identical values. A consumer written against v1 that
+semantics and - for the same run - identical values. A consumer written against v1 that
 reads a v2 row gets the same answers. If your code reads columns by name and ignores ones it
 does not recognise, it already works.
 
@@ -26,7 +26,7 @@ send a month of charger logs, the model produces information v1 has nowhere to p
 - when and how a capacity value was confirmed, and whether two sources disagreed
 - **why** a site's data confidence is what it is, not only what it is
 
-Widening v1 in place was not an option — the whole point of a frozen contract is that
+Widening v1 in place was not an option - the whole point of a frozen contract is that
 artifacts already quoting it keep meaning what they meant. So v2 is a superset, and v1 is
 now immutable.
 
@@ -39,7 +39,7 @@ now immutable.
 If you assert the major version (and the contract's own consumer rules say you should), you
 will need to accept `2`. Assert on the major component, not the whole string.
 
-### 2. `horizon_label` — `now` became `baseline` ⚠️
+### 2. `horizon_label` - `now` became `baseline` ⚠️
 
 **This is the change that can break something.** If you filter, join, or switch on
 `horizon_label == "now"`, that comparison silently matches nothing in v2 and your baseline
@@ -58,7 +58,7 @@ baseline = rows[rows.horizon_year == 2026]
 ```
 
 **Why bother changing it?** `now` is time-relative text frozen into a dated artifact. Read in
-2036, a row labelled `now` is simply false — and "now" is the one horizon word this program
+2036, a row labelled `now` is simply false - and "now" is the one horizon word this program
 prohibits everywhere else. v1 keeps `now` forever, because v1 is frozen. That is exactly the
 situation an immutable contract plus an additive successor exists to handle.
 
@@ -68,7 +68,7 @@ situation an immutable contract plus an additive successor exists to handle.
 |---|---|
 | `observed_months` | months of charger operating data behind the trigger decision |
 | `observed_utilization` | measured average utilisation, 0–1 |
-| `observed_uptime` | measured availability, 0–1 — the gate the policy checks first |
+| `observed_uptime` | measured availability, 0–1 - the gate the policy checks first |
 | `observed_p90_wait_min` | measured p90 wait, minutes |
 | `observed_source_system` | which system reported it |
 | `capacity_observed_date` | when the capacity value was confirmed |
@@ -95,7 +95,7 @@ In the CSV these are empty cells. In JSON they are `null`. In pandas they read b
 
 The contract enforces this rather than asking nicely. `validate_v2` refuses a table where a
 row carries an observed value while reporting `awaiting_observed_data`, and refuses a
-`verified_*` capacity basis with no `capacity_observed_date` — because verification with no
+`verified_*` capacity basis with no `capacity_observed_date` - because verification with no
 date is not verification.
 
 ---
@@ -108,7 +108,7 @@ loudly as in v1.
 
 That is the correct state, not an omission. The plumbing exists and is exercised by tests;
 no facility manager or utility has sent anything yet. Nothing in v2 is more certain than
-anything in v1 — it is the same numbers in a container that can hold more.
+anything in v1 - it is the same numbers in a container that can hold more.
 
 `model_version` in the v2 manifest is **`3.0.0`**, not `4.0.0`. The contract version and the
 model version are separate facts: v2 is a container change, and the numbers inside it were
@@ -124,14 +124,14 @@ bumps when V4 is genuinely complete.
 | Quoting published Milestone 2 figures | **v1.** It is frozen; it will never move under you. |
 | Building anything new | **v2.** Same numbers, room for the observed fields. |
 | Consuming observed / trigger data | **v2.** v1 cannot express it. |
-| MATLAB / Simulink harness | **v1** for now — the adapter still generates from v1. |
+| MATLAB / Simulink harness | **v1** for now - the adapter still generates from v1. |
 
 Both are tracked, both carry their own SHA-256 hash chain, and both are gated by
 `scripts/verify.sh`.
 
 ---
 
-## v1 is frozen — what that means in practice
+## v1 is frozen - what that means in practice
 
 `tests/test_contract_v2.py` pins the SHA-256 of `data/contract/v1/contract_manifest.json`.
 Anything that regenerates or edits v1 fails that test.
@@ -150,7 +150,7 @@ python scripts/build_contract_v2.py --check   # verify the tracked copy is curre
 ```
 
 v2 is **derived from v1** by migration, and that is the design rather than a shortcut:
-migration copies every v1 value across, so "additive" is guaranteed by construction — a v2
+migration copies every v1 value across, so "additive" is guaranteed by construction - a v2
 number drifting from its v1 counterpart is not something the code can express. The build
 refuses to leave a non-additive v2 on disk, and `verify.sh` re-checks it on every run.
 

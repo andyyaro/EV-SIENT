@@ -8,8 +8,8 @@ and every MATLAB energy figure was consequently `1/0.93` of the contract's rathe
 `1/0.92`.
 
 **It survived because charger efficiency is not a contract field.** The canonical contract is
-the mechanism that stops exactly this — one number, one place, consumers quote and never
-re-derive — and this quantity lived outside it, so there was nothing to reconcile against. It
+the mechanism that stops exactly this - one number, one place, consumers quote and never
+re-derive - and this quantity lived outside it, so there was nothing to reconcile against. It
 was found only by running the pipeline on the canonical data and asking why the energy column
 disagreed with the contract's: the implied efficiency measured **0.9300** across all 120 rows.
 
@@ -20,7 +20,7 @@ test that reads both copies and compares them.
 Scope, stated honestly
 ----------------------
 This checks constants that **demonstrably appear in both halves**. It is not a proof that no
-other duplicated constant exists — that would require a semantic mapping between two
+other duplicated constant exists - that would require a semantic mapping between two
 languages' variable names, which nothing here has. `test_no_unreviewed_numeric_defaults`
 narrows the gap by listing every numeric default in the MATLAB sources so a new one cannot
 appear unnoticed, but a reviewer still has to decide whether each has a Python counterpart.

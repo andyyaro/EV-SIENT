@@ -1,4 +1,4 @@
-# SESSION HANDOFF — written 2026-08-04
+# SESSION HANDOFF - written 2026-08-04
 
 For whoever picks this up next, human or assistant, with none of the conversation that produced
 it. Everything here was checked at the moment of writing, not remembered.
@@ -13,7 +13,7 @@ uncommitted, and no work is blocked on the machine. `v3.0.0` is published as a *
 | | |
 |---|---|
 | `main` | `bcb88a1` |
-| `v4-platform` | `bcb88a1` — identical, fully contained in `main` |
+| `v4-platform` | `bcb88a1` - identical, fully contained in `main` |
 | Working tree | clean, no stashes |
 | Unpushed commits | none, on any of six local branches |
 | Open PRs | none |
@@ -30,7 +30,7 @@ uncommitted, and no work is blocked on the machine. `v3.0.0` is published as a *
 marked pre-release, and it is stated on the Release page rather than left to the badge.
 
 The owner intends to open a session on a Windows machine to close this. **The full test prompt
-for that session is in §6 below** — it is self-contained and needs nothing from the conversation
+for that session is in §6 below** - it is self-contained and needs nothing from the conversation
 that wrote it.
 
 If that test passes, the follow-up is mechanical:
@@ -48,7 +48,7 @@ this exact condition as the trigger) and updating the "Windows install unexercis
 ## 3. Two live-state facts a new session must not guess at
 
 **The AWS SSO token was expired and has been renewed** (2026-08-04), and a full live audit ran
-against the real estate — see §3a. It will expire again; before any AWS work:
+against the real estate - see §3a. It will expire again; before any AWS work:
 
 ```bash
 aws sso login --profile future-city     # S3, CloudFront, certs, hosting, deployment
@@ -64,14 +64,14 @@ Asked of AWS directly, not inferred from the deploy script:
 |---|---|
 | `verify_deployment.py` against the public URLs | **33 passed, 0 failed** |
 | Platform bucket public-access blocks | **all four on** |
-| Objects under `platform/` in the MAIN bucket | **0** — the isolation is structural, not behavioural |
+| Objects under `platform/` in the MAIN bucket | **0** - the isolation is structural, not behavioural |
 | CloudFront cache behaviours | **1**, `/platform*`, at **Lambda v8** |
 | Gate allowlist | **2 accounts**, matched on `sub` **and** `email` |
-| Cognito pool members | **3 confirmed** — so `redacted-1@example.org` can sign in to the shared pool and **cannot** reach `/platform/*` |
+| Cognito pool members | **3 confirmed** - so `redacted-1@example.org` can sign in to the shared pool and **cannot** reach `/platform/*` |
 | Spend, 30 days | **$0.50** against a $10/month ceiling |
 
-**This program's incremental AWS cost is effectively zero.** The two largest lines — Secrets
-Manager and Amplify — were created 2026-06-29 and 2026-07-07, before this program began on
+**This program's incremental AWS cost is effectively zero.** The two largest lines - Secrets
+Manager and Amplify - were created 2026-06-29 and 2026-07-07, before this program began on
 2026-07-27. Neither is ours. (Running the Cost Explorer query itself cost $0.04 of that $0.50.)
 
 A shared user pool is **not** shared access: the authoriser holds an explicit two-entry
@@ -81,7 +81,7 @@ allowlist, so pool membership alone opens nothing.
 `app.js`, `index.html`, `styles.css` and `surfaces.json` changed in `27a6bdb` after the last
 deploy (2026-07-28). Checked, not assumed: those changes only affect surfaces that are **absent
 from an installation**, and the live deployment is built from the full repository where every
-surface is present — `surfaces.json` in this tree marks **none** absent. So nothing on the live
+surface is present - `surfaces.json` in this tree marks **none** absent. So nothing on the live
 site is currently wrong. Redeploying is tidying, not a fix:
 
 ```bash
@@ -125,13 +125,13 @@ open and actually matter:
 
 | # | What | Why it needs the owner |
 |---|---|---|
-| **8b** | Remove the superseded Tableau workbook from the public profile | Only the account holder can delete it. It publishes `legacy_v2` ranks (FFX002 first at 58.8) while the canonical answer is FFX004 at 53.4 — **a wrong number sitting in public** |
+| **8b** | Remove the superseded Tableau workbook from the public profile | Only the account holder can delete it. It publishes `legacy_v2` ranks (FFX002 first at 58.8) while the canonical answer is FFX004 at 53.4 - **a wrong number sitting in public** |
 | **8e** | Republish the workbook so the CO₂e sheet is not read backwards | `net_co2e_kg` is *avoided* emissions |
 | **11** | Facilities consent before any real site data is published | Other people must say yes |
 | **4** | Utility + facility data requests | **This is what unblocks the capacity placeholder**, and therefore every feasibility question |
 
 **Known stale rows in that tracker:** 8c (gallery re-baseline), 8d (the PDF) and 9 (website
-deploy) are **done** — decided by the owner and executed — but are still listed as open
+deploy) are **done** - decided by the owner and executed - but are still listed as open
 decisions. They should be struck through with dates the way rows 7 and 8 already are. Left
 undone deliberately: editing a decision log is the owner's call, not a cleanup task.
 
@@ -143,7 +143,7 @@ Paste this whole block into a session on the Windows machine. It assumes nothing
 
 ```
 Test the Windows build of Future City Fellowship v3.0.0 on this machine. You are the
-first person ever to run it on Windows — that is the entire point of this session, and
+first person ever to run it on Windows - that is the entire point of this session, and
 it is the only reason the release is marked pre-release.
 
 REPO (private, note the trailing hyphen):
@@ -154,18 +154,18 @@ RELEASE:
 
 HOUSE RULES (these override defaults):
 - Honesty is the product. Never claim something works that you did not run. Never
-  soften a limitation. If a step fails, report the failure verbatim — a failed test
+  soften a limitation. If a step fails, report the failure verbatim - a failed test
   here is a SUCCESSFUL session, because it found something four Windows-only defects
   already slipped past.
 - Do NOT put "Co-Authored-By: Claude" or "Generated with Claude Code" on any commit,
   PR or artifact. Use the machine's git identity.
 - Do NOT disable SmartScreen, Defender, or any security setting. A SmartScreen warning
-  is EXPECTED and correct — there is no code-signing certificate. Click through it the
+  is EXPECTED and correct - there is no code-signing certificate. Click through it the
   normal way (More info -> Run anyway) or right-click the zip -> Properties -> Unblock.
 - Do not weaken a check to make something pass. Do not force-push, rewrite history,
   or delete branches or tags.
 - Verify the way a recipient would: download the published asset from the Release page.
-  Do NOT clone the repo and build your own artifact — that tests the wrong thing.
+  Do NOT clone the repo and build your own artifact - that tests the wrong thing.
 
 WHAT TO DO, in order:
 
@@ -183,7 +183,7 @@ WHAT TO DO, in order:
 6. Once the platform is up, click through it. Report anything that is blank, broken,
    says "undefined", or offers a link that 404s.
 
-SPECIFICALLY CONFIRM THESE SIX — each is a defect that was found and fixed, and this
+SPECIFICALLY CONFIRM THESE SIX - each is a defect that was found and fixed, and this
 is the first time any of them is being checked on real Windows rather than inferred:
 
   a) All four model input paths exist in the extracted folder:
@@ -191,15 +191,15 @@ is the first time any of them is being checked on real Windows rather than infer
        data\inputs\legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv
        data\inputs\legacy_matlab_site_meta.csv
        data\provenance\field_provenance_v1.csv
-     (These were MISSING on Windows before — the build wrote them to the wrong paths.)
+     (These were MISSING on Windows before - the build wrote them to the wrong paths.)
   b) RELEASE_MANIFEST.json contains NO backslashes in its "files" keys. 58 of 60 did.
   c) The CSVs are valid UTF-8. Open data\inputs\real_sites_v2.csv and confirm the note
-     column reads "SYNTHETIC FIXTURE — invented facility" with a proper em dash, not a
+     column reads "SYNTHETIC FIXTURE - invented facility" with a proper em dash, not a
      mangled character. Confirm pandas can read it with default settings.
   d) THIRD_PARTY_LICENCES.md lists tzdata (a Windows-only dependency of pandas). It
      should be there on Windows and is correctly absent on macOS.
   e) scripts\verify.sh is NOT present, and the platform's "verify-all" operation shows
-     as unavailable with the reason "not part of this installation" — NOT the Windows
+     as unavailable with the reason "not part of this installation" - NOT the Windows
      bash reason.
   f) The platform shows FIVE surfaces labelled "not in this installation" (explorer,
      dashboard, contract, reports, NFC) with NO Open link on any of them. The sixth,
@@ -207,7 +207,7 @@ is the first time any of them is being checked on real Windows rather than infer
 
 ALSO CONFIRM the data is synthetic: site ids are SYN001, SYN002 and so on. If you see
 FFX001-FFX004 or PWC001-PWC008, or a real Virginia facility name, STOP IMMEDIATELY and
-report it — that is a DEC-016 breach and the release must be pulled.
+report it - that is a DEC-016 breach and the release must be pulled.
 
 REPORT: write what you observed, step by step, including exact error text. Then record
 it in docs/operations/v4-program/VERIFICATION.md as a new section and add a row to
@@ -225,14 +225,14 @@ IF ANYTHING FAILS: do not fix it and quietly move on. Report it first, then fix 
 then re-download a rebuilt artifact and re-test. Leave the release as pre-release.
 ```
 
-Python 3.11+ must be on that machine or the first thing you see is the version check refusing —
+Python 3.11+ must be on that machine or the first thing you see is the version check refusing -
 a valid result, but not the one you want.
 
 ---
 
 ## 7. Standing rules a new session must not have to rediscover
 
-- **Honesty is the product.** Never claim an engine ran that did not run — GNU Octave is not
+- **Honesty is the product.** Never claim an engine ran that did not run - GNU Octave is not
   MathWorks MATLAB, and a Python reimplementation is not MATLAB. Never soften a limitation.
   New plumbing with no real data ships empty and labelled.
 - **Nothing is "done" until observed working.** Verify the way the consumer will: render the
@@ -240,13 +240,13 @@ a valid result, but not the one you want.
 - **Never read `$?` through a pipe.** `| head` and `| tail` return *their* exit status. This
   caused two pushes behind failing gates and one wrong measurement in this program.
 - **Parse or exercise; never grep.** At least a dozen defects here were text-versus-meaning
-  errors — prose accurate about something other than the thing it annotated. Three of them were
+  errors - prose accurate about something other than the thing it annotated. Three of them were
   inside tests written to catch that exact class.
 - **A gate suite only checks the tree it runs in**, and passes identically on any branch. It
   cannot tell you that seven commits landed on the wrong branch; the owner caught that.
 - **Mutation-test every new gate.** A gate that cannot fail is decoration.
 - **DEC-016 is absolute:** no real facility identifier in the public installer. The twelve sites
-  are FFX001–FFX004 and PWC001–PWC008. A distinctive *fragment* of a name counts — `Neabsco`
+  are FFX001–FFX004 and PWC001–PWC008. A distinctive *fragment* of a name counts - `Neabsco`
   shipped for weeks behind a guard that matched whole names only.
 - **No `Co-Authored-By: Claude` or "Generated with Claude Code"** on commits, PRs or artifacts.
   Owner's instruction, 2026-07-28.

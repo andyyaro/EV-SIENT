@@ -1,4 +1,4 @@
-# `presentation/` — Milestone 2 presentation package
+# `presentation/` - Milestone 2 presentation package
 
 [← repository root](../README.md)
 
@@ -12,10 +12,10 @@
 
 ## `assets/`
 Presentation-specific graphics (the provisional-MCDA chart). The nine shared data
-visuals live in [`dashboard/static/`](../dashboard/README.md) — single source, no
+visuals live in [`dashboard/static/`](../dashboard/README.md) - single source, no
 duplicates.
 
 Presentation rules baked into the deck: static visuals only (no live demo), placeholder-
 capacity captions on every capacity slide, source/vintage footers on every data slide,
 peer question on the closing slide, Paula's speaking role left as an editable table
-(deliberately unassigned — a team decision, not the model's).
+(deliberately unassigned - a team decision, not the model's).
