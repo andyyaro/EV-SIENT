@@ -8,7 +8,8 @@ Python-native angle's entire answer, the sidecar for a Tauri or Electron shell, 
 "companion" for the web-first angle. So it is built first, before the shell is chosen, and
 none of that work is wasted whichever wins.
 
-**One UI, two tiers.** The files served here are byte-identical to the ones deployed publicly ``site/platform/``. The only difference is that this server answers ``/api/*``, so the same
+**One UI, two tiers.** The files served here are byte-identical to the ones deployed publicly
+``site/platform/``. The only difference is that this server answers ``/api/*``, so the same
 page shows the same operations list with the desktop-only entries *enabled*.
 
 Security posture, and why it is what it is
