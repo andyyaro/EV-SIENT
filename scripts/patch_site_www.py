@@ -122,7 +122,11 @@ MOBILE_MARKER = "fcf-mobile"
 #: of its container, and `methodology.html` at 414 px because the tech grid's `minmax(300px,
 #: 1fr)` column plus the box and article padding needs more than the phone has, and then at
 #: 402 px because the milestone wheel is `100vw - 36px` wide inside an article that leaves it
-#: `100vw - 48px`. Every primary
+#: `100vw - 48px`.
+#: The two-column "This model does not replace" list on methodology.html (column-count set
+#: inline) is a single column on phones: at 320 px each column is ~116 px, and in DejaVu Sans,
+#: the font Linux falls back to, "decision-making" does not fit and the page laid out at
+#: 329 px. macOS fonts fit, so this only failed in CI. Every primary
 #: nav link was 29 px tall and every footer link 15 px, against a 44 px touch minimum; a dozen
 #: labels rendered at 9-11 px.
 #:
@@ -147,6 +151,7 @@ MOBILE_CSS = """
   .gallery-shell { overflow-x: clip; }
 }
 @media (max-width: 520px) {
+  ul[style*="column-count"] { column-count: 1 !important; }
   .method-wheel-item { font-size: 20px; }
   .topnav { display: grid !important; grid-template-columns: repeat(3, auto); justify-content: center; gap: 0 14px !important; }
 }
