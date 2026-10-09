@@ -62,6 +62,7 @@ tests/test_platform_web.py
 tests/test_provenance.py
 tests/test_public_install_fallbacks.py
 tests/test_published_numbers.py
+tests/test_release_artifact_paths.py
 tests/test_repo_hygiene.py
 tests/test_report_cover.py
 tests/test_rollback_snapshot.py
