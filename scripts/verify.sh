@@ -17,7 +17,11 @@ gate () {
     # Name the failing tests, not just the totals. A browser gate with 39 tests used to print
     # only "# fail 1" here, which is the tail of node's TAP summary and says nothing about which.
     # Matches TAP ("not ok"), node's spec reporter ("✖") and pytest ("FAILED").
-    grep -E '^[[:space:]]*(not ok |✖ )|^FAILED ' /tmp/fcf_verify_out.txt | awk '!seen[$0]++' | head -20 | sed 's/^/       /'
+    # Each TAP failure is followed by a YAML block whose `error:` carries the assertion message;
+    # print that too, so a CI log says what was measured and not only what failed.
+    awk '/^[[:space:]]*(not ok |✖ )|^FAILED /{if(!seen[$0]++)print; e=0; next}
+         /^[[:space:]]*error: /{print; e=2; next}
+         e>0{print; e--}' /tmp/fcf_verify_out.txt | head -30 | sed 's/^/       /'
     tail -6 /tmp/fcf_verify_out.txt | sed 's/^/       /'
   fi
 }
