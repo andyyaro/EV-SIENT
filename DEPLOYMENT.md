@@ -208,3 +208,63 @@ them.
   Bash as the alternatives (`operations.py`, the `verify-all` operation's `unavailable_reason`). It still does not run there. *(This cited a line number that had already drifted to a different statement - line numbers in prose go stale on the next edit, so it names the thing instead.)*
 - **No release version scheme.** *Still open.* `pyproject` pins a static `3.0.0` and the
   existing git tags are milestone markers, not versions.
+
+---
+
+## 8. Preview environment (separate from production)
+
+Created 2026-10-09 to review the phone layout (`fix/mobile-web`, PR #12) on a real domain
+without replacing the live site. **Nothing in sections 1-7 was modified to create it**: the
+production distribution, its bucket, its DNS record and its certificate are untouched, and the
+only change to the shared `andyyaro.com` zone is three new records.
+
+**`https://preview.futurecityfellowship.andyyaro.com`** serves the public pages (`site/www/`)
+and the error page. It does **not** carry the NFC pages (`/t/`, `/f/`) or `/platform/`, and every
+response carries `X-Robots-Tag: noindex, nofollow`, so it never competes with the live site in
+search.
+
+| Resource | Identifier | Account |
+|---|---|---|
+| S3 bucket | `future-city-fellowship-preview` (us-east-1, all four public-access blocks on, tagged) | `future-city` |
+| Origin access control | `EFND3H1VNU6JZ` (`fcf-preview-oac`) | `future-city` |
+| Response headers policy | `fcf-preview-noindex` (`956c5570-…`): the production security headers plus `X-Robots-Tag` | `future-city` |
+| CloudFront distribution | `E37O3RT3H2GH39` (`dlanp4cbtcfpr.cloudfront.net`), PriceClass_100, same cache policy and error pages as production | `future-city` |
+| ACM certificate | `preview.futurecityfellowship.andyyaro.com`, us-east-1 (`04c12882-…`) | `future-city` |
+| Route 53 | `preview.futurecityfellowship.andyyaro.com` A + AAAA alias, and the ACM validation CNAME `_220a9a38….preview.futurecityfellowship` | `cerfodes-dns` |
+
+**Known limitation:** the AI assistant page loads, but chat cannot work from the preview. The
+assistant API (`future-city-assistant-api`) allows only `https://futurecityfellowship.andyyaro.com`
+as a CORS origin, measured with a preflight; widening it would change production, so it was left
+alone.
+
+**Verified on the preview** (2026-10-09): every page 200, an unknown path 404 via the error
+page, direct S3 access 403, and `tests/browser/www_mobile.test.mjs` plus
+`www_visibility.test.mjs` run against it with `WWW_URL=https://preview.futurecityfellowship.andyyaro.com`:
+**23 / 23, three consecutive runs**.
+
+**Cost:** one more distribution and a bucket holding ~1.7 MB. Well under a cent a month at
+preview traffic; no always-on compute.
+
+### Updating the preview
+
+```bash
+aws s3 sync site/www s3://future-city-fellowship-preview/ --profile future-city
+aws cloudfront create-invalidation --distribution-id E37O3RT3H2GH39 --paths "/*" --profile future-city
+```
+
+### Removing it, in order
+
+```bash
+# 1. DNS first, so the name stops resolving (cerfodes-dns; DELETE the three preview records only)
+# 2. Disable, wait for Deployed, then delete the distribution
+aws cloudfront get-distribution-config --id E37O3RT3H2GH39 --profile future-city   # edit Enabled=false, update-distribution with the ETag
+aws cloudfront delete-distribution --id E37O3RT3H2GH39 --if-match <ETag> --profile future-city
+# 3. Then the pieces it referenced
+aws cloudfront delete-response-headers-policy --id 956c5570-3079-4f8c-bff4-cec1195ff7b8 --if-match <ETag> --profile future-city
+aws cloudfront delete-origin-access-control --id EFND3H1VNU6JZ --if-match <ETag> --profile future-city
+aws s3 rb s3://future-city-fellowship-preview --force --profile future-city
+aws acm delete-certificate --certificate-arn <preview cert ARN> --region us-east-1 --profile future-city
+```
+
+Promoting the change to production is the normal path in section 4 after PR #12 merges; the
+preview is not part of that path and can be removed independently.

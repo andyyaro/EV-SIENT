@@ -111,8 +111,11 @@ test("index.html on a phone: the page's own landing shows, and Framer is never f
 });
 
 test("index.html on a desktop still shows the Framer landing", { skip }, async () => {
+  // Wait for the elements themselves, not for readyState: against a remote host the first
+  // evaluation can land on the blank document Chrome starts with, which is also "complete".
   const chrome = await launch(`${BASE}/index.html`,
-    `document.readyState === "complete"`, "index.html never finished loading");
+    `!!document.querySelector(".landing-wrap") && !!document.querySelector(".landing-mobile")`,
+    "index.html never rendered both landings");
   try {
     await chrome.send("Emulation.setDeviceMetricsOverride", {
       width: 1280, height: 800, deviceScaleFactor: 1, mobile: false,
