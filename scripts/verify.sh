@@ -14,6 +14,10 @@ gate () {
     RESULTS+=("PASS  $name"); PASS=$((PASS+1))
   else
     RESULTS+=("FAIL  $name"); FAIL=$((FAIL+1))
+    # Name the failing tests, not just the totals. A browser gate with 39 tests used to print
+    # only "# fail 1" here, which is the tail of node's TAP summary and says nothing about which.
+    # Matches TAP ("not ok"), node's spec reporter ("✖") and pytest ("FAILED").
+    grep -E '^[[:space:]]*(not ok |✖ )|^FAILED ' /tmp/fcf_verify_out.txt | awk '!seen[$0]++' | head -20 | sed 's/^/       /'
     tail -6 /tmp/fcf_verify_out.txt | sed 's/^/       /'
   fi
 }
