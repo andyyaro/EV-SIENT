@@ -285,13 +285,36 @@ METHODOLOGY_CORRECTIONS = [
 
 #: The editorial choice: six sites spanning the decision categories, not simply the top six.
 #: Presentation fields are preserved verbatim from the original cards.
+#:
+#: Each card shows a real picture of its own site (owner's request, 2026-10-15). Only openly
+#: licensed images are used. A ground-level photo is used where one exists under an open
+#: licence (FFX004, Wikimedia Commons); everywhere else the image is public-domain USGS
+#: National Map NAIP Plus aerial imagery centred on the site's coordinates, which were
+#: cross-checked against the US Census geocoder or OpenStreetMap before use. The older USGS
+#: basemap was rejected after it showed a cleared lot where PWC008's library now stands.
+#: Every image is cropped and shaded at top and bottom so the card's white text stays legible.
+_AERIAL = "Aerial view, USGS The National Map: NAIP Plus orthoimagery (public domain)"
 GALLERY_PRESENTATION = {
-    "FFX002": {"seed": 1103, "site": "City of Fairfax Regional Library"},
-    "FFX004": {"seed": 2339, "site": "Fairfax County Government Center"},
-    "PWC006": {"seed": 3721, "site": "Bull Run Library"},
-    "PWC002": {"seed": 4193, "site": "Neabsco-Potomac Commuter Garage"},
-    "PWC008": {"seed": 5377, "site": "Potomac Library"},
-    "PWC003": {"seed": 6791, "site": "Public Safety Training Center"},
+    "FFX002": {"seed": 1103, "site": "City of Fairfax Regional Library",
+               "alt": "Aerial view of the City of Fairfax Regional Library site and downtown Fairfax",
+               "credit": _AERIAL},
+    "FFX004": {"seed": 2339, "site": "Fairfax County Government Center",
+               "alt": "The front entrance of the Fairfax County Government Center",
+               "credit": ('Photo: <a href="https://commons.wikimedia.org/wiki/File:Fairfax_County_Government_Center_2020b.jpg">'
+                          'Antony-22</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, '
+                          'via Wikimedia Commons; cropped and darkened')},
+    "PWC006": {"seed": 3721, "site": "Bull Run Library",
+               "alt": "Aerial view of the Bull Run Library site in Manassas",
+               "credit": _AERIAL},
+    "PWC002": {"seed": 4193, "site": "Neabsco-Potomac Commuter Garage",
+               "alt": "Aerial view of the Neabsco-Potomac Commuter Garage area in Woodbridge",
+               "credit": _AERIAL},
+    "PWC008": {"seed": 5377, "site": "Potomac Library",
+               "alt": "Aerial view of the Potomac Community Library site in Woodbridge",
+               "credit": _AERIAL},
+    "PWC003": {"seed": 6791, "site": "Public Safety Training Center",
+               "alt": "Aerial view of the Prince William County Public Safety Training Center",
+               "credit": _AERIAL},
 }
 
 #: Card headings for positions after the top two, keyed by the canonical tier text so they
@@ -355,7 +378,8 @@ def build_specimens() -> str:
             "title": title,
             "label": f"{site_id} · {pres['site']}",
             "site": pres["site"],
-            "image": "img/card-background.png",
+            "image": f"img/sites/{site_id}.jpg",
+            "alt": pres["alt"],
             "score": f"{score:.1f}",
             "tier": TIER_SHORT.get(tier_full, tier_full),
             "priority": len(chosen) - position,
@@ -369,6 +393,21 @@ def build_specimens() -> str:
 
     body = ",\n        ".join(_json.dumps(item, ensure_ascii=False) for item in out)
     return "const specimens = [\n        " + body + "\n      ];"
+
+
+CREDITS_MARKER = "fcf-photo-credits"
+
+
+def build_photo_credits() -> str:
+    """The credit line the gallery's images require (CC BY-SA asks for author, licence, link and
+    a note of changes). Aerials are public domain and are credited anyway."""
+    ground = [f"<strong>{code}</strong>: {p['credit']}" for code, p in GALLERY_PRESENTATION.items()
+              if p["credit"] != _AERIAL]
+    aerial = sorted(code for code, p in GALLERY_PRESENTATION.items() if p["credit"] == _AERIAL)
+    return (f'<p class="{CREDITS_MARKER}" style="max-width:960px;margin:6px auto 0;padding:0 24px;'
+            f'font-size:12px;line-height:1.5;color:#6e6961;text-align:center;">Card images. '
+            + " · ".join(ground)
+            + f" · <strong>{', '.join(aerial)}</strong>: {_AERIAL}.</p>")
 
 
 def read(page: str) -> str:
@@ -555,6 +594,15 @@ def main() -> int:
             # left to match.
             for stale, fixed in CURRENCY_CORRECTIONS:
                 text = text.replace(stale, fixed)
+        if page == "results.html":
+            credits = build_photo_credits()
+            pattern = re.compile(r'<p class="' + CREDITS_MARKER + r'".*?</p>', re.S)
+            if pattern.search(text):
+                text = pattern.sub(lambda _m: credits, text, count=1)
+            else:
+                anchor = "      </section>\n    </main>"
+                if anchor in text:
+                    text = text.replace(anchor, "      </section>\n      " + credits + "\n    </main>", 1)
         if page == "results.html" and MODE_MARKER in text:
             text = replace_block(text, "fcf-mode-note", MODE_NOTE)
         if page == "results.html" and CAVEAT_MARKER in text:

@@ -683,6 +683,7 @@
           </div>
         </div>
       </section>
+      <p class="fcf-photo-credits" style="max-width:960px;margin:6px auto 0;padding:0 24px;font-size:12px;line-height:1.5;color:#6e6961;text-align:center;">Card images. <strong>FFX004</strong>: Photo: <a href="https://commons.wikimedia.org/wiki/File:Fairfax_County_Government_Center_2020b.jpg">Antony-22</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, via Wikimedia Commons; cropped and darkened · <strong>FFX002, PWC002, PWC003, PWC006, PWC008</strong>: Aerial view, USGS The National Map: NAIP Plus orthoimagery (public domain).</p>
     </main>
   </section>
 
@@ -846,18 +847,16 @@
     (() => {
       "use strict";
 
-      // The card image is DECORATIVE: every card renders the same abstract grain texture
-      // (img/card-background.png). Its alt text used to name the specific facility, so a
-      // screen-reader user was told the image depicts that site. It depicts nothing; the
-      // site name is already in the card's visible text, so the image is now alt="" and
-      // role="presentation" rather than announcing a picture that does not exist.
+      // Each card image now DEPICTS its site (a ground photo or a public-domain aerial view,
+      // credited under the gallery), so it carries real alt text from the specimen data.
+      // It used to be one shared decorative texture with alt="" - correct then, wrong now.
       const specimens = [
-        {"code": "FFX004", "title": "Top overall candidate", "label": "FFX004 · Fairfax County Government Center", "site": "Fairfax County Government Center", "image": "img/card-background.png", "score": "53.4", "tier": "Tier 1", "priority": 6, "seed": 2339, "description": "Rank 1 of 12 under the canonical milestone2_v3 model. Score: 53.4. Tier: Tier 1 - advance to site screening. Install now: 3 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
-        {"code": "FFX002", "title": "Second strongest candidate", "label": "FFX002 · City of Fairfax Regional Library", "site": "City of Fairfax Regional Library", "image": "img/card-background.png", "score": "51.8", "tier": "Tier 1", "priority": 5, "seed": 1103, "description": "Rank 2 of 12 under the canonical milestone2_v3 model. Score: 51.8. Tier: Tier 1 - advance to site screening. Install now: 2 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
-        {"code": "PWC002", "title": "Useful but high-review", "label": "PWC002 · Neabsco-Potomac Commuter Garage", "site": "Neabsco-Potomac Commuter Garage", "image": "img/card-background.png", "score": "51.1", "tier": "High-review", "priority": 4, "seed": 4193, "description": "Rank 3 of 12 under the canonical milestone2_v3 model. Score: 51.1. Tier: High-review candidate. Install now: 2 ports. Future-ready: 3 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
-        {"code": "PWC006", "title": "Promising, needs better data", "label": "PWC006 · Bull Run Library", "site": "Bull Run Library", "image": "img/card-background.png", "score": "50.2", "tier": "Tier 2", "priority": 3, "seed": 3721, "description": "Rank 4 of 12 under the canonical milestone2_v3 model. Score: 50.2. Tier: Tier 2 - promising candidate, refine data. Install now: 2 ports. Future-ready: 4 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
-        {"code": "PWC008", "title": "Monitor before expanding", "label": "PWC008 · Potomac Library", "site": "Potomac Library", "image": "img/card-background.png", "score": "41.8", "tier": "Tier 3", "priority": 2, "seed": 5377, "description": "Rank 10 of 12 under the canonical milestone2_v3 model. Score: 41.8. Tier: Tier 3 - lower priority / monitor. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."},
-        {"code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center", "image": "img/card-background.png", "score": "32.8", "tier": "Special-use", "priority": 1, "seed": 6791, "description": "Rank 12 of 12 under the canonical milestone2_v3 model. Score: 32.8. Tier: Low public-priority / special-use. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."}
+        {"code": "FFX004", "title": "Top overall candidate", "label": "FFX004 · Fairfax County Government Center", "site": "Fairfax County Government Center", "image": "img/sites/FFX004.jpg", "alt": "The front entrance of the Fairfax County Government Center", "score": "53.4", "tier": "Tier 1", "priority": 6, "seed": 2339, "description": "Rank 1 of 12 under the canonical milestone2_v3 model. Score: 53.4. Tier: Tier 1 - advance to site screening. Install now: 3 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "FFX002", "title": "Second strongest candidate", "label": "FFX002 · City of Fairfax Regional Library", "site": "City of Fairfax Regional Library", "image": "img/sites/FFX002.jpg", "alt": "Aerial view of the City of Fairfax Regional Library site and downtown Fairfax", "score": "51.8", "tier": "Tier 1", "priority": 5, "seed": 1103, "description": "Rank 2 of 12 under the canonical milestone2_v3 model. Score: 51.8. Tier: Tier 1 - advance to site screening. Install now: 2 ports. Future-ready: 8 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC002", "title": "Useful but high-review", "label": "PWC002 · Neabsco-Potomac Commuter Garage", "site": "Neabsco-Potomac Commuter Garage", "image": "img/sites/PWC002.jpg", "alt": "Aerial view of the Neabsco-Potomac Commuter Garage area in Woodbridge", "score": "51.1", "tier": "High-review", "priority": 4, "seed": 4193, "description": "Rank 3 of 12 under the canonical milestone2_v3 model. Score: 51.1. Tier: High-review candidate. Install now: 2 ports. Future-ready: 3 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC006", "title": "Promising, needs better data", "label": "PWC006 · Bull Run Library", "site": "Bull Run Library", "image": "img/sites/PWC006.jpg", "alt": "Aerial view of the Bull Run Library site in Manassas", "score": "50.2", "tier": "Tier 2", "priority": 3, "seed": 3721, "description": "Rank 4 of 12 under the canonical milestone2_v3 model. Score: 50.2. Tier: Tier 2 - promising candidate, refine data. Install now: 2 ports. Future-ready: 4 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC008", "title": "Monitor before expanding", "label": "PWC008 · Potomac Library", "site": "Potomac Library", "image": "img/sites/PWC008.jpg", "alt": "Aerial view of the Potomac Community Library site in Woodbridge", "score": "41.8", "tier": "Tier 3", "priority": 2, "seed": 5377, "description": "Rank 10 of 12 under the canonical milestone2_v3 model. Score: 41.8. Tier: Tier 3 - lower priority / monitor. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."},
+        {"code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center", "image": "img/sites/PWC003.jpg", "alt": "Aerial view of the Prince William County Public Safety Training Center", "score": "32.8", "tier": "Special-use", "priority": 1, "seed": 6791, "description": "Rank 12 of 12 under the canonical milestone2_v3 model. Score: 32.8. Tier: Low public-priority / special-use. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."}
       ];
 
       const CONFIG = {
@@ -910,7 +909,7 @@
             <span class="card-edge-left" aria-hidden="true"></span>
             <span class="card-edge-right" aria-hidden="true"></span>
             <span class="card-face">
-              <img src="${item.image}" alt="" role="presentation" draggable="false">
+              <img src="${item.image}" alt="${item.alt}" draggable="false">
               <span class="card-site-code">${item.code}</span>
               <span class="card-signal">${item.title}</span>
             </span>
@@ -959,6 +958,7 @@
         pauseAuto(CONFIG.autoResumeDelay);
         const item = specimens[activeIndex];
         detailArt.src = cards[activeIndex].dataUrl;
+        detailArt.alt = specimens[activeIndex].alt;
         detailKicker.textContent = `MODEL SIGNAL ${String(activeIndex + 1).padStart(2, "0")}`;
         detailTitle.textContent = item.title;
         detailLatin.textContent = `${item.code} · ${item.site}`;
