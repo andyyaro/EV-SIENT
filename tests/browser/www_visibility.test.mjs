@@ -25,6 +25,28 @@ import assert from "node:assert/strict";
 
 import { launch, skipReason } from "./chrome_harness.mjs";
 
+/**
+ * DEC-022 (owner, 2026-10-15): on laptop and desktop screens (>= 761 px) the disclaimer band and
+ * the vintage footer are hidden; phones keep both. So visibility is asserted where the banners
+ * are meant to be seen - a 390 px phone - and the desktop rule is asserted separately below, so
+ * neither half can change without a test noticing.
+ */
+async function asPhone(chrome, readyExpression) {
+  await chrome.send("Emulation.setDeviceMetricsOverride", {
+    width: 390, height: 844, deviceScaleFactor: 2, mobile: true,
+  });
+  await chrome.send("Page.enable");
+  await chrome.send("Page.reload", { ignoreCache: true });
+  await new Promise((r) => setTimeout(r, 300));
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const ready = await chrome.eval(`document.readyState === "complete" && (${readyExpression})`)
+      .catch(() => false);
+    if (ready) return;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error("page never re-rendered at phone width");
+}
+
 const BASE = process.env.WWW_URL || "http://127.0.0.1:8877";
 
 const PAGES = ["index.html", "results.html", "methodology.html", "dashboard.html"];
@@ -59,6 +81,7 @@ for (const page of PAGES) {
       `!!document.querySelector(".fcf-authority")`,
       `${page} never rendered a .fcf-authority disclaimer`);
     try {
+      await asPhone(chrome, `!!document.querySelector(".fcf-authority")`);
       const seen = await inspect(chrome, ".fcf-authority");
       assert.equal(seen.missing, false, `${page} has no authority disclaimer at all`);
       assert.notEqual(seen.display, "none", `${page}: disclaimer is display:none`);
@@ -80,6 +103,7 @@ test("index.html: nothing important is stranded below an unscrollable fold", { s
   const chrome = await launch(`${BASE}/index.html`,
     `!!document.querySelector(".fcf-vintage")`, "no vintage footer");
   try {
+    await asPhone(chrome, `!!document.querySelector(".fcf-vintage")`);
     const state = await chrome.eval(`(() => {
       const f = document.querySelector(".fcf-vintage");
       const r = f.getBoundingClientRect();
@@ -102,6 +126,7 @@ test("index.html: the capacity sentence is inside something a reader can see", {
   const chrome = await launch(`${BASE}/index.html`,
     `!!document.querySelector(".fcf-authority")`, "no disclaimer");
   try {
+    await asPhone(chrome, `!!document.querySelector(".fcf-authority")`);
     const shown = await chrome.eval(`(() => {
       const el = document.querySelector(".fcf-authority");
       return { text: el.innerText || "", rendered: el.getClientRects().length > 0 };
@@ -113,3 +138,22 @@ test("index.html: the capacity sentence is inside something a reader can see", {
     await chrome.close();
   }
 });
+
+for (const page of PAGES) {
+  test(`${page}: on a laptop both banners are hidden (DEC-022), and the markup is still there`, { skip }, async () => {
+    const chrome = await launch(`${BASE}/${page}`,
+      `!!document.querySelector(".fcf-authority") && !!document.querySelector(".fcf-vintage")`,
+      `${page} lost a banner from its markup`);
+    try {
+      await chrome.send("Emulation.setDeviceMetricsOverride", {
+        width: 1440, height: 900, deviceScaleFactor: 1, mobile: false,
+      });
+      const shown = await chrome.eval(`[".fcf-authority", ".fcf-vintage"]
+        .map((s) => document.querySelector(s).getClientRects().length > 0)`);
+      assert.deepEqual(shown, [false, false],
+        `${page}: a banner is showing on a 1440px screen: ${JSON.stringify(shown)}`);
+    } finally {
+      await chrome.close();
+    }
+  });
+}

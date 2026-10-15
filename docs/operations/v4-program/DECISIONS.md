@@ -1336,3 +1336,38 @@ grouped.
 the model wants minutes, metres where it wants feet, one field absent - runs end to end and
 produces a correctly-degraded rating. Correctly-degraded means neither easy answer: **not a
 refusal, and not a confident number.**
+
+---
+
+## DEC-022 - On laptop and desktop screens, the site shows no disclaimer band and no vintage footer
+
+**Date:** 2026-10-15 · **Decided by:** the project owner, on the day of a live presentation
+
+### The decision
+
+On screens 761 px and wider, the top authority disclaimer (`.fcf-authority`) and the bottom
+source-vintage footer (`.fcf-vintage`) are hidden on every public page. Phones keep both, in the
+quiet style adopted the same day. The markup stays on every page, so the text is still in the
+source, in search snippets and for assistive technology that reads hidden content.
+
+### What it does not change
+
+- The results page keeps its red capacity caveat (`fcf-capacity-caveat`) and its mode note
+  (`fcf-mode-note`) directly above the rankings, at every width. The owner was asked about the
+  top and bottom banners only.
+- The repository, reports and assistant still state that capacity is a placeholder at all
+  twelve sites.
+
+### Recorded rather than smoothed over
+
+This reverses the reasoning in Phase 9, which added the capacity sentence to every page because
+"it is cheap to state everywhere and expensive to omit anywhere". On a laptop, a visitor who
+lands on the home page and leaves no longer sees it. That is a deliberate trade the owner made
+for the presentation, and it is written down here so a later reader does not mistake it for a
+regression.
+
+### Gates
+
+`www_visibility.test.mjs` now asserts the banners are visible and uncovered **at phone width**,
+and adds one test per page asserting they are **hidden at 1440 px with the markup present**.
+Mutation-tested: those desktop tests fail 4 / 4 against the pre-change production pages.

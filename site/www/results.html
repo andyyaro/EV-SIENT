@@ -573,6 +573,11 @@
 @media (max-width: 360px) {
   .method-wheel-item { font-size: 16px; }
 }
+/* Laptop and desktop: no top disclaimer band and no bottom vintage footer (owner's decision,
+   2026-10-15, DEC-022). Phones keep both. The markup stays on every page. */
+@media (min-width: 761px) {
+  .fcf-authority, .fcf-vintage { display: none !important; }
+}
 </style>
 </head>
 <body>
