@@ -2133,9 +2133,21 @@
 
       // Production hardening: do not expose token/session helper methods on window.
 
-      getCurrentSession()
-        .then(({ session }) => setAuthenticatedUI(session))
-        .catch(() => setSignedOutUI());
+      // Public access (2026-10-15): the assistant needs no sign-in. The API no longer requires
+      // a token and rate-limits anonymous visitors itself. The sign-in markup is left in place,
+      // never shown, so restoring the gate is a revert of this block rather than a rebuild.
+      const setPublicUI = () => {
+        authGate.classList.add("is-hidden");
+        assistantShell.classList.remove("auth-locked");
+        assistantShell.removeAttribute("aria-hidden");
+        chatInput.disabled = false;
+        submitBtn.disabled = false;
+        authStatus.hidden = true;
+        signOutBtn.hidden = true;
+        hideAuthMessage();
+        resizeInput();
+      };
+      setPublicUI();
 
       chatForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -2148,14 +2160,6 @@
           return;
         }
 
-        let idToken;
-        try {
-          idToken = await getIdToken();
-        } catch (_) {
-          setSignedOutUI();
-          return;
-        }
-
         appendMessage(messageText, "user");
         chatInput.value = "";
         resizeInput();
@@ -2165,8 +2169,7 @@
           const response = await fetch(CONFIG.assistantApiEndpoint, {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${idToken}`
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
               message: messageText,
@@ -2178,7 +2181,6 @@
           const data = await readApiPayload(response);
 
           if (response.status === 401 || response.status === 403) {
-            signOut();
             throw new Error(buildApiErrorMessage(response.status, data));
           }
 

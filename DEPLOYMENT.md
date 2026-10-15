@@ -268,3 +268,32 @@ aws acm delete-certificate --certificate-arn <preview cert ARN> --region us-east
 
 Promoting the change to production is the normal path in section 4 after PR #12 merges; the
 preview is not part of that path and can be removed independently.
+
+---
+
+## 9. The AI assistant is public and reads `main` (2026-10-15)
+
+Changed on the owner's instruction, for a live presentation: no sign-in, and answers grounded
+in the current branch.
+
+| Piece | Before | After |
+|---|---|---|
+| Lambda `future-city-assistant-chat` code | 401 without a Cognito token; curated file lists pointed at the retired V2 layout | Anonymous visitors allowed (keyed by a salted hash of their IP, raw IP never stored); curated lists remapped to 32 files that exist on `main`; raw facility inputs blocked (`data/inputs/`, `data/provenance/`, `data/intake/`, `site/platform/`, `explorer/web/data/`, `matlab/data/`, `data/cache/`); site-wide daily cap |
+| Lambda env | `GITHUB_BRANCH=v2-expansion-planning`; 20/h and 100/day per signed-in user | `GITHUB_BRANCH=main`; preview origin added; 150/h and 400/day per visitor (an audience shares one venue IP); `GLOBAL_DAILY_LIMIT=600` |
+| GitHub token (Secrets Manager `future-city-assistant-secrets`) | **Rejected by GitHub (401)**, so the assistant had been answering with no repository context | Replaced by the owner with a fine-grained, read-only token for this repository (90 days) |
+| API `zale82q9w3`, route `POST /chat` | `AuthorizationType=JWT` (authorizer `2pk8gx`); CORS production only; no throttling | `NONE`; CORS production + preview; stage throttle 3 req/s, burst 10 |
+| `assistant.html` | Sign-in gate, token on every request | Gate never shown, no token sent. Uploaded to the preview, and to production **as this one file only**, patched from the live copy |
+
+**Verified:** in fresh browsers on both domains, desktop and phone, no sign-in screen appears
+and a question is answered. With the new token, "which site ranks first" is answered FFX004 53.4
+from `README.md` on `main`, horizons 2036 / 2046 / 2056, 25 ports with a pathway for 48. Six
+probing questions returned none of the private facility values (addresses, per-site figures).
+
+**Rollback:** Lambda version **1** is the exact pre-change code and configuration; point the
+integration at it, or re-upload it to `$LATEST`. Restore the gate with
+`aws apigatewayv2 update-route --api-id zale82q9w3 --route-id a3fm87o --authorization-type JWT --authorizer-id 2pk8gx`,
+then revert the `setPublicUI` block in `assistant.html` and re-upload.
+
+**The token expires in 90 days.** When it does, the assistant keeps answering but from no
+repository context, exactly the failure found today; the log line is
+`"phase_4_repo_lookup_error", "error": "HTTP Error 401: Unauthorized"`.
