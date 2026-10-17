@@ -139,6 +139,10 @@ make validate       # validate the tracked canonical contract
 ./scripts/verify.sh # every repository verification gate
 ```
 
+To run the model on another jurisdiction's sites, see **[Running EV-SIENT on your own
+sites](docs/INPUT_SCHEMA.md)**: intake reads your file in whatever shape it has, shows what
+it would do before anything runs, and `run --cohort` produces the same validated contract.
+
 Requirements: Python 3.11+ (verified on 3.12/3.14). MATLAB R2025b for the `matlab/`
 model (**not required** for anything above). The MATLAB suite has been executed on licensed
 MathWorks R2025b Update 5 - **49 passed / 0 failed** - but only against a *synthetic* fixture,

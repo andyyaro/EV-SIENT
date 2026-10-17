@@ -47,7 +47,7 @@ from typing import Any
 
 import pandas as pd
 
-from .scoring import NUMERIC_FIELDS, YES_NO_FIELDS
+from .scoring import NO_TOKENS, NUMERIC_FIELDS, TEXT_NULLS, YES_NO_FIELDS, YES_TOKENS
 
 #: Identity and geometry the model needs beyond the 27 scored fields.
 IDENTITY_FIELDS = ["site_id", "site_name", "site_type", "lat", "lon"]
@@ -267,6 +267,129 @@ def _detect_conversion(canonical: str, supplied: str) -> tuple[float, str] | Non
     return None
 
 
+#: A number written the way people write numbers - thousands separators, a leading dollar sign
+#: - which is read as the plain number with a recorded note. Nothing cleverer is attempted:
+#: "about 50", "50-60" and "12%" are not numbers this tool will guess at.
+_FORMATTED_NUMBER = re.compile(r"^\$?\s*-?\d{1,3}(?:,\d{3})+(?:\.\d+)?$|^\$\s*-?\d+(?:\.\d+)?$")
+
+
+def read_number(cell: Any) -> tuple[float, str]:
+    """One cell of a numeric field, as ``(value, kind)``.
+
+    ``kind`` is ``number``; ``formatted`` (read through separators or a currency sign);
+    ``blank`` (empty, or text such as ``n/a`` - absent, never 0); or ``unreadable`` (absent,
+    and reported). Before 2026-10-17 all of the last three became 0 with no record (F-07).
+    """
+    if cell is None or (not isinstance(cell, str) and pd.isna(cell)):
+        return math.nan, "blank"
+    if isinstance(cell, bool):
+        return math.nan, "unreadable"
+    if isinstance(cell, (int, float)):
+        return float(cell), "number"
+    text = str(cell).strip()
+    if text.lower() in TEXT_NULLS:
+        return math.nan, "blank"
+    try:
+        return float(text), "number"
+    except ValueError:
+        pass
+    if _FORMATTED_NUMBER.match(text):
+        return float(re.sub(r"[$,\s]", "", text)), "formatted"
+    return math.nan, "unreadable"
+
+
+def read_flag(cell: Any) -> tuple[float, str]:
+    """One cell of a yes/no field, as ``(value, kind)``: ``flag`` (1.0 or 0.0), ``blank``
+    (absent, which is not "no") or ``unreadable`` (absent, and reported)."""
+    if cell is None or (not isinstance(cell, str) and pd.isna(cell)):
+        return math.nan, "blank"
+    if isinstance(cell, bool):
+        return (1.0 if cell else 0.0), "flag"
+    if isinstance(cell, (int, float)):
+        return (float(cell), "flag") if float(cell) in (0.0, 1.0) else (math.nan, "unreadable")
+    text = str(cell).strip().lower()
+    if text in YES_TOKENS:
+        return 1.0, "flag"
+    if text in NO_TOKENS:
+        return 0.0, "flag"
+    if text in TEXT_NULLS:
+        return math.nan, "blank"
+    return math.nan, "unreadable"
+
+
+#: What else an absence does, for the fields where it is more than a lost score term.
+#: Said in the finding itself, because "earns no credit" alone would hide the one place a
+#: stand-in value is used (`scoring.SIZING_DEFAULTS`), the one place a plan is capped, and
+#: the two counts that are not in the score at all but size the plan through its sessions.
+ABSENCE_CONSEQUENCE = {
+    "parking_spaces": ", and the site's port plan is capped at the minimum of 2",
+    "hours_open": ", and port sizing assumes the site is open 8 hours a day",
+    "avg_dwell_min": ", and port sizing assumes visits of 120 minutes",
+    "employees_day": ", and the site's expected charging sessions count none from staff",
+    "visitors_day": ", and the site's expected charging sessions count none from visitors",
+}
+
+
+def _reader_for(canonical: str):
+    if canonical in NUMERIC_FIELDS or canonical in ("lat", "lon"):
+        return read_number
+    if canonical in YES_NO_FIELDS:
+        return read_flag
+    return None
+
+
+def _cells_by_kind(frame: pd.DataFrame, canonical: str, column: str) -> dict[str, list]:
+    """File row numbers (the header is row 1) and raw cells, grouped by how they read."""
+    reader = _reader_for(canonical)
+    kinds: dict[str, list] = {"formatted": [], "blank": [], "unreadable": []}
+    for i, cell in enumerate(frame[column].tolist()):
+        _, kind = reader(cell)
+        if kind in kinds:
+            kinds[kind].append((i + 2, cell))
+    return kinds
+
+
+def _where(items: list) -> str:
+    rows = ", ".join(str(row) for row, _ in items[:8]) + (" ..." if len(items) > 8 else "")
+    shown = ", ".join(repr(str(cell)) for _, cell in items[:3] if not pd.isna(cell))
+    return f"row(s) {rows}" + (f": {shown}" if shown else "")
+
+
+def _check_values(frame: pd.DataFrame, proposal: Proposal) -> None:
+    """Value-level findings, cell by cell, with the file row of each (F-07).
+
+    The column-level checks above say what a file's columns mean. These say what its cells
+    say, which is where a "1,400" or an "n/a" hides. None of them is a refusal: a cell that
+    cannot be read is scored as an absence, which earns no credit (DEC-011), so reading it as
+    absent cannot improve the file - but the person deciding is told which cells they were.
+    """
+    for canonical, column in sorted(proposal.mapping.items()):
+        if _reader_for(canonical) is None:
+            continue
+        kinds = _cells_by_kind(frame, canonical, column)
+        if kinds["formatted"]:
+            proposal.findings.append(Finding(
+                "note", canonical,
+                f"{canonical} has {len(kinds['formatted'])} value(s) written with thousands "
+                f"separators or a dollar sign, which will be read as plain numbers.",
+                detail=_where(kinds["formatted"])))
+        if kinds["blank"]:
+            proposal.findings.append(Finding(
+                "note", canonical,
+                f"{canonical} has no value in {len(kinds['blank'])} row(s), so those sites will "
+                f"be scored as an absence for it, which earns no credit"
+                f"{ABSENCE_CONSEQUENCE.get(canonical, ', rather than given a default')}.",
+                detail=_where(kinds["blank"])))
+        if kinds["unreadable"]:
+            expected = "yes or no" if canonical in YES_NO_FIELDS else "a number"
+            proposal.findings.append(Finding(
+                "warning", canonical,
+                f"{canonical} has {len(kinds['unreadable'])} value(s) that are not {expected}, "
+                f"which will be scored as absent rather than guessed at"
+                f"{ABSENCE_CONSEQUENCE.get(canonical, '')}, so correct them if they matter.",
+                detail=_where(kinds["unreadable"])))
+
+
 def propose(frame: pd.DataFrame) -> Proposal:
     """Read a supplied frame and say what intake WOULD do with it. Changes nothing.
 
@@ -324,14 +447,16 @@ def propose(frame: pd.DataFrame) -> Proposal:
 
     for canonical in proposal.absent:
         if canonical in _scored_fields():
+            consequence = ABSENCE_CONSEQUENCE.get(
+                canonical, " rather than being substituted with a default")
             proposal.findings.append(Finding(
                 "note", canonical,
                 f"{canonical} is not present in this file, so it will be scored as an absence "
-                f"and will lower this jurisdiction's data confidence rather than being "
-                f"substituted with a default."))
+                f"and will lower this jurisdiction's data confidence{consequence}."))
 
     _check_identity(frame, proposal)
     _check_coordinates(frame, proposal)
+    _check_values(frame, proposal)
     proposal.findings.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.field))
     return proposal
 
@@ -422,8 +547,18 @@ def apply(frame: pd.DataFrame, proposal: Proposal) -> tuple[pd.DataFrame, list[L
             continue
 
         series = frame[column]
-        if canonical in NUMERIC_FIELDS or canonical in ("lat", "lon"):
-            series = pd.to_numeric(series, errors="coerce")
+        reader = _reader_for(canonical)
+        if reader is not None:
+            # The same readers the proposal reported with, so what was shown is what is done.
+            kinds = _cells_by_kind(frame, canonical, column)
+            series = pd.Series([reader(cell)[0] for cell in series.tolist()], dtype="float64")
+            for kind, action, reason in (
+                    ("formatted", "read through separators", "written with thousands separators or a dollar sign"),
+                    ("blank", "left absent", "no value in the cell; scored as an absence, never defaulted"),
+                    ("unreadable", "left absent", "the cell is not a value the model can read")):
+                if kinds[kind]:
+                    ledger.append(LedgerEntry(canonical, f"{action} ({len(kinds[kind])} cell(s))",
+                                              reason, detail=_where(kinds[kind])))
         factor = proposal.conversions.get(canonical)
         if factor:
             series = series * factor
@@ -441,7 +576,8 @@ def apply(frame: pd.DataFrame, proposal: Proposal) -> tuple[pd.DataFrame, list[L
 
 
 def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
-                    source_org: str, source_date: str) -> pd.DataFrame:
+                    source_org: str, source_date: str,
+                    applied: pd.DataFrame | None = None) -> pd.DataFrame:
     """Typed provenance for the confidence system that already exists.
 
     Keyed per **site x field_group**, which is the shape `confidence.build_confidence` reads.
@@ -456,6 +592,11 @@ def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
     Absent fields are emitted as `missing`, never omitted. A field simply left out of the
     provenance table scores as though it had never been expected, which would make an
     incomplete file look exactly as trustworthy as a complete one.
+
+    With ``applied`` (the frame `apply` returned), a site whose cell is empty in a mapped
+    field gets `missing` for that field's group at that site only. A column can be supplied
+    and still be blank at half the sites, and those sites should not borrow the column's
+    rating from the ones that have a value.
     """
     # Weakest first: whichever appears earliest wins the group.
     RANK = ["missing", "unconfirmed", "planning_assumption", "derived_public_data",
@@ -481,19 +622,25 @@ def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
             current["assumption_type"] = note
 
     rows = []
-    for site_id in site_ids:
+    for position, site_id in enumerate(site_ids):
         for group, assessment in sorted(per_group.items()):
+            source_class, note = assessment["source_class"], assessment["assumption_type"]
+            if applied is not None and source_class != "missing":
+                blank = [f for f in proposal.mapping if FIELD_GROUP_FOR_INPUT[f] == group
+                         and f in applied.columns and pd.isna(applied[f].iloc[position])]
+                if blank:
+                    source_class = "missing"
+                    note = f"no value at this site for {', '.join(sorted(blank))}"
             rows.append({
                 "site_id": site_id,
                 "field_group": group,
-                "source_class": assessment["source_class"],
+                "source_class": source_class,
                 "verification_status": "unreviewed",
                 "source_org": source_org,
                 "source_date": source_date,
                 "reviewer": reviewer,
-                "assumption_type": assessment["assumption_type"],
-                "unresolved_flag": "1" if assessment["source_class"] in
-                                          ("missing", "unconfirmed") else "0",
+                "assumption_type": note,
+                "unresolved_flag": "1" if source_class in ("missing", "unconfirmed") else "0",
             })
     return pd.DataFrame(rows)
 

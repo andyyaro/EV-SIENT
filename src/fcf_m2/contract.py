@@ -60,6 +60,31 @@ REQUIRED_FIELDS = [
 VALID_CASES = {"baseline", "base", "high", "stress_combined"}
 VALID_HORIZONS = {BASELINE_YEAR, *V3_HORIZONS}
 
+#: RT-04's golden totals belong to ONE cohort: the 12-site Northern Virginia study, identified
+#: by the SHA-256 of the three input tables its right-sizing reads. They are that study's
+#: accepted figures and a regression check on it - not a property every cohort must have. A run
+#: on another jurisdiction's sites cannot reproduce them and must not be tuned until it does.
+#: Until 2026-10-17 any non-synthetic run was held to them, so every other cohort was refused
+#: (F-06). `tests/test_cohort_run.py` pins these digests to the files in `data/inputs/`, so
+#: editing the real inputs fails loudly instead of quietly switching the check off.
+REFERENCE_INPUTS = {
+    "real_sites_v2.csv": "582e0b375fe3a078972fe77ad602bd1837b26679e09bf1b9072ffed30678a748",
+    "legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv":
+        "064b6fdc5afe41e9a5e3a1480206c06195ffcaa6077ae4f7f081932024e3597c",
+    "legacy_matlab_site_meta.csv": "1b4255976b75429beb5fbd23c90b40ae480c5557564bf12e262e4fbd9831ff5a",
+}
+REFERENCE_STARTER_TOTAL = 25
+REFERENCE_PATHWAY_TOTAL = 48
+
+#: Site ids a cohort may use. Wider than the reference study's `FFX`/`PWC` + three digits, and
+#: still strict enough to be a safe file name, join key and URL segment.
+COHORT_SITE_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,39}$"
+
+
+def is_reference_cohort(inputs_hashed: dict[str, str]) -> bool:
+    """True when a run read the reference study's own inputs, under any file names."""
+    return set(REFERENCE_INPUTS.values()) <= set(inputs_hashed.values())
+
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -69,7 +94,7 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def build_schema(synthetic: bool = False) -> dict:
+def build_schema(synthetic: bool = False, jurisdiction: str | None = None) -> dict:
     """Build the contract's JSON Schema. ``synthetic=True`` admits generated sites.
 
     Widened, not relaxed. A synthetic run keeps ``SYN000``-style ids and the jurisdiction
@@ -77,8 +102,17 @@ def build_schema(synthetic: bool = False) -> dict:
     downstream consumer. Making synthetic ids match ``^(FFX|PWC)[0-9]{3}$`` would have
     satisfied the validator by making invented data indistinguishable from the real study's -
     the opposite of what a fixture is for.
+
+    ``jurisdiction`` is set for a cohort run (another jurisdiction's sites): it admits that
+    cohort's ids (`COHORT_SITE_ID_PATTERN`) and exactly that one jurisdiction, so a cohort's
+    rows can never claim Fairfax or Prince William.
     """
-    """JSON Schema for one scenario_table row."""
+    if jurisdiction is not None:
+        site_id_pattern, jurisdictions = COHORT_SITE_ID_PATTERN, [jurisdiction]
+    elif synthetic:
+        site_id_pattern, jurisdictions = "^(FFX|PWC|SYN)[0-9]{3}$", ["fairfax", "pwc", "synthetic"]
+    else:
+        site_id_pattern, jurisdictions = "^(FFX|PWC)[0-9]{3}$", ["fairfax", "pwc"]
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "FCF M2 canonical scenario row",
@@ -88,12 +122,9 @@ def build_schema(synthetic: bool = False) -> dict:
             "contract_version": {"const": SCHEMA_VERSION},
             "run_id": {"type": "string", "minLength": 8},
             "generated_at": {"type": "string"},
-            "site_id": {"type": "string",
-                        "pattern": "^(FFX|PWC|SYN)[0-9]{3}$" if synthetic
-                                   else "^(FFX|PWC)[0-9]{3}$"},
+            "site_id": {"type": "string", "pattern": site_id_pattern},
             "site_name": {"type": "string", "minLength": 3},
-            "jurisdiction": {"enum": ["fairfax", "pwc", "synthetic"] if synthetic
-                                     else ["fairfax", "pwc"]},
+            "jurisdiction": {"enum": jurisdictions},
             "site_type": {"type": "string"},
             "public_or_fleet": {"enum": ["public", "fleet", "mixed"]},
             "horizon_year": {"enum": sorted(VALID_HORIZONS)},
@@ -206,10 +237,10 @@ def validate_scenario_table(df: pd.DataFrame, site_table: pd.DataFrame,
         base = df[(df["horizon_year"] == BASELINE_YEAR) & (df["scenario_name"] == "baseline")]
         starter = int(base["ports_active"].sum())
         pathway = int(base["ports_pathway_capacity"].sum())
-        if starter != 25:
-            problems.append(f"RT-04: baseline starter total {starter} != 25")
-        if pathway != 48:
-            problems.append(f"RT-04: pathway total {pathway} != 48")
+        if starter != REFERENCE_STARTER_TOTAL:
+            problems.append(f"RT-04: baseline starter total {starter} != {REFERENCE_STARTER_TOTAL}")
+        if pathway != REFERENCE_PATHWAY_TOTAL:
+            problems.append(f"RT-04: pathway total {pathway} != {REFERENCE_PATHWAY_TOTAL}")
 
     # RT-05 unit ranges
     if (df["evse_power_kw"] <= 0).any() or (df["evse_power_kw"] > 5000).any():
@@ -298,14 +329,23 @@ def validate_against_json_schema(df: pd.DataFrame, schema: dict, sample: int | N
 
 def write_contract(out_dir: str | Path, scenario_table: pd.DataFrame, site_table: pd.DataFrame,
                    provenance: pd.DataFrame, standards_register: pd.DataFrame,
-                   assumptions: dict, run_id: str, inputs_hashed: dict[str, str]) -> Path:
-    """Write the full versioned contract directory with manifest hashes."""
+                   assumptions: dict, run_id: str, inputs_hashed: dict[str, str],
+                   cohort: dict | None = None) -> Path:
+    """Write the full versioned contract directory with manifest hashes.
+
+    ``cohort`` describes a run on another jurisdiction's sites (`workflow._load_cohort`). It
+    is recorded in the manifest, widens the schema to that cohort's ids, and decides RT-04 by
+    the inputs' digests: the golden totals are asserted only if the cohort IS the reference
+    study. Without it the run is the reference study and RT-04 applies as it always has.
+    """
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
 
     synthetic = run_is_synthetic(provenance)
-    validate_or_raise(scenario_table, site_table, expect_legacy_totals=not synthetic)
-    schema = build_schema(synthetic=synthetic)
+    expect_totals = not synthetic and (cohort is None or is_reference_cohort(inputs_hashed))
+    validate_or_raise(scenario_table, site_table, expect_legacy_totals=expect_totals)
+    schema = build_schema(synthetic=synthetic,
+                          jurisdiction=cohort["jurisdiction"] if cohort else None)
     schema_problems = validate_against_json_schema(scenario_table, schema)
     if schema_problems:
         raise ContractValidationError(schema_problems)
@@ -323,7 +363,7 @@ def write_contract(out_dir: str | Path, scenario_table: pd.DataFrame, site_table
         # Stated in the artifact itself, not only in the build log. A contract directory that
         # travels without saying its inputs were invented is one someone quotes.
         "synthetic_inputs": synthetic,
-        "legacy_totals_checked": not synthetic,
+        "legacy_totals_checked": expect_totals,
         "contract_version": SCHEMA_VERSION,
         "model_version": MODEL_VERSION,
         "run_id": run_id,
@@ -349,6 +389,8 @@ def write_contract(out_dir: str | Path, scenario_table: pd.DataFrame, site_table
             "Any schema change bumps contract_version; consumers assert the major version.",
         ],
     }
+    if cohort is not None:
+        manifest["cohort"] = cohort
     (out / "contract_manifest.json").write_text(json.dumps(manifest, indent=2))
     _write_readme(out)
     return out

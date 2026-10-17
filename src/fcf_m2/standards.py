@@ -12,6 +12,11 @@ from __future__ import annotations
 
 import pandas as pd
 
+#: The permitting authority as the reference study names it. True of Fairfax City and Prince
+#: William County only, so a run on any other cohort names it generically instead.
+REFERENCE_AUTHORITY_AREA = "(Fairfax City / PWC)"
+COHORT_AUTHORITY_AREA = "(the local authority having jurisdiction)"
+
 STANDARDS = [
     {
         "standard_id": "UL2594",
@@ -171,7 +176,7 @@ STANDARDS = [
         "adopted_edition": "UL 9540A 5th ed. 2025-03-12; NFPA 855 2026 ed.",
         "latest_edition": "UL 9540A 6th-ed. activity 2026",
         "applicability": "conditional_out_of_scope",
-        "condition": "Applies ONLY if battery storage enters scope. battery_storage_flag=0 at all 12 sites.",
+        "condition": "Applies ONLY if battery storage enters scope. {storage_fact}",
         "stages": {}, "evidence_required": "-", "authority": "-",
         "open_ahj_question": "-",
     },
@@ -181,9 +186,31 @@ STAGES = ["design", "procurement", "installation", "commissioning", "operation",
           "emergency_response", "end_of_life"]
 
 
-def build_register(site_table: pd.DataFrame) -> pd.DataFrame:
+def storage_fact(battery_storage: pd.Series) -> str:
+    """The storage row's second sentence, counted from the flags.
+
+    It used to be the literal "battery_storage_flag=0 at all 12 sites.", which a run on six
+    other sites repeated about them, true or not. On the reference study the count gives the
+    same sentence."""
+    flags = pd.to_numeric(battery_storage, errors="coerce")
+    total, yes, unrecorded = len(flags), int((flags == 1).sum()), int(flags.isna().sum())
+    if yes == 0 and unrecorded == 0:
+        return f"battery_storage_flag=0 at all {total} sites."
+    return (f"battery_storage_flag=1 at {yes} and unrecorded at {unrecorded} of {total} sites; "
+            f"confirm whether storage enters scope there.")
+
+
+def build_register(site_table: pd.DataFrame, battery_storage: pd.Series | None = None,
+                   reference: bool = True) -> pd.DataFrame:
     """One row per site x standard x stage (active standards) plus one conditional row
-    per site x conditional standard (marked out of scope)."""
+    per site x conditional standard (marked out of scope).
+
+    ``battery_storage`` (one flag per site) sets the storage row's count; without it the
+    reference study's own count is used. ``reference=False`` is a run on another cohort: the
+    permitting authority is then named generically, not as Fairfax City / PWC. The editions
+    stay Virginia's either way, and a cohort's manifest says so."""
+    fact = storage_fact(battery_storage) if battery_storage is not None \
+        else "battery_storage_flag=0 at all 12 sites."
     rows = []
     for _, site in site_table.iterrows():
         for std in STANDARDS:
@@ -194,7 +221,7 @@ def build_register(site_table: pd.DataFrame) -> pd.DataFrame:
                     "standard_title": std["title"],
                     "role": std["role"],
                     "stage": "n/a",
-                    "requirement": std.get("condition", ""),
+                    "requirement": std.get("condition", "").format(storage_fact=fact),
                     "adopted_edition": std["adopted_edition"],
                     "latest_edition": std["latest_edition"],
                     "applicability": std["applicability"],
@@ -218,7 +245,8 @@ def build_register(site_table: pd.DataFrame) -> pd.DataFrame:
                     "latest_edition": std["latest_edition"],
                     "applicability": "active",
                     "evidence_required": std["evidence_required"],
-                    "authority": std["authority"],
+                    "authority": (std["authority"] if reference else std["authority"].replace(
+                        REFERENCE_AUTHORITY_AREA, COHORT_AUTHORITY_AREA)),
                     "open_ahj_question": std["open_ahj_question"],
                 })
     return pd.DataFrame(rows)

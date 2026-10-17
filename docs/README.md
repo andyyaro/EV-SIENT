@@ -9,6 +9,7 @@
 - [Migration from contract v1 to v2](migration-from-v3.md) - additive; the one change that can break a consumer is `horizon_label`
 
 ## For model users
+- [Running EV-SIENT on your own sites](INPUT_SCHEMA.md) - intake, the cohort directory, every input field, and a worked example
 - [Workflow steps](WORKFLOW_STEPS.md) (generated - regenerate with `make docs`)
 - [`src/` guide](../src/README.md) · [`data/` guide](../data/README.md) · [`tests/` guide](../tests/README.md)
 - [Current-facts source register](methodology/current-facts-source-register.md) - primary-source verification of every time-sensitive fact (2026-07-19)

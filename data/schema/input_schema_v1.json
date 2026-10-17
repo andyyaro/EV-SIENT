@@ -1,0 +1,412 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ev-sient:input-schema:v1",
+  "title": "EV-SIENT cohort input, version 1: one row of sites.csv",
+  "description": "One row per candidate site. Only site_id is required. A value nobody recorded is left blank: it earns no credit and is never replaced by a guess (DEC-011). docs/INPUT_SCHEMA.md describes every field and the other files a cohort may hold.",
+  "x-schema-version": "1",
+  "x-blank-values": [
+    "-",
+    "--",
+    "?",
+    "n.a.",
+    "n/a",
+    "na",
+    "nan",
+    "none",
+    "not assessed",
+    "not known",
+    "not recorded",
+    "null",
+    "tbd",
+    "unk",
+    "unknown"
+  ],
+  "x-yes-values": [
+    "1",
+    "1.0",
+    "t",
+    "true",
+    "y",
+    "yes"
+  ],
+  "x-no-values": [
+    "0",
+    "0.0",
+    "f",
+    "false",
+    "n",
+    "no"
+  ],
+  "type": "object",
+  "required": [
+    "site_id"
+  ],
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,39}$",
+      "description": "A unique, stable identifier for the site. Letters, digits, '.', '_' and '-'.",
+      "x-unit": "identifier",
+      "x-in-readiness-score": false,
+      "x-if-absent": "the file is refused"
+    },
+    "site_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Display name. Not a model input.",
+      "x-unit": "text",
+      "x-in-readiness-score": false,
+      "x-if-absent": "the site_id is shown instead"
+    },
+    "site_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "What the building is, e.g. library, office, recreation, garage. A type containing 'garage' is routed to fire/AHJ review before any normal buildout.",
+      "x-unit": "text",
+      "x-in-readiness-score": false,
+      "x-if-absent": "'unspecified'"
+    },
+    "lat": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Latitude, WGS84 decimal degrees. Projected coordinates are refused, never converted.",
+      "x-unit": "degrees",
+      "x-in-readiness-score": false,
+      "x-if-absent": "the map surfaces are unavailable; nothing else changes",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "lon": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Longitude, WGS84 decimal degrees.",
+      "x-unit": "degrees",
+      "x-in-readiness-score": false,
+      "x-if-absent": "the map surfaces are unavailable; nothing else changes",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "employees_day": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Staff on site on a typical day. Drives expected charging sessions, not the score.",
+      "x-unit": "people/day",
+      "x-in-readiness-score": false,
+      "x-if-absent": "counts as 0 expected sessions from staff",
+      "minimum": 0
+    },
+    "visitors_day": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Visitors on a typical day. Drives expected charging sessions, not the score.",
+      "x-unit": "people/day",
+      "x-in-readiness-score": false,
+      "x-if-absent": "counts as 0 expected sessions from visitors",
+      "minimum": 0
+    },
+    "fleet_vehicles": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Fleet vehicles based at the site. Read and carried, not used.",
+      "x-unit": "vehicles",
+      "x-in-readiness-score": false,
+      "x-if-absent": "nothing changes",
+      "minimum": 0
+    },
+    "parking_spaces": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Parking spaces at the site. Also caps the port plan at 5% of spaces (2 to 12).",
+      "x-unit": "spaces",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit, and the port plan is capped at 2",
+      "minimum": 0
+    },
+    "hours_open": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Hours the site is open on a typical day. A '_min' column is recognised and converted.",
+      "x-unit": "hours/day",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit; port sizing assumes 8 hours",
+      "minimum": 0,
+      "maximum": 24
+    },
+    "avg_dwell_min": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Average length of a visit. An '_hr' or '_sec' column is recognised and converted.",
+      "x-unit": "minutes",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit; port sizing assumes 120 minutes",
+      "minimum": 0
+    },
+    "nearby_households_1mi": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Households within 1 mile.",
+      "x-unit": "households",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "nearby_jobs_1mi": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Jobs within 1 mile.",
+      "x-unit": "jobs",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "aadt_nearest": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Annual average daily traffic on the nearest arterial.",
+      "x-unit": "vehicles/day",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "amenities_count_0_5mi": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Amenities (shops, services) within half a mile.",
+      "x-unit": "count",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "ev_share_local": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Share of locally registered vehicles that are electric, as a fraction: 0.03 means 3%.",
+      "x-unit": "fraction",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "existing_l2_ports_1mi": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Public Level 2 charging ports already within 1 mile. Lower is better.",
+      "x-unit": "ports",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "existing_dcfc_ports_3mi": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Public DC fast charging ports already within 3 miles. Lower is better.",
+      "x-unit": "ports",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "equity_gap_index": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Charging-equity need, 0 (least) to 1 (most underserved).",
+      "x-unit": "index 0-1",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit; the contract's equity_indicator is left empty",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "spare_capacity_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Spare electrical capacity at the service. Used in the score, but the contract reports capacity as a placeholder until a utility or facility confirms it. Watts and megawatts are recognised and converted.",
+      "x-unit": "kW",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "distance_to_service_ft": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Distance from the parking area to the electrical service. Lower is better. Metres are recognised and converted.",
+      "x-unit": "feet",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score",
+      "minimum": 0
+    },
+    "trenching_ft": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Trenching needed. Lower is better. Metres are recognised and converted.",
+      "x-unit": "feet",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit, and the site gets no cost figures",
+      "minimum": 0
+    },
+    "trench_cost_per_ft": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Trenching cost per foot.",
+      "x-unit": "USD/foot",
+      "x-in-readiness-score": true,
+      "x-if-absent": "the install-cost term earns no credit, and the site gets no cost figures",
+      "minimum": 0
+    },
+    "service_upgrade_cost_usd": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Cost of upgrading the electrical service. Lower is better.",
+      "x-unit": "USD",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit, and the site gets no cost figures",
+      "minimum": 0
+    },
+    "elec_service_rating_amp": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Rating of the electrical service. Read and carried, not used.",
+      "x-unit": "amps",
+      "x-in-readiness-score": false,
+      "x-if-absent": "nothing changes",
+      "minimum": 0
+    },
+    "public_access": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Is the site open to the public? Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": true,
+      "x-if-absent": "treated as not public: demand counts at 65%, the 'Low public-priority' tier, and every port target held to 2"
+    },
+    "ada_layout_possible": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Can an ADA-accessible charging layout be built? Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score"
+    },
+    "fire_access_ok": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Is fire-service access adequate? Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score"
+    },
+    "garage_enclosed": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Is the parking an enclosed garage? Yes lowers the safety score. Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no safety credit, and the site is a 'High-review candidate'"
+    },
+    "emergency_disconnect_visible": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Is an emergency disconnect visible from the charging area? Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no credit in the score"
+    },
+    "stormwater_risk": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Is there a stormwater or flooding risk? Yes lowers the safety score. Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": true,
+      "x-if-absent": "earns no safety credit"
+    },
+    "battery_storage_flag": {
+      "type": [
+        "boolean",
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Is battery storage on site? Read and carried, not used. Write yes/no, 1/0 or true/false; leave blank if nobody knows.",
+      "x-unit": "yes/no",
+      "x-in-readiness-score": false,
+      "x-if-absent": "nothing changes"
+    }
+  },
+  "x-cohort-files": {
+    "sites.csv": "required: one row per site, the fields above",
+    "electrical_risk.csv": "optional: site_id, electrical_risk_level (low | medium | high); default medium",
+    "site_meta.csv": "optional: site_id, arrival_start_hr, arrival_end_hr, base_load_mean_kw, base_load_peak_kw; default arrivals from 08:00 for the opening hours, base load unknown",
+    "provenance.csv": "optional: site_id, field_group, source_class, verification_status, source_org, source_date, reviewer, assumption_type, unresolved_flag; default 'unconfirmed' everywhere",
+    "cohort.json": "optional: cohort_id, jurisdiction, source_date (YYYY-MM-DD), source_org; defaults from the directory name and 'unstated'"
+  }
+}

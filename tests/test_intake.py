@@ -255,3 +255,59 @@ def test_every_canonical_field_is_grouped_for_confidence():
     relying on the contract's column map put 29 of 32 fields into one group by default."""
     for field in intake._all_fields():
         assert field in intake.FIELD_GROUP_FOR_INPUT, f"{field} has no confidence group"
+
+
+# ---------------------------------------------------------------- cell by cell (F-07)
+
+@pytest.fixture()
+def dirty(messy) -> pd.DataFrame:
+    """The messy fixture with the three cell-level faults the 2026-10-17 audit measured."""
+    frame = messy.copy().astype(object)
+    frame.loc[0, "footfall"] = "1,400"      # visitors, with a thousands separator
+    frame.loc[1, "staff"] = "n/a"           # employees, a text blank
+    frame.loc[2, "enclosed"] = "banana"     # garage_enclosed, not an answer
+    return frame
+
+
+def _findings(proposal, field):
+    return [f for f in proposal.findings if f.field == field]
+
+
+def test_a_thousands_separator_is_read_and_said(dirty):
+    proposal = intake.propose(dirty)
+    (note,) = [f for f in _findings(proposal, "visitors_day") if "separators" in f.explain]
+    assert note.severity == "note" and "row(s) 2" in note.detail and "1,400" in note.detail
+    frame, ledger = intake.apply(dirty, proposal)
+    assert frame.loc[0, "visitors_day"] == 1400
+    assert any(e.canonical_field == "visitors_day" and "separators" in e.action for e in ledger)
+
+
+def test_a_text_blank_is_absent_not_zero_and_said(dirty):
+    proposal = intake.propose(dirty)
+    (note,) = [f for f in _findings(proposal, "employees_day") if "no value" in f.explain]
+    assert "row(s) 3" in note.detail
+    frame, ledger = intake.apply(dirty, proposal)
+    assert pd.isna(frame.loc[1, "employees_day"]), "an 'n/a' must never become 0"
+    assert any(e.canonical_field == "employees_day" and e.action.startswith("left absent")
+               for e in ledger)
+
+
+def test_a_flag_that_is_no_answer_is_warned_and_left_absent(dirty):
+    proposal = intake.propose(dirty)
+    (warning,) = [f for f in _findings(proposal, "garage_enclosed") if f.severity == "warning"
+                  and "not yes or no" in f.explain]
+    assert "row(s) 4" in warning.detail and "banana" in warning.detail
+    assert not proposal.refused, "an unreadable cell is an absence, not a reason to refuse the file"
+    frame, _ = intake.apply(dirty, proposal)
+    assert pd.isna(frame.loc[2, "garage_enclosed"]), "'banana' must never become 'no'"
+
+
+def test_a_site_with_a_blank_cell_does_not_borrow_the_columns_rating(dirty):
+    proposal = intake.propose(dirty)
+    frame, _ = intake.apply(dirty, proposal)
+    sites = [str(s) for s in frame["site_id"]]
+    prov = intake.provenance_rows(proposal, sites, "r", "org", "2026-10-17", applied=frame)
+    group = intake.FIELD_GROUP_FOR_INPUT["employees_day"]
+    by_site = prov[prov["field_group"] == group].set_index("site_id")["source_class"]
+    assert by_site[sites[1]] == "missing"
+    assert by_site[sites[0]] != "missing"

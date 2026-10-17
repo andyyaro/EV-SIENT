@@ -138,6 +138,9 @@ class TestWorkflowAndDocs:
         assert f"Step count: **{len(workflow.STEPS)}**" in docs
         for name, _ in workflow.STEPS:
             assert name in docs
+        # And the committed copy is that output: it is regenerated, never edited by hand.
+        assert (workflow.ROOT / "docs/WORKFLOW_STEPS.md").read_text() == docs, (
+            "docs/WORKFLOW_STEPS.md is stale: run `python -m fcf_m2.workflow docs`")
 
     def test_legacy_mode_runs(self, tmp_path):
         result = workflow.run("legacy_v2", tmp_path / "leg")

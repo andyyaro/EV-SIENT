@@ -16,6 +16,10 @@
 | `contract/v2/` | tracked reference - **additive over v1** | yes | every v1 field carried across byte-identically, plus the observed-data fields (`observed_*`, capacity confirmation, trigger outcome). Gated to rebuild byte-identically from v1, so v2 cannot silently restate a v1 value. |
 | `synthetic/` | tracked reference (fabricated) | yes | the invented site set shipped with the public installer (DEC-020). Every value is fabricated and labelled; a run against it declares `synthetic_inputs: true`. |
 | `observed/observed_sessions_template.csv` | example/template | yes | import format for future observed-session calibration |
+| `schema/input_schema_v1.json` | tracked reference | yes | the published shape of a cohort's `sites.csv` (JSON Schema 2020-12): every field, its unit, whether it is in the score and what its absence does. Explained in [`docs/INPUT_SCHEMA.md`](../docs/INPUT_SCHEMA.md); tested against the code |
+| `intake/template_sites.csv` | example/template | yes | an empty `sites.csv`: the header row in the canonical field names |
+| `intake/example/` | example/template (fabricated) | yes | six invented "Example City" sites, written messy on purpose; the guide's worked example ([README](intake/example/README.md)) |
+| `intake/fixtures/` | test fixture (fabricated) | yes | a messy third-party file in another city's shape, read by the intake and cohort tests |
 | `outputs/` | generated output | **no (gitignored)** | reproduce with `make run-legacy` / `make run-v3` |
 
 ## The contract in one paragraph

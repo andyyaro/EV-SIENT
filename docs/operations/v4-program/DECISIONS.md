@@ -1408,3 +1408,74 @@ regression.
 `www_visibility.test.mjs` now asserts the banners are visible and uncovered **at phone width**,
 and adds one test per page asserting they are **hidden at 1440 px with the markup present**.
 Mutation-tested: those desktop tests fail 4 / 4 against the pre-change production pages.
+
+---
+
+## DEC-023 - Another jurisdiction's sites run end to end, and are held to their own numbers
+
+**Date:** 2026-10-17 · **Phase:** 6B · **Closes audit findings F-18, F-06, F-07, F-25** · **Builds
+on DEC-011, DEC-021**
+
+### What was blocking
+
+`workflow.run` read four fixed files and the CLI had no way to name others, so the only way to
+run another jurisdiction was to overwrite the reference study's inputs. Measured on a six-site
+cohort in another city's shape, that failed twice (F-18): `KeyError: 'LIB-01'`, because MATLAB
+site meta was required for every site, and, once that file was fabricated, `RT-04: baseline
+starter total 12 != 25`, because the reference study's golden totals were asserted against
+every non-synthetic run (F-06). Intake's output fed nothing but a confidence preview, and a
+`1,400` or an `n/a` in a cell became 0 with no record (F-07).
+
+### The decision
+
+1. **A cohort is a directory.** `sites.csv` is required; `electrical_risk.csv`, `site_meta.csv`,
+   `provenance.csv` and `cohort.json` are optional. A missing one is replaced by a default that
+   invents nothing (every site `medium` risk, arrivals from 08:00, base load **unknown**,
+   provenance `unconfirmed`), and every default used is a sentence in the run summary and the
+   contract manifest. `intake FILE --out DIR --accept` writes one; without `--accept` it writes
+   nothing, and it never overwrites a cohort.
+2. **RT-04 keys on the inputs, not on how they arrived.** The 25 / 48 totals are asserted when
+   a run reads the reference study's own files, identified by digest
+   (`contract.REFERENCE_INPUTS`), and on no other cohort. A test pins those digests to the
+   files, so editing a real input fails loudly instead of quietly switching the check off.
+3. **A cohort's port plan follows the ranking its results show.** The reference study keeps its
+   accepted cohort-relative (legacy) ranking (PY-02), which is what reconciles 25 / 48; on the
+   fixed-anchor ranking the same rules give 25 / 47, now disclosed (F-05). A new cohort has no
+   accepted baseline, and the legacy ranking is the volatile one v3 replaced. Measured on the
+   worked example: planned on the legacy ranking, `EXC-03`, which the results call Tier 3, got
+   an "install now" plan described as a strong ranking and 8 pathway ports; the plan totals
+   were 12 / 24. On the fixed-anchor ranking they are 12 / 15, and each plan follows the rank
+   and tier its site has in the results. The manifest records `cohort.plan_ranking`.
+4. **A site missing a cost input gets no cost figures.** Costed with the gap as 0, it would
+   look cheaper than a site that was measured.
+5. **Reference-study text stays with the reference study.** On a cohort the standards register
+   counts its own sites instead of claiming "battery_storage_flag=0 at all 12 sites", and names
+   the permitting authority generically instead of as Fairfax City / PWC. The constants that
+   remain the reference region's (Virginia's code editions, the SRVC grid factor, the screening
+   tariff) are named in the manifest's `cohort.notes`.
+6. **Intake reads every cell and says which ones it could not** (F-07). Thousands separators
+   and a dollar sign are read with a note; blanks and `n/a`-style text are absent with a note;
+   anything else (`partial`, `about 50`) is absent with a warning naming its file rows. None of
+   these is a refusal: under DEC-011 an absence earns no credit, so reading a cell as absent
+   cannot improve the file.
+
+### What it does not do
+
+- **No visual mapping screen.** `intake-review` is still a command-line review. The screen
+  moves to the platform work, as the audit recommended (F-25).
+- **No reprojection** (DEC-021), and **no recalibration**: the anchors were set for the
+  reference region, and Tier 1 is still relative to the cohort (F-09).
+
+### Published numbers
+
+None moved. The reference study's v3 and legacy outputs are text-identical before and after,
+except run stamps; its standards register is byte-identical.
+
+### Gates
+
+`tests/test_cohort_run.py` (the reference digests, intake to a validated contract, defaults
+written down, costs withheld, the reference study run as a cohort still held to 25 / 48, bad
+identifiers and risk levels refused) and `tests/test_input_schema.py`, which checks
+`data/schema/input_schema_v1.json` against the code that implements each statement in it,
+measures which fields move the score rather than trusting the schema's word, and reruns the
+worked example in `docs/INPUT_SCHEMA.md`.

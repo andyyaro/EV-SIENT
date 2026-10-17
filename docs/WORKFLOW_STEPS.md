@@ -2,9 +2,9 @@
 
 Step count: **11**
 
-1. **load_inputs** - Load site table, electrical-risk fixture, provenance, anchors, MATLAB site meta
+1. **load_inputs** - Load the reference study's inputs, or a cohort directory (docs/INPUT_SCHEMA.md), plus the anchors
 2. **score_sites** - Score readiness (legacy min-max or V3 fixed anchors) + Erlang-C port screen
-3. **right_sizing** - Starter vs pathway right-sizing (legacy 2035/2050 or V3 2026/2036/2046/2056)
+3. **right_sizing** - Starter vs pathway right-sizing (legacy 2035/2050 or V3 2026/2036/2046/2056); the reference study on its accepted legacy ranking
 4. **confidence** - Structured field-level data confidence (V3) / legacy confidence passthrough
 5. **peak_wait** - Peak-window Erlang and seeded discrete-event wait simulation (P10/P50/P90)
 6. **economics** - Lifecycle NPC: staged vs overbuild vs defer at 2036/2046/2056, low/base/high
