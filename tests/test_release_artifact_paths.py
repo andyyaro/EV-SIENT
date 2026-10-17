@@ -25,6 +25,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import json
+import warnings
 import zipfile
 from pathlib import Path
 
@@ -223,3 +224,39 @@ def test_the_manifest_keys_match_the_archive_names(public_archive):
         f"{len(orphans)} manifest entries name files the archive does not contain: "
         f"{orphans[:5]}")
     assert not [k for k in listed if "\\" in k], "manifest keys carry backslashes"
+
+
+# --------------------------------------------------------------------------------------------
+# The reproduction text a Windows recipient types
+# --------------------------------------------------------------------------------------------
+
+def test_the_windows_reproduction_lines_name_real_paths():
+    """Found 2026-10-17 by reading the shipped REPRODUCTION.txt byte by byte.
+
+    `REPRO_PUBLIC` is an ordinary string, so the single backslashes in its Windows lines were
+    escapes. Python kept the invalid ones (`\\S`, `\\o`, `\\c`) as written, which hid the one it
+    did not: `\\v3_run` became a vertical tab and `3_run`, so both commands that name the output
+    folder pointed at a path that does not exist. The file was valid UTF-8, and every archive
+    test above passed.
+    """
+    text = bra.REPRO_PUBLIC
+    stray = sorted({hex(ord(c)) for c in text if ord(c) < 32 and c != "\n"})
+    assert not stray, f"REPRODUCTION.txt would carry control characters {stray}"
+    for path in ("venv\\Scripts\\pip", "--out data\\outputs\\v3_run\n",
+                 "validate-contract data\\outputs\\v3_run\\contract"):
+        assert path in text, f"the Windows lines no longer contain {path!r}"
+
+
+def test_the_public_archive_ships_that_text(public_archive):
+    with zipfile.ZipFile(public_archive) as z:
+        assert z.read("REPRODUCTION.txt").decode("utf-8") == bra.REPRO_PUBLIC
+
+
+@pytest.mark.parametrize("script", packaging_scripts(), ids=lambda p: p.name)
+def test_no_packaging_script_has_a_string_python_warns_about(script):
+    """Structural companion to the test above. Python 3.12 warns about an invalid escape such as
+    `\\S`, and that warning was printed beside the `\\v` on every packaging run from 2026-08-02
+    on. Compiling with warnings as errors makes it a failure instead of a log line."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        compile(script.read_text(encoding="utf-8"), str(script), "exec")

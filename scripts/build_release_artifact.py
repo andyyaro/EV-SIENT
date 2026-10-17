@@ -187,6 +187,12 @@ Reproduction (fresh environment):
 #: Written into the PUBLIC archive, which does NOT carry tests/. The internal text above was
 #: being written into every archive unconditionally, so a public recipient was told to run
 #: `pytest tests/` against a bundle with no tests directory -- their first instruction failed.
+#:
+#: The Windows backslashes are doubled because this is an ordinary string. Until 2026-10-17
+#: they were single, and Python read the `\v` of `\v3_run` as a vertical tab: both Windows
+#: commands that name the output folder shipped as `data\outputs<VT>3_run`, a path that does
+#: not exist. A raw string cannot be used here, because the `"""\` continuation below would
+#: then put a literal backslash at the top of the file.
 REPRO_PUBLIC = """\
 Reproduction (fresh environment). Requires Python 3.11 or newer.
 
@@ -197,9 +203,9 @@ macOS / Linux:
 
 Windows (PowerShell or cmd):
   python -m venv venv
-  venv\Scripts\pip install -e . -c requirements-lock.txt
-  venv\Scripts\python -m fcf_m2.workflow run --mode milestone2_v3 --out data\outputs\v3_run
-  venv\Scripts\python -m fcf_m2.workflow validate-contract data\outputs\v3_run\contract
+  venv\\Scripts\\pip install -e . -c requirements-lock.txt
+  venv\\Scripts\\python -m fcf_m2.workflow run --mode milestone2_v3 --out data\\outputs\\v3_run
+  venv\\Scripts\\python -m fcf_m2.workflow validate-contract data\\outputs\\v3_run\\contract
 
 (The Windows lines were missing until 2026-08-02. Half the artifacts this project
 builds are for Windows, and the only reproduction instructions shipped in them
