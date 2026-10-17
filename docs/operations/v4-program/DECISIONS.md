@@ -288,7 +288,7 @@ the model version is a claim about output.
 
 ---
 
-## DEC-011 - Missing data currently makes a site look better; one fix now, two deferred to 6B
+## DEC-011 - Missing data made a site look better; one fix at once, two more on 2026-10-17
 
 **Date:** 2026-07-27 · **Phase:** 4 → 6B · **Found by:** the Phase 6B research fleet
 (`wf_d029c874-d32`), **confirmed by execution before being acted on**, per the subagent
@@ -348,6 +348,43 @@ nobody has chosen yet, and picking one silently is the same failure as the defec
 **Rejected:** *record them and write no test.* Three of this program's defects were found in
 code that had been read and reasoned about but not exercised. An unpinned known defect is a
 defect that gets rediscovered.
+
+### Resolved 2026-10-17: absence earns no credit, in either direction
+
+Decided under the owner's instruction to fix every finding of the 2026-10-17 audit (F-07,
+F-08), and **not** the "likely answer" above. Keeping the permissive neutral and recording the
+gap only as lost confidence leaves the ranking itself built on the gap: confidence is reported
+beside the score, not inside it, so a site with no stormwater assessment would still outrank a
+measured one. The rule now is that a value nobody recorded earns no credit:
+
+| Where | Before | After |
+|---|---|---|
+| Absent yes/no (blank, `n/a`, `unknown`, ...) | `0.0`, "no" | NaN. Normal flags earn 0; the inverted `garage_enclosed` and `stormwater_risk` earn 0 too, instead of their maximum |
+| Unrecognised yes/no text (`banana`, `partial`, `"0.5"`) | `0.0`, silently | Refused, naming the field |
+| Inverted numeric drivers (existing ports, service distance, install cost, trenching) | Absent -> 0 -> `1 - 0`, the maximum | No credit. A total with an absent part (install cost, existing ports) is absent |
+| Cohort-relative scaling | An absent value entered the range as 0 and moved every other site | Range taken over recorded values only |
+| Numeric text (`"1,400"`, a typo) | Coerced to NaN, then 0, no record | Refused at scoring; intake reads thousands separators and reports each cell (F-07) |
+| `site_capacity_cap` with no parking count | 6 | 2, the minimum (#1) |
+| Unrecorded `public_access` | 0 at scoring, but 1 in right-sizing | Not public everywhere |
+| Unrecorded `garage_enclosed` | Not enclosed | "High-review candidate": the review that tier asks for is exactly what an unknown enclosure needs |
+| Absent `hours_open`, `avg_dwell_min` for port sizing | 0, which the queue read as a whole day's sessions in one hour | 8 h and 120 min, the defaults `right_sizing` already declared; no score credit |
+
+Every scored output row now carries `absent_fields`, so a run says in its own rows which
+inputs each site lacked.
+
+**The costs, accepted:** a jurisdiction that omits a column gets a lower score and, for
+parking, a smaller plan, until it supplies the field. Intake tells it so, cell by cell, before
+anything runs. The pessimistic neutral #2 worried about - asserting "this site is enclosed" -
+is avoided: the flag stays NaN in the output, and only the score and the tier treat it as
+unproven.
+
+**Published numbers: none moved.** All 12 real sites are complete. Measured: the v3 and
+legacy runs before and after the change are text-identical in every output file except the
+run stamps and the new, empty, `absent_fields` column.
+
+`tests/test_absence_is_not_favourable.py` no longer pins known defects. It pins the rule,
+including a property test that blanking any recorded value of any scored field at any site,
+in both modes, never raises that site's score.
 
 ---
 

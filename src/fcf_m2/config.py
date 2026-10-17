@@ -37,6 +37,18 @@ MODE_V3 = "milestone2_v3"
 #: milestone2_v3 must still reproduce; V4 adds the observed-data loop on top of them.
 MODE_V4 = "v4"
 
+#: The recommendation tiers' thresholds (`scoring.recommendation_tier`). Named here, rather
+#: than left as literals, because one of them is a policy with a consequence nobody had
+#: written down (F-09, 2026-10-17): **Tier 1 is relative to the cohort.** It requires a rank
+#: of TIER1_MAX_RANK or better, so at most two sites can hold it in any run, however many sites
+#: the run has and however they score - while the v3 SCORES are built to be cohort-independent.
+#: A Tier 1 site in one run and a Tier 2 site in another can therefore have the same score.
+#: Compare scores across cohorts, never tiers. Changing a value here re-baselines the
+#: right-sizing floors that key on the tier, and with them RT-04's 25 / 48.
+TIER1_MAX_RANK = 2
+TIER1_MIN_SCORE = 50
+TIER2_MIN_SCORE = 45
+
 BASELINE_YEAR = 2026
 V3_HORIZONS = [2036, 2046, 2056]
 V3_HORIZON_LABELS = {2026: "now", 2036: "plus10", 2046: "plus20", 2056: "plus30"}

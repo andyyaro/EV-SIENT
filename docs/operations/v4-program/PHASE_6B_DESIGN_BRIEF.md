@@ -12,7 +12,7 @@
 > **What has been independently confirmed by the lead, and what has not.** The brief's claims
 > about *this repository's current code* were spot-checked where they were acted on - and
 > three of them turned out to be real defects, reproduced by execution and recorded in
-> **DEC-011** with one fixed and two pinned by
+> **DEC-011** with one fixed at once and the other two fixed on 2026-10-17, all pinned by
 > [`tests/test_absence_is_not_favourable.py`](../../../tests/test_absence_is_not_favourable.py).
 > The brief's claims about *external data sources* have **not** been checked by anyone: §6
 > says so itself, in its own words - *"Read this section as a to-verify list, not a usable

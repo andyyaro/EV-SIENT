@@ -59,10 +59,22 @@ def ports_for_sessions(row: pd.Series, multiplier: float) -> int:
 
 
 def site_capacity_cap(row: pd.Series) -> int:
+    """Ports the lot can take: 5% of its spaces, rounded up to an even number, 2 to 12.
+
+    A lot nobody counted gets the minimum, 2 (DEC-011, decided 2026-10-17). It used to get
+    6 - three times the 2 a measured 40-space lot gets - so leaving the column out was the
+    surest way to a bigger plan.
+    """
     parking_spaces = to_number(row.get("parking_spaces", 0), 0)
     if parking_spaces <= 0:
-        return 6
+        return 2
     return even_ceiling(parking_spaces * 0.05, minimum=2, maximum=12)
+
+
+def _is_public(row: pd.Series) -> bool:
+    """A recorded yes only. A row with no such column is a caller that does not model access
+    and is treated as public, as before; a recorded-as-absent value is not public (DEC-011)."""
+    return to_number(row.get("public_access", 1), 0) >= 1
 
 
 def apply_strategy_floors(row: pd.Series, targets: dict[str, int]) -> dict[str, int]:
@@ -73,11 +85,10 @@ def apply_strategy_floors(row: pd.Series, targets: dict[str, int]) -> dict[str, 
     existing_ports = to_number(row.get("existing_ports_total", 0), 0)
     site_type = str(row.get("site_type", "")).lower()
     risk = str(row.get("electrical_risk_level", "medium")).lower()
-    public_access = to_number(row.get("public_access", 1), 1)
 
     adjusted = dict(targets)
 
-    if public_access < 1:
+    if not _is_public(row):
         for key in adjusted:
             adjusted[key] = min(adjusted[key], 2)
         return adjusted
@@ -120,9 +131,8 @@ def build_strategy(row: pd.Series, future_ready_capacity: int) -> tuple[str, str
     risk = str(row.get("electrical_risk_level", "medium")).lower()
     existing_ports = to_number(row.get("existing_ports_total", 0), 0)
     site_type = str(row.get("site_type", "")).lower()
-    public_access = to_number(row.get("public_access", 1), 1)
 
-    if public_access < 1:
+    if not _is_public(row):
         return ("do_not_advance_general_public_buildout",
                 "Limited or non-public access means port planning should wait until the use case is confirmed.")
     if risk == "high":

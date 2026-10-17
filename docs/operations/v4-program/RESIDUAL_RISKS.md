@@ -34,19 +34,18 @@ consent before any real site data is published).
 
 ---
 
-## 2. Two dormant model defects, deliberately not fixed
+## 2. ~~Two dormant model defects, deliberately not fixed~~ Fixed 2026-10-17 (DEC-011)
 
-Pinned by `tests/test_absence_is_not_favourable.py`, which asserts them **as known defects** so
-they cannot be forgotten and cannot silently change:
+Both were fixed with the rest of the 2026-10-17 audit: an absent parking count now gets the
+smallest cap (2), and an absent value earns no credit in any term, the inverted ones included.
+No published number moved, because no real site has a gap; the before/after runs are
+text-identical. `tests/test_absence_is_not_favourable.py` now pins the rule instead of the
+defects, and `test_all_twelve_real_sites_are_complete_so_no_published_number_moves` still fails
+the day a real site arrives with a gap, so that day is noticed.
 
-| Defect | Why it is dormant | Why it was not fixed |
-|---|---|---|
-| An **absent** parking count scores more permissively than a real 40-space lot (`site_capacity_cap` → 6 vs 2) | All twelve real sites supply positive parking | Fixing it moves scores and breaks the frozen golden |
-| `garage_enclosed` / `stormwater_risk` are inverted, so an **absent** flag scores as the best possible case - an affirmative safety claim from no data | All twelve real sites carry strict 0/1 flags | Same |
-
-`test_all_twelve_real_sites_have_complete_flags_so_the_two_defects_are_dormant` is the guard: if
-a site ever arrives without those fields, that test fails and the defects stop being theoretical.
-**The day real third-party data arrives, these must be fixed first.**
+The residual risk that remains is the **cost** of the rule: a jurisdiction that omits a column
+scores lower, and for parking gets a smaller plan, until it supplies the field. Intake reports
+each such gap before a run.
 
 ---
 
