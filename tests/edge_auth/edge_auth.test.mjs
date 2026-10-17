@@ -13,24 +13,30 @@
  * client id or issuer in `index.mjs` without changing them here, these tests **fail loudly** -
  * which is the direction a drift failure should point.
  *
+ * The PEOPLE are not. The real allowlist is `infra/edge-auth/granted.mjs`, which is not
+ * tracked, so the handler is imported from a byte-identical copy of `index.mjs` placed beside
+ * a `granted.mjs` written here from placeholder identities. The tests therefore run the same
+ * on a fresh clone, in CI, and on the owner's machine, and never print a real login.
+ *
  * The bar being tested is one sentence: **no request reaches the S3 origin unless it carries a
  * signature-verified, unexpired Cognito id_token for the one granted account.** Everything
  * else - expired, wrong audience, wrong pool, an access token, a forged algorithm, a duplicate
  * cookie, an unreachable JWKS - must deny.
  *
- * Run: node --test tests/edge_auth/
+ * Run: node --test 'tests/edge_auth/*.test.mjs'   (the bare directory form fails on Node 25)
  */
 
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync, createSign } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const MODULE = resolve(HERE, "../../infra/edge-auth/index.mjs");
+const SOURCE = resolve(HERE, "../../infra/edge-auth/index.mjs");
 
 // ---------------------------------------------------------------- keys and config
 
@@ -42,10 +48,22 @@ const JWK = { ...publicKey.export({ format: "jwk" }), kid: KID, alg: "RS256", us
 
 const ISSUER = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_mKrwfQTkg";
 const CLIENT_ID = "1b9ab91m46pr3m2n74qapq3ls5";
-const GRANTED_SUB = "00000000-0000-4000-8000-000000000003";
-const GRANTED_EMAIL = "redacted-3@example.org";
-const GRANTED2_SUB = "00000000-0000-4000-8000-000000000004";
-const GRANTED2_EMAIL = "redacted-6@example.org";
+// Placeholders, not accounts (see the header). Two granted people and one pool member who is
+// not granted - the three cases the real pool has.
+const GRANTED_SUB = "00000000-0000-4000-8000-000000000005";
+const GRANTED_EMAIL = "granted-one@example.org";
+const GRANTED2_SUB = "00000000-0000-4000-8000-000000000006";
+const GRANTED2_EMAIL = "granted-two@example.org";
+const MEMBER_SUB = "00000000-0000-4000-8000-000000000007";
+const MEMBER_EMAIL = "pool-member@example.org";
+
+const GATE_DIR = mkdtempSync(join(tmpdir(), "fcf-edge-auth-"));
+const MODULE = join(GATE_DIR, "index.mjs");
+copyFileSync(SOURCE, MODULE);
+writeFileSync(join(GATE_DIR, "granted.mjs"), `export const GRANTED = ${JSON.stringify([
+  { sub: GRANTED_SUB, email: GRANTED_EMAIL },
+  { sub: GRANTED2_SUB, email: GRANTED2_EMAIL },
+])};\n`);
 
 // ---------------------------------------------------------------- network stub
 
@@ -411,7 +429,7 @@ test("the second granted account also reaches the origin", async () => {
   const r = await handler(ev("/platform/index.html", {
     cookies: [session(idToken({ sub: GRANTED2_SUB, email: GRANTED2_EMAIL }))],
   }));
-  assert.ok(isAllow(r), "redacted-6@example.org is on the allowlist and must pass");
+  assert.ok(isAllow(r), `${GRANTED2_EMAIL} is on the allowlist and must pass`);
 });
 
 test("DENIED: one account's sub paired with the other's email", async () => {
@@ -425,10 +443,10 @@ test("DENIED: one account's sub paired with the other's email", async () => {
 });
 
 test("DENIED: a third pool member who is not on the allowlist", async () => {
-  // redacted-1@example.org exists in the same Cognito pool. Being able to authenticate is not the
+  // The real pool has a third member who is not granted. Being able to authenticate is not the
   // same as being granted, and the gate must keep those separate.
   const r = await handler(ev("/platform/index.html", {
-    cookies: [session(idToken({ sub: "00000000-0000-4000-8000-000000000008", email: "redacted-1@example.org" }))],
+    cookies: [session(idToken({ sub: MEMBER_SUB, email: MEMBER_EMAIL }))],
   }));
   assert.ok(!isAllow(r), "a valid pool member who is not allowlisted must still be refused");
 });
@@ -440,4 +458,25 @@ test("email_verified is deliberately NOT required (the granted account lacks it)
     cookies: [session(idToken({ email_verified: undefined }))],
   }));
   assert.ok(isAllow(r), "a token with no email_verified claim must still be accepted");
+});
+
+// ---------------------------------------------------------------- the allowlist file
+
+test("a checkout with no granted.mjs cannot load the gate at all (fail closed, loudly)", async () => {
+  // granted.mjs is not tracked, so a fresh clone does not have it. The gate must then admit
+  // nobody, and say why: the import fails, rather than quietly running with an empty list
+  // that would look like an "account not granted" problem.
+  const bare = mkdtempSync(join(tmpdir(), "fcf-edge-auth-bare-"));
+  copyFileSync(SOURCE, join(bare, "index.mjs"));
+  await assert.rejects(import(pathToFileURL(join(bare, "index.mjs")).href),
+    (err) => err.code === "ERR_MODULE_NOT_FOUND" && String(err.message).includes("granted.mjs"));
+});
+
+test("no login identity is written into the tracked gate or this test", () => {
+  // The allowlist moved out of index.mjs on 2026-10-17. Only placeholder domains may appear.
+  for (const text of [readFileSync(SOURCE, "utf8"), readFileSync(fileURLToPath(import.meta.url), "utf8")]) {
+    const emails = [...text.matchAll(/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g)]
+      .map((m) => m[0]).filter((e) => !/@example\.(org|com)$/.test(e));
+    assert.deepEqual(emails, []);
+  }
 });

@@ -93,7 +93,7 @@ def test_no_readable_file_carries_an_email_address():
 
 
 def test_identifiers_are_removed_from_every_excerpt():
-    text = ("granted: someone@example.org, sub 00000000-0000-4000-8000-000000000002; "
+    text = ("granted: someone@example.org, sub 00000000-0000-4000-8000-000000000001; "
             "a@b.co.uk")
     for path in ("notes.md", "page.html", "data.json"):
         cleaned = assistant._normalize_text_for_context(path, text)

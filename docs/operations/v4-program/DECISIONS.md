@@ -762,9 +762,9 @@ to wire in now.
 ### Context
 
 The owner asked for the deployed platform to sit behind a Cognito sign-in, granting access to
-an existing user, `redacted-3@example.org`, and asked whether it could be done without
+an existing user (granted account 1), and asked whether it could be done without
 them at the machine. Both were answered before any work started; the owner replied
-*"good i approve"*.
+*"good i approve"*. (Login identities in this file were replaced with role labels on 2026-10-17; the accounts themselves are listed only in the untracked `infra/edge-auth/granted.mjs`.)
 
 Reconnaissance established four facts that shaped the design, each verified rather than
 assumed:
@@ -852,7 +852,7 @@ Aggregate incremental cost stays inside the $10/month ceiling.
 
 ### What could not be verified, and why
 
-**That the gate opens for `redacted-3@example.org`.** Confirming it requires signing in as
+**That the gate opens for granted account 1.** Confirming it requires signing in as
 that user, and that password is neither available to nor appropriate for the assistant to
 hold. What *is* verified: an anonymous request is refused, and the NFC tags still answer.
 The remaining check is one sign-in by the owner, recorded as an open human action.
@@ -932,7 +932,7 @@ as broken.
 
 ### Access widened to a second account, and why the first one alone was not workable
 
-The granted account `redacted-3@example.org` is `CONFIRMED` and enabled, so it has a
+Granted account 1 is `CONFIRMED` and enabled, so it has a
 password. The owner reported never receiving a sign-in email and asked whether the email might
 simply have been sent earlier, when the account was first added. **CloudTrail settles it, and
 the answer is neither "sent earlier" nor the mechanism first inferred here:**
@@ -960,20 +960,20 @@ for **authorisation**; what was missed is that the same gap also breaks **recove
 fact, two consequences, only one of them followed through.
 
 **Still unproven: that the mailbox receives anything.** Because delivery was suppressed at
-creation and never attempted since, `redacted-3@example.org` has never been sent a message
+creation and never attempted since, granted account 1 has never been sent a message
 by this pool. Setting `email_verified` makes Cognito *willing* to send a reset there; it is not
 evidence that anything arrives.
 
 At the owner's direction, both routes were opened:
 
-1. **`email_verified` set to `true`** on `redacted-3@example.org`. This is a verification
+1. **`email_verified` set to `true`** on granted account 1. This is a verification
    flag, not a credential - it lets the owner run a self-service reset in which the password
    travels from Cognito to their mailbox and is never seen by the assistant.
-2. **`redacted-6@example.org` added to the allowlist.** It already existed in the same pool with
+2. **Granted account 2 added to the allowlist.** It already existed in the same pool with
    credentials the owner holds. Widening access beyond the single account originally specified
    was the owner's explicit decision, recorded here because it changes who can read the study.
 
-`redacted-1@example.org` is in the same pool and is **not** granted - a test asserts that a valid
+A third pool member is in the same pool and is **not** granted - a test asserts that a valid
 pool member who is not allowlisted is still refused, because being able to authenticate is not
 the same as being authorised.
 

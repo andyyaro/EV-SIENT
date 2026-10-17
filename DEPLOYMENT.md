@@ -137,7 +137,9 @@ they would be worse.
 To enable it: create a GitHub OIDC provider in IAM, a role trusting
 `repo:andyyaro/Future-City-Fellowship-:*` scoped to the two buckets plus
 `cloudfront:CreateInvalidation` and `cloudfront:UpdateDistribution` on this distribution only,
-and set the secret. No OIDC provider exists in the account today.
+and set the secret. No OIDC provider exists in the account today. Also set
+`PLATFORM_GRANTED_MJS` to the whole text of `infra/edge-auth/granted.mjs`: that file is not
+tracked (section 10), and without it the deploy refuses to package the gate.
 
 ---
 
@@ -380,6 +382,20 @@ with its ETag, then delete the policy. For `/platform*`, also remove it from `bu
 creates that region's log group on first use with no retention. Only us-east-1 and eu-central-1
 exist today. Re-check with `aws logs describe-log-groups --region <r>` after traffic from
 elsewhere.
+
+### Who may enter `/platform` is no longer in the repository
+
+The edge gate's allowlist (two people's Cognito ids and login emails) was inline in
+`infra/edge-auth/index.mjs`, so every clone carried it. It now lives in
+`infra/edge-auth/granted.mjs`, which is gitignored; `granted.mjs.example` shows the shape, and
+`deploy_platform.py` packages the file beside `index.mjs` and refuses to deploy without a
+well-formed one. A checkout without it cannot load the gate at all, which fails closed. The
+tests write placeholder identities instead (`tests/edge_auth/`).
+
+The deployed function (version 8) still carries the list inline. It behaves identically and is
+replaced by the next `deploy_platform.py --apply`. **The identities remain in git history**;
+removing them from history is a rewrite of every clone and was not done without the owner's
+decision.
 
 **Not enabled, on purpose: CloudFront access logs.** They would record every visitor's IP
 address and path, and `privacy.html` promises short-lived technical logs only.

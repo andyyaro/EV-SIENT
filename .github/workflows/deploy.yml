@@ -177,6 +177,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e . -c requirements-lock.txt
 
+      - name: Write the platform allowlist from its secret
+        if: steps.role.outputs.configured == 'true'
+        # infra/edge-auth/granted.mjs (who may enter /platform) is not tracked, so a clean
+        # checkout lacks it and deploy_platform.py refuses to package the gate. CI gets it from
+        # the PLATFORM_GRANTED_MJS secret: the file's whole text. No secret -> the refusal stands.
+        env:
+          GRANTED: ${{ secrets.PLATFORM_GRANTED_MJS }}
+        run: |
+          if [ -n "$GRANTED" ]; then printf '%s\n' "$GRANTED" > infra/edge-auth/granted.mjs; fi
+
       - name: Deploy
         if: steps.role.outputs.configured == 'true'
         # The script is dry-run by default. --apply is passed only when the operator ticked the

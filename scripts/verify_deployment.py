@@ -12,7 +12,7 @@ regression. So every run asserts both, and neither half can pass alone.
 What this cannot check, stated rather than glossed
 --------------------------------------------------
 **That the gate opens for the granted user.** Confirming that requires signing in as
-`redacted-3@example.org`, whose password is not available to the assistant and should not
+granted account 1, whose password is not available to the assistant and should not
 be. This script proves the door is locked and correctly scoped; it cannot prove the key turns.
 That check is one sign-in by the project owner, and it is recorded as an open human action
 rather than quietly counted as done.
@@ -183,7 +183,7 @@ def main() -> int:
     print("""
   NOT VERIFIED BY THIS SCRIPT - and not counted as done:
 
-    1. That the gate OPENS for redacted-3@example.org. Needs a sign-in with a
+    1. That the gate OPENS for granted account 1. Needs a sign-in with a
        password the assistant does not have and should not have.
 
     2. That the content behind the gate actually LOADS. This is a separate claim and

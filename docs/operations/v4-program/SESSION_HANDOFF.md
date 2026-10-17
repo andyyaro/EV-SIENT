@@ -67,7 +67,7 @@ Asked of AWS directly, not inferred from the deploy script:
 | Objects under `platform/` in the MAIN bucket | **0** - the isolation is structural, not behavioural |
 | CloudFront cache behaviours | **1**, `/platform*`, at **Lambda v8** |
 | Gate allowlist | **2 accounts**, matched on `sub` **and** `email` |
-| Cognito pool members | **3 confirmed** - so `redacted-1@example.org` can sign in to the shared pool and **cannot** reach `/platform/*` |
+| Cognito pool members | **3 confirmed** - so a third, non-granted member can sign in to the shared pool and **cannot** reach `/platform/*` |
 | Spend, 30 days | **$0.50** against a $10/month ceiling |
 
 **This program's incremental AWS cost is effectively zero.** The two largest lines - Secrets

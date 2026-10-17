@@ -78,3 +78,8 @@ site/platform/nfc/
 # Written by scripts/deploy_assistant.py for one upload and deleted straight after; listed so
 # an interrupted run can never commit it.
 infra/assistant/.deploy.zip
+
+# Who may read /platform: Cognito subs and login emails. Kept out of the repository since
+# 2026-10-17 (until then they were inline in index.mjs, in every clone). The shape is in
+# granted.mjs.example; scripts/deploy_platform.py refuses to package the gate without it.
+infra/edge-auth/granted.mjs

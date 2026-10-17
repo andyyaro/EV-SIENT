@@ -72,6 +72,13 @@ ORIGIN_ID = "platform-gated"
 FUNCTION_NAME = "fcf-platform-edge-auth"
 ROLE_NAME = "fcf-platform-edge-auth-role"
 EDGE_SOURCE = REPO / "infra/edge-auth/index.mjs"
+#: Who may enter: Cognito subs and login emails, so NOT tracked (.gitignore). Packaged beside
+#: index.mjs, which imports it. Moved out of index.mjs on 2026-10-17; until then every clone of
+#: the repository carried them.
+GRANTED_SOURCE = REPO / "infra/edge-auth/granted.mjs"
+GRANTED_ENTRY = re.compile(
+    r'\{\s*sub:\s*"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",\s*'
+    r'email:\s*"[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"\s*\}')
 BUNDLE = REPO / "site/platform"
 
 #: AWS managed cache policy "CachingOptimized". Cookies are deliberately NOT part of the cache
@@ -221,14 +228,36 @@ def ensure_oac(apply: bool) -> str:
 
 # ---------------------------------------------------------------- lambda
 
+def granted_entries() -> int:
+    """How many people the allowlist admits. Refuses to go on without a well-formed one.
+
+    Without the file the function cannot even load, which fails closed, but it fails closed in
+    production: every /platform request would error until the next deploy. Refusing here turns
+    that into a message on the deploying machine instead. Entries are counted, never printed.
+    """
+    if not GRANTED_SOURCE.is_file():
+        raise SystemExit(f"{GRANTED_SOURCE.relative_to(REPO)} is missing. It is not tracked; "
+                         f"copy granted.mjs.example beside it and fill in the real accounts.")
+    text = GRANTED_SOURCE.read_text()
+    entries = len(GRANTED_ENTRY.findall(text))
+    if "export const GRANTED" not in text or entries == 0:
+        raise SystemExit(f"{GRANTED_SOURCE.relative_to(REPO)} has no well-formed entry "
+                         f'({{ sub: "<uuid>", email: "<lower-case email>" }}); refusing to deploy')
+    if "@example." in text:
+        raise SystemExit(f"{GRANTED_SOURCE.relative_to(REPO)} still holds the example placeholder")
+    return entries
+
+
 def zip_edge_source() -> bytes:
     """Deterministic zip: fixed timestamps, so unchanged source produces identical bytes and
     the published version history keeps meaning something."""
+    granted_entries()
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        info = zipfile.ZipInfo("index.mjs", date_time=(1980, 1, 1, 0, 0, 0))
-        info.external_attr = 0o644 << 16
-        zf.writestr(info, EDGE_SOURCE.read_text())
+        for name, source in (("index.mjs", EDGE_SOURCE), ("granted.mjs", GRANTED_SOURCE)):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o644 << 16
+            zf.writestr(info, source.read_text())
     return buffer.getvalue()
 
 
@@ -265,8 +294,8 @@ def ensure_role(apply: bool) -> str:
 
 def deploy_lambda(apply: bool, role_arn: str) -> str:
     payload = zip_edge_source()
-    say("lambda", f"index.mjs packaged, {len(payload)} bytes, "
-                  f"sha256:{hashlib.sha256(payload).hexdigest()[:12]}…")
+    say("lambda", f"index.mjs + granted.mjs ({granted_entries()} granted) packaged, "
+                  f"{len(payload)} bytes, sha256:{hashlib.sha256(payload).hexdigest()[:12]}…")
 
     exists = aws("lambda", "get-function", "--function-name", FUNCTION_NAME,
                  "--region", REGION, check=False, parse=False).returncode == 0

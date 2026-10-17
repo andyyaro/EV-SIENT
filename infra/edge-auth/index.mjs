@@ -21,8 +21,8 @@
  *     pool's **public** JWKS.
  *
  * Every constant below is a public identifier - a user-pool id, a public app-client id, a
- * hosted-UI hostname, an email address the owner supplied. None is a credential. There is no
- * AWS account id or ARN here, deliberately.
+ * hosted-UI hostname. None is a credential. There is no AWS account id or ARN here,
+ * deliberately, and no person: who may enter is read from `granted.mjs` (see `GRANTED`).
  *
  * Fail-closed, everywhere
  * -----------------------
@@ -38,6 +38,7 @@
  */
 
 import { createHash, createPublicKey, createVerify, randomBytes, timingSafeEqual } from "node:crypto";
+import { GRANTED } from "./granted.mjs";
 
 // ---------------------------------------------------------------- configuration (public)
 
@@ -80,7 +81,7 @@ const PKCE_COOKIE = "__Host-fcf_pkce";
 const COOKIE_ATTRS = "Path=/; HttpOnly; Secure; SameSite=Lax";
 
 /**
- * Who may read the platform.
+ * Who may read the platform: `GRANTED`, imported above from `granted.mjs`.
  *
  * Matched on **`sub`** - Cognito's immutable per-user identifier, the tightest available
  * expression of "that user specifically" - *and* on `email`, which in this pool is also the
@@ -92,16 +93,21 @@ const COOKIE_ATTRS = "Path=/; HttpOnly; Secure; SameSite=Lax";
  * that could never open for the one account it exists to admit - a failure invisible from the
  * deploying side, because confirming it needs that user's password. Matching on the immutable
  * `sub` is strictly stronger than an `email_verified` flag anyway.
+ *
+ * **The list is not in this file.** It lives in `granted.mjs`, beside this file and NOT
+ * tracked. Until 2026-10-17 it was inline here, which put two people's login emails and
+ * Cognito ids in every clone of the repository. `granted.mjs.example` shows the shape; emails
+ * are compared lower-cased, so they must be written that way. The second entry was added at
+ * the owner's request after the first deployment: the first account carries no
+ * `email_verified`, so "Forgot your password?" cannot deliver to it, and granting an account
+ * whose credentials the owner already holds did not require the assistant to touch a password.
+ *
+ * Fail-closed holds without the file, by construction rather than by a fallback: a checkout
+ * with no `granted.mjs` cannot load this module at all, so every request errors before it can
+ * reach the origin, and `scripts/deploy_platform.py` refuses to package the function without
+ * a well-formed list. A fallback to an empty list would also deny everyone, but quietly, as
+ * an "account not granted" page that looks like a permissions problem instead of a missing file.
  */
-const GRANTED = [
-  { sub: "00000000-0000-4000-8000-000000000003", email: "redacted-3@example.org" },
-  // Added at the owner's request after the first deployment. The bytechisel account is
-  // CONFIRMED but carries no `email_verified`, and this pool's recovery mechanisms are
-  // `verified_email` then `verified_phone_number` - so "Forgot your password?" cannot deliver
-  // to it. Granting an account whose credentials the owner already holds is the route that
-  // does not require the assistant to touch a password.
-  { sub: "00000000-0000-4000-8000-000000000004", email: "redacted-6@example.org" },
-];
 
 // ---------------------------------------------------------------- small helpers
 
