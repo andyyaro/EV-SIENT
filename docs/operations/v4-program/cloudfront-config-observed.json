@@ -87,7 +87,7 @@
     },
     "FieldLevelEncryptionId": "",
     "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
-    "ResponseHeadersPolicyId": "5cc3b908-e619-4b99-88e5-2cf7f45965bd",
+    "ResponseHeadersPolicyId": "480181a4-9582-4a5a-8a09-c973ebb4d232",
     "GrpcConfig": {
       "Enabled": false
     }
@@ -138,6 +138,7 @@
         },
         "FieldLevelEncryptionId": "",
         "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+        "ResponseHeadersPolicyId": "ab666a54-b0ae-41cc-9bea-9143edfa4e66",
         "GrpcConfig": {
           "Enabled": false
         }

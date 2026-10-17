@@ -42,6 +42,9 @@ Usage
 -----
     python scripts/deploy_platform.py                 # dry run: says what it WOULD do
     python scripts/deploy_platform.py --apply         # actually do it
+    python scripts/deploy_platform.py --www-only [--apply]
+                                                      # public pages, NFC pages and error page only
+    python scripts/check_live_vs_main.py              # afterwards: is live byte-identical to main?
 """
 
 from __future__ import annotations
@@ -80,6 +83,19 @@ GRANTED_ENTRY = re.compile(
     r'\{\s*sub:\s*"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",\s*'
     r'email:\s*"[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"\s*\}')
 BUNDLE = REPO / "site/platform"
+
+#: The public half of the main bucket besides site/www: local folder -> key prefix. These files
+#: have no extension, so their type must be named or S3 stores them as binary, and they keep the
+#: five-minute cache they were first uploaded with on 2026-07-27 (measured live 2026-10-17).
+FIELD_TREES = {"site/nfc-landing": "t/", "site/nfc-capture": "f/", "site/errors": "errors/"}
+FIELD_HEADERS = ["--content-type", "text/html;charset=utf-8", "--cache-control", "public,max-age=300"]
+#: Every public page revalidates on each load, as the live copies have since 2026-10-15; images,
+#: the PDF and the vendored script carry no Cache-Control, also as live.
+PAGE_HEADERS = ["--cache-control", "no-cache"]
+
+#: Which commit the public half was published from. Written on every --apply, read by
+#: scripts/check_live_vs_main.py. Audit F-14 found production matching no commit at all.
+MARKER_KEY = "deployed.json"
 
 #: AWS managed cache policy "CachingOptimized". Cookies are deliberately NOT part of the cache
 #: key - they must not be, or every session would get its own cache entry. That is safe here
@@ -557,6 +573,29 @@ def deploy_bundle(apply: bool) -> None:
         say("cloudfront", f"invalidation {inv['Invalidation']['Id']} created")
 
 
+def deletions_from(sync_output: str) -> list[str]:
+    """The keys an `s3 sync --dryrun` listing would delete, relative to the platform prefix."""
+    prefix = f"s3://{PLATFORM_BUCKET}/{S3_PREFIX}/"
+    return [line.split(prefix, 1)[1] for line in sync_output.splitlines()
+            if line.startswith("(dryrun) delete: ") and prefix in line]
+
+
+def vendor_refusal(deletions: list[str]) -> str | None:
+    """Why the bundle sync must not run from this checkout, or None.
+
+    CesiumJS is fetched into a gitignored folder by scripts/vendor_cesium.sh (DECISIONS.md), so
+    a checkout that never ran it builds a bundle without it, and the --delete sync then removes
+    the vendored copy the live explorer loads: 377 files, measured 2026-10-17.
+    """
+    vendor = [key for key in deletions if key.startswith("explorer/vendor/")]
+    if not vendor:
+        return None
+    return (f"the bundle has no vendored CesiumJS, so the --delete sync would remove {len(vendor)} "
+            f"file(s) under {S3_PREFIX}/explorer/vendor/ that the live explorer loads. Run "
+            f"scripts/vendor_cesium.sh and scripts/build_platform_web.py first, or publish the "
+            f"public pages alone with --www-only")
+
+
 
 # ---------------------------------------------------------------- the public website
 
@@ -578,27 +617,67 @@ def object_exists(bucket: str, key: str) -> bool:
     return proc.returncode == 0
 
 
-def deploy_www(apply: bool) -> None:
-    """Publish the public pages. Never with --delete.
+def git(*args: str) -> str:
+    return subprocess.run(["git", "-C", str(REPO), *args], capture_output=True, text=True,
+                          check=True).stdout.strip()
 
-    The main bucket also holds the NFC landing pages, the capture forms and the error page,
-    none of which come from ``site/www``. A ``--delete`` sync would remove all of them, which
-    is precisely the sort of quiet catastrophe this program is meant not to have.
+
+def public_trees() -> dict[str, str]:
+    """Every folder published to the main bucket: local folder -> key prefix."""
+    return {"site/www": "", **FIELD_TREES}
+
+
+def uncommitted_public_files() -> list[str]:
+    """Changed or untracked files under the public folders. The marker names a commit, and a file
+    that differs from it would make the marker a false statement about what is live."""
+    out = git("status", "--porcelain", "--untracked-files=all", "--", *public_trees())
+    return [line[3:] for line in out.splitlines() if line.strip()]
+
+
+def sync_public(local: str, prefix: str, headers: list[str], apply: bool,
+                filters: tuple[str, ...] = ()) -> int:
+    """`s3 sync` one public folder, never with --delete. Returns the objects (to be) written."""
+    args = ["s3", "sync", str(REPO / local), f"s3://{MAIN_BUCKET}/{prefix}", *filters, *headers]
+    if not apply:
+        args.append("--dryrun")
+    proc = subprocess.run(["aws", *args, "--profile", PROFILE], capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise SystemExit(redact(proc.stderr))
+    return len([ln for ln in proc.stdout.splitlines() if ln.strip()])
+
+
+def deploy_www(apply: bool) -> None:
+    """Publish the public pages, the NFC pages and the error page. Never with --delete.
+
+    A deploy only adds and replaces. The bucket also holds folder markers no local folder has,
+    and removing anything from the public site is a decision for a person, not a side effect of
+    a sync - the quiet catastrophe this program is meant not to have.
     """
     if not (WWW / "index.html").is_file():
         raise SystemExit(f"{WWW} has no index.html")
 
     files = sorted(p for p in WWW.rglob("*") if p.is_file())
     say("www", f"{len(files)} public page/asset(s) -> s3://{MAIN_BUCKET}/")
+    written = sync_public("site/www", "", PAGE_HEADERS, apply, ("--exclude", "*", "--include", "*.html"))
+    written += sync_public("site/www", "", [], apply, ("--exclude", "*.html"))
+    for local, prefix in FIELD_TREES.items():
+        count = sum(1 for p in (REPO / local).iterdir() if p.is_file())
+        say("www", f"{count} field page(s) {local} -> s3://{MAIN_BUCKET}/{prefix}")
+        written += sync_public(local, prefix, FIELD_HEADERS, apply)
+    say("www", f"{written} object(s) {'would be ' if not apply else ''}written")
 
-    args = ["s3", "sync", str(WWW), f"s3://{MAIN_BUCKET}/"]
+    marker = {"commit": git("rev-parse", "HEAD"), "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
+              "deployed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     if not apply:
-        args.append("--dryrun")
-    proc = subprocess.run(["aws", *args, "--profile", PROFILE], capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise SystemExit(redact(proc.stderr))
-    changed = [ln for ln in proc.stdout.splitlines() if ln.strip()]
-    say("www", f"{len(changed)} object(s) {'would be ' if not apply else ''}written")
+        say("www", f"WOULD write {MARKER_KEY} naming commit {marker['commit'][:7]}")
+    else:
+        proc = subprocess.run(["aws", "s3", "cp", "-", f"s3://{MAIN_BUCKET}/{MARKER_KEY}",
+                               "--content-type", "application/json", *PAGE_HEADERS,
+                               "--profile", PROFILE],
+                              input=json.dumps(marker, indent=1) + "\n", capture_output=True, text=True)
+        if proc.returncode != 0:
+            raise SystemExit(redact(proc.stderr))
+        say("www", f"{MARKER_KEY} names commit {marker['commit'][:7]}")
 
     # A dry run must not claim an action it would not take. These seven were deleted on
     # 2026-07-28 and are gone -- verified with head-object, all 404 -- yet every dry run since
@@ -617,7 +696,7 @@ def deploy_www(apply: bool) -> None:
         subprocess.run(["aws", "s3", "rm", f"s3://{MAIN_BUCKET}/{key}", "--profile", PROFILE],
                        capture_output=True, text=True)
     if apply:
-        say("www", f"removed {len(STALE_OBJECTS)} duplicate/orphan object(s) "
+        say("www", f"removed {len(present)} duplicate/orphan object(s) "
                    f"(recoverable - bucket versioning is enabled)")
         inv = aws("cloudfront", "create-invalidation", "--distribution-id", DISTRIBUTION_ID,
                   "--paths", "/*")
@@ -626,17 +705,61 @@ def deploy_www(apply: bool) -> None:
 
 # ---------------------------------------------------------------- main
 
+def preflight(apply: bool, www_only: bool) -> None:
+    """Refuse before the first change, not halfway through a deploy.
+
+    Two things make a deploy from this checkout wrong rather than merely stale. A file under the
+    public folders that differs from HEAD would make deployed.json name a commit that is not
+    what went live. And a bundle built without the vendored CesiumJS would have the --delete
+    sync remove the copy the live explorer loads. A dry run reports either as WOULD REFUSE and
+    carries on, so its plan is still complete.
+    """
+    reasons = []
+    dirty = uncommitted_public_files()
+    if dirty:
+        reasons.append(f"{len(dirty)} file(s) under the public folders differ from HEAD "
+                       f"({', '.join(dirty[:3])}{', ...' if len(dirty) > 3 else ''}); commit them first")
+    if not www_only:
+        if not (BUNDLE / "index.html").is_file():
+            reasons.append(f"{BUNDLE} has no index.html - build the bundle first")
+        elif aws("s3api", "head-bucket", "--bucket", PLATFORM_BUCKET,
+                 check=False, parse=False).returncode == 0:
+            proc = subprocess.run(["aws", "s3", "sync", str(BUNDLE), f"s3://{PLATFORM_BUCKET}/{S3_PREFIX}/",
+                                   "--delete", "--dryrun", "--profile", PROFILE],
+                                  capture_output=True, text=True)
+            if proc.returncode != 0:
+                raise SystemExit(redact(proc.stderr))
+            reason = vendor_refusal(deletions_from(proc.stdout))
+            if reason:
+                reasons.append(reason)
+    for reason in reasons:
+        say("preflight", f"{'REFUSING' if apply else 'WOULD REFUSE'}: {reason}")
+    if apply and reasons:
+        raise SystemExit("REFUSING: nothing was changed.")
+    if not reasons:
+        say("preflight", "the public folders match HEAD" +
+            ("" if www_only else ", and the bundle sync keeps the vendored CesiumJS"))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", action="store_true",
                     help="actually deploy; without it the script only reports")
+    ap.add_argument("--www-only", action="store_true",
+                    help="publish only the public pages, the NFC pages and the error page; leave "
+                         "the platform, its gate and the distribution config untouched")
     args = ap.parse_args()
 
-    print(f"\nFuture City Fellowship - platform deploy "
+    print(f"\nFuture City Fellowship - {'public site' if args.www_only else 'platform'} deploy "
           f"({'APPLY' if args.apply else 'DRY RUN - nothing will change'})\n")
 
     check_identity()
+    preflight(args.apply, args.www_only)
+    if args.www_only:
+        deploy_www(args.apply)
+        print(f"\n{'Deployed.' if args.apply else 'Dry run complete. Re-run with --apply.'}\n")
+        return 0
     ensure_managed_login_branding(args.apply)
     ensure_platform_bucket(args.apply)
     oac_id = ensure_oac(args.apply)

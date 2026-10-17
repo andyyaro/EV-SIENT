@@ -104,10 +104,35 @@ aws sso login --profile future-city          # the token expires; this is the us
 python scripts/deploy_platform.py            # DRY RUN - prints its plan, changes nothing
 python scripts/deploy_platform.py --apply
 python scripts/verify_deployment.py          # 33 live assertions, both halves
+python scripts/check_live_vs_main.py         # every published file byte-identical to main
 ```
 
 The script is dry-run by default. It is idempotent - re-running with no changes republishes
 identical bytes and reports `0 object(s) written`.
+
+### Publishing the public half alone
+
+`--www-only` publishes `site/www`, the NFC landing pages (`site/nfc-landing` to `/t/`), the
+capture forms (`site/nfc-capture` to `/f/`) and the error page, and nothing else: no Lambda
+version, no platform bundle, no distribution change. Pages go up with `Cache-Control: no-cache`,
+as the live copies have carried since 2026-10-15; the field pages, which have no file extension,
+go up as `text/html;charset=utf-8` with the five-minute cache they were first uploaded with.
+Nothing is ever deleted.
+
+Both modes write `deployed.json` at the site root, naming the commit, and both refuse to run
+while any file under those folders differs from HEAD, so the marker cannot name a commit that is
+not what went live. `check_live_vs_main.py` then fetches every published file and compares it
+byte for byte with `origin/main` (audit F-14: production had matched no commit, and nothing
+compared the two). It accepts a marker naming an older commit only when no published file
+changed between that commit and `main`.
+
+### Before a full deploy: the vendored CesiumJS
+
+`scripts/vendor_cesium.sh` fetches CesiumJS into a gitignored folder, so a checkout that never
+ran it builds a platform bundle without it, and the bundle's `--delete` sync would then remove the
+377 files the live explorer loads (measured 2026-10-17 from such a checkout). The script now
+refuses that before changing anything. Run `scripts/vendor_cesium.sh` and
+`scripts/build_platform_web.py` first, or use `--www-only` when only the public half changed.
 
 ### The guard that matters
 
