@@ -7,10 +7,18 @@ name: tests
 # the reverse -- which is how the tree came to sit at 8 PASS / 2 FAIL with CI green.
 
 on:
+  # A push to a branch with an open pull request used to run this twice, once per event, on a
+  # private repository where minutes are metered. A branch is checked through its pull
+  # request; main is checked on every push; anything else can be dispatched by hand.
   push:
-    branches: ["**"]
+    branches: ["main"]
   pull_request:
   workflow_dispatch:
+
+# A newer push to the same pull request makes the older run's answer irrelevant.
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:

@@ -20,8 +20,11 @@ name: deploy
 # than failing in a way that trains people to ignore a red workflow.
 
 on:
+  # Same reasoning as tests.yml: one run per change, not one per event. No concurrency
+  # cancellation here, deliberately - cancelling a dispatched deploy mid-run is worse than
+  # paying for a duplicate validation.
   push:
-    branches: ["**"]
+    branches: ["main"]
   pull_request:
   workflow_dispatch:
     inputs:

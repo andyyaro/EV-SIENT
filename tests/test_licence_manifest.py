@@ -141,6 +141,10 @@ def test_a_constraints_install_is_accepted_rather_than_called_broken():
         "cycler", "fonttools", "kiwisolver", "pyparsing", "python-dateutil", "six", "attrs",
         "referencing", "rpds-py", "jsonschema-specifications", "typing-extensions", "pip",
     }
+    # Only what pip would install HERE. The lock pins `typing-extensions` below Python 3.13
+    # only, so on 3.13+ a correct install lacks it, and listing it anyway made this test fail
+    # on every developer machine newer than CI's 3.12 - while CI stayed green.
+    runtime_closure &= locked_names(applicable_only=True) | {"pip"}
     missing, unexpected = blm.check_environment(LOCK.read_text(), runtime_closure)
     assert (missing, unexpected) == ([], []), (
         f"a lock-constrained release install was rejected: missing={missing} "

@@ -185,7 +185,7 @@ intake degradation, and a clone-safety check that catches files present here but
 fresh clone. It exits with the number of failures, so a red run is visible in the exit code, not
 just in the log.
 
-CI runs **the same gates**, on every push and every pull request
+CI runs **the same gates**, on every pull request and every push to `main`
 ([tests.yml](.github/workflows/tests.yml)) - literally the same, because CI invokes
 `verify.sh` rather than keeping a second list of steps in step with the first. There is one
 definition of what "green" means. Both the secret scan and the Markdown link check are shared
