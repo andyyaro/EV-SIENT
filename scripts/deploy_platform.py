@@ -597,6 +597,22 @@ def vendor_refusal(deletions: list[str]) -> str | None:
             f"public pages alone with --www-only")
 
 
+def bucket_state(returncode: int, stderr: str) -> str:
+    """'exists', 'absent', or what head-bucket said instead.
+
+    Only a 404 means the bucket holds nothing a sync could delete. Any other failure (no access,
+    throttling, no network) says nothing about the vendored copy. The first preflight read every
+    failure as "no bucket" and skipped its CesiumJS check, so a blip there let --apply run the
+    --delete sync unchecked.
+    """
+    if returncode == 0:
+        return "exists"
+    if "(404)" in stderr:
+        return "absent"
+    lines = redact(stderr).strip().splitlines()
+    return lines[-1] if lines else f"head-bucket exited {returncode}"
+
+
 
 # ---------------------------------------------------------------- the public website
 
@@ -726,6 +742,7 @@ def preflight(apply: bool, www_only: bool) -> None:
     carries on, so its plan is still complete.
     """
     reasons = []
+    note = "" if www_only else ", and the bundle sync keeps the vendored CesiumJS"
     dirty = uncommitted_public_files()
     if dirty:
         reasons.append(f"{len(dirty)} file(s) under the public folders differ from HEAD "
@@ -733,23 +750,30 @@ def preflight(apply: bool, www_only: bool) -> None:
     if not www_only:
         if not (BUNDLE / "index.html").is_file():
             reasons.append(f"{BUNDLE} has no index.html - build the bundle first")
-        elif aws("s3api", "head-bucket", "--bucket", PLATFORM_BUCKET,
-                 check=False, parse=False).returncode == 0:
-            proc = subprocess.run(["aws", "s3", "sync", str(BUNDLE), f"s3://{PLATFORM_BUCKET}/{S3_PREFIX}/",
-                                   "--delete", "--dryrun", "--profile", PROFILE],
-                                  capture_output=True, text=True)
-            if proc.returncode != 0:
-                raise SystemExit(redact(proc.stderr))
-            reason = vendor_refusal(deletions_from(proc.stdout))
-            if reason:
-                reasons.append(reason)
+        else:
+            head = aws("s3api", "head-bucket", "--bucket", PLATFORM_BUCKET, check=False, parse=False)
+            bucket = bucket_state(head.returncode, head.stderr)
+            if bucket == "exists":
+                target = f"s3://{PLATFORM_BUCKET}/{S3_PREFIX}/"
+                proc = subprocess.run(["aws", "s3", "sync", str(BUNDLE), target, "--delete", "--dryrun",
+                                       "--profile", PROFILE], capture_output=True, text=True)
+                if proc.returncode != 0:
+                    raise SystemExit(redact(proc.stderr))
+                reason = vendor_refusal(deletions_from(proc.stdout))
+                if reason:
+                    reasons.append(reason)
+            elif bucket == "absent":
+                note = (f", and {PLATFORM_BUCKET} does not exist yet, so the bundle sync can "
+                        "delete nothing")
+            else:
+                reasons.append(f"could not check {PLATFORM_BUCKET} for the vendored CesiumJS, so the "
+                               f"--delete sync cannot be shown safe: {bucket}")
     for reason in reasons:
         say("preflight", f"{'REFUSING' if apply else 'WOULD REFUSE'}: {reason}")
     if apply and reasons:
         raise SystemExit("REFUSING: nothing was changed.")
     if not reasons:
-        say("preflight", "the public folders match HEAD" +
-            ("" if www_only else ", and the bundle sync keeps the vendored CesiumJS"))
+        say("preflight", "the public folders match HEAD" + note)
 
 
 def main() -> int:

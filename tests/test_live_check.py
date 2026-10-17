@@ -84,6 +84,19 @@ def test_a_bundle_without_vendored_cesium_is_refused_and_a_complete_one_is_not()
     assert deploy.vendor_refusal(["old-page.html"]) is None
 
 
+def test_only_a_missing_bucket_lets_the_preflight_skip_the_cesium_check():
+    """Any other head-bucket failure says nothing about what the bucket holds. The strings are
+    the CLI's own, measured 2026-10-17."""
+    missing = ("\naws: [ERROR]: An error occurred (404) when calling the HeadBucket operation: "
+               "Not Found\n")
+    denied = ("\naws: [ERROR]: An error occurred (403) when calling the HeadBucket operation: "
+              "Forbidden\n")
+    assert deploy.bucket_state(0, "") == "exists"
+    assert deploy.bucket_state(254, missing) == "absent"
+    assert deploy.bucket_state(254, denied) == denied.strip()
+    assert deploy.bucket_state(255, "") not in ("exists", "absent")
+
+
 def test_only_uploads_and_deletions_are_counted_never_progress_lines():
     listing = ("Completed 1.2 MiB/3.0 MiB (2.1 MiB/s) with 12 file(s) remaining\r"
                "upload: site/www/index.html to s3://bucket/index.html\n"
