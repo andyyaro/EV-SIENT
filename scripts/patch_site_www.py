@@ -114,7 +114,9 @@ MODE_NOTE = """
   each other, and ranks <strong>FFX004 (Fairfax County Government Center) first at 53.4</strong>,
   with FFX002 second at 51.8. This page has been corrected; the change is recorded rather than
   made silently. Neither ordering is a feasibility finding - electrical capacity is an
-  unverified placeholder at all twelve sites.
+  unverified placeholder at all twelve sites. Chinn Park Regional Library (PWC004) was closed
+  for renovation when the site data were gathered in June 2026; its rank assumes it reopens
+  much as it was.
 </aside>
 """
 
@@ -369,9 +371,16 @@ def build_specimens() -> str:
         else:
             title = TIER_TITLE.get(tier_full, tier_full)
 
-        staging = (f"Install now: {now} ports. Future-ready: {pathway} ports."
-                   if pathway > now else
-                   f"Install now: {now} ports, with no additional pathway modelled.")
+        # A site the model says not to advance still carries 2 starter ports in the totals
+        # (right_sizing never plans fewer). Saying "Install now" under "Do not advance yet"
+        # contradicted the card's own title (audit F-10).
+        if tier_full.startswith("Low public-priority"):
+            staging = (f"Counted at {now} starter ports in the study's totals, but the advice is "
+                       f"not to advance a public buildout until the use case is confirmed.")
+        elif pathway > now:
+            staging = f"Install now: {now} ports. Future-ready: {pathway} ports."
+        else:
+            staging = f"Install now: {now} ports, with no additional pathway modelled."
 
         out.append({
             "code": site_id,

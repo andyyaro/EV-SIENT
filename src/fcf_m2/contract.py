@@ -429,7 +429,11 @@ def _write_readme(out: Path) -> None:
         "`verified_utility`/`verified_facility`.\n"
         "3. Presentation numbers cite `contract_version` + `generated_utc` from the manifest.\n"
         "4. Validation: `python -m fcf_m2.workflow validate-contract <dir>` re-runs all rules "
-        "and the RT-10 hash chain.\n\n"
+        "and the RT-10 hash chain.\n"
+        "5. `lifecycle_cost_nominal_usd`, `lifecycle_cost_npv_usd` and "
+        "`avoided_overbuild_cost_usd` are computed for each site's base-case staged trajectory "
+        "only. The `high` and `stress_combined` rows of a horizon repeat its `base` value; they "
+        "are not the cost of those scenarios. Baseline (2026) rows carry none.\n\n"
         "All values are planning-support outputs. Nothing here is an engineering, permitting, "
         "budget, or procurement value.\n"
     )

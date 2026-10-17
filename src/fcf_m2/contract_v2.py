@@ -452,6 +452,13 @@ of 1.0 would walk straight past the reliability gate that exists to catch exactl
    date is not verification.
 5. Every v1 rule still applies, because `validate_v2` runs them first.
 
+## Read with care
+
+`lifecycle_cost_nominal_usd`, `lifecycle_cost_npv_usd` and `avoided_overbuild_cost_usd` are
+carried from v1 unchanged, so they keep v1's meaning: each site's base-case staged trajectory
+only. The `high` and `stress_combined` rows of a horizon repeat its `base` value; they are not
+the cost of those scenarios.
+
 ## Provenance
 
 Own hash chain in `contract_manifest.json`, same construction as v1: SHA-256 over every

@@ -135,7 +135,7 @@ PAGE = """<!doctype html>
     <div><dt>Space worth leaving room for, long term</dt><dd>up to {ports_pathway}</dd></div>
     <div><dt>How confident we are in the data here</dt><dd>{confidence}</dd></div>
     <div><dt>Is the electrical capacity confirmed?</dt><dd>{capacity_answer}</dd></div>
-  </dl>
+  </dl>{site_notes}
 
   <div class="caveat">
     <strong>The most important thing on this page:</strong> nobody has confirmed that the
@@ -183,6 +183,34 @@ PAGE = """<!doctype html>
 """
 
 
+#: What someone standing at one particular site must also be told, beyond the figures. Kept
+#: here because contract v1 is frozen and has no column for it. Chinn Park's closure was in
+#: the input notes all along and reached no public page (audit F-26).
+SITE_NOTES = {
+    "PWC004": ("<strong>This library was closed for renovation</strong> when the study's site "
+               "data were gathered in June 2026, according to the library system's own page. "
+               "The figures above assume it reopens much as it was; its opening hours and "
+               "parking are planning assumptions until then."),
+}
+
+#: A site the study says not to advance still carries 2 starter chargers in its totals,
+#: because right-sizing never plans fewer. Shown bare, "2 chargers to start with" reads as a
+#: recommendation the study does not make (audit F-10).
+NOT_ADVANCED = ("<strong>The study does not recommend public chargers here yet.</strong> "
+                "Access to this site is limited, so planning waits until its use is confirmed. "
+                "The {ports_now} starter chargers above are counted in the study's totals as a "
+                "placeholder, not a recommendation.")
+
+
+def site_notes(site_id: str, public_or_fleet: str, ports_now: int) -> str:
+    notes = []
+    if public_or_fleet != "public":
+        notes.append(NOT_ADVANCED.format(ports_now=ports_now))
+    if site_id in SITE_NOTES:
+        notes.append(SITE_NOTES[site_id])
+    return "".join(f'\n\n  <div class="caveat">\n    {note}\n  </div>' for note in notes)
+
+
 def capacity_answer(basis: str) -> str:
     return "No - placeholder" if basis == "placeholder" else html.escape(basis)
 
@@ -214,6 +242,7 @@ def main() -> int:
             ports_pathway=int(row.ports_pathway_capacity),
             confidence=confidence_answer(str(row.data_confidence)),
             capacity_answer=capacity_answer(str(row.capacity_basis)),
+            site_notes=site_notes(str(site.site_id), str(row.public_or_fleet), int(row.ports_active)),
         )
         # Written WITHOUT a .html extension, matching the tag URL byte for byte.
         #

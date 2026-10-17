@@ -401,20 +401,6 @@
 
     .fade-text { opacity: 0; transform: translateY(3px); filter: blur(2px); }
 
-    /* ---------- PDF Report Viewer Module ---------- */
-    .pdf-report-section { position: relative; }
-    .pdf-report-intro { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; color: var(--muted); font-size: 14px; }
-    .pdf-report-intro span:first-child { color: var(--ink); font-weight: 600; }
-    
-    .framerComponentShell {
-      width: 100%; height: min(86vh, 900px); min-height: 720px; position: relative; overflow: hidden;
-      background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 16px 40px rgba(16,18,20,.05);
-    }
-    .framerComponentShell iframe { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% + 48px); border: 0; display: block; background: #fff; }
-    
-    .pdf-report-fallback { margin-top: 14px; font-size: 14px; color: var(--muted); }
-    .pdf-report-fallback a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-
     /* ---------- Tableau Embed Showcase ---------- */
     .viz-showcase {
       background: #ffffff;
@@ -589,7 +575,6 @@
       <a class="active" href="results.html">Results</a>
       <a href="methodology.html">Methodology</a>
       <a href="assistant.html">AI Assistant</a>
-      <a href="https://github.com/andyyaro/Future-City-Fellowship-" rel="noopener noreferrer" target="_blank">GitHub</a>
     </nav>
     <div aria-hidden="true" class="topbar-spacer"></div>
   </header>
@@ -636,7 +621,9 @@
   each other, and ranks <strong>FFX004 (Fairfax County Government Center) first at 53.4</strong>,
   with FFX002 second at 51.8. This page has been corrected; the change is recorded rather than
   made silently. Neither ordering is a feasibility finding - electrical capacity is an
-  unverified placeholder at all twelve sites.
+  unverified placeholder at all twelve sites. Chinn Park Regional Library (PWC004) was closed
+  for renovation when the site data were gathered in June 2026; its rank assumes it reopens
+  much as it was.
 </aside>
   <section class="section top-signals-section">
     <div class="container">
@@ -779,41 +766,6 @@
     </div>
   </section>
 
-  <!-- PDF Report Viewer Module -->
-  <section class="section pdf-report-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Results Explorer</h2>
-        <p class="section-desc">
-          A planning report is embedded below from an external host; this repository cannot verify what that host serves. The copy tracked here was generated <strong>2026-06-28 from the <code>legacy_v2</code> baseline</strong> - its table is headed &ldquo;Current Site Ranking&rdquo; but its scores are superseded by the gallery above, and it names no model mode. Treat it as a dated artifact, not as current model output.
-        </p>
-      </div>
-
-      <div class="pdf-report-intro">
-        <span>Public EV Charging Planning Report</span>
-        <span>Model-generated planning-support artifact</span>
-      </div>
-
-      <div class="framerComponentShell">
-        <iframe
-          src="https://flowing-devices-628649.framer.app/"
-          title="Public EV Charging Planning Report PDF viewer"
-          loading="lazy"
-          allow="fullscreen"
-          allowfullscreen
-          webkitallowfullscreen>
-        </iframe>
-      </div>
-
-      <p class="pdf-report-fallback">
-        If the embedded viewer does not load,
-        <a href="https://futurecityfellowship.andyyaro.com/reports/Public_EV_Charging_Planning_Report.pdf" target="_blank" rel="noopener noreferrer">
-          open the PDF directly ↗
-        </a>
-      </p>
-    </div>
-  </section>
-
   <!-- Unified Minimal Footer -->
   <footer class="site-footer">
     <div class="footer-title">Future City GMU</div>
@@ -856,7 +808,7 @@
         {"code": "PWC002", "title": "Useful but high-review", "label": "PWC002 · Neabsco-Potomac Commuter Garage", "site": "Neabsco-Potomac Commuter Garage", "image": "img/sites/PWC002.jpg", "alt": "Aerial view of the Neabsco-Potomac Commuter Garage area in Woodbridge", "score": "51.1", "tier": "High-review", "priority": 4, "seed": 4193, "description": "Rank 3 of 12 under the canonical milestone2_v3 model. Score: 51.1. Tier: High-review candidate. Install now: 2 ports. Future-ready: 3 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
         {"code": "PWC006", "title": "Promising, needs better data", "label": "PWC006 · Bull Run Library", "site": "Bull Run Library", "image": "img/sites/PWC006.jpg", "alt": "Aerial view of the Bull Run Library site in Manassas", "score": "50.2", "tier": "Tier 2", "priority": 3, "seed": 3721, "description": "Rank 4 of 12 under the canonical milestone2_v3 model. Score: 50.2. Tier: Tier 2 - promising candidate, refine data. Install now: 2 ports. Future-ready: 4 ports. Readiness compares sites; it is not a finding that this site is electrically feasible."},
         {"code": "PWC008", "title": "Monitor before expanding", "label": "PWC008 · Potomac Library", "site": "Potomac Library", "image": "img/sites/PWC008.jpg", "alt": "Aerial view of the Potomac Community Library site in Woodbridge", "score": "41.8", "tier": "Tier 3", "priority": 2, "seed": 5377, "description": "Rank 10 of 12 under the canonical milestone2_v3 model. Score: 41.8. Tier: Tier 3 - lower priority / monitor. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."},
-        {"code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center", "image": "img/sites/PWC003.jpg", "alt": "Aerial view of the Prince William County Public Safety Training Center", "score": "32.8", "tier": "Special-use", "priority": 1, "seed": 6791, "description": "Rank 12 of 12 under the canonical milestone2_v3 model. Score: 32.8. Tier: Low public-priority / special-use. Install now: 2 ports, with no additional pathway modelled. Readiness compares sites; it is not a finding that this site is electrically feasible."}
+        {"code": "PWC003", "title": "Do not advance yet", "label": "PWC003 · Public Safety Training Center", "site": "Public Safety Training Center", "image": "img/sites/PWC003.jpg", "alt": "Aerial view of the Prince William County Public Safety Training Center", "score": "32.8", "tier": "Special-use", "priority": 1, "seed": 6791, "description": "Rank 12 of 12 under the canonical milestone2_v3 model. Score: 32.8. Tier: Low public-priority / special-use. Counted at 2 starter ports in the study's totals, but the advice is not to advance a public buildout until the use case is confirmed. Readiness compares sites; it is not a finding that this site is electrically feasible."}
       ];
 
       const CONFIG = {

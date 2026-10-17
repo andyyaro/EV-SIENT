@@ -868,7 +868,6 @@
       <a href="results.html">Results</a>
       <a class="active" href="methodology.html">Methodology</a>
       <a href="assistant.html">AI Assistant</a>
-      <a href="https://github.com/andyyaro/Future-City-Fellowship-" rel="noopener noreferrer" target="_blank">GitHub</a>
     </nav>
     <div aria-hidden="true" class="topbar-spacer"></div>
   </header>
@@ -958,7 +957,7 @@
       <ul>
         <li><strong>Site identity:</strong> Site ID, site name, and jurisdiction.</li>
         <li><strong>Context & Use:</strong> Public-serving use type, operating hours, and parking context.</li>
-        <li><strong>Demand proxies:</strong> Visitor or employee counts and nearby charging supply.</li>
+        <li><strong>Demand proxies:</strong> Households and jobs nearby, traffic on the nearest arterial, nearby amenities, local EV share, and the charging already nearby. Visitor and employee counts size the number of ports; they do not change the readiness score.</li>
         <li><strong>Infrastructure:</strong> Likely charger placement, electrical service rating, and spare electrical capacity.</li>
         <li><strong>Safety & Compliance:</strong> ADA and accessibility considerations, emergency disconnect visibility, garage/structure-specific needs, fire/AHJ indicators, and stormwater/site-work indicators.</li>
         <li><strong>Testing conditions:</strong> Future demand scenarios.</li>
@@ -967,7 +966,7 @@
       <h3 class="study-subheading">Core scoring dimensions</h3>
       <p>Sites are evaluated qualitatively and systematically across six high-level dimensions:</p>
       <ol>
-        <li><strong>Demand signal:</strong> Whether the site appears likely to support sufficient public charging demand based on context and visitation proxies.</li>
+        <li><strong>Demand signal:</strong> Whether the site appears likely to support sufficient public charging demand, judged from its surroundings (households, jobs, traffic, amenities, local EV share), its parking, hours and visit length, and the charging already nearby.</li>
         <li><strong>Electrical and cost feasibility:</strong> Whether the site's electrical capacity, service constraints, and likely implementation complexity support immediate readiness or pose heavy upgrade burdens.</li>
         <li><strong>Accessibility and site suitability:</strong> Whether site access, ADA spacing considerations, parking layout, and likely charger placement are viable.</li>
         <li><strong>Public value and equity:</strong> Whether a site supports useful public access, serves the community context well, and offers strategic planning value.</li>
@@ -1033,9 +1032,12 @@
         The model aims to prevent overbuilding while ensuring sites are prepared for the future. It does this by separating capacity into two distinct recommendations:
       </p>
       <ul>
-        <li><strong>Install-now ports:</strong> A smaller starter recommendation focused on immediate feasibility, electrical capacity, and proven current demand.</li>
+        <li><strong>Install-now ports:</strong> A smaller starter recommendation focused on immediate feasibility, electrical capacity, and modelled current demand.</li>
         <li><strong>Future-ready ports:</strong> The amount of underlying capacity (e.g., conduit, panel space, spatial planning) the site should be prepared to accommodate if demand grows over time.</li>
       </ul>
+      <p>
+        Three things about the published port plan are worth knowing. It follows the study's accepted <code>legacy_v2</code> ranking rather than the canonical <code>milestone2_v3</code> ranking shown on the results page, so that its totals of 25 starter and 48 future-ready ports reconcile with what was presented; on the canonical ranking the same rules give 25 and 47. Every site carries at least 2 starter ports, including the Public Safety Training Center (PWC003), where the advice is not to advance a public buildout until the use case is confirmed: its 2 are counted in the total as a placeholder, not recommended. And Chinn Park Regional Library (PWC004) was closed for renovation when the site data were gathered in June 2026; its rank and plan assume it reopens much as it was.
+      </p>
       <p><em>Note: Right-sizing is a planning-support recommendation. It must always be checked against engineering, utility, procurement, site design, ADA, and permitting review.</em></p>
 
       <h3 class="study-subheading">Review burden logic</h3>
@@ -1160,7 +1162,6 @@
       <a href="dashboard.html">Dashboard</a>
       <a href="results.html">Results</a>
       <a href="methodology.html">Methodology</a>
-      <a href="https://github.com/andyyaro/Future-City-Fellowship-" target="_blank" rel="noopener noreferrer">GitHub</a>
     </nav>
   </footer>
 
