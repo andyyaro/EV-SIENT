@@ -558,14 +558,15 @@ def deploy_bundle(apply: bool) -> None:
         say("cloudfront", "WOULD invalidate /platform*")
         return
 
-    args = ["s3", "sync", str(BUNDLE), f"s3://{PLATFORM_BUCKET}/{S3_PREFIX}/", "--delete"]
+    args = ["s3", "sync", str(BUNDLE), f"s3://{PLATFORM_BUCKET}/{S3_PREFIX}/", "--delete",
+            "--no-progress"]
     if not apply:
         args.append("--dryrun")
     proc = subprocess.run(["aws", *args, "--profile", PROFILE], capture_output=True, text=True)
     if proc.returncode != 0:
         raise SystemExit(redact(proc.stderr))
-    changed = [ln for ln in proc.stdout.splitlines() if ln.strip()]
-    say("s3", f"{len(changed)} object(s) {'would be ' if not apply else ''}written")
+    uploads, deletions = sync_changes(proc.stdout)
+    say("s3", f"{uploads} upload(s) and {deletions} deletion(s){' planned' if not apply else ''}")
 
     if apply:
         inv = aws("cloudfront", "create-invalidation", "--distribution-id", DISTRIBUTION_ID,
@@ -634,16 +635,26 @@ def uncommitted_public_files() -> list[str]:
     return [line[3:] for line in out.splitlines() if line.strip()]
 
 
+def sync_changes(output: str) -> tuple[int, int]:
+    """Uploads and deletions in an `s3 sync` listing, dry run or not. Progress lines are not
+    objects: counting every line reported 119 objects written for the 41-file deploy of
+    2026-10-17."""
+    lines = [line.removeprefix("(dryrun) ") for line in output.splitlines()]
+    return (sum(line.startswith("upload: ") for line in lines),
+            sum(line.startswith("delete: ") for line in lines))
+
+
 def sync_public(local: str, prefix: str, headers: list[str], apply: bool,
                 filters: tuple[str, ...] = ()) -> int:
     """`s3 sync` one public folder, never with --delete. Returns the objects (to be) written."""
-    args = ["s3", "sync", str(REPO / local), f"s3://{MAIN_BUCKET}/{prefix}", *filters, *headers]
+    args = ["s3", "sync", str(REPO / local), f"s3://{MAIN_BUCKET}/{prefix}", *filters, *headers,
+            "--no-progress"]
     if not apply:
         args.append("--dryrun")
     proc = subprocess.run(["aws", *args, "--profile", PROFILE], capture_output=True, text=True)
     if proc.returncode != 0:
         raise SystemExit(redact(proc.stderr))
-    return len([ln for ln in proc.stdout.splitlines() if ln.strip()])
+    return sync_changes(proc.stdout)[0]
 
 
 def deploy_www(apply: bool) -> None:

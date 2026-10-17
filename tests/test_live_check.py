@@ -84,6 +84,15 @@ def test_a_bundle_without_vendored_cesium_is_refused_and_a_complete_one_is_not()
     assert deploy.vendor_refusal(["old-page.html"]) is None
 
 
+def test_only_uploads_and_deletions_are_counted_never_progress_lines():
+    listing = ("Completed 1.2 MiB/3.0 MiB (2.1 MiB/s) with 12 file(s) remaining\r"
+               "upload: site/www/index.html to s3://bucket/index.html\n"
+               "Completed 2.0 MiB/3.0 MiB (2.0 MiB/s) with 11 file(s) remaining\n"
+               "(dryrun) upload: site/www/a.html to s3://bucket/a.html\n"
+               "(dryrun) delete: s3://bucket/old.html\n")
+    assert deploy.sync_changes(listing) == (2, 1)
+
+
 def test_field_pages_are_published_as_html():
     """They have no extension; without a named type S3 would serve the NFC pages as binary."""
     assert deploy.FIELD_HEADERS[:2] == ["--content-type", "text/html;charset=utf-8"]
