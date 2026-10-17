@@ -232,10 +232,10 @@ search.
 | ACM certificate | `preview.futurecityfellowship.andyyaro.com`, us-east-1 (`04c12882-…`) | `future-city` |
 | Route 53 | `preview.futurecityfellowship.andyyaro.com` A + AAAA alias, and the ACM validation CNAME `_220a9a38….preview.futurecityfellowship` | `cerfodes-dns` |
 
-**Known limitation:** the AI assistant page loads, but chat cannot work from the preview. The
-assistant API (`future-city-assistant-api`) allows only `https://futurecityfellowship.andyyaro.com`
-as a CORS origin, measured with a preflight; widening it would change production, so it was left
-alone.
+~~**Known limitation:** the AI assistant page loads, but chat cannot work from the preview.~~
+**CLOSED 2026-10-15** (section 9): the assistant API now allows both
+`https://futurecityfellowship.andyyaro.com` and the preview origin, and chat works from both.
+Measured again 2026-10-17 with `get-api`: `AllowOrigins` lists exactly those two.
 
 **Verified on the preview** (2026-10-09): every page 200, an unknown path 404 via the error
 page, direct S3 access 403, and `tests/browser/www_mobile.test.mjs` plus
@@ -289,11 +289,98 @@ and a question is answered. With the new token, "which site ranks first" is answ
 from `README.md` on `main`, horizons 2036 / 2046 / 2056, 25 ports with a pathway for 48. Six
 probing questions returned none of the private facility values (addresses, per-site figures).
 
-**Rollback:** Lambda version **1** is the exact pre-change code and configuration; point the
-integration at it, or re-upload it to `$LATEST`. Restore the gate with
+> **Corrected 2026-10-17.** Six questions that found nothing did not show that nothing could be
+> found. A probe written to look for the gaps found two: the blocklist named `data/inputs/` but
+> not `tests/fixture_*.csv`, which carry the same facility rows, and a script holding the
+> platform's login emails was readable and quoted back verbatim. Fixed in section 10.
+
+**Rollback:** Lambda version **1** is the exact pre-change code and configuration. Since
+2026-10-17 the integration invokes the `live` alias, so rolling back is
+`python scripts/deploy_assistant.py --rollback 1 --apply` (section 10). **Never roll back to
+version 2**: it is the 2026-10-15 code whose blocklist let test fixtures and a login email through. Restore the gate with
 `aws apigatewayv2 update-route --api-id zale82q9w3 --route-id a3fm87o --authorization-type JWT --authorizer-id 2pk8gx`,
 then revert the `setPublicUI` block in `assistant.html` and re-upload.
 
 **The token expires in 90 days.** When it does, the assistant keeps answering but from no
 repository context, exactly the failure found today; the log line is
 `"phase_4_repo_lookup_error", "error": "HTTP Error 401: Unauthorized"`.
+
+---
+
+## 10. Hardening after the 2026-10-17 audit
+
+Every change below was made against the live account and then measured. None of them touches
+the default cache behaviour's origin, the NFC pages, the certificate or DNS.
+
+### The assistant
+
+| Piece | Before | After |
+|---|---|---|
+| Source | Only inside AWS: `$LATEST` plus one published version, nothing in any branch | `infra/assistant/lambda_function.py` is the source; `scripts/deploy_assistant.py` is the only route to AWS |
+| Integration `zuu51m1` | Invoked the unqualified function, so `$LATEST` (any console edit) reached visitors at once | Invokes the alias `future-city-assistant-chat:live` |
+| Path rule | Blocklist of seven directories | **Allowlist** (`PUBLIC_PATH_PREFIXES`, `PUBLIC_EXACT_PATHS`): a new directory is unreadable until someone decides it is public. Readable files 310 -> 161 |
+| Excerpts | Passed to the model as read | Email addresses and UUIDs replaced before the model sees them, and the instructions forbid revealing contact details |
+| Limits | 150/h and 400/day per visitor | 20/h and 60/day per visitor, `GLOBAL_DAILY_LIMIT=600`, `RATE_LIMIT_FAIL_CLOSED=true` (if the usage table cannot be read, the request is refused rather than allowed) |
+
+`tests/test_assistant_paths.py` runs the deployed rule over the tracked tree and fails if a
+private file becomes readable or a readable file carries an email address.
+
+**Versions** (each immutable; `live` points at one of them):
+
+| Version | What it is |
+|---|---|
+| 1 | June 2026 code, Cognito sign-in required, branch `v2-expansion-planning`. The pre-2026-10-15 state |
+| 2 | 2026-10-15 public code with the blocklist. **Do not roll back to it** |
+| 3 | 2026-10-17 allowlist and redaction, old limits |
+| 4 | Same code as 3, new limits. **`live` points here** |
+
+```bash
+python scripts/deploy_assistant.py                       # dry run: repository vs deployed code
+python scripts/deploy_assistant.py --apply               # upload, publish a version, move `live`
+python scripts/deploy_assistant.py --rollback 3 --apply  # point `live` back at version 3
+```
+
+**Not possible: reserved concurrency.** The account's concurrent-execution limit is 10, and
+Lambda keeps 10 unreserved, so no function in this account can reserve any. The stage throttle
+(3 req/s, burst 10) and the per-visitor and site-wide caps are the cost controls. A spend cap on
+the OpenAI key is the backstop, and only the key's owner can set it.
+
+### Response headers
+
+Measured 2026-10-17: production sent **no** security headers at all, while the preview, created
+later, sent all of them.
+
+| Behaviour | Policy | Headers |
+|---|---|---|
+| Default (public site, NFC pages) | `fcf-production-security` (`480181a4-…`) | HSTS 1 year, `nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection` |
+| `/platform*` | `fcf-platform-security` (`ab666a54-…`) | The same set |
+
+HSTS deliberately has no `includeSubDomains` and no `preload`: the `andyyaro.com` zone is shared
+with other projects. There is **no Content-Security-Policy** yet; one needs an inventory of every
+inline script and CDN the pages load, and a wrong one breaks pages silently.
+
+`scripts/deploy_platform.py` rebuilds the `/platform*` behaviour on every run, so it names
+`PLATFORM_HEADERS_POLICY` itself; a policy attached only in the console would be dropped by the
+next deploy. The default behaviour is copied from the live config, so its policy survives.
+
+Verified on `/`, on the NFC page `/t/FFX001` and on the `/platform/` sign-in redirect.
+
+**Rollback:** remove `ResponseHeadersPolicyId` from the behaviour and re-send the whole config
+with its ETag, then delete the policy. For `/platform*`, also remove it from `build_behaviour`.
+
+### Accounts, logs, storage
+
+| Piece | Before | After | Rollback |
+|---|---|---|---|
+| Cognito pool `us-east-1_mKrwfQTkg` MFA | `OFF` | `ON`, authenticator app (TOTP). Each user enrolls at their next sign-in | `set-user-pool-mfa-config --mfa-configuration OFF` |
+| Log retention | Never expire | 30 days: `/aws/lambda/future-city-assistant-chat`, and the edge-auth groups in us-east-1 and eu-central-1 | `delete-retention-policy` |
+| `future-city-fellowship-platform` versioning | Off | `Enabled`, like the main bucket | Can be suspended, never removed |
+
+**Lambda@Edge writes its logs in the region of the edge location that served the request**, and
+creates that region's log group on first use with no retention. Only us-east-1 and eu-central-1
+exist today. Re-check with `aws logs describe-log-groups --region <r>` after traffic from
+elsewhere.
+
+**Not enabled, on purpose: CloudFront access logs.** They would record every visitor's IP
+address and path, and `privacy.html` promises short-lived technical logs only.
+

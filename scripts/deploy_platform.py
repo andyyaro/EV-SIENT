@@ -81,6 +81,12 @@ BUNDLE = REPO / "site/platform"
 #: forwarded to S3 and never lands in its logs.
 CACHING_OPTIMIZED = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 
+#: Response headers policy `fcf-platform-security` (HSTS, nosniff, frame options, referrer
+#: policy; no CORS). Created 2026-10-17 when an audit found production sending none of these.
+#: It has to be named here because this script REBUILDS the /platform* behaviour on every run:
+#: a policy attached only in the console would be silently dropped by the next deploy.
+PLATFORM_HEADERS_POLICY = "ab666a54-b0ae-41cc-9bea-9143edfa4e66"
+
 ACCOUNT_RE = re.compile(r"\b\d{12}\b")
 
 
@@ -327,6 +333,7 @@ def build_behaviour(lambda_arn: str) -> dict:
         },
         "Compress": True,
         "CachePolicyId": CACHING_OPTIMIZED,
+        "ResponseHeadersPolicyId": PLATFORM_HEADERS_POLICY,
         "SmoothStreaming": False,
         "FieldLevelEncryptionId": "",
         "LambdaFunctionAssociations": {
