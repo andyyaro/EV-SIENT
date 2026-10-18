@@ -8,8 +8,8 @@ not state is reported `UNRESOLVED` rather than assumed to be permissive.
 written to run under Octave. No Octave binary or source is distributed, so its GPL
 does not attach to anything here.
 
-**This project's own licence is not stated anywhere and has not been invented.**
-Choosing one is the owner's decision, not a packaging detail.
+**This project's own code is licensed under Apache-2.0** (`LICENSE`, `NOTICE`), chosen
+by the owner on 2026-10-18. Data files keep the terms stated beside them.
 
 ## Components that are not Python packages
 

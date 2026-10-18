@@ -236,4 +236,4 @@ Anna · Laylas · Andy · Adama · Paula - George Mason University Future City F
 in consultation with Prince William County's Office of Sustainability and Fire &
 Rescue interviewees.
 
-*License: not yet selected - all rights reserved by the team until a license is chosen.*
+*License: the code is licensed under the [Apache License 2.0](LICENSE) (chosen 2026-10-18). Data files keep the terms stated beside them; see [NOTICE](NOTICE).*

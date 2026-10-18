@@ -1,0 +1,6 @@
+EV-SIENT (Future City Fellowship EV charging site-readiness model)
+Copyright 2026 the EV-SIENT contributors
+
+This project's own code is licensed under the Apache License, Version 2.0 (see LICENSE).
+Data files keep their own terms, stated beside them (see data/README.md), and third-party
+components keep theirs (see THIRD_PARTY_LICENCES.md).

@@ -290,10 +290,8 @@ def main() -> int:
         "python_dependencies": entries,
         "other_components": NON_PYTHON,
         "unresolved_count": len(unresolved),
-        "this_project_licence": ("NOT STATED. The repository declares no licence and one has "
-                                 "deliberately not been invented - choosing it is the owner's "
-                                 "decision. Until it is chosen, no artifact should claim a "
-                                 "licence for this project's own code."),
+        "this_project_licence": ("Apache-2.0, chosen by the owner on 2026-10-18 (LICENSE, "
+                                 "NOTICE). Data files keep the terms stated beside them."),
     }
     # encoding/newline pinned: see build_synthetic_inputs.write_csv. This file ships
     # INSIDE the release artifact, and the Windows runner wrote it in cp1252 -- the em
@@ -313,8 +311,8 @@ def main() -> int:
         "written to run under Octave. No Octave binary or source is distributed, so its GPL",
         "does not attach to anything here.",
         "",
-        "**This project's own licence is not stated anywhere and has not been invented.**",
-        "Choosing one is the owner's decision, not a packaging detail.",
+        "**This project's own code is licensed under Apache-2.0** (`LICENSE`, `NOTICE`), chosen",
+        "by the owner on 2026-10-18. Data files keep the terms stated beside them.",
         "",
         "## Components that are not Python packages",
         "",
