@@ -295,9 +295,12 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     # fixed-anchor ranking the same rules give 25 / 47 (F-05). Any other cohort has no accepted
     # baseline to keep, and the cohort-relative legacy ranking is the volatile one v3 replaced,
     # so its plan follows the fixed-anchor ranking it is scored with: otherwise a site the
-    # results call Tier 3 is planned, and described, as Tier 1.
-    plan_on_legacy = (mode == MODE_LEGACY or info["cohort"] is None
-                      or info["cohort"]["reference_totals_apply"])
+    # results call Tier 3 is planned, and described, as Tier 1. Which run is the reference
+    # study is RT-04's own test (`contract.is_reference_run`), so the plan keeps the legacy
+    # ranking exactly when the run is held to 25 / 48. Synthetic inputs are never the
+    # reference study, including in the public bundle, where they sit at the reference paths.
+    reference_run = contract.is_reference_run(prov, info["inputs_hashed"], info["cohort"])
+    plan_on_legacy = mode == MODE_LEGACY or reference_run
     scored_legacy = enrich_and_score(sites, mode=MODE_LEGACY)
     scored_legacy = scored_legacy.merge(risk[["site_id", "electrical_risk_level"]], on="site_id", how="left")
     scored_legacy = add_tiers(scored_legacy)
@@ -331,7 +334,8 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     legacy_rs = run_right_sizing_legacy(planned)
     legacy_rs.to_csv(out_dir / "right_sizing_legacy_2035_2050.csv", index=False)
 
-    result = {"run_id": run_id, "mode": mode, "site_results": str(out_dir / f"site_results_{mode}.csv")}
+    result = {"run_id": run_id, "mode": mode, "site_results": str(out_dir / f"site_results_{mode}.csv"),
+              "plan_ranking": MODE_LEGACY if plan_on_legacy else MODE_V3}
     if info["cohort"] is not None:
         result["cohort"] = info["cohort"]
 
@@ -520,8 +524,7 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
         assumptions["costs_withheld_for_missing_inputs"] = sorted(costs_unknown)
 
     std_register = standards.build_register(
-        site_table, battery_storage=scored["battery_storage_flag"],
-        reference=info["cohort"] is None or info["cohort"]["reference_totals_apply"])
+        site_table, battery_storage=scored["battery_storage_flag"], reference=reference_run)
     std_register.to_csv(out_dir / "standards_register.csv", index=False)
 
     cdir = contract_dir or (out_dir / "contract")

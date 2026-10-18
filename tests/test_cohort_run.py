@@ -16,6 +16,7 @@ fails here instead of quietly switching the check off.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import shutil
 import sys
@@ -27,7 +28,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
-from fcf_m2 import contract, workflow  # noqa: E402
+from fcf_m2 import contract, standards, workflow  # noqa: E402
 
 MESSY = REPO / "data/intake/fixtures/messy_third_party.csv"
 SYNTHETIC = REPO / "data/synthetic"
@@ -125,6 +126,7 @@ def test_the_reference_study_run_as_a_cohort_is_still_held_to_25_and_48(tmp_path
     shutil.copy(REPO / "data/provenance/field_provenance_v1.csv", cohort / "provenance.csv")
     result = workflow.run("milestone2_v3", tmp_path / "out", cohort_dir=cohort)
     assert result["cohort"]["reference_totals_apply"] is True
+    assert result["plan_ranking"] == result["cohort"]["plan_ranking"] == "legacy_v2"
     assert (result["starter_total_2026"], result["pathway_total"]) == (25, 48)
     manifest = json.loads((tmp_path / "out/contract/contract_manifest.json").read_text())
     assert manifest["legacy_totals_checked"] is True
@@ -159,6 +161,53 @@ def test_the_reference_run_is_unchanged_by_any_of_this(tmp_path):
     result = workflow.run("milestone2_v3", tmp_path / "out")
     assert "cohort" not in result
     assert (result["starter_total_2026"], result["pathway_total"]) == (25, 48)
+    assert result["plan_ranking"] == "legacy_v2"
     manifest = json.loads((tmp_path / "out/contract/contract_manifest.json").read_text())
     assert "cohort" not in manifest and manifest["legacy_totals_checked"] is True
     assert set(contract.REFERENCE_INPUTS.items()) <= set(manifest["inputs"].items())
+
+
+def _public_layout(root: Path) -> Path:
+    """The public bundle's inputs: each synthetic file at the reference path it ships under."""
+    spec = importlib.util.spec_from_file_location(
+        "build_release_artifact", REPO / "scripts/build_release_artifact.py")
+    bra = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bra)
+    for real, synthetic in bra.PUBLIC_SUBSTITUTIONS.items():
+        (root / real).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(REPO / synthetic, root / real)
+    (root / "data/anchors").mkdir(parents=True)
+    shutil.copy(REPO / "data/anchors/anchor_set_v1.json", root / "data/anchors")
+    return root
+
+
+def test_synthetic_inputs_at_the_reference_paths_are_not_the_reference_study(tmp_path, monkeypatch):
+    """The public bundle ships its synthetic inputs under the reference study's file names
+    (DEC-016). Until 2026-10-17 a run without a cohort was taken for the reference study
+    whatever it read, so the bundle planned its invented sites on the ranking only the real
+    study keeps, 24 / 42, and named Fairfax City / PWC as their permitting authority. Run as a
+    cohort, the same sites got 24 / 38 and a generic authority. The layout must not matter."""
+    cohort = tmp_path / "synthetic"
+    cohort.mkdir()
+    for source, name in [("synthetic_sites_v2.csv", "sites.csv"),
+                         ("synthetic_v2_electrical_risk_summary.csv", "electrical_risk.csv"),
+                         ("synthetic_matlab_site_meta.csv", "site_meta.csv"),
+                         ("synthetic_field_provenance_v1.csv", "provenance.csv")]:
+        shutil.copy(SYNTHETIC / source, cohort / name)
+    as_cohort = workflow.run("milestone2_v3", tmp_path / "cohort_out", cohort_dir=cohort)
+
+    monkeypatch.setattr(workflow, "ROOT", _public_layout(tmp_path / "public"))
+    public = workflow.run("milestone2_v3", tmp_path / "public_out")
+
+    assert public["plan_ranking"] == as_cohort["plan_ranking"] == "milestone2_v3"
+    for total in ("starter_total_2026", "pathway_total", "legacy_starter_total", "legacy_pathway_total"):
+        assert public[total] == as_cohort[total], total
+    plans = [pd.read_csv(out / "right_sizing_v3_canonical.csv")
+             .sort_values(["site_id", "horizon_year", "case"]).reset_index(drop=True)
+             for out in (tmp_path / "public_out", tmp_path / "cohort_out")]
+    pd.testing.assert_frame_equal(*plans)
+    register = pd.read_csv(tmp_path / "public_out/standards_register.csv")
+    assert not register["authority"].str.contains(standards.REFERENCE_AUTHORITY_AREA, regex=False).any()
+    manifest = json.loads((tmp_path / "public_out/contract/contract_manifest.json").read_text())
+    assert manifest["legacy_totals_checked"] is False
+    _validate(tmp_path / "public_out/contract")

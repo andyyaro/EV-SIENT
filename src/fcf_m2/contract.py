@@ -303,6 +303,22 @@ def run_is_synthetic(provenance: pd.DataFrame) -> bool:
     return bool((provenance["source_class"].astype(str) == "synthetic_model").all())
 
 
+def is_reference_run(provenance: pd.DataFrame, inputs_hashed: dict[str, str],
+                     cohort: dict | None) -> bool:
+    """True when a run is the reference study, which RT-04 holds to its 25 / 48 totals.
+
+    A run on synthetic inputs never is, whatever its files are called. Otherwise a run without
+    a cohort is, as it always was, and a cohort is when it read the reference study's own
+    inputs. `workflow.run` asks this same question to decide which ranking the port plan
+    follows and whose permitting authority the standards register names, so neither can
+    disagree with RT-04. Until 2026-10-17 both took any run without a cohort for the reference
+    study, so the public bundle, which ships its synthetic inputs under the reference file
+    names, was planned and described as the real study: 24 / 42 where the same sites run as a
+    cohort get 24 / 38.
+    """
+    return not run_is_synthetic(provenance) and (cohort is None or is_reference_cohort(inputs_hashed))
+
+
 def validate_or_raise(df: pd.DataFrame, site_table: pd.DataFrame, **kw) -> None:
     problems = validate_scenario_table(df, site_table, **kw)
     if problems:
@@ -336,13 +352,14 @@ def write_contract(out_dir: str | Path, scenario_table: pd.DataFrame, site_table
     ``cohort`` describes a run on another jurisdiction's sites (`workflow._load_cohort`). It
     is recorded in the manifest, widens the schema to that cohort's ids, and decides RT-04 by
     the inputs' digests: the golden totals are asserted only if the cohort IS the reference
-    study. Without it the run is the reference study and RT-04 applies as it always has.
+    study. Without it the run is the reference study, unless its inputs are synthetic, and
+    RT-04 applies as it always has (`is_reference_run`).
     """
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
 
     synthetic = run_is_synthetic(provenance)
-    expect_totals = not synthetic and (cohort is None or is_reference_cohort(inputs_hashed))
+    expect_totals = is_reference_run(provenance, inputs_hashed, cohort)
     validate_or_raise(scenario_table, site_table, expect_legacy_totals=expect_totals)
     schema = build_schema(synthetic=synthetic,
                           jurisdiction=cohort["jurisdiction"] if cohort else None)

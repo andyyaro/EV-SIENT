@@ -128,7 +128,8 @@ site's gaps.
   and tiers as `site_results_milestone2_v3.csv`. The reference study is the one exception.
   Its plans follow its accepted cohort-relative (legacy) ranking, deliberately, so the totals
   it presented reconcile; on the fixed-anchor ranking the same rules give 25 / 47 instead of
-  25 / 48 (F-05). The manifest's `cohort.plan_ranking` says which one a run used.
+  25 / 48 (F-05). `plan_ranking` in `run_summary.json`, and the manifest's `cohort.plan_ranking`,
+  say which one a run used.
 - **Every site gets at least 2 starter ports**, including one the plan says not to advance
   (a non-public site). Read those 2 as a placeholder for a decision, not a recommendation.
 - **Electrical capacity is a placeholder at every site.** The score uses the
