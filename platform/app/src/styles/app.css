@@ -7,21 +7,35 @@
 .app-steps .hig-sidebar__row[aria-disabled] { cursor: default; color: var(--glass-label-tertiary); }
 .app-steps .hig-sidebar__row.is-selected { background: var(--fill-tertiary); }
 .app-steps .hig-sidebar__row.is-selected .hig-sidebar__label { font-weight: 600; }
-.app-steps__why { display: block; font: 400 12px/16px var(--font-sans); color: var(--glass-label-tertiary); }
+.app-steps__why { display: block; font: 400 12px/16px var(--font-sans); color: var(--glass-label-secondary); }
+.app-steps__why--stale { color: var(--glass-label-primary); }
+.app-steps .hig-sidebar__row { position: relative; }
+.app-steps__done, .app-steps__stale { flex: none; display: inline-flex; margin-inline-start: auto; padding-inline-start: 8px; color: var(--glass-label-secondary); }
+.app-steps__stale { color: var(--system-orange); }
 
 /* Compact step bar: below 1024px the sidebar hides and this sits at the top. */
 .app-compact {
   position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px;
-  margin: 0; padding: 8px var(--gutter); padding-top: max(8px, env(safe-area-inset-top)); border-radius: 0;
+  margin: 0; padding: 6px var(--gutter) 12px; padding-top: max(6px, env(safe-area-inset-top)); border-radius: 0;
 }
-.app-compact__brand { display: inline-flex; align-items: center; gap: 6px; font: 600 15px/20px var(--font-sans); color: var(--glass-label-primary); }
+.app-compact__brand {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 4px; margin-inline-start: -4px; border: 0; border-radius: var(--radius-capsule);
+  background: transparent; cursor: pointer; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--glass-label-primary);
+}
+.app-compact__mark { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--on-accent); }
+/* A thin progress line of the steps under the bar: past, current, ahead. Decorative; the select says the step. */
+.app-compact__dots { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 4px; display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.app-compact__dots li { flex: 1; height: 3px; border-radius: 2px; background: var(--fill-secondary, var(--fill-tertiary)); }
+.app-compact__dots li.is-past { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+.app-compact__dots li.is-current { background: var(--accent); }
 .app-compact__step { position: relative; display: inline-flex; align-items: center; margin-inline-start: auto; color: var(--glass-label-primary); }
 .app-compact__step select {
-  appearance: none; min-height: 44px; padding: 0 30px 0 14px; border: 0; border-radius: var(--radius-capsule);
+  appearance: none; -webkit-appearance: none; max-width: 52vw; text-overflow: ellipsis; min-height: 44px; padding: 0 30px 0 14px; border: 0; border-radius: var(--radius-capsule);
   background: var(--fill-tertiary); color: inherit; font: 500 15px/20px var(--font-sans);
 }
 .app-compact__step .hig-icon { position: absolute; right: 12px; pointer-events: none; }
 .app-compact__count { font: 400 13px/18px var(--font-sans); color: var(--glass-label-secondary); font-variant-numeric: tabular-nums; }
 @media (min-width: 1024px) { .app-compact { display: none; } }
+@media (max-width: 400px) { .app-compact__count { display: none; } }
 .app .main { padding-bottom: 64px; }
 .app .main:focus { outline: none; }

@@ -4,9 +4,10 @@
 import { create } from 'zustand';
 import { getEngine } from '../engine/client';
 import type {
-  AcceptDetails, AcceptResult, BootProgress, CheckResult, FieldCatalog, Proposal, RunResult,
-  RuntimeInfo, TableInput,
+  AcceptDetails, AcceptResult, BootProgress, CheckResult, FieldCatalog, MatchStatus, Proposal, RunOptions,
+  RunResult, RuntimeInfo, TableInput,
 } from '../engine/protocol';
+import type { ProjectSnapshot } from '../report/projectTypes';
 
 export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'run' | 'results' | 'report';
 
@@ -19,6 +20,9 @@ export const STEPS: { key: StepKey; label: string; icon: string; short: string }
   { key: 'results', label: 'Results', short: 'Results', icon: 'chart.bar' },
   { key: 'report', label: 'Report', short: 'Report', icon: 'doc' },
 ];
+
+/** The one configuration the engine runs today. Other presets need engine changes first. */
+export const CONFIGURATION = "Balanced (the study's weights)";
 
 export type BootState =
   | { status: 'idle' }
@@ -38,11 +42,17 @@ export interface Session {
   run: RunResult | null;
   /** Set when an input changed after the last run: results are shown as Out of Date. */
   staleReason: string | null;
-  busy: null | 'propose' | 'remap' | 'check' | 'accept' | 'run';
+  busy: null | 'propose' | 'remap' | 'check' | 'accept' | 'run' | 'restore';
   error: string | null;
+  /** A plain status message for the planner (not an error), shown once and dismissible. */
+  notice: string | null;
   selectedSiteId: string | null;
   /** Up to three site IDs to compare side by side. */
   compare: string[];
+  /** field -> column the planner confirmed (Confirm, Accept All Matched, choosing it, a reused or restored mapping). */
+  confirmed: Record<string, string>;
+  /** field -> column the engine guessed at upload and asked the planner to check. */
+  guessed: Record<string, string>;
 }
 
 interface Actions {
@@ -50,22 +60,67 @@ interface Actions {
   bootEngine(): Promise<void>;
   loadTable(table: TableInput): Promise<void>;
   remap(mapping: Record<string, string | null>): Promise<void>;
+  /** Set one field's column (or null, "not in this file") and send the WHOLE mapping. Returns the field the column was moved from, if any. */
+  chooseColumn(field: string, column: string | null): Promise<string | null>;
+  confirmMatch(field: string): void;
+  /** Confirm every suggested match still marked Check This Match. */
+  confirmAll(): void;
+  /** Use a whole remembered mapping, as the planner's own choice. */
+  applyMapping(mapping: Record<string, string | null>): Promise<void>;
   runCheck(): Promise<void>;
   setDetails(details: AcceptDetails): void;
-  runModel(): Promise<void>;
+  runModel(options?: RunOptions): Promise<void>;
   cancelRun(): void;
+  restoreProject(snapshot: ProjectSnapshot): Promise<void>;
   selectSite(siteId: string | null): void;
   toggleCompare(siteId: string): void;
   clearError(): void;
+  clearNotice(): void;
   newProject(): Promise<void>;
 }
 
 const initial: Omit<Session, 'boot' | 'fields'> = {
   step: 'start', table: null, proposal: null, check: null, details: {}, accepted: null, run: null,
-  staleReason: null, busy: null, error: null, selectedSiteId: null, compare: [],
+  staleReason: null, busy: null, error: null, notice: null, selectedSiteId: null, compare: [],
+  confirmed: {}, guessed: {},
 };
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/** Today in the planner's own time zone, as YYYY-MM-DD. */
+export const today = () => new Date().toLocaleDateString('en-CA');
+
+/** Every field the model reads, in the engine's order. */
+export function fieldNames(s: Pick<Session, 'fields' | 'proposal'>): string[] {
+  if (s.fields) return s.fields.fields.map((f) => f.name);
+  return s.proposal ? Object.keys(s.proposal.status) : [];
+}
+
+/** The whole mapping as the planner has it now: every field, null where it is not in this file. */
+export function fullMapping(s: Pick<Session, 'fields' | 'proposal'>): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const name of fieldNames(s)) out[name] = s.proposal?.mapping[name] ?? null;
+  return out;
+}
+
+/**
+ * Matched / Check This Match / Not Matched, as the planner sees it. The engine marks a guess or a
+ * unit conversion "check" after upload; after any change it reports every chosen pair as matched,
+ * so the app keeps its own record of what the planner has actually confirmed.
+ */
+export function matchStatus(s: Pick<Session, 'proposal' | 'confirmed' | 'guessed'>, field: string): MatchStatus {
+  const column = s.proposal?.mapping[field];
+  if (!column) return 'unmatched';
+  if (s.confirmed[field] === column) return 'matched';
+  if (s.proposal?.conversions[field] != null) return 'check';
+  if (s.guessed[field] === column) return 'check';
+  if (s.proposal?.status[field] === 'check') return 'check';
+  return 'matched';
+}
+
+export function pendingMatches(s: Pick<Session, 'fields' | 'proposal' | 'confirmed' | 'guessed'>): string[] {
+  return fieldNames(s).filter((f) => matchStatus(s, f) === 'check');
+}
 
 /** Whether a step can be opened yet, and if not, why, in the planner's words. */
 export function stepGate(s: Session, step: StepKey): { open: boolean; reason?: string } {
@@ -75,20 +130,34 @@ export function stepGate(s: Session, step: StepKey): { open: boolean; reason?: s
       return { open: true };
     case 'map':
       return s.proposal ? { open: true } : { open: false, reason: 'Upload a file first.' };
-    case 'check':
-      return s.proposal ? { open: true } : { open: false, reason: 'Upload a file first.' };
-    case 'run':
+    case 'check': {
+      if (!s.proposal) return { open: false, reason: 'Upload a file first.' };
+      const n = pendingMatches(s).length;
+      return n ? { open: false, reason: `Confirm or change the ${n === 1 ? 'match' : `${n} matches`} marked Check This Match first.` } : { open: true };
+    }
+    case 'run': {
+      const before = stepGate(s, 'check');
+      if (!before.open) return before;
       if (!s.check) return { open: false, reason: 'Check the file first.' };
       if (s.check.counts.mustFix > 0 || s.proposal?.refused) return { open: false, reason: 'Fix the items marked Must Fix first.' };
       return { open: true };
+    }
     case 'results':
     case 'report':
       return s.run ? { open: true } : { open: false, reason: 'Run the model first.' };
   }
 }
 
-export function unresolvedMatches(p: Proposal | null): string[] {
-  return p ? Object.entries(p.status).filter(([, v]) => v === 'check').map(([k]) => k) : [];
+/** Whether the planner has finished a step, for the step list's Done mark. */
+export function stepDone(s: Session, step: StepKey): boolean {
+  switch (step) {
+    case 'start': return !!s.table;
+    case 'upload': return !!s.proposal && !s.proposal.refused;
+    case 'map': return !!s.proposal && pendingMatches(s).length === 0 && !!s.check;
+    case 'check': return !!s.check && s.check.counts.mustFix === 0 && !s.proposal?.refused;
+    case 'run': return !!s.run && !s.staleReason;
+    default: return false;
+  }
 }
 
 function readHash(): StepKey | null {
@@ -99,6 +168,22 @@ function readHash(): StepKey | null {
 export const useSession = create<Session & Actions>((set, get) => {
   const fail = (e: unknown) => set({ error: message(e), busy: null });
   const markStale = (reason: string) => { if (get().run) set({ staleReason: reason }); };
+  let bootPromise: Promise<void> | null = null;
+  /** Bumped by Cancel and New Project, so an answer that arrives afterwards is ignored. */
+  let generation = 0;
+
+  async function ensureBooted(): Promise<void> {
+    await get().bootEngine();
+    const b = get().boot;
+    if (b.status === 'error') throw new Error(b.message);
+  }
+
+  /**
+   * Before any call that needs the planner's file. After Cancel the worker is gone; the engine
+   * client starts a fresh one and gives it the last file and mapping again by itself, so all the
+   * store has to do is boot it.
+   */
+  const ensureEngineSession = ensureBooted;
 
   return {
     ...initial,
@@ -113,63 +198,186 @@ export const useSession = create<Session & Actions>((set, get) => {
       window.scrollTo({ top: 0 });
     },
 
-    async bootEngine() {
+    bootEngine() {
       const b = get().boot.status;
-      if (b === 'booting' || b === 'ready') return;
+      if (b === 'ready') return Promise.resolve();
+      if (b === 'booting' && bootPromise) return bootPromise;
       const engine = getEngine();
       set({ boot: { status: 'booting', progress: { stage: 'runtime', fraction: 0, message: 'Preparing the model on this device' } } });
-      try {
-        const info = await engine.boot((progress) => set({ boot: { status: 'booting', progress } }));
-        const fields = await engine.fields();
-        set({ boot: { status: 'ready', info }, fields });
-      } catch (e) {
-        set({ boot: { status: 'error', message: message(e) } });
-      }
+      bootPromise = (async () => {
+        try {
+          const info = await engine.boot((progress) => set({ boot: { status: 'booting', progress } }));
+          const fields = await engine.fields();
+          set({ boot: { status: 'ready', info }, fields });
+        } catch (e) {
+          set({ boot: { status: 'error', message: message(e) } });
+        } finally {
+          bootPromise = null;
+        }
+      })();
+      return bootPromise;
     },
 
     async loadTable(table) {
+      const gen = generation;
       set({ busy: 'propose', error: null });
       try {
-        await get().bootEngine();
-        const proposal = await getEngine().propose(table);
+        await ensureBooted();
+        const engine = getEngine();
+        const proposal = await engine.propose(table);
+        // The file's own summary needs the row check (how many rows have a location), so it runs now.
+        const check = await engine.check();
+        if (gen !== generation) return;
+        const guessed: Record<string, string> = {};
+        for (const [field, status] of Object.entries(proposal.status)) {
+          if (status === 'check' && proposal.mapping[field]) guessed[field] = proposal.mapping[field];
+        }
         markStale('You uploaded a different file.');
-        set({ table, proposal, check: null, accepted: null, busy: null });
-      } catch (e) { fail(e); }
+        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null });
+      } catch (e) { if (gen === generation) fail(e); }
     },
 
     async remap(mapping) {
+      const gen = generation;
       set({ busy: 'remap', error: null });
       try {
+        await ensureEngineSession();
         const proposal = await getEngine().remap({ mapping });
+        if (gen !== generation) return;
         markStale('You changed how columns are matched.');
         set({ proposal, check: null, accepted: null, busy: null });
-      } catch (e) { fail(e); }
+      } catch (e) { if (gen === generation) fail(e); }
+    },
+
+    async chooseColumn(field, column) {
+      const s = get();
+      const mapping = fullMapping(s);
+      let movedFrom: string | null = null;
+      if (column) {
+        for (const [f, c] of Object.entries(mapping)) {
+          if (f !== field && c === column) { mapping[f] = null; movedFrom = f; }
+        }
+      }
+      mapping[field] = column;
+      await get().remap(mapping);
+      const after = get();
+      if (after.error || !after.proposal) return null;
+      const confirmed = { ...after.confirmed };
+      // Choosing a column is a confirmation, unless the engine now converts its units: the planner
+      // is shown the conversion and asked to confirm that separately.
+      if (column && after.proposal.conversions[field] == null) confirmed[field] = column;
+      else delete confirmed[field];
+      if (movedFrom) delete confirmed[movedFrom];
+      set({ confirmed });
+      return movedFrom;
+    },
+
+    confirmMatch(field) {
+      const s = get();
+      const column = s.proposal?.mapping[field];
+      if (!column) return;
+      set({ confirmed: { ...s.confirmed, [field]: column } });
+    },
+
+    confirmAll() {
+      const s = get();
+      const confirmed = { ...s.confirmed };
+      for (const field of pendingMatches(s)) {
+        const column = s.proposal?.mapping[field];
+        if (column) confirmed[field] = column;
+      }
+      set({ confirmed });
+    },
+
+    async applyMapping(mapping) {
+      const s = get();
+      const whole = { ...fullMapping(s), ...mapping };
+      await get().remap(whole);
+      const after = get();
+      if (after.error || !after.proposal) return;
+      const confirmed: Record<string, string> = {};
+      for (const [f, c] of Object.entries(after.proposal.mapping)) confirmed[f] = c;
+      set({ confirmed });
     },
 
     async runCheck() {
+      const gen = generation;
       set({ busy: 'check', error: null });
-      try { set({ check: await getEngine().check(), busy: null }); } catch (e) { fail(e); }
+      try {
+        await ensureEngineSession();
+        const check = await getEngine().check();
+        if (gen === generation) set({ check, busy: null });
+      } catch (e) { if (gen === generation) fail(e); }
     },
 
     setDetails(details) {
+      const before = get().details;
+      const next = { ...before, ...details };
+      const changed = (Object.keys(details) as (keyof AcceptDetails)[]).some((k) => (before[k] ?? '') !== (next[k] ?? ''));
+      if (!changed) return;
       markStale('You changed the source details.');
-      set({ details: { ...get().details, ...details }, accepted: null });
+      set({ details: next, accepted: null });
     },
 
-    async runModel() {
+    async runModel(options) {
+      const gen = generation;
       set({ busy: 'accept', error: null });
       try {
+        await ensureEngineSession();
         const engine = getEngine();
         const accepted = await engine.accept(get().details);
+        if (gen !== generation) return;
         set({ accepted, busy: 'run' });
-        const run = await engine.run({ asOf: new Date().toISOString().slice(0, 10) });
+        const run = await engine.run({ asOf: options?.asOf ?? today() });
+        if (gen !== generation) return;
         set({ run, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [] });
-      } catch (e) { fail(e); }
+      } catch (e) { if (gen === generation) fail(e); }
     },
 
     cancelRun() {
+      generation++;
       getEngine().cancel();
-      set({ busy: null, boot: { status: 'idle' }, accepted: null });
+      bootPromise = null;
+      // The worker is gone with everything it held; the next call starts a fresh one, which the
+      // engine client gives the file and mapping again. The previous run, if any, stays on screen.
+      set({ busy: null, boot: { status: 'idle' }, accepted: null, notice: 'The run was cancelled. Nothing was changed.' });
+    },
+
+    async restoreProject(snapshot) {
+      const gen = ++generation;
+      set({ ...initial, busy: 'restore' });
+      try {
+        await ensureBooted();
+        const engine = getEngine();
+        try { await engine.reset(); } catch { /* a fresh session either way */ }
+        await engine.propose(snapshot.table);
+        const proposal = await engine.remap({ mapping: snapshot.mapping });
+        const check = await engine.check();
+        if (gen !== generation) return;
+        const confirmed: Record<string, string> = { ...proposal.mapping };
+        set({ table: snapshot.table, proposal, check, confirmed, guessed: {}, details: { ...snapshot.details } });
+        if (proposal.refused || check.counts.mustFix > 0) {
+          set({ busy: null, notice: 'This project file was opened, but its file has items marked Must Fix, so the model was not run.' });
+          get().go('check');
+          return;
+        }
+        const accepted = await engine.accept(snapshot.details);
+        if (gen !== generation) return;
+        set({ accepted, busy: 'run' });
+        const run = await engine.run({ asOf: snapshot.manifest.asOf });
+        if (gen !== generation) return;
+        const b = get().boot;
+        const nowVersion = b.status === 'ready' ? b.info.engine.version : '';
+        const savedVersion = snapshot.manifest.engine.version;
+        const versionNote = nowVersion && savedVersion && nowVersion !== savedVersion
+          ? ` It was saved with model version ${savedVersion} and re-run with version ${nowVersion}, so some figures may differ.`
+          : '';
+        set({
+          run, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [],
+          notice: `Opened ${snapshot.manifest.name}. The model was run again on this device, with data confidence judged as of ${snapshot.manifest.asOf}.${versionNote}`,
+        });
+        get().go('results');
+      } catch (e) { if (gen === generation) fail(e); }
     },
 
     selectSite(siteId) { set({ selectedSiteId: siteId }); },
@@ -181,8 +389,10 @@ export const useSession = create<Session & Actions>((set, get) => {
     },
 
     clearError() { set({ error: null }); },
+    clearNotice() { set({ notice: null }); },
 
     async newProject() {
+      generation++;
       try { if (get().boot.status === 'ready') await getEngine().reset(); } catch { /* a fresh session either way */ }
       set({ ...initial });
       history.pushState(null, '', '#/start');
