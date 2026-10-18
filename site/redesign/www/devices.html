@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Device Preview · EV Site Readiness</title>
+<meta name="description" content="See any page of this site at phone, tablet, laptop and desktop sizes side by side.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/devices.css">
+</head>
+<body class="shell is-grouped" data-page="devices" data-nav="none">
+<a class="skip-link" href="#main">Skip to Content</a>
+
+<header class="dv-bar">
+  <div class="dv-bar__edge" aria-hidden="true"></div>
+  <div class="dv-bar__row">
+    <a class="dv-back hig-glass hig-glass--small hig-shape--capsule hig-focus hig-pressable" href="index.html">
+      <i data-icon="chevron.left" data-size="17"></i><span>Site</span>
+    </a>
+    <div class="dv-controls hig-glass hig-glass--small hig-shape--capsule">
+      <label class="dv-select">
+        <span class="hig-visually-hidden">Page to Preview</span>
+        <select id="dv-page" class="hig-focus"></select>
+        <i data-icon="chevron.up.chevron.down" data-size="13"></i>
+      </label>
+      <button type="button" id="dv-rotate" class="dv-text-btn hig-focus hig-pressable" aria-pressed="false" title="Rotate Phones and Tablets">Rotate</button>
+      <button type="button" id="dv-reload" class="dv-icon-btn hig-focus hig-pressable" title="Reload All Previews">
+        <i data-icon="arrow.clockwise" data-size="17"></i><span class="hig-visually-hidden">Reload All Previews</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="dv-main" tabindex="-1">
+  <div class="dv-head">
+    <h1 class="page-head__title">Device Preview</h1>
+    <p class="page-head__lede">One site, one address, every screen. Each frame below is a real viewport at that device's size, so the layout you see is the layout that device gets. Scroll and tap inside any frame.</p>
+    <div class="dv-filter">
+      <div class="hig-segmented hig-segmented--ios hig-segmented--small" role="radiogroup" aria-label="Device Group" id="dv-group">
+        <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="true" data-value="all"><span class="hig-segmented__label" data-label="All">All</span></button>
+        <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="phone"><span class="hig-segmented__label" data-label="Phones">Phones</span></button>
+        <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="tablet"><span class="hig-segmented__label" data-label="Tablets">Tablets</span></button>
+        <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="computer"><span class="hig-segmented__label" data-label="Computers">Computers</span></button>
+      </div>
+      <p class="footnote" id="dv-status" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="dv-stage" id="dv-stage"></div>
+  <noscript><p class="prose">The device preview needs JavaScript. Every page of the site works without it at <a href="index.html">the Overview</a>.</p></noscript>
+</main>
+
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/devices.js"></script>
+</body>
+</html>

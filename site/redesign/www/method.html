@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Method · EV Site Readiness</title>
+<meta name="description" content="How the planning-support model screens candidate public EV charging sites: the nine steps, inputs, scoring dimensions, decision categories, port right-sizing, scenario testing and limits.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/method.css">
+</head>
+<body class="shell is-grouped" data-page="method">
+<a class="skip-link" href="#main">Skip to Content</a>
+<div id="nav"></div>
+<main id="main" class="main" tabindex="-1">
+  <div class="page">
+    <header class="page-head">
+      <span class="page-head__eyebrow">Method</span>
+      <h1 class="page-head__title">How the Screening Works</h1>
+      <p class="page-head__lede">A transparent, rule-based model compares candidate public EV charging sites, sizes a starter installation for each, and flags what needs review before any decision moves forward. It supports planning; it approves nothing.</p>
+    </header>
+
+    <div class="m-layout">
+      <div class="m-sentinel" aria-hidden="true"></div>
+      <nav class="m-toc" aria-labelledby="m-toc-title">
+        <p class="m-toc__title" id="m-toc-title">On This Page</p>
+        <ul class="m-toc__list" role="list">
+          <li><a class="m-toc__link" href="#steps">The Nine Steps</a></li>
+          <li><a class="m-toc__link" href="#inputs">What Goes In</a></li>
+          <li><a class="m-toc__link" href="#scoring">How Sites Are Scored</a></li>
+          <li><a class="m-toc__link" href="#categories">Decision Categories</a></li>
+          <li><a class="m-toc__link" href="#ports">Right-Sizing Ports</a></li>
+          <li><a class="m-toc__link" href="#scenarios">Scenario Testing</a></li>
+          <li><a class="m-toc__link" href="#baseline">Baseline Check</a></li>
+          <li><a class="m-toc__link" href="#outputs">Outputs and Limits</a></li>
+        </ul>
+      </nav>
+
+      <div class="m-body">
+
+        <!-- ============ The Nine Steps ============ -->
+        <section class="m-section" id="steps" aria-labelledby="steps-title">
+          <div class="section__head">
+            <h2 class="section__title" id="steps-title">The Nine Steps</h2>
+            <button type="button" class="hig-button hig-button--ios hig-button--borderless hig-button--small m-expand" hidden>Expand All</button>
+          </div>
+          <div class="m-prose">
+            <p>The model is built for public-sector planners and local government staff. It helps them compare candidate sites side by side, pick starter candidates, see where future expansion may be needed, and spot administrative or engineering review issues early.</p>
+            <p>It runs as a fixed sequence, so every result can be traced back through these steps. Open a step to read what happens there.</p>
+          </div>
+
+          <ol class="m-steps" role="list">
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-1"><span class="m-step__marker" aria-hidden="true">1</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 1: </span>Candidate sites</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-1">
+                <p>Candidate public EV charging locations are loaded into the model. This run covers twelve sites in Fairfax and Prince William County.</p>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-2"><span class="m-step__marker" aria-hidden="true">2</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 2: </span>Input attributes</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-2">
+                <p>Each site is described with planning-screen inputs such as site type, public access, operating hours, parking context, nearby charging supply and electrical assumptions.</p>
+                <a class="m-step__link" href="#inputs">What Goes In</a>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-3"><span class="m-step__marker" aria-hidden="true">3</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 3: </span>Scoring dimensions</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-3">
+                <p>The model evaluates demand, electrical and cost feasibility, accessibility, public value, safety and review burden, and future readiness.</p>
+                <a class="m-step__link" href="#scoring">How Sites Are Scored</a>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-4"><span class="m-step__marker" aria-hidden="true">4</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 4: </span>Readiness scores</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-4">
+                <p>Each candidate receives a planning-support readiness score. The score exists for comparison between sites, not as a measure of approval.</p>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-5"><span class="m-step__marker" aria-hidden="true">5</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 5: </span>Decision categories</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-5">
+                <p>Scores and review signals are translated into planning categories: advance, expandable starter, resolve review issues, monitor, or do not advance yet.</p>
+                <a class="m-step__link" href="#categories">Decision Categories</a>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-6"><span class="m-step__marker" aria-hidden="true">6</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 6: </span>Port recommendations</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-6">
+                <p>The model separates install-now ports from future-ready capacity, so a site can start small without closing off growth.</p>
+                <a class="m-step__link" href="#ports">Right-Sizing Ports</a>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-7"><span class="m-step__marker" aria-hidden="true">7</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 7: </span>Review flags</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-7">
+                <p>The model identifies fields or site conditions that need confirmation before implementation decisions.</p>
+                <a class="m-step__link" href="#baseline">Baseline Check</a>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-8"><span class="m-step__marker" aria-hidden="true">8</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 8: </span>Scenario testing</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-8">
+                <p>Alternative future-demand conditions are tested to see whether future-ready capacity remains adequate.</p>
+                <a class="m-step__link" href="#scenarios">Scenario Testing</a>
+              </div>
+            </li>
+            <li class="m-step hig-disclosure hig-disclosure--group hig-disclosure--ios hig-disclosure--open">
+              <h3 class="m-step__heading"><button type="button" class="hig-disclosure__trigger hig-disclosure__row hig-focus" aria-expanded="true" aria-controls="step-9"><span class="m-step__marker" aria-hidden="true">9</span><span class="hig-disclosure__label"><span class="hig-visually-hidden">Step 9: </span>Planning outputs</span><span class="hig-disclosure__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></button></h3>
+              <div class="hig-disclosure__content m-step__body" id="step-9">
+                <p>The model exports site rankings, decision buckets, Tableau-ready files, scenario results and the generated PDF planning report.</p>
+                <a class="m-step__link" href="#outputs">Outputs and Limits</a>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <!-- ============ What Goes In ============ -->
+        <section class="m-section" id="inputs" aria-labelledby="inputs-title">
+          <div class="section__head"><h2 class="section__title" id="inputs-title">What Goes In</h2></div>
+          <div class="m-prose">
+            <p>Each site is described by planning-screen inputs in six groups. They are early-stage planning attributes: some still need formal confirmation, and none is treated as final, verified engineering data.</p>
+          </div>
+
+          <div class="m-private">
+            <span class="m-private__icon" aria-hidden="true"><i data-icon="lock" data-size="22"></i></span>
+            <div>
+              <p class="m-private__title">Inputs stay private. Only outputs are published.</p>
+              <p class="m-private__body">The real values behind these inputs, such as electrical service ratings, spare capacity, visitor and employee counts and parking counts, appear nowhere on this site. Pages show only what the model produces: ranks, scores, categories, port plans and review needs.</p>
+            </div>
+          </div>
+
+          <div class="hig-list hig-list--ios hig-list--insetGrouped m-list">
+            <div class="hig-list-section" role="group" aria-labelledby="inputs-list-h">
+              <div class="hig-list-section__header hig-list-section__header--nested"><span class="hig-list-section__title" id="inputs-list-h">Input Categories</span></div>
+              <ul class="hig-list-section__rows">
+                <li class="hig-list-row hig-list-row--subtitle hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="tag" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Site identity</span><span class="hig-list-row__subtitle">Site ID, site name and jurisdiction.</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="clock" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Context and use</span><span class="hig-list-row__subtitle">Public-serving use type, operating hours and parking context.</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="chart.bar" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Demand proxies</span><span class="hig-list-row__subtitle">Households and jobs nearby, traffic on the nearest arterial, nearby amenities, local EV share and the charging already nearby. Visitor and employee counts size the number of ports; they do not change the readiness score.</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="bolt" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Infrastructure</span><span class="hig-list-row__subtitle">Likely charger placement, electrical service rating and spare electrical capacity.</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="checkmark.circle" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Safety and compliance</span><span class="hig-list-row__subtitle">ADA and accessibility considerations, emergency disconnect visibility, garage and structure-specific needs, fire and AHJ indicators, and stormwater and site-work indicators.</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="calendar" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Testing conditions</span><span class="hig-list-row__subtitle">Future demand scenarios.</span></span></span></div></li>
+              </ul>
+              <div class="hig-list-section__footer">Site inputs as of 2026-06-24.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ How Sites Are Scored ============ -->
+        <section class="m-section" id="scoring" aria-labelledby="scoring-title">
+          <div class="section__head"><h2 class="section__title" id="scoring-title">How Sites Are Scored</h2></div>
+          <div class="m-prose">
+            <p>Each site is evaluated, qualitatively and systematically, across six high-level dimensions. The result is the readiness score used to compare sites. No weights for the dimensions are published.</p>
+          </div>
+          <ul class="m-dims" role="list">
+            <li class="card m-dim">
+              <span class="m-dim__icon" aria-hidden="true"><i data-icon="chart.bar" data-size="22"></i></span>
+              <h3 class="m-dim__name">Demand signal</h3>
+              <p class="m-dim__text">Whether the site looks likely to support enough public charging demand, judged from its surroundings (households, jobs, traffic, amenities, local EV share), its parking, hours and visit length, and the charging already nearby.</p>
+            </li>
+            <li class="card m-dim">
+              <span class="m-dim__icon" aria-hidden="true"><i data-icon="bolt" data-size="22"></i></span>
+              <h3 class="m-dim__name">Electrical and cost feasibility</h3>
+              <p class="m-dim__text">Whether the site's electrical capacity, service constraints and likely implementation complexity support immediate readiness or pose heavy upgrade burdens.</p>
+            </li>
+            <li class="card m-dim">
+              <span class="m-dim__icon" aria-hidden="true"><i data-icon="location" data-size="22"></i></span>
+              <h3 class="m-dim__name">Accessibility and site suitability</h3>
+              <p class="m-dim__text">Whether site access, ADA spacing, parking layout and likely charger placement are viable.</p>
+            </li>
+            <li class="card m-dim">
+              <span class="m-dim__icon" aria-hidden="true"><i data-icon="globe" data-size="22"></i></span>
+              <h3 class="m-dim__name">Public value and equity</h3>
+              <p class="m-dim__text">Whether the site supports useful public access, serves its community context well and offers strategic planning value.</p>
+            </li>
+            <li class="card m-dim">
+              <span class="m-dim__icon" aria-hidden="true"><i data-icon="flag" data-size="22"></i></span>
+              <h3 class="m-dim__name">Safety, review and implementation burden</h3>
+              <p class="m-dim__text">Whether AHJ review, fire codes, structured-parking rules, emergency disconnect visibility or stormwater impacts may complicate or slow implementation.</p>
+            </li>
+            <li class="card m-dim">
+              <span class="m-dim__icon" aria-hidden="true"><i data-icon="clock" data-size="22"></i></span>
+              <h3 class="m-dim__name">Future readiness and scenario sensitivity</h3>
+              <p class="m-dim__text">Whether the site appears structurally and spatially able to support future demand growth under varying planning scenarios.</p>
+            </li>
+          </ul>
+        </section>
+
+        <!-- ============ Decision Categories ============ -->
+        <section class="m-section" id="categories" aria-labelledby="categories-title">
+          <div class="section__head"><h2 class="section__title" id="categories-title">Decision Categories</h2></div>
+          <div class="m-prose">
+            <p>The scores and review signals sort every site into one of five categories. The categories help a team triage quickly: which sites warrant detailed engineering study now, and which should wait.</p>
+          </div>
+          <ul class="m-cats" role="list">
+            <li class="m-cat" data-tier-key="tier1">
+              <span class="m-cat__badge" data-tier="tier1"><span class="tier tier--tier1 tier--pill"><span class="tier__mark" aria-hidden="true"></span>Tier 1</span></span>
+              <h3 class="m-cat__name">Advance as strong starter candidates</h3>
+              <p class="m-cat__rule">The strongest current starter candidates in the model, with solid demand and lower implementation friction.</p>
+              <p class="m-cat__sites" hidden></p>
+            </li>
+            <li class="m-cat" data-tier-key="tier2">
+              <span class="m-cat__badge" data-tier="tier2"><span class="tier tier--tier2 tier--pill"><span class="tier__mark" aria-hidden="true"></span>Tier 2</span></span>
+              <h3 class="m-cat__name">Good starter candidates with expandable design</h3>
+              <p class="m-cat__rule">These sites may support a starter installation well, but should be planned carefully with future expansion and verification in mind.</p>
+              <p class="m-cat__sites" hidden></p>
+            </li>
+            <li class="m-cat" data-tier-key="high-review">
+              <span class="m-cat__badge" data-tier="high-review"><span class="tier tier--high-review tier--pill"><span class="tier__mark" aria-hidden="true"></span>High review</span></span>
+              <h3 class="m-cat__name">Resolve review issues before expansion</h3>
+              <p class="m-cat__rule">These sites may be useful public assets, but significant review burdens or electrical constraints should be addressed before committing to major capacity.</p>
+              <p class="m-cat__sites" hidden></p>
+            </li>
+            <li class="m-cat" data-tier-key="tier3">
+              <span class="m-cat__badge" data-tier="tier3"><span class="tier tier--tier3 tier--pill"><span class="tier__mark" aria-hidden="true"></span>Tier 3</span></span>
+              <h3 class="m-cat__name">Monitor or run a small pilot</h3>
+              <p class="m-cat__rule">These sites should be monitored over time, or considered only for smaller pilot-style planning rather than immediate general expansion.</p>
+              <p class="m-cat__sites" hidden></p>
+            </li>
+            <li class="m-cat" data-tier-key="special">
+              <span class="m-cat__badge" data-tier="special"><span class="tier tier--special tier--pill"><span class="tier__mark" aria-hidden="true"></span>Special use</span></span>
+              <h3 class="m-cat__name">Do not advance for general-public buildout yet</h3>
+              <p class="m-cat__rule">The site should not advance as a general-public charging site unless its foundational assumptions change, for example its public access hours or a fleet-only use case.</p>
+              <p class="m-cat__sites" hidden></p>
+            </li>
+          </ul>
+        </section>
+
+        <!-- ============ Right-Sizing Ports ============ -->
+        <section class="m-section" id="ports" aria-labelledby="ports-title">
+          <div class="section__head"><h2 class="section__title" id="ports-title">Right-Sizing Ports</h2></div>
+          <div class="m-prose">
+            <p>The aim is to avoid overbuilding while still preparing each site for growth. The model does this by splitting capacity into two recommendations.</p>
+          </div>
+
+          <div class="m-port-kinds">
+            <div class="card m-port-kind">
+              <span class="m-key m-key--now" aria-hidden="true"></span>
+              <p class="m-port-kind__value num">25</p>
+              <h3 class="m-port-kind__name">Install-now ports</h3>
+              <p class="m-port-kind__text">A smaller starter recommendation based on immediate feasibility, electrical capacity and modeled current demand.</p>
+            </div>
+            <div class="card m-port-kind">
+              <span class="m-key m-key--future" aria-hidden="true"></span>
+              <p class="m-port-kind__value num">48</p>
+              <h3 class="m-port-kind__name">Future-ready ports</h3>
+              <p class="m-port-kind__text">The capacity a site should be prepared to accommodate if demand grows, such as conduit, panel space and spatial planning.</p>
+            </div>
+          </div>
+
+          <figure class="card m-plan" aria-labelledby="m-plan-cap">
+            <figcaption class="m-plan__cap" id="m-plan-cap">
+              <span class="m-plan__title">Port plan by site</span>
+              <span class="m-plan__legend">
+                <span class="m-plan__legend-item"><span class="m-key m-key--now" aria-hidden="true"></span>Install now</span>
+                <span class="m-plan__legend-item"><span class="m-key m-key--future" aria-hidden="true"></span>Prepared for later</span>
+              </span>
+            </figcaption>
+            <p class="m-plan__note footnote">Each square is one port. A site's full row is its future-ready total; filled squares are installed now.</p>
+            <div class="m-plan__rows" id="m-plan-rows">
+              <p class="m-plan__status footnote">Loading the per-site port plan.</p>
+            </div>
+          </figure>
+
+          <h3 class="m-sub">Three things to know about the published plan</h3>
+          <ul class="m-notes" role="list">
+            <li><strong>It follows the <code>legacy_v2</code> ranking.</strong> The port plan uses the study's accepted <code>legacy_v2</code> ranking rather than the canonical <code>milestone2_v3</code> ranking shown on the results pages, so its totals of 25 install-now and 48 future-ready ports reconcile with what was presented. On the canonical ranking, the same rules give 25 and 47.</li>
+            <li><strong>Every site gets at least 2 install-now ports.</strong> That includes the Public Safety Training Center (PWC003), where the advice is not to advance a public buildout until the use case is confirmed. Its 2 ports are counted in the total as a placeholder, not as a recommendation.</li>
+            <li><strong>Chinn Park Regional Library (PWC004) was closed for renovation</strong> when the site data were gathered in June 2026. Its rank and plan assume it reopens much as it was.</li>
+          </ul>
+          <p class="m-caveat footnote">Right-sizing is a planning-support recommendation. It must always be checked against engineering, utility, procurement, site design, ADA and permitting review. Electrical capacity is an unverified placeholder at all twelve sites.</p>
+        </section>
+
+        <!-- ============ Scenario Testing ============ -->
+        <section class="m-section" id="scenarios" aria-labelledby="scenarios-title">
+          <div class="section__head"><h2 class="section__title" id="scenarios-title">Scenario Testing</h2></div>
+          <div class="m-prose">
+            <p>To check that future-ready recommendations hold up, the model tests whether the future-ready capacity stays adequate under different simulated planning conditions. These six scenarios come from the <code>legacy_v2</code> sweep.</p>
+          </div>
+
+          <div class="hig-list hig-list--ios hig-list--insetGrouped m-list">
+            <div class="hig-list-section" role="group" aria-labelledby="scen-list-h">
+              <div class="hig-list-section__header hig-list-section__header--nested"><span class="hig-list-section__title" id="scen-list-h">Scenarios and Results</span></div>
+              <ul class="hig-list-section__rows">
+                <li class="hig-list-row hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Base</span><span class="hig-list-row__subtitle">Demand grows 1.9 times by 2036, 3.0 times by 2046 and 4.0 times by 2056.</span></span><span class="hig-list-row__trailing"><span class="m-result m-result--ok"><i data-icon="checkmark.circle" data-size="18"></i>No gaps</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">High growth</span><span class="hig-list-row__subtitle">Demand grows 2.6 times by 2036, 4.5 times by 2046 and 6.0 times by 2056.</span></span><span class="hig-list-row__trailing"><span class="m-result m-result--ok"><i data-icon="checkmark.circle" data-size="18"></i>No gaps</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Long sessions</span><span class="hig-list-row__subtitle">From the legacy_v2 sweep. Parameters are not published here.</span></span><span class="hig-list-row__trailing"><span class="m-result m-result--ok"><i data-icon="checkmark.circle" data-size="18"></i>No gaps</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Short daily window</span><span class="hig-list-row__subtitle">From the legacy_v2 sweep. Parameters are not published here.</span></span><span class="hig-list-row__trailing"><span class="m-result m-result--ok"><i data-icon="checkmark.circle" data-size="18"></i>No gaps</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Peakier demand</span><span class="hig-list-row__subtitle">From the legacy_v2 sweep. Parameters are not published here.</span></span><span class="hig-list-row__trailing"><span class="m-result m-result--ok"><i data-icon="checkmark.circle" data-size="18"></i>No gaps</span></span></span></div></li>
+                <li class="hig-list-row hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Combined stress</span><span class="hig-list-row__subtitle">High growth plus a further 15 percent at every horizon.</span></span><span class="hig-list-row__trailing"><span class="m-result m-result--gap"><i data-icon="exclamationmark.triangle" data-size="18"></i>2 gaps</span></span></span></div></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card m-gaps">
+            <p class="m-gaps__lead">In the legacy_v2 sweep, the first five scenarios showed no future-ready capacity gaps at any site, and combined stress opened two minor gaps of one port each. The growth figures listed are the canonical milestone2_v3 definitions of the same names; they are provisional planning conventions, not yet calibrated to observed charging data.</p>
+            <ul class="m-gaps__list" role="list" aria-label="Combined-stress capacity gaps">
+              <li><a class="m-gaps__site" href="sites.html#PWC002">PWC002</a><span class="m-gaps__amt num">Gap of 1 port</span></li>
+              <li><a class="m-gaps__site" href="sites.html#PWC008">PWC008</a><span class="m-gaps__amt num">Gap of 1 port</span></li>
+            </ul>
+          </div>
+          <p class="m-caveat footnote">The canonical <code>milestone2_v3</code> contract carries four scenario names: <code>baseline</code>, <code>base</code>, <code>high</code> and <code>stress_combined</code>.</p>
+        </section>
+
+        <!-- ============ Baseline Check ============ -->
+        <section class="m-section" id="baseline" aria-labelledby="baseline-title">
+          <div class="section__head"><h2 class="section__title" id="baseline-title">Baseline Check</h2></div>
+          <div class="m-prose">
+            <p>The <code>legacy_v2</code> baseline run of the prototype, across the Fairfax and Prince William County candidates, produced these results.</p>
+          </div>
+          <dl class="m-metrics">
+            <div class="m-metric"><dt class="metric__label">Candidate sites evaluated</dt><dd class="metric__value">12</dd></div>
+            <div class="m-metric"><dt class="metric__label">Tier 1 starter candidates</dt><dd class="metric__value">2</dd></div>
+            <div class="m-metric"><dt class="metric__label">Decision categories applied</dt><dd class="metric__value">5</dd></div>
+            <div class="m-metric"><dt class="metric__label">Tableau-ready data exports</dt><dd class="metric__value">15</dd></div>
+            <div class="m-metric"><dt class="metric__label">Blocking validation errors</dt><dd class="metric__value">0</dd></div>
+            <div class="m-metric"><dt class="metric__label">Warnings</dt><dd class="metric__value">0</dd></div>
+            <div class="m-metric"><dt class="metric__label">Review flags to confirm</dt><dd class="metric__value">38</dd></div>
+            <div class="m-metric"><dt class="metric__label">Info items</dt><dd class="metric__value">12</dd></div>
+          </dl>
+
+          <h3 class="m-sub">Review flags are not failures</h3>
+          <div class="m-prose">
+            <p>The run has zero blocking validation errors. Each of the 38 review flags marks a field that needs more information or administrative confirmation from local staff before detailed design can proceed. The fields that recur most are:</p>
+          </div>
+          <ul class="m-chips" role="list">
+            <li>Electrical service ratings</li>
+            <li>Spare electrical capacity</li>
+            <li>Emergency disconnect visibility</li>
+            <li>Visitor and employee counts</li>
+            <li>Operating hours</li>
+            <li>Parking counts</li>
+            <li>Likely charger placement</li>
+            <li>Garage, fire, AHJ and access reviews at special-use sites</li>
+          </ul>
+        </section>
+
+        <!-- ============ Outputs and Limits ============ -->
+        <section class="m-section" id="outputs" aria-labelledby="outputs-title">
+          <h2 class="hig-visually-hidden" id="outputs-title">Outputs and Limits</h2>
+          <div class="m-pair">
+            <div class="m-pair__col" aria-labelledby="produces-title" role="group">
+              <div class="section__head"><h3 class="section__title" id="produces-title">What It Produces</h3></div>
+              <div class="hig-list hig-list--ios hig-list--insetGrouped m-list">
+                <div class="hig-list-section">
+                  <ul class="hig-list-section__rows">
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="doc" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Public EV Charging Planning Report (PDF)</span></span></span></div></li>
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="list.bullet" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Site rankings</span></span></span></div></li>
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="tag" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Decision buckets</span></span></span></div></li>
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="bolt" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Port recommendations</span></span></span></div></li>
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="calendar" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Scenario results</span></span></span></div></li>
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="chart.bar" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Visual summaries</span></span></span></div></li>
+                    <li class="hig-list-row hig-list-row--leading"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="square.and.arrow.down" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Tableau-ready CSV exports</span></span></span></div></li>
+                  </ul>
+                  <div class="hig-list-section__footer">Built in Python with pandas, NumPy and simple rule-based scoring logic. Intended for early screening, prioritization, right-sizing discussion and identifying review needs.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="m-pair__col" aria-labelledby="replace-title" role="group">
+              <div class="section__head"><h3 class="section__title" id="replace-title">What It Does Not Replace</h3></div>
+              <div class="hig-list hig-list--ios hig-list--insetGrouped m-list m-list--neutral">
+                <div class="hig-list-section">
+                  <ul class="hig-list-section__rows">
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Final engineering design</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Utility coordination</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Formal permitting</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Procurement processes</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">ADA compliance review</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Fire and AHJ review</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Stormwater review</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Construction approval</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">On-the-ground site surveys</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Stakeholder confirmation</span></span></span></div></li>
+                    <li class="hig-list-row"><div class="hig-list-row__content"><span class="m-dash" aria-hidden="true"></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Official municipal decision-making</span></span></span></div></li>
+                  </ul>
+                  <div class="hig-list-section__footer">Outputs support early screening, prioritization and discussion. They are not a final approval, a final design or a construction-ready determination.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="notice m-notice" aria-labelledby="m-notice-title">
+          <span class="notice__icon" aria-hidden="true"><i data-icon="exclamationmark.triangle" data-size="20"></i></span>
+          <div>
+            <p class="notice__title" id="m-notice-title">A planning-support prototype</p>
+            <p class="notice__body">This Future City Fellowship prototype is not engineering advice, a permit or code-compliance determination, a utility capacity confirmation, an official forecast, or a procurement or construction authorization. Every siting decision remains subject to electrical, ADA, fire and AHJ, stormwater and permitting review by the responsible authorities. No site shown here is approved.</p>
+            <p class="notice__body">Data confidence is Low at all 12 sites. Electrical capacity is an unverified placeholder at every one of them: nobody has confirmed the service could support chargers.</p>
+          </div>
+        </aside>
+
+        <div class="m-next">
+          <a class="hig-button hig-button--ios hig-button--bordered-prominent hig-button--medium" href="index.html">See the Results</a>
+          <a class="hig-button hig-button--ios hig-button--borderless hig-button--medium" href="explore.html">Explore Data</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/method.js"></script>
+</body>
+</html>

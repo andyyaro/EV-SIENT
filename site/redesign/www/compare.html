@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Compare Sites · EV Site Readiness</title>
+<meta name="description" content="All twelve candidate EV charging sites side by side: readiness score, starter and future-ready ports, and modelled wait times.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/charts.css">
+</head>
+<body class="shell" data-page="compare">
+<a class="skip-link" href="#main">Skip to Content</a>
+<div id="nav"></div>
+<main id="main" class="main" tabindex="-1">
+  <div class="page">
+    <header class="page-head">
+      <span class="page-head__eyebrow">Results</span>
+      <h1 class="page-head__title">Compare Sites</h1>
+      <p class="page-head__lede">All 12 candidate sites side by side: how they score, how many charging ports each could start with and grow to, and how long drivers might wait.</p>
+    </header>
+
+    <div class="notice" role="note">
+      <span class="notice__icon"><i data-icon="exclamationmark.triangle" data-size="20"></i></span>
+      <div>
+        <p class="notice__title">Low data confidence at all 12 sites</p>
+        <p class="notice__body">These are planning-support screening results. Electrical capacity is an unverified placeholder everywhere, and no site has been observed in operation.</p>
+      </div>
+    </div>
+
+    <section class="section" aria-labelledby="chart-title">
+      <div class="section__head"><h2 class="section__title" id="chart-title">Side by Side</h2></div>
+      <div class="chart-card">
+        <div class="chart-card__bar">
+          <div class="hig-segmented hig-segmented--ios hig-segmented--small" role="radiogroup" aria-label="Measure to Compare" id="view-picker">
+            <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="true" data-value="readiness"><span class="hig-segmented__label" data-label="Readiness">Readiness</span></button>
+            <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="ports"><span class="hig-segmented__label" data-label="Ports">Ports</span></button>
+            <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="waits"><span class="hig-segmented__label" data-label="Waits">Waits</span></button>
+          </div>
+          <p class="chart-card__key" id="chart-key" aria-live="polite"></p>
+        </div>
+        <div id="compare-chart"><p class="footnote">Loading the site data.</p></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="table-title">
+      <div class="compare-actions">
+        <h2 class="section__title" id="table-title">All Sites</h2>
+        <button type="button" class="hig-button hig-button--ios hig-button--medium hig-button--bordered-prominent" id="download-csv" disabled>
+          <i data-icon="square.and.arrow.down" data-size="18"></i><span class="hig-button__label">Download CSV</span>
+        </button>
+      </div>
+      <p class="section__intro">Select a column heading to sort. Select a site to open its details.</p>
+      <div class="site-table-wrap">
+        <div class="hig-table hig-table--ios site-table" id="site-table" tabindex="0" role="region" aria-labelledby="table-title">
+          <p class="footnote">Loading the site data.</p>
+        </div>
+      </div>
+      <p class="hig-visually-hidden" id="sort-status" aria-live="polite"></p>
+
+      <div class="notes">
+        <p><strong>Data confidence is Low at all 12 sites.</strong> Electrical capacity is an unverified placeholder: nobody has confirmed the service at any site could support chargers.</p>
+        <p><strong>Waits are modelled, not observed.</strong> Mean wait is the simulated average under the base case. Peak wait is an Erlang peak-window estimate for the busiest period of the day.</p>
+        <p><strong>Ports.</strong> Starter ports are the install-now recommendation; future-ready ports are the pathway capacity a site should be prepared for. Every site carries at least 2 starter ports, including the Public Safety Training Center (PWC003), where those 2 are a placeholder in the total, not a recommendation.</p>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/charts.js"></script>
+<script src="js/pages/compare.js"></script>
+</body>
+</html>

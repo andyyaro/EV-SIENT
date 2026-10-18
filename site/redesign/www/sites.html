@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Sites · EV Site Readiness</title>
+<meta name="description" content="All twelve candidate EV charging sites in Fairfax and Prince William, with readiness score, port plan, modelled waits and data confidence for each.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/sites.css">
+</head>
+<body class="shell is-grouped" data-page="sites">
+<a class="skip-link" href="#main">Skip to Content</a>
+<div id="nav"></div>
+<main id="main" class="main" tabindex="-1">
+  <div class="page page--wide sites" id="sites" data-view="list">
+    <div class="sites-split">
+
+      <!-- List column (master) -->
+      <section class="sites-master" id="sites-master" aria-labelledby="sites-title">
+        <header class="sites-head">
+          <h1 class="sites-head__title" id="sites-title">Sites</h1>
+          <p class="sites-head__lede">Twelve candidate sites in Fairfax and Prince William, ranked by modelled readiness. Choose one to see its port plan, waits and data confidence.</p>
+        </header>
+
+        <div class="sites-tools">
+          <div class="hig-search-field hig-search-field--ios hig-search-field--regular sites-search" role="search">
+            <div class="hig-search-field__row">
+              <div class="hig-search-field__field">
+                <span class="hig-search-field__glyph" aria-hidden="true"><i data-icon="magnifyingglass" data-size="20"></i></span>
+                <input id="sites-q" class="hig-search-field__input" type="search" placeholder="Search Sites" aria-label="Search sites by name, ID, jurisdiction or type" aria-controls="sites-rows" autocomplete="off" spellcheck="false" enterkeyhint="search">
+                <button type="button" class="hig-search-field__clear hig-focus" id="sites-q-clear" aria-label="Clear Text" tabindex="-1" hidden><i data-icon="xmark.circle.fill" data-size="20"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hig-segmented hig-segmented--ios hig-segmented--small sites-seg" id="sites-jur" role="radiogroup" aria-label="Jurisdiction">
+            <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="true" data-value="all"><span class="hig-segmented__label" data-label="All">All</span></button>
+            <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="Fairfax"><span class="hig-segmented__label" data-label="Fairfax">Fairfax</span></button>
+            <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="Prince William"><span class="hig-segmented__label" data-label="Prince William">Prince William</span></button>
+          </div>
+
+          <div class="sites-tools__row">
+            <p class="sites-count" id="sites-count" aria-live="polite">Loading sites</p>
+            <div class="sites-sort">
+              <span class="sites-sort__label" id="sites-sort-label">Sort</span>
+              <div class="hig-segmented hig-segmented--ios hig-segmented--small sites-seg sites-seg--sort" id="sites-sort" role="radiogroup" aria-labelledby="sites-sort-label">
+                <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="true" data-value="rank"><span class="hig-segmented__label" data-label="Rank">Rank</span></button>
+                <button class="hig-segmented__segment hig-focus" role="radio" aria-checked="false" data-value="name"><span class="hig-segmented__label" data-label="Name">Name</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hig-list hig-list--ios hig-list--insetGrouped sites-list" id="sites-list">
+          <div class="hig-list-section">
+            <ul class="hig-list-section__rows" id="sites-rows" aria-label="Sites"></ul>
+          </div>
+        </div>
+
+        <div class="sites-empty" id="sites-empty" hidden>
+          <span class="sites-empty__glyph" aria-hidden="true"><i data-icon="magnifyingglass" data-size="40"></i></span>
+          <p class="sites-empty__title" id="sites-empty-text">No sites match.</p>
+          <p class="sites-empty__body">Check the spelling, or search by site ID, jurisdiction or type.</p>
+          <button type="button" class="hig-button hig-button--ios hig-button--small hig-button--bordered hig-focus hig-pressable" id="sites-empty-clear"><span class="hig-button__label">Clear Search</span></button>
+        </div>
+
+        <p class="footnote sites-master__foot">Data confidence is Low at all 12 sites, and electrical capacity is an unverified placeholder. Scores compare sites for planning support only.</p>
+      </section>
+
+      <!-- Detail pane -->
+      <section class="sites-detail" id="sites-detail" aria-label="Site Details">
+        <div class="sites-backbar" id="sites-backbar">
+          <span class="hig-toolbar__edge hig-toolbar__edge--soft" aria-hidden="true"></span>
+          <div class="sites-backbar__row">
+            <span class="hig-toolbar__platter hig-toolbar__platter--single hig-glass hig-glass--small hig-shape--capsule">
+              <button type="button" class="hig-toolbar__item hig-toolbar__item--text hig-focus hig-pressable sites-back" id="sites-back">
+                <i data-icon="chevron.left" data-size="20"></i><span>Sites</span>
+              </button>
+            </span>
+            <div class="hig-toolbar__platter hig-glass hig-glass--small hig-shape--capsule sites-backbar__steps" role="group" aria-label="Step Through Sites">
+              <button type="button" class="hig-toolbar__item hig-focus hig-pressable" id="sites-bar-prev" aria-label="Previous Site" title="Previous Site"><i data-icon="chevron.up" data-size="20"></i></button>
+              <button type="button" class="hig-toolbar__item hig-focus hig-pressable" id="sites-bar-next" aria-label="Next Site" title="Next Site"><i data-icon="chevron.down" data-size="20"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <article class="sd" id="sd" aria-live="off">
+          <p class="sd-loading footnote">Loading site details</p>
+        </article>
+
+        <nav class="sd-pager" id="sd-pager" aria-label="Previous and Next Site" hidden>
+          <button type="button" class="sd-pager__btn sd-pager__btn--prev hig-focus hig-pressable" id="sd-prev">
+            <span class="sd-pager__dir"><i data-icon="chevron.left" data-size="16"></i>Previous</span>
+            <span class="sd-pager__name" id="sd-prev-name"></span>
+          </button>
+          <button type="button" class="sd-pager__btn sd-pager__btn--next hig-focus hig-pressable" id="sd-next">
+            <span class="sd-pager__dir">Next<i data-icon="chevron.right" data-size="16"></i></span>
+            <span class="sd-pager__name" id="sd-next-name"></span>
+          </button>
+        </nav>
+      </section>
+
+    </div>
+    <noscript><p class="notice__body sites-noscript">This page needs JavaScript to list the sites. The same results are summarized on the <a href="compare.html">Compare</a> page.</p></noscript>
+  </div>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/sites.js"></script>
+</body>
+</html>

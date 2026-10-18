@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Explore the Data · EV Site Readiness</title>
+<meta name="description" content="Seven interactive Tableau Public views of the canonical readiness results, loaded only when you ask.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/pages.css">
+</head>
+<body class="shell is-grouped" data-page="explore">
+<a class="skip-link" href="#main">Skip to Content</a>
+<div id="nav"></div>
+<main id="main" class="main" tabindex="-1">
+  <div class="page page--wide">
+    <header class="page-head">
+      <span class="page-head__eyebrow">Results</span>
+      <h1 class="page-head__title">Explore the Data</h1>
+      <p class="page-head__lede">Seven interactive views of the canonical milestone2_v3 results, published on Tableau Public. Nothing loads from Tableau until you choose a view and ask for it.</p>
+    </header>
+
+    <div class="notice" role="note">
+      <span class="notice__icon"><i data-icon="exclamationmark.triangle" data-size="20"></i></span>
+      <div>
+        <p class="notice__title">Read every view as a planning screen</p>
+        <p class="notice__body">Data confidence is Low at all 12 sites, and electrical capacity is an unverified placeholder at every one. No view shows that a site is feasible or approved.</p>
+      </div>
+    </div>
+
+    <section class="ex" id="explorer" aria-label="Interactive views">
+      <!-- explore.js builds the view picker and the content frame here. -->
+      <noscript>
+        <div class="pg-card ex-noscript">
+          <p class="pg-card__title">Open a View in Tableau Public</p>
+          <p class="prose">The view picker needs JavaScript. Each link opens the view on public.tableau.com in a new tab.</p>
+          <ul class="pg-bullets">
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/SiteMap" target="_blank" rel="noopener">Site Map</a></li>
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/ReadinessbySite" target="_blank" rel="noopener">Readiness by Site</a></li>
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/StartervsPathwayPorts" target="_blank" rel="noopener">Starter vs Pathway Ports</a></li>
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PortsAcrossHorizons" target="_blank" rel="noopener">Ports Across Horizons</a></li>
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/LifecycleCostbyHorizon" target="_blank" rel="noopener">Lifecycle Cost by Horizon</a></li>
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/NetCO2ebyHorizon" target="_blank" rel="noopener">Avoided CO2e by Horizon</a> (published as "Net CO2e"; higher is better)</li>
+            <li><a href="https://public.tableau.com/views/EV_Charging_Site_Readiness_M2_Canonical/PeakWaitsbySite" target="_blank" rel="noopener">Peak Waits by Site</a></li>
+          </ul>
+        </div>
+      </noscript>
+    </section>
+
+    <section class="pg-sec" aria-labelledby="ex-without">
+      <h2 class="pg-sec__title" id="ex-without">Without Tableau</h2>
+      <p class="pg-sec__intro">The same results are on this site as plain pages, with no third-party content.</p>
+      <div class="hig-list hig-list--ios hig-list--insetGrouped pg-list">
+        <div class="hig-list-section">
+          <ul class="hig-list-section__rows">
+            <li class="hig-list-row hig-list-row--actionable hig-list-row--leading hig-list-row--subtitle">
+              <div class="hig-list-row__content">
+                <span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="location" data-size="22"></i></span>
+                <span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html">Sites</a>
+                    <span class="hig-list-row__subtitle">Each of the 12 candidate sites in detail</span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></span>
+                </span>
+              </div>
+            </li>
+            <li class="hig-list-row hig-list-row--actionable hig-list-row--leading hig-list-row--subtitle">
+              <div class="hig-list-row__content">
+                <span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="chart.bar" data-size="22"></i></span>
+                <span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="compare.html">Compare</a>
+                    <span class="hig-list-row__subtitle">How the 12 sites compare</span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></span>
+                </span>
+              </div>
+            </li>
+            <li class="hig-list-row hig-list-row--actionable hig-list-row--leading hig-list-row--subtitle">
+              <div class="hig-list-row__content">
+                <span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="calendar" data-size="22"></i></span>
+                <span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="outlook.html">Outlook</a>
+                    <span class="hig-list-row__subtitle">Ports, lifecycle cost and avoided CO2e across planning horizons</span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><i data-icon="chevron.right" data-size="20"></i></span></span>
+                </span>
+              </div>
+            </li>
+          </ul>
+          <div class="hig-list-section__footer">Source workbook: EV_Charging_Site_Readiness_M2_Canonical on Tableau Public. Costs are screening-class planning estimates, not budgets or quotes.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/explore.js"></script>
+</body>
+</html>

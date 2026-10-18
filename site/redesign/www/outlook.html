@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Outlook · EV Site Readiness</title>
+<meta name="description" content="How the 12-site charging network could grow from 2026 to 2056 under different demand scenarios, with lifecycle cost and avoided emissions.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/charts.css">
+</head>
+<body class="shell" data-page="outlook">
+<a class="skip-link" href="#main">Skip to Content</a>
+<div id="nav"></div>
+<main id="main" class="main" tabindex="-1">
+  <div class="page">
+    <header class="page-head">
+      <span class="page-head__eyebrow">Results</span>
+      <h1 class="page-head__title">Outlook</h1>
+      <p class="page-head__lede">How the 12-site network could grow from 2026 to 2056 under different demand scenarios, what each way of building it might cost over its life, and how much carbon it could help avoid.</p>
+    </header>
+
+    <section aria-labelledby="glance-title">
+      <h2 class="hig-visually-hidden" id="glance-title">At a Glance</h2>
+      <div class="tiles" id="tiles"><p class="footnote">Loading the outlook data.</p></div>
+    </section>
+
+    <section class="section" aria-labelledby="scen-title">
+      <div class="section__head"><h2 class="section__title" id="scen-title">Scenarios</h2></div>
+      <p class="section__intro">Each scenario asks the same question: if demand for public charging grows a certain way, is the future-ready pathway planned at each site still big enough?</p>
+      <div class="hig-list hig-list--ios hig-list--insetGrouped scenario-list">
+        <div class="hig-list-section">
+          <ul class="hig-list-section__rows" id="scenario-rows" role="list"></ul>
+          <p class="hig-list-section__footer" id="scenario-foot">Growth multipliers are provisional planning conventions, not yet calibrated to observed charging data. The earlier legacy_v2 sweep also tested long sessions, a short daily window and peakier demand; their parameters are not published here. Like base and high growth, those showed no future-ready capacity gaps, while combined stress opened two (PWC002 and PWC008, one port each).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="ports-title">
+      <div class="section__head"><h2 class="section__title" id="ports-title">Ports Over Time</h2></div>
+      <div class="chart-card"><div id="ports-chart"></div></div>
+    </section>
+
+    <section class="section" aria-labelledby="cost-title">
+      <div class="section__head"><h2 class="section__title" id="cost-title">Lifecycle Cost</h2></div>
+      <p class="section__intro">Net present value of three ways to build the network, at each horizon. These are screening-class planning estimates for the base-case trajectory only: useful for comparing strategies, never a budget, quote or engineering estimate.</p>
+      <div class="chart-card">
+        <div id="cost-chart"></div>
+        <div class="saving-grid" id="savings" aria-label="Avoided overbuild cost by horizon" role="group"></div>
+      </div>
+      <ul class="notes strategy-list" id="strategy-list">
+        <li><p><strong>Deferred (DEF):</strong> prepare the future-ready pathway but energize no ports. It is the floor the other two are compared against, not an option on its own.</p></li>
+        <li><p><strong>Overbuild (OVB):</strong> energize the full future-ready pathway in 2026.</p></li>
+        <li><p><strong>Staged (STG):</strong> energize the starter ports in 2026, pre-build the pathway, and energize more ports two years before each horizon&#8217;s target. The avoided overbuild cost is the net present cost of overbuilding minus that of staging.</p></li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="em-title">
+      <div class="section__head"><h2 class="section__title" id="em-title">Avoided Emissions <span class="title-note"><i data-icon="chevron.up" data-size="14"></i>Higher is better</span></h2></div>
+      <p class="section__intro">Tonnes of CO<sub>2</sub>e avoided per year when drivers charge electric instead of burning fuel. More charging served means more avoided, so the busiest scenarios avoid the most.</p>
+      <div class="chart-card"><div id="em-chart"></div></div>
+      <div class="notes">
+        <p id="em-factor"><strong>Emissions factor:</strong> EPA eGRID2023 Rev 2, SRVC, 596.3 lb CO<sub>2</sub>e/MWh.</p>
+        <p><strong>Data confidence is Low at all 12 sites.</strong> Electrical capacity is an unverified placeholder at every site. Every figure on this page is a modelled planning-support output, not a forecast or a commitment.</p>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/charts.js"></script>
+<script src="js/pages/outlook.js"></script>
+</body>
+</html>

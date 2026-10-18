@@ -1,0 +1,243 @@
+/* Method page. Content layer only: grouped backgrounds, cards, inset grouped lists. No Liquid Glass here.
+   Long reading: text runs at a 68ch measure with generous section spacing. */
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+.m-layout { --toc-h: 64px; position: relative; }
+.m-body { min-width: 0; }
+.m-section { margin-top: 56px; scroll-margin-top: calc(var(--toc-h) + 16px); }
+.m-section:first-child { margin-top: 28px; }
+.m-section .section__head { margin-bottom: 14px; align-items: center; }
+.m-section > .section__head { max-width: 760px; }
+.m-sub { margin: 32px 0 12px; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-caveat { max-width: 68ch; margin-top: 14px; }
+
+.m-prose { max-width: 68ch; font: 400 17px/27px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); text-wrap: pretty; }
+.m-prose p + p { margin-top: 12px; }
+.m-prose + * { margin-top: 20px; }
+.m-section code, .m-notes code {
+  font: 500 0.88em/1 var(--font-mono); padding: 2px 5px; border-radius: 5px; background: var(--fill-tertiary); color: var(--label-primary);
+  white-space: nowrap;
+}
+
+/* ---------- In-page index ---------- */
+/* Narrow: a horizontally scrolling row of capsules that stays at the top while reading.
+   It sits on the page's own grouped ground (opaque, content layer), with a hairline once it is stuck. */
+.m-toc {
+  position: sticky; top: 0; z-index: 5;
+  margin-inline: calc(-1 * var(--gutter)); padding: 6px calc(var(--gutter) - 6px);
+  background: var(--grouped-background-primary);
+  box-shadow: 0 0.5px 0 transparent; transition: box-shadow 150ms ease;
+}
+.m-toc.is-stuck { box-shadow: 0 0.5px 0 var(--separator); }
+.m-toc__title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.m-toc__list {
+  display: flex; gap: 8px; list-style: none; margin: 0; padding: 6px; overflow-x: auto; overscroll-behavior-x: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-padding-inline: var(--gutter);
+}
+.m-toc__list::-webkit-scrollbar { display: none; }
+.m-toc__list > li { flex: none; }
+.m-toc__link {
+  position: relative; display: inline-flex; align-items: center; height: 34px; padding: 0 14px;
+  border-radius: var(--radius-capsule); background: var(--fill-tertiary); color: var(--label-primary);
+  font: 500 15px/20px var(--font-sans); letter-spacing: -0.23px; white-space: nowrap; text-decoration: none;
+}
+.m-toc__link::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 44px; transform: translateY(-50%); }
+.m-toc__link:hover { text-decoration: none; background: var(--fill-secondary); }
+.m-toc__link[aria-current="true"] { background: var(--label-primary); color: var(--grouped-background-secondary); font-weight: 600; }
+.m-toc__link:focus-visible { border-radius: var(--radius-capsule); }
+
+/* Wide: a quiet list of anchors in the margin beside the reading column. */
+@media (min-width: 1280px) {
+  .m-layout { --toc-h: 0px; display: grid; grid-template-columns: minmax(0, 1fr) 200px; column-gap: 56px; align-items: start; }
+  .m-body { grid-column: 1; grid-row: 1; }
+  .m-sentinel { display: none; }
+  .m-toc {
+    grid-column: 2; grid-row: 1; top: 28px; margin: 28px 0 0; padding: 0; background: none; box-shadow: none;
+    max-height: calc(100vh - 56px); overflow-y: auto;
+  }
+  .m-toc.is-stuck { box-shadow: none; }
+  .m-toc__title {
+    position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal;
+    margin: 0 0 8px 12px; font: 600 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary);
+  }
+  .m-toc__list { display: block; padding: 0; overflow: visible; }
+  .m-toc__link {
+    display: flex; align-items: center; height: auto; min-height: 44px; padding: 6px 12px; border-radius: 0 8px 8px 0;
+    background: none; color: var(--label-secondary); font: 400 15px/20px var(--font-sans); white-space: normal;
+    box-shadow: inset 2px 0 0 var(--separator);
+  }
+  .m-toc__link::before { display: none; }
+  .m-toc__link:hover { background: var(--fill-quaternary); color: var(--label-primary); }
+  .m-toc__link[aria-current="true"] { background: none; color: var(--label-primary); font-weight: 600; box-shadow: inset 2px 0 0 var(--label-primary); }
+  .m-toc__link:focus-visible { border-radius: 0 8px 8px 0; }
+  .m-section { scroll-margin-top: 28px; }
+  .m-section:first-child { margin-top: 28px; }
+}
+
+/* ---------- The nine steps (DisclosureGroup rows on a vertical timeline) ---------- */
+.m-steps {
+  list-style: none; margin: 20px 0 0; padding: 6px 0; max-width: 760px;
+  border-radius: var(--radius-group); background: var(--grouped-background-secondary);
+}
+.m-step { position: relative; --hig-list-row-bg: transparent; }
+.m-step__heading { margin: 0; font: inherit; }
+.m-step .hig-disclosure__row { padding-block: 12px; border-radius: 16px; }
+.m-step .hig-disclosure__row:hover { background: var(--fill-quaternary); }
+.m-step .hig-disclosure__label { font-weight: 600; }
+.m-step__marker {
+  position: relative; z-index: 1; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--fill-tertiary); color: var(--label-primary);
+  font: 600 15px/1 var(--font-sans); font-variant-numeric: tabular-nums;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.m-step.hig-disclosure--open .m-step__marker { background: var(--label-primary); color: var(--grouped-background-secondary); }
+/* Timeline connector: runs from this marker's centre to the next marker, through any open description. */
+.m-step:not(:last-child)::before {
+  content: ""; position: absolute; z-index: 0; left: calc(var(--margin-compact) + 14px); top: 42px; bottom: -14px; width: 2px;
+  border-radius: 1px; background: var(--separator);
+}
+.m-step__body { padding: 0 var(--margin-compact) 16px calc(var(--margin-compact) + 30px + 16px); }
+.m-step__body p { max-width: 62ch; font: 400 17px/26px var(--font-sans); letter-spacing: -0.43px; color: var(--label-secondary); }
+.m-step__link {
+  display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px;
+  font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px;
+}
+
+/* ---------- Inputs ---------- */
+.m-private {
+  display: flex; gap: 14px; align-items: flex-start; max-width: 760px; margin-top: 20px; padding: 16px 18px;
+  border-radius: var(--radius-group); background: var(--grouped-background-secondary);
+}
+.m-private__icon { flex: none; display: inline-flex; color: var(--label-primary); margin-top: 1px; }
+.m-private__title { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-private__body { margin-top: 4px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+
+/* Inset grouped lists sit directly in the page column (the page gutter already insets them). */
+.m-list.hig-list--insetGrouped { padding: 0; background: transparent; max-width: 760px; margin-top: 20px; }
+.m-list .hig-list-section__header { padding-top: 0; }
+.m-list .hig-list-row--subtitle .hig-list-row__subtitle { margin-top: 2px; line-height: 20px; }
+.m-list .hig-list-row__symbol { align-self: flex-start; padding-top: 14px; }
+.m-list .hig-list-row--subtitle .hig-list-row__title { font-weight: 600; }
+
+/* ---------- Scoring dimensions ---------- */
+.m-dims { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.m-dim { display: flex; flex-direction: column; gap: 6px; padding: 20px; }
+.m-dim__icon { display: inline-flex; color: var(--accent); margin-bottom: 4px; }
+.m-dim__name { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-dim__text { font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+
+/* ---------- Decision categories ---------- */
+.m-cats {
+  list-style: none; margin: 20px 0 0; padding: 0; max-width: 760px; overflow: hidden;
+  border-radius: var(--radius-group); background: var(--grouped-background-secondary);
+}
+.m-cat { position: relative; padding: 18px var(--margin-compact) 18px 20px; }
+.m-cat:has(.m-cat__sites:not([hidden])) { padding-bottom: 8px; }
+.m-cat + .m-cat::before { content: ""; position: absolute; top: 0; left: 20px; right: var(--margin-compact); height: 1px; background: var(--separator); }
+.m-cat__badge { display: block; margin-bottom: 8px; }
+.m-cat__name { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-cat__rule { max-width: 64ch; margin-top: 4px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+.m-cat__sites:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; column-gap: 14px; margin-top: 2px; font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+.m-cat__sites-label { margin-inline-end: -4px; }
+.m-cat__sites a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* ---------- Right-sizing ports ---------- */
+.m-port-kinds { display: grid; gap: 12px; margin-top: 20px; max-width: 760px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.m-port-kind { display: flex; flex-direction: column; gap: 4px; }
+.m-port-kind .m-key { margin-bottom: 8px; }
+@media (max-width: 480px) { .m-port-kind { padding: 16px; } }
+.m-port-kind__value { font: 700 34px/41px var(--font-sans); letter-spacing: 0.4px; color: var(--label-primary); }
+.m-port-kind__name { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-port-kind__text { margin-top: 2px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+
+/* Port keys: shape carries the meaning (filled vs outlined), never color alone. */
+.m-key { display: inline-block; flex: none; width: 14px; height: 14px; border-radius: 3px; }
+.m-key--now { background: var(--label-primary); }
+.m-key--future { box-shadow: inset 0 0 0 1.5px var(--label-secondary); }
+.m-key--held { background: repeating-linear-gradient(135deg, var(--label-tertiary) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1.5px var(--label-secondary); }
+
+.m-plan { margin: 12px 0 0; max-width: 760px; }
+.m-plan__cap { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.m-plan__title { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-plan__legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.m-plan__legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.m-plan__legend-item .m-key { width: 12px; height: 12px; }
+.m-plan__note { margin-top: 4px; }
+.m-plan__rows { margin-top: 14px; }
+.m-plan__status { padding: 12px 0; }
+.m-plan__list { list-style: none; margin: 0; padding: 0; }
+.m-plan__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px;
+  padding: 8px 0; border-top: 0.5px solid var(--separator);
+}
+.m-plan__row:first-child { border-top: 0; }
+.m-plan__site { min-width: 0; min-height: 44px; display: flex; flex-direction: column; justify-content: center; color: inherit; text-decoration: none; border-radius: 8px; }
+.m-plan__site:hover { text-decoration: none; }
+.m-plan__site:hover .m-plan__id { text-decoration: underline; }
+.m-plan__id { color: var(--link); font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; font-variant-numeric: tabular-nums; }
+.m-plan__name { font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); overflow-wrap: anywhere; }
+.m-plan__viz { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+.m-plan__cells { display: grid; grid-template-columns: repeat(8, 12px); gap: 3px; }
+.m-plan__cells .m-key { width: 12px; height: 12px; }
+.m-plan__nums { min-width: 64px; text-align: end; font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); font-variant-numeric: tabular-nums; }
+.m-plan__nums b { font-weight: 600; color: var(--label-primary); }
+.m-plan__flag { display: block; font: 400 12px/16px var(--font-sans); color: var(--label-secondary); }
+.m-plan__total { display: flex; justify-content: space-between; gap: 16px; padding-top: 10px; border-top: 1px solid var(--separator); font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); font-variant-numeric: tabular-nums; }
+
+.m-plan__foot { margin-top: 8px; }
+@media (max-width: 519px) { .m-plan__row { gap: 4px 12px; } .m-plan__viz { gap: 8px; } .m-plan__nums { min-width: 44px; } }
+
+.m-notes { list-style: none; margin: 0; padding: 0; max-width: 68ch; }
+.m-notes li { position: relative; padding-inline-start: 22px; font: 400 17px/26px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.m-notes li + li { margin-top: 14px; }
+.m-notes li::before { content: ""; position: absolute; left: 4px; top: 10px; width: 6px; height: 6px; border-radius: 50%; background: var(--label-tertiary); }
+.m-notes strong { font-weight: 600; }
+
+/* ---------- Scenario testing ---------- */
+.m-result { display: inline-flex; align-items: center; gap: 6px; font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); white-space: nowrap; }
+.m-result .hig-icon { flex: none; }
+.m-result--ok .hig-icon { color: var(--system-green); }
+.m-result--gap .hig-icon { color: var(--system-orange); }
+.m-gaps { max-width: 760px; margin-top: 12px; }
+.m-gaps__lead { font: 400 17px/25px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); max-width: 62ch; }
+.m-gaps__list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.m-gaps__list li { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px 0 0; border-radius: var(--radius-capsule); background: var(--fill-quaternary); }
+.m-gaps__site { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; box-shadow: inset 0 0 0 6px var(--fill-quaternary); border-radius: var(--radius-capsule); background: var(--grouped-background-secondary); font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; font-variant-numeric: tabular-nums; }
+.m-gaps__amt { font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+
+/* ---------- Baseline check ---------- */
+.m-metrics { display: grid; gap: 10px; margin: 20px 0 0; max-width: 760px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 700px) { .m-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.m-metric { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; padding: 14px 16px 16px; border-radius: 20px; background: var(--grouped-background-secondary); }
+.m-metric dd { margin: 0; }
+.m-metric dt { font-size: 15px; line-height: 20px; }
+
+.m-chips { list-style: none; margin: 4px 0 0; padding: 0; max-width: 760px; display: flex; flex-wrap: wrap; gap: 8px; }
+.m-chips li { padding: 6px 12px; border-radius: var(--radius-capsule); background: var(--fill-tertiary); font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+
+/* ---------- Outputs and limits ---------- */
+.m-pair { display: grid; gap: 32px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .m-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; } }
+.m-pair .m-list { margin-top: 0; }
+.m-dash { flex: none; align-self: center; width: 10px; height: 2px; margin: 0 14px 0 4px; border-radius: 1px; background: var(--label-tertiary); }
+
+.m-notice { margin-top: 56px; max-width: 760px; }
+.m-notice .notice__body + .notice__body { margin-top: 8px; }
+.m-next { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; }
+.m-next .hig-button, .m-expand { position: relative; }
+
+/* Short viewports (phone landscape): the pinned index would eat too much height, so it scrolls with the page. */
+@media (max-height: 500px) and (max-width: 1279px) {
+  .m-layout { --toc-h: 0px; }
+  .m-toc { position: static; }
+  .m-toc.is-stuck { box-shadow: none; }
+}
+
+@media (forced-colors: active) {
+  .m-key--now { background: CanvasText; }
+  .m-key--future, .m-key--held { border: 1.5px solid CanvasText; }
+  .m-toc__link[aria-current="true"] { outline: 2px solid CanvasText; }
+  .m-step__marker { border: 1px solid CanvasText; }
+}

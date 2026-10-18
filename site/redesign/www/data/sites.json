@@ -1,0 +1,422 @@
+{
+ "meta": {
+  "contract": "1.0.0",
+  "generated": "2026-07-19",
+  "inputs": "2026-06-24",
+  "mode": "milestone2_v3",
+  "emissions": "EPA eGRID2023 Rev 2, SRVC, 596.3 lb CO2e/MWh (accessed 2026-07-19; refreshed annually)",
+  "note": "Avoided CO2e: higher is better. Costs are screening-class planning estimates. Capacity is an unverified placeholder at all twelve sites."
+ },
+ "sites": [
+  {
+   "id": "FFX004",
+   "name": "Fairfax County Government Center",
+   "jurisdiction": "Fairfax",
+   "type": "office",
+   "lat": 38.85404,
+   "lon": -77.35706,
+   "rank": 1,
+   "score": 53.4,
+   "tier": "Tier 1 - advance to site screening",
+   "tierKey": "tier1",
+   "confidence": "Low",
+   "starter": 3,
+   "pathway": 8,
+   "waitMean": 0.6,
+   "waitPeak": 1.4,
+   "note": "Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.",
+   "image": "img/sites/FFX004.jpg",
+   "imageCredit": "Antony-22, CC BY-SA 4.0, via Wikimedia Commons"
+  },
+  {
+   "id": "FFX002",
+   "name": "City of Fairfax Regional Library",
+   "jurisdiction": "Fairfax",
+   "type": "library",
+   "lat": 38.847072,
+   "lon": -77.30363,
+   "rank": 2,
+   "score": 51.8,
+   "tier": "Tier 1 - advance to site screening",
+   "tierKey": "tier1",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 8,
+   "waitMean": 0.5,
+   "waitPeak": 1.3,
+   "note": "Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.",
+   "image": "img/sites/FFX002.jpg",
+   "imageCredit": "USGS NAIP Plus (public domain)"
+  },
+  {
+   "id": "PWC002",
+   "name": "Neabsco-Potomac Commuter Garage",
+   "jurisdiction": "Prince William",
+   "type": "garage",
+   "lat": 38.631185,
+   "lon": -77.288802,
+   "rank": 3,
+   "score": 51.1,
+   "tier": "High-review candidate",
+   "tierKey": "high-review",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 3,
+   "waitMean": 8.0,
+   "waitPeak": 42.4,
+   "note": "Install conservatively and complete electrical/AHJ review before planning larger expansion.",
+   "image": "img/sites/PWC002.jpg",
+   "imageCredit": "USGS NAIP Plus (public domain)"
+  },
+  {
+   "id": "PWC006",
+   "name": "Bull Run Library",
+   "jurisdiction": "Prince William",
+   "type": "library",
+   "lat": 38.78694,
+   "lon": -77.520529,
+   "rank": 4,
+   "score": 50.2,
+   "tier": "Tier 2 - promising candidate, refine data",
+   "tierKey": "tier2",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 4,
+   "waitMean": 0.5,
+   "waitPeak": 1.1,
+   "note": "Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.",
+   "image": "img/sites/PWC006.jpg",
+   "imageCredit": "USGS NAIP Plus (public domain)"
+  },
+  {
+   "id": "PWC007",
+   "name": "Central Library",
+   "jurisdiction": "Prince William",
+   "type": "library",
+   "lat": 38.768783,
+   "lon": -77.454823,
+   "rank": 5,
+   "score": 49.3,
+   "tier": "Tier 2 - promising candidate, refine data",
+   "tierKey": "tier2",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 4,
+   "waitMean": 0.5,
+   "waitPeak": 0.9,
+   "note": "Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.",
+   "image": null,
+   "imageCredit": null
+  },
+  {
+   "id": "FFX001",
+   "name": "Fairfax City Hall or municipal building",
+   "jurisdiction": "Fairfax",
+   "type": "office",
+   "lat": 38.840974,
+   "lon": -77.308103,
+   "rank": 6,
+   "score": 48.7,
+   "tier": "Tier 2 - promising candidate, refine data",
+   "tierKey": "tier2",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 4,
+   "waitMean": 0.3,
+   "waitPeak": 1.3,
+   "note": "Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.",
+   "image": null,
+   "imageCredit": null
+  },
+  {
+   "id": "PWC004",
+   "name": "Chinn Park Regional Library",
+   "jurisdiction": "Prince William",
+   "type": "library",
+   "lat": 38.67034,
+   "lon": -77.333127,
+   "rank": 7,
+   "score": 47.5,
+   "tier": "Tier 2 - promising candidate, refine data",
+   "tierKey": "tier2",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 4,
+   "waitMean": 0.5,
+   "waitPeak": 0.7,
+   "note": "Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.",
+   "image": null,
+   "imageCredit": null
+  },
+  {
+   "id": "PWC001",
+   "name": "PWC McCoart Government Center",
+   "jurisdiction": "Prince William",
+   "type": "office",
+   "lat": 38.679705,
+   "lon": -77.352905,
+   "rank": 8,
+   "score": 45.4,
+   "tier": "Tier 2 - promising candidate, refine data",
+   "tierKey": "tier2",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 3,
+   "waitMean": 1.2,
+   "waitPeak": 2.1,
+   "note": "Install conservatively and complete electrical/AHJ review before planning larger expansion.",
+   "image": null,
+   "imageCredit": null
+  },
+  {
+   "id": "FFX003",
+   "name": "Pohick Regional Library",
+   "jurisdiction": "Fairfax",
+   "type": "library",
+   "lat": 38.7749268,
+   "lon": -77.2680915,
+   "rank": 9,
+   "score": 44.9,
+   "tier": "Tier 3 - lower priority / monitor",
+   "tierKey": "tier3",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 4,
+   "waitMean": 0.1,
+   "waitPeak": 0.5,
+   "note": "Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.",
+   "image": null,
+   "imageCredit": null
+  },
+  {
+   "id": "PWC008",
+   "name": "Potomac Library",
+   "jurisdiction": "Prince William",
+   "type": "library",
+   "lat": 38.632723,
+   "lon": -77.2806337,
+   "rank": 10,
+   "score": 41.8,
+   "tier": "Tier 3 - lower priority / monitor",
+   "tierKey": "tier3",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 2,
+   "waitMean": 0.5,
+   "waitPeak": 0.8,
+   "note": "Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed.",
+   "image": "img/sites/PWC008.jpg",
+   "imageCredit": "USGS NAIP Plus (public domain)"
+  },
+  {
+   "id": "PWC005",
+   "name": "Haymarket Gainesville Library",
+   "jurisdiction": "Prince William",
+   "type": "library",
+   "lat": 38.836588,
+   "lon": -77.632135,
+   "rank": 11,
+   "score": 39.0,
+   "tier": "Tier 3 - lower priority / monitor",
+   "tierKey": "tier3",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 2,
+   "waitMean": 0.2,
+   "waitPeak": 0.4,
+   "note": "Lower current readiness suggests a small pilot or monitoring approach before larger investment.",
+   "image": null,
+   "imageCredit": null
+  },
+  {
+   "id": "PWC003",
+   "name": "Prince William County Public Safety Training Center",
+   "jurisdiction": "Prince William",
+   "type": "public_safety",
+   "lat": 38.663726,
+   "lon": -77.585658,
+   "rank": 12,
+   "score": 32.8,
+   "tier": "Low public-priority / special-use",
+   "tierKey": "special",
+   "confidence": "Low",
+   "starter": 2,
+   "pathway": 2,
+   "waitMean": 0.8,
+   "waitPeak": 0.7,
+   "note": "Limited or non-public access means port planning should wait until the use case is confirmed.",
+   "image": "img/sites/PWC003.jpg",
+   "imageCredit": "USGS NAIP Plus (public domain)"
+  }
+ ],
+ "horizons": [
+  {
+   "year": 2026,
+   "scenario": "baseline",
+   "active": 25,
+   "pathway": 48
+  },
+  {
+   "year": 2036,
+   "scenario": "base",
+   "active": 35,
+   "pathway": 48
+  },
+  {
+   "year": 2036,
+   "scenario": "high",
+   "active": 44,
+   "pathway": 48
+  },
+  {
+   "year": 2036,
+   "scenario": "stress_combined",
+   "active": 44,
+   "pathway": 48
+  },
+  {
+   "year": 2046,
+   "scenario": "base",
+   "active": 44,
+   "pathway": 48
+  },
+  {
+   "year": 2046,
+   "scenario": "high",
+   "active": 48,
+   "pathway": 48
+  },
+  {
+   "year": 2046,
+   "scenario": "stress_combined",
+   "active": 48,
+   "pathway": 48
+  },
+  {
+   "year": 2056,
+   "scenario": "base",
+   "active": 44,
+   "pathway": 48
+  },
+  {
+   "year": 2056,
+   "scenario": "high",
+   "active": 48,
+   "pathway": 48
+  },
+  {
+   "year": 2056,
+   "scenario": "stress_combined",
+   "active": 48,
+   "pathway": 48
+  }
+ ],
+ "costs": [
+  {
+   "year": 2036,
+   "case": "DEF",
+   "npv": 617403.0,
+   "avoided": 0.0
+  },
+  {
+   "year": 2036,
+   "case": "OVB",
+   "npv": 1872578.0,
+   "avoided": 0.0
+  },
+  {
+   "year": 2036,
+   "case": "STG",
+   "npv": 1560499.0,
+   "avoided": 312079.0
+  },
+  {
+   "year": 2046,
+   "case": "DEF",
+   "npv": 617403.0,
+   "avoided": 0.0
+  },
+  {
+   "year": 2046,
+   "case": "OVB",
+   "npv": 2635638.0,
+   "avoided": 0.0
+  },
+  {
+   "year": 2046,
+   "case": "STG",
+   "npv": 2294469.0,
+   "avoided": 341169.0
+  },
+  {
+   "year": 2056,
+   "case": "DEF",
+   "npv": 617403.0,
+   "avoided": 0.0
+  },
+  {
+   "year": 2056,
+   "case": "OVB",
+   "npv": 3407606.0,
+   "avoided": 0.0
+  },
+  {
+   "year": 2056,
+   "case": "STG",
+   "npv": 3014200.0,
+   "avoided": 393406.0
+  }
+ ],
+ "emissions": [
+  {
+   "year": 2026,
+   "scenario": "baseline",
+   "tonnes": 43.365
+  },
+  {
+   "year": 2036,
+   "scenario": "base",
+   "tonnes": 82.385
+  },
+  {
+   "year": 2036,
+   "scenario": "high",
+   "tonnes": 112.746
+  },
+  {
+   "year": 2036,
+   "scenario": "stress_combined",
+   "tonnes": 129.649
+  },
+  {
+   "year": 2046,
+   "scenario": "base",
+   "tonnes": 130.089
+  },
+  {
+   "year": 2046,
+   "scenario": "high",
+   "tonnes": 195.131
+  },
+  {
+   "year": 2046,
+   "scenario": "stress_combined",
+   "tonnes": 224.401
+  },
+  {
+   "year": 2056,
+   "scenario": "base",
+   "tonnes": 173.45
+  },
+  {
+   "year": 2056,
+   "scenario": "high",
+   "tonnes": 260.179
+  },
+  {
+   "year": 2056,
+   "scenario": "stress_combined",
+   "tonnes": 299.2
+  }
+ ]
+}

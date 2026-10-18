@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Overview · EV Site Readiness</title>
+<meta name="description" content="A planning-support screening of 12 public sites in Fairfax and Prince William, Virginia, for starter EV charging now and room to grow later.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hig.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/pages/home.css">
+</head>
+<body class="shell is-grouped" data-page="home">
+<a class="skip-link" href="#main">Skip to Content</a>
+<div id="nav"></div>
+<main id="main" class="main" tabindex="-1">
+  <div class="page home">
+    <header class="page-head">
+      <span class="page-head__eyebrow">Fairfax and Prince William, Virginia</span>
+      <h1 class="page-head__title">Where public EV charging can start</h1>
+      <p class="page-head__lede">A screening of 12 public sites (libraries, government centers, a commuter garage and a training center) for starter EV charging now, with room to grow later.</p>
+    </header>
+
+    <aside class="notice home-notice" aria-labelledby="notice-title">
+      <span class="notice__icon"><i data-icon="info.circle" data-size="22"></i></span>
+      <div class="home-notice__text">
+        <h2 class="notice__title" id="notice-title">What this site is, and is not</h2>
+        <p class="notice__body">A planning-support prototype. It is not engineering advice, a permit, or a utility interconnection decision, and no site shown here is approved. Electrical capacity is an unverified placeholder at all twelve sites, so no ranking here is a feasibility finding.</p>
+        <p class="notice__body home-notice__more"><a href="method.html">How the Screening Works</a></p>
+      </div>
+    </aside>
+
+    <section class="section home-glance" aria-labelledby="glance-title">
+      <h2 class="hig-visually-hidden" id="glance-title">Summary</h2>
+      <div class="home-widgets">
+        <a class="hig-widget hig-widget--systemSmall hig-widget--iphone hig-widget--fullColor hig-pressable home-widget home-widget--sites" href="sites.html">
+          <div class="hig-widget__surface"><div class="hig-widget__content">
+            <p class="home-widget__head"><span class="home-widget__glyph" style="--glyph: var(--system-blue)"><i data-icon="location" data-size="16"></i></span>Sites</p>
+            <p class="home-widget__figure num" data-k="sites">12</p>
+            <p class="home-widget__caption">sites screened</p>
+            <p class="home-widget__foot num" data-k="juris">4 Fairfax · 8 Prince William</p>
+          </div></div>
+        </a>
+
+        <a class="hig-widget hig-widget--systemSmall hig-widget--iphone hig-widget--fullColor hig-pressable home-widget home-widget--tier" href="sites.html">
+          <div class="hig-widget__surface"><div class="hig-widget__content">
+            <p class="home-widget__head"><span class="tier tier--tier1 home-widget__tiermark"><span class="tier__mark" aria-hidden="true"></span></span>Tier 1</p>
+            <p class="home-widget__figure num" data-k="tier1">2</p>
+            <p class="home-widget__caption">advance to site screening</p>
+            <p class="home-widget__foot num" data-k="tier1-ids">FFX004 · FFX002</p>
+          </div></div>
+        </a>
+
+        <a class="hig-widget hig-widget--systemMedium hig-widget--iphone hig-widget--fullColor hig-pressable home-widget home-widget--ports" href="outlook.html">
+          <div class="hig-widget__surface"><div class="hig-widget__content">
+            <p class="home-widget__head"><span class="home-widget__glyph" style="--glyph: var(--system-green)"><i data-icon="bolt" data-size="16"></i></span>Charging ports</p>
+            <div class="home-widget__pair">
+              <p class="home-widget__stat"><span class="home-widget__figure num" data-k="starter">25</span><span class="home-widget__caption">starter ports now</span></p>
+              <p class="home-widget__stat"><span class="home-widget__figure home-widget__figure--soft num" data-k="pathway">48</span><span class="home-widget__caption">future-ready (pathway)</span></p>
+            </div>
+            <div class="hig-gauge hig-gauge--linear hig-gauge--style-capacity hig-gauge--ios hig-gauge--tinted home-widget__meter" data-k-meter="ports"
+                 role="meter" aria-valuenow="25" aria-valuemin="0" aria-valuemax="48" aria-valuetext="25 of 48" aria-label="Starter ports as a share of future-ready ports" style="--hig-gauge-f: 0.5208">
+              <div class="hig-gauge__row" aria-hidden="true"><span class="hig-gauge__bar"><span class="hig-gauge__bar-fill" style="background: var(--system-green)"></span></span></div>
+            </div>
+          </div></div>
+        </a>
+
+        <a class="hig-widget hig-widget--systemMedium hig-widget--iphone hig-widget--fullColor hig-pressable home-widget home-widget--conf" href="method.html">
+          <div class="hig-widget__surface"><div class="hig-widget__content">
+            <p class="home-widget__head"><span class="home-widget__glyph" style="--glyph: var(--system-orange)"><i data-icon="exclamationmark.triangle" data-size="16" data-title="Warning"></i></span>Data confidence</p>
+            <p class="home-widget__line"><span class="home-widget__figure" data-k="conf">Low</span><span class="home-widget__caption num">at <span data-k="low">12</span> of <span data-k="total">12</span> sites</span></p>
+            <p class="home-widget__foot">Electrical capacity is an unverified placeholder at every site. Read rankings as screening signals.</p>
+          </div></div>
+        </a>
+      </div>
+      <p class="footnote home-glance__note">Port totals follow the study's port plan. The Public Safety Training Center's 2 starter ports are counted as a placeholder, not a recommendation. <span id="data-status" role="status"></span></p>
+    </section>
+
+    <section class="section" aria-labelledby="top-title">
+      <div class="section__head">
+        <h2 class="section__title" id="top-title">Top candidates</h2>
+        <a class="section__aside home-seeall" href="sites.html">All Sites</a>
+      </div>
+      <p class="section__intro">The three highest-ranked sites. Scores run from 0 to 100; ports are starter ports now and future-ready ports later.</p>
+      <div class="home-cands" id="top-candidates">
+        <article class="home-cand" aria-labelledby="cand-FFX004"><div class="home-cand__media"><img src="img/sites/FFX004.jpg" alt="Fairfax County Government Center, main entrance" width="720" height="840" loading="lazy" decoding="async"></div><div class="home-cand__body"><p class="home-cand__rank num">Rank 1</p><h3 class="home-cand__name" id="cand-FFX004"><a class="home-cand__link" href="sites.html#FFX004">Fairfax County Government Center</a></h3><p class="home-cand__meta">FFX004 · Fairfax · Government office</p><div class="home-cand__stats"><div class="hig-gauge hig-gauge--circular hig-gauge--style-capacity hig-gauge--ios hig-gauge--tinted" role="meter" aria-valuenow="53.4" aria-valuemin="0" aria-valuemax="100" aria-valuetext="53.4 out of 100" aria-label="Readiness score"><svg class="hig-gauge__dial" viewBox="0 0 58 58" width="58" height="58" aria-hidden="true" focusable="false"><defs><mask id="gauge-mask-FFX004" maskUnits="userSpaceOnUse" x="0" y="0" width="58" height="58"><rect width="58" height="58" fill="#fff"/><path d="M29.000 2.760A26.24 26.24 0 1 1 23.437 54.644" fill="none" stroke="#000" stroke-width="5.52" stroke-linecap="round"/></mask></defs><circle class="hig-gauge__track hig-gauge__track--capacity" cx="29" cy="29" r="26.24" fill="none" stroke-width="5.52" mask="url(#gauge-mask-FFX004)"/><path class="hig-gauge__fill" d="M29.000 2.760A26.24 26.24 0 1 1 23.437 54.644" fill="none" stroke-width="5.52" stroke-linecap="round" style="stroke: var(--system-green)"/></svg><span class="hig-gauge__value" aria-hidden="true">53.4</span></div><div class="home-cand__facts"><span class="tier tier--tier1 tier--pill"><span class="tier__mark" aria-hidden="true"></span>Tier 1</span><p class="home-cand__ports num"><span class="hig-visually-hidden">Ports: </span>3 now · 8 future</p></div></div><p class="home-cand__credit">Image: Antony-22, CC BY-SA 4.0, via Wikimedia Commons</p></div></article>
+        <article class="home-cand" aria-labelledby="cand-FFX002"><div class="home-cand__media"><img src="img/sites/FFX002.jpg" alt="Aerial view of City of Fairfax Regional Library" width="720" height="840" loading="lazy" decoding="async"></div><div class="home-cand__body"><p class="home-cand__rank num">Rank 2</p><h3 class="home-cand__name" id="cand-FFX002"><a class="home-cand__link" href="sites.html#FFX002">City of Fairfax Regional Library</a></h3><p class="home-cand__meta">FFX002 · Fairfax · Library</p><div class="home-cand__stats"><div class="hig-gauge hig-gauge--circular hig-gauge--style-capacity hig-gauge--ios hig-gauge--tinted" role="meter" aria-valuenow="51.8" aria-valuemin="0" aria-valuemax="100" aria-valuetext="51.8 out of 100" aria-label="Readiness score"><svg class="hig-gauge__dial" viewBox="0 0 58 58" width="58" height="58" aria-hidden="true" focusable="false"><defs><mask id="gauge-mask-FFX002" maskUnits="userSpaceOnUse" x="0" y="0" width="58" height="58"><rect width="58" height="58" fill="#fff"/><path d="M29.000 2.760A26.24 26.24 0 1 1 26.039 55.072" fill="none" stroke="#000" stroke-width="5.52" stroke-linecap="round"/></mask></defs><circle class="hig-gauge__track hig-gauge__track--capacity" cx="29" cy="29" r="26.24" fill="none" stroke-width="5.52" mask="url(#gauge-mask-FFX002)"/><path class="hig-gauge__fill" d="M29.000 2.760A26.24 26.24 0 1 1 26.039 55.072" fill="none" stroke-width="5.52" stroke-linecap="round" style="stroke: var(--system-green)"/></svg><span class="hig-gauge__value" aria-hidden="true">51.8</span></div><div class="home-cand__facts"><span class="tier tier--tier1 tier--pill"><span class="tier__mark" aria-hidden="true"></span>Tier 1</span><p class="home-cand__ports num"><span class="hig-visually-hidden">Ports: </span>2 now · 8 future</p></div></div><p class="home-cand__credit">Image: USGS NAIP Plus (public domain)</p></div></article>
+        <article class="home-cand" aria-labelledby="cand-PWC002"><div class="home-cand__media"><img src="img/sites/PWC002.jpg" alt="Aerial view of Neabsco-Potomac Commuter Garage" width="720" height="840" loading="lazy" decoding="async"></div><div class="home-cand__body"><p class="home-cand__rank num">Rank 3</p><h3 class="home-cand__name" id="cand-PWC002"><a class="home-cand__link" href="sites.html#PWC002">Neabsco-Potomac Commuter Garage</a></h3><p class="home-cand__meta">PWC002 · Prince William · Commuter garage</p><div class="home-cand__stats"><div class="hig-gauge hig-gauge--circular hig-gauge--style-capacity hig-gauge--ios hig-gauge--tinted" role="meter" aria-valuenow="51.1" aria-valuemin="0" aria-valuemax="100" aria-valuetext="51.1 out of 100" aria-label="Readiness score"><svg class="hig-gauge__dial" viewBox="0 0 58 58" width="58" height="58" aria-hidden="true" focusable="false"><defs><mask id="gauge-mask-PWC002" maskUnits="userSpaceOnUse" x="0" y="0" width="58" height="58"><rect width="58" height="58" fill="#fff"/><path d="M29.000 2.760A26.24 26.24 0 1 1 27.188 55.177" fill="none" stroke="#000" stroke-width="5.52" stroke-linecap="round"/></mask></defs><circle class="hig-gauge__track hig-gauge__track--capacity" cx="29" cy="29" r="26.24" fill="none" stroke-width="5.52" mask="url(#gauge-mask-PWC002)"/><path class="hig-gauge__fill" d="M29.000 2.760A26.24 26.24 0 1 1 27.188 55.177" fill="none" stroke-width="5.52" stroke-linecap="round" style="stroke: var(--system-orange)"/></svg><span class="hig-gauge__value" aria-hidden="true">51.1</span></div><div class="home-cand__facts"><span class="tier tier--high-review tier--pill"><span class="tier__mark" aria-hidden="true"></span>High review</span><p class="home-cand__ports num"><span class="hig-visually-hidden">Ports: </span>2 now · 3 future</p></div></div><p class="home-cand__credit">Image: USGS NAIP Plus (public domain)</p></div></article>
+      </div>
+    </section>
+
+    <div class="home-split">
+      <section class="section" aria-labelledby="say-title">
+        <div class="section__head"><h2 class="section__title" id="say-title">What the results say</h2></div>
+        <div class="hig-list hig-list--ios hig-list--insetGrouped home-list">
+          <div class="hig-list-section" role="group" aria-labelledby="say-h1">
+            <div class="hig-list-section__header hig-list-section__header--nested"><span class="hig-list-section__title" id="say-h1">Strongest signals</span></div>
+            <ul class="hig-list-section__rows">
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#FFX004" aria-describedby="say-s-FFX004 say-m-FFX004">Fairfax County Government Center</a>
+                    <span class="hig-list-row__subtitle" id="say-s-FFX004">The strongest Tier 1 signal, ranked first.</span>
+                    <span class="home-list__meta" id="say-m-FFX004" data-meta="FFX004"><span class="tier tier--tier1"><span class="tier__mark" aria-hidden="true"></span>Tier 1</span><span class="home-list__facts num">FFX004 · Rank 1 · 53.4</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#FFX002" aria-describedby="say-s-FFX002 say-m-FFX002">City of Fairfax Regional Library</a>
+                    <span class="hig-list-row__subtitle" id="say-s-FFX002">The other Tier 1 signal, close behind.</span>
+                    <span class="home-list__meta" id="say-m-FFX002" data-meta="FFX002"><span class="tier tier--tier1"><span class="tier__mark" aria-hidden="true"></span>Tier 1</span><span class="home-list__facts num">FFX002 · Rank 2 · 51.8</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#PWC006" aria-describedby="say-s-PWC006 say-m-PWC006">Bull Run Library</a>
+                    <span class="hig-list-row__subtitle" id="say-s-PWC006">The strongest Prince William library.</span>
+                    <span class="home-list__meta" id="say-m-PWC006" data-meta="PWC006"><span class="tier tier--tier2"><span class="tier__mark" aria-hidden="true"></span>Tier 2</span><span class="home-list__facts num">PWC006 · Rank 4 · 50.2</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hig-list-section" role="group" aria-labelledby="say-h2">
+            <div class="hig-list-section__header hig-list-section__header--nested"><span class="hig-list-section__title" id="say-h2">Review first</span></div>
+            <ul class="hig-list-section__rows">
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#PWC002" aria-describedby="say-s-PWC002 say-m-PWC002">Neabsco-Potomac Commuter Garage</a>
+                    <span class="hig-list-row__subtitle" id="say-s-PWC002">High review because of its peak waits: <span class="num" data-k="pwc002-peak">42.4</span> minutes at peak (mean <span class="num" data-k="pwc002-mean">8.0</span>). Settle electrical and AHJ questions before any expansion.</span>
+                    <span class="home-list__meta" id="say-m-PWC002" data-meta="PWC002"><span class="tier tier--high-review"><span class="tier__mark" aria-hidden="true"></span>High review</span><span class="home-list__facts num">PWC002 · Rank 3 · 51.1</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hig-list-section" role="group" aria-labelledby="say-h3">
+            <div class="hig-list-section__header hig-list-section__header--nested"><span class="hig-list-section__title" id="say-h3">Monitor</span></div>
+            <ul class="hig-list-section__rows">
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#PWC008" aria-describedby="say-s-PWC008 say-m-PWC008">Potomac Library</a>
+                    <span class="hig-list-row__subtitle" id="say-s-PWC008">Nearby charging supply is already high. Monitor rather than expand now.</span>
+                    <span class="home-list__meta" id="say-m-PWC008" data-meta="PWC008"><span class="tier tier--tier3"><span class="tier__mark" aria-hidden="true"></span>Tier 3</span><span class="home-list__facts num">PWC008 · Rank 10 · 41.8</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#PWC005" aria-describedby="say-s-PWC005 say-m-PWC005">Haymarket Gainesville Library</a>
+                    <span class="hig-list-row__subtitle" id="say-s-PWC005">Lower current readiness. A small pilot or monitoring comes before larger investment.</span>
+                    <span class="home-list__meta" id="say-m-PWC005" data-meta="PWC005"><span class="tier tier--tier3"><span class="tier__mark" aria-hidden="true"></span>Tier 3</span><span class="home-list__facts num">PWC005 · Rank 11 · 39.0</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hig-list-section" role="group" aria-labelledby="say-h4">
+            <div class="hig-list-section__header hig-list-section__header--nested"><span class="hig-list-section__title" id="say-h4">Do not advance</span></div>
+            <ul class="hig-list-section__rows">
+              <li class="hig-list-row hig-list-row--subtitle hig-list-row--actionable">
+                <div class="hig-list-row__content"><span class="hig-list-row__body">
+                  <span class="hig-list-row__text">
+                    <a class="hig-list-row__action hig-list-row__title" href="sites.html#PWC003" aria-describedby="say-s-PWC003 say-m-PWC003">Prince William County Public Safety Training Center</a>
+                    <span class="hig-list-row__subtitle" id="say-s-PWC003">Limited public access. Hold any public buildout unless the public-access or fleet-use case changes.</span>
+                    <span class="home-list__meta" id="say-m-PWC003" data-meta="PWC003"><span class="tier tier--special"><span class="tier__mark" aria-hidden="true"></span>Special use</span><span class="home-list__facts num">PWC003 · Rank 12 · 32.8</span></span>
+                  </span>
+                  <span class="hig-list-row__trailing"><span class="hig-list-row__chevron" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                </span></div>
+              </li>
+            </ul>
+            <div class="hig-list-section__footer">Waits are modelled under the base case. No site has been observed in operation.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="change-title">
+        <div class="section__head"><h2 class="section__title" id="change-title">The ranking changed</h2></div>
+        <div class="card home-change">
+          <ol class="home-change__steps">
+            <li class="home-change__step">
+              <span class="home-change__dot" aria-hidden="true"></span>
+              <span class="home-change__label">Earlier</span>
+              <span class="home-change__model">legacy_v2 ranking</span>
+              <span class="home-change__result">FFX002 first at <span class="num">58.8</span></span>
+            </li>
+            <li class="home-change__step home-change__step--now">
+              <span class="home-change__dot" aria-hidden="true"></span>
+              <span class="home-change__label">Now, canonical</span>
+              <span class="home-change__model">milestone2_v3 ranking</span>
+              <span class="home-change__result"><span data-k="first-id">FFX004</span> first at <span class="num" data-k="first-score">53.4</span>, FFX002 <span data-k="ffx002-rank">second</span> at <span class="num" data-k="ffx002-score">51.8</span></span>
+            </li>
+          </ol>
+          <p class="home-change__text">The canonical model scores each site against fixed anchors instead of against the other sites. The change is recorded here, not made silently. Neither order is a feasibility finding.</p>
+          <a class="home-change__link" href="method.html">Read the Method <span aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+        </div>
+      </section>
+    </div>
+
+    <section class="section" aria-labelledby="nav-title">
+      <div class="section__head"><h2 class="section__title" id="nav-title">Find your way</h2></div>
+      <ul class="home-nav" role="list">
+        <li><a class="card card--link hig-pressable home-nav__card" href="sites.html">
+          <span class="home-nav__icon" aria-hidden="true"><i data-icon="location" data-size="22"></i></span>
+          <span class="home-nav__text"><span class="home-nav__title">Sites</span><span class="home-nav__desc">All 12 sites with score, tier, ports and notes.</span></span>
+          <span class="home-nav__chev" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+        <li><a class="card card--link hig-pressable home-nav__card" href="compare.html">
+          <span class="home-nav__icon" aria-hidden="true"><i data-icon="chart.bar" data-size="22"></i></span>
+          <span class="home-nav__text"><span class="home-nav__title">Compare</span><span class="home-nav__desc">Line sites up side by side on score and ports.</span></span>
+          <span class="home-nav__chev" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+        <li><a class="card card--link hig-pressable home-nav__card" href="outlook.html">
+          <span class="home-nav__icon" aria-hidden="true"><i data-icon="calendar" data-size="22"></i></span>
+          <span class="home-nav__text"><span class="home-nav__title">Outlook</span><span class="home-nav__desc">Ports, costs and avoided emissions out to 2056.</span></span>
+          <span class="home-nav__chev" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+        <li><a class="card card--link hig-pressable home-nav__card" href="method.html">
+          <span class="home-nav__icon" aria-hidden="true"><i data-icon="list.bullet" data-size="22"></i></span>
+          <span class="home-nav__text"><span class="home-nav__title">Method</span><span class="home-nav__desc">How sites are scored, tiered and sized.</span></span>
+          <span class="home-nav__chev" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+        <li><a class="card card--link hig-pressable home-nav__card" href="explore.html">
+          <span class="home-nav__icon" aria-hidden="true"><i data-icon="map" data-size="22"></i></span>
+          <span class="home-nav__text"><span class="home-nav__title">Explore Data</span><span class="home-nav__desc">Interactive Tableau views of the model outputs.</span></span>
+          <span class="home-nav__chev" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+        <li><a class="card card--link hig-pressable home-nav__card" href="assistant.html">
+          <span class="home-nav__icon" aria-hidden="true"><i data-icon="bubble" data-size="22"></i></span>
+          <span class="home-nav__text"><span class="home-nav__title">Assistant</span><span class="home-nav__desc">Ask about the model, method and results.</span></span>
+          <span class="home-nav__chev" aria-hidden="true"><svg class="hig-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" data-rtl-flip="" focusable="false"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+      </ul>
+    </section>
+
+  </div>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/home.js"></script>
+</body>
+</html>
