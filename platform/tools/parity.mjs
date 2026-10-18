@@ -8,7 +8,7 @@
 // are the one field left out. Exits non-zero on any mismatch.
 //
 // Needs: node platform/tools/fetch_runtime.mjs, venv/bin/python platform/tools/build_engine.py
-// Usage: node platform/tools/parity.mjs
+// Usage: node platform/tools/parity.mjs   (VENV_PY=<python> to choose the native interpreter)
 
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -71,7 +71,8 @@ async function cases() {
 }
 
 function native(casesJson) {
-  const py = join(repo, 'venv/bin/python');
+  // VENV_PY lets CI use the runner's interpreter, as scripts/verify.sh does.
+  const py = process.env.VENV_PY || join(repo, 'venv/bin/python');
   // The engine prints its own warnings to stdout; keep stdout for the result.
   const script = `${DRIVER}\nimport contextlib, sys\nwith contextlib.redirect_stdout(sys.stderr):\n    result = _drive(sys.stdin.read())\nsys.stdout.write(result)\n`;
   const r = spawnSync(py, ['-c', script], {

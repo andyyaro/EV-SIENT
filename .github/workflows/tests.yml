@@ -55,3 +55,54 @@ jobs:
         # VENV_PY points verify.sh at the runner's interpreter instead of ./venv.
         # verify.sh prints a per-gate PASS/FAIL table and exits with the failure count.
         run: VENV_PY=$(command -v python) ./scripts/verify.sh
+
+  platform:
+    # The planner runs the engine in the browser under Pyodide. This job holds the two
+    # runtimes together: the same browser_api calls, run natively and under Pyodide with
+    # exactly the files the browser gets, must agree to 1e-9 (platform/tools/parity.mjs).
+    # It also type-checks and builds the app. Python 3.14 matches Pyodide 314's Python.
+    name: Planner (browser engine parity and app build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Install the engine's dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . -c requirements-lock.txt
+
+      - name: Install the app's packages
+        working-directory: platform/app
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Cache the Pyodide download
+        # The runtime files are pinned by version and checked against their SHA-256, so a
+        # cached copy is the same bytes; this only saves about 20 MB of download per run.
+        uses: actions/cache@v6
+        with:
+          path: platform/app/.cache
+          key: pyodide-${{ hashFiles('platform/tools/fetch_runtime.mjs') }}
+
+      - name: Fetch the pinned runtime and build the engine archive
+        run: |
+          node platform/tools/fetch_runtime.mjs
+          python platform/tools/build_engine.py
+
+      - name: Native and browser engines agree
+        run: VENV_PY=$(command -v python) node platform/tools/parity.mjs
+
+      - name: Type-check and build the app
+        working-directory: platform/app
+        run: npm run build
