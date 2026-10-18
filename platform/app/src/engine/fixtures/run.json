@@ -1,0 +1,824 @@
+{
+ "runId": "milestone2_v3_20261018T230858Z",
+ "generatedAt": "2026-10-18T23:08:58.742717+00:00",
+ "asOf": "2026-10-18",
+ "mode": "milestone2_v3",
+ "elapsedSec": 0.131,
+ "totals": {
+  "sites": 6,
+  "starterPorts2026": 12,
+  "pathwayPorts": 15,
+  "highConfidenceSites": 0
+ },
+ "claims": "All values planning-support screening outputs; capacity placeholder at 6/6 sites; demand uncalibrated; costs screening-class; nothing approved.",
+ "defaults": [
+  "electrical risk: no electrical_risk.csv, so every site is 'medium', the right-sizing default - no site is held back, or let through, on electrical grounds.",
+  "site meta: no site_meta.csv, so arrivals run from 08:00 for each site's opening hours (8 h where not recorded), and the building's base load is left unknown rather than invented."
+ ],
+ "notes": [
+  "Scores use the fixed anchor set built for the reference study; they are comparable across cohorts, but anchors were not calibrated to this jurisdiction.",
+  "standards_register.csv lists the editions Virginia has adopted; confirm the editions this jurisdiction has adopted before relying on it.",
+  "CO2e uses the grid factor of the reference study's region (EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e) and costs use its screening tariff and cost classes; replace both with this jurisdiction's before quoting either."
+ ],
+ "costsWithheld": [],
+ "subscoreWeights": {
+  "demand_subscore": 0.45,
+  "feasibility_subscore": 0.3,
+  "safety_subscore": 0.15,
+  "equity_subscore": 0.1
+ },
+ "sites": [
+  {
+   "siteId": "EXC-01",
+   "name": "Example City Central Library",
+   "type": "library",
+   "lat": 45.012,
+   "lon": -100.031,
+   "rank": 1,
+   "score": 47.7,
+   "tier": "Tier 2 - promising candidate, refine data",
+   "subscores": {
+    "demand": 39.476410256410254,
+    "feasibility": 35.705380577499994,
+    "safety": 100.0,
+    "equity": 42.0
+   },
+   "confidence": {
+    "score": 18.0,
+    "level": "Low",
+    "breakdown": {
+     "electrical_service": 20.0,
+     "site_use_and_demand": 20.0,
+     "address_and_public_access": 20.0,
+     "coordinates": 20.0,
+     "parking_and_layout": 20.0,
+     "safety_review_fields": 20.0,
+     "equity_and_context": 0.0
+    }
+   },
+   "portsNow": 2,
+   "pathwayPorts": 4,
+   "capacityCap": 6,
+   "plan": "Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.",
+   "expectedSessionsDay": 2.706082,
+   "utilization": 0.1691301249999999,
+   "meanWaitMin": 2.208550524640559,
+   "installCostUsd": 60748.031496,
+   "electricalRisk": "medium",
+   "absentFields": [
+    "amenities_count_0_5mi"
+   ]
+  },
+  {
+   "siteId": "EXC-02",
+   "name": "Example City North Branch Library",
+   "type": "library",
+   "lat": 45.061,
+   "lon": -100.018,
+   "rank": 2,
+   "score": 43.4,
+   "tier": "Tier 3 - lower priority / monitor",
+   "subscores": {
+    "demand": 23.455,
+    "feasibility": 42.26727909016667,
+    "safety": 90.0,
+    "equity": 67.0
+   },
+   "confidence": {
+    "score": 18.0,
+    "level": "Low",
+    "breakdown": {
+     "electrical_service": 20.0,
+     "site_use_and_demand": 20.0,
+     "address_and_public_access": 20.0,
+     "coordinates": 20.0,
+     "parking_and_layout": 20.0,
+     "safety_review_fields": 20.0,
+     "equity_and_context": 0.0
+    }
+   },
+   "portsNow": 2,
+   "pathwayPorts": 2,
+   "capacityCap": 4,
+   "plan": "Lower current readiness suggests a small pilot or monitoring approach before larger investment.",
+   "expectedSessionsDay": 0.799208,
+   "utilization": 0.099901,
+   "meanWaitMin": 6.659334139911277,
+   "installCostUsd": 49548.5564304,
+   "electricalRisk": "medium",
+   "absentFields": [
+    "amenities_count_0_5mi"
+   ]
+  },
+  {
+   "siteId": "EXC-05",
+   "name": "Example City Transit Garage",
+   "type": "garage",
+   "lat": 45.02,
+   "lon": -100.002,
+   "rank": 3,
+   "score": 42.5,
+   "tier": "Low public-priority / special-use",
+   "subscores": {
+    "demand": 26.233,
+    "feasibility": 50.11811023624999,
+    "safety": 85.0,
+    "equity": 28.999999999999996
+   },
+   "confidence": {
+    "score": 15.0,
+    "level": "Low",
+    "breakdown": {
+     "electrical_service": 20.0,
+     "site_use_and_demand": 20.0,
+     "address_and_public_access": 20.0,
+     "coordinates": 20.0,
+     "parking_and_layout": 0.0,
+     "safety_review_fields": 20.0,
+     "equity_and_context": 0.0
+    }
+   },
+   "portsNow": 2,
+   "pathwayPorts": 2,
+   "capacityCap": 12,
+   "plan": "Limited or non-public access means port planning should wait until the use case is confirmed.",
+   "expectedSessionsDay": 0.443772,
+   "utilization": 0.036981,
+   "meanWaitMin": 0.3286721368009067,
+   "installCostUsd": 35249.343832,
+   "electricalRisk": "medium",
+   "absentFields": [
+    "garage_enclosed",
+    "amenities_count_0_5mi"
+   ]
+  },
+  {
+   "siteId": "EXC-03",
+   "name": "Example City Hall Annex",
+   "type": "office",
+   "lat": 45.004,
+   "lon": -100.052,
+   "rank": 4,
+   "score": 42.2,
+   "tier": "Tier 3 - lower priority / monitor",
+   "subscores": {
+    "demand": 41.63858974358974,
+    "feasibility": 18.964785651916667,
+    "safety": 95.0,
+    "equity": 35.0
+   },
+   "confidence": {
+    "score": 11.0,
+    "level": "Low",
+    "breakdown": {
+     "electrical_service": 20.0,
+     "site_use_and_demand": 0.0,
+     "address_and_public_access": 20.0,
+     "coordinates": 20.0,
+     "parking_and_layout": 20.0,
+     "safety_review_fields": 0.0,
+     "equity_and_context": 0.0
+    }
+   },
+   "portsNow": 2,
+   "pathwayPorts": 3,
+   "capacityCap": 12,
+   "plan": "Lower current readiness suggests a small pilot or monitoring approach before larger investment.",
+   "expectedSessionsDay": 0.977437,
+   "utilization": 0.1629061666666666,
+   "meanWaitMin": 4.907143269706834,
+   "installCostUsd": 86196.8503936,
+   "electricalRisk": "medium",
+   "absentFields": [
+    "stormwater_risk",
+    "employees_day",
+    "amenities_count_0_5mi"
+   ]
+  },
+  {
+   "siteId": "EXC-04",
+   "name": "Example City Recreation Center",
+   "type": "recreation",
+   "lat": 44.981,
+   "lon": -100.077,
+   "rank": 5,
+   "score": 41.1,
+   "tier": "Tier 3 - lower priority / monitor",
+   "subscores": {
+    "demand": 29.71897435897436,
+    "feasibility": 27.940507436666667,
+    "safety": 90.0,
+    "equity": 57.99999999999999
+   },
+   "confidence": {
+    "score": 15.0,
+    "level": "Low",
+    "breakdown": {
+     "electrical_service": 20.0,
+     "site_use_and_demand": 20.0,
+     "address_and_public_access": 20.0,
+     "coordinates": 20.0,
+     "parking_and_layout": 0.0,
+     "safety_review_fields": 20.0,
+     "equity_and_context": 0.0
+    }
+   },
+   "portsNow": 2,
+   "pathwayPorts": 2,
+   "capacityCap": 2,
+   "plan": "Lower current readiness suggests a small pilot or monitoring approach before larger investment.",
+   "expectedSessionsDay": 1.256022,
+   "utilization": 0.0724628076923076,
+   "meanWaitMin": 0.4750717996755093,
+   "installCostUsd": 72997.375328,
+   "electricalRisk": "medium",
+   "absentFields": [
+    "parking_spaces",
+    "amenities_count_0_5mi"
+   ]
+  },
+  {
+   "siteId": "EXC-06",
+   "name": "Example City Riverside Park",
+   "type": "park",
+   "lat": 44.995,
+   "lon": -100.11,
+   "rank": 6,
+   "score": 26.6,
+   "tier": "Tier 3 - lower priority / monitor",
+   "subscores": {
+    "demand": 26.314487179487177,
+    "feasibility": 0.0,
+    "safety": 50.0,
+    "equity": 73.0
+   },
+   "confidence": {
+    "score": 18.0,
+    "level": "Low",
+    "breakdown": {
+     "electrical_service": 20.0,
+     "site_use_and_demand": 20.0,
+     "address_and_public_access": 20.0,
+     "coordinates": 20.0,
+     "parking_and_layout": 20.0,
+     "safety_review_fields": 20.0,
+     "equity_and_context": 0.0
+    }
+   },
+   "portsNow": 2,
+   "pathwayPorts": 2,
+   "capacityCap": 4,
+   "plan": "Lower current readiness suggests a small pilot or monitoring approach before larger investment.",
+   "expectedSessionsDay": 0.978704,
+   "utilization": 0.0699074285714285,
+   "meanWaitMin": 0.5893258925966928,
+   "installCostUsd": 135244.094488,
+   "electricalRisk": "medium",
+   "absentFields": [
+    "amenities_count_0_5mi"
+   ]
+  }
+ ],
+ "horizons": [
+  {
+   "siteId": "EXC-01",
+   "year": 2026,
+   "case": "baseline",
+   "portsActive": 2,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2036,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2036,
+   "case": "high",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2036,
+   "case": "stress_combined",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2046,
+   "case": "base",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2046,
+   "case": "high",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2046,
+   "case": "stress_combined",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2056,
+   "case": "base",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2056,
+   "case": "high",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-01",
+   "year": 2056,
+   "case": "stress_combined",
+   "portsActive": 4,
+   "portsPathway": 4,
+   "capacityCap": 6,
+   "strategy": "starter_install_with_expandable_design"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2026,
+   "case": "baseline",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2036,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2036,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2036,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2046,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2046,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2046,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2056,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2056,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-02",
+   "year": 2056,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2026,
+   "case": "baseline",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2036,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2036,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2036,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2046,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2046,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2046,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2056,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2056,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-05",
+   "year": 2056,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 12,
+   "strategy": "do_not_advance_general_public_buildout"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2026,
+   "case": "baseline",
+   "portsActive": 2,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2036,
+   "case": "base",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2036,
+   "case": "high",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2036,
+   "case": "stress_combined",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2046,
+   "case": "base",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2046,
+   "case": "high",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2046,
+   "case": "stress_combined",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2056,
+   "case": "base",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2056,
+   "case": "high",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-03",
+   "year": 2056,
+   "case": "stress_combined",
+   "portsActive": 3,
+   "portsPathway": 3,
+   "capacityCap": 12,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2026,
+   "case": "baseline",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2036,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2036,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2036,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2046,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2046,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2046,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2056,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2056,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-04",
+   "year": 2056,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 2,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2026,
+   "case": "baseline",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2036,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2036,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2036,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2046,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2046,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2046,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2056,
+   "case": "base",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2056,
+   "case": "high",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  },
+  {
+   "siteId": "EXC-06",
+   "year": 2056,
+   "case": "stress_combined",
+   "portsActive": 2,
+   "portsPathway": 2,
+   "capacityCap": 4,
+   "strategy": "monitor_or_small_pilot"
+  }
+ ]
+}

@@ -1,0 +1,161 @@
+/* Foundations shared by every component. Colors, radii, sizes, blurs and shadows are tokens.json variables;
+   literal px values below are kit measurements that have no token of their own, each cited. */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--background-primary);
+  color: var(--label-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+.hig-icon { display: inline-block; flex: none; vertical-align: middle; }
+/* HIG Right to left: mirror glyphs that show reading direction or forward/backward motion. */
+[dir="rtl"] .hig-icon[data-rtl-flip] { transform: scaleX(-1); }
+.hig-visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Keyboard focus: a solid accent ring outside the control (keyboardFocusIndicatorColor follows the accent). */
+.hig-focus:focus-visible,
+.hig-glass--interactive:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Pressed feedback from the kit's "Clicked" control layer styles: an 8% black (light) / white (dark) overlay. */
+/* Scroll containers made keyboard-focusable by useScrollFocusable: an inset ring so it never spills past the pane. */
+.hig-scroll-focus:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
+
+.hig-pressable { position: relative; }
+.hig-pressable::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--pressed-overlay); opacity: 0; transition: opacity 80ms linear;
+}
+.hig-pressable:active:not(:disabled):not([aria-disabled="true"])::after { opacity: 1; }
+
+/* ---------- Liquid Glass (functional layer only) ----------
+   Web approximation of the iOS 27 kit layer styles. A glass element blurs its backdrop (backdrop-filter), which also
+   isolates its own layers: they cannot blend with what is behind. So every kit fill is drawn with normal blending, in
+   the form that gives the kit's result: Regular glass draws its tint and shade; Small glass, whose four kit fills add
+   up to "backdrop x 0.45 + 132" in light, draws one white fill over a backdrop dimmed to 93.6%; the kit's
+   plus-lighter / plus-darker rim lights become translucent white / black inner shadows (shadow-glass-*-rim) on
+   ::after, above the fills, and its outer edges become shadow-glass-*-edge. Refraction and lensing are not drawn.
+
+   Appearance follows the nearest data-theme, so <Glass data-theme="light"> (or "dark") on one element works: the kit
+   flips small glass between light and dark with the content beneath it, which a page cannot measure: set it where
+   you know the content (bright photo under dark-mode glass, say). */
+:root, [data-theme^="light"] {
+  --hig-glass-backdrop: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+  --hig-glass-small-backdrop: blur(var(--blur-glass-small)) saturate(var(--saturate-glass-small)) brightness(0.936);
+}
+[data-theme^="dark"] {
+  --hig-glass-backdrop: blur(var(--blur-glass)) saturate(1.2);           /* kit Dark Regular - Large: saturation 1.2 */
+  --hig-glass-small-backdrop: blur(var(--blur-glass-small)) saturate(1); /* kit Dark Regular - Small: saturation 1 */
+}
+.hig-glass {
+  position: relative;
+  z-index: 0; /* own stacking context, so the -1 fill layers sit above the backdrop and below the content */
+  color: var(--glass-label-primary);
+  border-radius: var(--radius-glass);
+  -webkit-backdrop-filter: var(--hig-glass-backdrop);
+  backdrop-filter: var(--hig-glass-backdrop);
+  box-shadow: var(--shadow-glass), var(--shadow-glass-edge);
+}
+.hig-glass::before,
+.hig-glass::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+}
+/* fills (bottom layer, ::before) */
+.hig-glass--regular::before { background: linear-gradient(var(--glass-regular-shade), var(--glass-regular-shade)), var(--glass-regular-tint); }
+.hig-glass--small::before { background: var(--glass-small-fill); }
+.hig-glass--clear::before { background: var(--glass-clear-tint); }
+.hig-glass--tinted::before { background: var(--hig-glass-tint, var(--accent)); }
+/* rim lights (top layer, ::after): kit inner shadows */
+.hig-glass--regular::after { box-shadow: var(--shadow-glass-rim), var(--shadow-glass-highlight); }
+.hig-glass--small::after { box-shadow: var(--shadow-glass-small-rim); }
+.hig-glass--clear::after { box-shadow: var(--shadow-glass-clear-rim); }
+.hig-glass--tinted::after { box-shadow: var(--shadow-glass-tinted-rim); }
+
+.hig-glass--small {
+  -webkit-backdrop-filter: var(--hig-glass-small-backdrop);
+  backdrop-filter: var(--hig-glass-small-backdrop);
+  box-shadow: var(--shadow-glass-small), var(--shadow-glass-small-edge);
+}
+.hig-glass--clear {
+  color: var(--on-media);
+  -webkit-backdrop-filter: blur(var(--blur-glass-clear));
+  backdrop-filter: blur(var(--blur-glass-clear));
+  box-shadow: var(--shadow-glass-small), var(--shadow-glass-clear-edge);
+}
+/* Prominent ("stained") glass: the kit fills the shape with the tint color, then adds the glass rim. */
+.hig-glass--tinted { color: var(--on-accent); box-shadow: var(--shadow-glass-small), var(--shadow-glass-tinted-edge); }
+.hig-shape--capsule { border-radius: var(--radius-capsule); }
+.hig-shape--circle { border-radius: 50%; }
+
+/* ---------- Standard materials (content layer) ----------
+   Kit light materials put a plus-lighter white wash (w) under a normal white tint (t): (1 - t)(backdrop + w) + 255t.
+   The element isolates its layers (see glass), so the wash draws normal above the tint (together white at
+   t + w(1 - t)) and the backdrop is brightened by 1 / (1 - w): exactly the kit's result, clamping included.
+   Dark materials are a single normal black tint. Appearance follows the nearest data-theme, as with glass. */
+:root, [data-theme^="light"] {
+  --hig-material-ultrathin-backdrop: blur(45px) brightness(1.075);                                       /* kit: 45px, wash 7% */
+  --hig-material-thin-backdrop: blur(var(--blur-material)) saturate(1.455) brightness(1.053);            /* kit: sat 1.455, wash 5% */
+  --hig-material-regular-backdrop: blur(var(--blur-material)) saturate(var(--saturate-material)) brightness(1.333); /* wash 25% */
+  --hig-material-thick-backdrop: blur(var(--blur-material)) brightness(1.515);                           /* kit: sat 1, wash 34% */
+  --hig-material-mac-backdrop: blur(var(--blur-mac-material)) saturate(var(--saturate-mac-material));
+}
+[data-theme^="dark"] {
+  --hig-material-ultrathin-backdrop: blur(var(--blur-material));  /* kit Dark: 75px, saturation 1, no wash */
+  --hig-material-thin-backdrop: blur(var(--blur-material));
+  --hig-material-regular-backdrop: blur(var(--blur-material));
+  --hig-material-thick-backdrop: blur(var(--blur-material));
+  --hig-material-mac-backdrop: blur(var(--blur-mac-material)) saturate(1.9);
+}
+.hig-material { position: relative; z-index: 0; }
+.hig-material::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; }
+.hig-material--ultrathin { background: var(--material-ultrathin); -webkit-backdrop-filter: var(--hig-material-ultrathin-backdrop); backdrop-filter: var(--hig-material-ultrathin-backdrop); }
+.hig-material--ultrathin::before { background: var(--material-ultrathin-wash); }
+.hig-material--thin { background: var(--material-thin); -webkit-backdrop-filter: var(--hig-material-thin-backdrop); backdrop-filter: var(--hig-material-thin-backdrop); }
+.hig-material--thin::before { background: var(--material-thin-wash); }
+.hig-material--regular { background: var(--material-regular); -webkit-backdrop-filter: var(--hig-material-regular-backdrop); backdrop-filter: var(--hig-material-regular-backdrop); }
+.hig-material--regular::before { background: var(--material-regular-wash); }
+.hig-material--thick { background: var(--material-thick); -webkit-backdrop-filter: var(--hig-material-thick-backdrop); backdrop-filter: var(--hig-material-thick-backdrop); }
+.hig-material--thick::before { background: var(--material-thick-wash); }
+.hig-material[class*="hig-material--mac-"] { -webkit-backdrop-filter: var(--hig-material-mac-backdrop); backdrop-filter: var(--hig-material-mac-backdrop); }
+.hig-material[class*="hig-material--mac-"]::before { display: none; }
+.hig-material--mac-ultrathick { background: var(--mac-material-ultrathick); }
+.hig-material--mac-thick { background: var(--mac-material-thick); }
+.hig-material--mac-regular { background: var(--mac-material-regular); }
+.hig-material--mac-thin { background: var(--mac-material-thin); }
+.hig-material--mac-ultrathin { background: var(--mac-material-ultrathin); }
+
+/* ---------- Reduce Transparency ----------
+   The HIG (Materials): Liquid Glass "can differ in response to ... accessibility settings that reduce transparency or
+   increase contrast"; it gives no values. HIG Native swaps blur for opaque elevated fills (chosen): glass → background-elevated-secondary, iOS
+   materials → background-elevated-primary, macOS materials → mac-window-background, clear glass → a 75% black scrim
+   so white (on-media) text stays legible over media. Follows the OS setting; force it with
+   <html data-transparency="reduced">, or opt out with data-transparency="full". */
+@media (prefers-reduced-transparency: reduce) {
+  :root:not([data-transparency="full"]) .hig-glass:not(.hig-glass--tinted),
+  :root:not([data-transparency="full"]) .hig-material { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  :root:not([data-transparency="full"]) .hig-glass:not(.hig-glass--tinted):not(.hig-glass--clear)::before { background: var(--background-elevated-secondary); mix-blend-mode: normal; }
+  :root:not([data-transparency="full"]) .hig-glass:not(.hig-glass--tinted)::after { display: none; }
+  :root:not([data-transparency="full"]) .hig-glass--clear::before { background: color-mix(in srgb, var(--black) 75%, transparent); mix-blend-mode: normal; }
+  :root:not([data-transparency="full"]) .hig-glass--tinted { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  :root:not([data-transparency="full"]) .hig-material { background: var(--background-elevated-primary); }
+  :root:not([data-transparency="full"]) .hig-material::before { display: none; }
+  :root:not([data-transparency="full"]) .hig-material[class*="hig-material--mac-"] { background: var(--mac-window-background); }
+}
+:root[data-transparency="reduced"] .hig-glass:not(.hig-glass--tinted),
+:root[data-transparency="reduced"] .hig-material,
+:root[data-transparency="reduced"] .hig-glass--tinted { -webkit-backdrop-filter: none; backdrop-filter: none; }
+:root[data-transparency="reduced"] .hig-glass:not(.hig-glass--tinted):not(.hig-glass--clear)::before { background: var(--background-elevated-secondary); mix-blend-mode: normal; }
+:root[data-transparency="reduced"] .hig-glass:not(.hig-glass--tinted)::after { display: none; }
+:root[data-transparency="reduced"] .hig-glass--clear::before { background: color-mix(in srgb, var(--black) 75%, transparent); mix-blend-mode: normal; }
+:root[data-transparency="reduced"] .hig-material { background: var(--background-elevated-primary); }
+:root[data-transparency="reduced"] .hig-material::before { display: none; }
+:root[data-transparency="reduced"] .hig-material[class*="hig-material--mac-"] { background: var(--mac-window-background); }
+
+/* ---------- Preview-only helpers (used by components/<Comp>/preview.html, not by components) ---------- */

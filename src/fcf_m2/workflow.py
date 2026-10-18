@@ -20,7 +20,7 @@ import argparse
 import json
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -275,7 +275,10 @@ def _sessions_by_year(base_sessions: float, case: str) -> dict:
 
 
 def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
-        cohort_dir: Path | None = None) -> dict:
+        cohort_dir: Path | None = None, as_of: date | None = None) -> dict:
+    """Run the model. ``as_of`` is the date data confidence is judged on (its staleness
+    penalty); without it, today. The platform passes it so that one project file scores the
+    same on any day it is re-opened."""
     if cohort_dir is None:
         sites, risk, prov, meta, anchors = _load_inputs()
         info = _reference_info(sites)
@@ -350,7 +353,7 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     v3_rs = run_right_sizing_v3(planned)
     v3_rs.to_csv(out_dir / "right_sizing_v3_canonical.csv", index=False)
 
-    conf = build_confidence(prov, list(scored["site_id"]))
+    conf = build_confidence(prov, list(scored["site_id"]), today=as_of)
     conf.to_csv(out_dir / "data_confidence_v3.csv", index=False)
 
     site_table = pd.DataFrame({

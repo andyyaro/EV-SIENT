@@ -1,0 +1,312 @@
+{
+ "siteId": "EXC-06",
+ "name": "Example City Riverside Park",
+ "score": 26.6,
+ "rank": 6,
+ "accessAdjustment": 1.0,
+ "subscores": [
+  {
+   "key": "demand",
+   "label": "Demand",
+   "weight": 0.45,
+   "value": 26.314487179487177,
+   "points": 11.8415,
+   "max": 45.0
+  },
+  {
+   "key": "feasibility",
+   "label": "Feasibility",
+   "weight": 0.3,
+   "value": 0.0,
+   "points": 0.0,
+   "max": 30.0
+  },
+  {
+   "key": "safety",
+   "label": "Safety",
+   "weight": 0.15,
+   "value": 50.0,
+   "points": 7.5,
+   "max": 15.0
+  },
+  {
+   "key": "equity",
+   "label": "Equity",
+   "weight": 0.1,
+   "value": 73.0,
+   "points": 7.3,
+   "max": 10.0
+  }
+ ],
+ "drivers": [
+  {
+   "key": "nearby_households_1mi_n",
+   "label": "Households within 1 mile",
+   "subscore": "demand",
+   "weight": 0.081,
+   "credit": 0.366667,
+   "inverted": false,
+   "points": 2.97,
+   "max": 8.1,
+   "absent": false,
+   "inputs": [
+    "nearby_households_1mi"
+   ]
+  },
+  {
+   "key": "nearby_jobs_1mi_n",
+   "label": "Jobs within 1 mile",
+   "subscore": "demand",
+   "weight": 0.081,
+   "credit": 0.0775,
+   "inverted": false,
+   "points": 0.6277,
+   "max": 8.1,
+   "absent": false,
+   "inputs": [
+    "nearby_jobs_1mi"
+   ]
+  },
+  {
+   "key": "aadt_nearest_n",
+   "label": "Daily traffic nearby",
+   "subscore": "demand",
+   "weight": 0.0585,
+   "credit": 0.126667,
+   "inverted": false,
+   "points": 0.741,
+   "max": 5.85,
+   "absent": false,
+   "inputs": [
+    "aadt_nearest"
+   ]
+  },
+  {
+   "key": "amenities_count_0_5mi_n",
+   "label": "Amenities within half a mile",
+   "subscore": "demand",
+   "weight": 0.0495,
+   "credit": 0.0,
+   "inverted": false,
+   "points": 0.0,
+   "max": 4.95,
+   "absent": true,
+   "inputs": [
+    "amenities_count_0_5mi"
+   ]
+  },
+  {
+   "key": "parking_spaces_n",
+   "label": "Parking spaces",
+   "subscore": "demand",
+   "weight": 0.045,
+   "credit": 0.05,
+   "inverted": false,
+   "points": 0.225,
+   "max": 4.5,
+   "absent": false,
+   "inputs": [
+    "parking_spaces"
+   ]
+  },
+  {
+   "key": "hours_open_n",
+   "label": "Hours open",
+   "subscore": "demand",
+   "weight": 0.036,
+   "credit": 0.583333,
+   "inverted": false,
+   "points": 2.1,
+   "max": 3.6,
+   "absent": false,
+   "inputs": [
+    "hours_open"
+   ]
+  },
+  {
+   "key": "avg_dwell_min_n",
+   "label": "Visit length",
+   "subscore": "demand",
+   "weight": 0.0315,
+   "credit": 0.4,
+   "inverted": false,
+   "points": 1.26,
+   "max": 3.15,
+   "absent": false,
+   "inputs": [
+    "avg_dwell_min"
+   ]
+  },
+  {
+   "key": "ev_share_local_n",
+   "label": "Local EV share",
+   "subscore": "demand",
+   "weight": 0.036,
+   "credit": 0.22,
+   "inverted": false,
+   "points": 0.792,
+   "max": 3.6,
+   "absent": false,
+   "inputs": [
+    "ev_share_local"
+   ]
+  },
+  {
+   "key": "existing_ports_total_n",
+   "label": "Existing chargers nearby",
+   "subscore": "demand",
+   "weight": 0.0315,
+   "credit": 0.992308,
+   "inverted": true,
+   "points": 3.1258,
+   "max": 3.15,
+   "absent": false,
+   "inputs": [
+    "existing_l2_ports_1mi",
+    "existing_dcfc_ports_3mi"
+   ]
+  },
+  {
+   "key": "spare_capacity_kw_n",
+   "label": "Spare electrical capacity",
+   "subscore": "feasibility",
+   "weight": 0.105,
+   "credit": 0.0,
+   "inverted": false,
+   "points": 0.0,
+   "max": 10.5,
+   "absent": false,
+   "inputs": [
+    "spare_capacity_kw"
+   ]
+  },
+  {
+   "key": "distance_to_service_ft_n",
+   "label": "Distance to electrical service",
+   "subscore": "feasibility",
+   "weight": 0.075,
+   "credit": 0.0,
+   "inverted": true,
+   "points": 0.0,
+   "max": 7.5,
+   "absent": false,
+   "inputs": [
+    "distance_to_service_ft"
+   ]
+  },
+  {
+   "key": "install_cost_est_usd_n",
+   "label": "Estimated install cost",
+   "subscore": "feasibility",
+   "weight": 0.075,
+   "credit": 0.0,
+   "inverted": true,
+   "points": 0.0,
+   "max": 7.5,
+   "absent": false,
+   "inputs": [
+    "trenching_ft",
+    "trench_cost_per_ft",
+    "service_upgrade_cost_usd"
+   ]
+  },
+  {
+   "key": "trenching_ft_n",
+   "label": "Trenching needed",
+   "subscore": "feasibility",
+   "weight": 0.045,
+   "credit": 0.0,
+   "inverted": true,
+   "points": 0.0,
+   "max": 4.5,
+   "absent": false,
+   "inputs": [
+    "trenching_ft"
+   ]
+  },
+  {
+   "key": "ada_layout_possible",
+   "label": "ADA layout possible",
+   "subscore": "safety",
+   "weight": 0.0525,
+   "credit": 0.0,
+   "inverted": false,
+   "points": 0.0,
+   "max": 5.25,
+   "absent": false,
+   "inputs": [
+    "ada_layout_possible"
+   ]
+  },
+  {
+   "key": "fire_access_ok",
+   "label": "Fire access adequate",
+   "subscore": "safety",
+   "weight": 0.0525,
+   "credit": 1.0,
+   "inverted": false,
+   "points": 5.25,
+   "max": 5.25,
+   "absent": false,
+   "inputs": [
+    "fire_access_ok"
+   ]
+  },
+  {
+   "key": "garage_enclosed",
+   "label": "Enclosed garage",
+   "subscore": "safety",
+   "weight": 0.0225,
+   "credit": 1.0,
+   "inverted": true,
+   "points": 2.25,
+   "max": 2.25,
+   "absent": false,
+   "inputs": [
+    "garage_enclosed"
+   ]
+  },
+  {
+   "key": "emergency_disconnect_visible",
+   "label": "Emergency disconnect visible",
+   "subscore": "safety",
+   "weight": 0.015,
+   "credit": 0.0,
+   "inverted": false,
+   "points": 0.0,
+   "max": 1.5,
+   "absent": false,
+   "inputs": [
+    "emergency_disconnect_visible"
+   ]
+  },
+  {
+   "key": "stormwater_risk",
+   "label": "Stormwater risk",
+   "subscore": "safety",
+   "weight": 0.0075,
+   "credit": 0.0,
+   "inverted": true,
+   "points": 0.0,
+   "max": 0.75,
+   "absent": false,
+   "inputs": [
+    "stormwater_risk"
+   ]
+  },
+  {
+   "key": "equity_gap_index_n",
+   "label": "Equity need",
+   "subscore": "equity",
+   "weight": 0.1,
+   "credit": 0.73,
+   "inverted": false,
+   "points": 7.3,
+   "max": 10.0,
+   "absent": false,
+   "inputs": [
+    "equity_gap_index"
+   ]
+  }
+ ]
+}

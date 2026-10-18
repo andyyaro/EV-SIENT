@@ -1,0 +1,252 @@
+{
+ "siteCount": 6,
+ "ledger": [
+  {
+   "canonical_field": "site_id",
+   "action": "read from 'Facility ID'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "site_name",
+   "action": "read from 'Facility Name'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "site_type",
+   "action": "read from 'Category'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "lat",
+   "action": "read from 'Lat'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "lon",
+   "action": "read from 'Long'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "employees_day",
+   "action": "left absent (1 cell(s))",
+   "reason": "no value in the cell; scored as an absence, never defaulted",
+   "detail": "row(s) 4: 'n/a'"
+  },
+  {
+   "canonical_field": "employees_day",
+   "action": "read from 'Staff'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "visitors_day",
+   "action": "read through separators (1 cell(s))",
+   "reason": "written with thousands separators or a dollar sign",
+   "detail": "row(s) 2: '1,400'"
+  },
+  {
+   "canonical_field": "visitors_day",
+   "action": "read from 'Daily Visitors'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "fleet_vehicles",
+   "action": "read from 'Fleet'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "parking_spaces",
+   "action": "left absent (1 cell(s))",
+   "reason": "no value in the cell; scored as an absence, never defaulted",
+   "detail": "row(s) 5: ''"
+  },
+  {
+   "canonical_field": "parking_spaces",
+   "action": "read from 'Parking Stalls'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "hours_open",
+   "action": "read from 'Hours Per Day'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "avg_dwell_min",
+   "action": "multiplied by 60",
+   "reason": "supplied in a different unit from the one the model expects",
+   "detail": "from column 'Dwell (hr)'"
+  },
+  {
+   "canonical_field": "avg_dwell_min",
+   "action": "read from 'Dwell (hr)'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "nearby_households_1mi",
+   "action": "read from 'Households 1mi'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "nearby_jobs_1mi",
+   "action": "read from 'Jobs 1mi'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "aadt_nearest",
+   "action": "read from 'Daily Traffic'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "amenities_count_0_5mi",
+   "action": "left absent",
+   "reason": "not supplied in this file; scored as an absence rather than defaulted",
+   "detail": ""
+  },
+  {
+   "canonical_field": "ev_share_local",
+   "action": "read from 'EV Share'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "existing_l2_ports_1mi",
+   "action": "read from 'L2 Ports'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "existing_dcfc_ports_3mi",
+   "action": "read from 'DC Fast Ports'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "equity_gap_index",
+   "action": "read from 'Equity Index'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "spare_capacity_kw",
+   "action": "read from 'Spare Capacity'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "distance_to_service_ft",
+   "action": "multiplied by 3.28084",
+   "reason": "supplied in a different unit from the one the model expects",
+   "detail": "from column 'Service Distance (m)'"
+  },
+  {
+   "canonical_field": "distance_to_service_ft",
+   "action": "read from 'Service Distance (m)'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "trenching_ft",
+   "action": "multiplied by 3.28084",
+   "reason": "supplied in a different unit from the one the model expects",
+   "detail": "from column 'Trench Length (m)'"
+  },
+  {
+   "canonical_field": "trenching_ft",
+   "action": "read from 'Trench Length (m)'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "trench_cost_per_ft",
+   "action": "read from 'Trench Cost per ft'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "service_upgrade_cost_usd",
+   "action": "read through separators (1 cell(s))",
+   "reason": "written with thousands separators or a dollar sign",
+   "detail": "row(s) 2: '$45,000'"
+  },
+  {
+   "canonical_field": "service_upgrade_cost_usd",
+   "action": "read from 'Upgrade Cost'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "elec_service_rating_amp",
+   "action": "read from 'Service Amps'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "public_access",
+   "action": "read from 'Open To Public'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "ada_layout_possible",
+   "action": "read from 'ADA Possible'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "fire_access_ok",
+   "action": "read from 'Fire Access'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "garage_enclosed",
+   "action": "left absent (1 cell(s))",
+   "reason": "the cell is not a value the model can read",
+   "detail": "row(s) 6: 'partial'"
+  },
+  {
+   "canonical_field": "garage_enclosed",
+   "action": "read from 'Enclosed Garage'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "emergency_disconnect_visible",
+   "action": "read from 'Disconnect Visible'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "stormwater_risk",
+   "action": "left absent (1 cell(s))",
+   "reason": "no value in the cell; scored as an absence, never defaulted",
+   "detail": "row(s) 4: 'unknown'"
+  },
+  {
+   "canonical_field": "stormwater_risk",
+   "action": "read from 'Stormwater Risk'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  },
+  {
+   "canonical_field": "battery_storage_flag",
+   "action": "read from 'Battery'",
+   "reason": "column name differed from the canonical name",
+   "detail": ""
+  }
+ ],
+ "summary": "31 of 32 fields mapped, 1 absent, 0 refusal(s), 4 warning(s), 6 note(s)"
+}

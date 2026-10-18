@@ -1,0 +1,518 @@
+{
+ "rowCount": 6,
+ "columns": [
+  {
+   "name": "Facility ID",
+   "samples": [
+    "EXC-01",
+    "EXC-02",
+    "EXC-03",
+    "EXC-04",
+    "EXC-05"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Facility Name",
+   "samples": [
+    "Example City Central Library",
+    "Example City North Branch Library",
+    "Example City Hall Annex",
+    "Example City Recreation Center",
+    "Example City Transit Garage"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Category",
+   "samples": [
+    "library",
+    "office",
+    "recreation",
+    "garage",
+    "park"
+   ],
+   "blank": 0,
+   "distinct": 5
+  },
+  {
+   "name": "Lat",
+   "samples": [
+    "45.012",
+    "45.061",
+    "45.004",
+    "44.981",
+    "45.020"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Long",
+   "samples": [
+    "-100.031",
+    "-100.018",
+    "-100.052",
+    "-100.077",
+    "-100.002"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Staff",
+   "samples": [
+    "22",
+    "9",
+    "n/a",
+    "15",
+    "40"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Daily Visitors",
+   "samples": [
+    "1,400",
+    "380",
+    "260",
+    "640",
+    "90"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Parking Stalls",
+   "samples": [
+    "120",
+    "46",
+    "210",
+    "400",
+    "75"
+   ],
+   "blank": 1,
+   "distinct": 5
+  },
+  {
+   "name": "Hours Per Day",
+   "samples": [
+    "10",
+    "8",
+    "9",
+    "13",
+    "24"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Dwell (hr)",
+   "samples": [
+    "1.25",
+    "1",
+    "3",
+    "1.5",
+    "4"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Households 1mi",
+   "samples": [
+    "7400",
+    "3900",
+    "5100",
+    "6200",
+    "2800"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Jobs 1mi",
+   "samples": [
+    "18200",
+    "5200",
+    "21500",
+    "4800",
+    "9900"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Daily Traffic",
+   "samples": [
+    "24000",
+    "9100",
+    "31000",
+    "12800",
+    "27500"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "EV Share",
+   "samples": [
+    "0.031",
+    "0.024",
+    "0.029",
+    "0.027",
+    "0.033"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "L2 Ports",
+   "samples": [
+    "6",
+    "0",
+    "4",
+    "2",
+    "1"
+   ],
+   "blank": 0,
+   "distinct": 5
+  },
+  {
+   "name": "DC Fast Ports",
+   "samples": [
+    "1",
+    "0",
+    "2",
+    "3"
+   ],
+   "blank": 0,
+   "distinct": 4
+  },
+  {
+   "name": "Equity Index",
+   "samples": [
+    "0.42",
+    "0.67",
+    "0.35",
+    "0.58",
+    "0.29"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Service Distance (m)",
+   "samples": [
+    "30",
+    "22",
+    "55",
+    "40",
+    "15"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Trench Length (m)",
+   "samples": [
+    "30",
+    "22",
+    "48",
+    "40",
+    "10"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Trench Cost per ft",
+   "samples": [
+    "160"
+   ],
+   "blank": 0,
+   "distinct": 1
+  },
+  {
+   "name": "Upgrade Cost",
+   "samples": [
+    "$45,000",
+    "38000",
+    "61000",
+    "52000",
+    "30000"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Service Amps",
+   "samples": [
+    "800",
+    "400",
+    "1200",
+    "600",
+    "2000"
+   ],
+   "blank": 0,
+   "distinct": 6
+  },
+  {
+   "name": "Spare Capacity",
+   "samples": [
+    "0"
+   ],
+   "blank": 0,
+   "distinct": 1
+  },
+  {
+   "name": "Open To Public",
+   "samples": [
+    "yes",
+    "no"
+   ],
+   "blank": 0,
+   "distinct": 2
+  },
+  {
+   "name": "ADA Possible",
+   "samples": [
+    "yes",
+    "no"
+   ],
+   "blank": 0,
+   "distinct": 2
+  },
+  {
+   "name": "Fire Access",
+   "samples": [
+    "yes"
+   ],
+   "blank": 0,
+   "distinct": 1
+  },
+  {
+   "name": "Enclosed Garage",
+   "samples": [
+    "no",
+    "partial"
+   ],
+   "blank": 0,
+   "distinct": 2
+  },
+  {
+   "name": "Disconnect Visible",
+   "samples": [
+    "yes",
+    "no"
+   ],
+   "blank": 0,
+   "distinct": 2
+  },
+  {
+   "name": "Stormwater Risk",
+   "samples": [
+    "no",
+    "unknown",
+    "yes"
+   ],
+   "blank": 0,
+   "distinct": 3
+  },
+  {
+   "name": "Battery",
+   "samples": [
+    "no"
+   ],
+   "blank": 0,
+   "distinct": 1
+  },
+  {
+   "name": "Fleet",
+   "samples": [
+    "0",
+    "14",
+    "2",
+    "61"
+   ],
+   "blank": 0,
+   "distinct": 4
+  }
+ ],
+ "mapping": {
+  "site_id": "Facility ID",
+  "site_name": "Facility Name",
+  "site_type": "Category",
+  "lat": "Lat",
+  "lon": "Long",
+  "employees_day": "Staff",
+  "visitors_day": "Daily Visitors",
+  "fleet_vehicles": "Fleet",
+  "parking_spaces": "Parking Stalls",
+  "hours_open": "Hours Per Day",
+  "avg_dwell_min": "Dwell (hr)",
+  "nearby_households_1mi": "Households 1mi",
+  "nearby_jobs_1mi": "Jobs 1mi",
+  "aadt_nearest": "Daily Traffic",
+  "ev_share_local": "EV Share",
+  "existing_l2_ports_1mi": "L2 Ports",
+  "existing_dcfc_ports_3mi": "DC Fast Ports",
+  "equity_gap_index": "Equity Index",
+  "spare_capacity_kw": "Spare Capacity",
+  "distance_to_service_ft": "Service Distance (m)",
+  "trenching_ft": "Trench Length (m)",
+  "trench_cost_per_ft": "Trench Cost per ft",
+  "service_upgrade_cost_usd": "Upgrade Cost",
+  "elec_service_rating_amp": "Service Amps",
+  "public_access": "Open To Public",
+  "ada_layout_possible": "ADA Possible",
+  "fire_access_ok": "Fire Access",
+  "garage_enclosed": "Enclosed Garage",
+  "emergency_disconnect_visible": "Disconnect Visible",
+  "stormwater_risk": "Stormwater Risk",
+  "battery_storage_flag": "Battery"
+ },
+ "conversions": {
+  "avg_dwell_min": 60.0,
+  "distance_to_service_ft": 3.280839895,
+  "trenching_ft": 3.280839895
+ },
+ "matchScore": {
+  "site_id": 1.0,
+  "site_name": 1.0,
+  "site_type": 1.0,
+  "lat": 1.0,
+  "lon": 1.0,
+  "employees_day": 1.0,
+  "visitors_day": 1.0,
+  "fleet_vehicles": 1.0,
+  "parking_spaces": 1.0,
+  "hours_open": 1.0,
+  "avg_dwell_min": 1.0,
+  "nearby_households_1mi": 1.0,
+  "nearby_jobs_1mi": 1.0,
+  "aadt_nearest": 1.0,
+  "ev_share_local": 1.0,
+  "existing_l2_ports_1mi": 1.0,
+  "existing_dcfc_ports_3mi": 1.0,
+  "equity_gap_index": 1.0,
+  "spare_capacity_kw": 1.0,
+  "distance_to_service_ft": 1.0,
+  "trenching_ft": 1.0,
+  "trench_cost_per_ft": 1.0,
+  "service_upgrade_cost_usd": 1.0,
+  "elec_service_rating_amp": 1.0,
+  "public_access": 1.0,
+  "ada_layout_possible": 1.0,
+  "fire_access_ok": 1.0,
+  "garage_enclosed": 1.0,
+  "emergency_disconnect_visible": 1.0,
+  "stormwater_risk": 1.0,
+  "battery_storage_flag": 1.0
+ },
+ "status": {
+  "site_id": "matched",
+  "site_name": "matched",
+  "site_type": "matched",
+  "lat": "matched",
+  "lon": "matched",
+  "employees_day": "matched",
+  "visitors_day": "matched",
+  "fleet_vehicles": "matched",
+  "parking_spaces": "matched",
+  "hours_open": "matched",
+  "avg_dwell_min": "check",
+  "nearby_households_1mi": "matched",
+  "nearby_jobs_1mi": "matched",
+  "aadt_nearest": "matched",
+  "amenities_count_0_5mi": "unmatched",
+  "ev_share_local": "matched",
+  "existing_l2_ports_1mi": "matched",
+  "existing_dcfc_ports_3mi": "matched",
+  "equity_gap_index": "matched",
+  "spare_capacity_kw": "matched",
+  "distance_to_service_ft": "check",
+  "trenching_ft": "check",
+  "trench_cost_per_ft": "matched",
+  "service_upgrade_cost_usd": "matched",
+  "elec_service_rating_amp": "matched",
+  "public_access": "matched",
+  "ada_layout_possible": "matched",
+  "fire_access_ok": "matched",
+  "garage_enclosed": "matched",
+  "emergency_disconnect_visible": "matched",
+  "stormwater_risk": "matched",
+  "battery_storage_flag": "matched"
+ },
+ "absent": [
+  "amenities_count_0_5mi"
+ ],
+ "findings": [
+  {
+   "severity": "warning",
+   "field": "avg_dwell_min",
+   "explain": "avg_dwell_min appears to be supplied in hr and every value will be multiplied by 60 to reach the unit the model expects.",
+   "detail": "from column 'Dwell (hr)'"
+  },
+  {
+   "severity": "warning",
+   "field": "distance_to_service_ft",
+   "explain": "distance_to_service_ft appears to be supplied in m and every value will be multiplied by 3.28084 to reach the unit the model expects.",
+   "detail": "from column 'Service Distance (m)'"
+  },
+  {
+   "severity": "warning",
+   "field": "garage_enclosed",
+   "explain": "garage_enclosed has 1 value(s) that are not yes or no, which will be scored as absent rather than guessed at, so correct them if they matter.",
+   "detail": "row(s) 6: 'partial'"
+  },
+  {
+   "severity": "warning",
+   "field": "trenching_ft",
+   "explain": "trenching_ft appears to be supplied in m and every value will be multiplied by 3.28084 to reach the unit the model expects.",
+   "detail": "from column 'Trench Length (m)'"
+  },
+  {
+   "severity": "note",
+   "field": "amenities_count_0_5mi",
+   "explain": "amenities_count_0_5mi is not present in this file, so it will be scored as an absence and will lower this jurisdiction's data confidence rather than being substituted with a default.",
+   "detail": ""
+  },
+  {
+   "severity": "note",
+   "field": "employees_day",
+   "explain": "employees_day has no value in 1 row(s), so those sites will be scored as an absence for it, which earns no credit, and the site's expected charging sessions count none from staff.",
+   "detail": "row(s) 4: 'n/a'"
+  },
+  {
+   "severity": "note",
+   "field": "parking_spaces",
+   "explain": "parking_spaces has no value in 1 row(s), so those sites will be scored as an absence for it, which earns no credit, and the site's port plan is capped at the minimum of 2.",
+   "detail": "row(s) 5: ''"
+  },
+  {
+   "severity": "note",
+   "field": "service_upgrade_cost_usd",
+   "explain": "service_upgrade_cost_usd has 1 value(s) written with thousands separators or a dollar sign, which will be read as plain numbers.",
+   "detail": "row(s) 2: '$45,000'"
+  },
+  {
+   "severity": "note",
+   "field": "stormwater_risk",
+   "explain": "stormwater_risk has no value in 1 row(s), so those sites will be scored as an absence for it, which earns no credit, rather than given a default.",
+   "detail": "row(s) 4: 'unknown'"
+  },
+  {
+   "severity": "note",
+   "field": "visitors_day",
+   "explain": "visitors_day has 1 value(s) written with thousands separators or a dollar sign, which will be read as plain numbers.",
+   "detail": "row(s) 2: '1,400'"
+  }
+ ],
+ "refused": false,
+ "completeness": 0.963,
+ "summary": "31 of 32 fields mapped, 1 absent, 0 refusal(s), 4 warning(s), 6 note(s)"
+}

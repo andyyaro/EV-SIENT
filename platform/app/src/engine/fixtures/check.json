@@ -1,0 +1,70 @@
+{
+ "rows": [
+  {
+   "row": 2,
+   "siteId": "EXC-01",
+   "siteName": "Example City Central Library",
+   "status": "ready",
+   "mustFix": [],
+   "missing": []
+  },
+  {
+   "row": 3,
+   "siteId": "EXC-02",
+   "siteName": "Example City North Branch Library",
+   "status": "ready",
+   "mustFix": [],
+   "missing": []
+  },
+  {
+   "row": 4,
+   "siteId": "EXC-03",
+   "siteName": "Example City Hall Annex",
+   "status": "missing",
+   "mustFix": [],
+   "missing": [
+    "employees_day",
+    "stormwater_risk"
+   ]
+  },
+  {
+   "row": 5,
+   "siteId": "EXC-04",
+   "siteName": "Example City Recreation Center",
+   "status": "missing",
+   "mustFix": [],
+   "missing": [
+    "parking_spaces"
+   ]
+  },
+  {
+   "row": 6,
+   "siteId": "EXC-05",
+   "siteName": "Example City Transit Garage",
+   "status": "missing",
+   "mustFix": [],
+   "missing": [
+    "garage_enclosed"
+   ]
+  },
+  {
+   "row": 7,
+   "siteId": "EXC-06",
+   "siteName": "Example City Riverside Park",
+   "status": "ready",
+   "mustFix": [],
+   "missing": []
+  }
+ ],
+ "refusals": [],
+ "counts": {
+  "total": 6,
+  "ready": 3,
+  "missing": 3,
+  "mustFix": 0,
+  "located": 6
+ },
+ "absentFromFile": [
+  "amenities_count_0_5mi"
+ ]
+}

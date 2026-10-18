@@ -1,0 +1,2065 @@
+/* HIG Native component styles (List, Sidebar, TabBar, Toolbar, SegmentedControl, Gauge, Widget, Table, Disclosure, SearchField, Button, Chart, Sheet, SplitView, Collection, Label, Lockup, ProgressIndicator, Popover, Snippet, Box). Copied from the design system. */
+/* ===== Button ===== */
+/* Button: geometry from the iOS 27 and macOS 27 UI kits (Buttons pages). */
+.hig-button {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--button-icon-gap);
+  font-family: var(--font-sans); white-space: nowrap; text-decoration: none; box-sizing: border-box;
+  background: transparent; color: var(--accent); border-radius: var(--radius-capsule);
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.hig-button:disabled { cursor: default; }
+.hig-button__label { display: inline-block; }
+.hig-button__spinner { animation: hig-button-spin 1s steps(8) infinite; }
+@keyframes hig-button-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .hig-button__spinner { animation-duration: 2s; } }
+
+/* ---- iOS / iPadOS sizes: small 28pt (15pt label, 10pt padding), medium 34pt (17pt, 12pt), large 50pt (17pt, 20pt) */
+.hig-button--ios.hig-button--small { height: var(--button-small); padding: 0 var(--button-padding-small); font-size: 15px; line-height: 18px; letter-spacing: -0.23px; }
+.hig-button--ios.hig-button--medium { height: var(--button-medium); padding: 0 var(--button-padding-medium); font-size: 17px; line-height: 18px; letter-spacing: -0.43px; }
+.hig-button--ios.hig-button--large { height: var(--button-large); padding: 0 var(--button-padding-large); font-size: 17px; line-height: 18px; letter-spacing: -0.43px; }
+.hig-button--ios.hig-button--icon-only { padding: 0; width: auto; aspect-ratio: 1; }
+/* A 44pt minimum hit region around small controls (HIG Buttons); the visual stays at kit size. */
+.hig-button--ios.hig-button--small:not(.hig-glass)::before,
+.hig-button--ios.hig-button--medium:not(.hig-glass)::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, var(--target-ios)); height: var(--target-ios);
+  transform: translate(-50%, -50%);
+}
+
+/* borderless: accent label, no fill (kit Default/Borderless) */
+.hig-button--ios.hig-button--borderless { color: var(--accent); }
+/* bordered: tertiary fill, accent label */
+.hig-button--ios.hig-button--bordered { background: var(--fill-tertiary); color: var(--accent); }
+/* bordered prominent: accent fill, on-accent label */
+.hig-button--ios.hig-button--bordered-prominent { background: var(--accent); color: var(--on-accent); }
+/* glass: small Liquid Glass, primary glass label, Medium weight (kit Glass/Default) */
+.hig-button--ios.hig-button--glass { color: var(--glass-label-primary); font-weight: 500; }
+.hig-button--ios.hig-button--glass-prominent { color: var(--on-accent); font-weight: 500; }
+
+/* Glass buttons press by darkening the element's own background beneath the glass fills. */
+.hig-button.hig-glass:active:not(:disabled) { background-color: var(--pressed-overlay); }
+
+/* destructive role: system red (kit Destructive/*) */
+.hig-button--ios.hig-button--destructive.hig-button--borderless { color: var(--system-red); }
+.hig-button--ios.hig-button--destructive.hig-button--bordered { background: color-mix(in srgb, var(--system-red) 14%, transparent); color: var(--system-red); }
+.hig-button--ios.hig-button--destructive.hig-button--bordered-prominent { background: var(--system-red); color: var(--on-accent); }
+.hig-button--ios.hig-button--destructive.hig-button--glass { color: var(--system-red); }
+
+/* disabled (kit 4 - Disabled): quaternary fill, tertiary label; borderless keeps no fill */
+.hig-button--ios:disabled { color: var(--label-tertiary); }
+.hig-button--ios.hig-button--bordered:disabled,
+.hig-button--ios.hig-button--bordered-prominent:disabled { background: var(--fill-quaternary); color: var(--label-tertiary); }
+.hig-button--ios.hig-button--glass-prominent:disabled { color: var(--label-tertiary); }
+.hig-button--ios.hig-button--glass-prominent:disabled::before { background: var(--glass-small-fill); }
+
+/* ---- macOS push buttons: mini 16 / small 20 / regular 24 / large 28 (capsule) / xl 36 (capsule); Medium-weight labels */
+.hig-button--mac { color: var(--mac-label-primary); font-weight: 500; }
+.hig-button--mac.hig-button--mini { height: var(--mac-control-mini); padding: 0 var(--mac-button-padding-mini); border-radius: var(--radius-mac-mini); font-size: 10px; line-height: 13px; letter-spacing: 0.12px; }
+.hig-button--mac.hig-button--small { height: var(--mac-control-small); padding: 0 var(--button-padding-small); border-radius: var(--radius-mac-small); font-size: 11px; line-height: 13px; letter-spacing: 0.06px; }
+.hig-button--mac.hig-button--regular { height: var(--mac-control-regular); padding: 0 var(--mac-button-padding); border-radius: var(--radius-mac-regular); font-size: 13px; line-height: 16px; letter-spacing: -0.08px; }
+.hig-button--mac.hig-button--large { height: var(--mac-control-large); padding: 0 var(--mac-button-padding); border-radius: var(--radius-capsule); font-size: 13px; line-height: 16px; letter-spacing: -0.08px; }
+.hig-button--mac.hig-button--xl { height: var(--mac-control-xl); padding: 0 var(--mac-button-padding); border-radius: var(--radius-capsule); font-size: 13px; line-height: 16px; letter-spacing: -0.08px; }
+.hig-button--mac.hig-button--icon-only { padding: 0; aspect-ratio: 1; }
+
+.hig-button--mac.hig-button--push { background: var(--mac-fill-secondary); }
+.hig-button--mac.hig-button--default { background: var(--accent); color: var(--on-accent); }
+.hig-button--mac.hig-button--tinted { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
+.hig-button--mac.hig-button--borderless { color: var(--accent); }
+.hig-button--mac.hig-button--borderless:hover:not(:disabled) { background: var(--mac-fill-tertiary); }
+.hig-button--mac.hig-button--toggle { background: var(--mac-fill-tertiary); }
+.hig-button--mac.hig-button--toggle.hig-button--selected { background: var(--accent); color: var(--on-accent); }
+.hig-button--mac.hig-button--destructive.hig-button--push { background: color-mix(in srgb, var(--system-red) 20%, transparent); color: var(--system-red); }
+.hig-button--mac.hig-button--destructive.hig-button--default { background: var(--system-red); color: var(--on-accent); }
+.hig-button--mac.hig-button--help { border-radius: 50%; background: var(--mac-fill-secondary); color: var(--mac-label-primary); }
+.hig-button--mac:disabled { background: var(--mac-fill-quaternary); color: var(--mac-label-tertiary); }
+.hig-button--mac.hig-button--borderless:disabled { background: transparent; }
+/* ===== List ===== */
+/* List, ListSection, ListRow: iOS 27 kit (Lists, Sidebar, Toggles pages) and macOS 27 kit (Forms, Sidebars,
+   Toggles - Switches pages). Literal px values are kit measurements without a token of their own, cited inline;
+   values the kits do not give are marked "chosen". */
+.hig-list {
+  position: relative; box-sizing: border-box; margin: 0;
+  font-family: var(--font-sans); color: var(--label-primary); -webkit-tap-highlight-color: transparent;
+}
+.hig-list *, .hig-list *::before, .hig-list *::after { box-sizing: border-box; }
+
+/* ---------- iOS / iPadOS grounds ---------- */
+/* Grouped styles: grouped-background-primary ground, -secondary rows (kit Examples/Lists/Grouped). */
+.hig-list--ios.hig-list--insetGrouped,
+.hig-list--ios.hig-list--grouped { background: var(--grouped-background-primary); --hig-list-row-bg: var(--grouped-background-secondary); }
+.hig-list--ios.hig-list--plain { background: var(--background-primary); --hig-list-row-bg: var(--background-primary); }
+.hig-list--ios.hig-list--sidebar { --hig-list-row-bg: transparent; padding: 0 10px; } /* kit Sidebar/Items/Level 0: row 10pt from the column edge */
+/* Inset grouped: 370pt sections inset 16pt in a 402pt screen (kit Lists/Grouped Table View). */
+.hig-list--ios.hig-list--insetGrouped { padding: 0 var(--margin-compact); }
+
+/* ---------- Sections ---------- */
+.hig-list-section { margin: 0; }
+.hig-list-section + .hig-list-section { margin-top: 20px; } /* kit Examples/Lists/Grouped: sections 20pt apart */
+.hig-list--ios.hig-list--plain .hig-list-section + .hig-list-section { margin-top: 0; } /* plain sections run on; headers separate them */
+.hig-list-section__rows { position: relative; list-style: none; margin: 0; padding: 0; }
+.hig-list--ios.hig-list--insetGrouped .hig-list-section__rows {
+  background: var(--grouped-background-secondary); border-radius: var(--radius-group); overflow: hidden;
+}
+.hig-list--ios.hig-list--grouped .hig-list-section__rows { background: var(--grouped-background-secondary); }
+
+/* Headers (kit Lists/Header/*): title 16pt from the leading edge, 10pt above and below.
+   Extra Prominent 48pt (Title 2 Bold), Prominent 45pt (Title 3 Semibold), Nested 42pt (Body Semibold, secondary). */
+.hig-list-section__header { display: flex; align-items: baseline; padding: 10px var(--margin-compact); }
+.hig-list-section__title { flex: 1; min-width: 0; }
+.hig-list--ios .hig-list-section__header--extraProminent .hig-list-section__title {
+  font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.26px; color: var(--label-primary);
+}
+.hig-list--ios .hig-list-section__header--prominent .hig-list-section__title {
+  font-size: 20px; line-height: 25px; font-weight: 600; letter-spacing: -0.45px; color: var(--label-primary);
+}
+.hig-list--ios .hig-list-section__header--nested .hig-list-section__title {
+  font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -0.43px; color: var(--label-secondary);
+}
+/* Trailing header action: Subheadline 15pt in the accent (kit Headers/Extra Prominent/Trailing/Action). */
+.hig-list--ios .hig-list-section__action { flex: none; font-size: 15px; line-height: 20px; letter-spacing: -0.23px; color: var(--accent); }
+/* Footer (kit Lists/Footer): 13pt/16 (Footnote, tight leading), secondary, 8pt above, 30pt for one line. */
+.hig-list-section__footer {
+  padding: 8px var(--margin-compact) 6px;
+  font-size: 13px; line-height: 16px; letter-spacing: -0.08px; color: var(--label-secondary);
+}
+
+/* ---------- Rows (kit Lists/Rows/Default 52pt, Large 68pt) ---------- */
+.hig-list-row { position: relative; display: block; margin: 0; padding: 0; list-style: none; overflow: hidden; outline: none; }
+.hig-list-row__content {
+  position: relative; display: flex; align-items: stretch; min-height: var(--row-height);
+  padding-left: var(--margin-compact); background: var(--hig-list-row-bg);
+  transition: transform 200ms ease; /* chosen: the kits give no swipe duration */
+}
+.hig-list-row__content::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--pressed-overlay); opacity: 0; transition: opacity 80ms linear;
+}
+/* Title and trailing items share the "Stack", whose bottom border is the separator: it starts at the text. */
+.hig-list-row__body {
+  flex: 1; min-width: 0; display: flex; align-items: stretch; gap: 16px;
+  margin-right: var(--margin-compact); /* the Stack (and its separator) ends 16pt before the trailing edge (kit) */
+  padding: 14px 0; /* kit: title 15pt from the top of a 52pt row, 14pt in a 68pt row */
+  box-shadow: inset 0 -1px var(--separator);
+}
+.hig-list-section__rows > .hig-list-row:last-child .hig-list-row__body { box-shadow: none; }
+.hig-list-row__text { flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; }
+.hig-list-row__title {
+  font-size: 17px; line-height: 22px; letter-spacing: -0.43px; color: var(--label-primary); overflow-wrap: anywhere;
+}
+/* kit Rows/Large Subtitle: 15pt on an 18pt line, secondary */
+.hig-list-row__subtitle { font-size: 15px; line-height: 18px; letter-spacing: -0.23px; color: var(--label-secondary); }
+.hig-list-row__trailing {
+  flex: none; max-width: 62%; align-self: stretch; display: flex; align-items: center; justify-content: flex-end;
+  gap: 16px; /* kit Accessories - Trailing: chevron and symbols sit 16pt after the detail */
+  color: var(--label-secondary);
+}
+.hig-list-row__detail {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 17px; line-height: 22px; letter-spacing: -0.43px; color: var(--label-secondary);
+}
+/* Drill-in chevron: 17pt Semibold, tertiary, 10pt slot (kit Accessories - Trailing/Drill In) */
+.hig-list-row__chevron { flex: none; display: inline-flex; width: 10px; justify-content: center; color: var(--label-tertiary); }
+.hig-list-row__chevron .hig-icon { margin: 0 -5px; }
+/* Checkmark: 17pt Semibold, label-primary, 22pt slot (kit Accessories - Trailing/Checkmark) */
+.hig-list-row__check { flex: none; display: inline-flex; width: 22px; justify-content: center; color: var(--label-primary); }
+/* Info (detail disclosure) button: 17pt symbol in the accent, 22pt slot (kit Accessories - Trailing/Info) */
+.hig-list-row__info {
+  appearance: none; -webkit-appearance: none; margin: 0; padding: 0; border: 0; background: none; cursor: pointer;
+  position: relative; z-index: 1; flex: none; width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--accent);
+}
+.hig-list-row__info::before,
+.hig-list-switch::before,
+.hig-list-edit::before,
+.hig-list-row__grabber::before {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: max(100%, var(--target-ios)); height: max(100%, var(--target-ios));
+}
+.hig-list-row__info:disabled { color: var(--label-tertiary); cursor: default; }
+
+/* The row's primary action: its ::before covers the whole row, so the full row is the hit region. */
+.hig-list-row__action {
+  appearance: none; -webkit-appearance: none; margin: 0; padding: 0; border: 0; background: none; outline: none;
+  font: inherit; letter-spacing: inherit; color: inherit; text-align: inherit; text-decoration: none; cursor: pointer;
+}
+.hig-list-row__action::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.hig-list-row__action:disabled, .hig-list-row__action[aria-disabled="true"] { cursor: default; }
+.hig-list-row__action:active:not(:disabled):not([aria-disabled="true"])::before { background: var(--pressed-overlay); }
+.hig-list-row__action:focus-visible::before { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
+
+/* Option rows (selectable lists) */
+.hig-list-row--option { cursor: pointer; }
+.hig-list-row--option:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
+.hig-list-row--option:active:not(.hig-list-row--disabled) .hig-list-row__content::after { opacity: 1; }
+/* Persistent highlight for navigation selection: Fills/3 Tertiary, as the kit's selected sidebar item. */
+.hig-list--ios .hig-list-row--highlighted .hig-list-row__content {
+  background: linear-gradient(var(--fill-tertiary), var(--fill-tertiary)), var(--hig-list-row-bg);
+}
+
+/* Leading accessories */
+/* Image: 42pt thumbnail, radius-thumbnail; 16pt to the text (kit Rows/Default: accessories end 16pt before the Stack). */
+.hig-list-row__image {
+  flex: none; align-self: center; display: flex; width: 42px; height: 42px; margin-right: 16px;
+  border-radius: var(--radius-thumbnail); overflow: hidden; background: var(--fill-tertiary);
+}
+.hig-list-row__image > * { width: 100%; height: 100%; display: block; object-fit: cover; }
+/* Symbol: 22pt in the accent, 34pt slot (kit Accessories - Leading - Regular/With Symbol) */
+.hig-list-row__symbol { flex: none; align-self: center; display: inline-flex; justify-content: center; width: 34px; margin-right: 16px; color: var(--accent); }
+/* Settings-style icon tile: chosen: the iOS kit draws none; 28pt tile with the radius ratio (22.5%) of the macOS kit's
+   Forms "Service Icon" tiles, white (on-accent) glyph on a system color. */
+.hig-list-row__tile {
+  flex: none; align-self: center; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; margin-right: 16px; border-radius: 6.3px; color: var(--on-accent);
+}
+
+/* Edit controls: 22pt circles in a 25pt slot, 4pt before the image (kit Rows/Editing/*) */
+.hig-list-edit {
+  appearance: none; -webkit-appearance: none; margin: 0 4px 0 0; padding: 0 0 0 2px; border: 0; background: none;
+  position: relative; z-index: 1; flex: none; align-self: center; width: 25px; height: 22px;
+  display: inline-flex; align-items: center; cursor: pointer;
+}
+.hig-list-edit + .hig-list-row__body { margin-left: 12px; } /* 4pt + 12pt = the 16pt gap before the text */
+.hig-list-edit__frame {
+  width: 22px; height: 22px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--on-accent);
+}
+.hig-list-edit--delete .hig-list-edit__frame { background: var(--system-red); }
+.hig-list-edit--insert .hig-list-edit__frame { background: var(--system-green); }
+.hig-list-edit--selected .hig-list-edit__frame { background: var(--accent); }
+.hig-list-edit--unselected .hig-list-edit__frame { box-shadow: inset 0 0 0 1.5px var(--vibrant-label-tertiary); } /* kit Editing Unselected */
+/* Reorder grabber: 38pt column with a 0.5pt opaque separator on its leading edge (kit Accessories - Trailing, Grabber group) */
+.hig-list-row__grabber {
+  appearance: none; -webkit-appearance: none; margin: -14px 0; padding: 0 0 0 12.75px; border: 0; background: none;
+  position: relative; z-index: 1; flex: none; align-self: stretch; width: 38px; display: inline-flex; align-items: center;
+  box-shadow: inset 0.5px 0 var(--separator-opaque); color: var(--label-tertiary); cursor: grab;
+}
+
+/* Destructive rows and list buttons (kit Lists/Buttons: centered title in the accent; Destructive in system red) */
+.hig-list-row--destructive .hig-list-row__title { color: var(--system-red); }
+.hig-list-row--button .hig-list-row__text { align-items: center; text-align: center; }
+.hig-list-row--button .hig-list-row__title { color: var(--accent); }
+.hig-list-row--button.hig-list-row--destructive .hig-list-row__title { color: var(--system-red); }
+.hig-list-row--disabled .hig-list-row__title,
+.hig-list-row--disabled .hig-list-row__subtitle,
+.hig-list-row--disabled .hig-list-row__detail { color: var(--label-tertiary); }
+.hig-list-row--disabled .hig-list-row__symbol { opacity: 0.5; }
+
+/* ---------- Switch (kit Toggles/On|Off/1 - Idle: 64x28 track, 38x24 knob r13 inset 2pt; green on) ---------- */
+.hig-list-switch {
+  appearance: none; -webkit-appearance: none; margin: 0; padding: 0; border: 0; cursor: pointer;
+  position: relative; z-index: 1; flex: none; align-self: center;
+  width: var(--toggle-width); height: var(--toggle-height); border-radius: var(--radius-capsule);
+  background: var(--label-tertiary); transition: background-color 200ms ease; /* duration chosen */
+}
+.hig-list-switch--on { background: var(--system-green); }
+/* The knob is white in every appearance; no token is white in all four themes, so light themes use
+   background-primary (#fff) and dark themes label-primary (#fff). */
+.hig-list-switch__knob {
+  position: absolute; top: 2px; left: 2px; width: 38px; height: 24px; border-radius: 13px;
+  background: var(--control-knob); transition: transform 200ms ease;
+}
+.hig-list-switch--on .hig-list-switch__knob { transform: translateX(22px); }
+.hig-list-switch:disabled { opacity: 0.5; cursor: default; } /* kit 4 - Disabled */
+/* macOS mini switch in form rows: 36x16 track, 21x13 knob inset 1.5pt (kit Toggles - Switches/Content Area/1 Mn) */
+.hig-list-switch--mac { width: 36px; height: 16px; background: var(--mac-fill-primary); }
+.hig-list-switch--mac.hig-list-switch--on { background: var(--accent); }
+.hig-list-switch--mac .hig-list-switch__knob { top: 1.5px; left: 1.5px; width: 21px; height: 13px; border-radius: var(--radius-capsule); box-shadow: var(--shadow-knob); }
+.hig-list-switch--mac.hig-list-switch--on .hig-list-switch__knob { transform: translateX(12px); }
+.hig-list-switch--mac::before { width: max(100%, var(--target-mac)); height: var(--target-mac); }
+
+/* ---------- Swipe actions (kit Lists/Rows with Swipe Actions, Slide Action) ---------- */
+.hig-list-row--revealed-trailing .hig-list-row__content { border-radius: 0 var(--radius-capsule) var(--radius-capsule) 0; }
+.hig-list-row--revealed-leading .hig-list-row__content { border-radius: var(--radius-capsule) 0 0 var(--radius-capsule); }
+.hig-list-row__actions { position: absolute; top: 50%; transform: translateY(-50%); display: flex; gap: 10px; }
+.hig-list-row__actions--trailing { right: 0; }
+.hig-list-row__actions--leading { left: 0; }
+.hig-list-row__swipe {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; cursor: pointer; font-family: var(--font-sans);
+  height: 44px; border-radius: var(--radius-capsule); color: var(--on-accent);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+/* Symbol + Label 84x44: 16pt symbol, 13pt label 8pt after it, 14pt side padding */
+.hig-list-row__swipe--label { min-width: 84px; padding: 0 14px; gap: 8px; font-size: 13px; line-height: 16px; white-space: nowrap; }
+.hig-list-row__swipe--symbol { width: 60px; padding: 0; } /* Symbol 60x44, 18pt symbol */
+
+/* ---------- Section index (kit Lists/Section Index: 16pt strip, 11pt Semibold letters on 10pt lines, accent) ---------- */
+.hig-list__index {
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: 2; width: 16px; touch-action: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.hig-list__index-item {
+  appearance: none; -webkit-appearance: none; margin: 0; padding: 0; border: 0; background: none; cursor: pointer;
+  width: 14px; height: 10px; font-family: var(--font-sans); font-size: 11px; line-height: 10px; font-weight: 600; color: var(--accent);
+}
+/* Plain rows run under the index; keep their trailing content clear of the 16pt strip (chosen). */
+.hig-list--indexed.hig-list--plain .hig-list-row__body { margin-right: 32px; }
+
+/* ---------- iPadOS sidebar style (kit Sidebar: 44pt items, Fills/3 Tertiary selection r22, levels 20pt apart) ---------- */
+.hig-list--ios.hig-list--sidebar .hig-list-section + .hig-list-section { margin-top: 0; }
+/* Header 54pt: 17pt Medium secondary title at 12,21 in the 260pt column */
+.hig-list--ios.hig-list--sidebar .hig-list-section__header { padding: 21px 12px 11px 2px; }
+.hig-list--ios.hig-list--sidebar .hig-list-section__title {
+  font-size: 17px; line-height: 22px; font-weight: 500; letter-spacing: -0.43px; color: var(--label-secondary);
+}
+.hig-list--ios.hig-list--sidebar .hig-list-row { margin-left: calc(var(--hig-list-level, 0) * 20px); }
+.hig-list--ios.hig-list--sidebar .hig-list-row__content { min-height: var(--sidebar-row-height); padding-left: 10px; border-radius: var(--radius-capsule); }
+.hig-list--ios.hig-list--sidebar .hig-list-row__body { margin-right: 4px; padding: 4px 0; box-shadow: none; }
+.hig-list--ios.hig-list--sidebar .hig-list-row__symbol { width: 34px; margin-right: 4px; } /* titles 38pt after the symbol slot */
+.hig-list--ios.hig-list--sidebar .hig-list-row__subtitle { font-size: 13px; line-height: 14px; letter-spacing: -0.08px; }
+
+/* ---------- macOS ---------- */
+.hig-list--mac { color: var(--mac-label-primary); background: var(--mac-window-background); --hig-list-row-bg: transparent; }
+/* plain = bordered list: rows 24pt (kit Sidebars/Small rows), 13pt body text, alternating backgrounds (HIG) */
+.hig-list--mac .hig-list-row__content { min-height: 24px; padding-left: 10px; } /* 10pt inset as the kit's Forms rows */
+.hig-list--mac .hig-list-row__body { margin-right: 10px; padding: 4px 0; gap: 8px; box-shadow: none; } /* gap chosen */
+.hig-list--mac .hig-list-row__title { font-size: 13px; line-height: 16px; letter-spacing: -0.08px; color: var(--mac-label-primary); }
+.hig-list--mac .hig-list-row__subtitle { font-size: 11px; line-height: 14px; letter-spacing: 0.06px; color: var(--mac-label-secondary); }
+.hig-list--mac .hig-list-row__detail { font-size: 13px; line-height: 16px; letter-spacing: -0.08px; color: var(--mac-label-secondary); }
+.hig-list--mac .hig-list-row__trailing { gap: 8px; color: var(--mac-label-secondary); }
+/* Symbol: 16pt slot in the accent, title 4pt after it (kit Sidebars/Small/Items) */
+.hig-list--mac .hig-list-row__symbol { width: 16px; margin-right: 4px; color: var(--accent); }
+.hig-list--mac .hig-list-row__chevron { width: auto; color: var(--mac-label-secondary); }
+.hig-list--mac .hig-list-row__chevron .hig-icon { margin: 0; }
+.hig-list--mac .hig-list-row__check { width: auto; color: var(--mac-label-primary); }
+.hig-list--mac .hig-list-row__info { width: 20px; height: 16px; color: var(--mac-label-secondary); } /* kit Forms info button: 13pt, secondary */
+.hig-list--mac .hig-list-row__info::before { width: max(100%, var(--target-mac)); height: var(--target-mac); }
+/* Service icon tile 24pt r5.4, white 13pt symbol, title 8pt after it (kit Forms/Rows - Leading/Sidebar Icon/Service Icon 24pt) */
+.hig-list--mac .hig-list-row__tile { width: 24px; height: 24px; margin-right: 8px; border-radius: 5.4px; }
+/* Image 32pt r9 with a 0.5pt inner border at 10% (kit Forms/Image Icon Rounded Corner) */
+.hig-list--mac .hig-list-row__image {
+  width: 32px; height: 32px; margin-right: 8px; border-radius: 9px; background: var(--mac-fill-secondary);
+  box-shadow: inset 0 0 0 0.5px var(--mac-label-quaternary);
+}
+.hig-list--mac .hig-list-row--destructive .hig-list-row__title { color: var(--system-red); }
+.hig-list--mac .hig-list-row--disabled :is(.hig-list-row__title, .hig-list-row__subtitle, .hig-list-row__detail) { color: var(--mac-label-tertiary); }
+.hig-list--mac .hig-list-row__action:focus-visible::before { outline-offset: -3px; }
+.hig-list--mac .hig-list-row--button .hig-list-row__title { color: var(--accent); }
+
+/* Alternating row backgrounds (HIG: bordered style), every second row */
+.hig-list--mac.hig-list--alternating .hig-list-section__rows > .hig-list-row:nth-child(even):not(.hig-list-row--highlighted) .hig-list-row__content {
+  background: var(--mac-fill-quaternary);
+}
+/* Selected rows: accent with on-accent text */
+.hig-list--mac:not(.hig-list--sidebar) .hig-list-row--highlighted .hig-list-row__content { background: var(--accent); }
+.hig-list--mac:not(.hig-list--sidebar) .hig-list-row--highlighted :is(.hig-list-row__title, .hig-list-row__subtitle, .hig-list-row__detail, .hig-list-row__symbol, .hig-list-row__chevron, .hig-list-row__check, .hig-list-row__info) {
+  color: var(--on-accent);
+}
+
+/* Headers and footers: chosen: the macOS kit draws no list headers; Headline (13pt Bold) and Subheadline styles */
+.hig-list--mac .hig-list-section__header { padding: 6px 10px; }
+.hig-list--mac .hig-list-section__title { font-size: 13px; line-height: 16px; font-weight: 700; letter-spacing: -0.08px; color: var(--mac-label-primary); }
+.hig-list--mac .hig-list-section__action { flex: none; font-size: 13px; line-height: 16px; color: var(--accent); }
+.hig-list--mac .hig-list-section__footer { padding: 6px 10px; font-size: 11px; line-height: 14px; letter-spacing: 0.06px; color: var(--mac-label-secondary); }
+.hig-list--mac .hig-list-section + .hig-list-section { margin-top: 8px; } /* chosen */
+
+/* insetGrouped / grouped = Forms sections: quaternary fill, r12, rows inset 10pt, 40pt rows with text 12pt from the top,
+   tertiary-fill row separators across the row (kit Forms/Example Forms) */
+.hig-list--mac.hig-list--insetGrouped,
+.hig-list--mac.hig-list--grouped { padding: 20px; } /* kit: the form sits 20pt inside the window */
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-section + .hig-list-section { margin-top: 20px; } /* chosen */
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-section__header { padding: 0 10px 8px; } /* chosen */
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-section__rows {
+  padding: 0 10px; border-radius: var(--radius-mac-menu); background: var(--mac-fill-quaternary);
+}
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-row__content {
+  min-height: 40px; padding-left: 0; box-shadow: inset 0 -1px var(--mac-fill-tertiary);
+}
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-section__rows > .hig-list-row:last-child .hig-list-row__content { box-shadow: none; }
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-row__body { margin-right: 0; padding: 12px 0; }
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) :is(.hig-list-row__title, .hig-list-row__detail) { font-weight: 500; }
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-row__subtitle { margin-top: 2px; }
+/* Symbol: 13pt Medium, secondary, title 10pt after a 20pt slot (kit Forms "Title + Symbol") */
+.hig-list--mac:is(.hig-list--insetGrouped, .hig-list--grouped) .hig-list-row__symbol { width: 20px; margin-right: 10px; color: var(--mac-label-secondary); }
+
+/* sidebar (kit Sidebars Medium: sections 14pt from the edge, 32pt rows, 18pt headers, 14pt below each section,
+   selection r8 reaching 4pt past the row at 11% black x 50%) */
+.hig-list--mac.hig-list--sidebar { background: transparent; padding: 0 14px; }
+.hig-list--mac.hig-list--sidebar .hig-list-section { padding-bottom: 14px; }
+.hig-list--mac.hig-list--sidebar .hig-list-section + .hig-list-section { margin-top: 0; }
+.hig-list--mac.hig-list--sidebar .hig-list-section__header { padding: 2px 0; }
+.hig-list--mac.hig-list--sidebar .hig-list-section__title { font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: 0.06px; color: var(--mac-label-tertiary); }
+.hig-list--mac.hig-list--sidebar .hig-list-row { overflow: visible; margin-left: calc(var(--hig-list-level, 0) * 12px); }
+.hig-list--mac.hig-list--sidebar .hig-list-row__content { min-height: 32px; margin: 0 -4px; padding-left: 18px; border-radius: var(--radius-mac-menu-item); }
+.hig-list--mac.hig-list--sidebar .hig-list-row__body { margin-right: 6px; padding: 8px 0; }
+.hig-list--mac.hig-list--sidebar .hig-list-row__symbol { width: 20px; margin-right: 4px; } /* Medium: 20pt symbol slot, title at 24 */
+.hig-list--mac.hig-list--sidebar .hig-list-row__detail { font-weight: 500; }
+.hig-list--mac.hig-list--sidebar .hig-list-row--highlighted .hig-list-row__content { background: var(--mac-fill-tertiary); } /* nearest token to 11% x 50% */
+.hig-list--mac.hig-list--sidebar .hig-list-row--option:focus-visible { outline: none; }
+.hig-list--mac.hig-list--sidebar .hig-list-row--option:focus-visible .hig-list-row__content { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hig-list-row__content, .hig-list-switch, .hig-list-switch__knob { transition: none; }
+}
+/* ===== Sidebar ===== */
+/* Sidebar: geometry from the iOS 27 kit (Sidebars page: Items/Level 0–2, States, Header, Examples/Sidebar) and the
+   macOS 27 kit (Sidebars page: Small/Medium/Large Items, Folders, Header, Examples/Active; Windows/Unified Toolbar +
+   Title + Sidebar). */
+.hig-sidebar { box-sizing: border-box; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; }
+.hig-sidebar__list { list-style: none; margin: 0; padding: 0; }
+.hig-sidebar__li { margin: 0; padding: 0; }
+.hig-sidebar__row, button.hig-sidebar__header {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; background: transparent; color: inherit;
+  font: inherit; text-align: start; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.hig-sidebar__row { position: relative; display: flex; align-items: center; box-sizing: border-box; min-width: 0; }
+.hig-sidebar__row:disabled { opacity: 0.5; cursor: default; } /* kit States/Disabled: 50% opacity */
+.hig-sidebar__row .hig-icon, .hig-sidebar__header .hig-icon { pointer-events: none; }
+.hig-sidebar__text { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.hig-sidebar__label, .hig-sidebar__subtitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hig-sidebar__icon, .hig-sidebar__disclosure, .hig-sidebar__chevron, .hig-sidebar__header-chevron { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.hig-sidebar__icon { color: var(--accent); } /* HIG: sidebar icons use the accent color by default */
+.hig-sidebar__badge { flex: none; }
+.hig-sidebar__header { display: flex; box-sizing: border-box; width: 100%; }
+.hig-sidebar__header-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hig-sidebar__header-detail, .hig-sidebar__header-chevron { flex: none; }
+
+/* ---- iOS / iPadOS ---- */
+/* 260pt column (sidebar-width); items sit 10pt inside it and their state capsule another 10pt in, 20pt per level
+   (kit Examples/Sidebar: items at x=10, Items/Level 0–2: state at x=10/30/50). */
+.hig-sidebar--ios { width: var(--sidebar-width); padding: 0 10px 10px; background: var(--background-secondary); color: var(--label-primary); }
+.hig-sidebar--ios .hig-sidebar__row {
+  width: calc(100% - 10px - var(--hig-sidebar-level, 0) * 20px); margin-inline-start: calc(10px + var(--hig-sidebar-level, 0) * 20px);
+  height: var(--sidebar-row-height); padding: 0 12px 0 10px; gap: 4px; border-radius: var(--radius-capsule);
+  font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px; /* ios-body */
+}
+/* Selected: Fills/3 Tertiary capsule, 22pt radius (kit States/Selected 260×44). */
+.hig-sidebar--ios .hig-sidebar__row.is-selected { background: var(--fill-tertiary); }
+/* Symbol: 17pt Regular in a 34×36 box 10pt from the capsule edge, title 4pt after (kit Items/Leading/Composed). */
+.hig-sidebar--ios .hig-sidebar__icon { width: 34px; height: 36px; font-size: 17px; }
+.hig-sidebar--ios .hig-sidebar__subtitle { font: 400 13px/14px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); } /* kit Titles: 13pt subtitle */
+/* Trailing detail (counts): 17pt Regular secondary, 8pt after the title (kit Items/Trailing/Detail only). */
+.hig-sidebar--ios .hig-sidebar__badge { margin-inline-start: 4px; font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-secondary); }
+/* Disclosure chevron: 13pt Bold tertiary in an 18pt box, 6pt after the detail (kit Items/Trailing/Submenu). */
+.hig-sidebar--ios .hig-sidebar__chevron { width: 18px; height: 18px; margin-inline-start: 2px; font-size: 13px; color: var(--label-tertiary); }
+/* Section header: 54pt; 17pt Medium secondary title at 12,21; trailing detail + 18pt disclosure (kit Header/Header). */
+.hig-sidebar--ios .hig-sidebar__header {
+  align-items: flex-start; gap: 8px; height: 54px; padding: 21px 12px 11px;
+  font: 500 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-secondary);
+}
+.hig-sidebar--ios .hig-sidebar__header-detail { font-weight: 400; }
+/* The kit draws the header disclosure as an override placeholder; the accent color is a choice. */
+.hig-sidebar--ios .hig-sidebar__header-chevron { width: 18px; height: 18px; margin-top: 2px; font-size: 13px; color: var(--accent); }
+.hig-sidebar--ios .hig-sidebar__top { margin: 0 -10px; }
+
+/* Floating: a Liquid Glass panel; its corner is concentric with the 22pt capsules inset 10pt (22 + 10 = radius-menu). */
+.hig-sidebar--ios.hig-sidebar--floating { border-radius: var(--radius-menu); padding-top: 4px; }
+.hig-sidebar--floating .hig-sidebar__row, .hig-sidebar--floating .hig-sidebar__label { color: var(--glass-label-primary); }
+.hig-sidebar--floating .hig-sidebar__header, .hig-sidebar--floating .hig-sidebar__badge, .hig-sidebar--floating .hig-sidebar__subtitle { color: var(--glass-label-secondary); }
+.hig-sidebar--floating .hig-sidebar__chevron, .hig-sidebar--floating .hig-sidebar__disclosure { color: var(--glass-label-tertiary); }
+.hig-sidebar--floating .hig-sidebar__header-chevron { color: var(--accent); }
+.hig-sidebar--floating .hig-sidebar__icon { color: var(--accent); }
+
+/* ---- macOS ---- */
+/* 256pt pane, sections inset 14pt and 14pt apart (kit Windows/Unified Toolbar + Title + Sidebar, Examples/Active). */
+.hig-sidebar--mac { width: 256px; padding: 0 14px; color: var(--mac-label-primary); }
+.hig-sidebar--mac .hig-sidebar__section { padding-bottom: 14px; }
+/* Row: selection 4pt wider than the row on each side, 8pt radius (kit Items/Level 0 - Selected). The kit fill is
+   11% black at 50% opacity; mac-fill-tertiary (5%) is the nearest token. Items start 14pt in; a trailing count
+   ends 2pt from the row edge (kit Trailing - Detail). */
+.hig-sidebar--mac .hig-sidebar__row {
+  width: calc(100% + 8px); margin-inline: -4px; padding-inline: calc(4px + 14px) calc(4px + 2px); gap: 4px;
+  border-radius: var(--radius-mac-menu-item);
+}
+.hig-sidebar--mac .hig-sidebar__row.is-selected { background: var(--mac-fill-tertiary); }
+/* Rows in a section with hierarchy reserve a disclosure column; each level indents 12pt (kit Folders/Level 0–4). */
+.hig-sidebar--mac .hig-sidebar__row--folder { padding-inline-start: calc(4px + var(--hig-sidebar-level, 0) * 12px); }
+.hig-sidebar--mac .hig-sidebar__disclosure { color: var(--mac-label-tertiary); font-size: 11px; cursor: pointer; } /* 11pt Bold tertiary (kit) */
+.hig-sidebar--mac .hig-sidebar__disclosure.is-empty { cursor: inherit; }
+.hig-sidebar--mac .hig-sidebar__badge { color: var(--mac-label-secondary); font-weight: 500; }
+.hig-sidebar--mac .hig-sidebar__row--folder .hig-sidebar__label { font-weight: 500; } /* folder titles are Medium (kit) */
+.hig-sidebar--mac .hig-sidebar__header { align-items: center; gap: 4px; padding: 2px 0; color: var(--mac-label-tertiary); }
+.hig-sidebar--mac .hig-sidebar__header-detail { font-weight: 500; color: var(--mac-label-secondary); }
+.hig-sidebar--mac .hig-sidebar__header-chevron { width: 20px; color: var(--mac-label-tertiary); }
+
+/* Small: 24pt rows, 16pt symbol column (11pt Medium), 11pt Medium titles; 18pt header, 11pt Bold (kit Small).
+   Headers keep the kit's 18pt (Large 20pt) footprint but get a 24pt hit box (WCAG 2.5.8): a 6px transparent overhang
+   above, cancelled by a negative margin. It reaches into the 14pt gap after the previous section (or the sidebar's
+   top inset) rather than under the first row, which would cover it; the title stays at the kit's y=2. */
+.hig-sidebar--small .hig-sidebar__row { height: 24px; font: 500 11px/14px var(--font-sans); letter-spacing: 0.06px; }
+.hig-sidebar--small .hig-sidebar__icon { width: 16px; font-size: 11px; }
+.hig-sidebar--small .hig-sidebar__disclosure { width: 12px; }
+.hig-sidebar--small .hig-sidebar__header { height: 24px; margin-block: -6px 0; padding: 8px 0 2px; font: 700 11px/14px var(--font-sans); letter-spacing: 0.06px; }
+.hig-sidebar--small .hig-sidebar__header-chevron { height: 14px; font-size: 11px; }
+/* Medium: 32pt rows, 20pt symbol column (13pt Medium), 13pt Regular titles; 18pt header, 11pt Bold (kit Medium). */
+.hig-sidebar--medium .hig-sidebar__row { height: 32px; font: 400 13px/16px var(--font-sans); letter-spacing: -0.08px; }
+.hig-sidebar--medium .hig-sidebar__icon { width: 20px; font-size: 13px; }
+.hig-sidebar--medium .hig-sidebar__disclosure { width: 16px; }
+.hig-sidebar--medium .hig-sidebar__header { height: 24px; margin-block: -6px 0; padding: 8px 0 2px; font: 700 11px/14px var(--font-sans); letter-spacing: 0.06px; }
+.hig-sidebar--medium .hig-sidebar__header-chevron { height: 14px; font-size: 11px; }
+/* Large: 40pt rows, 24pt symbol column (15pt Medium), 15pt Regular titles; 20pt header, 13pt Bold (kit Large). */
+.hig-sidebar--large .hig-sidebar__row { height: 40px; font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; }
+.hig-sidebar--large .hig-sidebar__icon { width: 24px; font-size: 15px; }
+.hig-sidebar--large .hig-sidebar__disclosure { width: 16px; }
+.hig-sidebar--large .hig-sidebar__header { height: 26px; margin-block: -6px 0; padding: 8px 0 2px; font: 700 13px/16px var(--font-sans); letter-spacing: -0.08px; }
+.hig-sidebar--large .hig-sidebar__header-chevron { height: 16px; font-size: 13px; }
+.hig-sidebar--large .hig-sidebar__header-detail { font-size: 13px; }
+
+/* Floating macOS sidebar: Liquid Glass panel with the default glass corner (radius-glass). The kit draws every
+   sidebar header title in Labels/Vibrant/3 Tertiary (plus-darker), which keeps contrast by darkening the glass beneath;
+   drawn normal on glass, glass-label-tertiary measures about 1.4:1, so headers here use glass-label-secondary
+   (a deliberate one-step-up substitute for the kit's blended tertiary). */
+.hig-sidebar--mac.hig-sidebar--floating { border-radius: var(--radius-glass); padding-top: 10px; }
+.hig-sidebar--mac.hig-sidebar--floating .hig-sidebar__header { color: var(--glass-label-secondary); }
+.hig-sidebar--mac .hig-sidebar__top { margin: 0 -14px; }
+/* ===== TabBar ===== */
+/* TabBar: geometry from the iOS 27 kit (Tab Bars page: iPhone 402×99, Horizontal/Tabs, Tab - Default, Search
+   Selected, iPad (Regular) 510×44, iPhone Duo/Vertical) and the HIG (tvOS 68pt bar, 46pt from the top). */
+.hig-tab-bar {
+  box-sizing: border-box; font-family: var(--font-sans); color: var(--glass-label-primary);
+  -webkit-tap-highlight-color: transparent;
+}
+:where(.hig-tab-bar) button {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; padding: 0; background: transparent;
+  color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+:where(.hig-tab-bar) .hig-icon { pointer-events: none; }
+
+/* ---- iPhone: the 402×99 region holds the floating bar at 21,16 (kit Tab Bars/iPhone/Default) ---- */
+.hig-tab-bar--ios { display: flex; width: 100%; padding: 16px 21px 21px; }
+.hig-tab-bar__list { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; width: 100%; } /* search tab 8pt after the tabs */
+/* Capsule: 62pt tall, tabs 54pt tall at 8,4 (kit Horizontal/Tabs - No Search). */
+.hig-tab-bar__tabs { display: flex; flex: 0 1 auto; min-width: 0; box-sizing: border-box; height: 62px; padding: 4px 8px; }
+.hig-tab-bar__list--fill .hig-tab-bar__tabs { flex: 1 1 auto; }
+.hig-tab-bar__tab {
+  position: relative; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
+  flex: 0 1 var(--hig-tab-w, 72px); min-width: 0; height: 54px; padding: 7px 2px 6px; border-radius: var(--radius-capsule);
+}
+.hig-tab-bar__list--fill .hig-tab-bar__tab { flex: 1 1 0; }
+/* Selection: Fills/2 Secondary capsule 4pt wider than the tab on each side (kit Tab - Default/Selected). */
+.hig-tab-bar__selection { position: absolute; inset: 0 -4px; border-radius: var(--radius-capsule); background: var(--fill-secondary); }
+.hig-tab-bar__icon { position: relative; display: flex; align-items: center; justify-content: center; height: 28px; font-size: 18px; } /* 18pt Semibold symbol in a 28pt box (kit) */
+.hig-tab-bar__label {
+  position: relative; display: block; max-width: 100%; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 600 10px/12px var(--font-sans); letter-spacing: -0.1px; /* 10pt Semibold, kern -0.1 (kit) */
+}
+.hig-tab-bar__tab.is-selected { color: var(--accent); } /* the kit fills the selected symbol and label with Blue */
+/* Search tab: a separate 62pt glass circle with a 17pt Semibold magnifier (kit Tab - Search). */
+.hig-tab-bar__search { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none; width: 62px; height: 62px; font-size: 17px; }
+.hig-tab-bar__search.is-selected { color: var(--accent); }
+
+/* Badge: red capsule with white text, 16pt tall, 12pt Medium (visionOS 26 kit Badges/Small/Notification Badge: the
+   iOS kit draws no tab badge). Placement next to the symbol's top trailing corner is a choice.
+   Numerals are white on system-red, Apple's pairing: 3.57:1 light, 3.43:1 dark, 4.56:1 light-hc (contrast.py). On the
+   lighter dark-hc red white drops to 2.94:1 (below even 3:1) while black measures 7.15:1, so Increased Contrast Dark
+   uses black. Set per appearance on the nearest data-theme, independent of the accent (on-accent follows the accent). */
+:root, [data-theme] { --hig-tab-bar-badge-label: var(--white); }
+[data-theme="dark-hc"] { --hig-tab-bar-badge-label: var(--black); }
+.hig-tab-bar__badge {
+  position: absolute; top: -2px; left: calc(50% + 4px); box-sizing: border-box; min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: var(--radius-capsule); background: var(--system-red); color: var(--hig-tab-bar-badge-label);
+  font: 500 12px/16px var(--font-sans); letter-spacing: 0; text-align: center; pointer-events: none;
+}
+[dir="rtl"] .hig-tab-bar__badge { left: auto; right: calc(50% + 4px); }
+
+/* ---- Search selected / minimized: 48pt glass button + 48pt search field, 28pt margins (kit Search Selected) ---- */
+.hig-tab-bar--searching, .hig-tab-bar--minimized { align-items: center; gap: var(--padding-bezeled); padding: 0 28px 28px; }
+.hig-tab-bar--searching .hig-tab-bar__list { width: auto; flex: none; }
+.hig-tab-bar--minimized .hig-tab-bar__list { justify-content: space-between; }
+.hig-tab-bar__mini { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none; width: 48px; height: 48px; font-size: 17px; }
+.hig-tab-bar__mini.is-selected { color: var(--accent); }
+.hig-tab-bar__mini .hig-tab-bar__badge { top: 2px; left: calc(50% + 6px); }
+.hig-tab-bar__field {
+  display: flex; align-items: center; flex: 1 1 auto; min-width: 0; box-sizing: border-box; height: 48px; padding: 0 11px; gap: 4px;
+  color: var(--glass-label-secondary); cursor: text;
+}
+.hig-tab-bar__field-glyph { display: inline-flex; justify-content: center; flex: none; width: 26px; font-size: 17px; } /* magnifier 26pt box at 11pt (kit) */
+.hig-tab-bar__field-glyph--trailing { width: 18px; } /* dictation glyph 18pt box, 11pt from the end (kit) */
+.hig-tab-bar__field input {
+  appearance: none; -webkit-appearance: none; flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; border: 0; outline: none;
+  background: transparent; color: var(--glass-label-primary); font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px;
+}
+.hig-tab-bar__field input::placeholder { color: var(--glass-label-secondary); opacity: 1; }
+.hig-tab-bar__field input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.hig-tab-bar__field:focus-within { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ---- iPhone Duo vertical tab bar: 48pt capsule, 48pt tabs 50pt apart from y=6 (56pt apart beside search);
+   search circle 8pt below; selection 44×58 (kit iPhone Duo/Vertical/Tabs, Tab - Default/Selected) ---- */
+.hig-tab-bar--vertical { display: inline-flex; align-self: flex-start; width: auto; padding: 0; } /* never stretch to a neighbor's height */
+.hig-tab-bar--vertical .hig-tab-bar__list { flex-direction: column; width: auto; }
+.hig-tab-bar--vertical .hig-tab-bar__tabs { flex-direction: column; width: 48px; height: auto; padding: 6px 0; gap: 2px; }
+.hig-tab-bar--vertical .hig-tab-bar__tab { flex: none; width: 48px; height: 48px; padding: 0; justify-content: center; }
+.hig-tab-bar--vertical .hig-tab-bar__tabs--beside-search .hig-tab-bar__tab { height: 54px; }
+.hig-tab-bar--vertical .hig-tab-bar__selection { inset: -5px 2px; }
+.hig-tab-bar--vertical .hig-tab-bar__search { width: 48px; height: 48px; }
+.hig-tab-bar--vertical .hig-tab-bar__search .hig-tab-bar__selection { inset: 2px; }
+
+/* ---- iPadOS: 44pt capsule with 4pt inset; 36pt tabs (kit Tab Bars/iPad (Regular)/iPad 510×44) ---- */
+.hig-tab-bar--ipad { display: inline-flex; align-items: center; height: 44px; padding: 4px; max-width: 100%; }
+.hig-tab-bar--ipad .hig-tab-bar__list { width: auto; gap: 0; }
+/* Unselected label tab: 17pt Medium, 11pt padding (kit Tab - Label/Unselected 65×36). */
+.hig-tab-bar--ipad .hig-tab-bar__tab {
+  position: relative; flex-direction: row; justify-content: center; gap: 6px; flex: none; width: auto; height: 36px; padding: 0 11px;
+  font: 500 17px/20px var(--font-sans); letter-spacing: -0.43px;
+}
+/* Selected label tab: 17pt Semibold Blue on Fills/2 Secondary, 15pt padding (kit Tab - Label/Selected 74×36). */
+.hig-tab-bar--ipad .hig-tab-bar__tab.is-selected { padding: 0 15px; font-weight: 600; color: var(--accent); background: var(--fill-secondary); }
+.hig-tab-bar--ipad .hig-tab-bar__label { margin: 0; font: inherit; letter-spacing: inherit; }
+.hig-tab-bar--ipad .hig-tab-bar__badge { position: static; flex: none; }
+/* Symbol tabs (sidebar toggle, search): 52×36, 17pt Medium symbol (kit Tab - Symbol/Unselected). */
+.hig-tab-bar__sym { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none; width: 52px; height: 36px; border-radius: var(--radius-capsule); font-size: 17px; }
+.hig-tab-bar__sym.is-selected { color: var(--accent); background: var(--fill-secondary); }
+/* 44pt minimum hit region around the 36pt items (HIG). */
+.hig-tab-bar--ipad .hig-tab-bar__tab::before, .hig-tab-bar__sym::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: var(--target-ios); transform: translateY(-50%);
+}
+
+/* ---- tvOS: 68pt bar whose top edge is 46pt from the top of the screen (HIG). Translucent bar, only the selected tab
+   opaque, with a drop shadow when focused (HIG). No tvOS UI kit exists: the 56pt tab height (target-tv-min), 24pt
+   padding (padding-borderless), tv-body labels and the inverted label-primary selection are choices. ---- */
+.hig-tab-bar--tv { display: flex; justify-content: center; width: 100%; padding-top: 46px; }
+.hig-tab-bar--tv .hig-tab-bar__tabs { align-items: center; height: 68px; padding: 6px; gap: 0; max-width: 100%; overflow: hidden; }
+.hig-tab-bar--tv .hig-tab-bar__tab {
+  flex-direction: row; justify-content: center; gap: 8px; flex: none; width: auto; height: var(--target-tv-min); padding: 0 var(--padding-borderless);
+  color: var(--glass-label-secondary); transition: box-shadow 120ms linear;
+}
+.hig-tab-bar--tv .hig-tab-bar__tab--symbol { width: var(--target-tv-min); padding: 0; font-size: 29px; }
+.hig-tab-bar--tv .hig-tab-bar__label { margin: 0; font: 500 29px/36px var(--font-sans); letter-spacing: 0; } /* tv-body */
+.hig-tab-bar--tv .hig-tab-bar__tab.is-selected { background: var(--label-primary); color: var(--background-primary); } /* opaque, inverted platter (choice) */
+.hig-tab-bar--tv .hig-tab-bar__tab.is-selected:focus-visible { box-shadow: var(--shadow-glass); }
+.hig-tab-bar--tv .hig-tab-bar__badge { position: static; flex: none; }
+
+@media (prefers-reduced-motion: reduce) { .hig-tab-bar * { transition: none !important; } }
+/* ===== Toolbar ===== */
+/* Toolbar: geometry from the iOS 27 kit (Toolbars page: iPhone Top - Standard / Bottom, iPad Top / Bottom,
+   iPhone Duo vertical bar, Buttons 34/44/48pt) and the macOS 27 kit (Titlebars and Toolbars XL/Medium,
+   Windows/Unified Toolbar + Title, Unified Compact Toolbar + Title). Colors are tokens; literal px are kit values. */
+.hig-toolbar {
+  position: relative; box-sizing: border-box; width: 100%;
+  font-family: var(--font-sans); color: var(--glass-label-primary);
+  -webkit-tap-highlight-color: transparent;
+}
+.hig-toolbar__row, .hig-toolbar__large, .hig-toolbar__title-row { position: relative; z-index: 1; }
+
+/* ---- Scroll edge effect (kit Scroll Edge Effect symbols) ---- */
+.hig-toolbar__edge { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+/* Soft: a background blur masked by a gradient that starts at 60% (kit "Top - Soft (no text)", blur r100). Browsers
+   don't render a 100px backdrop blur on a bar-height element, so blur-glass (30px) stands in. The mask uses only
+   alpha; currentColor at 60% supplies the 0.6 starting alpha without a literal color. */
+.hig-toolbar__edge--soft {
+  -webkit-backdrop-filter: blur(var(--blur-glass)); backdrop-filter: blur(var(--blur-glass));
+  -webkit-mask-image: linear-gradient(to bottom, color-mix(in srgb, currentColor 60%, transparent), transparent);
+  mask-image: linear-gradient(to bottom, color-mix(in srgb, currentColor 60%, transparent), transparent);
+}
+.hig-toolbar--bottom .hig-toolbar__edge--soft,
+.hig-toolbar--vertical .hig-toolbar__edge--soft {
+  -webkit-mask-image: linear-gradient(to top, color-mix(in srgb, currentColor 60%, transparent), transparent);
+  mask-image: linear-gradient(to top, color-mix(in srgb, currentColor 60%, transparent), transparent);
+}
+/* Hard: the background color at 85% opacity over a 6pt blur, with a hairline (kit "Top - Hard"; the kit hairline is
+   5% black: `separator`, the token for toolbar edges, stands in). */
+.hig-toolbar__edge--hard {
+  background: color-mix(in srgb, var(--background-primary) 85%, transparent);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: inset 0 -0.67px 0 var(--separator);
+}
+.hig-toolbar--mac .hig-toolbar__edge--hard { background: color-mix(in srgb, var(--mac-window-background) 85%, transparent); }
+.hig-toolbar--bottom .hig-toolbar__edge--hard { box-shadow: inset 0 0.67px 0 var(--separator); }
+/* The dark Hard edge uses 55% opacity instead of 85% (kit Scroll Edge Effect/Dark/Top - Hard). */
+[data-theme^="dark"] .hig-toolbar__edge--hard { background: color-mix(in srgb, var(--background-primary) 55%, transparent); }
+[data-theme^="dark"] .hig-toolbar--mac .hig-toolbar__edge--hard { background: color-mix(in srgb, var(--mac-window-background) 55%, transparent); }
+
+/* ---- iOS / iPadOS layout ---- */
+/* iPhone top bar 402×54: 44pt row, 16pt side margins, 10pt below (kit iPhone/Top - Standard/Title). */
+.hig-toolbar--ios.hig-toolbar--top { padding: 0 var(--margin-compact) 10px; }
+/* iPad top bar 1210×54: 20pt side margins (kit iPad/Top/Default Title). */
+.hig-toolbar--ipad.hig-toolbar--top { padding: 0 20px 10px; }
+/* iPhone bottom toolbar 402×56: 48pt platters at 28,4 (kit iPhone/Bottom/Controls). */
+.hig-toolbar--ios.hig-toolbar--bottom { padding: 4px 28px; }
+/* iPad bottom toolbar: 44pt platters, one row (kit iPad/Bottom/Left, Center and Right). */
+.hig-toolbar--ipad.hig-toolbar--bottom { padding: 0 20px; }
+
+.hig-toolbar__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: start;
+  column-gap: var(--padding-bezeled); min-height: var(--toolbar-button);
+}
+.hig-toolbar--items-48 .hig-toolbar__row { min-height: 48px; }
+.hig-toolbar__side { display: flex; align-items: center; gap: var(--padding-bezeled); min-width: 0; } /* platters 56pt apart = 44 + 12 (kit) */
+/* Titles sit at their kit offsets from the top of the row, but the sides fill the row height so a smaller item
+   (the 34pt close button) centers on the 44pt (48pt) row like the platters beside it. */
+.hig-toolbar--ios:not(.hig-toolbar--vertical) .hig-toolbar__side,
+.hig-toolbar--ipad:not(.hig-toolbar--vertical) .hig-toolbar__side { align-self: stretch; }
+.hig-toolbar__side > .hig-toolbar__title--leading { align-self: flex-start; }
+.hig-toolbar__side--trailing { justify-content: flex-end; }
+.hig-toolbar__middle { display: flex; align-items: center; justify-content: center; gap: var(--padding-bezeled); min-width: 0; }
+.hig-toolbar__custom { display: flex; align-items: center; flex: none; min-width: 0; }
+
+/* Platters (kit Buttons/44pt): a group is 44pt tall, 36pt items at 6,4 that sit 56pt apart; a single item is a
+   44pt circle holding a 36pt item at 4,4. */
+.hig-toolbar__platter {
+  display: inline-flex; align-items: center; flex: none; box-sizing: border-box;
+  height: var(--toolbar-button); padding: 4px 6px; gap: 20px;
+}
+.hig-toolbar__platter--single { padding: 4px; gap: 0; }
+.hig-toolbar__platter--inactive { background: var(--glass-inactive); box-shadow: 0 0 0 0.5px var(--separator); } /* kit Regular - Small - Inactive */
+.hig-toolbar__item {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; padding: 0; cursor: pointer;
+  position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  box-sizing: border-box; width: 36px; height: 36px; border-radius: var(--radius-capsule);
+  background: transparent; color: inherit; font: 500 17px/22px var(--font-sans); letter-spacing: -0.43px; /* 17pt Medium (kit) */
+  white-space: nowrap; -webkit-tap-highlight-color: transparent;
+}
+/* 44pt minimum hit region around 36pt items (HIG); the visual stays at kit size. */
+.hig-toolbar__item::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: max(100%, var(--target-ios)); height: max(100%, var(--target-ios)); transform: translate(-50%, -50%);
+}
+.hig-toolbar__item--text { width: auto; padding: 0 8px; } /* + 4pt platter inset = label 12pt from the edge (kit Text 67×44) */
+.hig-toolbar__item.is-selected { background: var(--accent); color: var(--on-accent); } /* kit Buttons - Symbol/Selected */
+.hig-toolbar__item:disabled { color: var(--glass-label-tertiary); cursor: default; } /* kit Buttons - Symbol/Disabled */
+.hig-toolbar__item .hig-icon { pointer-events: none; }
+.hig-toolbar__platter--prominent .hig-toolbar__item { color: inherit; }
+.hig-toolbar__platter--prominent .hig-toolbar__item:disabled { color: var(--glass-label-tertiary); }
+.hig-toolbar__platter--inactive.hig-toolbar__platter--prominent { color: var(--glass-label-primary); } /* kit Inactive/Symbol 1 - Prominent */
+
+/* Close button: 34pt circle, 20pt Medium xmark (kit Buttons/34pt/Close Button), inside a 44pt hit region. */
+.hig-toolbar__platter--close { width: 34px; height: 34px; padding: 0; gap: 0; border-radius: 50%; }
+.hig-toolbar__platter--close .hig-toolbar__item { width: 34px; height: 34px; font-size: 20px; line-height: 22px; }
+
+/* 48pt platters for iPhone bottom toolbars and iPhone Duo side bars (kit Buttons/48pt): group padding 10/6 with
+   36pt items 54pt apart; a single item is a 48pt circle holding a 40pt item. */
+.hig-toolbar--items-48 .hig-toolbar__platter { height: 48px; padding: 6px 10px; gap: 18px; }
+.hig-toolbar--items-48 .hig-toolbar__platter--single { padding: 4px; gap: 0; }
+.hig-toolbar--items-48 .hig-toolbar__platter--single .hig-toolbar__item { width: 40px; height: 40px; }
+.hig-toolbar--items-48 .hig-toolbar__platter--single .hig-toolbar__item--text { width: auto; padding: 0 9px; } /* label at 13pt (kit Text 69×48) */
+.hig-toolbar--items-48 .hig-toolbar__platter--close { height: 34px; padding: 0; }
+
+/* Search field platter: 180pt wide, magnifier 26pt box at 11pt, 17pt Regular text at 41pt (kit Search - Bottom). */
+.hig-toolbar__search { width: 180px; padding: 0 11px; gap: 4px; color: var(--glass-label-secondary); cursor: text; }
+.hig-toolbar__search--grow { flex: 1 1 auto; width: auto; min-width: 0; }
+.hig-toolbar__search-glyph { display: inline-flex; justify-content: center; width: 26px; flex: none; font-size: 17px; }
+.hig-toolbar__search input {
+  appearance: none; -webkit-appearance: none; flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; border: 0;
+  background: transparent; color: var(--glass-label-primary); outline: none;
+  font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px;
+}
+.hig-toolbar__search input::placeholder { color: var(--glass-label-secondary); opacity: 1; }
+.hig-toolbar__search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.hig-toolbar__search:focus-within { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.hig-toolbar--items-48 .hig-toolbar__search { padding: 0 11px; }
+
+/* Titles (kit Titles - iPhone / Titles - iPad). Single line: 17pt Semibold, 13pt from the top of the 44pt row. */
+.hig-toolbar__title { display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; color: var(--glass-label-primary); }
+.hig-toolbar__title-text {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; /* ios-headline */
+}
+.hig-toolbar--ios .hig-toolbar__title--center, .hig-toolbar--ipad .hig-toolbar__title--center,
+.hig-toolbar--ios .hig-toolbar__title--leading, .hig-toolbar--ipad .hig-toolbar__title--leading { margin-top: 13px; }
+.hig-toolbar__subtitle {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 500 12px/16px var(--font-sans); letter-spacing: 0; color: var(--glass-label-secondary); /* 12pt Medium (kit) */
+}
+/* iPhone two-line title 46×39 at y=3: 15pt Semibold title at +2, 12pt Medium subtitle at +22 (kit Title and Subtitle). */
+.hig-toolbar--ios .hig-toolbar__title--two-line { margin-top: 3px; }
+.hig-toolbar--ios .hig-toolbar__title--two-line .hig-toolbar__title-text { padding-top: 2px; font-size: 15px; line-height: 20px; letter-spacing: -0.23px; }
+/* iPad two-line title at y=4: 17pt Semibold title, 12pt Medium subtitle (kit Titles - iPad/Title and Subtitle). */
+.hig-toolbar--ipad .hig-toolbar__title--two-line { margin-top: 4px; }
+.hig-toolbar__title--leading { align-items: flex-start; text-align: start; }
+.hig-toolbar--ios .hig-toolbar__title--leading.hig-toolbar__title--two-line { margin-top: 3.5px; }
+
+/* iPad: a center group (the tab bar) moves the title to a second row at y=65 (kit iPad/Tab Bar/Default Title, 98pt). */
+.hig-toolbar__title-row { display: flex; justify-content: center; padding: 21px 0 1px; }
+.hig-toolbar .hig-toolbar__title-row .hig-toolbar__title { margin-top: 0; }
+.hig-toolbar__title-row:has(.hig-toolbar__title--two-line) { padding-top: 14px; margin-bottom: -8px; } /* two-line block at y=58 */
+
+/* Large title: 34pt Bold at x=16, y=54 (iPhone 402×105) / x=30, y=54 (iPad 1210×102); subtitle 15pt Medium. */
+.hig-toolbar__large { display: flex; flex-direction: column; padding-top: 10px; min-width: 0; color: var(--glass-label-primary); }
+.hig-toolbar--ipad .hig-toolbar__large { padding-inline-start: 10px; margin-bottom: -3px; }
+.hig-toolbar--ipad .hig-toolbar__large:has(.hig-toolbar__large-subtitle) { margin-bottom: 0; }
+.hig-toolbar__large-title {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 700 34px/41px var(--font-sans); letter-spacing: 0.4px; /* ios-large-title-emphasized */
+}
+.hig-toolbar__large-subtitle {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 500 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--glass-label-secondary); /* 15pt Medium (kit) */
+}
+
+/* ---- iPhone Duo side toolbar: 84pt bar, 48pt platters 12pt from the content side and 24pt from the screen
+   edge, starting 24pt down; groups 12pt apart (kit Examples/Toolbar/iPhone Duo, Vertical Group - Symbol 2/3). */
+.hig-toolbar--vertical { width: 84px; padding: 24px 24px 24px 12px; padding-inline: 12px 24px; }
+.hig-toolbar--vertical .hig-toolbar__row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--padding-bezeled); min-height: 0; }
+.hig-toolbar--vertical .hig-toolbar__side { flex-direction: column; align-items: flex-start; }
+.hig-toolbar--vertical .hig-toolbar__platter { flex-direction: column; width: 48px; height: auto; padding: 10px 6px; gap: 18px; }
+.hig-toolbar--vertical .hig-toolbar__platter--single { height: 48px; padding: 4px; gap: 0; }
+.hig-toolbar--vertical .hig-toolbar__platter--close { width: 34px; height: 34px; padding: 0; margin-inline-start: 7px; }
+
+/* ---- macOS unified title bar and toolbar: 52pt bar, 36pt items at y=8, 8pt from the edges and between
+   groups (kit Windows/Unified Toolbar + Title); compact 40pt bar, 24pt items, 12pt between groups. ---- */
+.hig-toolbar--mac { height: 52px; padding: 8px; color: var(--glass-label-primary); }
+.hig-toolbar--mac .hig-toolbar__row { display: flex; align-items: center; gap: 8px; min-height: 36px; }
+.hig-toolbar--mac .hig-toolbar__side { gap: 8px; }
+.hig-toolbar--mac .hig-toolbar__side--leading { flex: 1 1 auto; }
+.hig-toolbar--mac .hig-toolbar__side--trailing { flex: none; }
+.hig-toolbar--mac .hig-toolbar__middle { flex: none; gap: 8px; }
+/* XL group: 4pt inset, 28pt items 37pt apart, 13pt Medium symbols (kit XL/Buttons/Active/1–6). */
+.hig-toolbar--mac .hig-toolbar__platter { height: 36px; padding: 4px; gap: 9px; }
+.hig-toolbar--mac .hig-toolbar__item { width: 28px; height: 28px; font-size: 13px; line-height: 15px; letter-spacing: 0; }
+.hig-toolbar--mac .hig-toolbar__item::before { width: max(100%, var(--target-mac)); height: max(100%, var(--target-mac)); }
+.hig-toolbar--mac .hig-toolbar__item--text { width: auto; padding: 0 8px; }
+.hig-toolbar--mac .hig-toolbar__item.is-selected { background: var(--mac-fill-secondary); color: inherit; } /* kit Button Group Buttons/2 - Selected */
+.hig-toolbar--mac .hig-toolbar__platter--close { width: 28px; height: 28px; }
+.hig-toolbar--mac .hig-toolbar__platter--close .hig-toolbar__item { width: 28px; height: 28px; font-size: 13px; }
+/* XL search field 159pt: magnifier 16pt box at 10pt, 13pt Medium text at 32pt (kit XL/Search/Active/Placeholder). */
+.hig-toolbar--mac .hig-toolbar__search { width: 159px; padding: 0 10px; gap: 6px; }
+.hig-toolbar--mac .hig-toolbar__search-glyph { width: 16px; font-size: 13px; }
+.hig-toolbar--mac .hig-toolbar__search input { font: 500 13px/16px var(--font-sans); letter-spacing: 0; }
+
+.hig-toolbar--mac.hig-toolbar--compact { height: 40px; }
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__row,
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__side,
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__middle { gap: 12px; min-height: 24px; }
+/* Medium group: 2pt inset, 20pt items 24pt apart, 10pt Semibold symbols (kit Medium/Buttons/Active/1–6). */
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__platter { height: 24px; padding: 2px; gap: 4px; }
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__item { width: 20px; height: 20px; font-size: 10px; line-height: 12px; }
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__item--text { width: auto; padding: 0 6px; font-size: 13px; line-height: 16px; }
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__platter--close,
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__platter--close .hig-toolbar__item { width: 20px; height: 20px; font-size: 10px; }
+/* Medium search 149pt: magnifier at 6pt, text at 26pt (kit Medium/Search/Active/Placeholder). */
+.hig-toolbar--mac.hig-toolbar--compact .hig-toolbar__search { width: 149px; padding: 0 6px; gap: 4px; }
+
+/* Window title: 13pt Bold (15pt Bold with a sidebar), 11pt Medium tertiary subtitle at +17 (kit Window/Title). */
+.hig-toolbar--mac .hig-toolbar__title { align-items: flex-start; text-align: start; flex: 0 1 auto; color: var(--mac-label-primary); }
+.hig-toolbar--mac .hig-toolbar__title-text { font: 700 13px/15px var(--font-sans); letter-spacing: 0; }
+.hig-toolbar--mac.hig-toolbar--with-sidebar .hig-toolbar__title-text { font-size: 15px; letter-spacing: -0.2px; }
+.hig-toolbar--mac .hig-toolbar__subtitle { margin-top: 2px; font: 500 11px/13px var(--font-sans); letter-spacing: 0; color: var(--mac-label-tertiary); }
+
+/* Window controls: three 14pt circles 23pt apart at x=18 (unified) / x=13 (compact) (kit Titlebars/Window Controls). */
+.hig-toolbar__window-controls { display: inline-flex; align-items: center; gap: 9px; flex: none; margin-inline-start: 10px; }
+.hig-toolbar--compact .hig-toolbar__window-controls { margin-inline-start: 5px; }
+.hig-toolbar__window-controls > span { width: 14px; height: 14px; border-radius: 50%; background: var(--system-red); }
+.hig-toolbar__window-controls > span:nth-child(2) { background: var(--system-yellow); }
+.hig-toolbar__window-controls > span:nth-child(3) { background: var(--system-green); }
+.hig-toolbar--inactive .hig-toolbar__window-controls > span { background: var(--mac-fill-primary); }
+.hig-toolbar--inactive .hig-toolbar__title { color: var(--mac-label-secondary); }
+
+@media (prefers-reduced-motion: reduce) { .hig-toolbar * { transition: none !important; } }
+
+/* A growing search field (iPhone bottom toolbar search) turns the row into a flex row (kit Bottom/Search + Leading Item). */
+.hig-toolbar__row:has(.hig-toolbar__search--grow) { display: flex; }
+.hig-toolbar__side:has(.hig-toolbar__search--grow) { flex: 1 1 auto; }
+.hig-toolbar__row:has(.hig-toolbar__search--grow) > .hig-toolbar__middle:empty { display: none; }
+/* ===== SegmentedControl ===== */
+/* SegmentedControl: iOS 27 kit (Segmented Controls/Small, Large; 􀻃/5 - Selected; 􀻃/3 - Touch) and macOS 27 kit
+   (Segmented Controls/Content Area/Duo, Trio; 􀻃/Buttons; 􀻃/Separator; 􀻃/Margins). */
+.hig-segmented {
+  position: relative; box-sizing: border-box; vertical-align: middle;
+  display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; /* equal widths, sized by the widest segment */
+  font-family: var(--font-sans); user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  /* Knob motion: the kit is static and the HIG gives no duration; 250ms is a chosen value. */
+  --hig-seg-dur: 250ms;
+}
+.hig-segmented__segment {
+  position: relative; display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-width: 0; margin: 0; border: 0; background: transparent; font: inherit; color: inherit; cursor: pointer;
+  white-space: nowrap; -webkit-appearance: none; appearance: none;
+}
+.hig-segmented__segment:disabled { cursor: default; }
+/* Reserve the semibold width so the label does not shift when it becomes the selected segment. */
+.hig-segmented__label { display: inline-grid; }
+.hig-segmented__label::after { content: attr(data-label); font-weight: 600; visibility: hidden; height: 0; overflow: hidden; }
+
+/* ---------- iOS: Fills/3 Tertiary capsule, 2pt inset, segments 70pt advancing 74pt (4pt gap) ---------- */
+.hig-segmented--ios {
+  padding: var(--segment-inset); column-gap: var(--segment-gap);
+  border-radius: var(--radius-capsule); background: var(--fill-tertiary); touch-action: pan-y;
+}
+.hig-segmented--ios.hig-segmented--small { height: var(--segmented-small); }
+.hig-segmented--ios.hig-segmented--large { height: var(--segmented-large); }
+/* 44pt hit region around the 32pt control */
+.hig-segmented--ios::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: max(100%, var(--target-ios)); transform: translateY(-50%);
+}
+.hig-segmented--ios .hig-segmented__segment {
+  z-index: 1; min-width: 70px; padding: 0 4px; border-radius: var(--radius-capsule); color: var(--label-primary);
+  font-size: 13.333px; line-height: 18px; letter-spacing: -0.4px; font-weight: 500; /* kit Label: SF Pro Medium 13.333pt, lh 18, kern -0.4 */
+}
+.hig-segmented--ios .hig-segmented__segment--selected { font-weight: 600; } /* kit 5 - Selected: Semibold */
+/* The selected knob: white with a 0 2 20 6% shadow (light); 27% white without shadow (dark). */
+.hig-segmented__knob {
+  --hig-seg-w: calc((100% - 2 * var(--segment-inset) - (var(--hig-seg-n) - 1) * var(--segment-gap)) / var(--hig-seg-n));
+  position: absolute; z-index: 0; pointer-events: none;
+  top: var(--segment-inset); bottom: var(--segment-inset); width: var(--hig-seg-w);
+  left: calc(var(--segment-inset) + var(--hig-seg-i) * (var(--hig-seg-w) + var(--segment-gap)));
+  border-radius: var(--radius-capsule);
+  background-color: var(--background-primary);
+  box-shadow: var(--shadow-segment-knob); /* kit 5 - Selected */
+  transition: left var(--hig-seg-dur) ease, top var(--hig-seg-dur) ease, bottom var(--hig-seg-dur) ease,
+    width var(--hig-seg-dur) ease, margin var(--hig-seg-dur) ease, background-color var(--hig-seg-dur) ease, box-shadow var(--hig-seg-dur) ease;
+}
+[data-theme^="dark"] .hig-segmented__knob { background-color: color-mix(in srgb, var(--label-primary) 27%, transparent); box-shadow: none; } /* kit Dark/5 - Selected rgba(255,255,255,0.27) */
+.hig-segmented .hig-segmented__lens { position: absolute; inset: 0; border-radius: inherit; box-shadow: var(--shadow-glass-small), var(--shadow-glass-highlight), 0 0 0 1px var(--separator); /* clear glass + a separator hairline for the kit's Knob Glow rim */ opacity: 0; transition: opacity var(--hig-seg-dur) ease; }
+/* While dragging, the knob becomes the Liquid Glass lens of 􀻃/3 - Touch: 10pt wider and 7pt taller on each side. */
+.hig-segmented--dragging .hig-segmented__knob {
+  top: calc(var(--segment-inset) - 7px); bottom: calc(var(--segment-inset) - 7px); margin-left: -10px;
+  width: calc(var(--hig-seg-w) + 20px); background-color: transparent; box-shadow: none;
+}
+.hig-segmented--dragging .hig-segmented__lens { opacity: 1; }
+.hig-segmented--ios.hig-segmented--disabled { opacity: 0.5; } /* kit 4 - Disabled */
+
+/* ---------- macOS: Fills/2 Secondary track, separators between unselected segments, accent selection ---------- */
+.hig-segmented--mac { height: var(--hig-seg-h); border-radius: var(--hig-seg-r); background: var(--mac-fill-secondary); }
+/* 28pt hit region (target-mac) */
+.hig-segmented--mac::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: max(100%, var(--target-mac)); transform: translateY(-50%);
+}
+.hig-segmented--mac .hig-segmented__segment {
+  min-width: var(--hig-seg-minw); padding: 0 var(--hig-seg-pad); border-radius: var(--hig-seg-r);
+  color: var(--mac-label-primary); font-weight: 500;
+}
+.hig-segmented--mac .hig-segmented__segment--icon { padding: 0; }
+.hig-segmented--mac .hig-segmented__label::after { font-weight: 500; }
+/* Separator/On: 1pt Labels Vibrant/5 Quinary, blended plus-darker in the kit (multiply stands in; screen in dark). */
+.hig-segmented--mac .hig-segmented__segment + .hig-segmented__segment::before {
+  content: ""; position: absolute; left: -0.5px; top: 50%; width: 1px; height: var(--hig-seg-sep); transform: translateY(-50%);
+  border-radius: 1px; background: var(--vibrant-separator); pointer-events: none;
+}
+/* Separator/Off on both sides of the selected segment */
+.hig-segmented--mac .hig-segmented__segment--selected::before,
+.hig-segmented--mac .hig-segmented__segment--selected + .hig-segmented__segment::before { opacity: 0; }
+/* On, 01 - Idle: accent + Fills Vibrant/4 Quaternary; label white */
+.hig-segmented--mac .hig-segmented__segment--selected {
+  background: linear-gradient(var(--mac-fill-quaternary), var(--mac-fill-quaternary)), var(--accent); color: var(--on-accent);
+}
+/* Off, 03 - Clicked: 0.16 (Fills/2 Secondary over the track); On, 03 - Clicked: accent + 0.15 */
+.hig-segmented--mac .hig-segmented__segment:active:not(:disabled) { background: var(--mac-fill-secondary); }
+.hig-segmented--mac .hig-segmented__segment--selected:active:not(:disabled) {
+  background: linear-gradient(var(--mac-fill-primary), var(--mac-fill-primary)), linear-gradient(var(--mac-fill-tertiary), var(--mac-fill-tertiary)), var(--accent);
+}
+/* 4 - Disabled: tertiary label; the selected segment at 0.45 with its label at 0.5 */
+.hig-segmented--mac .hig-segmented__segment:disabled { color: var(--mac-label-tertiary); }
+.hig-segmented--mac .hig-segmented__segment--selected:disabled { color: var(--on-accent); opacity: 0.45; }
+.hig-segmented--mac .hig-segmented__segment--selected:disabled > * { opacity: 0.5; }
+/* Sizes (kit 1 Mn … 5 XL): height, corner, glyph-segment width, minimum label margin, separator height, label size. */
+.hig-segmented--mac.hig-segmented--mini { --hig-seg-h: var(--mac-control-mini); --hig-seg-r: var(--radius-mac-mini); --hig-seg-minw: 23px; --hig-seg-pad: 6px; --hig-seg-sep: 10px; font-size: 10px; line-height: 13px; letter-spacing: 0.12px; }
+.hig-segmented--mac.hig-segmented--small { --hig-seg-h: var(--mac-control-small); --hig-seg-r: var(--radius-mac-small); --hig-seg-minw: 26px; --hig-seg-pad: 8px; --hig-seg-sep: 12px; font-size: 11px; line-height: 14px; letter-spacing: 0.06px; }
+.hig-segmented--mac.hig-segmented--regular { --hig-seg-h: var(--mac-control-regular); --hig-seg-r: var(--radius-mac-regular); --hig-seg-minw: 30px; --hig-seg-pad: 10px; --hig-seg-sep: 14px; font-size: 13px; line-height: 16px; letter-spacing: -0.08px; }
+.hig-segmented--mac.hig-segmented--large { --hig-seg-h: var(--mac-control-large); --hig-seg-r: var(--radius-capsule); --hig-seg-minw: 34px; --hig-seg-pad: 12px; --hig-seg-sep: 18px; font-size: 13px; line-height: 16px; letter-spacing: -0.08px; }
+.hig-segmented--mac.hig-segmented--xl { --hig-seg-h: var(--mac-control-xl); --hig-seg-r: var(--radius-capsule); --hig-seg-minw: 38px; --hig-seg-pad: 14px; --hig-seg-sep: 20px; font-size: 13px; line-height: 16px; letter-spacing: -0.08px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hig-segmented { --hig-seg-dur: 0ms; }
+}
+/* ===== Gauge ===== */
+/* Gauge: accessory gauges from the iOS 27 kit (System/Lock Screen Widgets: Circular Open Gauge 2, Circular Closed
+   Gauge, Rectangular Text Gauge); macOS level indicators per the HIG Gauges page.
+   The Lock Screen kit draws in vibrant labels (gauge track Vibrant/3 Tertiary, fill and text Vibrant/2 Secondary);
+   in app content the same roles map to label-tertiary / label-secondary. Current values use label-primary. */
+.hig-gauge { font-family: var(--font-sans); box-sizing: border-box; color: var(--label-secondary); }
+.hig-gauge--mac { color: var(--mac-label-secondary); }
+
+/* ---- Circular (58pt dial) */
+.hig-gauge--circular { position: relative; display: inline-block; vertical-align: middle; width: 58px; height: 58px; flex: none; }
+.hig-gauge__dial { position: absolute; inset: 0; display: block; overflow: visible; }
+.hig-gauge__track { stroke: var(--label-tertiary); }
+.hig-gauge__fill { stroke: var(--label-secondary); }
+.hig-gauge__dot { fill: var(--label-secondary); }
+.hig-gauge--tinted .hig-gauge__dot { fill: var(--label-primary); }
+.hig-gauge--mac .hig-gauge__track { stroke: var(--mac-label-tertiary); }
+.hig-gauge--mac .hig-gauge__fill { stroke: var(--mac-label-secondary); }
+.hig-gauge--mac .hig-gauge__dot { fill: var(--mac-label-secondary); }
+.hig-gauge--mac.hig-gauge--tinted .hig-gauge__dot { fill: var(--mac-label-primary); }
+.hig-gauge__value,
+.hig-gauge__min,
+.hig-gauge__max,
+.hig-gauge__caption { position: absolute; white-space: nowrap; text-align: center; font-variant-numeric: tabular-nums; }
+/* Standard (open) gauge: current value 24.52pt Medium in a 29pt box at y 12.5; ends 12.26pt Medium in 15pt boxes at
+   y 43, centred 17.5pt in from each side (kit Circular Open Gauge 2; the kit's right centre is 40, mirrored to 40.5). */
+.hig-gauge--circular .hig-gauge__value {
+  left: 0; right: 0; top: 12.5px; height: 29px; line-height: 29px;
+  font-size: 24.52px; font-weight: 500; color: var(--label-primary);
+}
+.hig-gauge--mac.hig-gauge--circular .hig-gauge__value { color: var(--mac-label-primary); }
+.hig-gauge__min, .hig-gauge__max, .hig-gauge__caption { top: 43px; height: 15px; line-height: 15px; font-size: 12.26px; font-weight: 500; }
+.hig-gauge__min { left: 17.5px; transform: translateX(-50%); }
+.hig-gauge__max { right: 17.5px; transform: translateX(50%); }
+.hig-gauge__caption { left: 0; right: 0; } /* kit Circular Open Gauge 3: "AQI" centred in the gap */
+/* Capacity (closed) gauge: centre value 17pt Regular, 24pt line (kit Circular Open Gauge "35" label). */
+.hig-gauge--circular.hig-gauge--style-capacity .hig-gauge__value { top: 17px; height: 24px; line-height: 24px; font-size: 17px; font-weight: 400; }
+
+/* ---- Linear (kit Rectangular Text Gauge: title 15/20 Semibold, second line 15/16 Regular, 6pt gap, 8pt capsule bar) */
+.hig-gauge--linear { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.hig-gauge__header { display: flex; flex-direction: column; }
+.hig-gauge__name { font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -0.23px; color: var(--label-primary); }
+.hig-gauge__current { font-size: 15px; line-height: 16px; font-weight: 400; letter-spacing: -0.23px; }
+.hig-gauge--mac .hig-gauge__name { color: var(--mac-label-primary); }
+/* Endpoint labels sit inline at the ends of the bar: 12.26pt Medium as on the circular gauge; the 6pt gap repeats
+   the kit's text-to-bar gap (the kit's linear gauge shows no endpoint labels). */
+.hig-gauge__row { display: flex; align-items: center; gap: 6px; }
+.hig-gauge__end { flex: none; font-size: 12.26px; line-height: 15px; font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hig-gauge__bar { position: relative; flex: 1; min-width: 0; height: 8px; border-radius: var(--radius-capsule); }
+.hig-gauge__bar-fill { position: absolute; inset: 0; border-radius: inherit; background: var(--label-secondary); }
+.hig-gauge--mac .hig-gauge__bar-fill { background: var(--mac-label-secondary); }
+/* capacity: translucent track, fill clipped at the value */
+.hig-gauge--style-capacity .hig-gauge__bar { background: var(--label-tertiary); }
+.hig-gauge--mac.hig-gauge--style-capacity .hig-gauge__bar { background: var(--mac-label-tertiary); }
+.hig-gauge--linear.hig-gauge--style-capacity .hig-gauge__bar-fill {
+  clip-path: inset(0 calc((1 - var(--hig-gauge-f)) * 100%) 0 0 round 4px);
+}
+.hig-gauge--linear.hig-gauge--style-capacity:dir(rtl) .hig-gauge__bar-fill {
+  clip-path: inset(0 0 0 calc((1 - var(--hig-gauge-f)) * 100%) round 4px);
+}
+/* standard: the whole path in the tint, an 8pt indicator dot with a 2.2pt cut-out around it
+   (the cut-out gap of kit Circular Open Gauge: (9.9 − 5.5) / 2). Masks carry alpha only; the opaque accent token stands in for "opaque". */
+.hig-gauge--linear.hig-gauge--style-standard .hig-gauge__bar-fill { background: var(--label-tertiary); }
+.hig-gauge--mac.hig-gauge--linear.hig-gauge--style-standard .hig-gauge__bar-fill { background: var(--mac-label-tertiary); }
+.hig-gauge--linear.hig-gauge--style-standard .hig-gauge__bar-fill {
+  --hig-gauge-x: calc(4px + (100% - 8px) * var(--hig-gauge-f));
+  -webkit-mask-image: radial-gradient(circle at var(--hig-gauge-x) 50%, transparent 6.2px, var(--accent) 6.25px);
+  mask-image: radial-gradient(circle at var(--hig-gauge-x) 50%, transparent 6.2px, var(--accent) 6.25px);
+}
+.hig-gauge--linear.hig-gauge--style-standard:dir(rtl) .hig-gauge__bar-fill {
+  --hig-gauge-x: calc(100% - 4px - (100% - 8px) * var(--hig-gauge-f));
+}
+.hig-gauge__bar-dot {
+  position: absolute; top: 0; width: 8px; height: 8px; border-radius: 50%;
+  inset-inline-start: calc((100% - 8px) * var(--hig-gauge-f)); background: var(--label-secondary);
+}
+.hig-gauge--tinted .hig-gauge__bar-dot { background: var(--label-primary); }
+.hig-gauge--mac .hig-gauge__bar-dot { background: var(--mac-label-secondary); }
+.hig-gauge--mac.hig-gauge--tinted .hig-gauge__bar-dot { background: var(--mac-label-primary); }
+
+/* ---- macOS level indicators. The macOS 27 kit has no level indicator; the continuous track reuses the kit's
+   regular progress bar (10pt capsule, --mac-track track, 0.5pt --mac-track-border border).
+   Default fill system-green (HIG), system-yellow / system-red past the thresholds. */
+.hig-gauge--capacity,
+.hig-gauge--levelDiscrete,
+.hig-gauge--relevance { display: flex; align-items: center; gap: 6px; width: 100%; }
+.hig-gauge__level {
+  position: relative; flex: 1; min-width: 0; height: 10px; border-radius: var(--radius-capsule);
+  background: var(--mac-track); box-shadow: inset 0 0 0 0.5px var(--mac-track-border);
+}
+.hig-gauge__level-fill {
+  position: absolute; inset: 0; border-radius: inherit;
+  clip-path: inset(0 calc((1 - var(--hig-gauge-f)) * 100%) 0 0 round 5px);
+}
+.hig-gauge--capacity:dir(rtl) .hig-gauge__level-fill { clip-path: inset(0 0 0 calc((1 - var(--hig-gauge-f)) * 100%) round 5px); }
+/* Discrete: equal rectangular segments, one per unit of capacity. Segment gap (2px) and corner (radius-xs) are
+   chosen: the HIG shows the style but gives no metrics. */
+.hig-gauge__segments { display: flex; flex: 1; min-width: 0; gap: 2px; height: 10px; }
+.hig-gauge__segment {
+  flex: 1; min-width: 0; border-radius: var(--radius-xs);
+  background: var(--mac-track); box-shadow: inset 0 0 0 0.5px var(--mac-track-border);
+}
+.hig-gauge__segment--on { box-shadow: none; }
+/* Relevance: a shaded bar with no track (HIG). Height 6pt (the kit's small progress bar) and mac-gray are chosen. */
+.hig-gauge__relevance { position: relative; flex: 1; min-width: 0; height: 6px; }
+.hig-gauge__relevance-fill { display: block; height: 100%; background: var(--mac-gray); }
+/* ===== Widget ===== */
+/* Widget: frames at the HIG Specifications sizes; corner radii and glass from the iOS 27 kit
+   (System/Home Screen/Widgets: iPhone r28, iPad r21, "Liquid Glass/Widget Glass") and the watchOS 26 kit
+   (System/Widgets/<size>/Background r14.5, Layout Guide margins). */
+.hig-widget {
+  box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: center; vertical-align: top;
+  font-family: var(--font-sans); color: var(--label-primary);
+  /* accented rendering: iPhone, iPad and Mac tint the primary and accent groups white (HIG): white content on clear glass */
+  --hig-widget-accent: var(--white);
+}
+.hig-widget *, .hig-widget *::before, .hig-widget *::after { box-sizing: border-box; }
+.hig-widget__surface {
+  position: relative; overflow: hidden;
+  width: var(--hig-widget-w); height: var(--hig-widget-h);
+  background: var(--hig-widget-bg, transparent);
+}
+/* Kit "Liquid Glass/Widget Glass" rims every full-color widget: its normal-blend specular edge stands in. */
+.hig-widget .hig-widget__surface { border-radius: var(--hig-widget-r); box-shadow: var(--shadow-glass-highlight); }
+.hig-widget .hig-widget__surface.hig-glass { border-radius: var(--hig-widget-r); position: relative; }
+.hig-widget__content { position: relative; z-index: 1; width: 100%; height: 100%; padding: var(--hig-widget-pad); }
+/* Home Screen name label: kit 'Widget Name' SF Pro Medium 12, white, centered, 6pt below the widget: drawn over the
+   wallpaper in both appearances, with the kit's Home Screen label shadow (App Icons/Home Screen 'App Name': 0 2 25 black). */
+.hig-widget__label { margin-top: 6px; font-size: 12px; line-height: 14px; font-weight: 500; text-align: center; color: var(--on-media); text-shadow: 0 2px 25px var(--black); }
+.hig-widget--unavailable { display: inline-block; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--fill-quaternary); color: var(--label-secondary); font-size: 13px; }
+
+/* ---- accessory families (iPhone / iPad Lock Screen) */
+.hig-widget--accessoryCircular .hig-widget__surface,
+.hig-widget--accessoryCircular .hig-widget__surface.hig-glass { border-radius: 50%; box-shadow: none; }
+.hig-widget--accessoryRectangular.hig-widget--iphone .hig-widget__surface,
+.hig-widget--accessoryRectangular.hig-widget--ipad .hig-widget__surface,
+.hig-widget--accessoryInline .hig-widget__surface { box-shadow: none; }
+.hig-widget--accessoryInline .hig-widget__content { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.hig-widget--no-background .hig-widget__surface { background: transparent; box-shadow: none; }
+/* AccessoryWidgetBackground: kit Circular masters draw a 58pt blurred disc inside the 72pt frame (inset 7/72),
+   filled Labels/Dark - Vibrant/4 Quaternary with plus-lighter. */
+.hig-widget--accessory-background .hig-widget__surface::before {
+  content: ""; position: absolute; inset: 9.72%; border-radius: 50%;
+  /* plus-lighter of #262626 adds 15% white; drawn as a 15% wash of the (white) vibrant primary label */
+  background: color-mix(in srgb, var(--vibrant-label-primary) 15%, transparent);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); /* kit 'Blur' r20 */
+}
+.hig-widget--accessoryCircular .hig-widget__content { display: grid; place-items: center; text-align: center; }
+
+/* ---- watchOS Smart Stack tile (dark-only) */
+.hig-widget--watch { font-family: var(--font-rounded); --hig-widget-accent: var(--hig-widget-tint); }
+.hig-widget--watch .hig-widget__surface { box-shadow: none; }
+
+/* ---- rendering modes ---- */
+/* Vibrant (Lock Screen, StandBy at night): content desaturated and drawn in the vibrant grays (HIG: white or light
+   gray for prominent content, darker grays for secondary). The frame is scoped to the dark token set. */
+.hig-widget--vibrant .hig-widget__content {
+  color: var(--vibrant-label-primary);
+  /* The kit blends vibrant grays plus-lighter (#999 adds 60% white, #404040 25%, #262626 15%); CSS can't blend
+     through the page's stacking contexts, so each gray is drawn as that share of white over the backdrop. */
+  --label-primary: var(--vibrant-label-primary);
+  --label-secondary: color-mix(in srgb, var(--vibrant-label-primary) 60%, transparent);
+  --label-tertiary: color-mix(in srgb, var(--vibrant-label-primary) 25%, transparent);
+  --label-quaternary: color-mix(in srgb, var(--vibrant-label-primary) 15%, transparent);
+  /* vibrant fills #333 / #1f1f1f / #121212 add 20% / 12% / 7% white the same way */
+  --fill-primary: color-mix(in srgb, var(--vibrant-label-primary) 20%, transparent);
+  --fill-secondary: color-mix(in srgb, var(--vibrant-label-primary) 12%, transparent);
+  --fill-tertiary: color-mix(in srgb, var(--vibrant-label-primary) 7%, transparent);
+  --separator: color-mix(in srgb, var(--vibrant-label-primary) 10%, transparent); /* #1a1a1a */
+  --accent: var(--vibrant-label-primary); --system-red: var(--vibrant-label-primary); --system-orange: var(--vibrant-label-primary);
+  --system-yellow: var(--vibrant-label-primary); --system-green: var(--vibrant-label-primary); --system-mint: var(--vibrant-label-primary);
+  --system-teal: var(--vibrant-label-primary); --system-cyan: var(--vibrant-label-primary); --system-blue: var(--vibrant-label-primary);
+  --system-indigo: var(--vibrant-label-primary); --system-purple: var(--vibrant-label-primary); --system-pink: var(--vibrant-label-primary);
+  --system-brown: var(--vibrant-label-primary); --system-gray: var(--label-secondary); --system-gray-2: var(--label-tertiary);
+  --system-gray-3: var(--label-tertiary); --system-gray-4: var(--label-quaternary);
+  --system-gray-5: var(--label-quaternary); --system-gray-6: var(--label-quaternary);
+}
+.hig-widget--vibrant .hig-widget__content :is(img, picture, video, image) { filter: grayscale(1); }
+.hig-widget--vibrant.hig-widget--systemSmall .hig-widget__surface,
+.hig-widget--vibrant.hig-widget--systemMedium .hig-widget__surface,
+.hig-widget--vibrant.hig-widget--systemLarge .hig-widget__surface { background: transparent; box-shadow: none; } /* StandBy: background removed */
+
+/* Accented (tinted / clear Home Screen; watch): the background becomes Liquid Glass and every view takes one solid
+   color per group: the primary group white, the accent group ([data-widget-accent]) --hig-widget-accent. */
+.hig-widget--accented .hig-widget__content,
+.hig-widget--accented .hig-widget__content [data-widget-accent] {
+  color: var(--hig-widget-group);
+  --label-primary: var(--hig-widget-group);
+  --label-secondary: color-mix(in srgb, var(--hig-widget-group) 60%, transparent);
+  --label-tertiary: color-mix(in srgb, var(--hig-widget-group) 30%, transparent);
+  --label-quaternary: color-mix(in srgb, var(--hig-widget-group) 18%, transparent);
+  --fill-primary: color-mix(in srgb, var(--hig-widget-group) 20%, transparent);
+  --fill-secondary: color-mix(in srgb, var(--hig-widget-group) 16%, transparent);
+  --fill-tertiary: color-mix(in srgb, var(--hig-widget-group) 12%, transparent);
+  --accent: var(--hig-widget-group); --system-red: var(--hig-widget-group); --system-orange: var(--hig-widget-group);
+  --system-yellow: var(--hig-widget-group); --system-green: var(--hig-widget-group); --system-mint: var(--hig-widget-group);
+  --system-teal: var(--hig-widget-group); --system-cyan: var(--hig-widget-group); --system-blue: var(--hig-widget-group);
+  --system-indigo: var(--hig-widget-group); --system-purple: var(--hig-widget-group); --system-pink: var(--hig-widget-group);
+  --system-brown: var(--hig-widget-group); --system-gray: var(--hig-widget-group);
+}
+/* the kit's label opacities (60/30/18%) and fill opacities (20/16/12%) are applied to the group color */
+.hig-widget--accented .hig-widget__content { --hig-widget-group: var(--white); }
+.hig-widget--accented .hig-widget__content [data-widget-accent] { --hig-widget-group: var(--hig-widget-accent); }
+.hig-widget--accented .hig-widget__content :is(img, picture, video, image) { filter: grayscale(1); }
+/* clear Liquid Glass over bright content gets the HIG's 35% dimming layer (glass-dim) so white content stays legible */
+.hig-widget--accented .hig-widget__surface.hig-glass--clear { background: var(--glass-dim); }
+.hig-widget--accented.hig-widget--watch .hig-widget__surface { background: var(--hig-widget-bg, transparent); }
+/* ===== Table ===== */
+/* Table: multicolumn table. The macOS 27 kit has no table masters: macOS rows take the kit's 24pt list row
+   (Sidebars/Small) with 13pt body text; iPadOS rows take the iOS kit's 52pt list row and Nested header. Cell padding,
+   heading height and heading type are chosen (marked). */
+.hig-table { position: relative; box-sizing: border-box; overflow: auto; font-family: var(--font-sans); }
+.hig-table *, .hig-table *::before, .hig-table *::after { box-sizing: border-box; }
+.hig-table--mac { background: var(--mac-window-background); color: var(--mac-label-primary); }
+.hig-table--ios { background: var(--background-primary); color: var(--label-primary); }
+.hig-table__grid { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; outline: none; }
+
+/* ---------- Column headings ---------- */
+.hig-table__heading {
+  position: sticky; top: 0; z-index: 1; padding: 0; text-align: start; font-weight: inherit; vertical-align: middle;
+  background: inherit;
+}
+.hig-table--mac .hig-table__heading {
+  height: var(--target-mac); /* chosen: the macOS default control size */
+  background: var(--mac-window-background); box-shadow: inset 0 -1px var(--mac-separator);
+  font-size: 11px; line-height: 14px; letter-spacing: 0.06px; font-weight: 500; color: var(--mac-label-secondary); /* chosen: Subheadline, Medium */
+}
+/* Thin dividers between headings (chosen inset) */
+.hig-table--mac .hig-table__heading + .hig-table__heading::before {
+  content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 1px; background: var(--mac-separator);
+}
+/* iPadOS: the Nested list header style, 42pt (kit Lists/Header/Nested: 17pt Semibold, secondary) */
+.hig-table--ios .hig-table__heading {
+  height: 42px; background: var(--background-primary); box-shadow: inset 0 -1px var(--separator);
+  font-size: 17px; line-height: 22px; letter-spacing: -0.43px; font-weight: 600; color: var(--label-secondary);
+}
+.hig-table__heading-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hig-table__heading > .hig-table__heading-label { display: block; padding: 0 8px; }
+.hig-table__sort {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; background: none; cursor: pointer;
+  width: 100%; height: 100%; min-height: inherit; padding: 0 8px; display: flex; align-items: center;
+  gap: var(--button-icon-gap); font: inherit; letter-spacing: inherit; color: inherit; text-align: inherit;
+}
+.hig-table--mac .hig-table__sort { height: var(--target-mac); }
+.hig-table--ios .hig-table__sort { height: 42px; }
+.hig-table__sort:focus-visible { outline-offset: -3px; }
+.hig-table__sort:active { background: var(--pressed-overlay); }
+.hig-table__heading--sorted { color: var(--mac-label-primary); }
+.hig-table--ios .hig-table__heading--sorted { color: var(--label-primary); }
+.hig-table__cell--trailing .hig-table__sort { flex-direction: row-reverse; }
+.hig-table__cell--center .hig-table__sort { justify-content: center; }
+.hig-table__sort-indicator { flex: none; display: inline-flex; min-width: 12px; color: var(--mac-label-secondary); }
+.hig-table--ios .hig-table__sort-indicator { min-width: 16px; color: var(--accent); }
+/* Resize handle on the trailing edge of each heading */
+.hig-table__resize { position: absolute; top: 0; right: -4px; z-index: 2; width: 8px; height: 100%; cursor: col-resize; touch-action: none; }
+.hig-table__heading:last-child .hig-table__resize { right: 0; width: 6px; }
+
+/* ---------- Cells ---------- */
+.hig-table__cell { padding: 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+.hig-table__cell--leading { text-align: start; }
+.hig-table__cell--trailing { text-align: end; font-variant-numeric: tabular-nums; }
+.hig-table__cell--center { text-align: center; }
+.hig-table--mac .hig-table__cell { height: 24px; font-size: 13px; line-height: 16px; letter-spacing: -0.08px; } /* kit 24pt rows, Body */
+.hig-table--ios .hig-table__cell {
+  height: var(--row-height); font-size: 17px; line-height: 22px; letter-spacing: -0.43px;
+  box-shadow: inset 0 -1px var(--separator);
+}
+/* iPadOS rows: separators start at the 16pt content margin, as list rows */
+.hig-table--ios .hig-table__cell:first-child,
+.hig-table--ios .hig-table__heading:first-child > * { padding-left: var(--margin-compact); }
+.hig-table--ios .hig-table__cell:last-child,
+.hig-table--ios .hig-table__heading:last-child > * { padding-right: var(--margin-compact); }
+.hig-table--ios .hig-table__cell:first-child {
+  box-shadow: none;
+  background-image: linear-gradient(var(--separator), var(--separator)); background-repeat: no-repeat;
+  background-position: right bottom; background-size: calc(100% - var(--margin-compact)) 1px;
+}
+.hig-table--ios .hig-table__row:last-child .hig-table__cell { box-shadow: none; background-image: none; }
+
+/* Row fills sit on the cells (not the row) so the inset focus ring paints above them. */
+.hig-table__row { cursor: default; outline: none; }
+/* Alternating row backgrounds (HIG: bordered style) */
+.hig-table--alternating.hig-table--mac .hig-table__row:nth-child(even):not(.hig-table__row--selected) > .hig-table__cell { background-color: var(--mac-fill-quaternary); }
+.hig-table--alternating.hig-table--ios .hig-table__row:nth-child(even):not(.hig-table__row--selected) > .hig-table__cell { background-color: var(--fill-quaternary); }
+/* Selection: accent with on-accent text */
+.hig-table .hig-table__row--selected { color: var(--on-accent); }
+.hig-table .hig-table__row.hig-table__row--selected > .hig-table__cell { box-shadow: none; background-color: var(--accent); background-image: none; }
+.hig-table__row:active:not(.hig-table__row--selected) > .hig-table__cell { background-image: linear-gradient(var(--pressed-overlay), var(--pressed-overlay)); }
+/* Keyboard focus: a 3pt focus ring inside the row (on accent rows, an on-accent ring inside it) */
+.hig-table .hig-table__row:focus-visible > .hig-table__cell { box-shadow: inset 0 3px var(--focus-ring), inset 0 -3px var(--focus-ring); }
+.hig-table .hig-table__row:focus-visible > .hig-table__cell:first-child { box-shadow: inset 3px 0 var(--focus-ring), inset 0 3px var(--focus-ring), inset 0 -3px var(--focus-ring); }
+.hig-table .hig-table__row:focus-visible > .hig-table__cell:last-child { box-shadow: inset -3px 0 var(--focus-ring), inset 0 3px var(--focus-ring), inset 0 -3px var(--focus-ring); }
+.hig-table .hig-table__row.hig-table__row--selected:focus-visible > .hig-table__cell { box-shadow: inset 0 2px var(--on-accent), inset 0 -2px var(--on-accent); }
+.hig-table .hig-table__row.hig-table__row--selected:focus-visible > .hig-table__cell:first-child { box-shadow: inset 2px 0 var(--on-accent), inset 0 2px var(--on-accent), inset 0 -2px var(--on-accent); }
+.hig-table .hig-table__row.hig-table__row--selected:focus-visible > .hig-table__cell:last-child { box-shadow: inset -2px 0 var(--on-accent), inset 0 2px var(--on-accent), inset 0 -2px var(--on-accent); }
+.hig-table__empty > td { height: 48px; text-align: center; color: var(--mac-label-tertiary); }
+.hig-table--ios .hig-table__empty > td { color: var(--label-tertiary); }
+/* ===== Disclosure ===== */
+/* Disclosure: macOS 27 kit (Forms disclosure rows, Disclosure Buttons) and iOS 27 kit (Lists disclosure accessory).
+   The 150ms rotation and the spacing between a control and its revealed content are chosen. */
+.hig-disclosure { box-sizing: border-box; font-family: var(--font-sans); }
+.hig-disclosure *, .hig-disclosure *::before { box-sizing: border-box; }
+.hig-disclosure__content[hidden] { display: none; }
+ul.hig-disclosure__content { list-style: none; margin: 0; padding: 0; }
+.hig-disclosure__trigger {
+  appearance: none; -webkit-appearance: none; position: relative; margin: 0; padding: 0; border: 0; background: none;
+  display: flex; align-items: center; font: inherit; letter-spacing: inherit; color: inherit; text-align: start; cursor: pointer;
+}
+.hig-disclosure__trigger:disabled { cursor: default; }
+.hig-disclosure__chevron { flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.hig-disclosure__chevron .hig-icon { transition: transform 150ms ease; }
+
+/* ---------- Triangle (kit Forms/Rows - Leading/Disclosure: 13pt Semibold chevron, label-primary, 18x16 slot;
+   label 13pt Medium at x=18) ---------- */
+.hig-disclosure--triangle { color: var(--mac-label-primary); }
+.hig-disclosure--triangle > .hig-disclosure__trigger { min-height: 16px; border-radius: var(--radius-mac-mini); }
+.hig-disclosure--triangle > .hig-disclosure__trigger::before {
+  content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: var(--target-mac); transform: translateY(-50%);
+}
+.hig-disclosure--triangle .hig-disclosure__chevron { width: 18px; height: 16px; justify-content: flex-start; color: var(--mac-label-primary); }
+.hig-disclosure--triangle .hig-disclosure__chevron .hig-icon { margin-left: -4px; }
+.hig-disclosure--triangle .hig-disclosure__label { font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: -0.08px; }
+.hig-disclosure--triangle.hig-disclosure--open .hig-disclosure__chevron .hig-icon { transform: rotate(90deg); }
+.hig-disclosure--triangle .hig-disclosure__chevron:dir(rtl) { transform: scaleX(-1); }
+.hig-disclosure--triangle > .hig-disclosure__content { padding: 8px 0 0 18px; } /* chosen: content aligns with the label */
+.hig-disclosure--triangle.hig-disclosure--disabled { color: var(--mac-label-tertiary); }
+.hig-disclosure--triangle.hig-disclosure--disabled .hig-disclosure__chevron { color: var(--mac-label-tertiary); }
+
+/* ---------- Disclosure button (kit Disclosure Buttons/Content Area: Bordered fill, label-primary chevron;
+   Mn 16 r4 8.5pt Bold, Sm 20 r5 10pt Bold, Rg 24 r6 13pt Semibold, Lg 28 and XL 36 capsules 13pt Semibold) ---------- */
+.hig-disclosure__bar { display: flex; align-items: center; gap: 8px; } /* gap chosen */
+.hig-disclosure__button {
+  appearance: none; -webkit-appearance: none; margin: 0; padding: 0; border: 0; cursor: pointer; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--mac-fill-secondary); color: var(--mac-label-primary);
+}
+.hig-disclosure__button::before {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: max(100%, var(--target-mac)); height: max(100%, var(--target-mac));
+}
+.hig-disclosure__button--mini { width: var(--mac-control-mini); height: var(--mac-control-mini); border-radius: var(--radius-mac-mini); }
+.hig-disclosure__button--small { width: var(--mac-control-small); height: var(--mac-control-small); border-radius: var(--radius-mac-small); }
+.hig-disclosure__button--regular { width: var(--mac-control-regular); height: var(--mac-control-regular); border-radius: var(--radius-mac-regular); }
+.hig-disclosure__button--large { width: var(--mac-control-large); height: var(--mac-control-large); border-radius: var(--radius-capsule); }
+.hig-disclosure__button--xl { width: var(--mac-control-xl); height: var(--mac-control-xl); border-radius: var(--radius-capsule); }
+/* Clicked: kit 16% fill = the 8% bordered fill + the 8% pressed overlay (hig-pressable) */
+.hig-disclosure__button:disabled { background: var(--mac-fill-quaternary); color: var(--mac-label-tertiary); cursor: default; }
+.hig-disclosure--open .hig-disclosure__button .hig-icon { transform: rotate(180deg); } /* points up when expanded */
+.hig-disclosure--button > .hig-disclosure__content { padding-top: 8px; } /* chosen */
+
+/* ---------- iOS DisclosureGroup (kit Lists Accessories - Trailing/Disclosure - Collapsed/Expanded:
+   17pt Semibold chevron in the accent, 8pt slot; row as Lists/Rows/Default) ---------- */
+.hig-disclosure--group { color: var(--label-primary); }
+.hig-disclosure__row {
+  width: 100%; min-height: var(--row-height); gap: 16px; justify-content: space-between;
+  padding: 15px var(--margin-compact); background: var(--hig-list-row-bg, transparent);
+}
+.hig-disclosure__row .hig-disclosure__label { flex: 1; min-width: 0; font-size: 17px; line-height: 22px; letter-spacing: -0.43px; }
+.hig-disclosure--group .hig-disclosure__chevron { width: 8px; color: var(--accent); }
+.hig-disclosure--group .hig-disclosure__chevron .hig-icon { margin: 0 -6px; }
+.hig-disclosure--group.hig-disclosure--open .hig-disclosure__chevron .hig-icon { transform: rotate(90deg); }
+.hig-disclosure--group .hig-disclosure__chevron:dir(rtl) { transform: scaleX(-1); }
+.hig-disclosure__row:active:not(:disabled) { background: linear-gradient(var(--pressed-overlay), var(--pressed-overlay)), var(--hig-list-row-bg, transparent); }
+.hig-disclosure__row:focus-visible { outline-offset: -3px; }
+.hig-disclosure--group.hig-disclosure--disabled .hig-disclosure__label,
+.hig-disclosure--group.hig-disclosure--disabled .hig-disclosure__chevron { color: var(--label-tertiary); }
+/* Inside a list section: the row separator starts at the text and ends 16pt before the edge, like list rows */
+.hig-list-section__rows > .hig-disclosure--group > .hig-disclosure__row {
+  background:
+    linear-gradient(var(--separator), var(--separator)) no-repeat left var(--margin-compact) bottom / calc(100% - 2 * var(--margin-compact)) 1px,
+    var(--hig-list-row-bg, transparent);
+}
+.hig-list-section__rows > .hig-disclosure--group:last-child:not(.hig-disclosure--open) > .hig-disclosure__row { background: var(--hig-list-row-bg, transparent); }
+.hig-list-section__rows > .hig-disclosure--group { list-style: none; }
+.hig-list-section__rows > .hig-disclosure--group:last-child > .hig-disclosure__content > .hig-list-row:last-child .hig-list-row__body { box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) { .hig-disclosure__chevron .hig-icon { transition: none; } }
+/* ===== SearchField ===== */
+/* SearchField: iOS 27 kit (Toolbars/Search - Bottom, Sidebar/Search, Toolbars/iPad Tab Bar/Search Field + Filter,
+   Segmented Controls) and macOS 27 kit (Search Fields, Titlebars and Toolbars/Search, Segmented Controls). */
+.hig-search-field {
+  display: flex; flex-direction: column; gap: 8px; /* kit iPad "Search Field + Filter": filter sits 8pt after the field */
+  min-width: 0; box-sizing: border-box; font-family: var(--font-sans);
+}
+.hig-search-field__row { display: flex; align-items: center; gap: 8px; min-width: 0; } /* kit: field → 48pt close button gap 8 */
+.hig-search-field__field {
+  position: relative; flex: 1 1 auto; min-width: 0; box-sizing: border-box;
+  display: flex; align-items: center; border-radius: var(--radius-capsule); cursor: text;
+}
+.hig-search-field__input {
+  flex: 1 1 auto; min-width: 0; align-self: stretch; margin: 0; padding: 0; border: 0; outline: none;
+  background: transparent; font: inherit; letter-spacing: inherit; color: inherit;
+  caret-color: var(--accent); /* kit Text Fields/Cursor and Search Fields I-beam: 2pt accent bar */
+  -webkit-appearance: none; appearance: none; text-overflow: ellipsis;
+}
+.hig-search-field__input::-webkit-search-cancel-button,
+.hig-search-field__input::-webkit-search-decoration,
+.hig-search-field__input::-webkit-search-results-button { -webkit-appearance: none; appearance: none; display: none; }
+.hig-search-field__input::placeholder { color: var(--hig-sf-placeholder); opacity: 1; }
+.hig-search-field__glyph {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--hig-sf-glyph);
+}
+.hig-search-field__clear,
+.hig-search-field__mic {
+  flex: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
+  margin: 0; padding: 0; border: 0; background: transparent; cursor: default; color: var(--hig-sf-glyph-trailing);
+  -webkit-tap-highlight-color: transparent;
+}
+.hig-search-field__clear:active:not(:disabled) { color: var(--hig-sf-clear-pressed); }
+
+/* ---------- iOS / iPadOS ---------- */
+.hig-search-field--ios .hig-search-field__field {
+  height: var(--target-ios); /* kit Sidebar/Search and iPad toolbar search: 44pt */
+  padding: 0 11px; /* kit: magnifying glass at x=11, mic ends 11pt from the trailing edge */
+  font-size: 17px; line-height: 22px; letter-spacing: -0.43px; /* kit 17pt, lh 22 (ios-body metrics) */
+}
+.hig-search-field--ios.hig-search-field--large .hig-search-field__field { height: 48px; } /* kit iPhone bottom toolbar / search tab field 48pt */
+.hig-search-field--ios .hig-search-field__glyph { width: 26px; height: 22px; margin-right: 8px; } /* kit glyph cell 26x22; inline text at x=45 */
+.hig-search-field--ios.hig-search-field--glass .hig-search-field__glyph { margin-right: 4px; } /* kit glass field: text at x=41 */
+.hig-search-field--ios .hig-search-field__mic { width: 18px; height: 22px; margin-left: 4px; } /* kit mic cell 18x22 */
+.hig-search-field--ios .hig-search-field__clear { width: 20px; height: 22px; margin-left: 3px; margin-right: -1px; } /* kit clear 20x22, 10pt from the edge */
+/* 44pt hit regions around the small trailing glyphs (HIG minimum targets) */
+.hig-search-field--ios .hig-search-field__clear::before,
+.hig-search-field--ios .hig-search-field__mic::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: var(--target-ios); height: var(--target-ios); transform: translate(-50%, -50%);
+}
+
+/* inline (content layer): kit Sidebar/Search: tertiary fill, Medium 17pt, secondary glyphs and placeholder */
+.hig-search-field--ios:not(.hig-search-field--glass) .hig-search-field__field {
+  background: var(--fill-tertiary); color: var(--label-primary); font-weight: 500;
+  --hig-sf-placeholder: var(--label-secondary); --hig-sf-glyph: var(--label-secondary);
+  --hig-sf-glyph-trailing: var(--label-secondary); --hig-sf-clear-pressed: var(--label-primary);
+}
+/* glass, 48pt (iPhone): kit Toolbars/Search - Bottom 180x48: Regular 17pt, Liquid Glass labels */
+.hig-search-field--ios.hig-search-field--glass .hig-search-field__field {
+  color: var(--glass-label-primary); font-weight: 400;
+  --hig-sf-placeholder: var(--glass-label-secondary); --hig-sf-glyph: var(--glass-label-secondary);
+  --hig-sf-glyph-trailing: var(--glass-label-secondary); --hig-sf-clear-pressed: var(--glass-label-primary);
+}
+/* glass, 44pt (iPad tab bar): kit Search - Bottom 180x44: Medium 17pt, vibrant labels */
+.hig-search-field--ios.hig-search-field--glass.hig-search-field--regular .hig-search-field__field {
+  color: var(--vibrant-label-primary); font-weight: 500;
+  --hig-sf-placeholder: var(--vibrant-label-secondary); --hig-sf-glyph: var(--vibrant-label-secondary);
+  --hig-sf-glyph-trailing: var(--vibrant-label-secondary); --hig-sf-clear-pressed: var(--vibrant-label-primary);
+}
+.hig-search-field--ios .hig-search-field__field:focus-within { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.hig-search-field--ios.is-disabled .hig-search-field__field { color: var(--label-tertiary); --hig-sf-placeholder: var(--label-tertiary); --hig-sf-glyph: var(--label-tertiary); cursor: default; }
+.hig-search-field--ios.is-disabled:not(.hig-search-field--glass) .hig-search-field__field { background: var(--fill-quaternary); }
+
+/* separate close button beside a focused search-tab field: kit Tab Bars/Search Selected - Typing, 48pt glass circle */
+.hig-search-field__cancel {
+  flex: none; width: 48px; height: 48px; margin: 0; padding: 0; border: 0; background-color: transparent; cursor: default;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--glass-label-primary);
+}
+.hig-search-field--regular .hig-search-field__cancel { width: var(--target-ios); height: var(--target-ios); }
+.hig-search-field__cancel:active:not(:disabled) { background-color: var(--pressed-overlay); }
+
+/* ---------- scope bars ---------- */
+.hig-search-field__scope {
+  position: relative; margin: 0; border: 0; padding: 0; background: transparent; color: inherit; cursor: default;
+  font: inherit; letter-spacing: inherit; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.hig-search-field__scope:disabled { color: var(--label-tertiary); }
+/* reserve the selected (heavier) label width so segments don't shift */
+.hig-search-field__scope-label { display: inline-grid; }
+.hig-search-field__scope-label::after { content: attr(data-label); height: 0; visibility: hidden; overflow: hidden; font-weight: 600; }
+
+/* iOS glass filter: kit Toolbars/iPad Tab Bar/Search Field + Filter: 44pt glass capsule, 117x36 buttons,
+   14pt labels (Semibold selected, Medium otherwise), selected background Fills - Vibrant/2 Secondary */
+.hig-search-field__scopes--glass {
+  flex: none; display: inline-flex; align-items: center; box-sizing: border-box;
+  height: var(--target-ios); padding: 4px 8px; color: var(--glass-label-primary);
+  font-size: 14px; line-height: 18px; font-weight: 500;
+}
+.hig-search-field--large .hig-search-field__scopes--glass { height: 48px; padding: 6px 8px; } /* matches a 48pt field; buttons stay 36pt */
+.hig-search-field__scopes--glass .hig-search-field__scope { height: 36px; min-width: 117px; padding: 0 var(--button-padding-medium); border-radius: var(--radius-capsule); }
+.hig-search-field__scopes--glass .hig-search-field__scope.is-selected { background: var(--vibrant-fill-secondary); font-weight: 600; }
+
+/* iOS segmented scope bar below an inline field: kit Segmented Controls/Small: 32pt track, 2pt inset, 4pt gap */
+.hig-search-field__scopes--segmented {
+  display: flex; box-sizing: border-box; height: var(--segmented-small); padding: var(--segment-inset); gap: var(--segment-gap);
+  border-radius: var(--radius-capsule); background: var(--fill-tertiary); color: var(--label-primary);
+  font-size: 13.333px; line-height: 18px; letter-spacing: -0.4px; font-weight: 500; /* kit segment label 13.333pt, kern -0.4 */
+  --hig-sf-knob: var(--background-primary);
+  --hig-sf-knob-shadow: 0 2px 20px 0 color-mix(in srgb, var(--label-primary) 6%, transparent); /* kit 5 - Selected: 0 2 20, black 6% */
+}
+[data-theme^="dark"] .hig-search-field__scopes--segmented {
+  --hig-sf-knob: color-mix(in srgb, var(--label-primary) 27%, transparent); /* kit Dark/5 - Selected: white at 27% */
+  --hig-sf-knob-shadow: none;
+}
+.hig-search-field__scopes--segmented .hig-search-field__scope { flex: 1 1 0; min-width: 0; height: 28px; border-radius: var(--radius-capsule); }
+.hig-search-field__scopes--segmented .hig-search-field__scope.is-selected { background: var(--hig-sf-knob); box-shadow: var(--hig-sf-knob-shadow); font-weight: 600; }
+
+/* macOS scope bar: kit Segmented Controls/Content Area: regular 24pt, radius 6, secondary fill, accent "on" segment */
+.hig-search-field__scopes--mac {
+  display: inline-flex; align-self: flex-start; height: var(--mac-control-regular); border-radius: var(--radius-mac-regular);
+  background: var(--mac-fill-secondary); color: var(--mac-label-primary);
+  font-size: 13px; line-height: 16px; letter-spacing: -0.08px; font-weight: 500;
+}
+.hig-search-field__scopes--mac .hig-search-field__scope { height: 100%; min-width: 30px; padding: 0 8px; border-radius: var(--radius-mac-regular); } /* kit segment 30pt min; 8pt text padding chosen */
+.hig-search-field__scopes--mac .hig-search-field__scope.is-selected { background: var(--accent); color: var(--on-accent); }
+.hig-search-field__scopes--mac .hig-search-field__scope.has-separator::before {
+  content: ""; position: absolute; left: -0.5px; top: 5px; bottom: 5px; width: 1px; border-radius: 1px; background: var(--mac-label-quinary); /* kit Separator/On 1x14 */
+}
+.hig-search-field__scopes--mac .hig-search-field__scope:disabled { color: var(--mac-label-tertiary); }
+
+/* ---------- macOS content-area search fields (kit Search Fields, sizes Mn/Sm/Rg/Lg/XL) ---------- */
+.hig-search-field--mac .hig-search-field__field {
+  background: var(--mac-window-background); color: var(--mac-label-primary); font-weight: 500;
+  --hig-sf-placeholder: var(--mac-label-secondary); --hig-sf-glyph: var(--mac-label-primary);
+  --hig-sf-glyph-trailing: var(--mac-label-secondary); --hig-sf-clear-pressed: var(--mac-label-primary);
+  --hig-sf-edge: color-mix(in srgb, var(--label-primary) 5%, transparent); /* kit: 1pt outside border, black 5% */
+  box-shadow: 0 0 0 1px var(--hig-sf-edge);
+}
+[data-theme^="dark"] .hig-search-field--mac .hig-search-field__field { --hig-sf-edge: color-mix(in srgb, var(--label-primary) 4%, transparent); } /* kit dark: white 4% */
+/* kit Input Fields/03 - Focus Ring: 3.5pt outside + 1pt inside, accent at 50% */
+.hig-search-field--mac .hig-search-field__field:focus-within {
+  box-shadow: 0 0 0 1px var(--hig-sf-edge), 0 0 0 3.5px color-mix(in srgb, var(--focus-ring) 50%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--focus-ring) 50%, transparent);
+}
+.hig-search-field--mac .hig-search-field__glyph { position: relative; justify-content: flex-start; gap: 0; }
+/* Recents-menu chevron (kit Magnifying Glass/with Menu): SM–XL a 6×3.67pt chevron at x 12.5 of the 21pt cell, which
+   leaves 5.5pt to the text; mini 5×3pt at x 10.67 of 17pt (4.33pt to the text). The box is sized so the stroked
+   glyph's outer edge matches those bounds. */
+.hig-search-field--mac .hig-search-field__menu-chevron { position: absolute; left: 11.2px; top: 50%; transform: translateY(-50%); }
+.hig-search-field--mac.hig-search-field--mini .hig-search-field__menu-chevron { left: 9.5px; }
+.hig-search-field--mac .hig-search-field__clear { margin-left: 2px; }
+
+.hig-search-field--mac.hig-search-field--mini .hig-search-field__field { height: var(--mac-control-mini); padding: 0 2px 0 6px; font-size: 10px; letter-spacing: 0.12px; }
+.hig-search-field--mac.hig-search-field--mini .hig-search-field__glyph { width: 17px; margin-right: 3px; } /* glyph cell 17 at x=6, text x=26 */
+.hig-search-field--mac.hig-search-field--mini .hig-search-field__clear { width: 13px; height: 13px; }
+.hig-search-field--mac.hig-search-field--small .hig-search-field__field { height: var(--mac-control-small); padding: 0 2.5px 0 6px; font-size: 11px; letter-spacing: 0.06px; }
+.hig-search-field--mac.hig-search-field--small .hig-search-field__glyph { width: 21px; margin-right: 3px; } /* x=6, text x=30 */
+.hig-search-field--mac.hig-search-field--regular .hig-search-field__field { height: var(--mac-control-regular); padding: 0 4px 0 8px; font-size: 13px; letter-spacing: -0.08px; }
+.hig-search-field--mac.hig-search-field--regular .hig-search-field__glyph { width: 21px; margin-right: 3px; } /* x=8, text x=32 */
+.hig-search-field--mac.hig-search-field--large .hig-search-field__field { height: var(--mac-control-large); padding: 0 6px 0 8px; font-size: 13px; letter-spacing: -0.08px; }
+.hig-search-field--mac.hig-search-field--large .hig-search-field__glyph { width: 21px; margin-right: 3px; } /* x=8, text x=32 */
+.hig-search-field--mac.hig-search-field--xl .hig-search-field__field { height: var(--mac-control-xl); padding: 0 8px 0 10px; font-size: 13px; letter-spacing: -0.08px; }
+.hig-search-field--mac.hig-search-field--xl .hig-search-field__glyph { width: 21px; margin-right: 3px; } /* x=10, text x=34 */
+.hig-search-field--mac:not(.hig-search-field--mini) .hig-search-field__clear { width: 16px; height: 15px; }
+
+/* kit 04 - Disabled: fill at 50% and a 4% edge (light); the whole field at 50% opacity (dark). The light Search Fields
+   master keeps the idle label colors, which on the white window leaves it identical to an enabled field; the light
+   Text Fields disabled master (the same 04 - Disabled style) sets its text in Labels/3 Tertiary, so value, placeholder
+   and glyphs use mac-label-tertiary here. The kit's Value + Disabled masters have no Clear button. */
+.hig-search-field--mac.is-disabled .hig-search-field__field {
+  background: color-mix(in srgb, var(--mac-window-background) 50%, transparent); cursor: default;
+  --hig-sf-edge: color-mix(in srgb, var(--label-primary) 4%, transparent);
+  color: var(--mac-label-tertiary); --hig-sf-placeholder: var(--mac-label-tertiary);
+  --hig-sf-glyph: var(--mac-label-tertiary); --hig-sf-glyph-trailing: var(--mac-label-tertiary);
+}
+[data-theme^="dark"] .hig-search-field--mac.is-disabled .hig-search-field__field {
+  opacity: 0.5; color: var(--mac-label-primary); --hig-sf-placeholder: var(--mac-label-secondary);
+  --hig-sf-glyph: var(--mac-label-primary); --hig-sf-glyph-trailing: var(--mac-label-secondary);
+  --hig-sf-edge: color-mix(in srgb, var(--label-primary) 4%, transparent);
+}
+
+/* macOS toolbar search (glass): kit Titlebars and Toolbars/Medium (24) and XL (36) Search */
+.hig-search-field--mac.hig-search-field--glass .hig-search-field__field {
+  background: transparent; color: var(--glass-label-primary);
+  box-shadow: var(--shadow-glass-small), var(--shadow-glass-highlight), 0 0 0 0.5px var(--separator); /* restore the glass edge */
+  --hig-sf-placeholder: var(--glass-label-secondary); --hig-sf-glyph: var(--glass-label-secondary);
+  --hig-sf-glyph-trailing: var(--glass-label-secondary); --hig-sf-clear-pressed: var(--glass-label-primary);
+}
+.hig-search-field--mac.hig-search-field--glass .hig-search-field__field:focus-within {
+  box-shadow: var(--shadow-glass-small), var(--shadow-glass-highlight), 0 0 0 0.5px var(--separator),
+    0 0 0 3.5px color-mix(in srgb, var(--focus-ring) 50%, transparent);
+}
+.hig-search-field--mac.hig-search-field--glass.hig-search-field--regular .hig-search-field__field { padding: 0 6px 0 6px; }
+.hig-search-field--mac.hig-search-field--glass.hig-search-field--regular .hig-search-field__glyph { width: 16px; margin-right: 4px; } /* glyph x=6, text x=26 */
+.hig-search-field--mac.hig-search-field--glass.hig-search-field--xl .hig-search-field__field { padding: 0 10px 0 10px; }
+.hig-search-field--mac.hig-search-field--glass.hig-search-field--xl .hig-search-field__glyph { width: 16px; margin-right: 6px; } /* glyph x=10, text x=32 */
+.hig-search-field--mac.hig-search-field--glass .hig-search-field__clear { width: 12px; height: 15px; } /* kit Clear Search 12x15 */
+/* ===== Chart ===== */
+/* Chart: Swift Charts-style marks (HIG Charts, Charting data). Neither the HIG nor the UI kits give chart metrics;
+   values chosen here are listed in Chart.jsx and the README. Axis text is label-secondary at the iOS Caption 2 size
+   (macOS Caption 1), axis titles at Footnote (macOS Subheadline); grid lines are the separator hairline. */
+.hig-chart {
+  margin: 0; min-width: 0; font-family: var(--font-sans); color: var(--label-primary);
+  /* Surface behind the plot: rings around symbols use it. Set it to the chart's real background when not on background-primary. */
+  --hig-chart-surface: var(--background-primary);
+}
+.hig-chart--mac { color: var(--mac-label-primary); --hig-chart-surface: var(--mac-window-background); }
+.hig-chart__header { margin-bottom: 8px; } /* chosen */
+.hig-chart__title { color: var(--label-primary); }
+.hig-chart__subtitle { color: var(--label-secondary); }
+.hig-chart--mac .hig-chart__title { color: var(--mac-label-primary); }
+.hig-chart--mac .hig-chart__subtitle { color: var(--mac-label-secondary); }
+
+.hig-chart__area { position: relative; width: 100%; touch-action: pan-y; -webkit-tap-highlight-color: transparent; border-radius: var(--radius-sm); }
+.hig-chart__svg { display: block; overflow: visible; }
+
+/* Axis value labels: iOS Caption 2 (11/13, +0.06) · macOS Caption 1 (10/13, +0.12), from tokens.json */
+.hig-chart__tick { fill: var(--label-secondary); font-size: 11px; letter-spacing: 0.06px; font-variant-numeric: tabular-nums; }
+.hig-chart--mac .hig-chart__tick { fill: var(--mac-label-secondary); font-size: 10px; letter-spacing: 0.12px; }
+/* Axis titles: iOS Footnote (13/18, −0.08) · macOS Subheadline (11/14, +0.06) */
+.hig-chart__axis-title { fill: var(--label-secondary); font-size: 13px; letter-spacing: -0.08px; }
+.hig-chart--mac .hig-chart__axis-title { fill: var(--mac-label-secondary); font-size: 11px; letter-spacing: 0.06px; }
+
+.hig-chart__grid { stroke: var(--separator); stroke-width: 1; }
+/* Selection rule: a recessive vertical line at the selected X (label-tertiary chosen). */
+.hig-chart__rule { stroke: var(--label-tertiary); stroke-width: 1; }
+.hig-chart--mac .hig-chart__rule { stroke: var(--mac-label-tertiary); }
+/* Area fill: the series color as a 20% wash under its 2px line (chosen). */
+.hig-chart__area-fill { fill-opacity: 0.2; }
+.hig-chart__ringed { stroke: var(--hig-chart-surface); paint-order: stroke; }
+.hig-chart__ring { stroke: var(--hig-chart-surface); }
+
+/* Selection callout (content layer, so no glass): background-secondary platter with a separator hairline,
+   radius-sm; 6/8px padding chosen. Values lead (Subheadline Semibold), labels follow (Caption 1, secondary). */
+.hig-chart__callout {
+  position: absolute; z-index: 1; pointer-events: none; box-sizing: border-box; white-space: nowrap;
+  padding: 6px 8px; border-radius: var(--radius-sm);
+  background: var(--background-secondary); box-shadow: inset 0 0 0 0.5px var(--separator);
+}
+.hig-chart__callout-x { color: var(--label-secondary); }
+.hig-chart__callout-row { display: flex; align-items: center; gap: 4px; }
+.hig-chart__callout-value { color: var(--label-primary); font-variant-numeric: tabular-nums; }
+.hig-chart__callout-unit { color: var(--label-secondary); }
+.hig-chart--mac .hig-chart__callout-x,
+.hig-chart--mac .hig-chart__callout-unit { color: var(--mac-label-secondary); }
+.hig-chart--mac .hig-chart__callout-value { color: var(--mac-label-primary); }
+
+/* Legend: below the plot, leading-aligned; 4px swatch gap and 12px item gap chosen. Text never wears the series color. */
+.hig-chart__legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; color: var(--label-secondary); }
+.hig-chart--mac .hig-chart__legend { color: var(--mac-label-secondary); }
+.hig-chart__legend-item { display: inline-flex; align-items: center; gap: 4px; }
+.hig-chart__swatch { display: block; flex: none; overflow: visible; }
+/* ===== Sheet ===== */
+/* Sheet: geometry from the iOS 27 kit (Sheets, Toolbars/iPhone/Top - Sheet) and macOS 27 kit (Dialogs). */
+.hig-sheet-scrim {
+  position: fixed; inset: 0; z-index: 1000; box-sizing: border-box;
+  background: var(--scrim-sheet); /* kit Sheets/Overlay */
+  font-family: var(--font-sans);
+}
+.hig-sheet-scrim--nonmodal { background: transparent; pointer-events: none; }
+.hig-sheet-scrim--nonmodal .hig-sheet { pointer-events: auto; }
+.hig-sheet { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; outline: none; overflow: hidden; }
+.hig-sheet__header { position: relative; flex: none; touch-action: none; }
+.hig-sheet__body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.hig-sheet__title { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- iPhone ---------- */
+/* Medium detent: an inset Liquid Glass card 8pt from the screen edges, 451pt of an 874pt screen (kit Medium Detent). */
+.hig-sheet--ios.hig-sheet--medium { left: 8px; right: 8px; bottom: 8px; height: calc(100% * 451 / 874); border-radius: var(--radius-sheet); }
+/* The kit renders this card with Regular - Medium glass: 15pt blur in light appearance (30pt dark). */
+.hig-sheet--ios.hig-sheet--medium.hig-glass { -webkit-backdrop-filter: blur(15px) saturate(var(--saturate-glass)); backdrop-filter: blur(15px) saturate(var(--saturate-glass)); }
+[data-theme^="dark"] .hig-sheet--ios.hig-sheet--medium.hig-glass { -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.2); backdrop-filter: blur(var(--blur-glass)) saturate(1.2); }
+/* Large detent: opaque, full width under the status bar, 38pt top corners (kit Large Detent). */
+.hig-sheet--ios.hig-sheet--large {
+  left: 0; right: 0; bottom: 0; top: var(--status-bar-height);
+  border-radius: 38px 38px 0 0; background: var(--background-elevated-primary); color: var(--label-primary); /* kit: white in light, the dark elevated background in dark */
+  box-shadow: 0 15px 50px 0 color-mix(in srgb, var(--glass-dim) 51%, transparent); /* kit: black at 18% */
+}
+.hig-sheet--ios .hig-sheet__header { height: 70px; } /* kit Toolbars/iPhone/Top - Sheet: 70pt */
+.hig-sheet--ios .hig-sheet__toolbar { position: absolute; left: 16px; right: 16px; top: 16px; height: 44px; } /* kit: 44pt buttons at x=16, y=16 */
+.hig-sheet--ios .hig-sheet__body { padding: 0 var(--margin-compact) var(--margin-compact); }
+.hig-sheet__grabber {
+  position: absolute; left: 50%; top: 5px; width: 60px; height: 4px; margin: 0 0 0 -30px; padding: 0; border: 0; cursor: grab; /* kit: 60×4 at y=5 */
+  border-radius: 2px; background: var(--vibrant-fill-primary); /* kit: 207 gray plus-darker (dark: 51 gray plus-lighter); the token is the blend-equivalent color */
+}
+/* Keep a 44pt-tall hit region around the 4pt grabber. */
+.hig-sheet__grabber::before { content: ""; position: absolute; left: -10px; right: -10px; top: -5px; height: var(--target-ios); }
+
+/* Toolbar row: leading button, centered title, trailing button. */
+.hig-sheet__toolbar { display: flex; align-items: center; }
+.hig-sheet__toolbar-side { flex: 1 1 0; display: flex; min-width: var(--toolbar-button); }
+.hig-sheet__toolbar-side--trailing { justify-content: flex-end; }
+.hig-sheet--ios .hig-sheet__title, .hig-sheet--ipad .hig-sheet__title {
+  flex: 0 1 auto; text-align: center; padding: 0 8px; /* 8pt keeps the title off the buttons: the kit title box spans 68–335 between 44pt buttons at 16 and 343 */
+  font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -0.43px; color: var(--glass-label-primary); /* ios-headline; kit Titles - iPhone/Title */
+}
+.hig-sheet__tool {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; cursor: pointer; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--button-icon-gap); height: var(--toolbar-button);
+  font-family: var(--font-sans); font-size: 17px; line-height: 22px; letter-spacing: -0.43px; font-weight: 500; /* kit: SF Pro Medium 17 */
+  background: transparent; color: var(--glass-label-primary); -webkit-tap-highlight-color: transparent;
+}
+.hig-sheet__tool--icon { width: var(--toolbar-button); padding: 0; border-radius: 50%; } /* kit Buttons (for Inspectors): 44×44, r24 */
+.hig-sheet__tool--text { padding: 0 12px; border-radius: var(--radius-capsule); } /* kit Buttons/44pt/Text: label inset 12 */
+.hig-sheet__tool:disabled { cursor: default; color: var(--label-tertiary); }
+/* iPhone: plain fills (kit Close Button: Fills/2 Secondary; Primary: system blue with a white symbol). */
+.hig-sheet--ios .hig-sheet__tool { background: var(--fill-secondary); }
+.hig-sheet--ios .hig-sheet__tool--prominent { background: var(--accent); color: var(--on-accent); }
+.hig-sheet--ios .hig-sheet__tool--prominent:disabled { background: var(--fill-quaternary); color: var(--label-tertiary); }
+/* iPad: Liquid Glass toolbar buttons (kit Toolbars/Buttons/44pt Symbol 1 and Symbol 1 - Prominent). */
+.hig-sheet--ipad .hig-sheet__tool--prominent { color: var(--on-accent); }
+.hig-sheet__tool.hig-glass:active:not(:disabled) { background-color: var(--pressed-overlay); }
+
+/* ---------- iPad form sheet: centered, 936×770 at most, 32pt from the screen's top and bottom (kit Sheets/iPad) ---------- */
+.hig-sheet-scrim--ipad { display: flex; align-items: center; justify-content: center; padding: 32px; }
+.hig-sheet--ipad {
+  position: relative; width: 936px; max-width: 100%; height: 770px; max-height: 100%;
+  border-radius: var(--radius-menu); background: var(--background-elevated-primary); color: var(--label-primary);
+}
+.hig-sheet--ipad .hig-sheet__header { height: 64px; } /* kit: toolbar at y=10, 54pt tall */
+.hig-sheet--ipad .hig-sheet__toolbar { position: absolute; left: 10px; right: 10px; top: 10px; height: 44px; } /* kit: 44pt buttons 10pt from the edges */
+.hig-sheet--ipad .hig-sheet__body { padding: 0 var(--margin-compact) var(--margin-compact); }
+
+/* ---------- macOS: a card over the dimmed parent window (kit Dialogs/Save Dialog) ---------- */
+/* Attached to the window: it fills the nearest positioned ancestor (put the Sheet inside the window's body). */
+.hig-sheet-scrim--mac { position: absolute; display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: inherit; }
+.hig-sheet--mac {
+  position: relative; width: 390px; max-width: 100%; max-height: 100%; padding: 20px; /* kit Save Dialog: 390pt wide, 20pt inset */
+  border-radius: var(--radius-mac-alert); background: var(--mac-window-background); color: var(--mac-label-primary);
+  box-shadow: var(--shadow-mac-window); font-size: 13px; line-height: 16px; letter-spacing: -0.08px; /* kit: Windows/No Sidebar/Active style */
+}
+.hig-sheet--mac .hig-sheet__header { touch-action: auto; }
+.hig-sheet--mac .hig-sheet__title { white-space: normal; margin-bottom: 20px; font-size: 14px; font-weight: 700; color: var(--mac-label-primary); } /* kit: SF Pro Bold 14, 20pt above the form */
+.hig-sheet__footer { display: flex; justify-content: flex-end; gap: 8px; padding-top: 20px; flex: none; } /* kit: 24pt push buttons 8pt apart, 20pt below the form */
+/* ===== SplitView ===== */
+/* SplitView: HIG Split views (macOS thin divider: one point) with pane widths and edges from the macOS 27 kit windows
+   (256pt sidebar, no line at the sidebar edge) and the iOS 27 kit iPad split view (320pt sidebar, 350pt content column,
+   0.5pt opaque separator between content and detail). */
+.hig-split-view {
+  position: relative; display: flex; flex-direction: row; align-items: stretch; box-sizing: border-box;
+  min-width: 0; min-height: 0; height: 100%; overflow: hidden;
+}
+.hig-split-view--ios { background: var(--background-primary); color: var(--label-primary); }
+.hig-split-view--mac { background: var(--mac-window-background); color: var(--mac-label-primary); }
+.hig-split-view--tv { color: var(--label-primary); }
+
+.hig-split-view__pane {
+  position: relative; flex: none; min-width: 0; min-height: 0; box-sizing: border-box;
+  display: flex; flex-direction: column; overflow: auto;
+}
+.hig-split-view__pane--flex { flex: 1 1 0; }
+.hig-split-view__pane.is-hidden { display: none !important; }
+/* iPadOS sidebar: Liquid Glass (functional layer) running the full height of the column, as in the kit example */
+.hig-split-view--ios .hig-split-view__pane--sidebar.hig-glass {
+  border-radius: 0; color: var(--label-primary);
+  box-shadow: 0.5px 0 0 0 var(--separator); /* glass rim on the trailing edge only */
+}
+/* macOS sidebar: the kit fills it rgba(250,250,250,.8), which has no token; mac-material-thick is the nearest material (chosen). */
+.hig-split-view--mac .hig-split-view__pane--sidebar.hig-material { color: var(--mac-label-primary); }
+
+/* ---- dividers ---- */
+.hig-split-view__divider { position: relative; flex: none; z-index: 2; box-sizing: border-box; outline-offset: 2px; touch-action: none; }
+.hig-split-view--mac .hig-split-view__divider { width: 1px; background: var(--mac-separator); } /* HIG: thin divider, one point */
+.hig-split-view--ios .hig-split-view__divider { width: 0; border-left: 0.5px solid var(--separator-opaque); } /* kit Column 1: 0.5pt opaque separator */
+.hig-split-view__divider--plain,
+.hig-split-view__divider.is-collapsed { background: transparent !important; border-left-color: transparent !important; } /* kit: no line at the sidebar edge */
+/* hit region wider than the visible line: target-mac-min (20) on macOS, target-ios-min (28) on iPad */
+.hig-split-view__divider.is-resizable::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: var(--target-mac-min); transform: translateX(-50%); cursor: col-resize;
+}
+.hig-split-view--ios .hig-split-view__divider.is-resizable::before { width: var(--target-ios-min); }
+.hig-split-view__divider:focus-visible { outline: 3px solid var(--focus-ring); }
+/* ===== Collection ===== */
+/* Collection: HIG Collections; tvOS grid from HIG Layout > tvOS > Grids. The HIG states no iOS or macOS item
+   metrics; values below cite the closest kit layouts. */
+.hig-collection {
+  display: grid; box-sizing: border-box; min-width: 0; align-items: start;
+  /* iOS: kit Activity View rows: 78pt items advance 92pt (14pt apart). */
+  --hig-collection-gap: 14px;
+  gap: var(--hig-collection-gap);
+}
+/* macOS: about 12pt around bezeled elements (HIG Accessibility; token padding-bezeled). */
+.hig-collection--mac { --hig-collection-gap: var(--padding-bezeled); }
+/* tvOS: 40pt horizontal spacing at every column count, 100pt minimum between unfocused rows (HIG). */
+.hig-collection--tv { --hig-collection-gap: var(--tv-grid-gap); column-gap: var(--hig-collection-gap); row-gap: var(--tv-grid-row-gap); }
+
+/* Horizontal row: scrolls sideways. The padding keeps focus rings (3px + 2px offset) and tvOS focus growth
+   inside the scroll area so they aren't clipped. */
+.hig-collection--row { grid-auto-flow: column; overflow-x: auto; overscroll-behavior-x: contain; padding: 5px; scroll-padding: 5px; }
+.hig-collection--mac.hig-collection--row { padding: 8px; scroll-padding: 8px; }
+.hig-collection--tv.hig-collection--row { padding: calc(var(--tv-grid-row-gap) / 2) var(--tv-grid-gap); scroll-padding: var(--tv-grid-gap); }
+
+.hig-collection__item {
+  position: relative; isolation: isolate; min-width: 0; display: flex; flex-direction: column;
+  border-radius: var(--radius-thumbnail); cursor: pointer; outline-offset: 2px;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
+}
+.hig-collection__item--disabled { cursor: default; }
+
+/* Media: content images take the thumbnail corner (kit radius-thumbnail); a fill-tertiary placeholder with a
+   photo symbol stands in when an item has no image. */
+.hig-collection__media {
+  position: relative; display: block; width: 100%; overflow: hidden; flex: none;
+  border-radius: var(--radius-thumbnail); background: var(--fill-tertiary);
+}
+.hig-collection__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.hig-collection__placeholder {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--label-tertiary);
+}
+.hig-collection__placeholder > svg { width: min(33%, 48px); height: auto; aspect-ratio: 1; }
+
+/* Text below the image: 7pt gap (kit Activity View: label 7pt below the 66pt glyph). One line each. */
+.hig-collection__text { display: flex; flex-direction: column; min-width: 0; margin-top: 7px; }
+.hig-collection__title, .hig-collection__subtitle { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hig-collection__title { color: var(--label-primary); }
+.hig-collection__subtitle { color: var(--label-secondary); }
+.hig-collection__item--disabled .hig-collection__title,
+.hig-collection__item--disabled .hig-collection__subtitle { color: var(--label-tertiary); }
+
+/* iOS / tvOS selection mark: the kit's 22pt accent circle with a white checkmark (Lists/Editing Selected),
+   ringed in white so it reads over any image. The 6px inset from the corner is chosen. */
+.hig-collection__check {
+  position: absolute; inset-inline-end: 6px; bottom: 6px; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--on-accent); box-shadow: 0 0 0 1.5px var(--on-accent);
+}
+
+/* ---- macOS: Labels/1 Primary title, Subheadline secondary subtitle 2pt below (kit Forms Title + Subtitle). */
+.hig-collection--mac .hig-collection__title { color: var(--mac-label-primary); }
+.hig-collection--mac .hig-collection__subtitle { color: var(--mac-label-secondary); margin-top: 2px; }
+.hig-collection--mac .hig-collection__item--disabled .hig-collection__title,
+.hig-collection--mac .hig-collection__item--disabled .hig-collection__subtitle { color: var(--mac-label-tertiary); }
+/* Selection: a highlight that bleeds 4pt past the item with 8pt corners (kit Sidebars …/Selected background:
+   x=-4, r=8); the 10% fill is mac-fill-primary. The focus ring clears the highlight. */
+.hig-collection--mac .hig-collection__item--selected::before {
+  content: ""; position: absolute; inset: -4px; z-index: -1; pointer-events: none;
+  border-radius: var(--radius-mac-menu-item); background: var(--mac-fill-primary);
+}
+.hig-collection--mac .hig-collection__item:focus-visible { outline-offset: 4px; }
+
+/* ---- tvOS: no focus ring; the focused item grows (--hig-collection-scale, set from the grid width) and lifts. */
+.hig-collection--tv .hig-collection__item {
+  border-radius: 0; outline: none; transform-origin: 50% 50%;
+  transition: transform 200ms ease; /* duration chosen; the HIG gives none */
+}
+.hig-collection--tv .hig-collection__media { box-shadow: var(--shadow-glass-small); transition: box-shadow 200ms ease; }
+.hig-collection--tv .hig-collection__text { margin-top: 12px; }
+.hig-collection--tv .hig-collection__item--default:focus-visible,
+.hig-collection--tv .hig-collection__item--default.hig-collection__item--focused,
+.hig-collection--tv .hig-collection__item--default:hover:not(.hig-collection__item--disabled) {
+  transform: scale(var(--hig-collection-scale, 1)); z-index: 1;
+}
+.hig-collection--tv .hig-collection__item--default:focus-visible .hig-collection__media,
+.hig-collection--tv .hig-collection__item--default.hig-collection__item--focused .hig-collection__media,
+.hig-collection--tv .hig-collection__item--default:hover:not(.hig-collection__item--disabled) .hig-collection__media { box-shadow: var(--shadow-glass); }
+.hig-collection--tv .hig-collection__item--disabled .hig-collection__media { box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hig-collection--tv .hig-collection__item, .hig-collection--tv .hig-collection__media { transition: none; }
+}
+/* ===== Label ===== */
+/* Label: the four system label colors (HIG Labels table) and the symbol + title arrangement of the kits.
+   Type metrics come from the compiled type-style class passed as textStyle (e.g. .ios-body); nothing here sets
+   font size, so the class decides. */
+.hig-label {
+  display: inline-flex; align-items: flex-start; max-width: 100%; vertical-align: top;
+  /* Native labels are not selectable unless the app enables it (HIG: make *useful* label text selectable). */
+  -webkit-user-select: none; user-select: none;
+}
+.hig-label--selectable { -webkit-user-select: text; user-select: text; cursor: text; }
+.hig-label__title { min-width: 0; overflow-wrap: anywhere; }
+
+/* Label colors: label / secondaryLabel / tertiaryLabel / quaternaryLabel (iOS, iPadOS, tvOS, visionOS) */
+.hig-label--ios.hig-label--primary { color: var(--label-primary); }
+.hig-label--ios.hig-label--secondary { color: var(--label-secondary); }
+.hig-label--ios.hig-label--tertiary { color: var(--label-tertiary); }
+.hig-label--ios.hig-label--quaternary { color: var(--label-quaternary); }
+/* labelColor / secondaryLabelColor / tertiaryLabelColor / quaternaryLabelColor (macOS) */
+.hig-label--mac.hig-label--primary { color: var(--mac-label-primary); }
+.hig-label--mac.hig-label--secondary { color: var(--mac-label-secondary); }
+.hig-label--mac.hig-label--tertiary { color: var(--mac-label-tertiary); }
+.hig-label--mac.hig-label--quaternary { color: var(--mac-label-quaternary); }
+
+/* The symbol sits on the first line: its box is one line of the text style tall (1lh). */
+.hig-label__icon {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  height: 1.3em; height: 1lh;
+}
+.hig-label__icon > svg, .hig-label__icon > img { width: 1.3em; height: 1.3em; width: 1lh; height: 1lh; display: block; }
+
+/* iOS: kit Sidebar Items/Leading/Symbols: a 34pt symbol column at 17pt text, title 4pt after it (x=38),
+   symbol in the accent color. Expressed in em so other text styles scale the same proportions. */
+.hig-label--ios .hig-label__icon { width: calc(34em / 17); margin-inline-end: calc(4em / 17); color: var(--accent); }
+/* macOS: kit Forms "Title + Symbol" row: a 20pt symbol box at 13pt text, title at x=30 (10pt gap),
+   symbol in Labels Vibrant Secondary. */
+.hig-label--mac .hig-label__icon { width: calc(20em / 13); margin-inline-end: calc(10em / 13); color: var(--mac-label-secondary); }
+
+/* Dimmed levels dim the symbol with the title unless iconColor overrides it. */
+.hig-label--secondary .hig-label__icon,
+.hig-label--tertiary .hig-label__icon,
+.hig-label--quaternary .hig-label__icon { color: inherit; }
+
+/* Icon-only: the symbol keeps its glyph size without the title column. */
+.hig-label--icon-only .hig-label__icon { width: auto; margin-inline-end: 0; }
+/* ===== Lockup ===== */
+/* Lockup: HIG Lockups (tvOS). No tvOS UI kit exists, so geometry comes from the HIG: widths from the tvOS grid
+   table (Layout), focus growth from the HIG focused/unfocused size tables (see Lockup.jsx), states from
+   Focus and selection (unfocused: small shadow; focused: larger and lifted; highlighted: unfocused size;
+   unavailable: no shadow). Type: tvOS type styles. */
+.hig-lockup {
+  -webkit-appearance: none; appearance: none; margin: 0; padding: 0; border: 0; background: none;
+  font: inherit; color: var(--label-primary); text-align: start; box-sizing: border-box;
+  position: relative; display: inline-flex; flex-direction: column; vertical-align: top; flex: none;
+  cursor: pointer; outline: none; transform-origin: 50% 50%;
+  transition: transform 200ms ease; /* duration chosen; the HIG gives none */
+  -webkit-tap-highlight-color: transparent;
+}
+.hig-lockup__media {
+  position: relative; display: block; width: 100%; overflow: hidden; flex: none;
+  background: var(--fill-tertiary);
+  box-shadow: var(--shadow-glass-small); /* unfocused: "a small drop shadow" */
+  transition: box-shadow 200ms ease;
+}
+.hig-lockup__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.hig-lockup__header { display: block; margin-bottom: 12px; }
+/* 12pt between content and text: chosen (padding-bezeled); the HIG gives no lockup spacing. */
+.hig-lockup__footer { display: flex; flex-direction: column; min-width: 0; margin-top: 12px; }
+.hig-lockup__title, .hig-lockup__subtitle { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hig-lockup__title { color: var(--label-primary); }
+.hig-lockup__subtitle { color: var(--label-secondary); }
+
+/* Focused: grows (scale from Lockup.jsx) and lifts with the panel shadow; header, content and footer scale together. */
+.hig-lockup:focus-visible,
+.hig-lockup--focused,
+.hig-lockup:hover:not(:disabled):not(.hig-lockup--disabled) { transform: scale(var(--hig-lockup-scale, 1)); z-index: 1; }
+.hig-lockup:focus-visible .hig-lockup__media,
+.hig-lockup--focused .hig-lockup__media,
+.hig-lockup:hover:not(:disabled):not(.hig-lockup--disabled) .hig-lockup__media { box-shadow: var(--shadow-glass); }
+/* Highlighted (pressed): back to the unfocused size, still lifted. */
+.hig-lockup:active:not(:disabled):not(.hig-lockup--disabled) { transform: scale(1); }
+
+/* Poster: title and subtitle stay hidden until the poster is focused. */
+.hig-lockup--poster .hig-lockup__footer { visibility: hidden; }
+.hig-lockup--poster:focus-visible .hig-lockup__footer,
+.hig-lockup--poster.hig-lockup--focused .hig-lockup__footer,
+.hig-lockup--poster:hover:not(:disabled) .hig-lockup__footer { visibility: visible; }
+
+/* Circle (monogram): circular picture, name centered below; initials when there's no image. */
+.hig-lockup--circle { align-items: center; text-align: center; }
+.hig-lockup--circle .hig-lockup__footer { align-items: center; width: 100%; }
+.hig-lockup__initials {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--label-secondary);
+}
+
+/* Card: header, content and footer share one platter (background-secondary: "cards and wells").
+   The platter takes the shadow; the 24pt text inset is padding-borderless, chosen (no HIG value). */
+.hig-lockup--card { border-radius: var(--radius-thumbnail); overflow: hidden; background: var(--background-secondary); box-shadow: var(--shadow-glass-small); transition: transform 200ms ease, box-shadow 200ms ease; }
+.hig-lockup--card .hig-lockup__media { border-radius: 0 !important; box-shadow: none; }
+.hig-lockup--card .hig-lockup__header { margin: 0; padding: var(--padding-borderless) var(--padding-borderless) 0; }
+.hig-lockup--card .hig-lockup__footer { margin: 0; padding: var(--padding-borderless); }
+.hig-lockup--card:focus-visible,
+.hig-lockup--card.hig-lockup--focused,
+.hig-lockup--card:hover:not(:disabled):not(.hig-lockup--disabled) { box-shadow: var(--shadow-glass); }
+.hig-lockup--card:focus-visible .hig-lockup__media,
+.hig-lockup--card.hig-lockup--focused .hig-lockup__media,
+.hig-lockup--card:hover .hig-lockup__media { box-shadow: none; }
+
+/* Unavailable: rests on the content without a shadow, low-contrast text. */
+.hig-lockup--disabled, .hig-lockup:disabled { cursor: default; }
+.hig-lockup--disabled .hig-lockup__media, .hig-lockup:disabled .hig-lockup__media,
+.hig-lockup--card.hig-lockup--disabled, .hig-lockup--card:disabled { box-shadow: none; }
+.hig-lockup--disabled .hig-lockup__title, .hig-lockup:disabled .hig-lockup__title,
+.hig-lockup--disabled .hig-lockup__subtitle, .hig-lockup:disabled .hig-lockup__subtitle { color: var(--label-tertiary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hig-lockup, .hig-lockup__media, .hig-lockup--card { transition: none; }
+}
+/* ===== ProgressIndicator ===== */
+/* ProgressIndicator: geometry from the iOS 27 and macOS 27 UI kits (Progress Indicators pages). */
+.hig-progress { font-family: var(--font-sans); box-sizing: border-box; }
+.hig-progress--spinner,
+.hig-progress--circular { display: inline-flex; align-items: center; vertical-align: middle; }
+.hig-progress--bar { display: flex; flex-direction: column; align-items: stretch; width: 100%; }
+
+/* ---- Spinner (activity indicator): 8 capsule spokes, stepping clockwise.
+   Timing (8 steps per 1s revolution) matches the Button loading spinner; the kits are static. */
+.hig-progress__spinner { flex: none; display: block; animation: hig-progress-spin 1s steps(8) infinite; }
+.hig-progress--ios .hig-progress__spinner { color: var(--label-secondary); } /* kit: Labels/2 Secondary */
+.hig-progress--mac .hig-progress__spinner { color: var(--label-primary); }  /* kit: black (light) / white (dark) spokes at 6–55% */
+.hig-progress__spinner--small { width: var(--spinner-small); height: var(--spinner-small); }
+.hig-progress__spinner--regular { width: var(--spinner-regular); height: var(--spinner-regular); }
+.hig-progress__spinner--large { width: var(--spinner-large); height: var(--spinner-large); }
+.hig-progress__spinner--mac-small { width: 16px; height: 16px; }   /* kit Circular/Indeterminate/2 Sm */
+.hig-progress__spinner--mac-regular { width: 32px; height: 32px; } /* kit Circular/Indeterminate/3 Rg */
+@keyframes hig-progress-spin { to { transform: rotate(360deg); } }
+
+/* iOS spinner with a label (kit "Indeterminate Spinner with Label", 402×62): a centred row,
+   20pt spinner, 8pt gap, Body 17/22 in label-secondary, 20pt above and below, 5pt at the sides. */
+.hig-progress--ios.hig-progress--spinner.hig-progress--labeled {
+  display: flex; justify-content: center; gap: 8px; padding: 20px 5px;
+}
+.hig-progress__label { color: var(--label-secondary); }
+.hig-progress--mac .hig-progress__label { color: var(--mac-label-secondary); }
+/* Circular determinate with a label: label on the trailing side, same 8pt gap as the kit spinner row. */
+.hig-progress--circular.hig-progress--labeled { gap: 8px; }
+/* Bar with a label: the label sits above the track. The 8pt gap reuses the kit's spinner-to-label gap (no bar label in the kits). */
+.hig-progress--bar.hig-progress--labeled { gap: 8px; }
+
+/* ---- Circular determinate (macOS kit geometry: 16 / 32pt, 5pt ring, accent fill, round end caps) */
+.hig-progress__ring { flex: none; display: block; }
+.hig-progress__ring-fill { stroke: var(--accent); }
+.hig-progress--ios .hig-progress__ring-track { stroke: var(--fill-primary); }
+/* kit track: --mac-track */
+.hig-progress--mac .hig-progress__ring-track { stroke: var(--mac-track); }
+
+/* ---- Bar */
+.hig-progress__track {
+  position: relative; display: block; overflow: hidden; width: 100%;
+  border-radius: var(--radius-capsule);
+}
+.hig-progress__fill { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+/* iOS (kit Table View Row): 4pt capsule track in Fills/1 Primary, System Blue fill. */
+.hig-progress--ios .hig-progress__track { height: 4px; background: var(--fill-primary); }
+/* macOS (kit Content Area/Linear): 6pt (2 Sm) or 10pt (3 Rg) capsule, 140pt default width in the kit.
+   Track: rgba(0,0,0,0.06) + 0.5pt rgba(0,0,0,0.07) border; tokens --mac-track / --mac-track-border. */
+.hig-progress--mac .hig-progress__track {
+  background: var(--mac-track); box-shadow: inset 0 0 0 0.5px var(--mac-track-border);
+}
+.hig-progress--mac .hig-progress__track--small { height: 6px; }
+.hig-progress--mac .hig-progress__track--regular { height: 10px; }
+/* At 0% the kit still shows a cap: 8×6 (small) and 10×10 (regular). */
+.hig-progress--mac .hig-progress__track--small .hig-progress__fill { min-width: 8px; }
+.hig-progress--mac .hig-progress__track--regular .hig-progress__fill { min-width: 10px; }
+
+/* macOS indeterminate bar (kit Linear/Indeterminate): a bar 60% of the track (84 of 140pt), solid at its
+   trailing end and fading to transparent toward its leading end (alpha mask from 100% to 4.67% of its width),
+   sweeping leading → trailing. Mask colors only carry alpha; the accent token stands in for "opaque".
+   The 1.4s sweep is not in the kit (static), chosen to match the spinner's pace. */
+.hig-progress__fill--indeterminate {
+  position: absolute; top: 0; bottom: 0; left: -60%; width: 60%; min-width: 0 !important;
+  -webkit-mask-image: linear-gradient(to right, transparent 4.67%, var(--accent));
+  mask-image: linear-gradient(to right, transparent 4.67%, var(--accent));
+  animation: hig-progress-sweep 1.4s linear infinite;
+}
+@keyframes hig-progress-sweep { from { left: -60%; } to { left: 100%; } }
+.hig-progress:dir(rtl) .hig-progress__fill--indeterminate {
+  -webkit-mask-image: linear-gradient(to left, transparent 4.67%, var(--accent));
+  mask-image: linear-gradient(to left, transparent 4.67%, var(--accent));
+  animation-name: hig-progress-sweep-rtl;
+}
+@keyframes hig-progress-sweep-rtl { from { left: 100%; } to { left: -60%; } }
+
+/* Reduced motion: keep the indicators moving (HIG: a stationary indicator reads as stalled), but slower. */
+@media (prefers-reduced-motion: reduce) {
+  .hig-progress__spinner { animation-duration: 2s; }
+  .hig-progress__fill--indeterminate { animation-duration: 2.8s; }
+}
+/* ===== Popover ===== */
+/* Popover: geometry from the iOS 27 kit (Popovers (iPad Only)) and the macOS 27 kit (Popovers). */
+.hig-popover-anchor { position: relative; display: inline-flex; vertical-align: middle; }
+.hig-popover { box-sizing: border-box; font-family: var(--font-sans); }
+.hig-popover--anchored { position: absolute; z-index: 1001; } /* the arrow tip sits on the anchor's edge */
+.hig-popover--inline { position: relative; display: inline-block; vertical-align: top; }
+.hig-popover__body { position: relative; box-sizing: border-box; outline: none; }
+/* A side arrow needs a minimum body height (set inline from the arrow shape); content shorter than that is centered
+   on the arrow's edge rather than left at the top (centering chosen; the kit shows only taller bodies). */
+.hig-popover--edge-left > .hig-popover__body, .hig-popover--edge-right > .hig-popover__body { display: flex; flex-direction: column; justify-content: center; }
+.hig-popover__arrow { position: absolute; display: block; pointer-events: none; border-radius: 0; }
+
+/* ---------- iPadOS: thick material platter (dark: regular), 13pt corners, soft 100pt shadow ---------- */
+.hig-popover--ios .hig-popover__body {
+  border-radius: var(--radius-platter); color: var(--label-primary);
+  box-shadow: 0 10px 100px 0 color-mix(in srgb, var(--glass-dim) 86%, transparent); /* kit 'Shadow' group: black at 30% */
+}
+[data-theme^="dark"] .hig-popover--ios .hig-material--thick { background: var(--material-regular); } /* kit dark: Materials/Dark/2 Regular */
+
+/* ---------- macOS: Liquid Glass Regular - Medium, 20pt corners ---------- */
+.hig-popover--mac .hig-popover__body { border-radius: var(--radius-mac-popover); color: var(--mac-label-primary); }
+.hig-popover--mac .hig-glass { -webkit-backdrop-filter: blur(15px) saturate(var(--saturate-glass)); backdrop-filter: blur(15px) saturate(var(--saturate-glass)); } /* kit: Regular - Medium, 15pt blur (light) */
+[data-theme^="dark"] .hig-popover--mac .hig-glass { -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.2); backdrop-filter: blur(var(--blur-glass)) saturate(1.2); }
+.hig-popover--mac .hig-popover__arrow.hig-glass { box-shadow: none; border-radius: 0; } /* the outline is the arrow shape itself */
+/* ===== Snippet ===== */
+/* Snippet: the system card for App Intents results and confirmations (HIG Snippets).
+   The HIG page states only the 400pt custom-view maximum and the button order; the iOS 27 and macOS 27 kits
+   have no snippet symbol (searched 'Snippet|Siri'). The card therefore uses the kits' other system-provided
+   cards: Alerts (Liquid Glass/Regular - Large, side-by-side system buttons) and expanded notifications , 
+   for its insets and buttons; each borrowed value is cited, and chosen values are marked "chosen". */
+.hig-snippet {
+  box-sizing: border-box; display: flex; flex-direction: column; max-width: 100%;
+  margin: 0; font-family: var(--font-sans); color: var(--glass-label-primary);
+  border-radius: var(--radius-group); /* chosen: no snippet in the kit; radius-group = kit expanded-notification corner (26pt) */
+}
+.hig-snippet__dialogue { margin: 0; color: var(--glass-label-primary); overflow-wrap: break-word; }
+/* The custom view: your content, clipped at the HIG's 400pt maximum height. */
+.hig-snippet__view { position: relative; max-height: 400px; overflow: hidden; } /* HIG: 400pt maximum height */
+.hig-snippet__view-inner { display: flow-root; }
+.hig-snippet__actions { display: flex; gap: 8px; } /* kit Alerts/Light/Default: 132 + 8 + 132pt buttons */
+.hig-snippet__button { flex: 1 1 0; min-width: 0; }
+.hig-snippet__button .hig-button__label { overflow: hidden; text-overflow: ellipsis; }
+
+/* ---- iOS / iPadOS ---- */
+.hig-snippet--ios {
+  width: 370px; /* chosen: iPhone 402pt screen less 2 × margin-compact: the kit's expanded-notification width */
+  padding: 14px; gap: 14px; /* kit Alerts and expanded notifications: content inset 14pt from the card edge */
+}
+.hig-snippet--ios .hig-snippet__dialogue { padding: 8px 8px 0; } /* kit Alerts: text sits 8pt inside the 14pt content group */
+/* System-provided buttons: the kit's alert buttons: 48pt capsules; primary accent fill with a Semibold label,
+   secondary tertiary fill with a Medium primary-label title (Alerts/􀻃/Light/1 Primary, 2 Secondary). */
+.hig-snippet .hig-snippet__actions .hig-button--ios { height: 48px; padding: 0 16px; font-size: 17px; line-height: 22px; letter-spacing: -0.43px; } /* kit: 48pt tall, label inset 16pt, 17/22 */
+.hig-snippet .hig-snippet__actions .hig-snippet__button--primary.hig-button--ios { font-weight: 600; }
+.hig-snippet .hig-snippet__actions .hig-snippet__button--secondary.hig-button--ios { font-weight: 500; }
+.hig-snippet .hig-snippet__actions .hig-snippet__button--secondary.hig-button--ios:not(:disabled) { color: var(--label-primary); }
+
+/* ---- macOS ---- */
+.hig-snippet--mac {
+  width: 344px; /* chosen: the macOS 27 kit's notification width (Notifications/Light/Single 344pt), where Siri cards appear */
+  padding: 16px; gap: 16px; /* kit macOS Alerts/Light/Side by Side: content and buttons inset 16pt; text-to-buttons 16pt */
+}
+.hig-snippet--mac .hig-snippet__dialogue { padding: 4px 6px 0; } /* kit macOS Alerts: text group at 20pt (16 + 4), text inset 6pt */
+/* macOS system buttons: kit Alerts/􀻃/Light/Buttons: 28pt capsules (Button platform mac, size large), 8pt apart. */
+/* ===== Box ===== */
+/* Box: HIG Boxes; macOS geometry from the macOS 27 kit Group Boxes and Forms pages. */
+.hig-box { box-sizing: border-box; min-width: 0; }
+
+/* ---- iOS / iPadOS: "use the secondary and tertiary background colors in boxes" (HIG).
+   Corners: radius-group (kit inset grouped list sections). Padding: margin-compact (kit content inset 16pt). */
+.hig-box--ios {
+  border-radius: var(--radius-group);
+  padding: var(--margin-compact);
+  color: var(--label-primary);
+}
+.hig-box--secondary { background: var(--background-secondary); }
+.hig-box--tertiary { background: var(--background-tertiary); }
+/* Title inside the box, then 10pt to the content (kit Lists/Header/Nested: 10pt below the header text). */
+.hig-box--ios > .hig-box__title { color: var(--label-primary); margin: 0 0 10px; }
+
+/* ---- macOS: title above the box (HIG). Kit Group Boxes: 12pt corners (radius-mac-menu), Fills/4 Quaternary.
+   Content inset 10pt horizontally and 12pt vertically (kit Forms: rows inset 10pt; row content 12pt from the top). */
+.hig-box--mac { color: var(--mac-label-primary); }
+.hig-box--mac > .hig-box__content {
+  border-radius: var(--radius-mac-menu);
+  background: var(--mac-fill-quaternary);
+  padding: 12px 10px;
+}
+/* Title aligned with the content inset (10pt, kit Forms). The 6px gap to the box is not in the kit or HIG. */
+.hig-box--mac > .hig-box__title { color: var(--mac-label-primary); margin: 0 10px 6px; }
