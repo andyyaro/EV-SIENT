@@ -263,6 +263,8 @@ search.
 **CLOSED 2026-10-15** (section 9): the assistant API now allows both
 `https://futurecityfellowship.andyyaro.com` and the preview origin, and chat works from both.
 Measured again 2026-10-17 with `get-api`: `AllowOrigins` lists exactly those two.
+On 2026-10-18 a third origin, `https://futurecity.andyyaro.com`, was added for the redesigned
+site's own Assistant page (see `site/redesign/README.md`). The two above are unchanged.
 
 **Verified on the preview** (2026-10-09): every page 200, an unknown path 404 via the error
 page, direct S3 access 403, and `tests/browser/www_mobile.test.mjs` plus

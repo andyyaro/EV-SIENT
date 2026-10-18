@@ -16,6 +16,7 @@ https://futurecity.andyyaro.com/devices.html.
 | `www/css/base.css`, `www/css/hig.css`, `www/js/icons.js` | Copied from the design system (foundations, component styles, icon glyphs) |
 | `www/css/site.css`, `www/js/app.js`, `www/js/theme.js` | The shell: navigation, footer, data loading, shared controls, system theme mapping |
 | `www/css/pages/`, `www/js/pages/` | One stylesheet and script per page |
+| `www/vendor/` | `amazon-cognito-identity-js` (Apache-2.0, same file as `site/www/vendor`) and `qrcode-generator` 1.4.4 (MIT), served from this site |
 | `www/data/sites.json` | The only figures the site shows: outputs from the published Tableau sheets (`dashboard/tableau/build/sheets/`) and `site/platform/contract/v1/`. No inputs (DEC-016) |
 | `tools/` | `gen_tokens.py`, `qa.py` (static checks), `matrix.py` (every page at 16 viewports in Chromium and WebKit, light and dark), `deploy.sh` |
 
@@ -23,16 +24,31 @@ https://futurecity.andyyaro.com/devices.html.
 
 Results: Overview, Sites (split view, deep links like `sites.html#FFX004`), Compare, Outlook,
 Explore Data (Tableau views, loaded only on request). Approach: Method, Standards. Project:
-Assistant (links to the existing assistant, which needs sign-in), About, Privacy. Phones get a
+Assistant (its own page here, see below), About, Privacy. Phones get a
 floating tab bar with a More page; widths of 1024px and up get a floating sidebar.
+
+## Assistant
+
+`assistant.html` is a native client for the existing assistant service; it does not link to the
+earlier site. Sign-in uses the same Cognito user pool, with every step handled on the page: new
+password, authenticator enrollment (QR code, "Add to Authenticator App" link and setup key),
+6-digit codes, and forgot password. Tokens live in `sessionStorage`, so a session lasts for one
+tab. Questions go straight from the browser to the HTTP API `POST /chat` (same body and limits as
+the earlier client). The call is not proxied through CloudFront because the service rate-limits
+by source IP.
+
+For this, `https://futurecity.andyyaro.com` was added to the HTTP API's CORS `AllowOrigins`
+(alongside the two existing origins, which are unchanged), and the response headers policy's
+`connect-src` allows `cognito-idp.us-east-1.amazonaws.com` and the API host.
 
 ## Hosting
 
 | Resource | Name |
 |---|---|
 | S3 bucket | `future-city-redesign` (private, OAC only) |
-| CloudFront | `E3RNYDDSMJAZUR`, PriceClass_100, response headers policy `fcf-redesign-noindex` (strict CSP, noindex) |
+| CloudFront | `E3RNYDDSMJAZUR`, PriceClass_100, response headers policy `fcf-redesign-noindex` (strict CSP, noindex; `connect-src` adds Cognito and the assistant API) |
 | Certificate | `futurecity.andyyaro.com`, ACM us-east-1 |
+| Assistant API | Shared with the earlier site; this origin is one more entry in its CORS `AllowOrigins` |
 | DNS | A and AAAA aliases plus the ACM validation CNAME in the `andyyaro.com` zone (`cerfodes-dns` profile) |
 
 ## Checks and deploy
@@ -41,6 +57,7 @@ floating tab bar with a More page; widths of 1024px and up get a floating sideba
 python3 site/redesign/tools/qa.py site/redesign/www
 (cd site/redesign/www && python3 -m http.server 8765) &
 python3 site/redesign/tools/matrix.py http://localhost:8765 /tmp/matrix-shots --shots
+# MATRIX_QUICK=1 for 6 viewports; MATRIX_PAGES=assistant.html,about.html for chosen pages
 site/redesign/tools/deploy.sh site/redesign/www
 ```
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Planning Assistant · EV Site Readiness</title>
-<meta name="description" content="An AI chat that answers questions about the project methods and results, on the current project site with sign-in.">
+<meta name="description" content="Sign in to ask the planning assistant about the EV site-readiness model, its methods and its results.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="img/icon.svg" type="image/svg+xml">
 <script src="js/theme.js"></script>
@@ -14,32 +14,158 @@
 <link rel="stylesheet" href="css/hig.css">
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/pages/pages.css">
+<link rel="stylesheet" href="css/pages/assistant.css">
 </head>
 <body class="shell is-grouped" data-page="assistant">
 <a class="skip-link" href="#main">Skip to Content</a>
 <div id="nav"></div>
 <main id="main" class="main" tabindex="-1">
   <div class="page page--narrow">
-    <header class="page-head">
+    <header class="page-head as-head">
       <span class="page-head__eyebrow">Project</span>
       <h1 class="page-head__title">Planning Assistant</h1>
-      <p class="page-head__lede">An AI chat that answers questions about this project’s methods and results. It runs on the current project site and needs sign-in.</p>
+      <p class="page-head__lede">Ask about the model, its methods and its results. Answers come from the project’s own files, and every answer lists the files it checked.</p>
     </header>
 
-    <section class="pg-card asst-hero" aria-labelledby="asst-open-title">
-      <div class="asst-hero__lead">
-        <span class="asst-hero__glyph" aria-hidden="true"><i data-icon="bubble" data-size="28"></i></span>
-        <div>
-          <h2 class="asst-hero__title" id="asst-open-title">Ask About the Study</h2>
-          <p class="asst-hero__body">The assistant explains the model, methods, datasets, assumptions and results of this planning-support prototype. It is an explanation tool, not a source of decisions.</p>
+    <!-- Signed out: sign-in steps -->
+    <section class="as-gate" id="as-gate" aria-labelledby="as-gate-title">
+      <div class="as-card">
+        <div class="as-card__lead">
+          <span class="as-card__glyph" aria-hidden="true"><i data-icon="lock" data-size="22"></i></span>
+          <div>
+            <h2 class="as-card__title" id="as-gate-title">Sign In to Continue</h2>
+            <p class="as-card__sub">Access is by invitation. Every account uses an authenticator app.</p>
+          </div>
         </div>
-      </div>
-      <div class="asst-hero__action">
-        <a class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large" href="https://futurecityfellowship.andyyaro.com/assistant.html" target="_blank" rel="noopener"><span class="hig-button__label">Open the Assistant</span><span class="hig-visually-hidden"> (opens the current project site in a new tab)</span></a>
-        <p class="asst-hero__hint"><i data-icon="lock" data-size="14"></i><span>Sign-in required. Access is by invitation.</span> <span class="asst-hero__hint-line">Opens futurecityfellowship.andyyaro.com in a new tab.</span></p>
+
+        <p class="as-msg" id="as-auth-msg" role="status" aria-live="polite" hidden></p>
+
+        <form class="as-form" id="as-signin-form" data-view="signin" novalidate>
+          <div class="as-fields">
+            <label class="as-field"><span class="as-field__label">Email</span>
+              <input id="as-email" type="email" name="username" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" required placeholder="name@example.org"></label>
+            <label class="as-field"><span class="as-field__label">Password</span>
+              <input id="as-password" type="password" name="password" autocomplete="current-password" required placeholder="Required"></label>
+          </div>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large as-submit" id="as-signin-btn" type="submit"><span class="hig-button__label">Sign In</span></button>
+          <button class="as-link hig-focus" id="as-forgot-link" type="button">Forgot Password?</button>
+        </form>
+
+        <form class="as-form" id="as-newpw-form" data-view="new-password" novalidate hidden>
+          <h3 class="as-step">Choose a New Password</h3>
+          <p class="as-help">Use at least 8 characters with upper and lower case letters, a number and a symbol.</p>
+          <div class="as-fields">
+            <label class="as-field"><span class="as-field__label">New Password</span>
+              <input id="as-newpw" type="password" autocomplete="new-password" required placeholder="Required"></label>
+            <label class="as-field"><span class="as-field__label">Confirm</span>
+              <input id="as-newpw2" type="password" autocomplete="new-password" required placeholder="Required"></label>
+          </div>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large as-submit" id="as-newpw-btn" type="submit"><span class="hig-button__label">Save Password</span></button>
+          <button class="as-link hig-focus" type="button" data-back-to-signin>Cancel</button>
+        </form>
+
+        <form class="as-form" id="as-enroll-form" data-view="enroll" novalidate hidden>
+          <h3 class="as-step">Set Up Your Authenticator App</h3>
+          <ol class="as-steps">
+            <li>Open an authenticator app, such as Apple Passwords, Google Authenticator or Microsoft Authenticator.</li>
+            <li>Scan this code, or on this device choose Add to Authenticator App.</li>
+            <li>Enter the 6-digit code the app shows.</li>
+          </ol>
+          <div class="as-enroll">
+            <div class="as-qr" id="as-qr"></div>
+            <div class="as-enroll__alt">
+              <a class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered hig-button--medium" id="as-otpauth" href="#"><span class="hig-button__label">Add to Authenticator App</span></a>
+              <p class="as-help">Can’t scan? Enter this setup key:</p>
+              <p class="as-secret"><code id="as-secret"></code></p>
+              <button class="as-link hig-focus" id="as-copy-secret" type="button">Copy Setup Key</button>
+            </div>
+          </div>
+          <div class="as-fields">
+            <label class="as-field"><span class="as-field__label">Code</span>
+              <input id="as-enroll-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="one-time-code" required placeholder="6 digits"></label>
+          </div>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large as-submit" id="as-enroll-btn" type="submit"><span class="hig-button__label">Verify and Sign In</span></button>
+          <button class="as-link hig-focus" type="button" data-back-to-signin>Cancel</button>
+        </form>
+
+        <form class="as-form" id="as-code-form" data-view="code" novalidate hidden>
+          <h3 class="as-step">Enter Your Code</h3>
+          <p class="as-help">Open your authenticator app and enter the 6-digit code for EV Site Readiness.</p>
+          <div class="as-fields">
+            <label class="as-field"><span class="as-field__label">Code</span>
+              <input id="as-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="one-time-code" required placeholder="6 digits"></label>
+          </div>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large as-submit" id="as-code-btn" type="submit"><span class="hig-button__label">Verify</span></button>
+          <button class="as-link hig-focus" type="button" data-back-to-signin>Cancel</button>
+        </form>
+
+        <form class="as-form" id="as-forgot-form" data-view="forgot" novalidate hidden>
+          <h3 class="as-step">Reset Your Password</h3>
+          <p class="as-help">Enter the email for your account. A reset code will be sent to it.</p>
+          <div class="as-fields">
+            <label class="as-field"><span class="as-field__label">Email</span>
+              <input id="as-forgot-email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" required placeholder="name@example.org"></label>
+          </div>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large as-submit" id="as-forgot-btn" type="submit"><span class="hig-button__label">Send Reset Code</span></button>
+          <button class="as-link hig-focus" type="button" data-back-to-signin>Back to Sign In</button>
+        </form>
+
+        <form class="as-form" id="as-reset-form" data-view="reset" novalidate hidden>
+          <h3 class="as-step">Set a New Password</h3>
+          <div class="as-fields">
+            <label class="as-field"><span class="as-field__label">Reset Code</span>
+              <input id="as-reset-code" type="text" inputmode="numeric" autocomplete="one-time-code" required placeholder="From the email"></label>
+            <label class="as-field"><span class="as-field__label">New Password</span>
+              <input id="as-reset-pw" type="password" autocomplete="new-password" required placeholder="Required"></label>
+            <label class="as-field"><span class="as-field__label">Confirm</span>
+              <input id="as-reset-pw2" type="password" autocomplete="new-password" required placeholder="Required"></label>
+          </div>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--bordered-prominent hig-button--large as-submit" id="as-reset-btn" type="submit"><span class="hig-button__label">Save Password</span></button>
+          <button class="as-link hig-focus" type="button" data-back-to-signin>Back to Sign In</button>
+        </form>
+        <noscript><p class="as-msg">Sign-in needs JavaScript. Turn it on and reload the page.</p></noscript>
       </div>
     </section>
 
+    <!-- Signed in: conversation -->
+    <section class="as-chat" id="as-chat" aria-labelledby="as-chat-title" hidden>
+      <div class="as-bar">
+        <div class="as-bar__who">
+          <h2 class="hig-visually-hidden" id="as-chat-title">Conversation</h2>
+          <span class="as-bar__label">Signed in as</span> <span class="as-bar__email" id="as-who"></span>
+        </div>
+        <div class="as-bar__actions">
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--borderless hig-button--medium" id="as-new" type="button"><i data-icon="square.and.pencil" data-size="17"></i><span class="hig-button__label">New Conversation</span></button>
+          <button class="hig-button hig-focus hig-pressable hig-button--ios hig-button--borderless hig-button--medium" id="as-signout" type="button"><span class="hig-button__label">Sign Out</span></button>
+        </div>
+      </div>
+
+      <div class="as-empty" id="as-empty">
+        <p class="as-empty__title">Start with a question</p>
+        <ul class="as-suggest" role="list">
+          <li><button class="as-chip hig-focus hig-pressable" type="button" data-ask="How is the readiness score calculated?">How is the readiness score calculated?</button></li>
+          <li><button class="as-chip hig-focus hig-pressable" type="button" data-ask="Why does FFX004 rank first in the canonical model?">Why does FFX004 rank first in the canonical model?</button></li>
+          <li><button class="as-chip hig-focus hig-pressable" type="button" data-ask="What is the difference between starter and pathway ports?">What is the difference between starter and pathway ports?</button></li>
+          <li><button class="as-chip hig-focus hig-pressable" type="button" data-ask="Why is data confidence Low at every site?">Why is data confidence Low at every site?</button></li>
+          <li><button class="as-chip hig-focus hig-pressable" type="button" data-ask="What would need to be verified before a site could advance?">What would need to be verified before a site could advance?</button></li>
+        </ul>
+        <p class="footnote as-empty__note">Answers are generated by an AI model and can be incomplete or wrong. Don’t enter personal or confidential information.</p>
+      </div>
+
+      <ol class="as-log" id="as-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation"></ol>
+      <div class="as-thinking" id="as-thinking" role="status" hidden><span class="as-spinner" aria-hidden="true"></span><span>Checking project files</span></div>
+      <div id="as-end" class="as-end" aria-hidden="true"></div>
+
+      <form class="as-composer hig-glass hig-glass--regular" id="as-composer" novalidate>
+        <label class="hig-visually-hidden" for="as-input">Message</label>
+        <textarea id="as-input" rows="1" maxlength="2400" placeholder="Ask about the model or results" autocomplete="off" enterkeyhint="send"></textarea>
+        <span class="as-count footnote" id="as-count" aria-live="polite" hidden></span>
+        <button class="as-send hig-focus hig-pressable" id="as-send" type="submit" disabled><i data-icon="paperplane" data-size="18" data-title="Send"></i></button>
+      </form>
+    </section>
+
+    <!-- About the assistant (shown while signed out) -->
+    <div id="as-intro">
     <section class="pg-sec" aria-labelledby="asst-ask">
       <h2 class="pg-sec__title" id="asst-ask">What You Can Ask</h2><p class="pg-sec__intro">Questions about how the study works and what its results mean.</p>
 <div class="hig-list hig-list--ios hig-list--insetGrouped pg-list">
@@ -73,17 +199,21 @@
       <h2 class="pg-sec__title" id="asst-privacy">Privacy</h2>
 <div class="hig-list hig-list--ios hig-list--insetGrouped pg-list">
 <div class="hig-list-section"><ul class="hig-list-section__rows">
-<li class="hig-list-row hig-list-row--leading hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="lock" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Sign-in required</span><span class="hig-list-row__subtitle">The assistant is restricted to approved, authenticated users. Accounts are managed with Amazon Cognito on the current project site, and access is by invitation.</span></span></span></div></li>
+<li class="hig-list-row hig-list-row--leading hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="lock" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Sign-in required</span><span class="hig-list-row__subtitle">The assistant is restricted to approved, authenticated users. Accounts are managed with Amazon Cognito, access is by invitation, and every account uses an authenticator app. Your sign-in lasts only for this browser tab.</span></span></span></div></li>
 <li class="hig-list-row hig-list-row--leading hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="doc" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Conversations may be logged</span><span class="hig-list-row__subtitle">Logs are kept for quality and security. They are not used for any other purpose and are not shared.</span></span></span></div></li>
 <li class="hig-list-row hig-list-row--leading hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="eye" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Not for personal data</span><span class="hig-list-row__subtitle">Do not enter passwords, credentials, API keys, personally sensitive information, or confidential project details.</span></span></span></div></li>
 <li class="hig-list-row hig-list-row--leading hig-list-row--subtitle"><div class="hig-list-row__content"><span class="hig-list-row__symbol" aria-hidden="true"><i data-icon="flag" data-size="22"></i></span><span class="hig-list-row__body"><span class="hig-list-row__text"><span class="hig-list-row__title">Not for formal comments</span><span class="hig-list-row__subtitle">Formal public comments belong in the accountable municipal channels. Assistant activity is never treated as formal public input.</span></span></span></div></li>
-</ul><div class="hig-list-section__footer">This redesigned site only links to the assistant; it loads nothing from the sign-in service. See the <a href="privacy.html">Privacy</a> page for the full notice.</div></div>
+</ul><div class="hig-list-section__footer">Signing in contacts Amazon Cognito; asking a question contacts the project’s assistant service on Amazon Web Services. See the <a href="privacy.html">Privacy</a> page for the full notice.</div></div>
 </div>
     </section>
+    </div>
 
   </div>
 </main>
 <script src="js/icons.js"></script>
 <script src="js/app.js"></script>
+<script src="vendor/amazon-cognito-identity.min.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script src="js/pages/assistant.js"></script>
 </body>
 </html>
