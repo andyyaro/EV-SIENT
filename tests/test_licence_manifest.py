@@ -228,9 +228,13 @@ def test_every_tracked_vendored_bundle_is_attributed():
 
 
 @pytest.mark.skipif(not MANIFEST_JSON.is_file(), reason="manifest not generated yet")
-def test_the_manifest_still_refuses_to_claim_a_licence_for_this_project():
+def test_the_manifest_states_the_licence_the_owner_chose():
+    """Apache-2.0, chosen by the owner on 2026-10-18. Until then this asserted "NOT STATED":
+    the manifest must say what LICENSE says, never something the repository does not hold."""
     payload = json.loads(MANIFEST_JSON.read_text())
-    assert "NOT STATED" in payload["this_project_licence"]
+    assert payload["this_project_licence"].startswith("Apache-2.0")
+    licence = (REPO / "LICENSE").read_text()
+    assert "Apache License" in licence and "Version 2.0, January 2004" in licence
     assert payload["unresolved_count"] == len(
         [e for e in payload["python_dependencies"] if e["licence"] == "UNRESOLVED"])
 

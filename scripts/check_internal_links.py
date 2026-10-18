@@ -32,7 +32,9 @@ def strip_code(text: str) -> str:
 def broken_links() -> list[str]:
     problems = []
     for md in sorted(REPO.rglob("*.md")):
-        if ".git" in md.parts or "venv" in md.parts or "data/outputs" in str(md):
+        # node_modules holds installed packages' own docs (platform/app), not ours.
+        if (".git" in md.parts or "venv" in md.parts or "node_modules" in md.parts
+                or "data/outputs" in str(md)):
             continue
         text = strip_code(md.read_text(errors="ignore"))
         for target in LINK.findall(text):

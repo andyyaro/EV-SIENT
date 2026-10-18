@@ -1,0 +1,21 @@
+{
+  "Comment": "EV-SIENT Planner: app.futurecity.andyyaro.com to CloudFront E1JXKS26TDP3Z2",
+  "Changes": [
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "app.futurecity.andyyaro.com.",
+        "Type": "A",
+        "AliasTarget": { "HostedZoneId": "Z2FDTNDATAQYW2", "DNSName": "d27zsj8ci8byf8.cloudfront.net.", "EvaluateTargetHealth": false }
+      }
+    },
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "app.futurecity.andyyaro.com.",
+        "Type": "AAAA",
+        "AliasTarget": { "HostedZoneId": "Z2FDTNDATAQYW2", "DNSName": "d27zsj8ci8byf8.cloudfront.net.", "EvaluateTargetHealth": false }
+      }
+    }
+  ]
+}

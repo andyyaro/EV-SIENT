@@ -128,7 +128,15 @@ DRIVER_INPUTS = {
     "install_cost_est_usd_n": ["trenching_ft", "trench_cost_per_ft", "service_upgrade_cost_usd"],
 }
 
+#: The fields intake reads as values, and so checks and notes when absent (its own rule).
 _SCORED = set(NUMERIC_FIELDS) | set(YES_NO_FIELDS)
+
+#: The fields the readiness score actually uses: every driver's inputs, plus public access,
+#: which scales demand. Staff, visitors, fleet, service rating and battery storage are read but
+#: not scored, as docs/INPUT_SCHEMA.md's "In the score" column says.
+_IN_SCORE = {"public_access"} | {
+    i for weights in DRIVER_WEIGHTS.values() for d in weights
+    for i in DRIVER_INPUTS.get(d, [d[:-2] if d.endswith("_n") else d])}
 
 
 class _Session:
@@ -256,11 +264,12 @@ def info() -> str:
     import sys
 
     import numpy
+    from importlib import metadata
     packages = {"pandas": pd.__version__, "numpy": numpy.__version__}
     try:
-        import jsonschema
-        packages["jsonschema"] = getattr(jsonschema, "__version__", "unknown")
-    except ImportError:
+        # jsonschema.__version__ is deprecated and warns on every boot; the metadata is not.
+        packages["jsonschema"] = metadata.version("jsonschema")
+    except metadata.PackageNotFoundError:
         pass
     return _out({
         "protocol": PROTOCOL_VERSION,
@@ -279,7 +288,7 @@ def fields() -> str:
         kind = ("flag" if name in YES_NO_FIELDS else "coordinate" if name in ("lat", "lon")
                 else "number" if name in NUMERIC_FIELDS else "text")
         out.append({**f, "group": group, "groupLabel": GROUP_LABELS[group], "kind": kind,
-                    "scored": name in _SCORED, "required": name == "site_id"})
+                    "scored": name in _IN_SCORE, "required": name == "site_id"})
     return _out({"fields": out, "groups": GROUP_LABELS})
 
 

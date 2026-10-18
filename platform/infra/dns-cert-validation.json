@@ -1,0 +1,1 @@
+{"Comment":"ACM validation for app.futurecity.andyyaro.com (EV-SIENT Planner)","Changes":[{"Action":"CREATE","ResourceRecordSet":{"Name":"_f6cba6cbc0a2d420337d921418190291.app.futurecity.andyyaro.com.","Type":"CNAME","TTL":300,"ResourceRecords":[{"Value":"_7cb81f60cc3e03711d9153dc0a115172.wzccmgtwzk.acm-validations.aws."}]}}]}

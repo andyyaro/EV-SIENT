@@ -182,8 +182,14 @@
     {
       "name": "amazon-cognito-identity-js",
       "licence": "Apache-2.0",
-      "why": "**Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`.",
+      "why": "**Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in, and the same file at `site/redesign/www/vendor/amazon-cognito-identity.min.js` for the redesigned site's Assistant page. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`.",
       "notice": "site/www/vendor/amazon-cognito-identity.min.js (SPDX header in the file)"
+    },
+    {
+      "name": "qrcode-generator 1.4.4",
+      "licence": "MIT",
+      "why": "**Tracked and publicly shipped** at `site/redesign/www/vendor/qrcode.js`, which draws the authenticator-app QR code on the redesigned site's Assistant page. Copyright (c) 2009 Kazuhiko Arase.",
+      "notice": "site/redesign/www/vendor/qrcode.js (licence header in the file)"
     },
     {
       "name": "OpenStreetMap data",

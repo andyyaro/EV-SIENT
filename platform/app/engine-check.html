@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<title>Engine check</title>
+</head>
+<body>
+<!-- Dev-only: boots the worker engine and runs Example City end to end, for
+     platform/tools/browser_check.py. Not part of the production build (vite.config.ts builds
+     it only when ENGINE_CHECK=1). -->
+<h1>Engine check</h1>
+<pre id="log">starting</pre>
+<script type="module">
+import { createWorkerEngine } from '/src/engine/workerClient.ts';
+
+const log = document.getElementById('log');
+const lines = [];
+const say = (s) => { lines.push(s); log.textContent = lines.join('\n'); };
+const params = new URLSearchParams(location.search);
+
+// A small RFC 4180 reader: every cell stays text, as the app's own upload does.
+function parseCsv(text) {
+  const rows = [];
+  let row = [], cell = '', quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else cell += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    } else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter((r) => r.some((x) => x !== ''));
+}
+
+async function expectRefusal(label, fn) {
+  try { await fn(); return { label, refused: false }; }
+  catch (e) { return { label, refused: true, name: e.name, message: e.message }; }
+}
+
+async function main() {
+  const engine = createWorkerEngine();
+  const result = { progress: [], refusals: [] };
+  const t0 = performance.now();
+  const info = await engine.boot((p) => { result.progress.push(p); say(`${p.stage} ${p.message}`); });
+  result.bootMs = Math.round(performance.now() - t0);
+  result.info = info;
+  say(`booted in ${result.bootMs} ms`);
+
+  result.refusals.push(await expectRefusal('run before upload', () => engine.run({ asOf: '2026-10-18' })));
+  const rows = parseCsv(await (await fetch('/samples/example-city.csv')).text());
+  const table = { fileName: 'example-city.csv', columns: rows[0], rows: rows.slice(1) };
+  const fields = await engine.fields();
+  const proposal = await engine.propose(table);
+  result.refusals.push(await expectRefusal('run before accept', () => engine.run({ asOf: '2026-10-18' })));
+  const cols = Object.values(proposal.mapping);
+  result.refusals.push(await expectRefusal('duplicate column', () =>
+    engine.remap({ mapping: { ...proposal.mapping, site_name: proposal.mapping.site_id } })));
+  await engine.remap({ mapping: proposal.mapping });
+  const check = await engine.check();
+  const accepted = await engine.accept({ jurisdiction: 'Example City', sourceDate: '2026-10-01' });
+  const t1 = performance.now();
+  const run = await engine.run({ asOf: '2026-10-18' });
+  result.runMs = Math.round(performance.now() - t1);
+  const explanations = [];
+  for (const s of run.sites) explanations.push(await engine.explain(s.siteId));
+  const files = await engine.outputFiles();
+
+  if (params.get('cancel') === '1') {
+    // Stop mid-run, then check the next call boots a fresh worker with the file replayed.
+    const pending = engine.run({ asOf: '2026-10-18' });
+    setTimeout(() => engine.cancel(), 50);
+    result.cancel = await pending.then(() => 'finished before cancel', (e) => `${e.name}: ${e.message}`);
+    const t2 = performance.now();
+    await engine.boot();
+    const rechecked = await engine.check();
+    await engine.accept({ jurisdiction: 'Example City', sourceDate: '2026-10-01' });
+    const rerun = await engine.run({ asOf: '2026-10-18' });
+    result.afterCancel = { ms: Math.round(performance.now() - t2), ready: rechecked.counts.ready, sites: rerun.sites.length,
+      sameScores: JSON.stringify(rerun.sites.map((s) => s.score)) === JSON.stringify(run.sites.map((s) => s.score)) };
+  }
+
+  Object.assign(result, {
+    fieldCount: fields.fields.length, columns: cols.length, counts: check.counts, siteCount: accepted.siteCount,
+    totals: run.totals, ranking: run.sites.map((s) => [s.siteId, s.score]),
+    explainSums: explanations.map((x) => [x.siteId, x.score, Math.round(x.drivers.reduce((a, d) => a + d.points, 0) * 10) / 10]),
+    outputFiles: Object.keys(files.files).length, engineElapsedSec: run.elapsedSec,
+  });
+  say(JSON.stringify(result, null, 1));
+  window.__engineCheck = { ok: true, result };
+}
+
+main().catch((e) => {
+  say(`FAILED: ${e.name}: ${e.message}`);
+  window.__engineCheck = { ok: false, error: `${e.name}: ${e.message}` };
+});
+</script>
+</body>
+</html>

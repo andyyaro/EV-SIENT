@@ -16,7 +16,8 @@ by the owner on 2026-10-18. Data files keep the terms stated beside them.
 | Component | Licence | Why it applies |
 |---|---|---|
 | CesiumJS | Apache-2.0 | Vendored into explorer/web/vendor by scripts/vendor_cesium.sh and shipped with the 3D explorer. |
-| amazon-cognito-identity-js | Apache-2.0 | **Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`. |
+| amazon-cognito-identity-js | Apache-2.0 | **Tracked and publicly shipped** at `site/www/vendor/amazon-cognito-identity.min.js` (112 KB), used by the assistant page's sign-in, and the same file at `site/redesign/www/vendor/amazon-cognito-identity.min.js` for the redesigned site's Assistant page. Its own header declares `SPDX-License-Identifier: Apache-2.0`, `Copyright Amazon.com, Inc. or its affiliates`. |
+| qrcode-generator 1.4.4 | MIT | **Tracked and publicly shipped** at `site/redesign/www/vendor/qrcode.js`, which draws the authenticator-app QR code on the redesigned site's Assistant page. Copyright (c) 2009 Kazuhiko Arase. |
 | OpenStreetMap data | ODbL 1.0 | The explorer's fallback basemap is OSM-derived. Attribution is required on display, not merely in a file. |
 | Google Photorealistic 3D Tiles | Terms of Service (not an open-source licence) | The explorer can consume them when a key is supplied. It ships no key and no tiles, so the terms bind whoever supplies the key rather than this repository. |
 | US Census TIGER/Line | Public domain (US Government work) | A filtered boundary extract is cached under data/cache/boundaries. |

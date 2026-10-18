@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "context": { "eventType": "viewer-response" },
+  "viewer": { "ip": "198.51.100.10" },
+  "request": {
+    "method": "GET",
+    "uri": "/index.html",
+    "querystring": {},
+    "headers": { "host": { "value": "app.futurecity.andyyaro.com" } },
+    "cookies": {}
+  },
+  "response": {
+    "statusCode": 200,
+    "statusDescription": "OK",
+    "headers": {
+      "content-type": { "value": "text/html; charset=utf-8" },
+      "x-robots-tag": { "value": "all" }
+    },
+    "cookies": {}
+  }
+}
