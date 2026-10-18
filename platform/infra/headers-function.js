@@ -11,7 +11,7 @@
 var CSP = [
   "default-src 'self'",
   "script-src 'self' 'wasm-unsafe-eval'",
-  "worker-src 'self' blob:",
+  "worker-src 'self'",
   "connect-src 'self' https://tiles.openfreemap.org",
   "img-src 'self' data: blob: https://tiles.openfreemap.org",
   "style-src 'self' 'unsafe-inline'",

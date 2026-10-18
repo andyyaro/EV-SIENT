@@ -75,7 +75,7 @@ Every response, including the 404 page and the runtime files, gets:
 
 | Header | Value |
 |---|---|
-| `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' https://tiles.openfreemap.org; img-src 'self' data: blob: https://tiles.openfreemap.org; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests` |
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' https://tiles.openfreemap.org; img-src 'self' data: blob: https://tiles.openfreemap.org; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests` |
 | `Strict-Transport-Security` | `max-age=31536000` |
 | `X-Content-Type-Options` | `nosniff` |
 | `Referrer-Policy` | `no-referrer` |
@@ -270,7 +270,7 @@ adding the item to `CacheBehaviors`, and `update-distribution --if-match <ETag>`
 |---|---|---|
 | Content | Flat HTML pages, no build step | Vite build plus Pyodide runtime (about 21 MB) |
 | Security headers | Custom response headers policy `fcf-redesign-noindex` | CloudFront Function `evsient-app-headers` (flat-rate compatible) |
-| CSP | Strict; `connect-src` adds Cognito and the assistant API | Adds `'wasm-unsafe-eval'`, `worker-src blob:` and the OpenFreeMap tile host; same-origin only otherwise |
+| CSP | Strict; `connect-src` adds Cognito and the assistant API | Adds `'wasm-unsafe-eval'` and the OpenFreeMap tile host (workers come only from `'self'`: the engine worker and MapLibre's bundled worker); same-origin only otherwise |
 | Behaviours | Default only | Default plus `/runtime/*` |
 | Caching | HTML `no-cache`, everything else 5 minutes | HTML `no-cache`; hashed and runtime files 1 year immutable; others 5 minutes |
 | Compression | Edge only | Edge, plus Brotli pre-compression for large runtime files |
