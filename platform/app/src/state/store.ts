@@ -4,18 +4,20 @@
 import { create } from 'zustand';
 import { getEngine } from '../engine/client';
 import type {
-  AcceptDetails, AcceptResult, BootProgress, CheckResult, FieldCatalog, MatchStatus, Proposal, RunOptions,
+  AcceptDetails, AcceptResult, BootProgress, CheckResult, FieldCatalog, FieldFill, MatchStatus, Proposal, RunOptions,
   RunResult, RuntimeInfo, TableInput,
 } from '../engine/protocol';
+import type { HubLookup, HubProgress } from '../hub/hub';
 import type { ProjectSnapshot } from '../report/projectTypes';
 
-export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'run' | 'results' | 'report';
+export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'report';
 
 export const STEPS: { key: StepKey; label: string; icon: string; short: string }[] = [
   { key: 'start', label: 'Start', short: 'Start', icon: 'house' },
   { key: 'upload', label: 'Upload', short: 'Upload', icon: 'square.and.arrow.up' },
   { key: 'map', label: 'Map Columns', short: 'Map', icon: 'list.bullet' },
   { key: 'check', label: 'Check', short: 'Check', icon: 'checkmark.circle' },
+  { key: 'fill', label: 'Public Data', short: 'Data', icon: 'globe' },
   { key: 'run', label: 'Run', short: 'Run', icon: 'play.fill' },
   { key: 'results', label: 'Results', short: 'Results', icon: 'chart.bar' },
   { key: 'report', label: 'Report', short: 'Report', icon: 'doc' },
@@ -42,7 +44,7 @@ export interface Session {
   run: RunResult | null;
   /** Set when an input changed after the last run: results are shown as Out of Date. */
   staleReason: string | null;
-  busy: null | 'propose' | 'remap' | 'check' | 'accept' | 'run' | 'restore';
+  busy: null | 'propose' | 'remap' | 'check' | 'hub' | 'fill' | 'accept' | 'run' | 'restore';
   error: string | null;
   /** A plain status message for the planner (not an error), shown once and dismissible. */
   notice: string | null;
@@ -53,6 +55,13 @@ export interface Session {
   confirmed: Record<string, string>;
   /** field -> column the engine guessed at upload and asked the planner to check. */
   guessed: Record<string, string>;
+  /** What the public data hub proposed, once the planner asked (DEC-025). Never sent anywhere. */
+  hub: HubLookup | null;
+  hubProgress: HubProgress | null;
+  /** field -> the planner's answer to the hub's proposal. Only 'use' reaches the engine. */
+  publicChoice: Record<string, 'use' | 'skip'>;
+  /** The public values the engine holds now, exactly as last sent to it. */
+  publicFills: FieldFill[];
 }
 
 interface Actions {
@@ -69,6 +78,10 @@ interface Actions {
   applyMapping(mapping: Record<string, string | null>): Promise<void>;
   runCheck(): Promise<void>;
   setDetails(details: AcceptDetails): void;
+  /** Fetch the hub's packs for these sites and work out its proposals. Only on the planner's request. */
+  lookUpPublicData(): Promise<void>;
+  /** Use or skip the hub's values for one field; sends the WHOLE set the planner now uses. */
+  choosePublicData(field: string, choice: 'use' | 'skip'): Promise<void>;
   runModel(options?: RunOptions): Promise<void>;
   cancelRun(): void;
   restoreProject(snapshot: ProjectSnapshot): Promise<void>;
@@ -82,8 +95,11 @@ interface Actions {
 const initial: Omit<Session, 'boot' | 'fields'> = {
   step: 'start', table: null, proposal: null, check: null, details: {}, accepted: null, run: null,
   staleReason: null, busy: null, error: null, notice: null, selectedSiteId: null, compare: [],
-  confirmed: {}, guessed: {},
+  confirmed: {}, guessed: {}, hub: null, hubProgress: null, publicChoice: {}, publicFills: [],
 };
+
+/** Everything public data adds, cleared whenever the file or its column matches change. */
+const noPublicData = { hub: null, hubProgress: null, publicChoice: {}, publicFills: [] };
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
@@ -122,6 +138,53 @@ export function pendingMatches(s: Pick<Session, 'fields' | 'proposal' | 'confirm
   return fieldNames(s).filter((f) => matchStatus(s, f) === 'check');
 }
 
+/**
+ * The sites that could take a public value, by field: every site for a field the file does not
+ * have, otherwise the sites whose cell is empty (and those already filled from public data).
+ */
+export function publicNeeds(s: Pick<Session, 'check'>): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  const check = s.check;
+  if (!check) return out;
+  const absent = new Set(check.absentFromFile);
+  for (const field of check.publicFill.fields) {
+    const sites = check.rows
+      .filter((r) => r.siteId && (absent.has(field) || r.missing.includes(field) || r.filled.includes(field)))
+      .map((r) => r.siteId);
+    if (sites.length) out[field] = sites;
+  }
+  return out;
+}
+
+/** The fills the engine should hold for these choices: each used field's proposed values, with their source. */
+export function fillsFor(s: Pick<Session, 'check' | 'hub'>, choice: Record<string, 'use' | 'skip'>): FieldFill[] {
+  const hub = s.hub;
+  if (!hub) return [];
+  const needs = publicNeeds(s);
+  const out: FieldFill[] = [];
+  for (const [field, answer] of Object.entries(choice)) {
+    const spec = hub.manifest.fields[field];
+    const proposed = hub.proposals[field];
+    if (answer !== 'use' || !spec || !proposed) continue;
+    const values: Record<string, number> = {};
+    for (const siteId of needs[field] ?? []) {
+      const p = proposed[siteId];
+      if (p && 'value' in p) values[siteId] = p.value;
+    }
+    if (!Object.keys(values).length) continue;
+    const data = hub.manifest.datasets[spec.primary];
+    out.push({
+      field, values,
+      source: {
+        hubVersion: hub.manifest.hubVersion, dataset: spec.primary, title: data?.title ?? spec.sourceLabel,
+        vintage: spec.vintage, sourceDate: spec.sourceDate, licence: spec.licence, method: spec.method,
+        url: data?.landing,
+      },
+    });
+  }
+  return out;
+}
+
 /** Whether a step can be opened yet, and if not, why, in the planner's words. */
 export function stepGate(s: Session, step: StepKey): { open: boolean; reason?: string } {
   switch (step) {
@@ -135,6 +198,7 @@ export function stepGate(s: Session, step: StepKey): { open: boolean; reason?: s
       const n = pendingMatches(s).length;
       return n ? { open: false, reason: `Confirm or change the ${n === 1 ? 'match' : `${n} matches`} marked Check This Match first.` } : { open: true };
     }
+    case 'fill':
     case 'run': {
       const before = stepGate(s, 'check');
       if (!before.open) return before;
@@ -155,6 +219,7 @@ export function stepDone(s: Session, step: StepKey): boolean {
     case 'upload': return !!s.proposal && !s.proposal.refused;
     case 'map': return !!s.proposal && pendingMatches(s).length === 0 && !!s.check;
     case 'check': return !!s.check && s.check.counts.mustFix === 0 && !s.proposal?.refused;
+    case 'fill': return s.publicFills.length > 0 || Object.keys(s.publicChoice).length > 0;
     case 'run': return !!s.run && !s.staleReason;
     default: return false;
   }
@@ -233,7 +298,7 @@ export const useSession = create<Session & Actions>((set, get) => {
           if (status === 'check' && proposal.mapping[field]) guessed[field] = proposal.mapping[field];
         }
         markStale('You uploaded a different file.');
-        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null });
+        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null, ...noPublicData });
       } catch (e) { if (gen === generation) fail(e); }
     },
 
@@ -245,7 +310,8 @@ export const useSession = create<Session & Actions>((set, get) => {
         const proposal = await getEngine().remap({ mapping });
         if (gen !== generation) return;
         markStale('You changed how columns are matched.');
-        set({ proposal, check: null, accepted: null, busy: null });
+        // The engine forgets public values on a new mapping (a filled field may now be in the file).
+        set({ proposal, check: null, accepted: null, busy: null, ...noPublicData });
       } catch (e) { if (gen === generation) fail(e); }
     },
 
@@ -319,6 +385,53 @@ export const useSession = create<Session & Actions>((set, get) => {
       set({ details: next, accepted: null });
     },
 
+    async lookUpPublicData() {
+      const gen = generation;
+      const s = get();
+      if (!s.check) return;
+      const needs = publicNeeds(s);
+      const wanted = new Set(Object.values(needs).flat());
+      // Only sites that could take a value are looked up, so only their counties are fetched.
+      const sites = s.check.rows.filter((r) => wanted.has(r.siteId)).map((r) => ({ siteId: r.siteId, lat: r.lat, lon: r.lon }));
+      set({ busy: 'hub', error: null, hubProgress: null });
+      try {
+        const { lookUp } = await import('../hub/hub');
+        const hub = await lookUp(sites, Object.keys(needs), (hubProgress) => { if (gen === generation) set({ hubProgress }); });
+        if (gen !== generation) return;
+        // Values kept from an older hub release (an opened project) are set aside, never swapped
+        // for the new release's: the planner chooses again, field by field.
+        const older = get().publicFills.filter((f) => f.source.hubVersion !== hub.manifest.hubVersion);
+        if (!older.length) { set({ hub, hubProgress: null, busy: null }); return; }
+        const kept = get().publicFills.filter((f) => !older.includes(f));
+        const publicChoice = { ...get().publicChoice };
+        for (const f of older) delete publicChoice[f.field];
+        set({ busy: 'fill' });
+        const check = await getEngine().fill({ fills: kept });
+        if (gen !== generation) return;
+        markStale('Public values from an older hub release were set aside.');
+        set({
+          hub, check, publicChoice, publicFills: kept, accepted: null, hubProgress: null, busy: null,
+          notice: `The values from public data release ${older[0].source.hubVersion} were set aside. Choose again for release ${hub.manifest.hubVersion}.`,
+        });
+      } catch (e) { if (gen === generation) { set({ hubProgress: null }); fail(e); } }
+    },
+
+    async choosePublicData(field, choice) {
+      const gen = generation;
+      const s = get();
+      const publicChoice = { ...s.publicChoice, [field]: choice };
+      const fills = fillsFor(s, publicChoice);
+      if (JSON.stringify(fills) === JSON.stringify(s.publicFills)) { set({ publicChoice }); return; }
+      set({ busy: 'fill', error: null });
+      try {
+        await ensureEngineSession();
+        const check = await getEngine().fill({ fills });
+        if (gen !== generation) return;
+        markStale('You changed which public values are used.');
+        set({ check, publicChoice, publicFills: fills, accepted: null, busy: null });
+      } catch (e) { if (gen === generation) fail(e); }
+    },
+
     async runModel(options) {
       const gen = generation;
       set({ busy: 'accept', error: null });
@@ -352,10 +465,13 @@ export const useSession = create<Session & Actions>((set, get) => {
         try { await engine.reset(); } catch { /* a fresh session either way */ }
         await engine.propose(snapshot.table);
         const proposal = await engine.remap({ mapping: snapshot.mapping });
-        const check = await engine.check();
+        // Public values are restored as they were saved, with their sources; the hub is not asked again.
+        const publicFills = snapshot.publicData?.fills ?? [];
+        const check = publicFills.length ? await engine.fill({ fills: publicFills }) : await engine.check();
         if (gen !== generation) return;
         const confirmed: Record<string, string> = { ...proposal.mapping };
-        set({ table: snapshot.table, proposal, check, confirmed, guessed: {}, details: { ...snapshot.details } });
+        const publicChoice = Object.fromEntries(publicFills.map((f) => [f.field, 'use' as const]));
+        set({ table: snapshot.table, proposal, check, confirmed, guessed: {}, details: { ...snapshot.details }, publicFills, publicChoice });
         if (proposal.refused || check.counts.mustFix > 0) {
           set({ busy: null, notice: 'This project file was opened, but its file has items marked Must Fix, so the model was not run.' });
           get().go('check');

@@ -23,6 +23,7 @@ function lazyMock(): EngineClient {
     propose: later('propose'),
     remap: later('remap'),
     check: later('check'),
+    fill: later('fill'),
     accept: later('accept'),
     run: later('run'),
     explain: later('explain'),

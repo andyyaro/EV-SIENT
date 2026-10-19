@@ -577,7 +577,8 @@ def apply(frame: pd.DataFrame, proposal: Proposal) -> tuple[pd.DataFrame, list[L
 
 def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
                     source_org: str, source_date: str,
-                    applied: pd.DataFrame | None = None) -> pd.DataFrame:
+                    applied: pd.DataFrame | None = None,
+                    public_fills: dict[str, dict[str, dict[str, str]]] | None = None) -> pd.DataFrame:
     """Typed provenance for the confidence system that already exists.
 
     Keyed per **site x field_group**, which is the shape `confidence.build_confidence` reads.
@@ -597,14 +598,18 @@ def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
     field gets `missing` for that field's group at that site only. A column can be supplied
     and still be blank at half the sites, and those sites should not borrow the column's
     rating from the ones that have a value.
+
+    With ``public_fills`` (``{field: {site_id: {"source_org", "source_date", "note"}}}``), a
+    value the planner accepted from the public data hub for a cell their file left empty counts
+    as `derived_public_data` at that site, and the group is re-assessed there by the same
+    weakest-first rule. A group whose weakest evidence is then a filled value carries the fill's
+    source and its oldest date, never the planner's file's. Without it, nothing changes.
     """
     # Weakest first: whichever appears earliest wins the group.
     RANK = ["missing", "unconfirmed", "planning_assumption", "derived_public_data",
             "public_web_reference", "official_source"]
 
-    per_group: dict[str, dict[str, Any]] = {}
-    for canonical in _all_fields():
-        group = FIELD_GROUP_FOR_INPUT[canonical]
+    def assess(canonical: str) -> tuple[str, str]:
         mapped = canonical in proposal.mapping
         inferred = mapped and _strip_units(proposal.mapping[canonical]) != _strip_units(canonical)
         source_class = ("missing" if not mapped
@@ -613,31 +618,56 @@ def provenance_rows(proposal: Proposal, site_ids: list[str], reviewer: str,
         note = ("field not supplied" if not mapped
                 else f"read from the supplied column '{proposal.mapping[canonical]}'; "
                      f"mapping inferred from its name" if inferred else "")
+        return source_class, note
 
-        current = per_group.get(group)
+    def fold(per: dict[str, dict[str, Any]], group: str, canonical: str, source_class: str, note: str) -> None:
+        current = per.get(group)
         if current is None or RANK.index(source_class) < RANK.index(current["source_class"]):
-            per_group[group] = {"source_class": source_class, "assumption_type": note,
-                                "weakest_field": canonical}
+            per[group] = {"source_class": source_class, "assumption_type": note,
+                          "weakest_field": canonical}
         elif note and not current["assumption_type"]:
             current["assumption_type"] = note
+
+    per_group: dict[str, dict[str, Any]] = {}
+    for canonical in _all_fields():
+        fold(per_group, FIELD_GROUP_FOR_INPUT[canonical], canonical, *assess(canonical))
 
     rows = []
     for position, site_id in enumerate(site_ids):
         for group, assessment in sorted(per_group.items()):
             source_class, note = assessment["source_class"], assessment["assumption_type"]
+            org, when = source_org, source_date
+            filled = {f: by_site[site_id] for f, by_site in (public_fills or {}).items()
+                      if FIELD_GROUP_FOR_INPUT.get(f) == group and site_id in by_site}
+            if filled:
+                here: dict[str, dict[str, Any]] = {}
+                for canonical in _all_fields():
+                    if FIELD_GROUP_FOR_INPUT[canonical] != group:
+                        continue
+                    if canonical in filled:
+                        fold(here, group, canonical, "derived_public_data",
+                             "filled from public data, accepted by the planner: "
+                             + "; ".join(f"{f} ({s['note']})" for f, s in sorted(filled.items())))
+                    else:
+                        fold(here, group, canonical, *assess(canonical))
+                source_class, note = here[group]["source_class"], here[group]["assumption_type"]
+                if source_class == "derived_public_data":
+                    org = "; ".join(dict.fromkeys(s["source_org"] for _, s in sorted(filled.items())))
+                    when = min(s["source_date"] for s in filled.values())
             if applied is not None and source_class != "missing":
                 blank = [f for f in proposal.mapping if FIELD_GROUP_FOR_INPUT[f] == group
                          and f in applied.columns and pd.isna(applied[f].iloc[position])]
                 if blank:
                     source_class = "missing"
                     note = f"no value at this site for {', '.join(sorted(blank))}"
+                    org, when = source_org, source_date
             rows.append({
                 "site_id": site_id,
                 "field_group": group,
                 "source_class": source_class,
                 "verification_status": "unreviewed",
-                "source_org": source_org,
-                "source_date": source_date,
+                "source_org": org,
+                "source_date": when,
                 "reviewer": reviewer,
                 "assumption_type": note,
                 "unresolved_flag": "1" if source_class in ("missing", "unconfirmed") else "0",

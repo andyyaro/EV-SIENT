@@ -4,7 +4,7 @@
 // the planner's own file: propose() always answers for Example City.
 
 import type {
-  AcceptResult, CheckResult, EngineClient, Explanation, FieldCatalog, OutputFiles, Proposal,
+  AcceptResult, CheckResult, EngineClient, Explanation, FieldCatalog, FillRequest, OutputFiles, Proposal,
   RemapRequest, RunResult, RuntimeInfo,
 } from './protocol';
 import { EngineError } from './protocol';
@@ -19,8 +19,38 @@ const explains = import.meta.glob('./fixtures/explain_*.json', { import: 'defaul
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Fields public data may fill (browser_api.PUBLIC_FILL_FIELDS). */
+const PUBLIC_FILL_FIELDS = [
+  'nearby_households_1mi', 'nearby_jobs_1mi', 'aadt_nearest', 'amenities_count_0_5mi', 'ev_share_local',
+  'existing_l2_ports_1mi', 'existing_dcfc_ports_3mi', 'equity_gap_index',
+];
+
+/** The recorded check, with the coordinates and public values protocol 2 adds. */
+function checkWith(request: FillRequest): CheckResult {
+  const fixture = checkJson as unknown as CheckResult;
+  const where = new Map((runJson as unknown as RunResult).sites.map((s) => [s.siteId, s]));
+  const rows = fixture.rows.map((r) => {
+    const filled = request.fills.filter((f) => r.siteId in f.values).map((f) => f.field);
+    const missing = r.missing.filter((m) => !filled.includes(m));
+    return {
+      ...r, filled, missing, status: r.status === 'missing' && !missing.length ? 'ready' as const : r.status,
+      lat: where.get(r.siteId)?.lat ?? null, lon: where.get(r.siteId)?.lon ?? null,
+    };
+  });
+  return {
+    ...fixture, rows,
+    counts: { ...fixture.counts, ready: rows.filter((r) => r.status === 'ready').length, missing: rows.filter((r) => r.status === 'missing').length },
+    publicFill: {
+      fields: PUBLIC_FILL_FIELDS,
+      filled: Object.fromEntries(request.fills.map((f) => [f.field, Object.keys(f.values).length])),
+      sources: Object.fromEntries(request.fills.map((f) => [f.field, f.source])),
+    },
+  };
+}
+
 export function createMockEngine(): EngineClient {
   let proposal: Proposal | null = null;
+  let fills: FillRequest = { fills: [] };
   let accepted = false;
   let ran = false;
   return {
@@ -40,8 +70,8 @@ export function createMockEngine(): EngineClient {
       };
     },
     async fields() { return fieldsJson as unknown as FieldCatalog; },
-    async reset() { proposal = null; accepted = false; ran = false; },
-    async propose() { await wait(150); proposal = proposalJson as unknown as Proposal; accepted = ran = false; return proposal; },
+    async reset() { proposal = null; fills = { fills: [] }; accepted = false; ran = false; },
+    async propose() { await wait(150); proposal = proposalJson as unknown as Proposal; fills = { fills: [] }; accepted = ran = false; return proposal; },
     async remap(request: RemapRequest) {
       if (!proposal) throw new EngineError('Upload a file first.');
       const mapping: Record<string, string> = {};
@@ -51,11 +81,22 @@ export function createMockEngine(): EngineClient {
         if (v) { mapping[k] = v; status[k] = 'matched'; } else { absent.push(k); status[k] = 'unmatched'; }
       }
       proposal = { ...proposal, mapping, status, absent };
+      fills = { fills: [] };
       accepted = ran = false;
       return proposal;
     },
-    async check() { if (!proposal) throw new EngineError('Upload a file first.'); return checkJson as unknown as CheckResult; },
-    async accept() { if (!proposal) throw new EngineError('Upload a file first.'); accepted = true; return acceptJson as unknown as AcceptResult; },
+    async check() { if (!proposal) throw new EngineError('Upload a file first.'); return checkWith(fills); },
+    async fill(request: FillRequest) {
+      if (!proposal) throw new EngineError('Upload a file first.');
+      fills = request; accepted = ran = false;
+      return checkWith(fills);
+    },
+    async accept() {
+      if (!proposal) throw new EngineError('Upload a file first.');
+      accepted = true;
+      const cells = fills.fills.reduce((n, f) => n + Object.keys(f.values).length, 0);
+      return { ...(acceptJson as unknown as AcceptResult), publicCells: cells };
+    },
     async run() {
       if (!accepted) throw new EngineError('Accept the checked file before running the model.');
       await wait(400); ran = true; return runJson as unknown as RunResult;

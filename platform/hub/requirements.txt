@@ -1,0 +1,5 @@
+# The hub builder's one dependency beyond the engine's (numpy). Install into the repo venv:
+#   venv/bin/python -m pip install -r platform/hub/requirements.txt
+# pyarrow 25.0.1 was published 2026-08-10. It writes the Parquet packs; nothing in the
+# browser or the engine needs it.
+pyarrow==25.0.1

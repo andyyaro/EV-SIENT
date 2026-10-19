@@ -13,6 +13,7 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | Upload | A CSV or Excel file; choose the sheet | `propose` |
 | Map Columns | Confirm guesses and unit conversions, choose columns for unmatched fields | `remap` |
 | Check | See which rows are ready, which have missing values, and anything that must be fixed | `check` |
+| Public Data | Optional: look up public values for fields the file lacks, then use or skip each field (DEC-025) | `fill` |
 | Run | One button | `accept`, then `run` |
 | Results | Ranked sites, a map, why each site scores what it does, compare up to three | `explain`; `provenance` resolves one number's lineage when it is opened |
 | Report | Download the report (HTML, tagged PDF, Word), the tables and the project file | `output_files` |
@@ -25,27 +26,34 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | `app/src/engine/protocol.ts` | The message protocol: every shape `browser_api.py` returns. Python is the source of truth |
 | `app/src/engine/mock.ts` | An engine stand-in that answers from recorded Example City outputs, for interface work (`?engine=mock`) |
 | `app/src/report/` | The report and its downloads. `ReportDocument.tsx` is the one source: the PDF and Word files are built from its rendered markup (`reportBlocks.ts`), the PDF by Typst in a worker (`report.typ`, `pdf.worker.ts`) |
+| `app/src/hub/` | Reads the public data hub: fetches and checks county packs, works out each proposed value |
 | `app/public/samples/` | The invented Example City file and the blank template, from `data/intake/` |
 | `app/public/manifest.webmanifest`, `app/public/icons/` | The install manifest and its icons (rendered from `icon.svg` by `tools/render_icons.py`) |
 | `app/pwa/` | The service worker (`sw.js`) and the Vite plugin that writes it into `dist/` with the build's file lists and hashes |
 | `app/public/runtime/` | Built, not committed: the pinned Pyodide subset and the engine archive (see `tools/`) |
+| `hub/` | The public data hub builder: pinned public sources to per-county Parquet packs (`hub/README.md`) |
 | `tools/` | Runtime fetch, engine packaging, parity checks, deploy |
 | `infra/` | Hosting configuration for app.futurecity.andyyaro.com |
 
 ## Rules the code keeps
 
 - **Nothing the planner uploads leaves the device.** No analytics, no telemetry, no server
-  calls with user rows. The only network requests are the app's own files and, on the
+  calls with user rows. The only network requests are the app's own files (including, when
+  the planner asks, the public data packs for the counties around their sites) and, on the
   Results map, basemap tiles.
 - **The engine never runs without a cohort.** A run without one would read the reference
   study's private inputs (DEC-016), which the browser bundle does not contain.
 - **Nothing is improved silently.** Intake's findings are shown before anything runs, and a
-  mapping the planner chooses is recorded as a choice, not a source (DEC-021, DEC-023).
+  mapping the planner chooses is recorded as a choice, not a source (DEC-021, DEC-023). A public
+  value is used only for a field the planner accepts, only where the file has none, and is
+  recorded as public data with its source and vintage (DEC-025).
 - **Provenance is resolved when asked, one cell at a time.** `provenance.resolve` finds its row
   through an index built once, so even a full `export_all` is linear: 9.0 s for 600 sites under
   Pyodide, where the per-cell mask took 466 s, with byte-identical output (a test pins it).
-- **Every number on screen comes from the engine.** The interface explains with fixed wording
-  filled from the engine's own numbers; it never computes a score itself.
+- **Every score on screen comes from the engine.** The interface explains with fixed wording
+  filled from the engine's own numbers; it never computes a score itself. The only numbers it
+  works out are the public values it proposes, from the hub's packs, and each is shown with how
+  it was worked out before the planner chooses it.
 
 ## Checks before a release
 

@@ -2,7 +2,7 @@
 // Every shape here is what src/fcf_m2/browser_api.py returns, field for field. Python is the
 // source of truth: change it there first, then here, and bump PROTOCOL_VERSION in both.
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 export type Severity = 'refusal' | 'warning' | 'note';
 
@@ -97,6 +97,38 @@ export interface CheckRow {
   mustFix: string[];
   /** Scored fields that are blank or unreadable in this row (scored as absent, never defaulted). */
   missing: string[];
+  /** Fields filled at this site from public data the planner accepted (no longer missing). */
+  filled: string[];
+  /** The site's coordinates as the model reads them; null when not supplied or not usable. */
+  lat: number | null;
+  lon: number | null;
+}
+
+/** Where a public value came from. Written beside every filled value, in the cohort and the report. */
+export interface FillSource {
+  hubVersion: string;
+  /** Hub dataset id, e.g. "lodes-wac-va". */
+  dataset: string;
+  title: string;
+  vintage: string;
+  /** YYYY-MM-DD: the date data confidence ages the value from. */
+  sourceDate: string;
+  licence: string;
+  /** One sentence: how the value was worked out. */
+  method: string;
+  url?: string;
+}
+
+/** Public values for one field, by site ID, as the planner accepted them. */
+export interface FieldFill {
+  field: string;
+  values: Record<string, number>;
+  source: FillSource;
+}
+
+export interface FillRequest {
+  /** The WHOLE set the planner wants; an empty list removes every public value. */
+  fills: FieldFill[];
 }
 
 export interface CheckResult {
@@ -105,6 +137,13 @@ export interface CheckResult {
   counts: { total: number; ready: number; missing: number; mustFix: number; located: number };
   /** Scored fields this file does not have at all. */
   absentFromFile: string[];
+  publicFill: {
+    /** Fields public data may fill: a site's surroundings, never the site itself. */
+    fields: string[];
+    /** field -> number of sites filled */
+    filled: Record<string, number>;
+    sources: Record<string, FillSource>;
+  };
 }
 
 export interface AcceptDetails {
@@ -126,6 +165,8 @@ export interface AcceptResult {
   siteCount: number;
   ledger: LedgerEntry[];
   summary: string;
+  /** Cells filled from public data. */
+  publicCells: number;
 }
 
 export interface RunOptions {
@@ -274,6 +315,8 @@ export interface EngineClient {
   propose(table: TableInput): Promise<Proposal>;
   remap(request: RemapRequest): Promise<Proposal>;
   check(): Promise<CheckResult>;
+  /** Record the public values the planner accepted; answers with the check again. */
+  fill(request: FillRequest): Promise<CheckResult>;
   accept(details: AcceptDetails): Promise<AcceptResult>;
   run(options?: RunOptions): Promise<RunResult>;
   explain(siteId: string): Promise<Explanation>;

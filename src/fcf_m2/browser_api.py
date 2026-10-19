@@ -14,6 +14,8 @@ It adds no model logic. Each call is a thin wrapper over what the command line a
     run       ->  workflow.run("milestone2_v3", cohort_dir=...), never without a cohort
     explain   ->  the score broken into the weights scoring.py already uses
     provenance -> provenance.resolve, for the one cell the planner opens
+    fill      ->  values the planner accepted from the public data hub, for cells their file
+                  left empty, recorded with their source (applied by `accept`)
 
 Two rules carry over from intake and matter more here, where no one reads a terminal:
 
@@ -21,7 +23,11 @@ Two rules carry over from intake and matter more here, where no one reads a term
   private inputs (DEC-016). The browser bundle does not ship them, and this module refuses to
   ask.
 * **Never improve the data silently.** A mapping the planner chose is still a mapping, not a
-  source: provenance is written exactly as `workflow intake --accept` writes it (DEC-021).
+  source: provenance is written exactly as `workflow intake --accept` writes it (DEC-021). A
+  value from the public data hub reaches the model only through `fill`, which the planner calls
+  field by field after seeing every value, and it is recorded as derived public data with its
+  dataset, vintage and hub release (DEC-025). This module never fetches anything: the browser
+  computes the values from the hub's county packs and hands them over.
 
 The protocol this implements is `platform/PROTOCOL.md`; its version is `PROTOCOL_VERSION`.
 """
@@ -41,7 +47,7 @@ from . import intake
 from .scoring import (DRIVER_WEIGHTS, INVERTED_DRIVERS, NUMERIC_FIELDS, SUBSCORE_WEIGHTS,
                       YES_NO_FIELDS)
 
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2
 
 #: The engine's own field groups, in the planner's words.
 GROUP_LABELS = {
@@ -139,6 +145,14 @@ _IN_SCORE = {"public_access"} | {
     i for weights in DRIVER_WEIGHTS.values() for d in weights
     for i in DRIVER_INPUTS.get(d, [d[:-2] if d.endswith("_n") else d])}
 
+#: Fields public data can describe: the site's surroundings, never the site itself (its
+#: parking, wiring or safety review). The hub fills some of them; `fill` accepts only these.
+PUBLIC_FILL_FIELDS = [f for f in NUMERIC_FIELDS
+                      if intake.FIELD_GROUP_FOR_INPUT[f] == "equity_and_context"]
+#: Of those, the fields whose unit is a share, which cannot exceed 1.
+_UNIT_INTERVAL = {"ev_share_local", "equity_gap_index"}
+_FILL_SOURCE_KEYS = ("hubVersion", "dataset", "title", "vintage", "sourceDate", "licence", "method")
+
 
 class _Session:
     """Everything one planner has open. Replaced whole by `reset`."""
@@ -152,6 +166,8 @@ class _Session:
         self.out_dir: Path | None = None
         self.results: pd.DataFrame | None = None
         self.contract: Any = None             # the last run's provenance.ContractIndex
+        #: Public data the planner accepted (see `fill`); cleared by a new file or mapping.
+        self.fills: list[dict] = []
 
 
 _session = _Session()
@@ -258,6 +274,50 @@ def _proposal_payload(proposal: intake.Proposal, frame: pd.DataFrame,
     }
 
 
+def _applied() -> pd.DataFrame:
+    """The canonical frame intake would materialise now, with site IDs as the model reads them."""
+    applied, _ = intake.apply(_session.frame, _session.proposal)
+    applied["site_id"] = applied["site_id"].astype(str).str.strip()
+    return applied
+
+
+def _filled_at() -> dict[str, dict[str, float]]:
+    """{field: {site_id: value}} for every public value the planner accepted."""
+    return {f["field"]: f["values"] for f in _session.fills}
+
+
+def _apply_fills(applied: pd.DataFrame, ledger: list) -> tuple[dict, list[dict]]:
+    """Write the accepted public values into the empty cells they fill, and say so.
+
+    Returns the per-site sources `intake.provenance_rows` reads, and one row per filled cell for
+    `public_data_fills.csv`.
+    """
+    position = {sid: i for i, sid in enumerate(applied["site_id"])}
+    sources: dict[str, dict[str, dict[str, str]]] = {}
+    cells = []
+    for fill in _session.fills:
+        field, src = fill["field"], fill["source"]
+        org = f"EV-SIENT public data hub {src['hubVersion']}: {src['title']}"
+        note = f"{src['title']}, {src['vintage']}"
+        # A field the file lacked is an all-NA column; as numbers it writes the same empty cells.
+        column = pd.to_numeric(applied[field], errors="coerce").astype("float64")
+        for site_id, value in fill["values"].items():
+            column.iloc[position[site_id]] = value
+            sources.setdefault(field, {})[site_id] = {"source_org": org, "source_date": src["sourceDate"],
+                                                      "note": note}
+            cells.append({"site_id": site_id, "field": field, "value": value, "dataset": src["dataset"],
+                          "title": src["title"], "vintage": src["vintage"], "source_date": src["sourceDate"],
+                          "licence": src["licence"], "hub_version": src["hubVersion"],
+                          "method": src["method"], "url": src.get("url", "")})
+        applied[field] = column
+        ledger.append(intake.LedgerEntry(
+            field, f"filled from public data ({len(fill['values'])} cell(s))",
+            f"empty in the file; the planner accepted values from {src['title']} ({src['vintage']}), "
+            f"public data hub {src['hubVersion']}: {src['method']}",
+            detail="site(s) " + ", ".join(sorted(fill["values"]))))
+    return sources, cells
+
+
 # ---------- protocol ----------
 
 def info() -> str:
@@ -308,6 +368,7 @@ def propose(table_json: str) -> str:
     _session.frame, _session.file_name, _session.proposal = frame, table.get("fileName", ""), proposal
     _session.cohort_dir = _session.out_dir = None
     _session.results = None
+    _session.fills = []
     return _out(_proposal_payload(proposal, frame))
 
 
@@ -373,11 +434,18 @@ def remap(mapping_json: str) -> str:
     _session.proposal = proposal
     _session.cohort_dir = _session.out_dir = None
     _session.results = None
+    # A new mapping can change which cells are empty, so earlier public values no longer apply.
+    _session.fills = []
     return _out(_proposal_payload(proposal, frame, chosen=set(proposal.mapping)))
 
 
 def check() -> str:
-    """Row by row: which sites are ready, which have missing values, and why any must be fixed."""
+    """Row by row: which sites are ready, which have missing values, and why any must be fixed.
+
+    Each row also carries the site's coordinates as the model reads them (for the public data
+    step, which works its values out in the browser) and the fields filled there from public
+    data, which no longer count as missing.
+    """
     frame, proposal = _session.frame, _session.proposal
     if frame is None or proposal is None:
         raise ValueError("Upload a file first.")
@@ -390,17 +458,21 @@ def check() -> str:
         applied, _ = intake.apply(frame, proposal)
     ids = frame[id_column].astype(str).str.strip().tolist() if id_column else [""] * len(frame)
     duplicated = pd.Series(ids).duplicated(keep=False).tolist()
+    filled_at = _filled_at()
     for i in range(len(frame)):
         must_fix = []
         if not id_column or ids[i] in ("", "nan", "None"):
             must_fix.append("This row has no site identifier.")
         elif duplicated[i]:
             must_fix.append(f"The site identifier '{ids[i]}' appears more than once.")
-        missing = []
+        missing, lat, lon = [], None, None
+        filled = [f["name"] for f in FIELDS if ids[i] in filled_at.get(f["name"], {})]
         if applied is not None:
             missing = [f["name"] for f in FIELDS
                        if f["name"] in _SCORED and f["name"] in proposal.mapping
+                       and f["name"] not in filled
                        and pd.isna(applied[f["name"]].iloc[i])]
+            lat, lon = applied["lat"].iloc[i], applied["lon"].iloc[i]
         name_column = proposal.mapping.get("site_name")
         rows.append({
             "row": i + 2,
@@ -409,6 +481,9 @@ def check() -> str:
             "status": "must_fix" if must_fix else ("missing" if missing else "ready"),
             "mustFix": must_fix,
             "missing": missing,
+            "filled": filled,
+            "lat": None if pd.isna(lat) else float(lat),
+            "lon": None if pd.isna(lon) else float(lon),
         })
     absent_scored = [name for name in proposal.absent if name in _SCORED]
     located = 0
@@ -425,7 +500,73 @@ def check() -> str:
             "located": located,
         },
         "absentFromFile": absent_scored,
+        "publicFill": {
+            "fields": PUBLIC_FILL_FIELDS,
+            "filled": {f["field"]: len(f["values"]) for f in _session.fills},
+            "sources": {f["field"]: f["source"] for f in _session.fills},
+        },
     })
+
+
+def fill(fills_json: str) -> str:
+    """Record the public values the planner accepted, then check every row again.
+
+    The input is `{"fills": [{"field", "values": {site_id: number}, "source": {...}}]}`, the
+    WHOLE set as the planner now wants it (an empty list removes them all). Each `source` names
+    the hub release, dataset, title, vintage, sourceDate (YYYY-MM-DD), licence and method, and
+    is written beside every value. Nothing reaches the model until `accept`.
+
+    A value is taken only where the planner's file has none: a field the file lacks, or a cell
+    it left empty or unreadable. A public value never replaces the planner's own (DEC-021), and
+    only fields about a site's surroundings can be filled (`PUBLIC_FILL_FIELDS`).
+    """
+    frame, proposal = _session.frame, _session.proposal
+    if frame is None or proposal is None:
+        raise ValueError("Upload a file first.")
+    if proposal.refused:
+        raise ValueError("Fix the items marked Must Fix before filling values from public data.")
+    request = json.loads(fills_json or "{}")
+    applied = _applied()
+    position = {sid: i for i, sid in enumerate(applied["site_id"])}
+    fills, seen = [], set()
+    for item in request.get("fills", []):
+        field = item.get("field")
+        if field not in PUBLIC_FILL_FIELDS:
+            raise ValueError(f"{field} cannot be filled from public data; only a site's surroundings can.")
+        if field in seen:
+            raise ValueError(f"{field} is listed twice. Send each field once.")
+        seen.add(field)
+        source = item.get("source") or {}
+        lacking = [k for k in _FILL_SOURCE_KEYS if not str(source.get(k) or "").strip()]
+        if lacking:
+            raise ValueError(f"The public values for {field} do not say their {', '.join(lacking)}, "
+                             f"so they cannot be recorded.")
+        try:
+            date.fromisoformat(str(source["sourceDate"]))
+        except ValueError:
+            raise ValueError(f"The source date for {field} is not a date (YYYY-MM-DD).") from None
+        values = item.get("values") or {}
+        if not values:
+            raise ValueError(f"No values were given for {field}.")
+        clean: dict[str, float] = {}
+        for site_id, value in values.items():
+            site_id = str(site_id).strip()
+            if site_id not in position:
+                raise ValueError(f"There is no site {site_id} in this file.")
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError(f"The public value for {field} at {site_id} is not a number.")
+            if value < 0 or (field in _UNIT_INTERVAL and value > 1):
+                raise ValueError(f"The public value for {field} at {site_id} is out of range.")
+            if not pd.isna(applied[field].iloc[position[site_id]]):
+                raise ValueError(f"Your file already has a value for {field} at {site_id}. Public data "
+                                 f"never replaces your own values.")
+            clean[site_id] = float(value)
+        fills.append({"field": field, "values": clean,
+                      "source": {k: str(v) for k, v in source.items() if isinstance(v, (str, int, float))}})
+    _session.fills = fills
+    _session.cohort_dir = _session.out_dir = None
+    _session.results = None
+    return check()
 
 
 def accept(details_json: str) -> str:
@@ -433,6 +574,11 @@ def accept(details_json: str) -> str:
 
     `details` carries `jurisdiction`, `sourceOrg` and `sourceDate` (YYYY-MM-DD or empty), all
     optional, and `reviewer` for the provenance trail.
+
+    Public values the planner accepted (`fill`) are written into the cells they fill, each with a
+    ledger entry, `derived_public_data` provenance at its site, and a row in
+    `public_data_fills.csv` naming its dataset, vintage and hub release. With none, the cohort
+    is exactly what `workflow intake --accept` writes.
     """
     from . import contract
 
@@ -445,13 +591,15 @@ def accept(details_json: str) -> str:
     applied, ledger = intake.apply(frame, proposal)
     applied["site_id"] = applied["site_id"].astype(str).str.strip()
     site_ids = list(applied["site_id"])
+    public_sources, public_cells = _apply_fills(applied, ledger)
     source_date = (details.get("sourceDate") or "").strip() or "unstated"
     stem = Path(_session.file_name or "uploaded").stem
     source_org = (details.get("sourceOrg") or "").strip() or stem
     jurisdiction = (details.get("jurisdiction") or "").strip() or stem
     provenance = intake.accept(intake.provenance_rows(
         proposal, site_ids, reviewer=details.get("reviewer") or "planner, in the platform",
-        source_org=source_org, source_date=source_date, applied=applied))
+        source_org=source_org, source_date=source_date, applied=applied,
+        public_fills=public_sources or None))
 
     cohort = _session.root / "cohort"
     if cohort.exists():
@@ -462,6 +610,8 @@ def accept(details_json: str) -> str:
     provenance.to_csv(cohort / "provenance.csv", index=False)
     pd.DataFrame([vars(e) for e in ledger]).to_csv(cohort / "intake_ledger.csv", index=False)
     (cohort / "intake_findings.json").write_text(json.dumps([vars(f) for f in proposal.findings], indent=2))
+    if public_cells:
+        pd.DataFrame(public_cells).to_csv(cohort / "public_data_fills.csv", index=False)
     source = cohort / "source_upload.csv"
     frame.to_csv(source, index=False)
     from .workflow import _slug
@@ -483,6 +633,7 @@ def accept(details_json: str) -> str:
         "siteCount": len(site_ids),
         "ledger": [vars(e) for e in ledger],
         "summary": proposal.summary(),
+        "publicCells": len(public_cells),
     })
 
 

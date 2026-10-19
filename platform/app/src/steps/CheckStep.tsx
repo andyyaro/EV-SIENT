@@ -11,7 +11,7 @@ import { StepActions } from '../components/StepActions';
 import type { AcceptDetails, CheckRow, Finding, RowStatus } from '../engine/protocol';
 import { fieldLabel, listWords, plainText, plural } from '../lib/fieldText';
 import { readableFileName } from '../lib/projectName';
-import { stepGate, useSession } from '../state/store';
+import { publicNeeds, stepGate, useSession } from '../state/store';
 
 const PAGE = 100;
 
@@ -164,7 +164,8 @@ function RowsTable() {
                 <td role="cell" className="st-wrap st-cell-details">
                   {r.mustFix.map((m, i) => <p key={i}>{m}</p>)}
                   {r.missing.length > 0 && <p>No value for {listWords(r.missing.map((m) => fieldLabel(s.fields, m)))}.</p>}
-                  {!r.mustFix.length && !r.missing.length && <span className="st-muted">Every matched field has a value.</span>}
+                  {r.filled.length > 0 && <p>From public data: {listWords(r.filled.map((m) => fieldLabel(s.fields, m)))}.</p>}
+                  {!r.mustFix.length && !r.missing.length && !r.filled.length && <span className="st-muted">Every matched field has a value.</span>}
                 </td>
               </tr>
             ))}
@@ -207,6 +208,10 @@ export function CheckStep() {
   // Fields absent from the whole file are summarised in one notice above, not one note each.
   const absent = new Set(check?.absentFromFile ?? []);
   const notes = p.findings.filter((f) => f.severity === 'note' && !absent.has(f.field));
+  // Fields filled from public data are listed in their own notice, with how many sites they cover.
+  const filled = Object.keys(check?.publicFill.filled ?? {});
+  const absentShown = (check?.absentFromFile ?? []).filter((f) => !filled.includes(f));
+  const canFill = Object.keys(publicNeeds(s)).length > 0;
 
   return (
     <div className="page st-page">
@@ -232,9 +237,16 @@ export function CheckStep() {
             <p><strong>Missing values never raise a score.</strong> A blank or unreadable value is scored as absent: it earns no credit and lowers data confidence. Nothing is estimated and no row is left out.</p>
           </div>
 
-          {check.absentFromFile.length > 0 && (
-            <Banner tone="info" title={`${plural(check.absentFromFile.length, 'Scored Field Is', 'Scored Fields Are')} Not in This File`}>
-              <p>{listWords(check.absentFromFile.map((f) => fieldLabel(s.fields, f)))}. Every site is scored as if {check.absentFromFile.length === 1 ? 'it is' : 'they are'} absent, and data confidence is lower. If your file has {check.absentFromFile.length === 1 ? 'this' : 'any of these'}, match {check.absentFromFile.length === 1 ? 'it' : 'them'} in Map Columns.</p>
+          {absentShown.length > 0 && (
+            <Banner tone="info" title={`${plural(absentShown.length, 'Scored Field Is', 'Scored Fields Are')} Not in This File`}>
+              <p>{listWords(absentShown.map((f) => fieldLabel(s.fields, f)))}. Every site is scored as if {absentShown.length === 1 ? 'it is' : 'they are'} absent, and data confidence is lower. If your file has {absentShown.length === 1 ? 'this' : 'any of these'}, match {absentShown.length === 1 ? 'it' : 'them'} in Map Columns.</p>
+              {absentShown.some((f) => check.publicFill.fields.includes(f)) && <p>Public data may be able to propose some of them in the next step, Public Data.</p>}
+            </Banner>
+          )}
+
+          {filled.length > 0 && (
+            <Banner tone="info" title="Filled From Public Data">
+              <p>{listWords(filled.map((f) => `${fieldLabel(s.fields, f)} at ${plural(check.publicFill.filled[f], 'site')}`))}, from {listWords([...new Set(filled.map((f) => `${check.publicFill.sources[f].title} (${check.publicFill.sources[f].vintage})`))])}. You chose these in Public Data; each value is recorded with its source.</p>
             </Banner>
           )}
 
@@ -272,8 +284,8 @@ export function CheckStep() {
 
       <StepActions
         onBack={() => s.go('map')}
-        onNext={() => s.go('run')}
-        nextLabel="Continue to Run"
+        onNext={() => s.go(canFill ? 'fill' : 'run')}
+        nextLabel={canFill ? 'Continue to Public Data' : 'Continue to Run'}
         busy={s.busy === 'check'}
         blockedReason={runGate.open ? null : runGate.reason}
       />

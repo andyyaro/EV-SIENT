@@ -1,0 +1,4 @@
+# Downloaded upstream files (untrusted, large, re-fetchable and pinned in sources.json).
+cache/
+# Built releases: published to S3, never committed.
+out/

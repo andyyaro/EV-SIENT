@@ -9,7 +9,7 @@ import { StatusMark } from '../components/StatusMark';
 import { StepActions } from '../components/StepActions';
 import { plural } from '../lib/fieldText';
 import { readableFileName } from '../lib/projectName';
-import { CONFIGURATION, stepGate, today, useSession } from '../state/store';
+import { CONFIGURATION, publicNeeds, stepGate, today, useSession } from '../state/store';
 
 function Row({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -45,6 +45,8 @@ export function RunStep() {
   const matched = Object.keys(p.mapping).length;
   const d = s.details;
   const asOf = today();
+  const back = () => s.go(Object.keys(publicNeeds(s)).length || s.publicFills.length ? 'fill' : 'check');
+  const publicCells = s.publicFills.reduce((n, f) => n + Object.keys(f.values).length, 0);
 
   async function run() {
     setStarted(true);
@@ -77,6 +79,11 @@ export function RunStep() {
               <Row title="Sites"><span className="num">{check.counts.total.toLocaleString('en-US')}</span></Row>
               <Row title="Rows With Missing Values"><span className="num">{check.counts.missing.toLocaleString('en-US')}</span></Row>
               <Row title="Fields Matched"><span className="num">{matched} of {total}</span></Row>
+              <Row title="Values From Public Data">
+                {publicCells
+                  ? <span className="num">{`${plural(publicCells, 'value')} in ${plural(s.publicFills.length, 'field')}`}</span>
+                  : 'None'}
+              </Row>
               <Row title="Configuration">{CONFIGURATION}</Row>
               <Row title="Data Confidence Judged On"><span className="num">{asOf}</span></Row>
             </ul>
@@ -128,7 +135,7 @@ export function RunStep() {
       </section>
 
       <StepActions
-        onBack={() => s.go('check')}
+        onBack={back}
         onNext={s.run ? () => s.go('results') : undefined}
         nextLabel={s.staleReason ? 'See Earlier Results' : 'See Results'}
       />

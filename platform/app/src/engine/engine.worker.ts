@@ -146,6 +146,7 @@ const api = {
   async propose(tableJson: string) { await ready(); return invoke('propose', tableJson); },
   async remap(mappingJson: string) { await ready(); return invoke('remap', mappingJson); },
   async check() { await ready(); return invoke('check'); },
+  async fill(fillsJson: string) { await ready(); return invoke('fill', fillsJson); },
   async accept(detailsJson: string) { await ready(); return invoke('accept', detailsJson); },
   async run(optionsJson: string) { await ready(); return invoke('run', optionsJson); },
   async explain(siteId: string) { await ready(); return invoke('explain', siteId); },

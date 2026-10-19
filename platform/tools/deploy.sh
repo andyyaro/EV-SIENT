@@ -15,6 +15,7 @@
 #   with Brotli (quality 11) and uploaded with Content-Encoding: br; CloudFront passes them through.
 #   Immutable files already in the bucket with the same size are skipped.
 #   Old files under assets/ and runtime/ are kept (open tabs and rollback); other stale keys are deleted.
+#   hub/ is never touched: the public data hub is published on its own (platform/hub/README.md).
 #   Only /, /index.html and /404.html are invalidated.
 #
 # Works with macOS /bin/bash 3.2. Needs: aws (CLI v2, profile future-city), brotli.
@@ -153,10 +154,10 @@ while IFS=$'\t' read -r order cache ctype enc; do
 done < "$STAGE/groups.tsv"
 echo "uploaded $uploaded, skipped $skipped unchanged immutable"
 
-# Prune stale keys outside assets/ and runtime/.
+# Prune stale keys outside assets/, runtime/ and hub/ (the hub is not part of the app build).
 cut -f5 "$PLAN" | sort > "$STAGE/local.txt"
 cut -f1 "$REMOTE" | sort > "$STAGE/remote-keys.txt"
-comm -13 "$STAGE/local.txt" "$STAGE/remote-keys.txt" | grep -vE '^(assets|runtime)/' > "$STAGE/stale.txt" || true
+comm -13 "$STAGE/local.txt" "$STAGE/remote-keys.txt" | grep -vE '^(assets|runtime|hub)/' > "$STAGE/stale.txt" || true
 while IFS= read -r key; do
   [ -n "$key" ] || continue
   echo "delete: $key"

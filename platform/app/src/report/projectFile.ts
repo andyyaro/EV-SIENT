@@ -6,15 +6,17 @@
 //   inputs/table.json     the uploaded table, every cell as text (TableInput)
 //   inputs/mapping.json   field -> column, null for "not in this file"
 //   inputs/details.json   source details (AcceptDetails)
+//   inputs/public_data.json  public values the planner accepted, with their sources (only when
+//                         there are any; the file is then evsient-project/2, otherwise /1)
 //   results/...           every file the engine wrote for the last run (engine.outputFiles())
 
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
 import { version as appVersion } from '../../package.json';
 import { getEngine } from '../engine/client';
-import { PROTOCOL_VERSION, type AcceptDetails, type TableInput } from '../engine/protocol';
+import { PROTOCOL_VERSION, type AcceptDetails, type FieldFill, type TableInput } from '../engine/protocol';
 import { projectName } from '../lib/projectName';
 import { fullMapping, useSession } from '../state/store';
-import { PROJECT_SCHEMA, type ProjectManifest, type ProjectSnapshot } from './projectTypes';
+import { PROJECT_SCHEMA, PROJECT_SCHEMA_V1, type ProjectManifest, type ProjectSnapshot } from './projectTypes';
 
 export const PROJECT_EXTENSION = '.evsient';
 const MAX_PROJECT_BYTES = 100 * 1024 * 1024;
@@ -44,6 +46,7 @@ export async function buildProjectFile(): Promise<Blob> {
     'inputs/mapping.json': json(fullMapping(s)),
     'inputs/details.json': json(s.details),
   };
+  if (s.publicFills.length) members['inputs/public_data.json'] = json({ fills: s.publicFills });
   for (const [path, text] of Object.entries(outputs.files)) {
     // Engine paths are "results/..." and "inputs/..." (the accepted cohort); all of them live under results/.
     const clean = path.replace(/^\/+/, '');
@@ -56,7 +59,7 @@ export async function buildProjectFile(): Promise<Blob> {
   const b = s.boot;
   const info = b.status === 'ready' ? b.info : null;
   const manifest: ProjectManifest = {
-    schema: PROJECT_SCHEMA,
+    schema: s.publicFills.length ? PROJECT_SCHEMA : PROJECT_SCHEMA_V1,
     name: projectName(s.details, s.table.fileName),
     savedAt: new Date().toISOString(),
     app: { version: appVersion },
@@ -110,9 +113,9 @@ export async function readProjectFile(file: File): Promise<ProjectSnapshot> {
   if (!files['project.json']) throw new ProjectFileError(broken);
 
   const manifest = parseMember<ProjectManifest>(files, 'project.json');
-  if (!isRecord(manifest) || manifest.schema !== PROJECT_SCHEMA) {
+  if (!isRecord(manifest) || (manifest.schema !== PROJECT_SCHEMA && manifest.schema !== PROJECT_SCHEMA_V1)) {
     const found = isRecord(manifest) && typeof manifest.schema === 'string' ? ` (it says ${manifest.schema})` : '';
-    throw new ProjectFileError(`This project file was saved in a format this planner does not read${found}. It reads ${PROJECT_SCHEMA}.`);
+    throw new ProjectFileError(`This project file was saved in a format this planner does not read${found}. It reads ${PROJECT_SCHEMA_V1} and ${PROJECT_SCHEMA}.`);
   }
   if (!isRecord(manifest.members) || typeof manifest.asOf !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.asOf)) {
     throw new ProjectFileError(broken);
@@ -145,5 +148,12 @@ export async function readProjectFile(file: File): Promise<ProjectSnapshot> {
   if (!isRecord(details) || !Object.values(details).every((v) => v === undefined || typeof v === 'string')) {
     throw new ProjectFileError('The source details in this project file are not in the expected shape, so it cannot be opened.');
   }
-  return { manifest, table, mapping, details };
+  if (!files['inputs/public_data.json']) return { manifest, table, mapping, details };
+  const publicData = parseMember<{ fills: FieldFill[] }>(files, 'inputs/public_data.json');
+  const isFill = (f: unknown) => isRecord(f) && typeof f.field === 'string' && isRecord(f.source)
+    && isRecord(f.values) && Object.values(f.values).every((v) => typeof v === 'number');
+  if (!isRecord(publicData) || !Array.isArray(publicData.fills) || !publicData.fills.every(isFill)) {
+    throw new ProjectFileError('The public data values in this project file are not in the expected shape, so it cannot be opened.');
+  }
+  return { manifest, table, mapping, details, publicData };
 }

@@ -5,7 +5,9 @@
 import type {
   AcceptDetails, Explanation, FieldCatalog, OutputFiles, RunResult, RuntimeInfo, TableInput,
 } from '../engine/protocol';
-import { readAssumptions, readCapacity, readCohort, readManifest, type CapacityEvidence } from '../results/data';
+import {
+  readAssumptions, readCapacity, readCohort, readManifest, readPublicSources, type CapacityEvidence, type PublicSource,
+} from '../results/data';
 import { projectName } from '../lib/projectName';
 import { slug, today } from '../results/format';
 
@@ -21,6 +23,8 @@ export interface ReportModel {
   manifest: ReturnType<typeof readManifest>;
   assumptions: ReturnType<typeof readAssumptions>;
   capacity: Map<string, CapacityEvidence>;
+  /** Public datasets the planner accepted values from, if any. */
+  publicSources: PublicSource[];
   /** The jurisdiction or project name shown on the cover. */
   place: string;
 }
@@ -38,6 +42,7 @@ export function buildModel(args: {
     manifest: readManifest(args.files),
     assumptions: readAssumptions(args.files),
     capacity: readCapacity(args.files),
+    publicSources: readPublicSources(args.files),
     place,
   };
 }

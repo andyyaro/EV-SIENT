@@ -205,3 +205,169 @@ def test_provenance_keeps_site_ids_as_text(tmp_path, no_reference_inputs):
         {"siteId": "107", "horizonYear": 2026, "scenario": "baseline", "column": "ports_active"})))
     assert record["row_key"]["site_id"] == "107"
     assert record["field_provenance"] is not None, "the site's own provenance, found by its text ID"
+
+
+# ---------- public data fills (DEC-025) ----------
+
+SOURCE = {
+    "hubVersion": "2026-10-18.1", "dataset": "lodes-wac-va", "title": "Census LODES 8.4, 2023 jobs",
+    "vintage": "LODES 8.4, 2023 jobs", "sourceDate": "2025-12-18", "licence": "Public domain",
+    "method": "Jobs at 2020 blocks within 1 mile.", "url": "https://lehd.ces.census.gov/data/",
+}
+
+
+def _table_without(path: Path, drop: set[str], blank: dict[str, str] | None = None) -> str:
+    """The file as a planner might have it: some columns missing, some cells left empty."""
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        rows = list(csv.reader(f))
+    keep = [i for i, c in enumerate(rows[0]) if c not in drop]
+    out = [[r[i] for i in keep] for r in rows]
+    for site, column in (blank or {}).items():
+        j = out[0].index(column)
+        for r in out[1:]:
+            if r[0] == site:
+                r[j] = ""
+    return json.dumps({"fileName": path.name, "columns": out[0], "rows": out[1:]})
+
+
+def _fill(field: str, values: dict, **source) -> str:
+    return json.dumps({"fills": [{"field": field, "values": values, "source": {**SOURCE, **source}}]})
+
+
+def _cohort_file(name: str) -> str:
+    return _strict(api.output_files())["files"][f"inputs/{name}"]
+
+
+def test_check_gives_coordinates_and_no_fills_by_default():
+    check = _session(EXAMPLE, run=False)["check"]
+    for row in check["rows"]:
+        assert isinstance(row["lat"], float) and isinstance(row["lon"], float)
+        assert row["filled"] == []
+    assert check["publicFill"]["filled"] == {}
+    assert "nearby_jobs_1mi" in check["publicFill"]["fields"]
+    assert "parking_spaces" not in check["publicFill"]["fields"]
+
+
+def test_fill_an_absent_field_is_recorded_as_derived_public_data(no_reference_inputs):
+    api.propose(_table_without(SYNTHETIC, {"nearby_jobs_1mi"}))
+    before = _strict(api.check())
+    assert "nearby_jobs_1mi" in before["absentFromFile"]
+    sites = [r["siteId"] for r in before["rows"]]
+    values = {sid: 1000.0 + 10 * i for i, sid in enumerate(sites[:-1])}  # the last site is not filled
+    after = _strict(api.fill(_fill("nearby_jobs_1mi", values)))
+    filled = {r["siteId"]: r["filled"] for r in after["rows"]}
+    assert all(filled[s] == ["nearby_jobs_1mi"] for s in values) and filled[sites[-1]] == []
+    assert after["publicFill"]["filled"] == {"nearby_jobs_1mi": len(values)}
+    assert after["publicFill"]["sources"]["nearby_jobs_1mi"]["hubVersion"] == "2026-10-18.1"
+
+    accepted = _strict(api.accept(json.dumps({"sourceDate": "2026-10-01", "sourceOrg": "Facilities"})))
+    assert accepted["publicCells"] == len(values)
+    entry = [e for e in accepted["ledger"] if e["action"].startswith("filled from public data")]
+    assert len(entry) == 1 and entry[0]["canonical_field"] == "nearby_jobs_1mi"
+    assert "Census LODES 8.4, 2023 jobs" in entry[0]["reason"] and "2026-10-18.1" in entry[0]["reason"]
+    _strict(api.run(json.dumps({"asOf": AS_OF})))
+
+    by_id = {r["site_id"]: r for r in csv.DictReader(_cohort_file("sites.csv").splitlines())}
+    for sid, v in values.items():
+        assert float(by_id[sid]["nearby_jobs_1mi"]) == v
+    assert by_id[sites[-1]]["nearby_jobs_1mi"] == "", "a site the planner did not fill stays absent"
+
+    prov = {(r["site_id"], r["field_group"]): r
+            for r in csv.DictReader(_cohort_file("provenance.csv").splitlines())}
+    filled_row = prov[(sites[0], "equity_and_context")]
+    assert filled_row["source_class"] == "derived_public_data"
+    assert filled_row["source_date"] == "2025-12-18"
+    assert filled_row["source_org"] == "EV-SIENT public data hub 2026-10-18.1: Census LODES 8.4, 2023 jobs"
+    assert "nearby_jobs_1mi" in filled_row["assumption_type"]
+    assert prov[(sites[-1], "equity_and_context")]["source_class"] == "missing"
+    # Other groups keep the planner's own source.
+    assert prov[(sites[0], "parking_and_layout")]["source_org"] == "Facilities"
+
+    cells = list(csv.DictReader(_cohort_file("public_data_fills.csv").splitlines()))
+    assert len(cells) == len(values)
+    assert {c["dataset"] for c in cells} == {"lodes-wac-va"}
+    assert {c["hub_version"] for c in cells} == {"2026-10-18.1"}
+
+
+def test_a_filled_value_scores_the_same_but_is_trusted_less(no_reference_inputs):
+    """Filling earns the value's credit, but its provenance is weaker than the planner's own."""
+    measured = _session(SYNTHETIC)["run"]
+    with open(SYNTHETIC, encoding="utf-8-sig", newline="") as f:
+        jobs = {r["site_id"]: float(r["nearby_jobs_1mi"]) for r in csv.DictReader(f)}
+    api.reset()
+    api.propose(_table_without(SYNTHETIC, {"nearby_jobs_1mi"}))
+    api.fill(_fill("nearby_jobs_1mi", jobs))
+    api.accept(json.dumps({"sourceDate": "2026-10-01"}))
+    filled = _strict(api.run(json.dumps({"asOf": AS_OF})))
+    score = lambda r: {s["siteId"]: s["score"] for s in r["sites"]}
+    conf = lambda r: {s["siteId"]: s["confidence"]["score"] for s in r["sites"]}
+    assert score(filled) == score(measured), "the same numbers must score the same"
+    assert all(conf(filled)[s] <= conf(measured)[s] for s in jobs)
+    assert any(conf(filled)[s] < conf(measured)[s] for s in jobs)
+    for site in filled["sites"]:
+        x = _strict(api.explain(site["siteId"]))
+        assert abs(sum(d["points"] for d in x["drivers"]) - x["score"]) <= 0.05 + 1e-3
+
+
+def test_fill_takes_a_blank_cell_but_never_replaces_a_value():
+    api.propose(_table_without(SYNTHETIC, set(), blank={"SYN001": "existing_l2_ports_1mi"}))
+    row = next(r for r in _strict(api.check())["rows"] if r["siteId"] == "SYN001")
+    assert row["missing"] == ["existing_l2_ports_1mi"]
+    after = _strict(api.fill(_fill("existing_l2_ports_1mi", {"SYN001": 3}, dataset="afdc-stations")))
+    row = next(r for r in after["rows"] if r["siteId"] == "SYN001")
+    assert row["missing"] == [] and row["filled"] == ["existing_l2_ports_1mi"] and row["status"] == "ready"
+    with pytest.raises(ValueError, match="already has a value for existing_l2_ports_1mi at SYN002"):
+        api.fill(_fill("existing_l2_ports_1mi", {"SYN002": 3}))
+
+
+@pytest.mark.parametrize("item, message", [
+    ({"field": "parking_spaces", "values": {"EXC-01": 10}}, "cannot be filled from public data"),
+    ({"field": "amenities_count_0_5mi", "values": {"NOPE": 1}}, "There is no site NOPE"),
+    ({"field": "amenities_count_0_5mi", "values": {"EXC-01": -1}}, "out of range"),
+    ({"field": "amenities_count_0_5mi", "values": {"EXC-01": "12"}}, "is not a number"),
+    ({"field": "amenities_count_0_5mi", "values": {"EXC-01": True}}, "is not a number"),
+    ({"field": "amenities_count_0_5mi", "values": {}}, "No values were given"),
+])
+def test_fill_refuses_in_words(item, message):
+    api.propose(_table(EXAMPLE))
+    with pytest.raises(ValueError, match=message):
+        api.fill(json.dumps({"fills": [{**item, "source": SOURCE}]}))
+
+
+def test_fill_refuses_a_share_above_one_and_an_unsourced_value():
+    api.propose(_table_without(EXAMPLE, {"Equity Index"}))
+    with pytest.raises(ValueError, match="out of range"):
+        api.fill(_fill("equity_gap_index", {"EXC-01": 1.5}))
+    with pytest.raises(ValueError, match="do not say their vintage, licence"):
+        api.fill(_fill("equity_gap_index", {"EXC-01": 0.5}, vintage="", licence=""))
+    with pytest.raises(ValueError, match="not a date"):
+        api.fill(_fill("equity_gap_index", {"EXC-01": 0.5}, sourceDate="2025"))
+    twice = json.loads(_fill("equity_gap_index", {"EXC-01": 0.5}))
+    twice["fills"] *= 2
+    with pytest.raises(ValueError, match="listed twice"):
+        api.fill(json.dumps(twice))
+
+
+def test_a_new_mapping_or_file_clears_the_fills():
+    proposal = _strict(api.propose(_table(EXAMPLE)))
+    _strict(api.fill(_fill("amenities_count_0_5mi", {"EXC-01": 4})))
+    _strict(api.remap(json.dumps({"mapping": proposal["mapping"]})))
+    assert _strict(api.check())["publicFill"]["filled"] == {}
+    _strict(api.fill(_fill("amenities_count_0_5mi", {"EXC-01": 4})))
+    _strict(api.propose(_table(EXAMPLE)))
+    assert _strict(api.check())["publicFill"]["filled"] == {}
+    # And an empty list removes them on purpose.
+    _strict(api.fill(_fill("amenities_count_0_5mi", {"EXC-01": 4})))
+    assert _strict(api.fill(json.dumps({"fills": []})))["publicFill"]["filled"] == {}
+
+
+def test_without_fills_the_cohort_is_what_intake_writes(no_reference_inputs):
+    """No fills: no public_data_fills.csv, and provenance identical to the command line's."""
+    from fcf_m2 import intake
+    _session(SYNTHETIC)
+    assert "inputs/public_data_fills.csv" not in _strict(api.output_files())["files"]
+    applied = api._applied()
+    args = dict(reviewer="r", source_org="o", source_date="2026-10-01", applied=applied)
+    plain = intake.provenance_rows(api._session.proposal, list(applied["site_id"]), **args)
+    empty = intake.provenance_rows(api._session.proposal, list(applied["site_id"]), **args, public_fills={})
+    assert plain.equals(empty)

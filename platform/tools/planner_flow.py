@@ -1,9 +1,9 @@
 """Drive the EV-SIENT Planner through its screens with Playwright, for the QA scripts.
 
 Shared by matrix.py (device matrix) and a11y_audit.py (axe-core, contrast, keyboard). It walks
-Start -> Upload (Example City sample) -> Map Columns -> Check -> Run -> Results -> Report once per
-page, then moves between the screens through the app's own history handling, so each screen can be
-shown again at any window size without running the model again.
+Start -> Upload (Example City sample) -> Map Columns -> Check -> Public Data -> Run -> Results ->
+Report once per page, then moves between the screens through the app's own history handling, so
+each screen can be shown again at any window size without running the model again.
 
 Not a test of the engine's numbers: platform/tools/parity.mjs and browser_check.py do that.
 """
@@ -13,7 +13,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-SCREENS = ["start", "upload", "map", "check", "run", "results", "compare", "report"]
+SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "compare", "report"]
 
 # The live engine boots Pyodide and runs the model; give it room on a cold, slow machine.
 BOOT_TIMEOUT_MS = 240_000
@@ -84,6 +84,10 @@ def run_flow(page, base: str, mock: bool) -> dict:
     _wait_h1(page, "Check")
     page.locator(".st-coverage").wait_for(timeout=BOOT_TIMEOUT_MS)
 
+    # Example City lacks a field public data could fill, so Check leads to Public Data. The flow
+    # does not look anything up there (the sample is outside the hub's coverage).
+    page.get_by_role("button", name="Continue to Public Data", exact=True).click()
+    _wait_h1(page, "Public Data")
     page.get_by_role("button", name="Continue to Run", exact=True).click()
     _wait_h1(page, "Run")
     t1 = time.time()
@@ -113,7 +117,7 @@ def show(page, screen: str) -> None:
         page.locator("#rs-compare-title").scroll_into_view_if_needed()
     else:
         go(page, screen)
-        _wait_h1(page, {"start": "Rank Your", "upload": "Upload", "map": "Map Columns", "check": "Check",
+        _wait_h1(page, {"start": "Rank Your", "upload": "Upload", "map": "Map Columns", "check": "Check", "fill": "Public Data",
                         "run": "Run", "results": "Results", "report": "Report"}[screen])
         page.evaluate("() => window.scrollTo(0, 0)")
     if screen == "report":

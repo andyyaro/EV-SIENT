@@ -1,5 +1,5 @@
 // The window: a floating glass sidebar of steps on wide screens, a compact step bar on narrow
-// ones, and the current step's screen. Steps 1 to 4 behave as a wizard; Results and Report are
+// ones, and the current step's screen. Steps 1 to 5 behave as a wizard; Results and Report are
 // a workspace the planner moves around in freely once a run exists.
 
 import { lazy, Suspense, useEffect, useRef } from 'react';
@@ -13,6 +13,7 @@ import { StartStep } from './steps/StartStep';
 import { UploadStep } from './steps/UploadStep';
 import { MapStep } from './steps/MapStep';
 import { CheckStep } from './steps/CheckStep';
+import { FillStep } from './steps/FillStep';
 import { RunStep } from './steps/RunStep';
 
 // Results and Report (with the report's styles and the downloads) load only once there is a run, so
@@ -23,7 +24,7 @@ const ResultsView = lazy(loadResults);
 const ReportView = lazy(loadReport);
 
 const SCREENS: Record<StepKey, React.ComponentType> = {
-  start: StartStep, upload: UploadStep, map: MapStep, check: CheckStep, run: RunStep,
+  start: StartStep, upload: UploadStep, map: MapStep, check: CheckStep, fill: FillStep, run: RunStep,
   results: ResultsView, report: ReportView,
 };
 

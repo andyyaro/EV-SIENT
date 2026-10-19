@@ -290,5 +290,18 @@
 .st-run__status:empty { display: none; }
 @media (max-width: 520px) { .st-run__button { width: 100%; } }
 
+/* ---------- Public Data ---------- */
+.st-fill-list { display: grid; gap: 16px; }
+.st-fill { display: grid; gap: 8px; }
+.st-fill__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 20px; }
+.st-fill__text { min-width: 0; flex: 1 1 260px; }
+.st-fill__source { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; padding: 2px 10px 2px 8px; border-radius: var(--radius-capsule);
+  background: var(--fill-tertiary); font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.st-fill__choice { display: flex; flex-wrap: wrap; gap: 8px; }
+.st-fill__choice .hig-button { gap: 6px; }
+.st-fill__method { max-width: 72ch; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.st-fill__value { text-align: end !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.st-fill .st-table td.st-wrap { min-width: 220px; }
+
 /* The heading takes focus on a step change; it is not a control, so no ring. */
 .page-head__title:focus { outline: none; }

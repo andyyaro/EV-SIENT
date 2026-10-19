@@ -133,6 +133,35 @@ export const readCohort = (f: OutputFiles | null) => json<Cohort>(f, 'inputs/coh
 export const readManifest = (f: OutputFiles | null) => json<Manifest>(f, 'results/contract/contract_manifest.json');
 export const readAssumptions = (f: OutputFiles | null) => json<Assumptions>(f, 'results/contract/assumptions.json');
 
+/** One public dataset the planner accepted values from (inputs/public_data_fills.csv, DEC-025). */
+export interface PublicSource {
+  title: string;
+  vintage: string;
+  sourceDate: string;
+  licence: string;
+  hubVersion: string;
+  fields: string[];
+  cells: number;
+}
+
+/** The public values in this run, grouped by the dataset they came from. Empty when there are none. */
+export function readPublicSources(files: OutputFiles | null): PublicSource[] {
+  const text = files?.files['inputs/public_data_fills.csv'];
+  if (!text) return [];
+  const out = new Map<string, PublicSource>();
+  for (const r of parseCsv(text)) {
+    const key = `${r.hub_version}\u0000${r.dataset}`;
+    let s = out.get(key);
+    if (!s) {
+      s = { title: r.title ?? '', vintage: r.vintage ?? '', sourceDate: r.source_date ?? '', licence: r.licence ?? '', hubVersion: r.hub_version ?? '', fields: [], cells: 0 };
+      out.set(key, s);
+    }
+    if (!s.fields.includes(r.field)) s.fields.push(r.field);
+    s.cells++;
+  }
+  return [...out.values()];
+}
+
 export interface CapacityEvidence {
   basis: string;
   source: string;

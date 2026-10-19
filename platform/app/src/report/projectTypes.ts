@@ -2,13 +2,15 @@
 // Written by report/projectFile.ts (Results workstream), read back by the Start screen and
 // restored by the store's restoreProject action (Steps workstream).
 
-import type { AcceptDetails, TableInput } from '../engine/protocol';
+import type { AcceptDetails, FieldFill, TableInput } from '../engine/protocol';
 
-export const PROJECT_SCHEMA = 'evsient-project/1';
+/** Written when the project uses public data; /1 otherwise, so older planners still open it. */
+export const PROJECT_SCHEMA = 'evsient-project/2';
+export const PROJECT_SCHEMA_V1 = 'evsient-project/1';
 
 /** project.json inside the zip. */
 export interface ProjectManifest {
-  schema: typeof PROJECT_SCHEMA;
+  schema: typeof PROJECT_SCHEMA | typeof PROJECT_SCHEMA_V1;
   name: string;
   savedAt: string;
   app: { version: string };
@@ -27,4 +29,6 @@ export interface ProjectSnapshot {
   table: TableInput;
   mapping: Record<string, string | null>;
   details: AcceptDetails;
+  /** inputs/public_data.json: the public values the planner accepted, with their sources (DEC-025). */
+  publicData?: { fills: FieldFill[] };
 }

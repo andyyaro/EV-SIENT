@@ -446,6 +446,14 @@ function Sources({ m }: { m: ReportModel }) {
                 <td>{g.source}{isNumber(g.value_lb_per_mwh) ? `; ${fmt.one(g.value_lb_per_mwh)} lb CO2e per MWh` : ''}</td>
               </tr>
             )}
+            {m.publicSources.map((p) => (
+              <tr key={`${p.hubVersion}-${p.title}`}>
+                <th scope="row">{p.title}</th>
+                <td>EV-SIENT public data hub, release {p.hubVersion}</td>
+                <td>{p.sourceDate}</td>
+                <td>{`${p.cells} ${p.cells === 1 ? 'value' : 'values'} the planner accepted for ${p.fields.map((f) => fieldLabel(m, f)).join(', ')}; vintage ${p.vintage}. ${p.licence}`}</td>
+              </tr>
+            ))}
             {Object.keys(m.manifest?.inputs ?? {}).filter((f) => f.startsWith('anchor_set')).map((f) => (
               <tr key={f}><th scope="row">{f}</th><td>EV-SIENT reference study</td><td>Fixed with the engine</td><td>The anchors every score is scaled against.</td></tr>
             ))}
@@ -453,7 +461,7 @@ function Sources({ m }: { m: ReportModel }) {
         </table>
       </div>
       {m.details.reviewer && <p>Reviewed by {m.details.reviewer}.</p>}
-      <p className="rp-note">Field-by-field provenance is in inputs/provenance.csv in the model outputs download.</p>
+      <p className="rp-note">Field-by-field provenance is in inputs/provenance.csv in the model outputs download.{m.publicSources.length > 0 && ' Every value filled from public data, with its source and method, is in inputs/public_data_fills.csv.'}</p>
     </section>
   );
 }

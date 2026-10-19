@@ -3,13 +3,14 @@
 //
 // cancel() ends the worker outright (Python cannot be interrupted mid-run) and the next call
 // starts a fresh one. The engine's session dies with it, so the last uploaded table and the
-// planner's mapping are replayed into the new worker before a call that needs them.
+// planner's mapping and accepted public values are replayed into the new worker before a call
+// that needs them.
 
 import * as Comlink from 'comlink';
 import type {
   AcceptDetails, AcceptResult, BootProgress, CheckResult, EngineClient, Explanation, FieldCatalog,
-  OutputFiles, Proposal, ProvenanceRecord, ProvenanceRequest, RemapRequest, RunOptions, RunResult,
-  RuntimeInfo, TableInput,
+  FillRequest, OutputFiles, Proposal, ProvenanceRecord, ProvenanceRequest, RemapRequest, RunOptions,
+  RunResult, RuntimeInfo, TableInput,
 } from './protocol';
 import { EngineError } from './protocol';
 import type { EngineWorkerApi } from './engine.worker';
@@ -27,6 +28,7 @@ export function createWorkerEngine(): EngineClient {
   let onProgress: ((p: BootProgress) => void) | undefined;
   let lastTable: string | null = null;
   let lastRemap: string | null = null;
+  let lastFill: string | null = null;
   const pending = new Set<(e: unknown) => void>();
 
   function spawn(): Live {
@@ -66,6 +68,7 @@ export function createWorkerEngine(): EngineClient {
     if (session && !current.hasSession && lastTable) {
       await guarded(() => current.api.propose(lastTable!));
       if (lastRemap) await guarded(() => current.api.remap(lastRemap!));
+      if (lastFill) await guarded(() => current.api.fill(lastFill!));
       current.hasSession = true;
     }
     return current;
@@ -84,14 +87,14 @@ export function createWorkerEngine(): EngineClient {
     },
     fields: () => call<FieldCatalog>(false, (api) => api.fields()),
     async reset() {
-      lastTable = lastRemap = null;
+      lastTable = lastRemap = lastFill = null;
       await call(false, (api) => api.reset());
     },
     async propose(table: TableInput) {
       const json = JSON.stringify(table);
       const result = await call<Proposal>(false, (api) => api.propose(json));
       lastTable = json;
-      lastRemap = null;
+      lastRemap = lastFill = null;
       if (live) live.hasSession = true;
       return result;
     },
@@ -99,9 +102,16 @@ export function createWorkerEngine(): EngineClient {
       const json = JSON.stringify(request);
       const result = await call<Proposal>(true, (api) => api.remap(json));
       lastRemap = json;
+      lastFill = null;
       return result;
     },
     check: () => call<CheckResult>(true, (api) => api.check()),
+    async fill(request: FillRequest) {
+      const json = JSON.stringify(request);
+      const result = await call<CheckResult>(true, (api) => api.fill(json));
+      lastFill = request.fills.length ? json : null;
+      return result;
+    },
     accept: (details: AcceptDetails) => call<AcceptResult>(true, (api) => api.accept(JSON.stringify(details ?? {}))),
     run: (options?: RunOptions) => call<RunResult>(true, (api) => api.run(JSON.stringify(options ?? {}))),
     explain: (siteId: string) => call<Explanation>(true, (api) => api.explain(siteId)),

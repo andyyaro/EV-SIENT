@@ -1,7 +1,35 @@
+import { createReadStream, existsSync, statSync } from 'node:fs';
+import { resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, type Connect, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { serviceWorker } from './pwa/plugin';
+
+// The public data hub a local build wrote (platform/hub/build_hub.py --out ../hub/out), served
+// at /hub/ by `npm run dev` and `npm run preview` the way the site serves it. Never bundled.
+const HUB_DIR = fileURLToPath(new URL('../hub/out/hub', import.meta.url));
+const HUB_TYPES: Record<string, string> = { '.json': 'application/json', '.parquet': 'application/vnd.apache.parquet', '.txt': 'text/plain; charset=utf-8' };
+
+function localHub(): Plugin {
+  const serve: Connect.NextHandleFunction = (req, res, next) => {
+    const path = decodeURIComponent((req.url ?? '').split('?')[0]);
+    if (!path.startsWith('/hub/')) return next();
+    const file = resolve(HUB_DIR, '.' + path.slice('/hub'.length));
+    if (!file.startsWith(HUB_DIR + sep) || !existsSync(file) || !statSync(file).isFile()) {
+      res.statusCode = 404;
+      res.end('Not in the local hub build.');
+      return;
+    }
+    const ext = file.slice(file.lastIndexOf('.'));
+    res.setHeader('Content-Type', HUB_TYPES[ext] ?? 'application/octet-stream');
+    createReadStream(file).pipe(res);
+  };
+  return {
+    name: 'evsient-local-hub',
+    configureServer(server) { server.middlewares.use(serve); },
+    configurePreviewServer(server) { server.middlewares.use(serve); },
+  };
+}
 
 // A static single-page app: no server, no runtime CDN. The Python runtime and the engine
 // archive are served from /runtime/ (see platform/tools/), never bundled.
@@ -12,7 +40,7 @@ import { serviceWorker } from './pwa/plugin';
 // `vite build --mode engine-check --outDir dist-check` builds only engine-check.html, the
 // dev-only harness platform/tools/browser_check.py drives; the production build never does.
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), typstGlueWithoutEval(), serviceWorker(fileURLToPath(new URL('./pwa/sw.js', import.meta.url)))],
+  plugins: [react(), typstGlueWithoutEval(), localHub(), serviceWorker(fileURLToPath(new URL('./pwa/sw.js', import.meta.url)))],
   base: '/',
   build: {
     target: 'es2022',

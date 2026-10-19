@@ -30,7 +30,7 @@ from playwright.sync_api import sync_playwright
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import planner_flow as pf  # noqa: E402
 
-AXE_SCREENS = ["start", "upload", "map", "check", "run", "results", "report"]
+AXE_SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "report"]
 APPEARANCES = [("light", "no-preference"), ("dark", "no-preference"), ("light", "more"), ("dark", "more")]
 TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]
 

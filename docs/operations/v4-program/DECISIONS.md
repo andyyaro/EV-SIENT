@@ -1529,3 +1529,63 @@ None moved. `as_of` defaults to today, as before.
 `tests/test_browser_api.py` (the bridge's field catalog matches `docs/INPUT_SCHEMA.md`, statuses,
 refusal without a cohort, explanations that sum to the score), `tests/test_licence_manifest.py`,
 and the CI `platform` job (runtime fetch with pinned hashes, engine archive, parity, app build).
+
+## DEC-025 - Public data can fill a planner's gaps, one accepted field at a time
+
+**Date:** 2026-10-18 · **Phase:** platform v1 · **Builds on DEC-011, DEC-016, DEC-021, DEC-024**
+
+### What was blocking
+
+Most planners' files do not carry a site's surroundings (households and jobs within a mile,
+nearby chargers, equity need). DEC-011 scores those as absent, so a planner without a GIS team
+lost credit for data the public already publishes. Filling them in the engine or on a server
+would break DEC-021 (never improve silently) or DEC-024 (the file stays on the device).
+
+### The decision
+
+1. **A separate, public-only hub.** `platform/hub/` builds versioned releases from pinned public
+   files (ACS 2020-2024 B11001, 2020 P.L. 94-171 blocks, LODES 8.4 WAC 2023, CDC/ATSDR SVI 2022,
+   TIGER 2026 state boundary) and a dated AFDC snapshot, recording each input's URL, vintage,
+   licence and SHA-256. It writes one Parquet pack per Virginia county (133 packs, 3.6 MB in
+   all), national tables, STAC metadata and `latest.json`. Every key is new per release; only
+   `latest.json` and the STAC catalogue and collections change. Nothing from `data/inputs`, the
+   contract or real provenance goes in (DEC-016).
+2. **Opt in, then accept per field.** The Public Data step fetches nothing until the planner
+   asks. The app then fetches only the county packs around their sites from its own origin,
+   checks each against the release's SHA-256, and works out each value in the browser. Every
+   proposed value is shown with its source, vintage and method; a site without one gets a
+   reason (outside Virginia, within the radius of the state line, no coordinates), never a 0.
+3. **Recorded as public data, never as the planner's.** `browser_api.fill` takes the accepted
+   values with their sources and refuses any cell the file already has. On `accept` each value
+   gets a ledger entry, `derived_public_data` provenance at its site (scored 55, below the
+   planner's own sources) with the release's source date, and a row in
+   `public_data_fills.csv`. With no fills the cohort is byte-for-byte what it was. The bridge
+   protocol is now 2.
+4. **v1 fills five fields.** `nearby_households_1mi` (ACS shared to blocks by 2020 occupied
+   homes), `nearby_jobs_1mi` (LODES), `equity_gap_index` (SVI national rank, household-weighted;
+   labelled a proxy), `existing_l2_ports_1mi` and `existing_dcfc_ports_3mi` (AFDC open, public
+   stations, including those within 3.5 miles across the line).
+5. **Plain Parquet the browser can read.** Snappy compression, int32 counts and point columns
+   (`lat`, `lon`), so hyparquet 1.31.2 reads them with no codec add-on and no BigInt. Not
+   GeoParquet and not ZSTD, which the build plan named; neither is needed for points.
+
+### What it does not do
+
+- **Three fields are not in the hub yet.** `aadt_nearest` (no downloadable HPMS 2024 or VDOT
+  2025 file; VDOT's live layer ends in 2022), `amenities_count_0_5mi` (no Virginia Overture
+  extract or agreed category list) and `ev_share_local` (the ODbL pack is not built). The app
+  names each gap and why.
+- **Virginia only.** Sites elsewhere are told so and keep their gaps.
+- **No new scoring.** A filled value scores exactly as the same value typed in the file; only
+  data confidence differs.
+
+### Published numbers
+
+None moved. The reference study does not use the hub.
+
+### Gates
+
+`tests/test_hub_builder.py` (publisher layouts, pins, immutable keys, the five release gates:
+schema, row-count change of more than 20%, coordinates, licence text, size), the DEC-025 cases
+in `tests/test_browser_api.py` (provenance, ledger, refusals, an unchanged cohort without
+fills), and parity (unchanged).
