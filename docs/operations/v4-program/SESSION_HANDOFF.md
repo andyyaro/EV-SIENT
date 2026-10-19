@@ -3,6 +3,16 @@
 For whoever picks this up next, human or assistant, with none of the conversation that produced
 it. Everything here was checked at the moment of writing, not remembered.
 
+> **Updated 2026-10-18: the Cognito-gated `/platform*` path is retired (DEC-030).** The owner
+> decided that the planner at https://app.futurecity.andyyaro.com, which carries synthetic samples
+> only, replaces it, so nothing on `futurecityfellowship.andyyaro.com` needs a sign-in. The
+> `/platform*` behaviour, the `platform-gated` origin and two Cognito app clients were removed
+> live that day; the bucket, OAC, headers policy, Lambda@Edge function, its role and its log
+> groups are removed by hand after that (DEC-030 lists them). The repository can no longer
+> rebuild the gate: `infra/edge-auth/` is gone, and `scripts/deploy_platform.py` publishes the
+> public site only and refuses a gate or platform mode. Rows in section 3a about the gate, the
+> allowlist and Lambda v8 describe 2026-08-04 and are no longer true.
+
 ---
 
 ## 1. Bottom line
@@ -70,23 +80,26 @@ Asked of AWS directly, not inferred from the deploy script:
 | Cognito pool members | **3 confirmed** - so a third, non-granted member can sign in to the shared pool and **cannot** reach `/platform/*` |
 | Spend, 30 days | **$0.50** against a $10/month ceiling |
 
+*2026-10-18 (DEC-030): the platform bucket, the `/platform*` behaviour and the gate allowlist in
+the table above are retired. `verify_deployment.py` now asserts the opposite of the gate: 14
+former platform paths return 404 with no redirect to Cognito, and the 12 NFC pages and 6 public
+pages still load. **32 passed, 0 failed** on 2026-10-18.*
+
 **This program's incremental AWS cost is effectively zero.** The two largest lines - Secrets
 Manager and Amplify - were created 2026-06-29 and 2026-07-07, before this program began on
 2026-07-27. Neither is ours. (Running the Cost Explorer query itself cost $0.04 of that $0.50.)
 
-A shared user pool is **not** shared access: the authoriser holds an explicit two-entry
-allowlist, so pool membership alone opens nothing.
+The user pool is shared and stays after DEC-030, with the embedded assistant client
+`future-city-assistant-embedded-client`. Nothing on this distribution consults it any more.
 
-**The live platform is 4 files behind the repo, and it does not matter.** `site/platform/`'s
-`app.js`, `index.html`, `styles.css` and `surfaces.json` changed in `27a6bdb` after the last
-deploy (2026-07-28). Checked, not assumed: those changes only affect surfaces that are **absent
-from an installation**, and the live deployment is built from the full repository where every
-surface is present - `surfaces.json` in this tree marks **none** absent. So nothing on the live
-site is currently wrong. Redeploying is tidying, not a fix:
+~~**The live platform is 4 files behind the repo, and it does not matter.**~~ Moot since
+2026-10-18: there is no live platform bundle on this distribution to be behind (DEC-030).
+`site/platform/` still builds the desktop installer's bundle. To publish the public site:
 
 ```bash
-python scripts/deploy_platform.py            # dry run, read-only, says what it WOULD do
-python scripts/deploy_platform.py --apply     # then verify with scripts/verify_deployment.py
+python scripts/deploy_platform.py            # dry run, read only, says what it WOULD do
+python scripts/deploy_platform.py --apply    # public pages, NFC pages, error page; nothing else
+python scripts/verify_deployment.py          # /platform serves nothing; NFC and public pages load
 ```
 
 ---

@@ -1641,3 +1641,71 @@ the owner's 360-site file run end to end in the browser under the production CSP
 found an older fault: the Excel download never finished for a workbook of 160 kB or more,
 because the zip library compresses large parts in a `blob:` Worker that `worker-src 'self'`
 blocks. `vite.config.ts` now makes write-excel-file zip synchronously; the CSP is unchanged.
+
+## DEC-030 - The Cognito-gated `/platform*` path is retired; the planner needs no sign-in
+
+**Date:** 2026-10-18 · **Decided by:** the project owner · **Supersedes:** DEC-017 · **Builds
+on:** DEC-016, DEC-024
+
+### The decision
+
+Retire the Cognito-gated `/platform*` path on `futurecityfellowship.andyyaro.com`. The planner
+at https://app.futurecity.andyyaro.com replaces it. It carries synthetic samples only and keeps
+a planner's own file on their device (DEC-024), so there is nothing behind it to gate, and the
+platform v1 plan has no accounts.
+
+### Why the gate existed, and why that reason is gone
+
+DEC-017 put the web platform behind an edge sign-in because its bundle carried the real study:
+`provenance_v1.json` and `contract/v1/site_table.csv` hold the twelve real facilities, which
+DEC-016 keeps private. The new planner never carries them, so the reason for a gate does not
+apply to it, and keeping the old gated copy alive would only keep that private data on a
+public distribution behind a login.
+
+### What was retired
+
+Removed live on 2026-10-18, before this entry:
+
+- the `/platform*` cache behaviour and the `platform-gated` origin on distribution
+  `E1XZPHWHZV0OEO`; the default behaviour, which serves the public site and the NFC pages, was
+  not changed;
+- the Cognito app clients `future-city-platform-edge` and `future-city-assistant-web`, with
+  their managed-login branding.
+
+Removed by hand after this entry, in order: the bucket `future-city-fellowship-platform` (backed
+up locally first; the backup is kept outside the repository), the origin access control
+`E1JND6HMX02LBD`, the response headers policy `fcf-platform-security`, the Lambda@Edge function
+`fcf-platform-edge-auth` once its edge replicas drain, the IAM role
+`fcf-platform-edge-auth-role`, and the edge-auth log groups.
+
+In the repository: `infra/edge-auth/index.mjs`, `infra/edge-auth/granted.mjs.example` and
+`tests/edge_auth/` are removed, with the `verify.sh` gate that ran them.
+`scripts/deploy_platform.py` publishes the public site only (what `--www-only` did), never sends
+a distribution config, and refuses `--platform`, `--gate`, `--full`, `--with-gate` and
+`--platform-only` with exit code 2. It no longer needs the allowlist file, and `deploy.yml` no
+longer writes it from a secret. `scripts/verify_deployment.py` now asserts that 14 former
+platform paths return 404 with no redirect to Cognito, alongside the 12 NFC pages and 6 public
+pages; it passed 32 of 32 against the live site on 2026-10-18. Open actions 16 and 18 are
+closed as moot.
+
+### What stays, and why
+
+- **The Cognito user pool `us-east-1_mKrwfQTkg`.** It is shared and predates this program.
+- **The embedded assistant client `future-city-assistant-embedded-client`.** It belongs to the
+  assistant, not to the gate.
+- **`infra/edge-auth/granted.mjs` in `.gitignore`.** A copy may still sit on a maintainer's
+  disk; it holds login identities and must never be committed.
+- **`site/platform/`.** It still builds the desktop installer's bundle (DEC-015, DEC-016); only
+  its hosted, gated copy is retired.
+- **The history.** DEC-017 and the ledger rows that describe the gate stay as written. The
+  allowlist's identities also remain in git history until the repository is cleaned before it
+  is made public (open action 14).
+
+### Rejected
+
+- **Keep the gate as a fallback.** It would keep the real study on a public distribution behind
+  a login, and keep a Lambda@Edge function, a bucket and two app clients to maintain, for a path
+  nobody is sent to.
+- **Leave the deploy script's gate mode in place but unused.** A full `--apply` rebuilt the
+  behaviour, the origin, the Lambda association and the bucket. Left in, the next person to run
+  the documented command would have recreated the gate.

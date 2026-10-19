@@ -165,7 +165,7 @@ never against real site data; see
 | [`scripts/`](scripts/README.md) | Verification harness and artifact builders |
 | `site/` | The deployed surfaces: the public website (`site/www/`) and the platform bundle (`site/platform/`) |
 | `explorer/` | The 3D site explorer - Cesium viewer, 12 building models, its own ETL |
-| `infra/` | The Lambda@Edge authoriser that gates `/platform/` behind Cognito sign-in |
+| `infra/` | The public assistant's Lambda source (`infra/assistant/`), deployed by `scripts/deploy_assistant.py` |
 
 ## Key documents
 
@@ -184,7 +184,7 @@ baseline reproduction, contract rule/schema/hash-chain validation, cross-model r
 against the MATLAB input, generated-docs drift, footer QA on every dashboard visual, secret and
 local-path scans, size limits, Markdown link checks, the 3D explorer and its CDN pins, the
 Tableau workbook and embed forms, the platform's two tiers and their provenance, field-entry
-parity in a real browser, the Cognito edge gate, supply-chain digests, packaging constraints,
+parity in a real browser, supply-chain digests, packaging constraints,
 intake degradation, and a clone-safety check that catches files present here but missing from a
 fresh clone. It exits with the number of failures, so a red run is visible in the exit code, not
 just in the log.
@@ -218,8 +218,9 @@ disconnect-placement, access, and code-edition determinations rest with the loca
 Milestone 2 package complete (July 2026); presentation 2026-07-21.
 
 Since then the project has become a running system rather than a document set: the model is
-served through a **platform** with two capability tiers, deployed at
-`futurecityfellowship.andyyaro.com` with `/platform/` behind Cognito sign-in; a **3D explorer**
+served through a **platform** with two capability tiers (the planner at
+`app.futurecity.andyyaro.com` carries synthetic samples only and needs no sign-in; the old
+Cognito-gated `/platform/` path was retired on 2026-10-18, DEC-030); a **3D explorer**
 and a **static dashboard** read the same contract; an **NFC field layer** is built and walked
 end to end on real hardware, so that someone standing in a car park could send a correction back
 into the model - **no tag has been placed at any site, and no permission to place one has been

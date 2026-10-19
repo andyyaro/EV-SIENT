@@ -11,15 +11,20 @@ an estimate it says so.
 ## 1. What is live
 
 One CloudFront distribution, `E1XZPHWHZV0OEO`, on the alias
-**`futurecityfellowship.andyyaro.com`**, serving two different things with two different
-access rules.
+**`futurecityfellowship.andyyaro.com`**, serving one thing with one access rule.
 
 | Path | Origin | Who can reach it |
 |---|---|---|
-| `/platform*` | `future-city-fellowship-platform` (private, OAC) | **Cognito sign-in required** |
-| everything else | `future-city-fellowship` (private, OAC) | **anyone, no account** |
+| everything | `future-city-fellowship` (private, OAC) | **anyone, no account** |
 
-The second row is the one to be careful about. `/t/FFX001` … `/t/PWC008` are the **NFC landing
+Until 2026-10-18 a second row sent `/platform*` to a separate private bucket behind a Cognito
+sign-in enforced by Lambda@Edge. **The owner retired that path on 2026-10-18 (DEC-030).** The
+planner now lives at **https://app.futurecity.andyyaro.com**, carries synthetic samples only, and
+needs no sign-in, so nothing on this distribution is gated. `/platform/...` now falls through to
+the main bucket, which holds nothing under `platform/`, and returns 404
+(`scripts/verify_deployment.py` checks 14 spellings).
+
+Be careful with the default behaviour. `/t/FFX001` … `/t/PWC008` are the **NFC landing
 pages** - the twelve pages a reader would reach by tapping a physical coin in a car park, with
 no app and no account. **All twelve pages are live and public; no physical tag has been placed
 at any site, and no placement permission has been sought** (`docs/nfc/README.md`,
@@ -27,44 +32,37 @@ at any site, and no placement permission has been sought** (`docs/nfc/README.md`
 **Any change that gates the default cache behaviour breaks all twelve pages** - and once tags
 are placed they are not something that can be un-deployed from a car park.
 
-### Why the platform has its own bucket
-
-Not tidiness - it is the whole access-control argument.
-
-A cache behaviour is chosen by matching the request path against `/platform*`. CloudFront also
-normalises percent-encoding: **measured on this distribution**, `/%61ssistant.html` returns the
-same 70 378 bytes as `/assistant.html`. If pattern matching happens *before* normalisation,
-`/%70latform/index.html` would miss the gated behaviour and be served with no authentication.
-
-Rather than depend on the order of two internal CloudFront steps, the platform bundle lives in
-a bucket the default behaviour's origin cannot see. A request that evades the path pattern
-lands on the main bucket, which holds **zero** objects under `platform/`, and gets a 404. The
-guarantee is structural rather than behavioural.
-
 ---
 
 ## 2. Resources created, and how to remove each
 
-Everything below is reversible. Nothing was created that another project depends on.
+Everything the gated platform needed was created for it alone, and DEC-030 retires all of it.
+Nothing below was shared with another project except the Cognito user pool, which stays.
 
-| Resource | Identifier | Rollback |
+| Resource | Identifier | State after DEC-030 |
 |---|---|---|
-| S3 bucket (gated bundle) | `future-city-fellowship-platform` | `aws s3 rb --force`. Nothing else references it once the cache behaviour is gone. |
-| Origin access control | `E1JND6HMX02LBD` | Delete after the origin is removed. |
-| CloudFront origin | `platform-gated` | Remove from `Origins`, re-send config. |
-| CloudFront cache behaviour | `/platform*` | Set `CacheBehaviors.Quantity` to 0. **This alone fully un-gates and un-deploys the platform**, leaving the public site untouched. |
-| Lambda@Edge function | `fcf-platform-edge-auth` (versions 1–5) | Detach from the behaviour first; Lambda@Edge replicas take hours to drain before the function can be deleted. This is normal, not a fault. |
-| IAM role | `fcf-platform-edge-auth-role` | Delete after the function. |
-| Cognito app client | `future-city-platform-edge` | Delete. The **user pool is pre-existing and shared** - do not delete it. |
-| Cognito managed-login branding | per-client record | Deleting it removes the client's sign-in page entirely (see §5). |
+| CloudFront cache behaviour | `/platform*` | **Removed 2026-10-18.** The default behaviour was not changed |
+| CloudFront origin | `platform-gated` | **Removed 2026-10-18** |
+| Cognito app client | `future-city-platform-edge` | **Deleted 2026-10-18**, with its managed-login branding |
+| Cognito app client | `future-city-assistant-web` | **Deleted 2026-10-18**, with its managed-login branding |
+| S3 bucket (gated bundle) | `future-city-fellowship-platform` | To be removed by hand, after a local backup |
+| Origin access control | `E1JND6HMX02LBD` | To be removed by hand; the origin that used it is already gone |
+| Response headers policy | `fcf-platform-security` | To be removed by hand; nothing references it once the behaviour is gone |
+| Lambda@Edge function | `fcf-platform-edge-auth` | To be removed by hand once its edge replicas drain, which takes hours after the association is removed. This is normal, not a fault |
+| IAM role | `fcf-platform-edge-auth-role` | To be removed by hand, after the function |
+| Log groups | the edge-auth groups in us-east-1 and eu-central-1 | To be removed by hand, after the function |
+| Cognito user pool | `us-east-1_mKrwfQTkg` | **Stays.** Pre-existing and shared; the embedded assistant client `future-city-assistant-embedded-client` stays with it |
 
-**The fastest full rollback** - platform gone, public site and NFC layer untouched - is to set
-`CacheBehaviors.Quantity` to `0` and re-send the distribution config. Everything else can be
-cleaned up afterwards at leisure.
+`scripts/deploy_platform.py` can no longer recreate any of these: it publishes the public site
+alone, never sends a distribution config, and refuses a gate or platform mode (section 4).
 
 `docs/operations/v4-program/cloudfront-config-before-platform.json` holds the distribution
-configuration as it was before each change (account id redacted), rewritten on every run of the
-deploy script.
+configuration as it was before the gate was added (account id redacted). It is a historical
+record now, not a rollback target: the default behaviour has gained a response headers policy
+since (section 10), which restoring from it would drop.
+`docs/operations/v4-program/cloudfront-config-observed.json` is the config as last observed by
+the old deploy script, on 2026-10-17, **with the gate still attached**; nothing writes it any
+more.
 
 ---
 
@@ -78,12 +76,12 @@ Incremental cost of everything this program added, at on-demand rates, no Free T
 
 | Item | Measured quantity | Monthly |
 |---|---|---|
-| S3 storage, gated bundle | 468 objects, 25.74 MB | $0.00059 |
 | S3 storage, public site | 37 objects, 1.89 MB (**was 8.1 MB**) | $0.00004 |
-| Lambda@Edge | 128 MB, ~50 ms, low hundreds of requests | < $0.001 |
-| Cognito | 2 granted users | **$0.00** (free below 50 000 MAU) |
 | CloudFront | existing distribution, marginal requests | negligible |
 | **Total incremental** | | **< $0.01 / month** |
+
+Until DEC-030 (2026-10-18) the list also carried the gated bundle (468 objects, 25.74 MB,
+$0.00059), Lambda@Edge (< $0.001) and two Cognito users ($0.00). All three go with the gate.
 
 Against a **$10/month** ceiling. Even a conservative upper bound assuming a thousand-fold
 traffic increase stays under $1.
@@ -92,8 +90,9 @@ The public site got **cheaper**: six identical copies of one background image (6
 8.1 MB) were replaced by a single file, so it is now 1.89 MB. That is a ~77% reduction in bytes
 served on the page that used them.
 
-**No always-on compute, no database, no load balancer, no NAT gateway.** The one piece of
-compute is Lambda@Edge, which scales to zero and bills per request.
+**No always-on compute, no database, no load balancer, no NAT gateway.** On this distribution
+there is no compute at all now that the Lambda@Edge gate is retired; the assistant's Lambda
+(section 9) scales to zero and bills per request.
 
 ---
 
@@ -103,55 +102,57 @@ compute is Lambda@Edge, which scales to zero and bills per request.
 aws sso login --profile future-city          # the token expires; this is the usual blocker
 python scripts/deploy_platform.py            # DRY RUN - prints its plan, changes nothing
 python scripts/deploy_platform.py --apply
-python scripts/verify_deployment.py          # 33 live assertions, both halves
+python scripts/verify_deployment.py          # 32 live assertions, both halves
 python scripts/check_live_vs_main.py         # every published file byte-identical to main
 ```
 
 The script is dry-run by default. It is idempotent - re-running with no changes republishes
 identical bytes and reports `0 object(s) written`.
 
-### Publishing the public half alone
+### What it publishes, and what it no longer does
 
-`--www-only` publishes `site/www`, the NFC landing pages (`site/nfc-landing` to `/t/`), the
-capture forms (`site/nfc-capture` to `/f/`) and the error page, and nothing else: no Lambda
-version, no platform bundle, no distribution change. Pages go up with `Cache-Control: no-cache`,
-as the live copies have carried since 2026-10-15; the field pages, which have no file extension,
-go up as `text/html;charset=utf-8` with the five-minute cache they were first uploaded with.
-Nothing is ever deleted.
+It publishes `site/www`, the NFC landing pages (`site/nfc-landing` to `/t/`), the capture forms
+(`site/nfc-capture` to `/f/`) and the error page, and nothing else. Pages go up with
+`Cache-Control: no-cache`, as the live copies have carried since 2026-10-15; the field pages,
+which have no file extension, go up as `text/html;charset=utf-8` with the five-minute cache they
+were first uploaded with. Nothing is ever deleted.
 
-Both modes write `deployed.json` at the site root, naming the commit, and both refuse to run
-while any file under those folders differs from HEAD, so the marker cannot name a commit that is
-not what went live. `check_live_vs_main.py` then fetches every published file and compares it
-byte for byte with `origin/main` (audit F-14: production had matched no commit, and nothing
-compared the two). It accepts a marker naming an older commit only when no published file
-changed between that commit and `main`.
+Since DEC-030 (2026-10-18) that is all it does. It builds no bucket, origin, cache behaviour,
+Lambda version or Cognito branding, and needs no allowlist file. It never sends a distribution
+config; it reads the live one and reports anything the retired gate left behind. `--platform`,
+`--gate`, `--full`, `--with-gate` and `--platform-only` are refused with exit code 2 and a
+message naming DEC-030 and the planner's address. `--www-only`, which used to select this mode,
+is still accepted and changes nothing.
 
-### Before a full deploy: the vendored CesiumJS
+It writes `deployed.json` at the site root, naming the commit, and refuses to run while any file
+under those folders differs from HEAD, so the marker cannot name a commit that is not what went
+live. `check_live_vs_main.py` then fetches every published file and compares it byte for byte
+with `origin/main` (audit F-14: production had matched no commit, and nothing compared the two).
+It accepts a marker naming an older commit only when no published file changed between that
+commit and `main`.
 
-`scripts/vendor_cesium.sh` fetches CesiumJS into a gitignored folder, so a checkout that never
-ran it builds a platform bundle without it, and the bundle's `--delete` sync would then remove the
-377 files the live explorer loads (measured 2026-10-17 from such a checkout). The script now
-refuses that before changing anything. Run `scripts/vendor_cesium.sh` and
-`scripts/build_platform_web.py` first, or use `--www-only` when only the public half changed.
+### Nothing the checkout lacks can be deleted from the live site
+
+On 2026-10-17 a full deploy from a checkout that never ran `scripts/vendor_cesium.sh` would have
+had the gated bundle's `--delete` sync remove the 377 CesiumJS files the live explorer loaded.
+That sync went with the gate. No sync in the script passes `--delete`, a test holds that, and if
+a sync ever reports a deletion anyway the deploy stops.
 
 ### The guard that matters
 
 `update-distribution` is a **whole-config replace**; there is no partial update. A script that
-builds the config slightly wrong does not fail, it *successfully deploys a broken site*. So
-`assert_safe_change` refuses to send a config in which the default cache behaviour, the
-existing origin, the aliases or the certificate differ by so much as a key - and refuses if the
-gated behaviour stops pointing at the isolated bucket.
-
-It has already earned that: it caught a redeploy that would have modified the platform origin
-in place, and was itself then corrected for crying wolf on unchanged configs. A check that
-fails every time is a check people learn to skip.
+builds the config slightly wrong does not fail, it *successfully deploys a broken site*. The old
+script guarded that with `assert_safe_change`. The public-site deploy does not call
+`update-distribution` at all, so a deploy cannot change the default cache behaviour, the
+aliases or the certificate. A change to the distribution is a deliberate act by a person, made
+with its ETag, and checked afterwards with `scripts/verify_deployment.py`.
 
 ### Deploying from CI
 
 Deliberately **not enabled**. `.github/workflows/deploy.yml` validates the deploy plan with no
 credentials at all - rebuilding every generated artifact from a clean checkout, checking the
-website's caveats and embeds, resolving surface links the way S3 resolves them, and exercising
-the deploy guards against configs that would gate the NFC layer or drop the alias.
+website's caveats and embeds, resolving surface links the way S3 resolves them, and checking
+that the deploy refuses the retired gate modes and reports a gate left on the distribution.
 
 The credentialed job runs only on manual dispatch and only if `AWS_DEPLOY_ROLE_ARN` is set. It
 is unset, because configuring it grants **anyone who can dispatch that workflow the ability to
@@ -160,11 +161,10 @@ owner to grant. Long-lived access keys are not an option - the standing rules fo
 they would be worse.
 
 To enable it: create a GitHub OIDC provider in IAM, a role trusting
-`repo:andyyaro/Future-City-Fellowship-:*` scoped to the two buckets plus
-`cloudfront:CreateInvalidation` and `cloudfront:UpdateDistribution` on this distribution only,
-and set the secret. No OIDC provider exists in the account today. Also set
-`PLATFORM_GRANTED_MJS` to the whole text of `infra/edge-auth/granted.mjs`: that file is not
-tracked (section 10), and without it the deploy refuses to package the gate.
+`repo:andyyaro/Future-City-Fellowship-:*` scoped to the main bucket plus
+`cloudfront:CreateInvalidation` and `cloudfront:GetDistributionConfig` on this distribution
+only, and set the secret. No OIDC provider exists in the account today. The deploy no longer
+needs `cloudfront:UpdateDistribution` or any allowlist secret (DEC-030).
 
 ---
 
@@ -172,9 +172,9 @@ tracked (section 10), and without it the deploy refuses to package the gate.
 
 | Risk | Status |
 |---|---|
-| A config change breaks the NFC tags | Guarded by `assert_safe_change`; verified after every deploy by 12 live tag checks |
-| A path spelling evades the gate | Structurally impossible - the main bucket has no platform content. 6 spellings tested |
-| The gate redirects to a sign-in page that does not exist | **Happened.** See below |
+| A config change breaks the NFC tags | The deploy sends no distribution config at all; verified after every deploy by 12 live tag checks |
+| The retired `/platform` path serves something | The main bucket has no platform content; 14 spellings tested to return 404 |
+| The gate redirects to a sign-in page that does not exist | **Happened** (before DEC-030). See below |
 | The website embeds a deleted Tableau workbook | **Happened.** See DEC-019 |
 | Cost overrun | Measured monthly; account total is under $0.40 |
 
@@ -182,8 +182,8 @@ tracked (section 10), and without it the deploy refuses to package the gate.
 had no page to serve: this pool runs **Managed Login v2**, where every app client needs its own
 branding record, and a client without one gets *"Login pages unavailable."* All 32 assertions
 passed while the feature was unusable, because they asserted *the gate redirects* - a strictly
-weaker claim than *a person can sign in*. The verifier now follows the redirect and asserts a
-real password field renders.
+weaker claim than *a person can sign in*. The verifier then followed the redirect and asserted a
+real password field rendered, until the gate was retired (DEC-030).
 
 **The deleted workbook.** The original Tableau workbook was audited, found wrong, republished
 under a new name, and deleted - and nothing re-pointed the website, so 21 embeds across two
@@ -195,20 +195,17 @@ for live and deleted views alike**, and both redirect chains end in a 200 carryi
 
 ## 6. What is verified, and what is not
 
-**Verified against the live site** (`python scripts/verify_deployment.py`, 33 assertions):
-8 gated assets return 302 to Cognito with zero bytes served · 6 alternative path spellings fail
-to evade · the Cognito sign-in page renders a real password field · all 12 NFC tag pages return
-200 · 6 pre-existing pages unchanged · direct S3 access returns 403 · the main bucket holds 0
-objects under `platform/`.
+**Verified against the live site** (`python scripts/verify_deployment.py`, 32 assertions,
+**32 passed on 2026-10-18** after the gate was removed): 8 former platform assets and 6
+alternative spellings of them return 404, with no redirect to Cognito · all 12 NFC tag pages
+return 200 · 6 pre-existing pages unchanged.
 
-**Verified by a human:** the gate opens, and the platform renders behind it (owner sign-in,
-2026-07-27).
+**Not verified by that script:** that the AWS resources behind the retired gate are gone. It
+sees only what a visitor sees; section 2 lists them and their state.
 
-**Not verified:** every surface *inside* the platform. "It renders" establishes that
-`index.html` and its assets are served through the gate. It does not establish that the
-provenance panel resolves, that the explorer and dashboard sub-surfaces load, or that tier
-detection reports the web tier correctly. Those are separate claims and no one has exercised
-them.
+Until 2026-10-18 this section described the gate: 8 gated assets redirected to Cognito, the
+sign-in page rendered a real password field, and the owner signed in on 2026-07-27. That history
+is in `docs/operations/v4-program/LEDGER.md`.
 
 ---
 
@@ -382,47 +379,44 @@ later, sent all of them.
 | Behaviour | Policy | Headers |
 |---|---|---|
 | Default (public site, NFC pages) | `fcf-production-security` (`480181a4-…`) | HSTS 1 year, `nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection` |
-| `/platform*` | `fcf-platform-security` (`ab666a54-…`) | The same set |
+| ~~`/platform*`~~ | ~~`fcf-platform-security` (`ab666a54-…`)~~ | Behaviour removed 2026-10-18 (DEC-030); the policy is to be deleted by hand |
 
 HSTS deliberately has no `includeSubDomains` and no `preload`: the `andyyaro.com` zone is shared
 with other projects. There is **no Content-Security-Policy** yet; one needs an inventory of every
 inline script and CDN the pages load, and a wrong one breaks pages silently.
 
-`scripts/deploy_platform.py` rebuilds the `/platform*` behaviour on every run, so it names
-`PLATFORM_HEADERS_POLICY` itself; a policy attached only in the console would be dropped by the
-next deploy. The default behaviour is copied from the live config, so its policy survives.
+`scripts/deploy_platform.py` never sends a distribution config, so it cannot drop the default
+behaviour's policy.
 
-Verified on `/`, on the NFC page `/t/FFX001` and on the `/platform/` sign-in redirect.
+Verified on `/` and on the NFC page `/t/FFX001` (and, until DEC-030, on the `/platform/` sign-in
+redirect).
 
 **Rollback:** remove `ResponseHeadersPolicyId` from the behaviour and re-send the whole config
-with its ETag, then delete the policy. For `/platform*`, also remove it from `build_behaviour`.
+with its ETag, then delete the policy.
 
 ### Accounts, logs, storage
 
 | Piece | Before | After | Rollback |
 |---|---|---|---|
 | Cognito pool `us-east-1_mKrwfQTkg` MFA | `OFF` | `ON`, authenticator app (TOTP). Each user enrolls at their next sign-in | `set-user-pool-mfa-config --mfa-configuration OFF` |
-| Log retention | Never expire | 30 days: `/aws/lambda/future-city-assistant-chat`, and the edge-auth groups in us-east-1 and eu-central-1 | `delete-retention-policy` |
-| `future-city-fellowship-platform` versioning | Off | `Enabled`, like the main bucket | Can be suspended, never removed |
+| Log retention | Never expire | 30 days: `/aws/lambda/future-city-assistant-chat`, and the edge-auth groups in us-east-1 and eu-central-1 (those two go with the gate, DEC-030) | `delete-retention-policy` |
+| `future-city-fellowship-platform` versioning | Off | `Enabled`, like the main bucket. The bucket goes with the gate (DEC-030) | Can be suspended, never removed |
 
 **Lambda@Edge writes its logs in the region of the edge location that served the request**, and
 creates that region's log group on first use with no retention. Only us-east-1 and eu-central-1
-exist today. Re-check with `aws logs describe-log-groups --region <r>` after traffic from
-elsewhere.
+existed on 2026-10-17. When the function is deleted (DEC-030), check every region once with
+`aws logs describe-log-groups --region <r>` and delete any edge-auth group left behind.
 
-### Who may enter `/platform` is no longer in the repository
+### The `/platform` allowlist is out of the repository, and so is the gate
 
 The edge gate's allowlist (two people's Cognito ids and login emails) was inline in
-`infra/edge-auth/index.mjs`, so every clone carried it. It now lives in
-`infra/edge-auth/granted.mjs`, which is gitignored; `granted.mjs.example` shows the shape, and
-`deploy_platform.py` packages the file beside `index.mjs` and refuses to deploy without a
-well-formed one. A checkout without it cannot load the gate at all, which fails closed. The
-tests write placeholder identities instead (`tests/edge_auth/`).
-
-The deployed function (version 8) still carries the list inline. It behaves identically and is
-replaced by the next `deploy_platform.py --apply`. **The identities remain in git history**;
-removing them from history is a rewrite of every clone and was not done without the owner's
-decision.
+`infra/edge-auth/index.mjs` until 2026-10-17, then moved to a gitignored `granted.mjs`. On
+2026-10-18 the gate itself was retired (DEC-030): `infra/edge-auth/index.mjs`, its example
+allowlist and its tests were removed from the repository, and the deploy no longer needs the
+allowlist file. `infra/edge-auth/granted.mjs` stays in `.gitignore`, so a copy left on a
+maintainer's disk can never be committed. **The identities remain in the repository's
+history**; removing them from history is a rewrite of every clone and is part of cleaning the
+repository before it is made public (`docs/operations/open-human-actions.md`, row 14).
 
 **Not enabled, on purpose: CloudFront access logs.** They would record every visitor's IP
 address and path, and `privacy.html` promises short-lived technical logs only.
