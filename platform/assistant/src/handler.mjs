@@ -9,6 +9,7 @@
 import { createAssistant } from './core.mjs';
 import { configFromEnv } from './config.mjs';
 import { createLedger } from './ledger.mjs';
+import { readRetentionMode } from './retention.mjs';
 import { dynamoStore } from './store.mjs';
 
 /** Bedrock's streaming Messages call, yielding the Anthropic stream events one by one. */
@@ -39,8 +40,10 @@ async function assistant() {
       const config = configFromEnv();
       const region = process.env.AWS_REGION;
       const store = await dynamoStore(process.env.TABLE_NAME, region);
-      const ledger = createLedger(store, { monthMicros: config.monthMicros, dayMicros: config.dayMicros, deeperMonthMicros: config.deeperMonthMicros });
-      return createAssistant(config, { store, ledger, model: await bedrockModel(region) });
+      const ledger = createLedger(store, { monthMicros: config.monthMicros, dayMicros: config.dayMicros, deeperMonthMicros: config.deeperMonthMicros, visitorDayMicros: config.visitorDayMicros });
+      const a = createAssistant(config, { store, ledger, model: await bedrockModel(region), retention: () => readRetentionMode(region) });
+      await a.warm();
+      return a;
     })().catch((e) => { ready = null; throw e; });
   }
   return ready;

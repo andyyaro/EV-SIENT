@@ -114,6 +114,31 @@ export function renderAnswer(answer: string, data: unknown, allowed: number[]): 
 const CAUSAL = /\b(caus(?:e|es|ed|ing)|leads? to|led to|results? in|resulted in|drives)\b/gi;
 const NEGATION = /\b(not|never|nothing|none|neither|cannot|can't|cant|no|isn't|aren't|doesn't|don't|didn't|without|nor)\b/i;
 
+/** At most `n` characters counted as the server counts them (code points), never half of one. */
+export function clipChars(text: string, n: number): string {
+  const chars = [...text];
+  return chars.length <= n ? text : chars.slice(0, n).join('');
+}
+
+// The end of a sentence: . ! ? or : followed by a space, or a line break.
+const SENTENCE_END = /[.!?:](?=\s)|\n/g;
+
+/**
+ * What of a streaming answer may be shown so far: whole sentences only, and nothing at all once
+ * any of them claims a cause, so a causal sentence is never on screen even for a moment. When
+ * `done`, the whole answer is checked and shown.
+ */
+export function visiblePart(text: string, done: boolean): { shown: string; causal: boolean } {
+  let cut = text.length;
+  if (!done) {
+    cut = 0;
+    for (const m of text.matchAll(SENTENCE_END)) cut = (m.index ?? 0) + m[0].length;
+  }
+  const shown = text.slice(0, cut);
+  if (claimsCause(shown)) return { shown: '', causal: true };
+  return { shown, causal: false };
+}
+
 /**
  * Whether the answer claims a cause. A causal word with a negation shortly before it ("a
  * pattern is not a cause", "this cannot show what causes it") is allowed: that is the answer

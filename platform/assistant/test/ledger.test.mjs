@@ -150,8 +150,45 @@ test('prices: worst case covers any actual use of the same request', () => {
     const plain = actualMicros(model, { input_tokens: bytes, output_tokens: max });
     assert.ok(worst >= plain);
   }
-  // Haiku at the request size limit: under one cent of input, about a cent in all.
-  assert.ok(worstCaseMicros('haiku', 64 * 1024 + 12_000, 0) < 0.01 * USD);
-  assert.ok(worstCaseMicros('haiku', 64 * 1024 + 12_000, 1200) < 0.011 * USD);
+  // Haiku at the request size limit (32 KB plus the system prompt): well under a cent.
+  assert.ok(worstCaseMicros('haiku', 32 * 1024 + 12_000, 1200) < 0.0065 * USD);
   assert.throws(() => worstCaseMicros('nope', 1, 1));
+  // Every input field counts at its own price (M2: Sonnet cache reads at $0.20 a million).
+  assert.equal(actualMicros('sonnet', { cache_read_input_tokens: 1_000_000 }), 0.20 * USD);
+});
+
+test('S4: one visitor has a daily share; reaching it refuses them only, and writes nothing', async () => {
+  const store = jittery();
+  const ledger = createLedger(store, { ...CAPS, visitorDayMicros: 0.05 * USD });
+  const amounts = Array.from({ length: 60 }, () => 1_000);
+  const results = await Promise.allSettled(amounts.map((a) => ledger.reserve(a, { now: NOW, visitor: 'v1' })));
+  const granted = results.filter((r) => r.status === 'fulfilled').length;
+  assert.equal(granted, 50, 'exactly the share, even when the requests race');
+  for (const r of results.filter((x) => x.status === 'rejected')) {
+    assert.equal(r.reason.scope, 'visitor');
+    assert.equal(r.reason.until.toISOString(), '2026-10-19T00:00:00.000Z');
+  }
+  assert.equal(store.items.get('ledger#visitor#v1#2026-10-18').committed, 50_000);
+  assert.equal(store.items.get('ledger#day#2026-10-18').committed, 50_000, 'refused reservations wrote nothing');
+  // Another visitor is unaffected, and a call dearer than a whole share is refused up front.
+  await ledger.reserve(1_000, { now: NOW, visitor: 'v2' });
+  await assert.rejects(ledger.reserve(50_001, { now: NOW, visitor: 'v3' }), (e) => e.scope === 'visitor');
+  assert.equal(store.items.get('ledger#visitor#v3#2026-10-18'), undefined);
+  // Tomorrow is a new day.
+  await ledger.reserve(1_000, { now: new Date('2026-10-19T00:00:01Z'), visitor: 'v1' });
+});
+
+test('S4: settling adjusts the visitor share too', async () => {
+  const store = memoryStore();
+  const ledger = createLedger(store, { ...CAPS, visitorDayMicros: 0.05 * USD });
+  const r = await ledger.reserve(6_000, { now: NOW, visitor: 'v1' });
+  assert.equal(r.visitor, 'ledger#visitor#v1#2026-10-18');
+  await ledger.settle(r, 900);
+  const v = store.items.get(r.visitor);
+  assert.deepEqual({ committed: v.committed, spent: v.spent }, { committed: 900, spent: 900 });
+  assert.equal(v.expiresAt, Date.UTC(2026, 9, 21) / 1000, 'the share expires on its own, two days after the day ends');
+  // Without a share configured nothing per visitor is written.
+  const plain = createLedger(store, CAPS);
+  const p = await plain.reserve(100, { now: NOW, visitor: 'v9' });
+  assert.equal(p.visitor, null);
 });

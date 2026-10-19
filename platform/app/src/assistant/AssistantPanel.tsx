@@ -17,9 +17,9 @@ import { getEngine } from '../engine/client';
 import type { Explanation } from '../engine/protocol';
 import { useExplore } from '../explore/exploreStore';
 import { useSession } from '../state/store';
-import { claimsCause, numbersIn, numbersInText, renderAnswer, type Piece } from './answer';
+import { clipChars, numbersIn, numbersInText, renderAnswer, visiblePart, type Piece } from './answer';
 import { ask, AssistantRefusal, fetchStatus, newSessionId, type Status, type Turn } from './client';
-import { buildContext, LIMITS, sanitizeLabel, type Context, type PayloadInputs, type ShareChoice } from './payload';
+import { buildContext, contextFits, fitRequest, LIMITS, sanitizeLabel, type Context, type PayloadInputs, type ShareChoice } from './payload';
 
 
 // ---------------------------------------------------------------- state for this page session
@@ -214,7 +214,8 @@ function ShareReview({ inputs, onDone }: { inputs: PayloadInputs; onDone: () => 
   const effective: ShareChoice = { ...choice, site: choice.site && !!siteId && site?.id === siteId };
   const context = buildContext(inputs, effective);
   const preview = pretty(context);
-  const set = (patch: Partial<ShareChoice>) => setChoice((c) => ({ ...c, ...patch }));
+  const fits = contextFits(context);
+  const set =(patch: Partial<ShareChoice>) => setChoice((c) => ({ ...c, ...patch }));
   const toggleColumn = (name: string, withhold: boolean) =>
     set({ withheld: withhold ? [...choice.withheld, name] : choice.withheld.filter((n) => n !== name) });
 
@@ -270,8 +271,11 @@ function ShareReview({ inputs, onDone }: { inputs: PayloadInputs; onDone: () => 
       <h4 className="as-h4" id="as-preview-title">Exactly what is sent with each question</h4>
       <p className="as-fine">Besides your question and this conversation's earlier questions and answers, this is everything:</p>
       <pre className="as-preview" tabIndex={0} aria-labelledby="as-preview-title">{preview}</pre>
+      {!fits && (
+        <p className="as-share__stale" role="status">This is too much to send with a question. Leave out some columns or groups to share it.</p>
+      )}
       <div className="as-actions">
-        <button type="button" className="hig-button hig-button--ios hig-button--medium hig-button--bordered-prominent hig-focus" onClick={agree}>
+        <button type="button" className="hig-button hig-button--ios hig-button--medium hig-button--bordered-prominent hig-focus" onClick={agree} disabled={!fits}>
           <span className="hig-button__label">Share for This Session</span>
         </button>
         <button type="button" className="hig-button hig-button--ios hig-button--medium hig-button--bordered hig-focus" onClick={onDone}>
@@ -350,7 +354,7 @@ export function AssistantPanel({ onClose }: { onClose: () => void }) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const q = question.trim();
+    const q = clipChars(question.trim(), LIMITS.questionChars);
     if (!q || !canAsk || full) return;
     const context: Context = consent && !stale && sharedNow ? { app: buildContext(inputs, null).app, shared: sharedNow } : buildContext(inputs, null);
     // Earlier questions with their answers. A failed or hidden answer is dropped with its
@@ -372,15 +376,28 @@ export function AssistantPanel({ onClose }: { onClose: () => void }) {
       next[next.length - 1] = { ...next[next.length - 1], ...patch };
       return { turns: next };
     });
+    // The oldest turns go first if the request would be too large for the server.
+    const body = fitRequest({ v: 1 as const, session, question: q, history: clean, context, ...(deeper ? { deeper: true } : {}) });
+    if (!body) {
+      update({ streaming: false, failed: 'This question and what it shares are too large to send. Share fewer columns or start a new conversation.' });
+      useAssistant.setState({ busy: false });
+      return;
+    }
+    // Text is shown a whole sentence at a time, and only while no sentence claims a cause.
     let text = '';
+    let causal = false;
     try {
-      await ask({ v: 1, session, question: q, history: clean.slice(-LIMITS.historyTurns), context, ...(deeper ? { deeper: true } : {}) }, (ev) => {
+      await ask(body, (ev) => {
         if (ev.t === 'meta') update({ methodNumbers: ev.methodNumbers });
-        else if (ev.t === 'text') { text += ev.v; update({ text }); }
-        else if (ev.t === 'error') update({ failed: ev.message });
+        else if (ev.t === 'text' && !causal) {
+          text += ev.v;
+          const part = visiblePart(text, false);
+          causal = part.causal;
+          update({ text: part.shown, causal });
+        } else if (ev.t === 'error') update({ failed: ev.message });
       });
-      const causal = claimsCause(text);
-      update({ streaming: false, causal, text: text.slice(0, LIMITS.assistantChars), ...(text ? {} : { failed: 'The assistant gave no answer. Try asking again.' }) });
+      if (!causal) causal = visiblePart(text, true).causal;
+      update({ streaming: false, causal, text: causal ? '' : clipChars(text, LIMITS.assistantChars), ...(text ? {} : { failed: 'The assistant gave no answer. Try asking again.' }) });
       setAnnounce(causal ? 'The answer described a cause, so it is not shown.' : 'Answer ready.');
     } catch (err) {
       const message = err instanceof AssistantRefusal ? err.message : 'The assistant could not be reached. Everything else in the planner keeps working.';

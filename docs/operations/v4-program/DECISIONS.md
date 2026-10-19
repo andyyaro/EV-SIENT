@@ -1728,15 +1728,21 @@ The owner's choices on 2026-10-18:
    (`template.yaml` parameters), not code.
 2. **A hard cap of $5 a month on model spend that fails closed.** A DynamoDB ledger reserves
    the most each call could cost before calling Bedrock, on condition that the month's and the
-   day's ($0.35) committed spend stay within their caps, and settles to the actual cost after.
-   Any ledger error refuses. When the cap is reached the assistant stops and the panel says
+   day's ($0.35) committed spend, and one visitor's share of the day ($0.05), stay within
+   their caps, and settles after to the larger of the stream's and the invocation metrics'
+   token counts (the whole reservation when no final count arrives). The price row comes from
+   the model ID, and the proxy refuses to start on a mismatch. Any ledger error refuses. When the cap is reached the assistant stops and the panel says
    "The assistant has reached this month's limit"; everything else keeps working.
 3. **Bedrock data retention `none`** in the assistant's Region, and model invocation logging
-   off. `deploy.sh` checks both and stops otherwise. The proxy logs metadata only.
+   off. `deploy.sh` checks both and stops otherwise, and the proxy reads the retention mode
+   itself at cold start and every 15 minutes and answers nothing unless it is `none`. The
+   proxy logs metadata only.
 4. **The old OpenAI assistant will be retired**, not deleted in this change.
    `platform/assistant/README.md` lists the steps; retiring it closes open action 12.
 5. **The AWS bill outside model spend stays under $10 a month.** Estimated $0.00 to $0.15 at
-   expected use; a tag budget alerts at $5 and $10.
+   expected use; a tag budget alerts at $5 and $10. Under a sustained request flood the
+   function adds at most about $3.20 a month (in-memory buckets keep refused requests off
+   DynamoDB), plus CloudFront's per-request charge; AWS WAF would cost more than the budget.
 
 How it is built (`platform/assistant/`, `platform/app/src/assistant/`):
 
@@ -1744,20 +1750,29 @@ How it is built (`platform/assistant/`, `platform/app/src/assistant/`):
   AuthType AWS_IAM behind origin access control, streaming NDJSON. The CSP is unchanged
   (`connect-src 'self'`). The proxy never answers 403 or 404, which the distribution turns
   into its 404 page.
-- **Three tiers, enforced twice.** Always: the question, the conversation, the step and the
-  file's size. With consent, once per session, after the planner sees the exact JSON: column
+- **Three tiers. The server enforces shape and limits; the browser enforces content.**
+  Always: the question, the conversation, the step and the file's size. With consent, once per session, after the planner sees the exact JSON: column
   summaries (rounded 10th, 50th and 90th percentiles, categories of 10 or more), results per
   tier, Explore patterns, Your Index settings, and one site's breakdown as "Site A". Never:
   rows, cells, names, IDs, addresses, coordinates, free text, the file name. The browser
-  builds the payload; the server accepts only closed objects with rounded numbers and
-  sanitised labels, and a column whose header names an identifying field carries only its
-  header whatever role it was given.
+  builds the payload and is what keeps the Never tier out of it. The server accepts only
+  closed objects with rounded numbers and sanitised labels, within the size, rate and spend
+  limits, and a column whose header names an identifying field (by word, or by an ending such
+  as `id` or `name` or a beginning such as `lat`) carries only its header whatever role
+  it was given; but it cannot tell whether a label is really a header, so it does not
+  guarantee content. Both sides strip the same invisible characters.
 - **Answers are checked.** Numbers from the data come back as placeholders filled from what
   was sent; any other number that matches nothing is struck through; an answer that claims a
   cause is not shown. The system prompt says the tool is planning support, not engineering
   advice.
-- **Limits:** 20 questions an hour and 60 a day per address (hashed by /24 or /56), 40 a day
-  per session, 30 a minute for everyone, 8 questions a conversation, 64 KB a request.
+- **Limits:** first, per instance and in memory (no database call): 3 questions at once then
+  1 a minute per address, 4 at once then 3 a minute for everyone, and 10 status checks a
+  minute per address (status is cached for 30 seconds). Then, shared in DynamoDB: 12 questions
+  an hour and 30 a day per address (hashed by /24 or /56, from CloudFront-Viewer-Address only,
+  never X-Forwarded-For), 30 a day per session, 20 a minute for everyone. 8 questions a
+  conversation, 32 KB a request (the largest payload from the 360-site fixture is about
+  16 KB; the browser drops the oldest turns to fit). An optional ReservedConcurrency
+  parameter caps instances once the account's Lambda quota allows it.
 
 ### What it does not do
 
@@ -1778,8 +1793,11 @@ None moved. The engine, the scores and parity are untouched.
 and the Planner CI job): 150 seeded property cases over the 360-row synthetic file proving the
 Never tier cannot reach the payload and that the server accepts every payload the browser
 builds; server validation; the ledger under 200 concurrent reservations, cap reached, settle;
-the rate limits; request handling with a fake model (streaming, settling, refusals, never 403
-or 404); the answer checks. The app type-checks and builds.
+the rate limits and in-memory buckets (refusals reach no database); request handling with a
+fake model (streaming, settling at the larger usage, refusals, the retention check, the
+visitor share, never 403 or 404); unfriendly headers and hidden characters in both
+sanitisers; the answer checks, including that a causal sentence is never shown while
+streaming. The security review of 2026-10-19 (S1 to S6 and the minor findings) added these. The app type-checks and builds.
 
 Open before deploy: the Region (plan: `us-east-2`, so the retention setting does not touch
 another project's Bedrock Region), whether Bedrock accepts `thinking` switched off for Haiku

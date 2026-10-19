@@ -10,6 +10,7 @@
 // Items (one DynamoDB table, key `pk`):
 //   ledger#month#2026-10     committed, spent, calls, deeperCommitted
 //   ledger#day#2026-10-18    committed, spent
+//   ledger#visitor#<hash>#2026-10-18   committed, spent (one visitor's share of a day)
 // Amounts are micro-dollars (1 = $0.000001).
 
 import { ConditionFailed } from './store.mjs';
@@ -35,13 +36,13 @@ export class CapReached extends Error {
   constructor(scope, until) {
     super(`${scope} limit reached`);
     this.name = 'CapReached';
-    this.scope = scope; // 'month' | 'day' | 'deeper'
+    this.scope = scope; // 'month' | 'day' | 'deeper' | 'visitor'
     this.until = until; // Date
   }
 }
 
 /**
- * caps: { monthMicros, dayMicros, deeperMonthMicros } (whole micro-dollars).
+ * caps: { monthMicros, dayMicros, deeperMonthMicros, visitorDayMicros? } (whole micro-dollars).
  * Returns { reserve, settle, status }.
  */
 export function createLedger(store, caps) {
@@ -53,7 +54,7 @@ export function createLedger(store, caps) {
    * Reserve `amount` micro-dollars for one call. Throws CapReached when any cap would be passed,
    * and lets any other error through (the caller refuses the call on any error).
    */
-  async function reserve(amount, { now = new Date(), deeper = false } = {}) {
+  async function reserve(amount, { now = new Date(), deeper = false, visitor = null } = {}) {
     if (!Number.isInteger(amount) || amount <= 0) throw new Error('a reservation must be a positive whole number of micro-dollars');
     const month = `ledger#month#${monthKey(now)}`;
     const day = `ledger#day#${dayKey(now)}`;
@@ -63,6 +64,8 @@ export function createLedger(store, caps) {
     if (amount > caps.monthMicros) throw new CapReached('month', untilMonth);
     if (amount > caps.dayMicros) throw new CapReached('day', untilDay);
     if (deeper && amount > caps.deeperMonthMicros) throw new CapReached('deeper', untilMonth);
+    const perVisitor = visitor && caps.visitorDayMicros !== undefined;
+    if (perVisitor && amount > caps.visitorDayMicros) throw new CapReached('visitor', untilDay);
     const monthOp = {
       key: month,
       add: { committed: amount, ...(deeper ? { deeperCommitted: amount } : {}) },
@@ -70,11 +73,17 @@ export function createLedger(store, caps) {
       ttl: epoch(untilMonth) + 400 * 86400,
     };
     const dayOp = { key: day, add: { committed: amount }, atMost: { committed: caps.dayMicros - amount }, ttl: epoch(untilDay) + 40 * 86400 };
+    const visitorKey = perVisitor ? `ledger#visitor#${visitor}#${dayKey(now)}` : null;
+    const ops = [monthOp, dayOp];
+    if (visitorKey) {
+      ops.push({ key: visitorKey, add: { committed: amount }, atMost: { committed: caps.visitorDayMicros - amount }, ttl: epoch(untilDay) + 2 * 86400 });
+    }
     try {
-      await store.write([monthOp, dayOp]);
+      await store.write(ops);
     } catch (e) {
       if (e instanceof ConditionFailed) {
         if (e.index === 1) throw new CapReached('day', untilDay);
+        if (e.index === 2) throw new CapReached('visitor', untilDay);
         // The month operation carries both month conditions; tell them apart by reading back.
         if (deeper) {
           const m = await store.read(month).catch(() => null);
@@ -84,17 +93,19 @@ export function createLedger(store, caps) {
       }
       throw e;
     }
-    return { month, day, amount, deeper };
+    return { month, day, visitor: visitorKey, amount, deeper };
   }
 
   /** Replace a reservation with what the call cost. Never conditional: spend already happened. */
   async function settle(reservation, actual) {
     if (!Number.isInteger(actual) || actual < 0) throw new Error('actual spend must be a whole number of micro-dollars');
     const delta = actual - reservation.amount;
-    await store.write([
+    const ops = [
       { key: reservation.month, add: { committed: delta, spent: actual, calls: 1, ...(reservation.deeper ? { deeperCommitted: delta } : {}) } },
       { key: reservation.day, add: { committed: delta, spent: actual } },
-    ]);
+    ];
+    if (reservation.visitor) ops.push({ key: reservation.visitor, add: { committed: delta, spent: actual } });
+    await store.write(ops);
   }
 
   /** What the panel shows: whether the month's cap is reached and roughly how much is used. */

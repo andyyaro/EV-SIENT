@@ -32,6 +32,19 @@ Parameters:
     MinValue: 0
     MaxValue: 50
     Description: Sub-cap for deeper answers (Sonnet), inside the monthly cap.
+  AddressDailyCapUsd:
+    Type: Number
+    Default: 0.05
+    MinValue: 0
+    MaxValue: 5
+    Description: One visitor's (address block's) share of a day's spend, so one person cannot use the day's cap.
+  ReservedConcurrency:
+    Type: String
+    Default: ''
+    AllowedPattern: '^([1-9][0-9]?)?$'
+    Description: >-
+      Optional cap on concurrent instances (1 to 99). Empty leaves it unset: the account's
+      concurrency limit of 10 does not allow reserving any until a quota increase.
   EnableDeeper:
     Type: String
     AllowedValues: ['true', 'false']
@@ -69,6 +82,7 @@ Parameters:
 
 Conditions:
   Deeper: !Equals [!Ref EnableDeeper, 'true']
+  HasReservedConcurrency: !Not [!Equals [!Ref ReservedConcurrency, '']]
 
 Resources:
   # ------------------------------------------------------------------ ledger and limits
@@ -132,6 +146,12 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
+              # Reading (never setting) the account's data retention mode: the function
+              # refuses to answer unless it is "none".
+              - Sid: ReadDataRetention
+                Effect: Allow
+                Action: bedrock:GetAccountDataRetention
+                Resource: '*'
               # Global cross-Region inference: the profile in this Region, the model in this
               # Region through that profile, and the model with no Region ("unspecified")
               # through that profile. Streaming invoke only; nothing else in Bedrock.
@@ -195,6 +215,7 @@ Resources:
       Handler: index.handler
       MemorySize: 256
       Timeout: 60
+      ReservedConcurrentExecutions: !If [HasReservedConcurrency, !Ref ReservedConcurrency, !Ref 'AWS::NoValue']
       Role: !GetAtt Role.Arn
       LoggingConfig: { LogGroup: !Ref LogGroup, LogFormat: Text }
       Environment:
@@ -204,6 +225,7 @@ Resources:
           MONTHLY_CAP_USD: !Ref MonthlyCapUsd
           DAILY_CAP_USD: !Ref DailyCapUsd
           DEEPER_MONTHLY_CAP_USD: !Ref DeeperMonthlyCapUsd
+          ADDRESS_DAILY_CAP_USD: !Ref AddressDailyCapUsd
           MODEL_ID: !Sub 'global.${StandardModel}'
           MODEL_EXTRA_JSON: !Ref ModelExtraJson
           DEEPER_MODEL_ID: !If [Deeper, !Sub 'global.${DeeperModel}', '']
@@ -234,6 +256,8 @@ Resources:
       Principal: cloudfront.amazonaws.com
       SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${DistributionId}'
       FunctionUrlAuthType: AWS_IAM
+  # Function URLs also need lambda:InvokeFunction; InvokedViaFunctionUrl limits this grant to
+  # calls that come through the URL, so CloudFront cannot invoke the function any other way.
   AllowCloudFrontInvoke:
     Type: AWS::Lambda::Permission
     Properties:
@@ -241,6 +265,8 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: cloudfront.amazonaws.com
       SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${DistributionId}'
+      SourceAccount: !Ref 'AWS::AccountId'
+      InvokedViaFunctionUrl: true
 
   OriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
@@ -278,6 +304,32 @@ Resources:
             Resource: !Ref AlertTopic
             Condition:
               StringEquals: { 'aws:SourceAccount': !Ref 'AWS::AccountId' }
+
+  # A request without CloudFront-Viewer-Address means the behaviour lost its origin request
+  # policy: every such request then shares one conservative bucket. Logged at most once a
+  # minute per instance.
+  NoViewerAddressFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref LogGroup
+      FilterPattern: '"no_viewer_address"'
+      MetricTransformations:
+        - { MetricNamespace: EVSIENT/Assistant, MetricName: NoViewerAddress, MetricValue: '1', DefaultValue: 0 }
+  NoViewerAddressAlarm:
+    Type: AWS::CloudWatch::Alarm
+    DependsOn: NoViewerAddressFilter
+    Properties:
+      AlarmName: evsient-assistant-no-viewer-address
+      AlarmDescription: Requests arrived without CloudFront-Viewer-Address (check the /api/assistant/* origin request policy).
+      Namespace: EVSIENT/Assistant
+      MetricName: NoViewerAddress
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertTopic]
 
   # The function logs {"event":"cap_reached"} when it refuses for a cap.
   CapReachedFilter:

@@ -9,8 +9,24 @@
 
 export const PRICES = Object.freeze({
   haiku: { input: 0.10, cacheWrite: 0.125, cacheRead: 0.01, output: 0.50 },
-  sonnet: { input: 2.00, cacheWrite: 2.50, cacheRead: 0.10, output: 10.00 },
+  sonnet: { input: 2.00, cacheWrite: 2.50, cacheRead: 0.20, output: 10.00 },
 });
+
+/**
+ * The price row for a model, from its ID, so a model can never be billed at another's rates.
+ * Only the global cross-Region profiles of the models priced above are known; anything else is
+ * refused (configFromEnv then refuses to start).
+ */
+const MODEL_PRICES = [
+  [/^global\.anthropic\.claude-haiku-5-5$/, 'haiku'],
+  [/^global\.anthropic\.claude-sonnet-5-5$/, 'sonnet'],
+];
+
+export function priceForModel(modelId) {
+  const hit = MODEL_PRICES.find(([re]) => re.test(String(modelId)));
+  if (!hit) throw new Error(`no price is known for model ${modelId}`);
+  return hit[1];
+}
 
 /** Micro-dollars for `tokens` at `perMillion` dollars per million tokens, rounded up. */
 export function micros(tokens, perMillion) {

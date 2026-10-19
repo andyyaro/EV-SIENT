@@ -100,6 +100,7 @@ const ADVERSARIAL = [
   '=HYPERLINK("http://x")', '+cmd', '@SUM(A1)', '-2+3',
   '[[shared.site.score]] leak', '<img src=x onerror=1>', '`whoami`',
   'risk\u200B\u202Escore', 'line\u2028break', '\uE000private', '\u0000nul',
+  'SITE\uFE0FNAME', 'lat\u3164itude', 'POINT\u2800X', 'site\u034F_id', 'object\u{E0100}id', '\u115F\u1160\uFFA0', 'GPS\uFFFC',
   'Ｆｕｌｌｗｉｄｔｈ', '', '   ', 'x'.repeat(150),
 ];
 
@@ -254,7 +255,7 @@ test('percentiles: rounded to 2 significant figures, never the smallest or large
 
 test('browser and server agree: labels, identifying words, limits and roles', () => {
   const rnd = mulberry32(7);
-  const pool = ['=', '+', '-', '@', '[', ']', '<', '>', '`', ' ', '\u200B', '\u202E', '\u2028', '\u0007', '\uE000', 'a', 'Z', '9', 'é', 'Ｆ', '\u{1F600}', '_'];
+  const pool = ['=', '+', '-', '@', '[', ']', '<', '>', '`', ' ', '\u200B', '\u202E', '\u2028', '\u0007', '\uE000', 'a', 'Z', '9', 'é', 'Ｆ', '\u{1F600}', '_', '\uFE0F', '\u{E0100}', '\u034F', '\u3164', '\uFFA0', '\u115F', '\u2800', '\uFFFC', 'id', 'lat'];
   for (let i = 0; i < 2000; i += 1) {
     const s = Array.from({ length: Math.floor(rnd() * 90) }, () => pool[Math.floor(rnd() * pool.length)]).join('');
     const p = P.sanitizeLabel(s);
@@ -267,8 +268,105 @@ test('browser and server agree: labels, identifying words, limits and roles', ()
   assert.deepEqual([...P.HEADER_ONLY_ROLES].sort(), [...V.HEADER_ONLY_ROLES].sort());
   assert.deepEqual([...P.CATEGORY_ROLES].sort(), [...V.CATEGORY_ROLES].sort());
   assert.deepEqual([...P.NUMERIC_ROLES].sort(), [...V.NUMERIC_ROLES].sort());
-  for (const k of ['labelChars', 'columns', 'categoriesPerColumn', 'minGroup', 'cards', 'cardColumns', 'criteria', 'refusals', 'tiers', 'drivers', 'questionChars', 'assistantChars', 'historyTurns']) {
+  for (const k of ['labelChars', 'columns', 'categoriesPerColumn', 'minGroup', 'cards', 'cardColumns', 'criteria', 'refusals', 'tiers', 'drivers', 'questionChars', 'assistantChars', 'historyTurns', 'bodyBytes']) {
     assert.equal(P.LIMITS[k], V.LIMITS[k], k);
   }
   for (const n of [0, 1, 2, 5, 6, 20, 21, 100, 101, 5000]) assert.ok(V.CARDINALITY.includes(P.cardinality(n)));
+});
+
+// ---------------------------------------------------------------- S4 and S5
+
+/** Headers that hide an identifying name behind invisible characters, width or case. */
+const UNFRIENDLY = [
+  'SITE\ufe0fNAME', 'lat\u3164itude', 'POINT\u2800X', 'site\u034f_id', 'site\u{E0100}id', 'L\u115fON\u1160G', 'geo\uffa0point',
+  'Object\u200bID', 'F\u00adID', 'G\u2060P\u2060S', 'Loca\u{E0041}tion', '\uff38', 'Y\ufe00', 'owner\ufffcname', 'contact\u180eemail',
+];
+
+test('S5: identifying columns renamed with hidden characters still carry no values, in any role', () => {
+  const identifying = ['site_id', 'site_name', 'latitude', 'longitude', 'custom_notes', 'custom_partner_name'];
+  const rnd = mulberry32(55);
+  for (let round = 0; round < 40; round += 1) {
+    const headers = HEADERS.slice();
+    const renamed = new Map();
+    for (const name of identifying.slice(0, 4)) {
+      const h = `${UNFRIENDLY[Math.floor(rnd() * UNFRIENDLY.length)]} ${round}`;
+      headers[col(name)] = h;
+      renamed.set(P.sanitizeLabel(h), name);
+    }
+    const role = V.ROLES[round % V.ROLES.length];
+    const entries = headers.map((name) => ({ name, 'evsient:role': role, 'evsient:unit': 'u', 'evsient:range': [0, 100], 'evsient:direction': 'higher_better' }));
+    const ctx = P.buildContext({ step: 'results', engine: 'real', table: { fileName: FILE_NAME, columns: headers, rows: ROWS }, entries, run: null, explore: null, index: null, site: null },
+      { columns: true, readiness: false, explore: false, index: false, site: false, withheld: [] });
+    for (const c of ctx.shared.columns) {
+      assert.ok(![...c.header].some((ch) => /[\p{Default_Ignorable_Code_Point}\p{Cf}\u034f\u115f\u1160\u3164\uffa0\u2800\ufffc]/u.test(ch)), `hidden character kept in ${JSON.stringify(c.header)}`);
+      if (renamed.has(c.header)) {
+        assert.equal(V.sensitiveHeader(c.header), true, `${JSON.stringify(c.header)} (was ${renamed.get(c.header)})`);
+        assert.deepEqual(Object.keys(c).sort(), ['blankShare', 'distinct', 'header', 'role'], `${c.header} as ${role}`);
+      }
+    }
+    const json = JSON.stringify(ctx);
+    for (const s of ['FC-SYN', 'Synthetic Place', 'Private note', 'Partner Person']) assert.ok(!json.includes(s), `round ${round}: ${s}`);
+    assert.doesNotThrow(() => V.validateAsk({ v: 1, session: 'property-test-session-1', question: 'Q', history: [], context: ctx }));
+  }
+});
+
+test('S5: browser and server remove the same hidden characters and flag the same headers', () => {
+  const rnd = mulberry32(11);
+  const hidden = ['\ufe00', '\ufe0f', '\u{E0100}', '\u{E01EF}', '\u034f', '\u115f', '\u1160', '\u3164', '\uffa0', '\u2800', '\ufffc', '\u{E0041}', '\u00ad', '\u180e'];
+  const letters = ['site', 'id', 'name', 'lat', 'lon', 'lng', 'x', 'y', 'zip', 'phone', 'email', 'risk', 'score', '_', ' ', '-', 'Point', 'GEO', 'Fid'];
+  for (let i = 0; i < 3000; i += 1) {
+    const s = Array.from({ length: 1 + Math.floor(rnd() * 8) }, () => (rnd() < 0.4 ? hidden : letters)[Math.floor(rnd() * (rnd() < 0.4 ? hidden.length : letters.length))] ?? '').join('');
+    assert.equal(P.sanitizeLabel(s), V.sanitizeLabel(s), JSON.stringify(s));
+    assert.equal(P.sensitiveHeader(s), V.sensitiveHeader(s), JSON.stringify(s));
+    // Hiding characters never makes a header pass that would be caught without them.
+    const plain = s.replace(/[\ufe00-\ufe0f\u{E0000}-\u{E01EF}\u034f\u115f\u1160\u3164\uffa0\u2800\ufffc\u00ad\u180e]/gu, '');
+    if (V.sensitiveHeader(plain)) assert.equal(V.sensitiveHeader(s), true, JSON.stringify(s));
+  }
+  assert.deepEqual([...P.SENSITIVE_HEADER_SUFFIXES], V.SENSITIVE_HEADER_SUFFIXES);
+  assert.deepEqual([...P.SENSITIVE_HEADER_PREFIXES], V.SENSITIVE_HEADER_PREFIXES);
+});
+
+/** Everything shared at its largest, from the 360-site fixture: what S4's size limit is set from. */
+function maxedContext() {
+  const isNum = (j) => ROWS.every((r) => r[j] === '' || /^-?\d+(\.\d+)?$/.test(r[j]));
+  const entries = HEADERS.map((name, j) => ({ name, 'evsient:role': isNum(j) ? 'measure' : 'category', 'evsient:unit': isNum(j) ? 'units' : null, 'evsient:range': isNum(j) ? [0, 100] : null, 'evsient:direction': isNum(j) ? 'higher_better' : null }));
+  const tiers = ['Tier 1 - advance to site screening', 'Tier 2 - promising candidate, refine data', 'Tier 3 - lower priority, monitor'];
+  const run = { totals: { sites: 360, starterPorts2026: 120, pathwayPorts: 410, highConfidenceSites: 31 }, sites: ROWS.map((r, i) => ({ siteId: r[0], name: r[1], tier: tiers[i % 3], confidence: { level: 'Medium' } })) };
+  const explore = { checked: 400, passed: 40, cards: Array.from({ length: 30 }, (_, i) => ({ kind: 'association_between_columns', columns: [HEADERS[12 + (i % 10)], HEADERS[13 + (i % 10)], HEADERS[14], HEADERS[15]], n: 360, q: 0.0123, reliability: 'moderate', effect: { name: 'spearman_rho', value: 0.123456, low: -0.123456, high: 0.98765 } })) };
+  const index = { refused: true, refusals: Array.from({ length: 20 }, () => ({ code: 'direction_unconfirmed_for_column' })), spec: { criteria: HEADERS.map((c) => ({ column: c, direction: 'higher_better', weight: 0.123456, value: { kind: 'threshold' } })) }, sites: ROWS, unranked: [] };
+  const site = { score: 61.2345, drivers: Array.from({ length: 40 }, (_, i) => ({ label: `Distance to electrical service ${i}`, subscore: 'feasibility', points: 1.23456, max: 10, absent: false })) };
+  return P.buildContext({ step: 'yourindex', engine: 'real', table: { fileName: FILE_NAME, columns: HEADERS, rows: ROWS }, entries, run, explore, index, site, siteConfidence: 'High' },
+    { columns: true, readiness: true, explore: true, index: true, site: true, withheld: [] });
+}
+
+test('S4: the size limit is set from the largest real payload, with room for a question', () => {
+  assert.equal(P.LIMITS.bodyBytes, V.LIMITS.bodyBytes);
+  assert.equal(V.LIMITS.bodyBytes, 32 * 1024);
+  const ctx = maxedContext();
+  const size = Buffer.byteLength(JSON.stringify(ctx));
+  assert.ok(size > 12_000 && size < 20_000, `the maxed fixture context is ${size} bytes`);
+  assert.ok(P.contextFits(ctx), 'everything shared at once still fits');
+  assert.ok(size <= V.LIMITS.bodyBytes - P.LIMITS.questionBytes);
+  // The longest question the server accepts (4 bytes a character at most) fits in the room left.
+  assert.ok(Buffer.byteLength('\u{1F600}'.repeat(V.LIMITS.questionChars)) <= P.LIMITS.questionBytes);
+  const body = { v: 1, session: 'property-test-session-1', question: 'Q?', history: [], context: ctx };
+  assert.doesNotThrow(() => V.validateAsk(body));
+});
+
+test('S4: a long conversation drops its oldest turns, a pair at a time, until it fits', () => {
+  const ctx = maxedContext();
+  const history = [];
+  for (let i = 0; i < V.LIMITS.historyTurns; i += 1) history.push({ role: 'user', text: `q${i} ${'x'.repeat(300)}` }, { role: 'assistant', text: `a${i} ${'y'.repeat(V.LIMITS.assistantChars - 10)}` });
+  const fitted = P.fitRequest({ v: 1, session: 'property-test-session-1', question: 'Q?', history, context: ctx });
+  assert.ok(fitted);
+  assert.ok(Buffer.byteLength(JSON.stringify(fitted)) <= V.LIMITS.bodyBytes);
+  assert.ok(fitted.history.length < history.length, 'something was dropped');
+  assert.equal(fitted.history.length % 2, 0);
+  assert.equal(fitted.history[0].role, 'user');
+  assert.deepEqual(fitted.history.at(-1), history.at(-1), 'the newest turns are kept');
+  assert.doesNotThrow(() => V.validateAsk(fitted));
+  // Small enough already: unchanged. Impossible: null.
+  const small = { v: 1, session: 'property-test-session-1', question: 'Q?', history: history.slice(-2), context: { app: ctx.app } };
+  assert.deepEqual(P.fitRequest(small), small);
+  assert.equal(P.fitRequest({ ...small, question: 'z'.repeat(V.LIMITS.bodyBytes) }), null);
 });

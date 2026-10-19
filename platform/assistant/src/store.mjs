@@ -10,7 +10,8 @@
 //   op = { key, add: { attr: delta, ... }, ttl?: epochSeconds, atMost?: { attr: limit, ... } }
 //
 // A failed condition throws ConditionFailed with the index of the first failing operation.
-// putNew(key, strings) writes an item only if none exists (the salt in limits.mjs).
+// update(op) applies one operation on its own (a plain conditional update, half the cost of a
+// transaction). putNew(key, strings) writes an item only if none exists (the salt in limits.mjs).
 
 export class ConditionFailed extends Error {
   constructor(index) {
@@ -90,6 +91,16 @@ export async function dynamoStore(table, region) {
         }
       }
     },
+    /** One operation on its own: a plain conditional UpdateItem (one write unit, not two). */
+    async update(op) {
+      const { Update } = toTransactItems([op], table)[0];
+      try {
+        await client.send(new ddb.UpdateItemCommand(Update));
+      } catch (e) {
+        if (e?.name === 'ConditionalCheckFailedException') throw new ConditionFailed(0);
+        throw e;
+      }
+    },
     async putNew(key, strings) {
       const Item = { pk: { S: key } };
       for (const [k, v] of Object.entries(strings)) Item[k] = { S: String(v) };
@@ -110,35 +121,42 @@ export async function dynamoStore(table, region) {
 
 /**
  * The same interface in memory, with DynamoDB's semantics: conditions are checked and additions
- * applied in one step, all operations or none. `delay` lets tests interleave many writers.
+ * applied in one step, all operations or none. `delay` lets tests interleave many writers;
+ * `calls` counts what reached the store (what DynamoDB would bill).
  */
 export function memoryStore({ delay } = {}) {
   const items = new Map();
+  const calls = { write: 0, update: 0, putNew: 0, read: 0 };
+  async function apply(ops) {
+    if (delay) await delay();
+    // Everything below runs without yielding, as one transaction does.
+    ops.forEach((op, i) => {
+      const item = items.get(op.key) ?? {};
+      for (const [attr, limit] of Object.entries(op.atMost ?? {})) {
+        if (attr in item && !(item[attr] <= limit)) throw new ConditionFailed(i);
+      }
+    });
+    for (const op of ops) {
+      const item = { ...(items.get(op.key) ?? {}) };
+      for (const [attr, delta] of Object.entries(op.add ?? {})) item[attr] = (item[attr] ?? 0) + delta;
+      if (op.ttl && item.expiresAt === undefined) item.expiresAt = op.ttl;
+      items.set(op.key, item);
+    }
+  }
   return {
     items,
-    async write(ops) {
-      if (delay) await delay();
-      // Everything below runs without yielding, as one transaction does.
-      ops.forEach((op, i) => {
-        const item = items.get(op.key) ?? {};
-        for (const [attr, limit] of Object.entries(op.atMost ?? {})) {
-          if (attr in item && !(item[attr] <= limit)) throw new ConditionFailed(i);
-        }
-      });
-      for (const op of ops) {
-        const item = { ...(items.get(op.key) ?? {}) };
-        for (const [attr, delta] of Object.entries(op.add ?? {})) item[attr] = (item[attr] ?? 0) + delta;
-        if (op.ttl && item.expiresAt === undefined) item.expiresAt = op.ttl;
-        items.set(op.key, item);
-      }
-    },
+    calls,
+    async write(ops) { calls.write += 1; await apply(ops); },
+    async update(op) { calls.update += 1; await apply([op]); },
     async putNew(key, strings) {
+      calls.putNew += 1;
       if (delay) await delay();
       if (items.has(key)) return false;
       items.set(key, { ...strings });
       return true;
     },
     async read(key) {
+      calls.read += 1;
       if (delay) await delay();
       const item = items.get(key);
       return item ? { ...item } : null;

@@ -2,7 +2,8 @@
 // through, and answers that claim a cause held back (platform/app/src/assistant/answer.ts).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { claimsCause, lookUp, matches, numbersIn, numbersInText, renderAnswer } from '../../app/src/assistant/answer.ts';
+import { claimsCause, clipChars, lookUp, matches, numbersIn, numbersInText, renderAnswer, visiblePart } from '../../app/src/assistant/answer.ts';
+import { LIMITS } from '../src/validate.mjs';
 import { methodNumbers } from '../src/prompt.mjs';
 
 const CTX = {
@@ -53,4 +54,43 @@ test('causal claims are caught; negated ones are allowed', () => {
 test('the method numbers include the published weights and thresholds', () => {
   const n = methodNumbers();
   for (const x of [45, 30, 15, 10, 50, 65, 75, 0.1]) assert.ok(n.includes(x), String(x));
+});
+
+test('M9: while streaming, only whole sentences show, and a causal sentence never shows', () => {
+  const answers = [
+    'The demand part is 45% of the score. Shade causes more visits in summer. Ask about another part.',
+    'Sites with more shade score higher: shade leads to visitors staying longer.\nThat is all.',
+    'A pattern is not a cause. Heat risk and visits move together in [[shared.columns.0.p50]] sites.',
+  ];
+  for (const full of answers) {
+    let everCausal = false;
+    for (let n = 0; n <= full.length; n += 1) {
+      const { shown, causal } = visiblePart(full.slice(0, n), false);
+      assert.ok(full.startsWith(shown), 'what shows is the start of the answer');
+      assert.equal(claimsCause(shown), false, `shown at ${n}: ${shown}`);
+      if (shown) assert.match(shown, /[.!?:]$|\n$/, 'a whole sentence');
+      if (everCausal) assert.equal(causal, true, 'once a cause is claimed, it stays hidden');
+      everCausal ||= causal;
+    }
+    assert.equal(everCausal, claimsCause(full));
+    const end = visiblePart(full, true);
+    assert.equal(end.causal, claimsCause(full));
+    assert.equal(end.shown, end.causal ? '' : full);
+  }
+  // A sentence still being written is held back, even a word that is about to be causal.
+  assert.deepEqual(visiblePart('The demand part is 4', false), { shown: '', causal: false });
+  assert.deepEqual(visiblePart('One part. Heat caus', false), { shown: 'One part.', causal: false });
+  assert.deepEqual(visiblePart('One part. Heat causes it. Then', false), { shown: '', causal: true });
+});
+
+test('M10: answers and questions are cut by code points, never inside a character', () => {
+  const emoji = '\u{1F600}';
+  assert.equal(clipChars(emoji.repeat(5), 3), emoji.repeat(3));
+  assert.equal(clipChars('ab' + emoji, 3), 'ab' + emoji);
+  assert.equal(clipChars('ab' + emoji + 'c', 2), 'ab');
+  assert.equal(clipChars('short', 100), 'short');
+  const long = emoji.repeat(LIMITS.assistantChars + 10);
+  const cut = clipChars(long, LIMITS.assistantChars);
+  assert.equal([...cut].length, LIMITS.assistantChars);
+  assert.ok(!/[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/.test(cut), 'no half of a pair');
 });

@@ -1,16 +1,20 @@
 // What the planner's browser may send, checked field by field (docs/FLEXIBLE_ANALYSIS.md section 5).
 //
-// The browser builds the payload (platform/app/src/assistant/payload.ts), but a modified client
-// could send anything, so this file is the boundary that counts. Every object is closed: a key
-// this file does not name is refused, not ignored, so a client cannot add rows, cells, names,
-// coordinates or the file name under a new key. Free text is refused everywhere except the
-// planner's own question and the conversation so far. Labels (column headers, the engine's field
-// and tier names) must already be sanitised and short. Numbers must be finite and already
-// rounded: percentiles to 2 significant figures, everything else to 3, so an exact cell value
-// cannot ride along as a statistic. Category counts under 10 are refused.
+// Who enforces what. The server (this file) enforces the shape and the limits: every object is
+// closed (a key this file does not name is refused, not ignored), labels must already be
+// sanitised and short, numbers must be finite and already rounded (percentiles to 2 significant
+// figures, everything else to 3), category counts under 10 are refused, identifying headers
+// carry no statistics, and every list and the whole request have a size limit. The browser
+// (platform/app/src/assistant/payload.ts) enforces the content: that a header is a header and a
+// category label is a category, never a cell, a name or a coordinate. A modified client could
+// still put a site's name where a label goes; the server cannot tell, and does not claim to.
+// Free text is refused everywhere except the planner's own question and the conversation.
 
 export const LIMITS = Object.freeze({
-  bodyBytes: 64 * 1024,
+  // The largest consented payload the 360-site fixture produces with every group shared is
+  // about 16 KB (platform/assistant/test/payload.test.mjs measures it); a question adds at most
+  // 3 KB. The browser drops the oldest turns of the conversation to stay under this.
+  bodyBytes: 32 * 1024,
   questionChars: 1000,
   assistantChars: 4000,
   historyTurns: 14, // seven questions before this one: eight per conversation
@@ -46,22 +50,51 @@ export const SENSITIVE_HEADER_WORDS = [
   'coord', 'coords', 'coordinate', 'coordinates', 'geometry', 'geom', 'wkt', 'geojson', 'easting', 'northing',
   'address', 'addr', 'street', 'postcode', 'postal', 'zip', 'zipcode', 'email', 'phone', 'tel', 'contact',
   'note', 'notes', 'comment', 'comments', 'description', 'remarks', 'owner', 'parcel', 'apn',
+  'x', 'y', 'pointx', 'pointy', 'xcoord', 'ycoord', 'gps', 'location', 'loc', 'geo', 'geopoint', 'fid', 'oid',
+  'objectid', 'sitename', 'siteid', 'latdd', 'londd', 'lngdd', 'mail', 'mobile', 'fax', 'dob', 'birth', 'ssn',
+  'passport', 'plate', 'vin', 'ip',
 ];
+/** Word endings and beginnings that mark the same: site_id, siteid, sitename, latdd, lon_wgs84. */
+export const SENSITIVE_HEADER_SUFFIXES = ['id', 'name', 'address', 'zip', 'postcode', 'phone', 'email'];
+export const SENSITIVE_HEADER_PREFIXES = ['lat', 'lon', 'lng'];
 
-export function sensitiveHeader(header) {
-  const words = String(header).replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-  return words.some((w) => SENSITIVE_HEADER_WORDS.includes(w));
+/**
+ * Whether a header names an identifying column. The header is split into words at anything not
+ * a letter or digit and at case changes (siteName, POINT_X, geo_point); each word, and all the
+ * words run together, is checked against the list, the endings and the beginnings. It errs
+ * towards sharing less: "valid" or "latency" also send only their header.
+ */
+function headerWords(header) {
+  const words = header.normalize('NFKC').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  return words.length > 1 ? [...words, words.join('')] : words;
 }
 
-export const DIRECTIONS =['higher_better', 'lower_better', 'neither'];
+export function sensitiveHeader(header) {
+  // The header as written and as it travels (hidden characters removed), so a hidden character
+  // can neither split a word apart nor run two together unseen.
+  const raw = String(header ?? '');
+  const candidates = [...headerWords(raw), ...headerWords(sanitizeLabel(raw)), ...headerWords(raw.replace(HIDDEN, ''))];
+  return candidates.some((w) => SENSITIVE_HEADER_WORDS.includes(w)
+    || SENSITIVE_HEADER_SUFFIXES.some((s) => w.endsWith(s))
+    || SENSITIVE_HEADER_PREFIXES.some((p) => w.startsWith(p)));
+}
+
+export const DIRECTIONS = ['higher_better', 'lower_better', 'neither'];
 export const CARDINALITY = ['one value', '2 to 5', '6 to 20', '21 to 100', 'over 100'];
 export const PARTS = ['demand', 'feasibility', 'safety', 'equity'];
 export const CONFIDENCE = ['High', 'Medium', 'Low'];
 export const INDEX_KINDS = ['linear', 'threshold', 'target', 'ordinal'];
 
-// Format (Cf), control (Cc), private-use (Co), surrogates (Cs), unassigned (Cn), line and
-// paragraph separators: none can be seen, and several are used to hide instructions.
-const INVISIBLE = /[\p{Cc}\p{Cf}\p{Co}\p{Cs}\p{Cn}\u2028\u2029]/gu;
+// Characters nobody can see, removed outright: every default-ignorable code point (zero-width
+// characters, variation selectors U+FE00-FE0F and U+E0100-E01EF, the combining grapheme joiner
+// U+034F, the Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, bidirectional controls, tag
+// characters), every format character (Cf), the braille blank U+2800 and the object
+// replacement U+FFFC. Several are used to hide instructions or to split a word such as
+// "latitude" so a check does not see it.
+const HIDDEN = /[\p{Default_Ignorable_Code_Point}\p{Cf}\u034f\u115f\u1160\u3164\uffa0\ufe00-\ufe0f\u{E0100}-\u{E01EF}\u2800\ufffc]/gu;
+// Controls (Cc), private use (Co), surrogates (Cs), unassigned (Cn), line and paragraph
+// separators: turned into spaces, then runs of spaces into one.
+const SPACING = /[\p{Cc}\p{Co}\p{Cs}\p{Cn}\u2028\u2029]/gu;
 const LEADING_FORMULA = /^[\s=+\-@]+/u;
 
 /**
@@ -71,7 +104,13 @@ const LEADING_FORMULA = /^[\s=+\-@]+/u;
  * label is unchanged by it. Returns '' when nothing is left.
  */
 export function sanitizeLabel(raw) {
-  let s = String(raw ?? '').normalize('NFKC').replace(INVISIBLE, ' ');
+  let s = String(raw ?? '');
+  // Normalising can make a hidden character (U+3164 becomes U+1160) and removing one can leave
+  // characters that normalise further, so repeat until nothing changes.
+  for (let i = 0, prev = null; i < 4 && s !== prev; i += 1) {
+    prev = s;
+    s = s.normalize('NFKC').replace(HIDDEN, '').replace(SPACING, ' ');
+  }
   s = s.replace(/\[\[|\]\]/g, ' ').replace(/[<>`]/g, ' ');
   s = s.replace(/\s+/gu, ' ').trim();
   let before;

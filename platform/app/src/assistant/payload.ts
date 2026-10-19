@@ -37,6 +37,10 @@ export const LIMITS = {
   questionChars: 1000,
   assistantChars: 4000,
   historyTurns: 14,
+  /** The server's request size limit; the oldest turns are dropped to stay under it. */
+  bodyBytes: 32 * 1024,
+  /** Room kept for the question and the request's own fields. */
+  questionBytes: 4 * 1024,
 } as const;
 
 export type Role =
@@ -59,12 +63,32 @@ export const SENSITIVE_HEADER_WORDS: readonly string[] = [
   'coord', 'coords', 'coordinate', 'coordinates', 'geometry', 'geom', 'wkt', 'geojson', 'easting', 'northing',
   'address', 'addr', 'street', 'postcode', 'postal', 'zip', 'zipcode', 'email', 'phone', 'tel', 'contact',
   'note', 'notes', 'comment', 'comments', 'description', 'remarks', 'owner', 'parcel', 'apn',
+  'x', 'y', 'pointx', 'pointy', 'xcoord', 'ycoord', 'gps', 'location', 'loc', 'geo', 'geopoint', 'fid', 'oid',
+  'objectid', 'sitename', 'siteid', 'latdd', 'londd', 'lngdd', 'mail', 'mobile', 'fax', 'dob', 'birth', 'ssn',
+  'passport', 'plate', 'vin', 'ip',
 ];
+/** Word endings and beginnings that mark the same: site_id, siteid, sitename, latdd, lon_wgs84. */
+export const SENSITIVE_HEADER_SUFFIXES: readonly string[] = ['id', 'name', 'address', 'zip', 'postcode', 'phone', 'email'];
+export const SENSITIVE_HEADER_PREFIXES: readonly string[] = ['lat', 'lon', 'lng'];
 
-/** Whether a header names an identifying column (split into words at _, -, spaces and case changes). */
+/**
+ * Whether a header names an identifying column. Split into words at anything not a letter or
+ * digit and at case changes; each word, and all of them run together, is checked against the
+ * list, the endings and the beginnings. Errs towards sharing less. Exactly the server's rule.
+ */
+function headerWords(header: string): string[] {
+  const words = header.normalize('NFKC').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  return words.length > 1 ? [...words, words.join('')] : words;
+}
+
 export function sensitiveHeader(header: string): boolean {
-  const words = header.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-  return words.some((w) => SENSITIVE_HEADER_WORDS.includes(w));
+  // The header as written and as it travels (hidden characters removed), so a hidden character
+  // can neither split a word apart nor run two together unseen.
+  const raw = String(header ?? '');
+  const candidates = [...headerWords(raw), ...headerWords(sanitizeLabel(raw)), ...headerWords(raw.replace(HIDDEN, ''))];
+  return candidates.some((w) => SENSITIVE_HEADER_WORDS.includes(w)
+    || SENSITIVE_HEADER_SUFFIXES.some((s) => w.endsWith(s))
+    || SENSITIVE_HEADER_PREFIXES.some((p) => w.startsWith(p)));
 }
 
 export type Cardinality = 'one value' | '2 to 5' | '6 to 20' | '21 to 100' | 'over 100';
@@ -77,7 +101,12 @@ export function cardinality(distinct: number): Cardinality {
   return 'over 100';
 }
 
-const INVISIBLE = /[\p{Cc}\p{Cf}\p{Co}\p{Cs}\p{Cn}\u2028\u2029]/gu;
+// Removed outright: default-ignorable code points (zero-width characters, variation selectors,
+// U+034F, the Hangul fillers, bidirectional controls, tag characters), format characters, the
+// braille blank U+2800 and U+FFFC. Turned into spaces: controls, private use, surrogates,
+// unassigned, line and paragraph separators. The same classes as the server.
+const HIDDEN = /[\p{Default_Ignorable_Code_Point}\p{Cf}\u034f\u115f\u1160\u3164\uffa0\ufe00-\ufe0f\u{E0100}-\u{E01EF}\u2800\ufffc]/gu;
+const SPACING = /[\p{Cc}\p{Co}\p{Cs}\p{Cn}\u2028\u2029]/gu;
 const LEADING_FORMULA = /^[\s=+\-@]+/u;
 
 /**
@@ -85,7 +114,11 @@ const LEADING_FORMULA = /^[\s=+\-@]+/u;
  * = + - @, no [[ ]], < > or backticks, at most 64 characters. Exactly the server's rule.
  */
 export function sanitizeLabel(raw: unknown): string {
-  let s = String(raw ?? '').normalize('NFKC').replace(INVISIBLE, ' ');
+  let s = String(raw ?? '');
+  for (let i = 0, prev: string | null = null; i < 4 && s !== prev; i += 1) {
+    prev = s;
+    s = s.normalize('NFKC').replace(HIDDEN, '').replace(SPACING, ' ');
+  }
   s = s.replace(/\[\[|\]\]/g, ' ').replace(/[<>`]/g, ' ');
   s = s.replace(/\s+/gu, ' ').trim();
   let before: string;
@@ -372,4 +405,28 @@ export function buildContext(i: PayloadInputs, choice: ShareChoice | null): Cont
   const app = buildAppState(i);
   const shared = choice ? buildShared(i, choice) : undefined;
   return shared ? { app, shared } : { app };
+}
+
+const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
+
+/** Whether a context leaves room in a request for a question (the consent step checks this). */
+export function contextFits(context: Context): boolean {
+  return bytes(context) <= LIMITS.bodyBytes - LIMITS.questionBytes;
+}
+
+interface Turnish { role: string; text: string }
+
+/**
+ * The request with the oldest turns of the conversation dropped, a question and its answer at
+ * a time, until it fits the server's size limit; null when it does not fit even with none.
+ */
+export function fitRequest<T extends { history: Turnish[] }>(body: T): T | null {
+  let history = body.history.slice(-LIMITS.historyTurns);
+  if (history.length % 2) history = history.slice(1);
+  for (;;) {
+    const candidate = { ...body, history };
+    if (bytes(candidate) <= LIMITS.bodyBytes) return candidate;
+    if (!history.length) return null;
+    history = history.slice(2);
+  }
 }

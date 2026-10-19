@@ -13,22 +13,46 @@ browser (Assistant panel)                       same origin, so CSP connect-src 
     -> CloudFront E1JXKS26TDP3Z2, behaviour /api/assistant/* (no caching, all viewer headers
        except Host, the evsient-app-headers function), origin access control signs the request
     -> Lambda function URL (AuthType AWS_IAM, RESPONSE_STREAM): evsient-assistant
-         1. size limit (64 KB), then validate.mjs: closed objects, allowed tiers only
-         2. switched off?            -> 503 "switched off"
-         3. rate limits (limits.mjs) -> 429
-         4. spend ledger (ledger.mjs): reserve the most this call could cost -> 503 if a cap
-            would be passed ("The assistant has reached this month's limit")
-         5. Bedrock InvokeModelWithResponseStream, global.anthropic.claude-haiku-5-5
-         6. stream NDJSON lines back; settle the ledger with the actual cost
+         1. this instance's token buckets, per viewer address and for everyone (in memory,
+            no database call)                                    -> 429
+            /status stops here: it is answered from a 30-second in-memory cache
+         2. size limit (32 KB), then validate.mjs: closed objects, allowed tiers only -> 413, 400
+         3. switched off?                                        -> 503 "switched off"
+         4. Bedrock data retention reads "none"? (checked at cold start, then every 15 minutes;
+            a failed check is retried after a minute)            -> 503 "not available"
+         5. a cap this instance has already seen reached (in memory) -> 503
+         6. shared rate limits in DynamoDB (limits.mjs)          -> 429
+         7. spend ledger (ledger.mjs): reserve the most this call could cost against the
+            month, the day and this visitor's share of the day -> 503 if any would be passed
+            ("The assistant has reached this month's limit")
+         8. Bedrock InvokeModelWithResponseStream, global.anthropic.claude-haiku-5-5
+         9. stream NDJSON lines back; settle the ledger with the actual cost
     -> DynamoDB table evsient-assistant (ledger, rate counters, salt; no text is ever stored)
 ```
+
+## What the server checks, and what the browser checks
+
+The server enforces the shape and the limits: closed objects with only the allowed keys,
+rounded numbers, sanitised labels, no statistics on columns whose role or header marks them
+as identifying, sizes, rates and spend. It cannot tell whether a label is really a column
+header or a category someone typed, so the content (no cells, names, notes or coordinates)
+rests on the browser's payload builder, `platform/app/src/assistant/payload.ts`, which the
+property tests in `test/payload.test.mjs` exercise against the 360-site fixture with
+unfriendly headers and hidden characters. Both sides strip the same invisible characters
+(variation selectors, the combining grapheme joiner, Hangul fillers, the braille blank, tag
+characters, zero-width and other format characters) and flag the same identifying headers
+(words such as `x`, `y`, `gps`, `fid`, `objectid`, `location`, and any word ending in `id`,
+`name`, `address`, `zip`, `postcode`, `phone` or `email`, or starting with `lat`, `lon` or
+`lng`). The header rule errs towards sharing less: `valid` or `latest_visit` also send only
+their header.
 
 | File | What it is |
 |---|---|
 | `src/core.mjs` | Request handling, in order of the checks above. No AWS in it |
 | `src/validate.mjs` | The server boundary: what the browser may send |
 | `src/ledger.mjs`, `src/store.mjs` | The spend ledger and its DynamoDB transactions |
-| `src/limits.mjs` | Per address (hashed, by /24 or /56), per session, and global limits |
+| `src/limits.mjs` | In-memory token buckets, then per address (hashed, by /24 or /56), per session, and global limits |
+| `src/retention.mjs` | Reads Bedrock's data retention mode (signed GET) |
 | `src/prompt.mjs` | The system prompt, method and common questions |
 | `src/pricing.mjs` | Prices per million tokens; the ledger only spends from this table |
 | `src/config.mjs` | Settings from the environment; anything malformed refuses every question |
@@ -44,16 +68,53 @@ The browser side is `platform/app/src/assistant/`: `payload.ts` builds what may 
 ## Spend cap: how it holds
 
 - Before each call the proxy reserves the most it could cost: every byte of the request as a
-  token at the dearest input rate, plus the full output allowance. Haiku at the size limit is
-  about one US cent. The reservation is a DynamoDB conditional transaction, so concurrent calls
-  cannot both take the last cent.
-- After the call it settles to the cost Bedrock reports. A call that breaks off keeps its whole
-  reservation; one Bedrock refused outright (validation, throttling, access) costs nothing.
+  token at the dearest input rate, plus the full output allowance. Haiku at the size limit
+  (32 KB plus the system prompt) is about $0.006. The reservation is a DynamoDB conditional
+  transaction, so concurrent calls cannot both take the last cent.
+- After the call it settles to the cost Bedrock reports, taking for each kind of token the
+  larger of what the stream and the invocation metrics say. A call without a final output
+  count, or one that breaks off, keeps its whole reservation; one Bedrock refused outright
+  (validation, throttling, access) costs nothing.
 - Any error reading or writing the ledger refuses the question. Unsettled reservations stay
   counted. The ledger can overstate spend, never understate it.
-- Caps: $5 a month (UTC calendar month), $0.35 a day so one bad day cannot use the month, and
-  $1 a month for deeper answers (off unless switched on).
+- Caps: $5 a month (UTC calendar month), $0.35 a day so one bad day cannot use the month,
+  $0.05 a day per visitor (address prefix) so one person cannot use the day, and $1 a month
+  for deeper answers (off unless switched on). The visitor share allows roughly 8 questions
+  at the size limit and 25 to 50 ordinary ones.
+- The price row comes from the model ID (`pricing.mjs`). The proxy refuses to start if
+  `ModelPrice` names a different row, or if `ModelExtraJson` sets anything other than
+  `thinking` (`disabled` or `adaptive`), `output_config.effort` or `temperature`.
 - Budgets and alarms only warn; the ledger is what stops spending.
+
+## Request floods
+
+AWS WAF costs more than the whole non-model budget, so floods are handled in the function:
+
+- Each instance keeps token buckets in memory: per viewer address prefix (3 questions at once,
+  then 1 a minute; 10 status checks at once, then 10 a minute) and for everyone (4 questions
+  at once, then 3 a minute). A refused request never reaches DynamoDB, and refusals are logged
+  once a minute with a count.
+- The viewer address is CloudFront's `CloudFront-Viewer-Address` only. `X-Forwarded-For` is
+  never used, because a viewer can write it. A request without the header (a misconfigured
+  behaviour) goes into one shared, conservative bucket, and the `NoViewerAddress` alarm fires.
+- The shared limits in DynamoDB: 12 questions an hour and 30 a day per address prefix, 30 a
+  day per session, 20 a minute for everyone.
+- `ReservedConcurrency` (template parameter, unset by default) caps the number of instances.
+  The account's Lambda concurrency limit is 10 today, which leaves nothing to reserve; once
+  the quota increase is granted, deploy with `--param ReservedConcurrency=2`.
+
+Worst case outside model spend, under a sustained flood:
+
+| Item | Cost |
+|---|---|
+| CloudFront requests (about $1 a million) and Lambda requests ($0.20 a million) | about $1.20 per million flood requests; the same as a flood on any path of the distribution |
+| Lambda duration for refused requests (about 5 ms at 256 MB arm64) | about $0.02 per million |
+| DynamoDB: at most 3 questions a minute per instance pass the buckets, 10 instances at most, up to 4 write units each | about 1.3 million questions a month, about $3.20; with `ReservedConcurrency=2`, about $0.65 |
+| CloudWatch Logs: refusals sampled once a minute | pennies |
+
+So the function adds at most about $3.20 a month (about $0.65 with reserved concurrency) on
+top of CloudFront's per-request charge, which only a WAF or CloudFront's flat-rate plan can
+cap.
 
 ## Deploy (coordinator, after review)
 
@@ -68,7 +129,10 @@ open questions in DEC-029) and use it for every step.
    aws bedrock put-account-data-retention --mode none --region us-east-2 --profile future-city
    aws bedrock get-model-invocation-logging-configuration --region us-east-2 --profile future-city
    ```
-   The last must show no `loggingConfig`. `deploy.sh` checks both and stops otherwise.
+   The last must show no `loggingConfig`. `deploy.sh` checks both and stops otherwise. The
+   function also reads the retention mode itself (IAM `bedrock:GetAccountDataRetention`, a
+   signed GET of `/data-retention`) when it starts and every 15 minutes, and answers nothing
+   unless it reads `none`.
 3. **Cost allocation tag.** Activate `Project` as a cost allocation tag (Billing, Cost
    allocation tags) so the non-model budget can see it. It can take a day to appear.
 4. **Stack and code:**
@@ -80,7 +144,8 @@ open questions in DEC-029) and use it for every step.
    Confirm the SNS subscription email. The stack outputs `FunctionUrlDomain` and
    `OriginAccessControlId`.
 5. **Smoke test before connecting CloudFront.** A direct call to the function URL must be
-   refused (`403`, AuthType AWS_IAM). Then one test call with the CLI, which also confirms the
+   refused (`403`, AuthType AWS_IAM). CloudFront's permission is limited to its own
+   distribution, this account and calls through the function URL (`InvokedViaFunctionUrl`). Then one test call with the CLI, which also confirms the
    request fields are accepted (cost: under one cent):
    ```
    aws lambda invoke --function-name evsient-assistant --region us-east-2 --profile future-city \
@@ -138,13 +203,15 @@ At the expected use (a few hundred questions a month), about $0.00 to $0.15:
 |---|---|
 | Lambda (256 MB arm64, about 5 s a question) | free tier (400,000 GB-seconds and 1M requests a month) |
 | DynamoDB on demand (about 16 write units a question) | under $0.01 per 1,000 questions |
-| CloudWatch Logs (7 days), 1 metric filter, 3 alarms | $0.00 within the free tier (10 metrics, 10 alarms); $0.60 at most outside it |
+| CloudWatch Logs (7 days), 2 metric filters, 4 alarms | $0.00 within the free tier (10 metrics, 10 alarms); $0.80 at most outside it |
 | SNS email | free (first 1,000 a month) |
 | Budgets (2, no actions) | $0.00 |
 | CloudFront requests to /api | under $0.01 |
 | Origin access control, IAM, data retention setting | free |
 
-Worst case if every free tier is already used elsewhere: about $1 a month.
+Worst case if every free tier is already used elsewhere: about $1 a month. Under a sustained
+flood, see Request floods above: at most about $3.20 more from the function, plus
+CloudFront's per-request charge.
 
 ## Retiring the old OpenAI assistant (futurecity.andyyaro.com)
 
