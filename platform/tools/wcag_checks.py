@@ -389,7 +389,9 @@ HELPERS_JS = r"""
     return out;
   };
 
-  const pageWidth = () => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth });
+  // scrollsSideways: how far the page can actually be scrolled sideways, which is what a reader meets.
+  const pageWidth = () => { const x = scrollX; scrollTo(99999, scrollY); const can = scrollX; scrollTo(x, scrollY);
+    return { scrollWidth: document.documentElement.scrollWidth, innerWidth, scrollsSideways: can }; };
 
   // ---- placeholder text (1.4.3 applies to it): its colour over the field's own background
   const placeholders = () => [...document.querySelectorAll('input[placeholder], textarea[placeholder]')]
@@ -739,7 +741,8 @@ def undecided_text(page):
             if not el.is_visible():
                 continue
             # Measured in full view: a row half under the window's edge measures its padding, not its text.
-            el.evaluate("(el) => { const r = el.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) el.scrollIntoView({ block: 'center' }); }")
+            if el.evaluate("(el) => { const r = el.getBoundingClientRect(); if (r.top >= 0 && r.bottom <= innerHeight) return false; el.scrollIntoView({ block: 'center' }); return true; }"):
+                page.wait_for_timeout(150)
             r = el.evaluate("(el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return { x: r.left, y: r.top, w: r.width, h: r.height, d: window.__w.describe(el), size: cs.fontSize, weight: cs.fontWeight }; }")
             img, inner = shot(page, r, 2)
             if img is None:
@@ -764,6 +767,9 @@ def focus_walk(page, pixels, limit=260):
     result = {"stops": stops, "ended": None}
     for _ in range(limit):
         page.keyboard.press("Tab")
+        if page.evaluate("() => !!(document.activeElement && document.activeElement.closest('.rs-marker'))"):
+            # A marker outside the visible map brings the map round to it in 400 ms; measure where it lands.
+            page.wait_for_timeout(600)
         info = page.evaluate("() => window.__w.focusInfo()")
         if info is None:
             result["ended"] = "left the page (focus returned to the browser)"
