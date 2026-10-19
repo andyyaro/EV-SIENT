@@ -13,8 +13,8 @@ the live copy and checks it against the same path at a git ref (default `origin/
 reads `deployed.json`, which every `--apply` writes, and checks that it names that ref's commit.
 It only reads.
 
-What it cannot see: objects in the bucket that no tracked folder produces, and anything behind
-the platform gate, which `scripts/verify_deployment.py` covers.
+What it cannot see: objects in the bucket that no tracked folder produces. That the retired
+`/platform` path serves nothing is `scripts/verify_deployment.py`'s job (DEC-030).
 
 Usage
 -----

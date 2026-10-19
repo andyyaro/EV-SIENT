@@ -284,13 +284,6 @@ gate "browser: caveats are VISIBLE, the form refuses visibly, and the explorer a
     for i in \$(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8877/index.html && break; sleep 0.5; done; \
     node --test 'tests/browser/*.test.mjs'"
 
-# The edge authoriser is the only thing standing between an anonymous request and the study's
-# full lineage, so its tests run here rather than only in the deploy path. They exercise the
-# REAL handler with REAL RSA keys - only the network is stubbed - so a regression in token
-# verification fails the repository gates, not just a deployment nobody re-ran.
-gate "edge-auth: only a verified id_token for the granted account reaches the origin" \
-  bash -c "cd '$REPO' && if command -v node >/dev/null; then node --test 'tests/edge_auth/*.test.mjs'; else echo 'node absent - edge auth tests SKIPPED (deploy path still runs them)'; fi"
-
 # The fail-closed capacity guard is the single safety property this whole project rests on:
 # it is what stops a feasibility claim being emitted from placeholder capacity. It is tested
 # from Python, but until now nothing exercised it in the OCTAVE tier -- and `guardproof.m`

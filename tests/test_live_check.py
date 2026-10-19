@@ -5,9 +5,10 @@ Why this file exists
 Audit F-14 found production matching no commit, and nothing that would have noticed.
 `scripts/check_live_vs_main.py` is that check, and it is only worth having if it fails when live
 differs. The same day, a full deploy from a checkout without the vendored CesiumJS would have
-had its `--delete` sync remove the 377 files the live explorer loads; `deploy_platform.py` now
-refuses that before changing anything. Both are tested here without the network: the parts that
-decide are pure, and the network only feeds them.
+had its `--delete` sync remove the 377 files the live explorer loads. That sync went with the
+gated platform (DEC-030); `deploy_platform.py` now publishes the public site alone, never passes
+`--delete`, and refuses any deletion a sync reports. Both are tested here without the network:
+the parts that decide are pure, and the network only feeds them.
 """
 
 from __future__ import annotations
@@ -72,29 +73,27 @@ def test_the_marker_must_account_for_the_ref():
     assert check.published_trees_equal(head, head, trees) is True
 
 
-def test_a_bundle_without_vendored_cesium_is_refused_and_a_complete_one_is_not():
-    prefix = f"s3://{deploy.PLATFORM_BUCKET}/{deploy.S3_PREFIX}/"
-    listing = "\n".join([f"(dryrun) upload: site/platform/index.html to {prefix}index.html",
-                         f"(dryrun) delete: {prefix}explorer/vendor/Cesium/Cesium.js",
-                         f"(dryrun) delete: {prefix}old-page.html"])
+def test_a_sync_that_deletes_anything_is_refused_and_one_that_only_writes_is_not():
+    """The public syncs never pass --delete. If one ever reports a deletion anyway, the deploy
+    stops: a checkout lacks every vendored file that is fetched rather than committed."""
+    bucket = f"s3://{deploy.MAIN_BUCKET}/"
+    listing = "\n".join([f"(dryrun) upload: site/www/index.html to {bucket}index.html",
+                         f"(dryrun) delete: {bucket}explorer/vendor/Cesium/Cesium.js",
+                         f"(dryrun) delete: {bucket}old-page.html"])
     deletions = deploy.deletions_from(listing)
-    assert deletions == ["explorer/vendor/Cesium/Cesium.js", "old-page.html"]
-    reason = deploy.vendor_refusal(deletions)
-    assert reason and "vendor_cesium.sh" in reason and "--www-only" in reason
-    assert deploy.vendor_refusal(["old-page.html"]) is None
+    assert deletions == [f"{bucket}explorer/vendor/Cesium/Cesium.js", f"{bucket}old-page.html"]
+    reason = deploy.deletion_refusal(deletions)
+    assert reason and "2 deletion(s)" in reason and "1 of them under a vendor/ folder" in reason
+    assert deploy.deletion_refusal(deploy.deletions_from(
+        f"upload: site/www/a.html to {bucket}a.html\n")) is None
 
 
-def test_only_a_missing_bucket_lets_the_preflight_skip_the_cesium_check():
-    """Any other head-bucket failure says nothing about what the bucket holds. The strings are
-    the CLI's own, measured 2026-10-17."""
-    missing = ("\naws: [ERROR]: An error occurred (404) when calling the HeadBucket operation: "
-               "Not Found\n")
-    denied = ("\naws: [ERROR]: An error occurred (403) when calling the HeadBucket operation: "
-              "Forbidden\n")
-    assert deploy.bucket_state(0, "") == "exists"
-    assert deploy.bucket_state(254, missing) == "absent"
-    assert deploy.bucket_state(254, denied) == denied.strip()
-    assert deploy.bucket_state(255, "") not in ("exists", "absent")
+def test_no_sync_in_the_deploy_is_ever_given_delete():
+    """Asserted against the source: the property is that the flag is absent, everywhere."""
+    source = (REPO / "scripts/deploy_platform.py").read_text()
+    code = [line for line in source.splitlines()
+            if line.strip() and not line.strip().startswith("#")]
+    assert not any('"--delete"' in line for line in code)
 
 
 def test_only_uploads_and_deletions_are_counted_never_progress_lines():

@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
-"""Verify the live deployment: the platform is shut, and the NFC field layer is not.
+"""Verify the live deployment: the retired /platform path serves nothing, and the NFC layer is open.
 
 Why both halves are checked, always
 -----------------------------------
-A gate that closes is only half the requirement. The same CloudFront distribution serves the
-twelve NFC landing pages that people reach by tapping a physical coin in a car park, with no
-account and no app - and those tags are already in the field. A deployment that locked the
-platform *and* broke the tags would satisfy the request as literally stated and be a clear
-regression. So every run asserts both, and neither half can pass alone.
+The Cognito-gated `/platform*` path was retired on 2026-10-18 (DEC-030); the planner now lives at
+https://app.futurecity.andyyaro.com with synthetic samples only. Retiring it removed a cache
+behaviour from the same CloudFront distribution that serves the twelve NFC landing pages people
+reach by tapping a physical coin in a car park, with no account and no app. A change that
+removed the gate *and* broke the tags would satisfy the request as literally stated and be a
+clear regression. So every run asserts both, and neither half can pass alone.
 
-What this cannot check, stated rather than glossed
---------------------------------------------------
-**That the gate opens for the granted user.** Confirming that requires signing in as
-granted account 1, whose password is not available to the assistant and should not
-be. This script proves the door is locked and correctly scoped; it cannot prove the key turns.
-That check is one sign-in by the project owner, and it is recorded as an open human action
-rather than quietly counted as done.
+The first half asserts the old platform URLs return no content at all: not the bundle, and not
+a redirect to a sign-in page that no longer exists. The main bucket holds nothing under
+`platform/`, so with the behaviour gone those requests fall through to it and miss.
 
 Exit code is 0 only if every assertion holds.
 """
@@ -35,9 +32,10 @@ SITES = ["FFX001", "FFX002", "FFX003", "FFX004",
          "PWC001", "PWC002", "PWC003", "PWC004",
          "PWC005", "PWC006", "PWC007", "PWC008"]
 
-#: Assets that must never be served to an anonymous caller. `provenance_v1.json` is the whole
-#: study's lineage; `contract/v1/site_table.csv` carries the twelve real facilities.
-GATED = [
+#: The retired gate's paths, and the spellings once tested against it. None may return the old
+#: bundle (`provenance_v1.json` is the whole study's lineage; `contract/v1/site_table.csv`
+#: carries the twelve real facilities) or bounce to the deleted sign-in client.
+RETIRED = [
     "/platform/",
     "/platform/index.html",
     "/platform/app.js",
@@ -46,12 +44,6 @@ GATED = [
     "/platform/operations.json",
     "/platform/contract/v1/site_table.csv",
     "/platform/explorer/index.html",
-]
-
-#: Spellings that resolve to the same object but might miss a `/platform*` path pattern.
-#: CloudFront normalises percent-encoding - measured, not assumed - so these are real attempts,
-#: not paranoia. They are why the bundle lives in its own bucket.
-BYPASSES = [
     "/%70latform/index.html",
     "/%70%6Catform/index.html",
     "/platform/../platform/index.html",
@@ -117,50 +109,17 @@ def main() -> int:
 
     r = Result()
 
-    print("\nHALF 1 - the platform must be SHUT to anonymous callers\n")
-    for path in GATED:
+    print("\nHALF 1 - the retired /platform path must serve NOTHING\n")
+    for path in RETIRED:
         status, body, headers = fetch(path)
         location = headers.get("location", "")
-        # The only acceptable answers are "go and sign in" or "not found". Anything that
-        # returns the asset is a failure, however it is dressed up.
-        redirected_to_cognito = status in (301, 302, 303, 307, 308) and "amazoncognito.com" in location
-        r.check(
-            redirected_to_cognito,
-            f"{path} is gated",
-            f"HTTP {status}" + (f" -> Cognito" if redirected_to_cognito else f" ({len(body)} bytes leaked!)"),
-        )
-
-    print("\nHALF 1b - alternative path spellings must not evade the gate\n")
-    for path in BYPASSES:
-        status, body, headers = fetch(path)
-        location = headers.get("location", "")
-        served = status == 200 and len(body) > 200 and b"<html" in body[:2000].lower()
-        gated = ("amazoncognito.com" in location) or status in (403, 404)
-        r.check(gated and not served, f"{path} does not serve the bundle", f"HTTP {status}")
-
-    print("\nHALF 1c - the sign-in page the gate sends people to must actually EXIST\n")
-    # Added after this shipped broken. The gate redirected to Cognito correctly and Cognito
-    # had no page to serve: under Managed Login v2 an app client without a branding record
-    # gets "Login pages unavailable · Please contact an administrator". Asserting the redirect
-    # is a strictly weaker claim than asserting a person can reach a sign-in form, and the
-    # weaker claim is the one that passed.
-    _status, _body, headers = fetch("/platform/index.html")
-    login_url = headers.get("location", "")
-    if not login_url:
-        r.check(False, "gate provides a sign-in URL", "no Location header")
-    else:
-        proc = subprocess.run(
-            ["curl", "-sSL", "--max-time", "30", "-w", "\n%{http_code}", login_url],
-            capture_output=True, text=True)
-        page, _, code = proc.stdout.rpartition("\n")
-        # The presence of a password input is the reliable signal. Searching the text for
-        # "unavailable" is NOT: Cognito ships its entire error-string table, including the
-        # definition of "Login pages unavailable", inside a <script> on every page - the ninth
-        # text-versus-meaning trap in this program.
-        has_password_field = 'type="password"' in page
-        r.check(code.strip() == "200" and has_password_field,
-                "Cognito sign-in page renders a real form",
-                f"HTTP {code.strip()}, password field: {has_password_field}")
+        # A 200 means content is still being served from somewhere; a redirect to Cognito means
+        # a gate is still attached. Either is a failure, however it is dressed up.
+        to_cognito = "amazoncognito.com" in location
+        ok = status in (403, 404) and not to_cognito
+        r.check(ok, f"{path} serves nothing",
+                f"HTTP {status}" + (" -> Cognito (a gate is still attached)" if to_cognito else "")
+                + (f" ({len(body)} bytes served!)" if status == 200 else ""))
 
     print("\nHALF 2 - the NFC field layer must remain PUBLIC (no account, no app)\n")
     for site in SITES:
@@ -183,19 +142,9 @@ def main() -> int:
     print("""
   NOT VERIFIED BY THIS SCRIPT - and not counted as done:
 
-    1. That the gate OPENS for granted account 1. Needs a sign-in with a
-       password the assistant does not have and should not have.
-
-    2. That the content behind the gate actually LOADS. This is a separate claim and
-       is deliberately listed separately rather than folded into the first, because
-       everything past the redirect is unexercised: the origin access control, the
-       gated bucket's policy, and the URI rewrite that turns /platform/ into
-       /platform/index.html. Each is configured the way the working main bucket is
-       configured, but configured-like-a-working-one is not the same as observed
-       working. Reaching it requires passing the gate, so it cannot be checked from
-       this side without weakening the gate - which would defeat the point.
-
-    Both resolve together the first time the owner signs in. Open human action.
+    That the AWS resources behind the retired gate are gone (bucket, origin access control,
+    Lambda@Edge function and role, response headers policy, log groups). This script sees
+    only what a visitor sees. DEC-030 lists them and who removes them.
 """)
 
     if args.json:

@@ -86,44 +86,38 @@ jobs:
       - name: No credentials, tokens or account ids in anything tracked
         run: python scripts/secret_scan.py
 
-      - name: The deploy script's safety assertions actually refuse a bad config
-        # assert_safe_change is the guard protecting the NFC field layer from a whole-config
-        # replace. A guard nobody exercises is a guard nobody can trust.
+      - name: The deploy script publishes the public site only and refuses the retired gate
+        # The Cognito-gated /platform* path was retired on 2026-10-18 (DEC-030). The deploy
+        # script must not be able to rebuild it, must not touch the distribution config, and
+        # must report a gate left on the distribution, including a Lambda on the DEFAULT
+        # behaviour, which would gate the NFC tag pages. A guard nobody exercises is a guard
+        # nobody can trust.
         run: |
           python - <<'PY'
-          import importlib.util, copy, sys
+          import importlib.util, sys
           spec = importlib.util.spec_from_file_location("dp", "scripts/deploy_platform.py")
           dp = importlib.util.module_from_spec(spec); spec.loader.exec_module(dp)
 
-          before = {
-              "Origins": {"Quantity": 1, "Items": [{"Id": "main", "DomainName": "x"}]},
-              "CacheBehaviors": {"Quantity": 0, "Items": []},
-              "DefaultCacheBehavior": {"TargetOriginId": "main",
-                                       "LambdaFunctionAssociations": {"Quantity": 0}},
-              "Aliases": {"Quantity": 1, "Items": ["futurecityfellowship.andyyaro.com"]},
-          }
+          # 1. Every gate or platform mode is refused before anything runs.
+          for flag in ("--platform", "--gate", "--full"):
+              if dp.main([flag, "--apply"]) != 2:
+                  sys.exit(f"FAIL: {flag} was not refused")
 
-          # 1. Touching the default behaviour must be refused -- that is what serves the NFC tags.
-          bad = copy.deepcopy(before)
-          bad["DefaultCacheBehavior"]["LambdaFunctionAssociations"] = {"Quantity": 1}
-          try:
-              dp.assert_safe_change(before, bad)
-              sys.exit("FAIL: a config gating the DEFAULT behaviour was accepted")
-          except SystemExit as exc:
-              if "REFUSING" not in str(exc):
-                  raise
+          # 2. A gate left on the distribution is reported, and a clean config is not.
+          clean = {"Origins": {"Quantity": 1, "Items": [{"Id": "main"}]},
+                   "CacheBehaviors": {"Quantity": 0},
+                   "DefaultCacheBehavior": {"LambdaFunctionAssociations": {"Quantity": 0}}}
+          gated = {"Origins": {"Quantity": 2, "Items": [{"Id": "main"}, {"Id": "platform-gated"}]},
+                   "CacheBehaviors": {"Quantity": 1, "Items": [{"PathPattern": "/platform*"}]},
+                   "DefaultCacheBehavior": {"LambdaFunctionAssociations": {"Quantity": 1}}}
+          if dp.gate_leftovers(clean) or len(dp.gate_leftovers(gated)) != 3:
+              sys.exit("FAIL: gate leftovers are not reported correctly")
 
-          # 2. Dropping an alias must be refused.
-          bad2 = copy.deepcopy(before)
-          bad2["Aliases"] = {"Quantity": 0, "Items": []}
-          try:
-              dp.assert_safe_change(before, bad2)
-              sys.exit("FAIL: a config dropping the alias was accepted")
-          except SystemExit as exc:
-              if "REFUSING" not in str(exc):
-                  raise
+          # 3. The script never sends a distribution config.
+          if "update-distribution" in open("scripts/deploy_platform.py").read():
+              sys.exit("FAIL: the deploy script can rewrite the distribution config")
 
-          print("deploy guards refuse both a gated default behaviour and a dropped alias")
+          print("gate and platform modes refused; leftovers reported; no distribution writes")
           PY
 
   deploy:
@@ -180,16 +174,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e . -c requirements-lock.txt
 
-      - name: Write the platform allowlist from its secret
-        if: steps.role.outputs.configured == 'true'
-        # infra/edge-auth/granted.mjs (who may enter /platform) is not tracked, so a clean
-        # checkout lacks it and deploy_platform.py refuses to package the gate. CI gets it from
-        # the PLATFORM_GRANTED_MJS secret: the file's whole text. No secret -> the refusal stands.
-        env:
-          GRANTED: ${{ secrets.PLATFORM_GRANTED_MJS }}
-        run: |
-          if [ -n "$GRANTED" ]; then printf '%s\n' "$GRANTED" > infra/edge-auth/granted.mjs; fi
-
       - name: Deploy
         if: steps.role.outputs.configured == 'true'
         # The script is dry-run by default. --apply is passed only when the operator ticked the
@@ -203,5 +187,6 @@ jobs:
 
       - name: Verify the deployment from the outside
         if: steps.role.outputs.configured == 'true' && inputs.apply
-        # Both halves, always: the platform shut AND the NFC field layer still open.
+        # Both halves, always: the retired /platform path serves nothing AND the NFC field
+        # layer is still open.
         run: python scripts/verify_deployment.py

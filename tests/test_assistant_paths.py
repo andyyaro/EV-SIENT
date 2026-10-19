@@ -38,7 +38,7 @@ PLACEHOLDER_EMAILS = {"name@agency.gov"}
     "tests/fixture_milestone2_v3_site_results.csv",
     "tests/fixture_legacy_v2_site_results.csv",
     "data/provenance/field_provenance_v1.csv",
-    "infra/edge-auth/index.mjs",
+    "infra/assistant/lambda_function.py",
     "scripts/verify_deployment.py",
     "scripts/deploy_platform.py",
     "docs/operations/v4-program/DECISIONS.md",
