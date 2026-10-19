@@ -12,7 +12,8 @@
 ## Results impact
 
 <!-- If any number a reviewer might quote changes, say which and why.
-     Legacy baseline (25 starter / 48 pathway, FFX002 58.8) must remain
+     Official totals are 25 starter / 47 pathway (milestone2_v3, contract v3,
+     DEC-027). Legacy baseline (25 starter / 48 pathway, FFX002 58.8) must remain
      reproducible in legacy_v2 mode unless a deliberate re-baselining is
      documented in a migration note. -->
 

@@ -1,9 +1,9 @@
 {
- "runId": "milestone2_v3_20261018T230858Z",
- "generatedAt": "2026-10-18T23:08:58.742717+00:00",
+ "runId": "milestone2_v3_20261019T030131Z",
+ "generatedAt": "2026-10-19T03:01:32.189312+00:00",
  "asOf": "2026-10-18",
  "mode": "milestone2_v3",
- "elapsedSec": 0.131,
+ "elapsedSec": 0.533,
  "totals": {
   "sites": 6,
   "starterPorts2026": 12,

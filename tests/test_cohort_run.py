@@ -115,8 +115,9 @@ def test_a_site_missing_a_cost_input_gets_no_cost_figures(tmp_path):
     assert gap not in set(costs["site_id"])
 
 
-def test_the_reference_study_run_as_a_cohort_is_still_held_to_25_and_48(tmp_path):
-    """RT-04 keys on the inputs, not on how they arrived."""
+def test_the_reference_study_run_as_a_cohort_is_still_held_to_25_and_47(tmp_path):
+    """RT-04 keys on the inputs, not on how they arrived. Since DEC-027 the totals are the
+    canonical 25 / 47, planned on the fixed-anchor ranking like any other cohort."""
     cohort = tmp_path / "nova"
     cohort.mkdir()
     shutil.copy(REPO / "data/inputs/real_sites_v2.csv", cohort / "sites.csv")
@@ -126,8 +127,10 @@ def test_the_reference_study_run_as_a_cohort_is_still_held_to_25_and_48(tmp_path
     shutil.copy(REPO / "data/provenance/field_provenance_v1.csv", cohort / "provenance.csv")
     result = workflow.run("milestone2_v3", tmp_path / "out", cohort_dir=cohort)
     assert result["cohort"]["reference_totals_apply"] is True
-    assert result["plan_ranking"] == result["cohort"]["plan_ranking"] == "legacy_v2"
-    assert (result["starter_total_2026"], result["pathway_total"]) == (25, 48)
+    assert result["plan_ranking"] == result["cohort"]["plan_ranking"] == "milestone2_v3"
+    assert (result["starter_total_2026"], result["pathway_total"]) == (25, 47)
+    assert (result["legacy_v2_result"]["starter_total"],
+            result["legacy_v2_result"]["pathway_total"]) == (25, 48)
     manifest = json.loads((tmp_path / "out/contract/contract_manifest.json").read_text())
     assert manifest["legacy_totals_checked"] is True
 
@@ -157,11 +160,11 @@ def test_an_unknown_risk_level_is_refused(tmp_path):
 
 
 def test_the_reference_run_is_unchanged_by_any_of_this(tmp_path):
-    """No --cohort: the same inputs, digests, schema and golden totals as before."""
+    """No --cohort: the same inputs, digests and schema; the golden totals are DEC-027's."""
     result = workflow.run("milestone2_v3", tmp_path / "out")
     assert "cohort" not in result
-    assert (result["starter_total_2026"], result["pathway_total"]) == (25, 48)
-    assert result["plan_ranking"] == "legacy_v2"
+    assert (result["starter_total_2026"], result["pathway_total"]) == (25, 47)
+    assert result["plan_ranking"] == "milestone2_v3"
     manifest = json.loads((tmp_path / "out/contract/contract_manifest.json").read_text())
     assert "cohort" not in manifest and manifest["legacy_totals_checked"] is True
     assert set(contract.REFERENCE_INPUTS.items()) <= set(manifest["inputs"].items())

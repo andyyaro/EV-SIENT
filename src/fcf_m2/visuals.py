@@ -17,7 +17,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from .config import MODEL_VERSION, SCHEMA_VERSION
+from .config import MODEL_VERSION, SCHEMA_VERSION_V3
 
 BEIGE = "#F5F0E6"
 DARK_GREEN = "#1B4332"
@@ -53,7 +53,8 @@ def footer(fig, source: str, source_date: str, scenario: str,
            assumption: str | None = None) -> None:
     """Stamp the mandatory provenance footer onto a figure and log it for QA."""
     parts = [f"Source: {source}", f"Vintage: {source_date}", f"Scenario: {scenario}",
-             f"Model: fcf_m2 v{MODEL_VERSION} / contract v{SCHEMA_VERSION}"]
+             # Charts are drawn from the authoritative contract, v3 since DEC-027.
+             f"Model: fcf_m2 v{MODEL_VERSION} / contract v{SCHEMA_VERSION_V3}"]
     if assumption:
         parts.append(f"Assumption: {assumption}")
     text = "  ·  ".join(parts)

@@ -31,7 +31,7 @@ echo "=== Future City Fellowship - repository verification ($(date)) ==="
 gate "python: test suite with coverage gate (incl. legacy golden + cohort invariance + contract + offline GIS)" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/ -q --cov=fcf_m2 --cov-fail-under=80"
 
-gate "python: legacy_v2 mode reproduces the accepted baseline (25 starter / 48 pathway)" \
+gate "python: legacy_v2 mode reproduces the earlier legacy_v2 result (25 starter / 48 pathway)" \
   bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow run --mode legacy_v2 --out data/outputs/verify_legacy >/dev/null && grep -q '\"starter_total\": 25' data/outputs/verify_legacy/run_summary.json && grep -q '\"pathway_total\": 48' data/outputs/verify_legacy/run_summary.json"
 
 gate "contract: tracked data/contract/v1 passes all rules + JSON Schema + RT-10 hash chain" \
@@ -46,18 +46,26 @@ gate "contract: v2 rebuilds byte-identically from the frozen v1 and every shared
 gate "contract: tracked data/contract/v2 passes v1 rules + v2 rules + JSON Schema + RT-10 hash chain" \
   bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow validate-contract data/contract/v2"
 
+# v3 is the authoritative output (DEC-027): a new run of the model, not a copy of v2. The
+# check reruns the model and refuses if anything but the run stamp differs from the tracked v3.
+gate "contract: v3 matches a fresh canonical run (25 starter / 47 pathway) and its hash chain verifies" \
+  bash -c "cd '$REPO' && '$PY' scripts/build_contract_v3.py --check"
+
+gate "contract: tracked data/contract/v3 passes v1 + v2 rules + JSON Schema + RT-10 hash chain" \
+  bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow validate-contract data/contract/v3"
+
 # A physical assumption may not hold two values in two halves of one model. charger
 # efficiency was 0.92 in Python and 0.93 in three MATLAB files, and survived because it is
 # not a contract field -- so there was nothing to reconcile it against.
 gate "cross-model: shared physical constants agree between Python and MATLAB" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_cross_model_constants.py -q"
 
-gate "cross-model: MATLAB canonical CSV reconciles with the contract (ports, horizons, capacity_basis)" \
+gate "cross-model: MATLAB canonical CSV reconciles with contract v3 (ports, horizons, capacity_basis)" \
   "$PY" - <<EOF
 import pandas as pd
 from pathlib import Path
 repo = Path("$REPO")
-st = pd.read_csv(repo/"data/contract/v1/scenario_table.csv")
+st = pd.read_csv(repo/"data/contract/v3/scenario_table.csv")
 m = pd.read_csv(repo/"matlab/data/canonical/matlab_scenarios.csv")
 assert set(st.horizon_year) == set(m.horizon_year) == {2026, 2036, 2046, 2056}
 mg = st.merge(m, on="scenario_id"); assert len(mg) == len(st) == 120

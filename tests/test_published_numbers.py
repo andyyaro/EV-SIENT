@@ -5,9 +5,15 @@ speaker notes, and the website patch package said 44/47/47/48 where the contract
 35/44/44/48 -- while the cost and emissions columns in the *same table rows* were correct. The
 ports column had gone stale and nothing noticed, because no gate compared prose against data.
 
-This is that gate. It recomputes each published figure from ``data/contract/v1`` and asserts
-the documents still say it. It is deliberately literal: if a number changes, these fail, and
-the fix is to regenerate the prose from the contract -- never to loosen the assertion.
+This is that gate. It recomputes each published figure from the contract and asserts the
+documents still say it. It is deliberately literal: if a number changes, these fail, and the
+fix is to regenerate the prose from the contract -- never to loosen the assertion.
+
+Since DEC-027 (2026-10-18) there are two contracts to check against, and each document is
+checked against exactly one. Current documents (README, the website results content) publish
+``data/contract/v3``, the authoritative output: 25 starter / 47 pathway. Dated Milestone 2
+deliverables (the final report, the speaker notes) are left as delivered and publish the frozen
+``data/contract/v1``, the earlier ``legacy_v2`` plan: 25 / 48.
 """
 
 from __future__ import annotations
@@ -20,6 +26,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "data/contract/v1"
+CONTRACT_V3 = ROOT / "data/contract/v3"
 
 BASE_CASES = {"baseline", "base"}
 HIGH_CASES = {"baseline", "high"}
@@ -31,8 +38,11 @@ def scenarios() -> pd.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def ports_by_path(scenarios) -> dict[str, dict[int, int]]:
-    """Portfolio active ports per horizon, on the base and high adoption paths."""
+def scenarios_v3() -> pd.DataFrame:
+    return pd.read_csv(CONTRACT_V3 / "scenario_table.csv")
+
+
+def _ports_by_path(scenarios) -> dict[str, dict[int, int]]:
     out: dict[str, dict[int, int]] = {}
     for label, cases in (("base", BASE_CASES), ("high", HIGH_CASES)):
         totals = {}
@@ -44,16 +54,32 @@ def ports_by_path(scenarios) -> dict[str, dict[int, int]]:
     return out
 
 
+@pytest.fixture(scope="module")
+def ports_by_path(scenarios) -> dict[str, dict[int, int]]:
+    """Portfolio active ports per horizon, on the base and high adoption paths (v1)."""
+    return _ports_by_path(scenarios)
+
+
+@pytest.fixture(scope="module")
+def ports_by_path_v3(scenarios_v3) -> dict[str, dict[int, int]]:
+    """The same, from the authoritative contract v3."""
+    return _ports_by_path(scenarios_v3)
+
+
 def read(rel: str) -> str:
     return (ROOT / rel).read_text(encoding="utf-8")
 
 
-# Documents that publish the active-port series, and how they format it.
-PORT_TABLE_DOCS = [
+# Documents that publish the active-port series. Current ones quote contract v3; the dated
+# Milestone 2 deliverable quotes the frozen v1 it was delivered with.
+CURRENT_PORT_TABLE_DOCS = [
     "README.md",
-    "reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md",
     "docs/operations/website-patch-package/content/results_2036_2046_2056.md",
 ]
+DATED_PORT_TABLE_DOCS = [
+    "reports/milestone-2/Future_City_Fellowship_Milestone_2_Final_Report.md",
+]
+PORT_TABLE_DOCS = CURRENT_PORT_TABLE_DOCS + DATED_PORT_TABLE_DOCS
 
 
 class TestContractGroundTruth:
@@ -63,11 +89,22 @@ class TestContractGroundTruth:
         assert ports_by_path["base"] == {2026: 25, 2036: 35, 2046: 44, 2056: 44}
         assert ports_by_path["high"] == {2026: 25, 2036: 44, 2046: 48, 2056: 48}
 
-    def test_pathway_ceiling_is_48(self, scenarios):
+    def test_pathway_ceiling_is_48_in_the_frozen_v1(self, scenarios):
         for horizon in sorted(scenarios.horizon_year.unique()):
             rows = scenarios[(scenarios.horizon_year == horizon)
                              & (scenarios.scenario_name.isin(BASE_CASES))]
             assert int(rows.ports_pathway_capacity.sum()) == 48
+
+    def test_expected_port_series_v3(self, ports_by_path_v3):
+        """The official series since DEC-027."""
+        assert ports_by_path_v3["base"] == {2026: 25, 2036: 31, 2046: 43, 2056: 43}
+        assert ports_by_path_v3["high"] == {2026: 25, 2036: 43, 2046: 47, 2056: 47}
+
+    def test_official_pathway_ceiling_is_47(self, scenarios_v3):
+        for horizon in sorted(scenarios_v3.horizon_year.unique()):
+            rows = scenarios_v3[(scenarios_v3.horizon_year == horizon)
+                                & (scenarios_v3.scenario_name.isin(BASE_CASES))]
+            assert int(rows.ports_pathway_capacity.sum()) == 47
 
     def test_no_site_ever_exceeds_its_pathway(self, scenarios):
         over = scenarios[scenarios.ports_active > scenarios.ports_pathway_capacity]
@@ -77,13 +114,33 @@ class TestContractGroundTruth:
 class TestPublishedPortSeries:
     @pytest.mark.parametrize("doc", PORT_TABLE_DOCS)
     def test_documents_do_not_contain_the_superseded_series(self, doc):
-        """47 was never a portfolio total at any horizon under any case."""
+        """The pre-Phase-0 series (44/47/47/48) was never a portfolio total in any contract."""
         text = read(doc)
-        for stale in ("44 → 47", "47 → 48", "| 47 |", "44 | 47 |"):
-            assert stale not in text, f"{doc} still publishes the superseded series: {stale!r}"
+        stale = ["44 → 47", "47 → 48", "44 | 47 |"]
+        if doc in DATED_PORT_TABLE_DOCS:
+            stale.append("| 47 |")  # 47 is in no v1 column; in v3 it is the pathway
+        for s in stale:
+            assert s not in text, f"{doc} still publishes the superseded series: {s!r}"
 
-    @pytest.mark.parametrize("doc", PORT_TABLE_DOCS)
-    def test_documents_publish_the_contract_series(self, doc, ports_by_path):
+    @pytest.mark.parametrize("doc", CURRENT_PORT_TABLE_DOCS)
+    def test_current_documents_publish_the_official_series(self, doc, ports_by_path_v3):
+        text = read(doc)
+        base, high = ports_by_path_v3["base"], ports_by_path_v3["high"]
+        for horizon in (2036, 2046, 2056):
+            arrow = f"{base[horizon]} → {high[horizon]}"
+            cells = f"| {base[horizon]} | {high[horizon]} |"
+            assert arrow in text or cells in text, (
+                f"{doc} does not publish {horizon} as {arrow}")
+
+    @pytest.mark.parametrize("doc", CURRENT_PORT_TABLE_DOCS)
+    def test_current_documents_name_47_and_label_48_as_history(self, doc):
+        text = read(doc)
+        assert "47" in text and "legacy_v2" in text, doc
+        if "48" in text:
+            assert "earlier" in text.lower(), f"{doc} mentions 48 without calling it the earlier result"
+
+    @pytest.mark.parametrize("doc", DATED_PORT_TABLE_DOCS)
+    def test_dated_documents_publish_the_contract_series(self, doc, ports_by_path):
         text = read(doc)
         base, high = ports_by_path["base"], ports_by_path["high"]
         for horizon in (2036, 2046, 2056):
@@ -159,12 +216,12 @@ def portfolio() -> pd.DataFrame:
 
 
 class TestPublishedCosts:
-    """The columns that were already right stay right."""
+    """The README's cost columns are a fresh canonical run's (contract v3's) portfolio."""
 
     @pytest.mark.parametrize("horizon,staged,broad,avoided", [
-        (2036, "$1.56M", "$1.87M", "$0.31M"),
-        (2046, "$2.29M", "$2.64M", "$0.34M"),
-        (2056, "$3.01M", "$3.41M", "$0.39M"),
+        (2036, "$1.49M", "$1.85M", "$0.36M"),
+        (2046, "$2.21M", "$2.60M", "$0.38M"),
+        (2056, "$2.92M", "$3.36M", "$0.44M"),
     ])
     def test_published_costs_match_the_model(self, portfolio, horizon, staged, broad, avoided):
         def millions(case: str, column: str) -> str:

@@ -3,8 +3,8 @@
 The model now runs in two permanent modes:
 
 - **`legacy_v2` (accepted baseline):** the reviewed V2 workflow, reproduced bit-for-bit
-  (12 sites; FFX002 top at 58.8; 25 starter / 48 pathway ports; 38 REVIEW + 12 INFO data
-  findings; 0 High-confidence sites).
+  (12 sites; FFX002 top at 58.8; 25 starter / 48 pathway ports, the earlier result; 38 REVIEW
+  + 12 INFO data findings; 0 High-confidence sites).
 - **`milestone2_v3`:** the same evidence base extended with (1) canonical 10/20/30-year
   horizons - 2036/2046/2056 from a 2026 baseline; (2) cohort-independent fixed-anchor
   scoring (versioned anchor set, migration report published); (3) typed field-level data

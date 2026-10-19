@@ -1,0 +1,94 @@
+{
+  "growth_multipliers": {
+    "2026_baseline": 1.0,
+    "2036_base": 1.9,
+    "2036_high": 2.6,
+    "2046_base": 3.0,
+    "2046_high": 4.5,
+    "2056_base": 4.0,
+    "2056_high": 6.0
+  },
+  "growth_provenance": "Provisional planning convention (research Report 05 s3): 2036 re-anchors the legacy 2035 cases; 2046 inherits the legacy 2050 cases on the evidence that regional adoption is front-loaded; 2056 extends with saturation capped by pathway capacity. Status: synthetic_uncalibrated - pending team adoption and observed-data calibration.",
+  "stress_extra_multiplier": 1.15,
+  "demand_model": {
+    "status": "synthetic_uncalibrated",
+    "coefficients": {
+      "visitors_day": 0.0015,
+      "employees_day": 0.0006,
+      "nearby_jobs_1mi": 2e-05,
+      "nearby_households_1mi": 3e-05
+    },
+    "floor_sessions": 0.3,
+    "provenance": "Coefficients are synthetic screening values chosen by the team for the V2 prototype; no published derivation exists. They must not be presented as calibrated. Calibration path: fcf_m2.demand.calibrate() with observed session data.",
+    "calibrated_at": null,
+    "calibration_metrics": null,
+    "n_observed_rows": 0,
+    "n_observed_sites": 0
+  },
+  "base_load_growth_per_year": {
+    "value": 0.008,
+    "label": "commercial base-load growth planning proxy (assumption; facility interval data pending)"
+  },
+  "energy_per_session_kwh": {
+    "value": 9.5,
+    "label": "benchmark assumption (typical public L2 session), TBV with observed data"
+  },
+  "economics": {
+    "hardware_usd_per_port": 6500.0,
+    "install_soft_cost_share": 0.25,
+    "pathway_premium_share": 0.15,
+    "retrofit_civil_multiplier": 1.8,
+    "network_fee_usd_per_port_yr": 1000.0,
+    "maintenance_usd_per_port_yr": 400.0,
+    "tariff_usd_per_kwh": 0.11,
+    "demand_charge_usd_per_kw_month": 0.0,
+    "replacement_usd_per_port": 2500.0,
+    "replacement_year_offset": 10,
+    "decommission_usd_per_port": 800.0,
+    "inspection_admin_usd_per_site_yr": 300.0,
+    "contingency_civil_share": 0.25,
+    "discount_rate_real": 0.03,
+    "escalation": {
+      "low": 0.01,
+      "base": 0.025,
+      "high": 0.04
+    },
+    "provenance": "All cost lines are screening/planning benchmarks (AFDC/NREL cost classes + client operating evidence). None are quotes, budgets, or engineering estimates. Site quotes, the Dominion tariff, and vendor fee schedules are required before any budget use."
+  },
+  "emissions": {
+    "energy_delivered_kwh": 1000.0,
+    "grid_emissions_kg": 294.0,
+    "displaced_tailpipe_kg": 1333.3,
+    "net_co2e_avoided_kg": 1039.3,
+    "renewable_matched_share": 0.0,
+    "grid_factor_value": 596.3,
+    "grid_factor_units": "lb CO2e/MWh",
+    "grid_factor_source": "EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e",
+    "grid_factor_vintage": "eGRID2023r2, accessed 2026-07-19",
+    "grid_factor_next_refresh": "eGRID2024 (preliminary API data available 2026; re-pull official release annually)",
+    "assumption_note": "energy/session 9.5 kWh (benchmark); EV efficiency 0.3 kWh/mi (EPA-class benchmark); displaced gasoline LDV 400.0 gCO2/mi (fleet-average-class benchmark); charger efficiency 0.92. No observed baseline exists yet - values are screening estimates, not measured reductions."
+  },
+  "trigger_policy": {
+    "policy_status": "proposed_default_pending_team_and_client_adoption",
+    "utilization_threshold": 0.4,
+    "wait_threshold_min": 10.0,
+    "reliability_uptime_min": 0.97,
+    "min_observation_months": 6,
+    "equity_override": {
+      "enabled": true,
+      "equity_index_percentile_min": 0.6,
+      "reduced_utilization_threshold": 0.25,
+      "note": "Equity override allows expansion review at lower observed utilization in high-equity-need areas; requires the same human approval gate."
+    },
+    "budget_gate": "human_approval_required",
+    "pathway_gate": "ports_active_plus_step_must_not_exceed_ports_pathway"
+  },
+  "capacity": "service/spare capacity NULL with capacity_basis=placeholder at all 12 sites until utility/facility confirmation",
+  "contract_v3": {
+    "derivation": "a new run of model version 3.1.0 on the reference study's inputs, put into contract v2's container; not derived from v1 or v2.",
+    "plan": "the milestone2_v3 port plan follows the fixed-anchor ranking; the pathway is the V3 rule over the V3 2036/2046 targets (DEC-027).",
+    "data_confidence_as_of": "2026-10-18",
+    "observed_data": "0 capacity observation set(s) and 0 session summary/summaries applied. Zero means no field data has been received; every observed_* field is empty and every row reports awaiting_observed_data.",
+    "empty_means": "An empty observed_* field means NOT OBSERVED. It never means zero."
+  }
+}

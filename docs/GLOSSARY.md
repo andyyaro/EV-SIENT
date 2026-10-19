@@ -123,7 +123,9 @@ observed data clears the expansion triggers. The strategy this whole project exi
 ### Starter ports
 
 The number of charging ports recommended for immediate installation at a site. Across the
-portfolio it is deliberately smaller than the pathway capacity - 25 now against a pathway for 48 though at three of the twelve sites (PWC003, PWC005, PWC008) the two are equal at 2 ports, so
+portfolio it is deliberately smaller than the pathway capacity - 25 now against a pathway for 47 (the
+official total since DEC-027; the earlier `legacy_v2` result was 48) though at four of the twelve sites
+(FFX003, PWC003, PWC005, PWC008) the two are equal at 2 ports, so
 "starter" and "pathway" are not always different numbers.
 
 ---
@@ -132,9 +134,10 @@ portfolio it is deliberately smaller than the pathway capacity - 25 now against 
 
 ### Contract (data contract)
 
-The frozen set of tables every surface reads from, with a SHA-256 hash chain so a number on a
-chart can be traced to the exact bytes it came from. `v1` is frozen; `v2` adds fields without
-changing any `v1` value.
+The set of tables every surface reads from, with a SHA-256 hash chain so a number on a chart can
+be traced to the exact bytes it came from. `v3` is the authoritative output (DEC-027): a new run
+of the model in `v2`'s container. `v1` and `v2` are frozen history; `v2` adds fields without
+changing any `v1` value, and both hold the earlier 48-port pathway.
 
 ### Desktop tier / web tier
 
@@ -145,7 +148,8 @@ never hidden.
 ### Legacy v2 / Milestone 2 v3
 
 Two modes of the same model. `legacy_v2` reproduces an earlier accepted baseline bit-for-bit
-(25 starter ports, 48 pathway); `milestone2_v3` is the current canonical model.
+(25 starter ports, 48 pathway: the earlier result, not the official one); `milestone2_v3` is the
+current canonical model (25 starter ports, 47 pathway: the official totals, DEC-027).
 
 ### Synthetic inputs
 

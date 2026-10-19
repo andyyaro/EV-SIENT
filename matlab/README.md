@@ -106,7 +106,8 @@ values are efficiency-adjusted inside `makeSessionProfiles`.
 Single input: `data/canonical/matlab_scenarios.csv` - 120 rows = 12 sites
 x {2026 baseline; 2036/2046/2056 x base/high/stress_combined}. It is
 **auto-generated** by the Python adapter (`fcf_m2.matlab_adapter`) from
-canonical contract 1.0.0; column-by-column detail in `DATA_DICTIONARY.md`.
+canonical contract 3.0.0 (DEC-027; contract 1.0.0 before 2026-10-18); column-by-column
+detail in `DATA_DICTIONARY.md`.
 
 **Current data state (important):** `capacity_basis` is `placeholder` on
 **all** rows and `service_capacity_kW`/`spare_capacity_kW` are **empty**.
@@ -205,10 +206,10 @@ even express.
 ## Regeneration instructions
 
 1. **Input CSV**: regenerate from the Python V3 model (producer of the
-   canonical contract): run `make run-v3` at the repository root - the
-   `fcf_m2.matlab_adapter` writes `data/outputs/v3_run/matlab_scenarios.csv`
-   (repo root); copy it to `matlab/data/canonical/matlab_scenarios.csv`.
-   Validate with `make validate` at the repository root.
+   canonical contract): run `make contract-v3` at the repository root - it
+   rebuilds `data/contract/v3` and writes
+   `matlab/data/canonical/matlab_scenarios.csv` from its rows through
+   `fcf_m2.matlab_adapter`. Validate with `make validate` at the repository root.
 2. **Results**: `matlab -batch "addpath('src'); run_all_scenarios"`.
 3. **Golden regression baseline**: first licensed run of
    `runtests('tests')` writes `tests/golden/regression_golden.csv`;

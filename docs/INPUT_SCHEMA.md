@@ -125,11 +125,11 @@ site's gaps.
 - **Tiers are relative to the cohort.** Tier 1 needs rank 2 or better, so at most two sites
   in any run can hold it (`config.TIER1_MAX_RANK`). Compare scores across cohorts, never tiers.
 - **Port plans follow the ranking your results show**: the fixed-anchor one, the same ranks
-  and tiers as `site_results_milestone2_v3.csv`. The reference study is the one exception.
-  Its plans follow its accepted cohort-relative (legacy) ranking, deliberately, so the totals
-  it presented reconcile; on the fixed-anchor ranking the same rules give 25 / 47 instead of
-  25 / 48 (F-05). `plan_ranking` in `run_summary.json`, and the manifest's `cohort.plan_ranking`,
-  say which one a run used.
+  and tiers as `site_results_milestone2_v3.csv`. Since DEC-027 (2026-10-18) that includes the
+  reference study, whose official totals are therefore 25 / 47; until then it kept its
+  cohort-relative (legacy) ranking so that the earlier 25 / 48 reconciled (F-05), and
+  `legacy_v2` mode still gives that. `plan_ranking` in `run_summary.json`, and the manifest's
+  `cohort.plan_ranking`, say which one a run used.
 - **Every site gets at least 2 starter ports**, including one the plan says not to advance
   (a non-public site). Read those 2 as a placeholder for a decision, not a recommendation.
 - **Electrical capacity is a placeholder at every site.** The score uses the
@@ -141,7 +141,7 @@ site's gaps.
   the editions Virginia has adopted; CO2e uses the EPA eGRID factor for its grid subregion
   (SRVC); costs use its screening tariff and cost classes. Confirm or replace each before
   quoting it. A cohort's manifest repeats this in `cohort.notes`.
-- **RT-04's 25 starter / 48 pathway totals belong to the reference study.** They are asserted
+- **RT-04's 25 starter / 47 pathway totals belong to the reference study.** They are asserted
   only when a run reads the reference study's own inputs (`contract.REFERENCE_INPUTS`), and
   never against another cohort.
 

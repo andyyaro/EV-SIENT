@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased - One official output: contract v3 and a 47-port pathway (DEC-027)
+
+The reference study now has one authoritative output. The official totals are **25 starter
+ports and a 47-port pathway**, the ones the canonical `milestone2_v3` rules produce. **48 is
+the earlier `legacy_v2` result**, kept as history: `legacy_v2` mode still reproduces 25 / 48
+bit-exactly, and the frozen contracts v1 and v2 still hold it.
+
+### Changed
+- **The canonical plan follows the fixed-anchor ranking.** In `milestone2_v3` mode the port
+  plan and pathway use the V3 ranking and the V3 pathway rule, not the cohort-relative legacy
+  ranking. `FFX003` pathway 4 to 2, `PWC001` 3 to 4; `FFX001` and `PWC007` 2036 base active
+  ports 4 to 2. Scores, ranks, energy and emissions are unchanged. Model version `3.1.0`.
+- **Headline numbers** (2036 / 2046 / 2056): active ports base 31 / 43 / 43 (was 35 / 44 / 44)
+  and high 43 / 47 / 47 (was 44 / 48 / 48); staged NPC $1.49M / $2.21M / $2.92M (was $1.56M /
+  $2.29M / $3.01M); broad NPC $1.85M / $2.60M / $3.36M (was $1.87M / $2.64M / $3.41M); avoided
+  cost $0.36M / $0.38M / $0.44M (was $0.31M / $0.34M / $0.39M).
+- The README, start-here page, glossary, schema and reproduction docs, the website patch
+  content, the static dashboard, the MATLAB canonical input, the 3D explorer data and the
+  platform engine fixtures now read contract v3. Dated deliverables keep 25 / 48.
+- RT-04 checks the reference totals for the model version that made the contract: 25 / 48 for
+  3.0.0 (v1, v2), 25 / 47 for 3.1.0 (v3).
+
+### Added
+- **`data/contract/v3/`** (contract `3.0.0`), the authoritative contract: a new model run in
+  v2's 60-field container with its own hash chain, pinning the v1 and v2 digests as history.
+  Built by `scripts/build_contract_v3.py` (`make contract-v3`), checked by its `--check` in
+  `verify.sh`.
+- `tests/test_contract_v3.py` and `tests/test_pathway_total_independent.py`, which rebuilds
+  the 47 per site without the model's right-sizing.
+
+### Resolved
+- Audit finding F-05 (the plan kept the legacy ranking so 48 would survive), by DEC-027.
+
 ## Unreleased - V4 platform program, Phases 5–10
 
 The study became a running system. Everything below preserves the epistemics: `capacity_basis`

@@ -6,9 +6,9 @@
 make setup            # venv + editable install with pinned [test] extras (Python 3.11+)
 make test             # full suite incl. legacy golden tests; reports coverage (the 80% floor
                       #   is enforced by ./scripts/verify.sh and CI, not by this target)
-make run-legacy       # reproduce the accepted V2 baseline (25 starter / 48 pathway)
-make run-v3           # full V3 run into data/outputs/v3_run/
-make validate         # validate the tracked contract at data/contract/v1
+make run-legacy       # reproduce the earlier legacy_v2 result (25 starter / 48 pathway)
+make run-v3           # full V3 run into data/outputs/v3_run/ (official: 25 starter / 47 pathway)
+make validate         # validate contract v3 (authoritative) and the frozen v2 and v1
 ./scripts/verify.sh   # every repository gate - must pass before you open a PR
 ```
 
@@ -41,7 +41,10 @@ The legacy fixtures under `tests/` are **frozen**. They encode the accepted
 V2 baseline (FFX002 58.8; 25/48 port totals). A golden-test failure means
 the model changed - investigate it. **Do not regenerate goldens to silence a
 failure.** A deliberate re-baselining requires a documented migration note
-and reviewer sign-off, never a quiet fixture update.
+and reviewer sign-off, never a quiet fixture update. DEC-027 is the worked
+example: it re-baselined the canonical `milestone2_v3` plan to 25 / 47 in a new
+contract (`data/contract/v3`) and left the legacy goldens, and the frozen v1
+and v2, holding 25 / 48.
 
 ## Pull requests
 

@@ -1,28 +1,28 @@
 [
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "legacy_v2 baseline scores",
     "assumption": "all 12 sites score Low data confidence; none reaches Medium",
     "file": "dashboard/static/01_readiness_ranking.png"
   },
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "2026 baseline",
     "assumption": "pathway = conduit/panel capacity, not installed hardware",
     "file": "dashboard/static/02_starter_vs_pathway.png"
   },
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "V3 canonical horizons",
     "assumption": "growth multipliers provisional (uncalibrated); trigger-gated activation",
     "file": "dashboard/static/03_ports_three_horizons.png"
   },
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "base escalation, 3% real discount",
     "assumption": "screening-class benchmarks - not budgets or quotes",
     "file": "dashboard/static/04_lifecycle_cost.png"
@@ -35,22 +35,22 @@
     "file": "dashboard/static/05_net_co2e.png"
   },
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "base path",
     "assumption": "fee frame ~$1k/port/yr from client operating evidence (screening)",
     "file": "dashboard/static/06_avoided_evse.png"
   },
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "2026 baseline, seeded discrete-event simulation (400 days)",
     "assumption": "demand synthetic/uncalibrated - screening only",
     "file": "dashboard/static/07_peak_wait.png"
   },
   {
-    "source": "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)",
-    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19",
+    "source": "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)",
+    "source_date": "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18",
     "scenario": "limitations panel",
     "assumption": "",
     "file": "dashboard/static/08_limitations.png"

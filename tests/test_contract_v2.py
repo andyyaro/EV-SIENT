@@ -439,13 +439,14 @@ def test_v2_does_not_claim_model_version_4(v2_rows):
     """The contract version and the model version are separate facts.
 
     v2 is a container change. The numbers inside it were produced by the V3 model -- every
-    row says ``model_mode = milestone2_v3`` -- so the artifact reports model version 3.0.0.
+    row says ``model_mode = milestone2_v3`` -- so the artifact reports model version 3.0.0, the
+    version that made v1. (The current model is 3.1.0 since DEC-027; its numbers are in v3.)
     Stamping 4.0.0 on it would be a version claiming work that has not happened, which is
     the same defect as a placeholder capacity presented as verified, one layer up.
     """
     v2_manifest = json.loads((V2 / "contract_manifest.json").read_text())
     v1_manifest = json.loads((V1 / "contract_manifest.json").read_text())
-    assert v2_manifest["model_version"] == v1_manifest["model_version"] == config.MODEL_VERSION
+    assert v2_manifest["model_version"] == v1_manifest["model_version"] == config.MODEL_VERSION_V1_V2
     assert v2_manifest["model_version"] != config.MODEL_VERSION_V4
     assert set(v2_rows.model_mode.unique()) == {config.MODE_V3}, \
         "if this ever contains v4 rows, the model_version claim must be revisited"

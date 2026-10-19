@@ -1,13 +1,14 @@
 # Data Dictionary - `data/canonical/matlab_scenarios.csv`
 
-Producer: Python V3 `fcf_m2.matlab_adapter` (canonical contract 1.0.0, run
-`milestone2_v3_20260719T052322Z`). 120 rows = 12 sites x {2026 baseline;
+Producer: Python V3 `fcf_m2.matlab_adapter` (canonical contract 3.0.0, the run named in
+`data/contract/v3/contract_manifest.json`; DEC-027, 25 starter / 47 pathway ports). Until
+2026-10-18 it was contract 1.0.0, run `milestone2_v3_20260719T052322Z`, the earlier
+`legacy_v2`-era plan with a 48-port pathway. 120 rows = 12 sites x {2026 baseline;
 2036/2046/2056 x base/high/stress_combined}. **Do not hand-edit; regenerate
-via `make run-v3` at the repository root** (writes repo-root
-`data/outputs/v3_run/matlab_scenarios.csv`; copy it here - see the README
-"Regeneration instructions").
+via `make contract-v3` at the repository root** (`scripts/build_contract_v3.py` writes
+contract v3 and this file together - see the README "Regeneration instructions").
 
-Consumer rules inherited from the data contract v1: join on `site_id` only;
+Consumer rules inherited from the data contract (v1 rules, carried into v3): join on `site_id` only;
 propagate the placeholder label whenever `capacity_basis` is not
 `verified_utility`/`verified_facility`; cite contract version + generation
 stamp when presenting numbers.

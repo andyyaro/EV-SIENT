@@ -1,0 +1,80 @@
+{
+  "contract_version": "3.0.0",
+  "model_version": "3.1.0",
+  "model_version_note": "Model version 3.1.0 is the V3 model with the DEC-027 plan: the milestone2_v3 port plan follows the fixed-anchor ranking and its pathway is the V3 rule over the V3 targets. Contracts v1 and v2 were produced by model version 3.0.0. Model version 4.0.0 is reserved for when V4 is genuinely complete and is not claimed by this artifact.",
+  "supersedes": "2.0.0",
+  "decision": "DEC-027",
+  "authoritative": true,
+  "run_id": "milestone2_v3_20261019T025129Z",
+  "generated_utc": "2026-10-19T02:51:30.231115+00:00",
+  "producer": {
+    "package": "fcf_m2",
+    "module": "fcf_m2.contract_v3"
+  },
+  "inputs": {
+    "real_sites_v2.csv": "582e0b375fe3a078972fe77ad602bd1837b26679e09bf1b9072ffed30678a748",
+    "legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv": "064b6fdc5afe41e9a5e3a1480206c06195ffcaa6077ae4f7f081932024e3597c",
+    "field_provenance_v1.csv": "9a07aa1e0dc4bca43e160459db7a0985bc99a08454fe51437481bb2f7af4d482",
+    "anchor_set_v1.json": "668c8309b529f9a30012f7418268c5b202ed5227628d15c486140e9d9d41f78d",
+    "legacy_matlab_site_meta.csv": "1b4255976b75429beb5fbd23c90b40ae480c5557564bf12e262e4fbd9831ff5a"
+  },
+  "tables": {
+    "schema.json": "9bc84dd897c0c97d929eceba688b065be5d760241538e0c7cb0500ee362f2cd6",
+    "scenario_table.csv": "3b2eecdaf677eb2e034c86a651b2294466672059a6d8b25c8d40be387512b1a5",
+    "site_table.csv": "0ed5e4ec7078f9cc9316827d48b86f4fab4b946b87a683b1f0f65977ee517790",
+    "source_provenance.csv": "2d346861cf6216fb9b1f5c4500f8fe30c65411204d9c18fd1bbfd047a0efd875",
+    "standards_register.csv": "62e4759538c56dbd080e8a86d46fb5e141b20b36c1a162f817946ccf0b5fa96b",
+    "assumptions.json": "a615ccf67eefd1d98898c4aab568cfa31580b21deb4c63c9d30935166f6f74fc"
+  },
+  "reference_totals": {
+    "official": {
+      "starter": 25,
+      "pathway": 47,
+      "model_mode": "milestone2_v3",
+      "model_version": "3.1.0"
+    },
+    "earlier_legacy_v2": {
+      "starter": 25,
+      "pathway": 48,
+      "where": "data/contract/v1 and data/contract/v2 (model version 3.0.0), and legacy_v2 mode",
+      "status": "history; not the official figure since DEC-027"
+    }
+  },
+  "history": {
+    "contract/v1/contract_manifest.json": "0dc7bf37a2c9b057edacf282ddea294994bef7a9d2369b3fcc65a784676b8df8",
+    "contract/v2/contract_manifest.json": "747ddc61333d7d701849ac6bffe5262711ff465c027628b1ada1475432eb317d"
+  },
+  "grid_factor": {
+    "source": "EPA eGRID2023 Rev 2 (data year 2023, released 2025-06-12), SRVC subregion, total output emission rate CO2e",
+    "value_lb_per_mwh": 596.3,
+    "vintage": "eGRID2023r2, accessed 2026-07-19"
+  },
+  "conventions": {
+    "baseline_year": 2026,
+    "horizons": [
+      2036,
+      2046,
+      2056
+    ],
+    "cases": [
+      "base",
+      "baseline",
+      "high",
+      "stress_combined"
+    ],
+    "discount_rate_real": 0.03
+  },
+  "relationship_to_v2": [
+    "SAME CONTAINER. Every v2 field is present, in v2's order, with v2's semantics and v2's observation rules.",
+    "NEW RUN. The values come from model version 3.1.0, not from v1, so they are not carried from v2. The fields that differ are named in README.md.",
+    "v1 and v2 are FROZEN HISTORY. Nothing regenerates or edits them; their manifest digests are pinned under 'history'."
+  ],
+  "consumer_rules": [
+    "Join on site_id only; site_name is display text.",
+    "MATLAB refuses feasibility claims when capacity_basis is not verified_utility/verified_facility.",
+    "Excel/Tableau/presentation quote contract values; no re-derivation.",
+    "Any schema change bumps contract_version; consumers assert the major version.",
+    "An empty observed_* field means NOT OBSERVED. It never means zero.",
+    "Quote this contract for current figures. Quote v1 or v2 only as the earlier legacy_v2 result, labelled as such."
+  ]
+}

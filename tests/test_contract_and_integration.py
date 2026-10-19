@@ -81,12 +81,16 @@ class TestContractValidation:
 
 
 class TestReconciliation:
-    def test_rt04_legacy_totals(self, v3_outputs):
+    def test_rt04_reference_totals(self, v3_outputs):
+        """The official totals are the canonical 25 / 47 (DEC-027); the run still reports the
+        earlier legacy_v2 result, 25 / 48, as history."""
         out, result = v3_outputs
         assert result["starter_total_2026"] == 25
-        assert result["pathway_total"] == 48
-        assert result["legacy_starter_total"] == 25
-        assert result["legacy_pathway_total"] == 48
+        assert result["pathway_total"] == 47
+        assert result["plan_ranking"] == "milestone2_v3"
+        assert (result["legacy_starter_total"], result["legacy_pathway_total"]) == (25, 47)
+        assert (result["legacy_v2_result"]["starter_total"],
+                result["legacy_v2_result"]["pathway_total"]) == (25, 48)
 
     def test_rt06_year_set(self, v3_outputs):
         out, _ = v3_outputs

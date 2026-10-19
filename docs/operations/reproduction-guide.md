@@ -22,7 +22,7 @@ make test
 Includes the legacy golden tests, cohort-invariance tests, contract validation
 tests, and offline-GIS tests.
 
-## 2. Legacy baseline (expect: FFX002 58.8; 25 starter / 48 pathway ports)
+## 2. Legacy baseline (expect: FFX002 58.8; 25 starter / 48 pathway ports, the earlier `legacy_v2` result)
 
 ```bash
 make run-legacy      # writes data/outputs/legacy_check/
@@ -31,13 +31,17 @@ make run-legacy      # writes data/outputs/legacy_check/
 `legacy_v2` mode reproduces the accepted V2 baseline bit-for-bit; the golden
 tests in `make test` enforce the same numbers.
 
-## 3. V3 run + contract (expect: contract valid, 120 scenario rows)
+## 3. V3 run + contract (expect: contract valid, 120 scenario rows, 25 starter / 47 pathway)
 
 ```bash
 make run-v3          # writes data/outputs/v3_run/ (scores, scenarios, economics,
                      # emissions, contract tables, matlab_scenarios.csv)
-make validate        # validates the tracked canonical contract at data/contract/v1
+make contract-v3     # rebuilds data/contract/v3, the authoritative contract (DEC-027)
+make validate        # validates data/contract/v3, then the frozen v2 and v1
 ```
+
+25 / 47 are the official totals. The frozen contracts v1 and v2 hold the earlier `legacy_v2`
+result, 25 / 48, and are validated against it.
 
 ## 4. Artifact rebuilds
 
@@ -52,9 +56,9 @@ The Excel rebuild requires the team's original workbook via `--source`; the
 original is **not tracked** in this repository (only the updated output,
 `excel/Electric_Data_Milestone_2_Updated.xlsx`, is).
 
-To refresh the MATLAB canonical input: run `make run-v3`, then copy
-`data/outputs/v3_run/matlab_scenarios.csv` to
-`matlab/data/canonical/matlab_scenarios.csv` and re-run `make validate`.
+To refresh the MATLAB canonical input: run `make contract-v3`, which rebuilds
+`data/contract/v3` and writes `matlab/data/canonical/matlab_scenarios.csv` from it, then
+re-run `make validate`.
 
 ## 5. Full verification (one command)
 
@@ -62,7 +66,8 @@ To refresh the MATLAB canonical input: run `make run-v3`, then copy
 ./scripts/verify.sh      # every repository gate; exits nonzero on any failure
 ```
 
-Gates: tests + coverage floor, legacy baseline reproduction (25/48), contract
+Gates: tests + coverage floor, legacy baseline reproduction (25/48), contract v3
+reproduction from a fresh run (25/47), contract
 rules/schema/hash chain, cross-model reconciliation with the MATLAB canonical
 CSV, workflow-docs consistency, dashboard footer QA, secret scan, local-path
 scan, file-size limit, and Markdown link check. CI runs the same gates
@@ -90,8 +95,9 @@ No MATLAB output describes a real facility.
 | Check | Expected |
 |---|---|
 | `make test` | all tests pass; coverage ≥ 80% |
-| `make run-legacy` | starter_total 25, pathway_total 48 (accepted V2 baseline) |
-| `make validate` | contract v1.0.0 passes all rules, JSON Schema, and the manifest hash chain |
+| `make run-legacy` | starter_total 25, pathway_total 48 (the earlier `legacy_v2` result) |
+| `make run-v3` | starter_total_2026 25, pathway_total 47 (the official totals, DEC-027) |
+| `make validate` | contracts v3.0.0, v2.0.0 and v1.0.0 pass all rules, JSON Schema, and their manifest hash chains |
 | `./scripts/verify.sh` | `ALL REPOSITORY VERIFICATION GATES PASSED` |
 
 ## Determinism notes

@@ -1,64 +1,64 @@
 site_id,site_name,model_rank,horizon_year,case,ports_active,ports_pathway,site_capacity_cap,expansion_strategy,right_sizing_reason
-FFX002,City of Fairfax Regional Library,1,2026,baseline,2,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2036,base,4,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2036,high,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2036,stress_combined,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2046,base,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2046,high,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2046,stress_combined,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2056,base,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2056,high,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX002,City of Fairfax Regional Library,1,2056,stress_combined,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2026,baseline,3,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2036,base,4,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2036,high,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2036,stress_combined,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2046,base,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2046,high,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2046,stress_combined,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2056,base,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2056,high,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-FFX004,Fairfax County Government Center,2,2056,stress_combined,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
-PWC006,Bull Run Library,3,2026,baseline,2,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2036,base,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2036,high,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2036,stress_combined,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2046,base,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2046,high,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2046,stress_combined,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2056,base,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2056,high,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-PWC006,Bull Run Library,3,2056,stress_combined,4,4,8,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 4 ports.
-FFX001,Fairfax City Hall or municipal building,4,2026,baseline,2,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2036,base,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2036,high,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2036,stress_combined,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2046,base,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2046,high,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2046,stress_combined,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2056,base,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2056,high,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX001,Fairfax City Hall or municipal building,4,2056,stress_combined,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC002,Neabsco-Potomac Commuter Garage,5,2026,baseline,2,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2036,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2036,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2036,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2046,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2046,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2046,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2056,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2056,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC002,Neabsco-Potomac Commuter Garage,5,2056,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC007,Central Library,6,2026,baseline,2,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2036,base,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2036,high,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2036,stress_combined,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2046,base,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2046,high,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2046,stress_combined,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2056,base,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2056,high,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC007,Central Library,6,2056,stress_combined,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX004,Fairfax County Government Center,1,2026,baseline,3,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2036,base,4,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2036,high,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2036,stress_combined,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2046,base,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2046,high,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2046,stress_combined,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2056,base,6,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2056,high,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX004,Fairfax County Government Center,1,2056,stress_combined,8,8,12,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2026,baseline,2,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2036,base,4,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2036,high,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2036,stress_combined,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2046,base,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2046,high,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2046,stress_combined,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2056,base,6,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2056,high,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+FFX002,City of Fairfax Regional Library,2,2056,stress_combined,8,8,10,install_now_and_make_future_ready,Strong ranking supports installing starter ports now while preparing pathway capacity for about 8 ports.
+PWC002,Neabsco-Potomac Commuter Garage,3,2026,baseline,2,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2036,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2036,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2036,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2046,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2046,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2046,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2056,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2056,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC002,Neabsco-Potomac Commuter Garage,3,2056,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC006,Bull Run Library,4,2026,baseline,2,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2036,base,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2036,high,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2036,stress_combined,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2046,base,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2046,high,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2046,stress_combined,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2056,base,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2056,high,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC006,Bull Run Library,4,2056,stress_combined,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2026,baseline,2,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2036,base,2,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2036,high,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2036,stress_combined,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2046,base,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2046,high,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2046,stress_combined,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2056,base,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2056,high,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+PWC007,Central Library,5,2056,stress_combined,4,4,4,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2026,baseline,2,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2036,base,2,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2036,high,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2036,stress_combined,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2046,base,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2046,high,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2046,stress_combined,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2056,base,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2056,high,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
+FFX001,Fairfax City Hall or municipal building,6,2056,stress_combined,4,4,6,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
 PWC004,Chinn Park Regional Library,7,2026,baseline,2,4,12,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
 PWC004,Chinn Park Regional Library,7,2036,base,2,4,12,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
 PWC004,Chinn Park Regional Library,7,2036,high,4,4,12,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
@@ -69,36 +69,36 @@ PWC004,Chinn Park Regional Library,7,2046,stress_combined,4,4,12,starter_install
 PWC004,Chinn Park Regional Library,7,2056,base,4,4,12,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
 PWC004,Chinn Park Regional Library,7,2056,high,4,4,12,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
 PWC004,Chinn Park Regional Library,7,2056,stress_combined,4,4,12,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2026,baseline,2,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2036,base,2,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2036,high,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2036,stress_combined,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2046,base,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2046,high,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2046,stress_combined,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2056,base,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2056,high,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-FFX003,Pohick Regional Library,8,2056,stress_combined,4,4,8,starter_install_with_expandable_design,Promising candidate; install starter ports and preserve room or conduit for about 4 future-ready ports.
-PWC008,Potomac Library,9,2026,baseline,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2036,base,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2036,high,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2036,stress_combined,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2046,base,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2046,high,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2046,stress_combined,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2056,base,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2056,high,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC008,Potomac Library,9,2056,stress_combined,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
-PWC001,PWC McCoart Government Center,10,2026,baseline,2,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2036,base,2,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2036,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2036,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2046,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2046,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2046,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2056,base,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2056,high,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
-PWC001,PWC McCoart Government Center,10,2056,stress_combined,3,3,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2026,baseline,2,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2036,base,2,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2036,high,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2036,stress_combined,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2046,base,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2046,high,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2046,stress_combined,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2056,base,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2056,high,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+PWC001,PWC McCoart Government Center,8,2056,stress_combined,4,4,12,electrical_review_before_expansion,Install conservatively and complete electrical/AHJ review before planning larger expansion.
+FFX003,Pohick Regional Library,9,2026,baseline,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2036,base,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2036,high,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2036,stress_combined,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2046,base,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2046,high,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2046,stress_combined,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2056,base,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2056,high,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+FFX003,Pohick Regional Library,9,2056,stress_combined,2,2,8,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
+PWC008,Potomac Library,10,2026,baseline,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2036,base,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2036,high,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2036,stress_combined,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2046,base,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2046,high,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2046,stress_combined,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2056,base,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2056,high,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
+PWC008,Potomac Library,10,2056,stress_combined,2,2,8,monitor_due_to_nearby_supply,"Nearby existing charging supply is high, so keep the buildout conservative unless local need is confirmed."
 PWC005,Haymarket Gainesville Library,11,2026,baseline,2,2,6,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
 PWC005,Haymarket Gainesville Library,11,2036,base,2,2,6,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.
 PWC005,Haymarket Gainesville Library,11,2036,high,2,2,6,monitor_or_small_pilot,Lower current readiness suggests a small pilot or monitoring approach before larger investment.

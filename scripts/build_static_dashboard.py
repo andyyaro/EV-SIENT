@@ -31,8 +31,9 @@ LOG = OUT / "footer_log.json"
 # rebuild idempotent, which is what the drift gate assumes.
 LOG.unlink(missing_ok=True)
 
-scen = pd.read_csv(REPO / "data/contract/v1/scenario_table.csv")
-sites_dim = pd.read_csv(REPO / "data/contract/v1/site_table.csv")
+# The authoritative contract since DEC-027. v1 and v2 hold the earlier legacy_v2 plan.
+scen = pd.read_csv(REPO / "data/contract/v3/scenario_table.csv")
+sites_dim = pd.read_csv(REPO / "data/contract/v3/site_table.csv")
 v3run = REPO / "data/outputs/v3_run"  # produce with: make run-v3
 legacy_scores = pd.read_csv(v3run / "site_results_legacy_v2.csv")
 conf = pd.read_csv(v3run / "data_confidence_v3.csv")
@@ -40,8 +41,11 @@ econ_p = pd.read_csv(v3run / "lifecycle_costs_portfolio.csv")
 peaks = pd.read_csv(v3run / "peak_wait_simulation.csv")
 avoided = pd.read_csv(v3run / "avoided_evse_metric.csv")
 
-CONTRACT_SRC = "canonical contract v1.0.0 (fcf_m2 V3 run 2026-07-19)"
-VINTAGE = "inputs 2026-06-24; eGRID2023r2; verified 2026-07-19"
+CONTRACT_SRC = "canonical contract v3.0.0 (fcf_m2 3.1.0 run 2026-10-18, DEC-027)"
+VINTAGE = "inputs 2026-06-24; eGRID2023r2; verified 2026-10-18"
+_BASE26 = scen[(scen.horizon_year == 2026) & (scen.scenario_name == "baseline")]
+STARTER = int(_BASE26["ports_active"].sum())
+PATHWAY = int(_BASE26["ports_pathway_capacity"].sum())
 
 
 def c1_ranking():
@@ -69,11 +73,11 @@ def c2_ports():
     fig, ax = plt.subplots(figsize=(9, 6))
     visuals.style_axes(ax)
     y = np.arange(len(base))
-    ax.barh(y, base["ports_pathway_capacity"], color="#D8CDB6", label="Future-ready pathway (48 total)")
-    ax.barh(y, base["ports_active"], color=DARK_GREEN, label="Starter ports 2026 (25 total)")
+    ax.barh(y, base["ports_pathway_capacity"], color="#D8CDB6", label=f"Future-ready pathway ({PATHWAY} total)")
+    ax.barh(y, base["ports_active"], color=DARK_GREEN, label=f"Starter ports 2026 ({STARTER} total)")
     ax.set_yticks(y, base["site_id"])
     ax.set_xlabel("Ports")
-    ax.set_title("Start small, stay expandable: 25 starter ports inside a 48-port pathway", fontsize=12)
+    ax.set_title(f"Start small, stay expandable: {STARTER} starter ports inside a {PATHWAY}-port pathway", fontsize=12)
     ax.legend(loc="lower right", frameon=False)
     visuals.footer(fig, CONTRACT_SRC, VINTAGE, "2026 baseline",
                    "pathway = conduit/panel capacity, not installed hardware")
@@ -90,8 +94,8 @@ def c3_three_horizons():
             q = scen[(scen.horizon_year == yq) & (scen.scenario_name == ("baseline" if yq == 2026 else case))]
             totals.append(q["ports_active"].sum())
         ax.plot(years, totals, style, marker="o", color=color, label=f"{case} adoption path")
-    ax.axhline(48, color=BLACK, linewidth=1, linestyle=":", alpha=0.7)
-    ax.text(2027, 48.6, "48-port pathway ceiling (saturation)", fontsize=8, color=BLACK)
+    ax.axhline(PATHWAY, color=BLACK, linewidth=1, linestyle=":", alpha=0.7)
+    ax.text(2027, PATHWAY + 0.6, f"{PATHWAY}-port pathway ceiling (saturation)", fontsize=8, color=BLACK)
     ax.set_xticks(years)
     ax.set_ylabel("Active ports (portfolio)")
     ax.set_title("Aspect 1 - ports and utilization capacity at 2036 / 2046 / 2056", fontsize=12)

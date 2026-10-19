@@ -14,7 +14,8 @@ Source tables (all keyed on site_id):
   data/inputs/legacy_v2_electrical_risk_summary_*   electrical risk + rank sensitivity
   dashboard/tableau/patch_package/tbl_peak_waits    queueing results
   dashboard/tableau/patch_package/tbl_avoided_evse  avoided-overbuild economics
-  data/contract/v1/scenario_table.csv               per-horizon scenarios
+  data/contract/v3/scenario_table.csv               per-horizon scenarios (milestone2_v3;
+                                                    v1 for legacy_v2 - DEC-027)
   data/provenance/site_coordinate_sources.csv       coordinate provenance
 
 Nothing here re-runs the model. This is a read-only projection of frozen
@@ -96,6 +97,12 @@ OPTIONAL = {
     "coord_sources": "data/provenance/site_coordinate_sources.csv",
     "readiness_conf": "dashboard/tableau/patch_package/tbl_readiness_confidence.csv",
 }
+#: Per-mode overrides of OPTIONAL. milestone2_v3 reads the authoritative contract v3 (DEC-027),
+#: whose plan is the one in its right-sizing fixture; legacy_v2 keeps the frozen v1 it matches.
+MODE_OPTIONAL: dict[str, dict[str, str]] = {
+    MODE_V3: {"scenarios": "data/contract/v3/scenario_table.csv"},
+    MODE_LEGACY: {},
+}
 # electrical risk file is date-stamped
 ELECTRICAL_GLOB = "data/inputs/legacy_v2_electrical_risk_summary_frozen_*.csv"
 
@@ -114,7 +121,7 @@ def resolve_sources(repo: str, mode: str = DEFAULT_MODE) -> dict[str, str]:
         if not os.path.isfile(path):
             raise SourceMissing(f"required table missing for mode {mode}: {rel}")
         found[key] = path
-    for key, rel in OPTIONAL.items():
+    for key, rel in {**OPTIONAL, **MODE_OPTIONAL.get(mode, {})}.items():
         path = os.path.join(repo, rel)
         if os.path.isfile(path):
             found[key] = path
@@ -426,6 +433,14 @@ def build(frames: dict[str, pd.DataFrame], sources: dict[str, str],
     coords_i = coords.set_index("site_id") if coords is not None else None
     scen = frames.get("scenarios")
     avoided = frames.get("avoided_evse")
+    if mode == MODE_V3 and scen is not None:
+        # The Tableau patch package carries contract v1's plan. In milestone2_v3 the pathway
+        # ports not energized are worked out from contract v3's own rows, by the model's
+        # function, so the map cannot show one plan's ports beside another's avoided ports.
+        from fcf_m2.emissions import avoided_evse_metric
+        avoided = avoided_evse_metric(
+            scen.rename(columns={"scenario_name": "case", "ports_pathway_capacity": "ports_pathway"})
+            [["site_id", "horizon_year", "case", "ports_active", "ports_pathway"]])
 
     out = BuildResult()
 

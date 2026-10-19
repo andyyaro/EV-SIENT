@@ -297,19 +297,21 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     run_id = f"{mode}_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     generated_at = datetime.now(timezone.utc).isoformat()
 
-    # Right-sizing (ports/pathway) follows the ranking that was ACCEPTED for these inputs. For
-    # the reference study that is the legacy baseline (RT-04: 25 starter / 48 pathway must
-    # reconcile); V3 fixed-anchor scores are reported alongside with a migration report and do
-    # not silently re-baseline the port structure (PY-02 deliberate-migration rule). On the
-    # fixed-anchor ranking the same rules give 25 / 47 (F-05). Any other cohort has no accepted
-    # baseline to keep, and the cohort-relative legacy ranking is the volatile one v3 replaced,
-    # so its plan follows the fixed-anchor ranking it is scored with: otherwise a site the
-    # results call Tier 3 is planned, and described, as Tier 1. Which run is the reference
-    # study is RT-04's own test (`contract.is_reference_run`), so the plan keeps the legacy
-    # ranking exactly when the run is held to 25 / 48. Synthetic inputs are never the
+    # Right-sizing (ports/pathway) follows the ranking the results show. In milestone2_v3 mode
+    # that is the fixed-anchor ranking, for the reference study as for any other cohort, and
+    # the pathway is the V3 rule over the V3 targets: 25 starter / 47 pathway on the reference
+    # study, the official total since DEC-027 (2026-10-18). Until then the reference study's
+    # V3 plan kept the cohort-relative legacy ranking and the legacy pathway so that the
+    # earlier 25 / 48 survived (PY-02 deliberate-migration rule, F-05); that is now the
+    # legacy_v2 result, which legacy_v2 mode still reproduces bit-exactly. Planning on the
+    # legacy ranking also let a site the results call Tier 3 be planned, and described, as a
+    # Tier 2 site (one did, in the reference study), which DEC-023 had already ruled out for
+    # every other cohort. Which run is the reference study is still RT-04's own test
+    # (`contract.is_reference_run`): it decides whether the golden totals are asserted and
+    # whose permitting authority the standards register names. Synthetic inputs are never the
     # reference study, including in the public bundle, where they sit at the reference paths.
     reference_run = contract.is_reference_run(prov, info["inputs_hashed"], info["cohort"])
-    plan_on_legacy = mode == MODE_LEGACY or reference_run
+    plan_on_legacy = mode == MODE_LEGACY
     scored_legacy = enrich_and_score(sites, mode=MODE_LEGACY)
     scored_legacy = scored_legacy.merge(risk[["site_id", "electrical_risk_level"]], on="site_id", how="left")
     scored_legacy = add_tiers(scored_legacy)
@@ -327,8 +329,9 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
         migration["explanation"] = (
             "Fixed anchors widen normalization ranges beyond the cohort extremes, so cohort-extreme "
             "sites compress toward the middle; ranking changes are a property of anchor choice, not new data. "
-            + ("Port/pathway structure remains anchored to the accepted legacy baseline pending deliberate re-baselining."
-               if plan_on_legacy else
+            + ("The port/pathway plan follows this fixed-anchor ranking (DEC-027); the earlier legacy_v2 "
+               "plan on the cohort-relative ranking is reproduced by legacy_v2 mode and kept as history."
+               if reference_run else
                "This cohort has no accepted legacy baseline, so its port/pathway structure follows the fixed-anchor ranking.")
         )
         migration.to_csv(out_dir / "scoring_migration_report.csv", index=False)
@@ -340,6 +343,9 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     if info["cohort"] is not None:
         info["cohort"]["plan_ranking"] = MODE_LEGACY if plan_on_legacy else MODE_V3
 
+    # The legacy 2035/2050 rule on the plan's ranking. In milestone2_v3 mode it sizes nothing
+    # and is reported alongside (`legacy_*_total`, right_sizing_legacy_2035_2050.csv); on the
+    # fixed-anchor ranking it gives the same pathway as the V3 rule.
     legacy_rs = run_right_sizing_legacy(planned)
     legacy_rs.to_csv(out_dir / "right_sizing_legacy_2035_2050.csv", index=False)
 
@@ -376,13 +382,14 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     scored_idx = scored_legacy.set_index("site_id")
     conf_idx = conf.set_index("site_id")
     meta_idx = meta.set_index("site_id")
-    legacy_idx = legacy_rs.set_index("site_id")
+    # Starter ports come from the plan (the 2026 baseline row), not from the legacy plan.
+    plan_now = v3_rs[v3_rs["horizon_year"] == BASELINE_YEAR].set_index("site_id")
 
     # peak/discrete-event stats at baseline ports (seeded, reproducible)
     peak_stats = {}
     for sid in scored["site_id"]:
         row = scored_idx.loc[sid]
-        ports_now = int(legacy_idx.loc[sid, "ports_now"])
+        ports_now = int(plan_now.loc[sid, "ports_active"])
         dwell_hr = row["avg_dwell_min"] / 60 if row["avg_dwell_min"] > 0 else 2
         sim = peak_wait.simulate_waits(row["expected_sessions_day"], dwell_hr, row["hours_open"], ports_now)
         pk_wait, _ = peak_wait.peak_window_wait(row["expected_sessions_day"], dwell_hr, row["hours_open"], ports_now)
@@ -412,7 +419,7 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
                           for hy in V3_HORIZONS}
         inputs = economics.SiteCostInputs(
             site_id=sid,
-            ports_now=int(legacy_idx.loc[sid, "ports_now"]),
+            ports_now=int(plan_now.loc[sid, "ports_active"]),
             ports_pathway=int(sub["ports_pathway"].max()),
             staged_targets=staged_targets,
             trenching_ft=float(row["trenching_ft"]),
@@ -564,6 +571,16 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
         "high_confidence_sites": int((conf["data_confidence_level_v3"] == "High").sum()),
         "claims_discipline": f"All values planning-support screening outputs; capacity placeholder at {n_sites}/{n_sites} sites; demand uncalibrated; costs screening-class; nothing approved.",
     })
+    if reference_run:
+        # The earlier legacy_v2 result on the reference study (25 / 48), named as history so
+        # the run states both figures and says which one is official (DEC-027).
+        earlier = run_right_sizing_legacy(scored_legacy)
+        result["legacy_v2_result"] = {
+            "starter_total": int(earlier["ports_now"].sum()),
+            "pathway_total": int(earlier["future_ready_capacity"].sum()),
+            "status": "earlier result, kept as history; the official totals are "
+                      "starter_total_2026 / pathway_total (DEC-027)",
+        }
     if info["cohort"] is not None:
         result["costs_withheld_for_missing_inputs"] = sorted(costs_unknown)
     (out_dir / "run_summary.json").write_text(json.dumps(result, indent=2))
@@ -783,11 +800,18 @@ def main(argv=None):
         # validated under v1's weaker rules by getting the flag wrong.
         manifest = json.loads((cdir / "contract_manifest.json").read_text())
         version = manifest.get("contract_version", config.SCHEMA_VERSION)
-        if version == config.SCHEMA_VERSION_V2:
+        # RT-04's totals belong to the model that made the rows, which the manifest records:
+        # 25 / 48 for the frozen v1 and v2 (3.0.0), 25 / 47 since DEC-027.
+        model_version = manifest.get("model_version", config.MODEL_VERSION_V1_V2)
+        if version == config.SCHEMA_VERSION_V3:
+            from . import contract_v3
+            problems = contract_v3.validate_v3(st, site, model_version=model_version)
+        elif version == config.SCHEMA_VERSION_V2:
             from . import contract_v2
-            problems = contract_v2.validate_v2(st, site)
+            problems = contract_v2.validate_v2(st, site, model_version=model_version)
         elif version == config.SCHEMA_VERSION:
-            # RT-04 asserts the real study's accepted totals (25 starter / 48 pathway). A run
+            # RT-04 asserts the real study's accepted totals (25 starter / 47 pathway; 25 / 48
+            # for the frozen v1, made by model version 3.0.0). A run
             # on SYNTHETIC inputs cannot reproduce them and must not be tuned until it does --
             # `run_is_synthetic()` exists for exactly this, and `write_contract()` already
             # consults it. This command did not, so `validate-contract` failed on every
@@ -802,13 +826,14 @@ def main(argv=None):
             other_cohort = ("cohort" in manifest
                             and not contract.is_reference_cohort(manifest.get("inputs", {})))
             problems = contract.validate_scenario_table(
-                st, site, expect_legacy_totals=not synthetic and not other_cohort)
+                st, site, expect_legacy_totals=not synthetic and not other_cohort,
+                model_version=model_version)
             if synthetic:
                 print("note: this contract declares SYNTHETIC inputs, so the real study's "
-                      "25/48 golden totals are not asserted against it.")
+                      "golden totals are not asserted against it.")
             elif other_cohort:
                 print(f"note: this contract is cohort {manifest['cohort'].get('cohort_id')!r}, not "
-                      f"the reference study, so its 25/48 golden totals are not asserted against it.")
+                      f"the reference study, so its golden totals are not asserted against it.")
         else:
             problems = [f"unknown contract_version {version!r}; known versions are "
                         f"{', '.join(config.CONTRACT_VERSIONS)}"]

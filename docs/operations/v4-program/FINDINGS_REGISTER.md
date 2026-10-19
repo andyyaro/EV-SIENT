@@ -1451,3 +1451,22 @@ subset the program lead independently confirmed and the plan for acting on each.
 **Claim.** The 12 GLBs are gitignored build outputs, not tracked assets - any Phase 3 integration that assumes they travel with the repo will find an empty models directory.
 
 **Evidence.** incoming/explorer/fcf-3d/.gitignore:8 `web/models/*.glb`. Makefile:119 `rm -rf web/data/sites.* web/data/manifest.json web/models/*.glb`. Rebuild path is `python -m fcf3d.build_models --sites web/data/sites.geojson --out web/models` (fcf3d/build_models.py docstring).
+
+---
+
+## Audit findings (2026-10-17 audit)
+
+The 2026-10-17 audit numbers its findings F-01 to F-28. The full report is the owner's document
+and is kept outside the repo; its findings are tracked here only when a repo decision closes them.
+
+### F-05 · `src/fcf_m2/workflow.py`
+**Category:** data-integrity · **Status:** resolved by DEC-027 (2026-10-18)
+
+**Claim.** The canonical `milestone2_v3` port plan followed the cohort-relative legacy ranking and
+the legacy pathway rule, so that the published 25 / 48 reconciled, and this was not disclosed.
+The same V3 rules on the V3 ranking give 25 / 47: `FFX003` pathway 4 to 2, `PWC001` 3 to 4.
+
+**Resolution.** The owner chose the migration: the official pathway total is 47, the one the
+canonical rules produce, published in the new authoritative contract v3 (model version 3.1.0).
+48 is the earlier `legacy_v2` result, reproduced bit-exactly by `legacy_v2` mode and kept in the
+frozen v1 and v2 contracts as history. I-43's 48 is that earlier figure.

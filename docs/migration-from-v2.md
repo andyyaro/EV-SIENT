@@ -51,8 +51,11 @@ asserted by `tests/test_legacy_golden.py` against frozen fixtures).
 
 `milestone2_v3` anchor scores differ from legacy scores *by design* (fixed anchors
 compress cohort extremes). Every rank change is explained in the generated
-`scoring_migration_report.csv` of a V3 run. The accepted port/pathway structure
-(25/48) is deliberately retained pending a documented re-baselining decision. Growth
+`scoring_migration_report.csv` of a V3 run. The port/pathway structure was retained at
+the accepted 25/48 pending a documented re-baselining decision; that decision is DEC-027
+(2026-10-18). `milestone2_v3` now plans on its own fixed-anchor ranking with the V3 pathway
+rule, giving the official 25 starter / 47 pathway in `data/contract/v3`; 25/48 is the earlier
+`legacy_v2` result, which `legacy_v2` mode and the frozen contracts v1 and v2 keep. Growth
 multipliers (2036: 1.9/2.6 · 2046: 3.0/4.5 · 2056: 4.0/6.0, stress ×1.15) are
 provisional planning conventions, not calibrated forecasts.
 

@@ -25,8 +25,16 @@ SCHEMA_VERSION = "1.0.0"
 #: v2 adds the fields the V4 field-data loop produces. v1 is frozen -- see
 #: tests/test_contract_v2.py, which pins its manifest digest so a change to it fails.
 SCHEMA_VERSION_V2 = "2.0.0"
-CONTRACT_VERSIONS = (SCHEMA_VERSION, SCHEMA_VERSION_V2)
-MODEL_VERSION = "3.0.0"
+#: Contract v3 carries v2's fields with values from a NEW model run (DEC-027, 2026-10-18): the
+#: canonical milestone2_v3 plan follows the fixed-anchor ranking and the V3 pathway rule, so
+#: the reference study's pathway is 47, not the 48 that v1 and v2 hold. v1 and v2 are frozen
+#: history and are not regenerated; v3 is the authoritative output.
+SCHEMA_VERSION_V3 = "3.0.0"
+CONTRACT_VERSIONS = (SCHEMA_VERSION, SCHEMA_VERSION_V2, SCHEMA_VERSION_V3)
+#: The model that produces new runs. 3.1.0 since DEC-027: the V3 pathway rule and the
+#: fixed-anchor plan ranking. Contracts v1 and v2 were produced by MODEL_VERSION_V1_V2.
+MODEL_VERSION = "3.1.0"
+MODEL_VERSION_V1_V2 = "3.0.0"
 #: Bumped to 4.0.0 only when V4 is genuinely complete, per the program's own rule.
 MODEL_VERSION_V4 = "4.0.0"
 ANCHOR_SET_VERSION = "anchors_v1_2026-07"
@@ -44,7 +52,8 @@ MODE_V4 = "v4"
 #: the run has and however they score - while the v3 SCORES are built to be cohort-independent.
 #: A Tier 1 site in one run and a Tier 2 site in another can therefore have the same score.
 #: Compare scores across cohorts, never tiers. Changing a value here re-baselines the
-#: right-sizing floors that key on the tier, and with them RT-04's 25 / 48.
+#: right-sizing floors that key on the tier, and with them RT-04's 25 / 47 (25 / 48 in
+#: legacy_v2 mode).
 TIER1_MAX_RANK = 2
 TIER1_MIN_SCORE = 50
 TIER2_MIN_SCORE = 45

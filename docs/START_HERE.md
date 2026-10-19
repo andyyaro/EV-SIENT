@@ -15,7 +15,9 @@ offline: not enough people used them, and they cost roughly $1,000 per station p
 keep. At another county site, a ten-port install ran over budget on trenching. Overbuild and
 you pay for chargers nobody uses; underbuild and expanding later means digging up ground you
 already paid to close. This project is about finding the middle - **install 25 ports now, build
-the underground pathway for 48, and energise the rest only when real usage data says to.**
+the underground pathway for 47, and energise the rest only when real usage data says to.**
+(An earlier version of the model, `legacy_v2`, said 48; the official figure is 47, see
+"Why 47 and not 48?" below.)
 
 ## The one caveat that governs everything
 
@@ -115,6 +117,17 @@ artifacts predate that rule and still show `legacy_v2` ranks: the superseded Tab
 this project's own results gallery (now labelled on the page), a 2026-06-28 planning-report PDF
 that prints the full twelve-site legacy ranking (now labelled where it is linked), and the
 dated Milestone 2 deck (left as the record of what was presented).
+
+**Why 47 and not 48?**
+The official pathway total is the one the canonical `milestone2_v3` rules produce: 25 starter
+ports and a 47-port pathway, in `data/contract/v3`. Until 2026-10-18 the canonical run borrowed
+the older `legacy_v2` plan so that its 48 survived, and the repository published both without
+saying which counted. The owner decided (DEC-027) that 47 is the one authoritative figure. The
+one-port difference comes from the ranking, not the growth assumptions: on the fixed-anchor
+ranking one site the results call Tier 3 is planned as Tier 3 (2 pathway ports instead of 4)
+and another the results call Tier 2 gets 4 instead of 3. 48 stays in the frozen contracts v1
+and v2, in `legacy_v2` mode, and in the dated Milestone 2 deliverables, always as the earlier
+`legacy_v2` result.
 
 **Why is the data confidence low everywhere?**
 Because it is scored from where the data actually came from, not from how good the answer

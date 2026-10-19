@@ -46,7 +46,6 @@ import pandas as pd
 
 from . import config, contract
 from .config import (
-    MODEL_VERSION,
     MODEL_VERSION_V4,
     SCHEMA_VERSION,
     SCHEMA_VERSION_V2,
@@ -260,9 +259,15 @@ def _is_blank(series: pd.Series) -> pd.Series:
     return series.isna() | (series.astype(str).str.strip().isin(["", "nan", "<NA>", "None"]))
 
 
-def validate_v2(scenario_v2: pd.DataFrame, site_table: pd.DataFrame) -> list[str]:
-    """Every v1 rule, plus the rules that only make sense once observation is possible."""
-    problems = contract.validate_scenario_table(scenario_v2, site_table)
+def validate_v2(scenario_v2: pd.DataFrame, site_table: pd.DataFrame,
+                model_version: str = config.MODEL_VERSION_V1_V2) -> list[str]:
+    """Every v1 rule, plus the rules that only make sense once observation is possible.
+
+    ``model_version`` is the model that produced the rows. v2 is derived from the frozen v1,
+    so it is 3.0.0 and RT-04 holds v2 to v1's 25 / 48 (`contract.reference_totals`).
+    """
+    problems = contract.validate_scenario_table(scenario_v2, site_table,
+                                                model_version=model_version)
 
     if set(scenario_v2.contract_version.unique()) != {SCHEMA_VERSION_V2}:
         problems.append(f"contract_version must be {SCHEMA_VERSION_V2} on every v2 row")
@@ -318,10 +323,11 @@ def validate_v2(scenario_v2: pd.DataFrame, site_table: pd.DataFrame) -> list[str
 def write_contract_v2(out_dir: str | Path, scenario_v2: pd.DataFrame, site_table: pd.DataFrame,
                       provenance: pd.DataFrame, standards_register: pd.DataFrame,
                       assumptions: dict, run_id: str, inputs_hashed: dict[str, str],
-                      model_version: str = MODEL_VERSION) -> Path:
+                      model_version: str = config.MODEL_VERSION_V1_V2) -> Path:
     """Write ``data/contract/v2/`` with its own hash chain. Never touches v1.
 
-    ``model_version`` defaults to ``MODEL_VERSION`` (3.0.0), **not** to ``MODEL_VERSION_V4``,
+    ``model_version`` defaults to ``MODEL_VERSION_V1_V2`` (3.0.0, the model that made v1),
+    **not** to ``MODEL_VERSION_V4``,
     and the distinction is the whole point. The contract version and the model version are
     different facts: v2 is a container change, and the numbers inside today's v2 were
     produced by the V3 model, on rows that say ``model_mode = milestone2_v3``. Stamping
@@ -335,7 +341,7 @@ def write_contract_v2(out_dir: str | Path, scenario_v2: pd.DataFrame, site_table
             ["refusing to write v2 content into data/contract/v1: v1 is frozen"])
     out.mkdir(parents=True, exist_ok=True)
 
-    problems = validate_v2(scenario_v2, site_table)
+    problems = validate_v2(scenario_v2, site_table, model_version=model_version)
     if problems:
         raise contract.ContractValidationError(problems)
 

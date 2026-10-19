@@ -1,6 +1,6 @@
 PY ?= venv/bin/python
 
-.PHONY: setup test run-legacy run-v3 validate dashboard docs reports explorer explorer-legacy explorer-serve explorer-vendor nfc verify
+.PHONY: setup test run-legacy run-v3 validate contract-v3 dashboard docs reports explorer explorer-legacy explorer-serve explorer-vendor nfc verify
 
 setup:
 	python3 -m venv venv && venv/bin/pip install -e ".[test]" -c requirements-lock.txt
@@ -14,8 +14,14 @@ run-legacy:
 run-v3:
 	$(PY) -m fcf_m2.workflow run --mode milestone2_v3 --out data/outputs/v3_run
 
+# v3 is the authoritative contract (DEC-027); v1 and v2 are frozen history, still checked.
 validate:
+	$(PY) -m fcf_m2.workflow validate-contract data/contract/v3
+	$(PY) -m fcf_m2.workflow validate-contract data/contract/v2
 	$(PY) -m fcf_m2.workflow validate-contract data/contract/v1
+
+contract-v3:
+	$(PY) scripts/build_contract_v3.py
 
 dashboard: run-v3
 	$(PY) scripts/build_static_dashboard.py

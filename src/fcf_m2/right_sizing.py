@@ -5,9 +5,13 @@
 - ``milestone2_v3`` mode produces the canonical 2026/2036/2046/2056 scenario set
   (PY-01) with the same floors/cap machinery, saturation-capped by the pathway.
 
-The pathway (future-ready) capacity is computed with the legacy rule in both modes
-so the 48-port pathway total is preserved; V3 activation targets are additionally
-capped at the pathway (saturation logic).
+Each mode computes the pathway (future-ready) capacity with its own rule: the same
+structure (``_future_ready``) applied to that mode's own horizon targets. ``legacy_v2``
+uses its 2035/2050 targets and keeps the earlier 48-port total bit-exactly;
+``milestone2_v3`` uses its 2036/2046 targets under the V3 multipliers and, on the
+reference study's fixed-anchor ranking, gives the official 47 (DEC-027). Until
+2026-10-18 the V3 mode borrowed the legacy pathway so that 48 survived; that is the
+earlier ``legacy_v2`` result, kept for history and no longer the canonical one.
 """
 
 from __future__ import annotations
@@ -210,26 +214,29 @@ def run_right_sizing_legacy(results: pd.DataFrame) -> pd.DataFrame:
 def run_right_sizing_v3(results: pd.DataFrame) -> pd.DataFrame:
     """Canonical V3 scenario set: one row per site x horizon x case (PY-01).
 
-    Pathway capacity uses the legacy rule (preserving the 48-port pathway).
     Horizon activation targets: queueing-driven ports under the V3 multipliers,
     with the legacy floor machinery mapped 2036->h1, 2046->h2, then 2056 computed
     directly and saturation-capped by the pathway.
+
+    Pathway capacity is the V3 rule: ``_future_ready`` over these same V3 targets (the
+    larger of the starter ports, the 2036 high case and the 2046 base case; a Tier 1 site
+    also reserves its 2046 high case), capped by the lot (DEC-027). It no longer borrows
+    the legacy 2035/2050 pathway.
     """
     df = _merge_risk_defaults(results)
-    legacy = run_right_sizing_legacy(results).set_index("site_id")
 
     rows = []
     for _, row in df.iterrows():
         sid = row["site_id"]
         cap = site_capacity_cap(row)
-        pathway = int(legacy.loc[sid, "future_ready_capacity"])
-        ports_now = int(legacy.loc[sid, "ports_now"])
 
         m = {"h1_base": V3_GROWTH_MULTIPLIERS[(2036, "base")], "h1_high": V3_GROWTH_MULTIPLIERS[(2036, "high")],
              "h2_base": V3_GROWTH_MULTIPLIERS[(2046, "base")], "h2_high": V3_GROWTH_MULTIPLIERS[(2046, "high")]}
         targets = apply_strategy_floors(row, _base_targets(row, m))
         for key in ["h1_base", "h1_high", "h2_base", "h2_high"]:
             targets[key] = min(targets[key], cap)
+        ports_now = int(targets["ports_now"])
+        pathway = int(_future_ready(row, targets, cap))
 
         p2056 = {}
         for case in ("base", "high"):

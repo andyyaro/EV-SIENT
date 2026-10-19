@@ -20,8 +20,10 @@ existing limitation text - only extend or supersede as directed.
 
 ## 3. Results page (`results.html`)
 - Insert `content/results_2036_2046_2056.md` (rendered) as the lead section.
-- Every number on this page must trace to `data/contract/v1/scenario_table.csv`; remove
-  any figure that does not.
+- Every number on this page must trace to `data/contract/v3/scenario_table.csv`, the
+  authoritative contract since DEC-027; remove any figure that does not. A figure from the
+  frozen `data/contract/v1` (such as the 48-port pathway) may appear only labelled as the
+  earlier `legacy_v2` result.
 - Keep the "0 of 12 sites High confidence" line prominent.
 
 ## 4. Methodology page (`methodology.html`)

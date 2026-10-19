@@ -11,11 +11,13 @@ Decision-support platform for planning safe, code-responsive public EV charging 
 
 Portfolio lifecycle cost, net present value, base escalation - from the canonical
 `milestone2_v3` run. **STG** (staged, the recommendation) costs less than **OVB** (energise the
-whole future-ready pathway in 2026) at every horizon: **$1.56M vs $1.87M** by 2036, **$3.01M vs
-$3.41M** by 2056. **DEF** is a floor comparator and not a plan - it lays the pathway and
-energises **no ports at all**, which is why it sits flat at $0.62M and why the lowest bars on
-this chart are the ones that charge nobody. Screening-class estimates for comparing cases
-against each other. Never a budget, quote or bid.
+whole future-ready pathway in 2026) at every horizon: **$1.49M vs $1.85M** by 2036, **$2.92M vs
+$3.36M** by 2056 (contract v3). **DEF** is a floor comparator and not a plan - it lays the
+pathway and energises **no ports at all**, which is why it sits flat at $0.62M and why the
+lowest bars on this chart are the ones that charge nobody. The chart itself is a capture of the
+earlier contract v1 run, the `legacy_v2`-era 48-port plan ($1.56M vs $1.87M by 2036, $3.01M vs
+$3.41M by 2056); the comparison it shows holds under both. Screening-class estimates for
+comparing cases against each other. Never a budget, quote or bid.
 
 ## Start here
 
@@ -31,7 +33,7 @@ paid to close.
 **This project is about the middle.** Install fewer ports than you think you need, but put the
 conduit and electrical pathway in for more while the ground is already open - then energise the
 rest only when real usage data says to. For these twelve sites that means **25 ports now, a
-pathway built for 48**.
+pathway built for 47**.
 
 That's the whole idea. Everything below is the evidence for it, and the honest accounting of
 what we don't know.
@@ -55,7 +57,7 @@ from a 2026 baseline).
 
 **The leading strategy it supports:** *staged, evidence-gated deployment* - start with
 25 charging ports at the strongest sites, pre-build expandable civil/electrical pathways
-for up to 48, and energize more only when observed utilization, wait, and reliability
+for up to 47, and energize more only when observed utilization, wait, and reliability
 data clear predefined, equity-aware triggers. This is the direct answer to the client's
 own operating history described above: the Neabsco-Potomac garage (70 ports, 17 later
 taken offline) and the McCoart trenching cost escalation.
@@ -66,14 +68,23 @@ taken offline) and the McCoart trenching cost escalation.
 > even Medium - and electrical capacity is a labeled placeholder at all 12 sites** pending
 > utility and facility verification.
 
-## Headline results (canonical contract v1.0.0, screening values)
+## Headline results (canonical contract v3.0.0, screening values)
 
 | Horizon | Active ports (base → high path) | Staged plan NPC | Broad buildout NPC | Staged avoids | Net CO2e avoided |
 |---|---|---|---|---|---|
 | 2026 | 25 | - | - | - | ≈43 t/yr |
-| 2036 | 35 → 44 | $1.56M | $1.87M | **$0.31M** | ≈82–113 t/yr |
-| 2046 | 44 → 48 | $2.29M | $2.64M | **$0.34M** | ≈130–195 t/yr |
-| 2056 | 44 → 48 (48-port pathway ceiling) | $3.01M | $3.41M | **$0.39M** | ≈173–260 t/yr |
+| 2036 | 31 → 43 | $1.49M | $1.85M | **$0.36M** | ≈82–113 t/yr |
+| 2046 | 43 → 47 | $2.21M | $2.60M | **$0.38M** | ≈130–195 t/yr |
+| 2056 | 43 → 47 (47-port pathway ceiling) | $2.92M | $3.36M | **$0.44M** | ≈173–260 t/yr |
+
+**One official output.** These figures are `data/contract/v3`, the authoritative output since
+[DEC-027](docs/operations/v4-program/DECISIONS.md) (2026-10-18): the canonical `milestone2_v3`
+rules plan the ports on the fixed-anchor ranking the results show, and give **25 starter ports
+and a 47-port pathway**. The earlier result, **25 / 48**, is the `legacy_v2` plan: it is what
+the frozen contracts v1 and v2 hold (active ports 35 → 44, 44 → 48, 44 → 48; staged $1.56M,
+$2.29M, $3.01M against broad $1.87M, $2.64M, $3.41M), and `legacy_v2` mode still reproduces it
+bit-exactly. It is history, kept so the dated deliverables that quote it stay checkable, and
+it is not a second current answer.
 
 Costs are screening-class net present cost (3% real, base escalation) - never budgets.
 Emissions use the EPA eGRID2023 Rev 2 SRVC factor (596.3 lb CO2e/MWh, refreshed
@@ -88,7 +99,10 @@ ranks: the superseded public Tableau workbook (limitation 5 below, queued for re
 scores with no mode named (open action 8d - the page now labels it, but the PDF itself cannot
 be regenerated from here); and the **dated Milestone 2 deck and speaker notes**. The deck is
 deliberately left alone - it records what was presented on 2026-07-21, and editing a dated
-deliverable to match a later model would misrepresent what was said.
+deliverable to match a later model would misrepresent what was said. For the same reason the
+dated Milestone 2 deliverables (the deck, its speaker notes and runbook, and the final report)
+and the 2026-06-28 PDF keep the earlier 48-port pathway; it is the `legacy_v2` result they were
+built on.
 Data confidence is **Low at all 12 sites** - no site reaches Medium, let alone High.
 
 ## How the system fits together
@@ -96,7 +110,7 @@ Data confidence is **Low at all 12 sites** - no site reaches Medium, let alone H
 ```mermaid
 flowchart LR
     A[12-site inputs<br/>data/inputs] --> B[Python model src/fcf_m2<br/>readiness · right-sizing · waits<br/>economics · emissions · triggers]
-    B --> C[Canonical data contract<br/>data/contract/v1 frozen · v2 additive<br/>site x horizon x case, hash-chained]
+    B --> C[Canonical data contract<br/>data/contract/v3 authoritative<br/>v1 · v2 frozen history<br/>site x horizon x case, hash-chained]
     C --> D[MATLAB site-load model<br/>matlab/]
     C --> E[Excel workbook<br/>excel/]
     C --> F[Static dashboard + Tableau<br/>dashboard/]
@@ -121,11 +135,12 @@ manager's consent, and that has not been sought.
 
 | Mode | Purpose |
 |---|---|
-| `legacy_v2` | Bit-exact reproduction of the accepted V2 baseline (golden-tested: FFX002 58.8; 25 starter / 48 pathway ports) |
-| `milestone2_v3` | Canonical 2036/2046/2056 horizons, cohort-independent fixed-anchor scoring, typed data confidence, peak-window + discrete-event waits, lifecycle economics, emissions, equity-aware expansion triggers |
+| `legacy_v2` | Bit-exact reproduction of the accepted V2 baseline (golden-tested: FFX002 58.8; 25 starter / 48 pathway ports, the earlier result, not the official total) |
+| `milestone2_v3` | Canonical: 25 starter / 47 pathway ports (the official totals, DEC-027); 2036/2046/2056 horizons, cohort-independent fixed-anchor scoring, typed data confidence, peak-window + discrete-event waits, lifecycle economics, emissions, equity-aware expansion triggers |
 
-V3 never silently replaces legacy numbers - see the
-[migration guide](docs/migration-from-v2.md).
+V3 never silently replaces legacy numbers. Where it does replace one, a recorded decision says
+so: DEC-027 made the canonical 47-port pathway the official total and 48 the earlier
+`legacy_v2` result. See the [migration guide](docs/migration-from-v2.md).
 
 ## Quick start
 
@@ -133,9 +148,9 @@ V3 never silently replaces legacy numbers - see the
 make setup          # venv + editable install with pinned test extras
 make test           # full suite incl. legacy golden tests (reports coverage; the 80% floor
                     #   is enforced by ./scripts/verify.sh and CI, not by this target)
-make run-legacy     # reproduce the accepted V2 baseline (25/48)
+make run-legacy     # reproduce the earlier legacy_v2 result (25/48; official is 25/47)
 make run-v3         # full V3 run: scores, scenarios, economics, emissions, contract
-make validate       # validate the tracked canonical contract
+make validate       # validate contract v3 (authoritative) and the frozen v1/v2
 ./scripts/verify.sh # every repository verification gate
 ```
 

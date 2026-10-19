@@ -74,7 +74,25 @@ REFERENCE_INPUTS = {
     "legacy_matlab_site_meta.csv": "1b4255976b75429beb5fbd23c90b40ae480c5557564bf12e262e4fbd9831ff5a",
 }
 REFERENCE_STARTER_TOTAL = 25
-REFERENCE_PATHWAY_TOTAL = 48
+#: The official pathway total since DEC-027 (2026-10-18): the canonical milestone2_v3 rules,
+#: the fixed-anchor ranking and the V3 pathway rule, on the reference study.
+REFERENCE_PATHWAY_TOTAL = 47
+#: The earlier legacy_v2 result. legacy_v2 mode still reproduces it bit-exactly, and contracts
+#: v1 and v2 (model version 3.0.0, planned on the legacy ranking) hold it. History, not the
+#: official figure.
+LEGACY_REFERENCE_PATHWAY_TOTAL = 48
+
+
+def reference_totals(model_version: str = MODEL_VERSION) -> tuple[int, int]:
+    """RT-04's (starter, pathway) for a reference-study contract made by ``model_version``.
+
+    The total is a property of the model that produced the rows, not of the container they
+    sit in: frozen v1 and v2 were made by 3.0.0 and hold 25 / 48; every run since DEC-027
+    holds 25 / 47.
+    """
+    if model_version == config.MODEL_VERSION_V1_V2:
+        return REFERENCE_STARTER_TOTAL, LEGACY_REFERENCE_PATHWAY_TOTAL
+    return REFERENCE_STARTER_TOTAL, REFERENCE_PATHWAY_TOTAL
 
 #: Site ids a cohort may use. Wider than the reference study's `FFX`/`PWC` + three digits, and
 #: still strict enough to be a safe file name, join key and URL segment.
@@ -178,7 +196,8 @@ class ContractValidationError(Exception):
 
 
 def validate_scenario_table(df: pd.DataFrame, site_table: pd.DataFrame,
-                            expect_legacy_totals: bool = True) -> list[str]:
+                            expect_legacy_totals: bool = True,
+                            model_version: str = MODEL_VERSION) -> list[str]:
     """Rule-based validation implementing RT-01..RT-05, RT-07..RT-09 and master-prompt rules.
 
     RT-06 is **not implemented here** and never has been. The previous docstring claimed
@@ -186,6 +205,10 @@ def validate_scenario_table(df: pd.DataFrame, site_table: pd.DataFrame,
     gap is the point: a validator that overstates its own coverage is worse than one with a
     known hole, because nobody goes looking for the hole. RT-10, the manifest hash chain,
     lives in ``verify_hash_chain``.
+
+    ``expect_legacy_totals`` asserts RT-04's golden totals for the reference study, and
+    ``model_version`` says which: 25 / 47 for the current model, 25 / 48 for the 3.0.0 rows
+    of the frozen v1 and v2 (`reference_totals`).
 
     Returns list of problems (empty = valid). Raise via validate_or_raise().
     """
@@ -232,15 +255,17 @@ def validate_scenario_table(df: pd.DataFrame, site_table: pd.DataFrame,
         if any(b < a for a, b in zip(seq, seq[1:])):
             problems.append(f"RT-03: {sid}/{case} ports_active decreases across horizons {seq}")
 
-    # RT-04 legacy totals at baseline
+    # RT-04 golden totals at baseline (the reference study only)
     if expect_legacy_totals:
+        want_starter, want_pathway = reference_totals(model_version)
         base = df[(df["horizon_year"] == BASELINE_YEAR) & (df["scenario_name"] == "baseline")]
         starter = int(base["ports_active"].sum())
         pathway = int(base["ports_pathway_capacity"].sum())
-        if starter != REFERENCE_STARTER_TOTAL:
-            problems.append(f"RT-04: baseline starter total {starter} != {REFERENCE_STARTER_TOTAL}")
-        if pathway != REFERENCE_PATHWAY_TOTAL:
-            problems.append(f"RT-04: pathway total {pathway} != {REFERENCE_PATHWAY_TOTAL}")
+        if starter != want_starter:
+            problems.append(f"RT-04: baseline starter total {starter} != {want_starter}")
+        if pathway != want_pathway:
+            problems.append(f"RT-04: pathway total {pathway} != {want_pathway} "
+                            f"(model version {model_version})")
 
     # RT-05 unit ranges
     if (df["evse_power_kw"] <= 0).any() or (df["evse_power_kw"] > 5000).any():
@@ -288,7 +313,7 @@ def run_is_synthetic(provenance: pd.DataFrame) -> bool:
     """True only when EVERY provenance row declares synthetic inputs.
 
     Used to decide whether the RT-04 golden-baseline totals apply. They are the real study's
-    accepted figures (25 starter / 48 pathway) and a run on invented inputs cannot reproduce
+    accepted figures (25 starter / 47 pathway) and a run on invented inputs cannot reproduce
     them - nor should it be made to. Tuning a synthetic fixture until it hits the real totals
     would encode the real results inside data labelled as invented, which is both a false
     label and a leak.
@@ -305,13 +330,13 @@ def run_is_synthetic(provenance: pd.DataFrame) -> bool:
 
 def is_reference_run(provenance: pd.DataFrame, inputs_hashed: dict[str, str],
                      cohort: dict | None) -> bool:
-    """True when a run is the reference study, which RT-04 holds to its 25 / 48 totals.
+    """True when a run is the reference study, which RT-04 holds to its 25 / 47 totals.
 
     A run on synthetic inputs never is, whatever its files are called. Otherwise a run without
     a cohort is, as it always was, and a cohort is when it read the reference study's own
-    inputs. `workflow.run` asks this same question to decide which ranking the port plan
-    follows and whose permitting authority the standards register names, so neither can
-    disagree with RT-04. Until 2026-10-17 both took any run without a cohort for the reference
+    inputs. `workflow.run` asks this same question to decide whose permitting authority the
+    standards register names, so it cannot disagree with RT-04 (until DEC-027 it also decided
+    which ranking the port plan followed). Until 2026-10-17 both took any run without a cohort for the reference
     study, so the public bundle, which ships its synthetic inputs under the reference file
     names, was planned and described as the real study: 24 / 42 where the same sites run as a
     cohort get 24 / 38.
