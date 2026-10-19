@@ -60,12 +60,39 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | Command | What it proves |
 |---|---|
 | `node platform/tools/parity.mjs` | The browser engine and the native package give the same numbers (also in CI) |
-| `python3 platform/tools/matrix.py <base-url> <out-dir>` | Every screen at 11 window sizes, light and dark: no sideways scroll, nothing covered, controls large enough |
-| `python3 platform/tools/a11y_audit.py <base-url> <out-dir> --axe <axe.min.js>` | axe-core on every screen, in all four themes |
+| `python3 platform/tools/matrix.py <base-url> <out-dir>` | Every screen at 11 window sizes, light and dark: no sideways scroll, nothing covered, controls large enough, no console errors, no requests to other sites (in CI at three sizes) |
+| `python3 platform/tools/a11y_audit.py <base-url> <out-dir> --axe <axe.min.js>` | axe-core on every screen, in all four themes, and the whole flow from Start to a downloaded report by keyboard alone (also in CI) |
 | `python3 platform/tools/browser_check.py` | The real engine boots and runs Example City in Chromium and WebKit |
-| `python3 platform/tools/offline_check.py platform/app/dist` | Installable (manifest, icons, no Chromium installability errors), the service worker holds the shell and, after one run, the runtime stored decoded; then, with the server stopped, the whole flow runs again with the real engine, in Chromium and WebKit |
+| `python3 platform/tools/offline_check.py platform/app/dist` | Installable (manifest, icons, no Chromium installability errors), the service worker holds the shell and, after one run, the runtime stored decoded; then, with the server stopped, the whole flow runs again with the real engine, in Chromium and WebKit (also in CI) |
 
 Both screen scripts walk the flow through `tools/planner_flow.py` and take `--mock` for the stand-in engine.
+`a11y_audit.py`, `matrix.py` and `offline_check.py` exit non-zero on any finding and write their findings as JSON (`offline_check.py` with `--json`).
+
+### The same checks as CI, on your machine
+
+The `platform` job in `.github/workflows/tests.yml` runs those three after the app
+build, with the real engine, against the build served under the production CSP. Any axe
+violation, keyboard problem, failing layout check or offline problem fails the job, and the
+findings and screenshots are then uploaded as the `planner-browser-checks` artifact. To run them
+the way CI does (ports 5311 and 5312, as there):
+
+```sh
+pip install -r platform/tools/requirements-qa.txt     # Playwright 1.63.0, pinned
+python -m playwright install --only-shell chromium webkit
+curl -fsSL -o /tmp/axe-core.tgz https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz
+tar -xzf /tmp/axe-core.tgz -C /tmp package/axe.min.js  # CI checks its SHA-256 first
+(cd platform/app && npm run build)                     # after fetch_runtime.mjs and build_engine.py
+python platform/tools/serve_csp.py platform/app/dist --port 5311 &
+python platform/tools/a11y_audit.py http://127.0.0.1:5311 /tmp/qa/a11y --axe /tmp/package/axe.min.js --shots
+python platform/tools/matrix.py http://127.0.0.1:5311 /tmp/qa/matrix --sizes 1440x900,390x844,320x640
+python platform/tools/offline_check.py platform/app/dist --port 5312 --json /tmp/qa/offline.json
+```
+
+axe-core is not a dependency of the app; CI fetches the 4.13.0 tarball and checks its SHA-256.
+The axe audit injects axe as a script, so it bypasses the CSP for that page only; matrix.py and
+offline_check.py run under the real policy. CI leaves out `--map`, which needs the map tile host.
+`offline_check.py` starts its own server with `--brotli` and needs the `brotli` command. On an
+Apple-silicon laptop the three take about 2, 1.5 and 2 minutes.
 
 `npm run build` first runs `tools/build_licences.mjs`, which writes `public/licences.txt` (every
 bundled package, the Pyodide runtime and its Python wheels, with their licence texts).

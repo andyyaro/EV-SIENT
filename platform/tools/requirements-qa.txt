@@ -1,0 +1,8 @@
+# Browser QA for the planner: a11y_audit.py, matrix.py, offline_check.py, browser_check.py.
+# Not part of the engine or the app, so it is kept out of requirements-lock.txt.
+# Every pin was at least two weeks old when chosen (2026-10-18). Playwright pins its own
+# browser builds, so this file is also the cache key for the browsers in CI.
+playwright==1.63.0      # 2026-09-15
+greenlet==3.5.6         # 2026-09-14, needed by playwright
+pyee==13.0.1            # 2026-02-14, needed by playwright
+typing-extensions==4.16.0  # 2026-07-02, needed by pyee; the same pin as requirements-lock.txt

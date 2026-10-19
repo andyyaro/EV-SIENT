@@ -192,6 +192,12 @@ def keyboard_audit(p, args, out: Path) -> tuple[dict, int]:
                 break
             page.keyboard.press("Tab")
         page.keyboard.type("City of Example")
+        # Check leads to Public Data when the upload lacks a field public data could fill
+        # (Example City does), and straight to Run otherwise.
+        if page.get_by_role("button", name="Continue to Public Data", exact=True).count():
+            kb.press("Continue to Public Data")
+            page.locator("#main h1", has_text="Public Data").wait_for()
+            result["steps"].append("Public Data")
         kb.press("Continue to Run")
         page.locator("#main h1", has_text="Run").wait_for()
         kb.press("Run the Model")
