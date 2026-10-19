@@ -40,7 +40,7 @@ function localHub(): Plugin {
 // `vite build --mode engine-check --outDir dist-check` builds only engine-check.html, the
 // dev-only harness platform/tools/browser_check.py drives; the production build never does.
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), typstGlueWithoutEval(), localHub(), serviceWorker(fileURLToPath(new URL('./pwa/sw.js', import.meta.url)))],
+  plugins: [react(), typstGlueWithoutEval(), excelZipWithoutBlobWorkers(), localHub(), serviceWorker(fileURLToPath(new URL('./pwa/sw.js', import.meta.url)))],
   base: '/',
   build: {
     target: 'es2022',
@@ -91,6 +91,33 @@ function __evsientKnownFunction(...parts) {
       }
       if (/new Function|\beval\(/.test(out)) throw new Error(`Typst glue changed: ${id} still builds a function from source.`);
       return { code: out + KNOWN, map: null };
+    },
+  };
+}
+
+// write-excel-file 4 zips the workbook with fflate's asynchronous zip(), which compresses any part
+// of 160 kB or more in a Worker started from a blob: URL. The app's CSP allows only same-origin
+// workers (worker-src 'self'), so that Worker never starts and a workbook of a few hundred sites
+// never finishes: the Excel download waited forever. This makes the library zip synchronously
+// (fflate's zipSync, a fraction of a second at 360 sites), keeping the same promise it returns.
+// The build fails if the library's zip step no longer reads as expected.
+function excelZipWithoutBlobWorkers(): Plugin {
+  const ZIP = /write-excel-file\/modules\/zip\/zipToArrayBuffer\.js$/;
+  const EDITS = [
+    ["import { zip } from 'fflate';", "import { zipSync } from 'fflate';"],
+    ['zip(files, function (error, archive) {', '(function (callback) { try { callback(null, zipSync(files)); } catch (e) { callback(e, null); } })(function (error, archive) {'],
+  ];
+  return {
+    name: 'evsient-excel-zip-without-blob-workers',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!ZIP.test(id.split('?')[0])) return null;
+      let out = code;
+      for (const [from, to] of EDITS) {
+        if (out.split(from).length !== 2) throw new Error(`write-excel-file changed: expected one "${from}" in ${id}. Check that it still zips without blob: workers.`);
+        out = out.replace(from, to);
+      }
+      return { code: out, map: null };
     },
   };
 }
