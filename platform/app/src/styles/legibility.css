@@ -23,9 +23,27 @@
   --label-secondary: color-mix(in srgb, var(--system-gray) 70%, var(--label-primary));
   --glass-label-secondary: var(--label-secondary);
   --accent: color-mix(in srgb, var(--system-blue) 70%, var(--black));
+  --field-edge: var(--label-secondary);
 }
 
 :root:root[data-theme="dark"] {
   --accent: color-mix(in srgb, var(--system-blue) 70%, var(--white));
   --on-accent: var(--black);
+}
+
+/* Placeholder text is text (WCAG 1.4.3), and here it carries information: an example of what to
+   type, a column's own name as its default label, the data range a Your Index setting starts from.
+   Tertiary Label measures 1.7:1 (light) and 2.4:1 (dark) on a text field, so placeholders take
+   Secondary Label, which meets 4.5:1 in all four themes. Typed text stays Label, so the two still
+   differ. */
+:root:root { --placeholder-text: var(--label-secondary); }
+
+/* Non-text contrast (WCAG 1.4.11): a text field or menu has to be visible as one. The design
+   system draws them as a Tertiary Fill with no edge, 1.2:1 against the page in light and 1.3:1 in
+   dark, so they get a 1px edge of at least 3:1 against what surrounds them: Secondary Label in light
+   (set in the light block above), System Gray in dark. A border rather than a shadow, so it also
+   shows in forced colours. */
+:root:root { --field-edge: var(--system-gray); }
+:root:root :is(.st-select select, .app-compact__step select, .yc-input, .yi-text, .yi-num__input, .rs-yours__input, .st-inset-fields) {
+  border: 1px solid var(--field-edge);
 }
