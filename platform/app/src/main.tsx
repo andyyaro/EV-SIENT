@@ -8,5 +8,7 @@ import './styles/shell.css';
 import './styles/app.css';
 import './styles/steps.css';
 import { App } from './App';
+import { registerServiceWorker } from './pwa/register';
 
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
+registerServiceWorker();

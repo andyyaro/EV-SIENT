@@ -51,3 +51,24 @@
 .app-licences:hover { color: var(--label-primary); }
 .nav-sidebar__foot .app-licences:hover { color: var(--glass-label-primary); }
 .st-smallprint { margin-top: 32px; }
+
+/* Common Questions: a modal dialog over the open project. Nearly full width on a phone, a centred
+   sheet on wider screens; the answers scroll under a fixed title and Done button. */
+.app-faq {
+  width: min(640px, calc(100% - 16px)); max-width: none; max-height: min(85vh, calc(100dvh - 16px)); margin: auto; padding: 0;
+  border: 0; border-radius: var(--radius-sheet); background: var(--background-elevated-primary); color: var(--label-primary);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); overflow: hidden;
+}
+.app-faq[open] { display: flex; flex-direction: column; }
+.app-faq::backdrop { background: var(--scrim-sheet); }
+.app-faq__head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 8px 24px; border-bottom: 1px solid var(--separator); }
+.app-faq__title { margin: 0; font: 700 22px/28px var(--font-sans); letter-spacing: -0.26px; }
+.app-faq__body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 8px 24px 24px; }
+.app-faq__item { padding-top: 16px; }
+.app-faq__q { margin: 0 0 6px; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; }
+.app-faq__item p { margin: 0 0 8px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+.app-faq__item strong { color: var(--label-primary); font-weight: 600; }
+@media (max-width: 480px) {
+  .app-faq__head { padding-left: 16px; }
+  .app-faq__body { padding: 4px 16px 20px; }
+}

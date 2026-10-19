@@ -5,7 +5,9 @@
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Banner } from './components/Banner';
 import { Icon } from './components/Icon';
+import { FaqLink } from './components/FaqLink';
 import { LicencesLink } from './components/LicencesLink';
+import { useUpdate } from './pwa/register';
 import { STEPS, stepDone, stepGate, useSession, type StepKey } from './state/store';
 import { StartStep } from './steps/StartStep';
 import { UploadStep } from './steps/UploadStep';
@@ -75,7 +77,7 @@ function StepNav() {
       </div>
       <p className="nav-sidebar__foot">
         Your files stay on this device. Planning support, not engineering advice.{' '}
-        <LicencesLink />
+        <FaqLink /> · <LicencesLink />
       </p>
     </nav>
   );
@@ -118,10 +120,26 @@ function CompactBar() {
 
 function Messages() {
   const s = useSession();
+  const update = useUpdate();
   const showStale = !!s.run && !!s.staleReason && s.step !== 'run' && s.step !== 'start';
   const runOpen = stepGate(s, 'run').open;
   return (
     <div className="app-messages">
+      {update.ready && !update.dismissed && (
+        <Banner
+          tone="info"
+          title="Update Available"
+          onDismiss={update.dismiss}
+          action={<button type="button" className="hig-button hig-button--ios hig-button--medium hig-button--bordered hig-focus" onClick={update.apply}>Reload</button>}
+        >
+          <p>
+            A new version of the planner is ready.{' '}
+            {s.table
+              ? 'Reloading closes this project, so save a project file from the Report step first if you want to keep it.'
+              : 'Reload to start using it.'}
+          </p>
+        </Banner>
+      )}
       {s.error && (
         <Banner tone="error" title="Something Went Wrong" onDismiss={s.clearError}>
           <p>{s.error}</p>
