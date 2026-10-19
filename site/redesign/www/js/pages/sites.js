@@ -6,7 +6,7 @@
   'use strict';
   var FC = window.FC;
   var WIDE = window.matchMedia('(min-width: 1024px)');
-  var BASE_TITLE = 'Sites · EV Site Readiness';
+  var BASE_TITLE = 'Sites · EV-SIENT';
 
   var S = { sites: [], byId: {}, q: '', jur: 'all', sort: 'rank', sel: null, view: null, listScroll: 0, rendered: null };
   var E = {};

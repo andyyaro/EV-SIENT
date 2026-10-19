@@ -11,6 +11,9 @@
   ICONS['bubble'] = [['path', { d: 'M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17H5A1.5 1.5 0 0 1 3.5 15.5V7A1.5 1.5 0 0 1 5 5.5z' }]];
   ICONS['books'] = [['path', { d: 'M4.5 5h4v14h-4zM8.5 5h4v14h-4z' }], ['path', { d: 'M13.2 6.2l3.9-1 3.4 13.6-3.9 1z' }]];
   var RTL = window.HIG_RTL_FLIP || new Set();
+  /* The EV-SIENT Bolt Pin mark (logo kit, site-dropin/nav-brand-mark.html). It fills with currentColor, so it follows
+     --on-accent in every theme. The planner app uses the same mark. */
+  var EVSIENT_MARK = '<svg class="hig-icon" viewBox="0 0 64 64" width="24" height="24" aria-hidden="true" focusable="false"><path fill-rule="evenodd" fill="currentColor" d="M27.283 58.704L24.592 40.17A1.813 1.813 0 0 0 23.33 38.698A17.118 17.118 0 1 1 43.619 30.079A0.906 0.906 0 0 0 44.427 31.396L52.383 31.396A1.208 1.208 0 0 1 53.294 33.398L30.443 59.634A1.813 1.813 0 0 1 27.283 58.704ZM28.353 15.889A6.444 6.444 0 1 0 28.353 28.778A6.444 6.444 0 1 0 28.353 15.889Z"/></svg>';
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -93,8 +96,8 @@
     side.className = 'nav-sidebar hig-sidebar hig-sidebar--ios hig-sidebar--floating hig-glass hig-glass--regular';
     side.setAttribute('aria-label', 'Site');
     var html = '<div class="hig-sidebar__top"><a class="nav-brand" href="index.html">' +
-      '<span class="nav-brand__mark">' + icon('bolt', { size: 22, strokeWidth: 2 }) + '</span>' +
-      '<span class="nav-brand__text"><span class="nav-brand__title">EV Site Readiness</span>' +
+      '<span class="nav-brand__mark">' + EVSIENT_MARK + '</span>' +
+      '<span class="nav-brand__text"><span class="nav-brand__title">EV-SIENT</span>' +
       '<span class="nav-brand__sub">Future City Fellowship</span></span></a></div>';
     NAV.forEach(function (sec, si) {
       html += '<div class="hig-sidebar__section" role="group" aria-labelledby="nav-sec-' + si + '">' +
