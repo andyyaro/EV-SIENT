@@ -727,6 +727,8 @@ def undecided_text(page):
             el = loc.nth(i)
             if not el.is_visible():
                 continue
+            # Measured in full view: a row half under the window's edge measures its padding, not its text.
+            el.evaluate("(el) => { const r = el.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) el.scrollIntoView({ block: 'center' }); }")
             r = el.evaluate("(el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return { x: r.left, y: r.top, w: r.width, h: r.height, d: window.__w.describe(el), size: cs.fontSize, weight: cs.fontWeight }; }")
             img, inner = shot(page, r, 2)
             if img is None:
