@@ -1589,3 +1589,55 @@ None moved. The reference study does not use the hub.
 schema, row-count change of more than 20%, coordinates, licence text, size), the DEC-025 cases
 in `tests/test_browser_api.py` (provenance, ledger, refusals, an unchanged cohort without
 fills), and parity (unchanged).
+
+## DEC-026 - The planner's other columns travel with their sites, never scored; site IDs stay text
+
+**Date:** 2026-10-18 · **Phase:** platform v1 · **Builds on DEC-011, DEC-021, DEC-024, DEC-025**
+
+### What was blocking
+
+The owner tested the planner with a 360-site file of 31 columns. Seven map to model fields; the
+other 24 (city, region, program focus, heat risk, solar potential, the planner's own `custom_*`
+notes) were read and then vanished from every screen and download. A planner who cannot see
+their own columns beside the ranking has to rebuild it in a spreadsheet, and loses the context
+the ranking needs. Separately, an all-digit site ID column came back from a run as numbers:
+`workflow._load_cohort` read `sites.csv` with default types, so "007" returned as "7.0" and
+`explain` and `provenance` found no such site.
+
+### The decision
+
+1. **Carry every column the model does not use, never score it** (the owner's choice). The app
+   keeps each one with its site, keyed by the exact site ID the engine reads, from the mapping
+   the run used. Values are shown as written; a column is formatted as numbers only when every
+   value in it reads as a plain number (a leading zero, as in a ZIP code, keeps it text).
+2. **Always labelled Not in the score, everywhere it appears**: extra Ranked Sites columns the
+   planner adds (sortable, with a contains or range filter that narrows the table only), a card
+   in the site's details, a group in Compare, marker colours on the map (five sequential steps,
+   or up to eight categories and Other, with a legend), CSV columns headed "Your column (not in
+   the score)", an Excel sheet of their own, a tenth report section and each profile's values,
+   and `inputs/your_columns.json` in the project file, which is then `evsient-project/3`. Files
+   saved as /1 and /2 still open, with the columns read again from their table.
+3. **Display data only.** Nothing carried is sent to the engine's scoring, and the interface
+   computes no score from it. The only things worked out from it are the order, filter and map
+   colours the planner asks for. Ranking by the planner's own columns is the separate,
+   labelled "Your index" in `docs/FLEXIBLE_ANALYSIS.md`, not this.
+4. **Say how much of the score the file feeds.** Map Columns and Check state how many of the 22
+   scored fields the file provides and that the other columns are carried, not scored. Below
+   half, a warning says first that the ranking will mostly reflect missing information, not
+   site suitability (the owner's file provides 1 of 22).
+5. **Site IDs are text end to end.** `_load_cohort` reads `site_id`, `site_name` and
+   `site_type` as text, and `electrical_risk.csv` and `site_meta.csv` key on text IDs. The
+   reference study is read by its own loader and is untouched.
+
+### Published numbers
+
+None moved. The full suite passes, golden tests included, and parity is unchanged.
+
+### Gates
+
+`test_site_ids_keep_their_exact_text` in `tests/test_browser_api.py` ("007", "0042", "12" and
+mixed IDs through `run`, `explain` and `provenance`, and the cohort's `sites.csv`), parity, and
+the owner's 360-site file run end to end in the browser under the production CSP. That run
+found an older fault: the Excel download never finished for a workbook of 160 kB or more,
+because the zip library compresses large parts in a `blob:` Worker that `worker-src 'self'`
+blocks. `vite.config.ts` now makes write-excel-file zip synchronously; the CSP is unchanged.

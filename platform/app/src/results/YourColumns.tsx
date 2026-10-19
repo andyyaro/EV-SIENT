@@ -43,6 +43,12 @@ export function YourColumnsControl({ carried, total, showing }: { carried: Carri
     setView({ filter: col.numeric ? { column: name, kind: 'range', min: '', max: '' } : { column: name, kind: 'text', contains: '' } });
   }
 
+  // The same order the column headings set; on a phone the headings are hidden, so this is the way in.
+  function chooseSort(value: string) {
+    const at = value.indexOf(':');
+    setView({ sort: at < 0 ? null : { column: value.slice(at + 1), dir: value.slice(0, at) === '1' ? 1 : -1 } });
+  }
+
   return (
     <div className="rs-yours">
       <div className="rs-yours__bar">
@@ -95,6 +101,32 @@ export function YourColumnsControl({ carried, total, showing }: { carried: Carri
             </button>
           )}
         </fieldset>
+
+        {view.shown.length > 0 && (
+          <fieldset className="rs-yours__set">
+            <legend className="rs-yours__legend">Sort the Table</legend>
+            <div className="rs-yours__filter">
+              <label className="rs-yours__field">
+                <span className="rs-yours__label">Order</span>
+                <span className="st-select">
+                  <select className="hig-focus" value={view.sort ? `${view.sort.dir}:${view.sort.column}` : ''} onChange={(e) => chooseSort(e.target.value)}>
+                    <option value="">Rank Order</option>
+                    {view.shown.map((name) => {
+                      const numeric = carried.columns[columnIndex(carried, name)]?.numeric;
+                      return [1, -1].map((dir) => (
+                        <option key={`${dir}:${name}`} value={`${dir}:${name}`}>
+                          {name}, {numeric ? (dir === 1 ? 'lowest first' : 'highest first') : (dir === 1 ? 'A to Z' : 'Z to A')}
+                        </option>
+                      ));
+                    })}
+                  </select>
+                  <Icon name="chevron.up.chevron.down" size={13} />
+                </span>
+              </label>
+            </div>
+            <p className="footnote">The column headings sort too. Ranks stay as the model set them.</p>
+          </fieldset>
+        )}
 
         <fieldset className="rs-yours__set">
           <legend className="rs-yours__legend">Filter the Table</legend>

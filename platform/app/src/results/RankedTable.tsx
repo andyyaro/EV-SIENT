@@ -56,6 +56,7 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
                   {!sort && <Icon name="chevron.up" size={12} strokeWidth={2.4} />}
                 </button>
               ) : <span className="hig-table__heading-label">Rank</span>}
+              {extra.length > 0 && onSort && <span className="rs-sort-text">Rank</span>}
             </th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading rs-col-site"><span className="hig-table__heading-label">Site</span></th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Score</span></th>
@@ -83,6 +84,7 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
                     </span>
                     {on && <Icon name={sort!.dir === 1 ? 'chevron.up' : 'chevron.down'} size={12} strokeWidth={2.4} />}
                   </button>
+                  <span className="rs-sort-text">{name}, {NOT_IN_SCORE.toLowerCase()}</span>
                 </th>
               );
             })}

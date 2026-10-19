@@ -126,6 +126,8 @@
 }
 .hig-table__cell--trailing > .rs-sort { flex-direction: row-reverse; }
 .rs-sort .hig-icon { flex: none; margin-bottom: 2px; }
+/* A heading's plain name, used where the sort buttons are hidden (the stacked phone layout below). */
+.rs-sort-text { display: none; }
 .rs-ranked .rs-col-yours { max-width: 24ch; }
 .rs-ranked.hig-table--ios .hig-table__heading.rs-col-yours, .rs-ranked .rs-row > .rs-col-yours { background-color: var(--rs-yours-tint); }
 .rs-yours-head { display: flex; flex-direction: column; align-items: inherit; gap: 1px; }
@@ -317,6 +319,10 @@
 @container rs-ranked (max-width: 599px) {
   .rs-ranked .hig-table__grid, .rs-ranked tbody { display: block; min-width: 0; }
   .rs-ranked thead { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* The headings are only read out here, so they hold no buttons a keyboard could land on unseen:
+     the Your Columns panel's Sort the Table sets the same order. */
+  .rs-ranked thead .rs-sort { display: none; }
+  .rs-ranked thead .rs-sort-text { display: inline; }
   .rs-ranked .rs-row {
     position: relative; display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; padding: 6px 4px 10px 44px;
     box-shadow: inset 0 -0.5px var(--separator);

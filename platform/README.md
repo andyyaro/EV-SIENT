@@ -11,11 +11,11 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 |---|---|---|
 | Start | New project, open a `.evsient` file, or try the Example City sample | `info`, `fields` |
 | Upload | A CSV or Excel file; choose the sheet | `propose` |
-| Map Columns | Confirm guesses and unit conversions, choose columns for unmatched fields | `remap` |
+| Map Columns | Confirm guesses and unit conversions, choose columns for unmatched fields; see how many scored fields the file provides | `remap` |
 | Check | See which rows are ready, which have missing values, and anything that must be fixed | `check` |
 | Public Data | Optional: look up public values for fields the file lacks, then use or skip each field (DEC-025) | `fill` |
 | Run | One button | `accept`, then `run` |
-| Results | Ranked sites, a map, why each site scores what it does, compare up to three | `explain`; `provenance` resolves one number's lineage when it is opened |
+| Results | Ranked sites, a map, why each site scores what it does, compare up to three; the file's other columns as Your Columns (DEC-026) | `explain`; `provenance` resolves one number's lineage when it is opened |
 | Report | Download the report (HTML, tagged PDF, Word), the tables and the project file | `output_files` |
 
 ## Layout
@@ -47,13 +47,23 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
   mapping the planner chooses is recorded as a choice, not a source (DEC-021, DEC-023). A public
   value is used only for a field the planner accepts, only where the file has none, and is
   recorded as public data with its source and vintage (DEC-025).
+- **The planner's other columns are carried, never scored (DEC-026).** Every column the model
+  does not read is kept with its site by the exact site ID (`results/carried.ts`) and shown as
+  written, labelled Not in the score, in Results (table columns to add, sort and filter, the
+  site's card, Compare, map colours), the CSV and Excel downloads, the report's tenth section
+  and the project file (`inputs/your_columns.json`, `evsient-project/3`; /1 and /2 still open).
+  None of it is sent to the engine. Map Columns and Check say how many of the scored fields the
+  file provides, and warn when fewer than half are there.
+- **Site IDs stay text.** A cohort's `sites.csv` is read with its IDs as text, so "007" comes back
+  from a run as "007", never 7.
 - **Provenance is resolved when asked, one cell at a time.** `provenance.resolve` finds its row
   through an index built once, so even a full `export_all` is linear: 9.0 s for 600 sites under
   Pyodide, where the per-cell mask took 466 s, with byte-identical output (a test pins it).
 - **Every score on screen comes from the engine.** The interface explains with fixed wording
   filled from the engine's own numbers; it never computes a score itself. The only numbers it
   works out are the public values it proposes, from the hub's packs, and each is shown with how
-  it was worked out before the planner chooses it.
+  it was worked out before the planner chooses it, and the order, filter and map colours the
+  planner asks for from Your Columns.
 
 ## Checks before a release
 

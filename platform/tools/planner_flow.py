@@ -79,6 +79,9 @@ def run_flow(page, base: str, mock: bool) -> dict:
     page.get_by_role("button", name="Continue to Map Columns", exact=True).click()
     _wait_h1(page, "Map Columns")
     # Fleet is read but not scored; left unmatched, it is carried as one of Your Columns.
+    show_all = page.locator('button[aria-controls="grp-matched-list"]', has_text="Show All")
+    if show_all.count():
+        show_all.click()
     page.locator("#col-fleet_vehicles").select_option("")
     page.locator(".st-map-row--unmatched#field-fleet_vehicles").wait_for(timeout=60_000)
     accept = page.get_by_role("button", name="Accept All Matched", exact=True)
