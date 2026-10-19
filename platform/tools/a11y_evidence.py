@@ -104,6 +104,9 @@ def wcag_summary(path: Path) -> dict:
         if r.get("zoom"):
             s["zoom"] = {label: {"pageWidth": z["pageWidth"], "clipped": z["clipped"], "fixedBars": z["fixed"], "focus": z.get("focus")}
                          for label, z in r["zoom"].items()}
+        if r.get("axe"):
+            s["axe"] = {run: {"violations": [f"{v['id']} x{len(v['nodes'])}" for v in a["violations"]],
+                              "incomplete": sorted({v["id"] for v in a["incomplete"]})} for run, a in r["axe"].items()}
         s["smallTargets1440"] = r.get("targets1440")
         s["smallTargets390"] = r.get("targets390")
         out["screens"][name] = s

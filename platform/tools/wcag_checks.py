@@ -33,6 +33,9 @@ the Results map (unless --no-map), and visits every screen:
   step menu   the compact step menu below 1024 px when its value changes (3.2.2)
   downloads   the report as HTML, tagged PDF and Word: language, title, headings, tables, header
               cells, alternative text, and the PDF's structure tree in reading order
+  axe         with --axe, axe-core on every screen visited, in all four themes at 1440x900 and in
+              light at 390x844, with the same rules as a11y_audit.py; this reaches the screens
+              a11y_audit.py does not (Your Columns open, Your Index refused and ranked, the map shown)
 
 A second session uploads Example City with six more invented sites (Your Index ranks only with ten
 or more), runs Your Index to its results and repeats the per-screen checks on Your Index and Explore.
@@ -42,7 +45,7 @@ The page is opened with bypass_csp, only so the checks can add their own style a
 matrix.py and offline_check.py for the app under its real policy.
 
 Usage:
-  python platform/tools/wcag_checks.py http://127.0.0.1:5321 /tmp/wcag [--no-map]
+  python platform/tools/wcag_checks.py http://127.0.0.1:5321 /tmp/wcag [--no-map] [--axe axe.min.js]
       [--screens start,results] [--skip focus,contrast,spacing,zoom,errors,downloads,index]
 Writes <out>/wcag.json (everything), <out>/downloads/ and <out>/error-files/. Exits 0; the findings
 are for a person to read, not a gate. platform/tools/a11y_evidence.py summarises them.
@@ -65,6 +68,9 @@ from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import planner_flow as pf  # noqa: E402
+from a11y_audit import run_axe  # noqa: E402
+
+AXE_PATH: str | None = None  # set by --axe
 
 THEMES = [("light", "no-preference"), ("dark", "no-preference"), ("light", "more"), ("dark", "more")]
 SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "explore", "yourindex", "report"]
@@ -1221,6 +1227,14 @@ def check_screen(page, screen, skip):
         page.evaluate("() => window.scrollTo(0, 0)")
     r["structure"] = page.evaluate("() => window.__w.structure()")
     r["targets1440"] = page.evaluate("() => window.__w.targets()")
+    if AXE_PATH:
+        r["axe"] = {}
+        for scheme, contrast in THEMES:
+            theme = set_theme(page, scheme, contrast)
+            r["axe"][f"{theme} 1440x900"] = run_axe(page, AXE_PATH)
+        set_theme(page, "light", "no-preference")
+        n = sum(len(v["nodes"]) for x in r["axe"].values() for v in x["violations"])
+        print(f"   axe: {n} violation nodes in four themes", flush=True)
     if "focus" not in skip:
         r["focus"] = {}
         for scheme, contrast in THEMES:
@@ -1251,6 +1265,8 @@ def check_screen(page, screen, skip):
         r["focus390"] = summarise_focus(walk)
         print(f"   focus 390: {r['focus390']['count']} stops, hidden {len(r['focus390']['entirelyHidden'])}", flush=True)
     r["targets390"] = page.evaluate("() => window.__w.targets()")
+    if AXE_PATH:
+        r["axe"]["light 390x844"] = run_axe(page, AXE_PATH)
     if "contrast" not in skip:
         r["undecidedText390"] = {}
         for scheme, contrast in THEMES:
@@ -1283,8 +1299,11 @@ def main() -> int:
     ap.add_argument("out")
     ap.add_argument("--no-map", action="store_true", help="do not show the Results map (it contacts tiles.openfreemap.org)")
     ap.add_argument("--screens", default=",".join(SCREENS))
-    ap.add_argument("--skip", default="", help="comma list of sections to skip: focus,contrast,spacing,zoom,errors,downloads")
+    ap.add_argument("--skip", default="", help="comma list of sections to skip: focus,contrast,spacing,zoom,errors,downloads,index")
+    ap.add_argument("--axe", help="path to axe.min.js (4.13.0, as CI pins): also run axe-core on every screen visited")
     args = ap.parse_args()
+    global AXE_PATH
+    AXE_PATH = args.axe
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     skip = set(filter(None, args.skip.split(",")))
