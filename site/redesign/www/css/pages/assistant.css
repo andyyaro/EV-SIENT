@@ -35,8 +35,9 @@
   border-radius: var(--radius-capsule); color: var(--accent); font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px;
 }
 .as-msg { margin: 0 0 14px; padding: 12px 14px; border-radius: var(--radius-thumbnail); background: var(--fill-quaternary);
-  font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); border-left: 3px solid var(--system-red); }
-.as-msg--ok { border-left-color: var(--system-green); }
+  font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary);
+  background: color-mix(in srgb, var(--system-red) 14%, var(--fill-quaternary)); }
+.as-msg--ok { background: color-mix(in srgb, var(--system-green) 14%, var(--fill-quaternary)); }
 .as-msg[hidden] { display: none; }
 
 .as-steps { margin: 0; padding-inline-start: 1.3em; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
