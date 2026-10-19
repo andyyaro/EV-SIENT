@@ -23,9 +23,14 @@ function walk(dir: string): string[] {
     e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
 }
 
+/** The PDF maker's compiler and fonts: about 30 MB, fetched only when a planner asks for a PDF. */
+function onDemand(path: string): boolean {
+  return path.startsWith('assets/') && /\.(wasm|otf)$/.test(path);
+}
+
 function inShell(path: string): boolean {
   if (path === ENGINE_JSON) return true;
-  if (path.startsWith('runtime/') || path.endsWith('.map')) return false;
+  if (path.startsWith('runtime/') || path.endsWith('.map') || onDemand(path)) return false;
   // The error page is CloudFront's, and the worker is not part of its own shell.
   return path !== '404.html' && path !== 'sw.js';
 }
@@ -49,10 +54,11 @@ export function serviceWorker(template: string): Plugin {
       } else {
         this.warn(`${ENGINE_JSON} is not in the build; the planner will not work offline (run platform/tools/build_engine.py)`);
       }
-      const version = createHash('sha256').update(JSON.stringify({ shell, runtime })).digest('hex').slice(0, 16);
+      const later = files.filter(onDemand);
+      const version = createHash('sha256').update(JSON.stringify({ shell, runtime, later })).digest('hex').slice(0, 16);
       const source = readFileSync(template, 'utf8');
       if (!source.includes(MARKER)) throw new Error(`${template} has lost its manifest marker`);
-      writeFileSync(join(dist, 'sw.js'), source.replace(MARKER, JSON.stringify({ version, shell, runtime })));
+      writeFileSync(join(dist, 'sw.js'), source.replace(MARKER, JSON.stringify({ version, shell, runtime, later })));
     },
   };
 }

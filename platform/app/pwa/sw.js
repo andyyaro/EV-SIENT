@@ -9,6 +9,8 @@
 // 2. Runtime: the Pyodide files and the engine archive are versioned and immutable, so they are
 //    kept the first time the planner uses the model (the page asks once the model is ready),
 //    not at install: a visitor who only reads the Start screen is not sent 14 MB.
+//    The PDF maker's compiler and fonts (about 30 MB) are kept the first time a PDF is made, and
+//    never fetched before that.
 // 3. Serve: the shell and the runtime from the cache first, so the planner works offline.
 //    engine.json is part of the shell, so the page and the engine it loads always move together.
 //    Requests to other sites (map tiles) are never touched.
@@ -27,6 +29,7 @@ const scope = new URL(self.registration.scope);
 const at = (path) => new URL(path, scope).pathname;
 const SHELL = new Map(MANIFEST.shell.map((entry) => [at(entry.url), entry.sha256]));
 const RUNTIME = new Set(MANIFEST.runtime.map(at));
+const LATER = new Set(MANIFEST.later.map(at));
 const INDEX = at('index.html');
 
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -75,7 +78,8 @@ self.addEventListener('activate', (event) => {
     // Runtime files another version used are dropped; their URLs stay on the server for rollback.
     const runtime = await caches.open(RUNTIME_CACHE);
     for (const request of await runtime.keys()) {
-      if (!RUNTIME.has(new URL(request.url).pathname)) await runtime.delete(request);
+      const path = new URL(request.url).pathname;
+      if (!RUNTIME.has(path) && !LATER.has(path)) await runtime.delete(request);
     }
     await self.clients.claim();
   })());
@@ -115,5 +119,5 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   if (SHELL.has(path)) event.respondWith(fromShell(path, request));
-  else if (RUNTIME.has(path)) event.respondWith(fromRuntime(path, request));
+  else if (RUNTIME.has(path) || LATER.has(path)) event.respondWith(fromRuntime(path, request));
 });
