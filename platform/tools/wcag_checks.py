@@ -673,6 +673,10 @@ AXE_UNDECIDED_TEXT = [
     ("sidebar footer", ".nav-sidebar__foot"),
     ("sidebar step note", ".app-steps__why"),
     ("compact bar", ".app-compact__brand span, .app-compact select"),
+    ("sidebar current step", ".nav-sidebar .is-selected .hig-sidebar__label"),
+    ("rank cell", ".rs-row .rs-rank"),
+    ("selected row", ".rs-row.is-selected .hig-table__cell"),
+    ("report plot note", ".rp-plot__note"),
 ]
 
 
