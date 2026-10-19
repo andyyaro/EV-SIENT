@@ -156,6 +156,47 @@ with a check of whether missingness differs by group; suppress pairs related by 
 (|rho| > 0.98); show the within-country version beside any pooled result that reverses or
 vanishes inside countries. Sentences are filled from computed values by templates only.
 
+**Input.** `scan(typed, entries)` takes the typed frame and the dictionary entries. Numbers are
+floats, ordinals are 0-based positions in the entry's `categories`, flags are 1.0 / 0.0,
+categories are text, and missing is NaN (any marker from section 1 still present as text is
+read as missing too). `bridge_scan(table_json, entries_json, options_json)` is the worker's
+door: `{"columns", "rows"}` as uploaded text, or with `"typed": true` when the cells are
+already typed; entries as a list or a Table Schema with `fields`; options `fdr`, `minGroup`,
+`seed`, `stratum` (`"auto"`, a column name or `"none"`), `asOf`, `staleYears`, `thresholds`,
+`neighbours`, `bootstrap`, `paretoColumns`. Same input, same JSON: no clock, a seeded generator
+per card, strict JSON (no NaN or infinity).
+
+**Tests.** Two rankable columns (numbers, years, ordinals): Spearman's rho. A category or flag
+against a rankable column: Kruskal-Wallis, with Cliff's delta for two groups and epsilon squared
+(the squared correlation ratio on ranks) for more. Two categories: chi-square with bias-corrected
+Cramer's V, or a permutation test (Besag-Clifford sequential stopping) when Cochran's rule fails.
+Missingness of each column against each category: the same table test. Intervals are percentile
+bootstraps (1,000 draws; group sizes held fixed for group comparisons). All in numpy: the
+default scan never imports SciPy or scikit-learn.
+
+**What counts as by construction.** |rho| > 0.98 between rankable columns, or a category fixed
+by another (Goodman and Kruskal's lambda of 0.98 or more, such as city within country); two
+categories that split the sites the same way are tested once. A suppressed column's other pairs
+are not tested, so they are not counted.
+
+**Within-country.** The stratum is the first category whose header names a country, then a
+region, state or province, then a city, with 3 or more groups of 10+ sites. Spearman pairs and
+two-group comparisons are recomputed inside each such group and combined (weights n, or
+n1 x n2 for Cliff's delta), with a stratified bootstrap interval. The verdict is `reverses`
+(opposite sign, interval excluding 0), `vanishes` (interval including 0) or `holds`; the first
+two add a `within` card right after the pooled one. It is a check on a pooled result, not a new
+test, so it is not counted.
+
+**Further keys.** Each card may also carry `detail` (the numbers in words), `hiddenGroups`,
+`method` (chi-square or permutation) and `within` (the check above). Card kinds: `association`,
+`group`, `missingness`, `within`. Beside `cards` the result carries `tests` (every counted test
+with its p and q, which is the association matrix), `suppressed` and `skipped` (with the reason),
+`stratum`, `summaries` (per role: median, IQR, skew, zeros, outliers and a log-scale suggestion;
+ordered level counts and the median level; category concentration; dates by year with stale
+assessments against `asOf`; keyword counts for text), `pareto` (sites no other site beats on
+every column whose direction the visitor confirmed, complete cases only) and `similar` (each
+site's nearest sites by Gower distance with the columns that make them alike).
+
 ## 3. Your index
 
 A pack-shaped spec, built by the visitor, run by `fcf_m2.flex.index`.
