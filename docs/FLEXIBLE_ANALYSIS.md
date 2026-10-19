@@ -31,25 +31,35 @@ by the visitor. Stored in the `.evsient` file as a Frictionless Data Package v2 
 {
   "name": "flood_risk",
   "type": "string",
+  "format": null,
   "categories": ["Low", "Moderate", "High"],
   "categoriesOrdered": true,
   "missingValues": ["Unknown"],
+  "decimalChar": null,
   "evsient:role": "ordinal",
   "evsient:unit": null,
   "evsient:range": null,
   "evsient:direction": "lower_better",
   "evsient:modelField": "stormwater_risk",
   "evsient:evidence": [
-    {"signal": "header", "text": "the word 'risk' in the header"},
-    {"signal": "scale", "text": "values match the scale Low < Moderate < High"}
+    {"signal": "header", "match": "risk", "text": "the header word 'risk' suggests a scale of levels"},
+    {"signal": "scale", "match": "Low < Moderate < High", "text": "values match the scale Low < Moderate < High"},
+    {"signal": "direction", "match": "risk", "direction": "lower_better",
+     "text": "the word 'risk' in the header suggests lower is better; a proposal only, until you confirm a direction"},
+    {"signal": "mapping", "match": "stormwater_risk",
+     "text": "Map Columns matched this column to the model's field stormwater_risk, which the model reads as yes or no"}
   ],
   "evsient:agreement": "agree",
-  "evsient:provenance": "inferred",
+  "evsient:provenance": "confirmed_by_user",
   "evsient:reading": {
-    "cells": 360, "read": 287, "missing": 73, "unreadable": 0, "ambiguous": 0,
-    "decimalSeparator": null,
-    "patterns": [{"pattern": "Moderate", "readAs": "Moderate (2 of 3)", "count": 112},
-                 {"pattern": "Unknown", "readAs": "missing", "count": 73}],
+    "cells": 360, "read": 345, "missing": 15, "unreadable": 0, "ambiguous": 0,
+    "outOfRange": 0, "notWhole": 0, "decimalSeparator": null, "distinct": 3,
+    "min": null, "max": null,
+    "patterns": [{"pattern": "Low", "kind": "value", "readAs": "Low (1 of 3)", "count": 167},
+                 {"pattern": "Moderate", "kind": "value", "readAs": "Moderate (2 of 3)", "count": 112},
+                 {"pattern": "High", "kind": "value", "readAs": "High (3 of 3)", "count": 66},
+                 {"pattern": "Unknown", "kind": "missing", "readAs": "missing", "count": 15}],
+    "patternsNotShown": null,
     "sentinels": []
   }
 }
@@ -59,23 +69,61 @@ by the visitor. Stored in the `.evsient` file as a Frictionless Data Package v2 
   extra states listed as missing or as categories), `count`, `measure` (has a unit), `score`
   (a bounded scale such as 0 to 100 or 1 to 5, in `evsient:range`), `percentage`, `money`
   (ISO 4217 code in `evsient:unit`), `date`, `year`, `latitude`, `longitude`, `address`,
-  `text`, `unknown`.
+  `text`, `unknown`. A declared Likert range (`_1_5`, `_1_7`) whose values are all whole and
+  inside it is an `ordinal` with levels `[1, 2, 3, 4, 5]`; one with a value outside it or a
+  decimal is a `score` and a conflict. A `flag`'s `categories` are its yes forms, its no forms
+  and its extra states (such as "Seasonal"), in that order. A `measure` with no unit in its
+  header has `evsient:unit` null.
+- **Every entry has every key above**, in that order. The standard Frictionless keys that do not
+  apply to a role (`format`, `categories`, `categoriesOrdered`, `decimalChar`) are null in the
+  entry and left out of the Table Schema; `from_table_schema` restores them, so the round trip
+  is exact. `format` is a date column's order (`%Y-%m-%d`, `%d/%m/%Y` or `%m/%d/%Y`, or null
+  while undecided); `decimalChar` is a number column's decimal mark (null while undecided).
 - **Units** are UCUM codes (`kW`, `m2`, `kW.h`) or ISO 4217 for money (`USD`). Units come from
-  the header only when the header says so (`_kw`, `_m2`, `_usd`); otherwise `null`.
+  the header only when the header says so (`_kw`, `_m2`, `_usd`); otherwise `null`. A currency
+  sign in the cells is evidence, never the unit.
 - **Direction** (`evsient:direction`): `higher_better`, `lower_better`, `neither`, or `null`
   until the visitor confirms. A proposed direction lives in `evsient:evidence` only; the field
-  itself stays `null` while `evsient:provenance` is `inferred`.
+  itself stays `null` while `evsient:provenance` is `inferred`. Categories, identifiers, names,
+  text, addresses and coordinates cannot be higher or lower better.
+- **Evidence** items are `{"signal", "match", "text"}`, plus `"direction"` for a direction
+  proposal. `signal` is `header`, `values`, `scale`, `range`, `direction` or `mapping`; `match`
+  is the exact header token or value fact; `text` is the sentence shown. **Agreement** is
+  `agree` when the header and the values say the same thing, `conflict` when they disagree or
+  the reading found values outside a declared range, mixed decimal marks or a doubled level,
+  and `unknown` when only one signal speaks.
 - **Provenance**: `inferred` or `confirmed_by_user`. A confirmed entry is never relabelled.
-- **Reading report**: every distinct raw pattern (capped at 50, the rest counted), how it was
-  read and how many cells. Nothing is clamped, rounded or coerced without a pattern saying so.
-  Read with `dtype=object`, `keep_default_na=False`; the missing markers are a visible list
-  (`""`, `n/a`, `N/A`, `NULL`, `null`, `none`, `-`, `Unknown`, `unknown`, `TBD`, `To be
-  confirmed`), never pandas' defaults ("NA" is Namibia). Sentinels (-999, -99, 9999) are
-  flagged in `sentinels`, never applied.
+- **Reading report**: every distinct raw pattern (capped at 50, the rest counted in
+  `patternsNotShown`), how it was read (`readAs`), what kind of reading it was (`kind`: `value`,
+  `missing`, `unreadable`, `ambiguous`, `sentinel`, `outOfRange`, `notWhole`, or `extra` for a
+  flag's other states) and how many cells. Numbers are shown as shapes (`99.9`, `$9,999`) and
+  anything unusual as its own text. `cells = read + missing + unreadable` always; `ambiguous`
+  counts the cells that alone could be read two ways, read or not. Nothing is clamped, rounded
+  or coerced without a pattern saying so. Read with `dtype=object`, `keep_default_na=False`; the
+  missing markers are a visible list (`""`, `n/a`, `N/A`, `NULL`, `null`, `none`, `-`,
+  `Unknown`, `unknown`, `TBD`, `To be confirmed`), compared without case or surrounding spaces,
+  never pandas' defaults ("NA" is Namibia). `missingValues` lists the exact text found.
+  Sentinels (-999, -99, 9999, 99999) are flagged in `sentinels`, never applied; -99 is not
+  flagged where it is a valid longitude.
 - **Decimal separators** are decided per column from unambiguous cells; ambiguous cells are
-  counted, never guessed.
+  counted, never guessed. With no deciding cell, or both marks in one column, an ambiguous cell
+  is not read until the visitor chooses. Dates written with `/` follow the same rule for the
+  order of day and month.
 - `evsient:modelField` is the EV-SIENT field the column is mapped to, if any; mapping stays the
-  job of Map Columns, and the dictionary records it.
+  job of Map Columns, and the dictionary records it. `propose` takes the mapping in intake's
+  shape, `{model field: column}`.
+- **Confirming**: `confirm(entries, changes)` takes `{"column", ...}` changes with any of `role`,
+  `unit`, `direction`, `categories` (levels in order, lowest first), `missingValues`, `range`,
+  `decimalSeparator`, `dateFormat`, or `confirm: true`, and raises a planner-readable error for
+  anything the dictionary cannot hold. A change to how cells read sets `evsient:reading` to
+  null; `reread(frame, entries)` makes it again. The browser reaches these through
+  `bridge_propose`, `bridge_confirm` and `bridge_reread` (JSON in, JSON out).
+- **The Table Schema** is `{"$schema": "https://datapackage.org/profiles/2.0/tableschema.json",
+  "fields": [...], "missingValues": [""], "evsient:dictionaryVersion": 1}`; each field's own
+  `missingValues` overrides the table's.
+- **Typed values** (`parse`): numbers as floats, an ordinal as its level's position from 0, a
+  flag as 1.0, 0.0 or NaN, a category as a pandas Categorical, a date as datetime64, other
+  roles as text; columns `(name, "value")` and `(name, "raw")`, the raw cells untouched.
 
 ## 2. Explore
 

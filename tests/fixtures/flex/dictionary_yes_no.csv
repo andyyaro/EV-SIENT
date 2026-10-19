@@ -1,0 +1,11 @@
+site_id,open_after_dark,has_parking,fire_access_ok
+S01,Yes,yes,Y
+S02,No,no,N
+S03,Seasonal,Yes,Y
+S04,Unknown,No,Partial
+S05,Yes,yes,Y
+S06,To be confirmed,,N
+S07,No,no,Y
+S08,Seasonal,YES,N
+S09,Yes,no,Y
+S10,No,yes,unknown
