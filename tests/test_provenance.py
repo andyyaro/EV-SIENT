@@ -252,3 +252,85 @@ def test_the_export_is_reproducible(tmp_path, export):
     fresh = tmp_path / "p.json"
     pv.export_all(CONTRACT, fresh)
     assert json.loads(fresh.read_text()) == export
+    assert fresh.read_bytes() == EXPORT.read_bytes(), "the published export must not change by a byte"
+
+
+# ------------------------------------------------------------------ indexed, and the same answers
+
+def _mask_row(index: pv.ContractIndex, site_id, horizon_year, scenario_name) -> pd.Series:
+    """How resolve() found its row until 2026-10-18: a three-column mask over the whole table
+    for every cell, which made export_all quadratic (251 s for 600 sites under Pyodide). Kept
+    as the reference the index must agree with, refusals included."""
+    s = index.scenarios
+    rows = s[(s.site_id == site_id) & (s.horizon_year == horizon_year) &
+             (s.scenario_name == scenario_name)]
+    if rows.empty:
+        raise pv.ProvenanceError(
+            f"no scenario row for site_id={site_id!r}, horizon_year={horizon_year}, "
+            f"scenario_name={scenario_name!r}")
+    if len(rows) > 1:
+        raise pv.ProvenanceError(
+            f"{len(rows)} rows match ({site_id}, {horizon_year}, {scenario_name}); the "
+            f"contract's uniqueness rule is broken and no number here can be attributed")
+    return rows.iloc[0]
+
+
+@pytest.fixture(scope="module")
+def larger_contract(tmp_path_factory) -> Path:
+    """The 12 synthetic sites three times over, with new IDs: a 36-site contract made by a real
+    cohort run. Synthetic only, so nothing private is read (DEC-016)."""
+    from fcf_m2 import workflow
+
+    root = tmp_path_factory.mktemp("larger")
+    cohort = root / "cohort"
+    cohort.mkdir()
+    synthetic = REPO / "data/synthetic"
+    for source, name in [("synthetic_sites_v2.csv", "sites.csv"),
+                         ("synthetic_v2_electrical_risk_summary.csv", "electrical_risk.csv"),
+                         ("synthetic_matlab_site_meta.csv", "site_meta.csv"),
+                         ("synthetic_field_provenance_v1.csv", "provenance.csv")]:
+        frame = pd.read_csv(synthetic / source, dtype={"site_id": str})
+        copies = []
+        for k in range(3):
+            copy = frame.copy()
+            copy["site_id"] = copy["site_id"] + f"-R{k}"
+            copies.append(copy)
+        pd.concat(copies, ignore_index=True).to_csv(cohort / name, index=False)
+    workflow.run("milestone2_v3", root / "out", cohort_dir=cohort)
+    return root / "out/contract"
+
+
+def test_the_index_and_the_mask_export_the_same_bytes(larger_contract, tmp_path, monkeypatch):
+    indexed, masked = tmp_path / "indexed.json", tmp_path / "masked.json"
+    payload = pv.export_all(larger_contract, indexed)
+    assert len(payload["entries"]) == 36 * 10 * 31, "every cell of the 36-site table"
+    monkeypatch.setattr(pv.ContractIndex, "scenario_row", _mask_row)
+    pv.export_all(larger_contract, masked)
+    assert indexed.read_bytes() == masked.read_bytes()
+
+
+def test_the_index_and_the_mask_resolve_and_refuse_alike(larger_contract):
+    index = pv.ContractIndex.load(larger_contract)
+    cells = [("SYN003-R2", 2046, "high", "ports_active"),
+             ("SYN012-R0", 2026, "baseline", "spare_capacity_kw"),
+             ("SYN007-R1", 2036.0, "stress_combined", "net_co2e_kg")]
+    for cell in cells:
+        indexed = pv.resolve(index, *cell).to_dict()
+        with pytest.MonkeyPatch.context() as m:
+            m.setattr(pv.ContractIndex, "scenario_row", _mask_row)
+            masked = pv.resolve(index, *cell).to_dict()
+        assert indexed == masked, cell
+
+    # A key that is absent, or present twice, is refused by both, in the same words.
+    doubled = pv.ContractIndex(directory=index.directory, manifest=index.manifest,
+                               provenance=index.provenance,
+                               scenarios=pd.concat([index.scenarios, index.scenarios.head(1)],
+                                                   ignore_index=True))
+    first = doubled.scenarios.iloc[0]
+    for target, key in [(index, ("SYN999-R0", 2036, "base")), (index, ("SYN001-R0", "2036", "base")),
+                        (doubled, (first.site_id, int(first.horizon_year), first.scenario_name))]:
+        with pytest.raises(pv.ProvenanceError) as by_index:
+            target.scenario_row(*key)
+        with pytest.raises(pv.ProvenanceError) as by_mask:
+            _mask_row(target, *key)
+        assert str(by_index.value) == str(by_mask.value), key

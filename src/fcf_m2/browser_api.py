@@ -13,6 +13,7 @@ It adds no model logic. Each call is a thin wrapper over what the command line a
     accept    ->  intake.apply + provenance_rows + accept, written as a cohort directory
     run       ->  workflow.run("milestone2_v3", cohort_dir=...), never without a cohort
     explain   ->  the score broken into the weights scoring.py already uses
+    provenance -> provenance.resolve, for the one cell the planner opens
 
 Two rules carry over from intake and matter more here, where no one reads a terminal:
 
@@ -150,6 +151,7 @@ class _Session:
         self.cohort_dir: Path | None = None
         self.out_dir: Path | None = None
         self.results: pd.DataFrame | None = None
+        self.contract: Any = None             # the last run's provenance.ContractIndex
 
 
 _session = _Session()
@@ -505,6 +507,7 @@ def run(options_json: str = "{}") -> str:
     summary = workflow.run("milestone2_v3", out, **kwargs)
     elapsed = (datetime.now(timezone.utc) - started).total_seconds()
     _session.out_dir = out
+    _session.contract = None
 
     results = pd.read_csv(out / "site_results_milestone2_v3.csv", dtype={"site_id": str})
     confidence = pd.read_csv(out / "data_confidence_v3.csv", dtype={"site_id": str})
@@ -642,6 +645,37 @@ def explain(site_id: str) -> str:
         "subscores": subscores,
         "drivers": drivers,
     })
+
+
+def provenance(cell_json: str) -> str:
+    """Where one number in the run's scenario table came from, resolved only when asked.
+
+    The input is `{"siteId", "horizonYear", "scenario", "column"}`, one cell of the contract's
+    `scenario_table.csv`. The answer is `provenance.resolve()`'s record, the same one the
+    desktop tier shows. Resolving every cell up front took minutes at 600 sites, so the
+    platform asks for the cell the planner opens. A cell that cannot be explained is refused in
+    words, never answered with "unknown".
+    """
+    from . import provenance as pv
+
+    if _session.out_dir is None:
+        raise ValueError("Run the model first.")
+    cell = json.loads(cell_json)
+    missing = [k for k in ("siteId", "horizonYear", "scenario", "column") if cell.get(k) in (None, "")]
+    if missing:
+        raise ValueError(f"Say which number to explain: {', '.join(missing)} is missing.")
+    try:
+        horizon = int(cell["horizonYear"])
+    except (TypeError, ValueError):
+        raise ValueError(f"{cell['horizonYear']!r} is not a horizon year.") from None
+    if _session.contract is None:
+        _session.contract = pv.ContractIndex.load(_session.out_dir / "contract", text_site_ids=True)
+    try:
+        record = pv.resolve(_session.contract, str(cell["siteId"]), horizon,
+                            str(cell["scenario"]), str(cell["column"]))
+    except pv.ProvenanceError as e:
+        raise ValueError(str(e)) from None
+    return _out(record.to_dict())
 
 
 def output_files() -> str:

@@ -26,6 +26,7 @@ function lazyMock(): EngineClient {
     accept: later('accept'),
     run: later('run'),
     explain: later('explain'),
+    provenance: later('provenance'),
     outputFiles: later('outputFiles'),
     cancel() { void loaded.then((m) => m.cancel()); },
   };

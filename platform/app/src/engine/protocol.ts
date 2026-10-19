@@ -214,6 +214,42 @@ export interface Explanation {
   drivers: Driver[];
 }
 
+/** One cell of the run's contract scenario table, e.g. ports_active at 2036 in "base". */
+export interface ProvenanceRequest {
+  siteId: string;
+  horizonYear: number;
+  scenario: string;
+  column: string;
+}
+
+/** provenance.resolve()'s record for one cell, resolved when asked (never precomputed). */
+export interface ProvenanceRecord {
+  value: number | string | boolean | null;
+  column: string;
+  table: string;
+  row_key: { site_id: string; horizon_year: number; scenario_name: string };
+  contract_version: string;
+  model_version: string;
+  model_mode: string;
+  run_id: string;
+  generated_at: string;
+  engine: string;
+  table_sha256: string;
+  source_id: string;
+  source_date: string;
+  assumption_flag: string;
+  data_confidence: string;
+  capacity_basis: string;
+  /** Caveat texts, in full. */
+  caveats: string[];
+  consumer_rules: string[];
+  field_provenance: {
+    field_group: string; source_class: string; verification_status: string; source_org: string;
+    source_date: string; reviewer: string; assumption_type: string; unresolved: boolean;
+  } | null;
+  notes: string;
+}
+
 export interface OutputFiles {
   /** "results/..." and "inputs/..." paths -> file text */
   files: Record<string, string>;
@@ -241,6 +277,7 @@ export interface EngineClient {
   accept(details: AcceptDetails): Promise<AcceptResult>;
   run(options?: RunOptions): Promise<RunResult>;
   explain(siteId: string): Promise<Explanation>;
+  provenance(cell: ProvenanceRequest): Promise<ProvenanceRecord>;
   outputFiles(): Promise<OutputFiles>;
   /** Stops a run in progress by ending the worker; the next call starts a fresh one. */
   cancel(): void;

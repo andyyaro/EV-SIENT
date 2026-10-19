@@ -8,7 +8,8 @@
 import * as Comlink from 'comlink';
 import type {
   AcceptDetails, AcceptResult, BootProgress, CheckResult, EngineClient, Explanation, FieldCatalog,
-  OutputFiles, Proposal, RemapRequest, RunOptions, RunResult, RuntimeInfo, TableInput,
+  OutputFiles, Proposal, ProvenanceRecord, ProvenanceRequest, RemapRequest, RunOptions, RunResult,
+  RuntimeInfo, TableInput,
 } from './protocol';
 import { EngineError } from './protocol';
 import type { EngineWorkerApi } from './engine.worker';
@@ -104,6 +105,7 @@ export function createWorkerEngine(): EngineClient {
     accept: (details: AcceptDetails) => call<AcceptResult>(true, (api) => api.accept(JSON.stringify(details ?? {}))),
     run: (options?: RunOptions) => call<RunResult>(true, (api) => api.run(JSON.stringify(options ?? {}))),
     explain: (siteId: string) => call<Explanation>(true, (api) => api.explain(siteId)),
+    provenance: (cell: ProvenanceRequest) => call<ProvenanceRecord>(true, (api) => api.provenance(JSON.stringify(cell))),
     outputFiles: () => call<OutputFiles>(true, (api) => api.output_files()),
     cancel() {
       if (!live) return;

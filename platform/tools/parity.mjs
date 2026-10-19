@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Native vs Pyodide parity for the browser path. Runs the same browser_api calls (propose,
-// remap, check, accept, run with a fixed asOf, explain for every site, output_files) on
+// remap, check, accept, run with a fixed asOf, explain for every site, provenance for a set of
+// cells per site, output_files) on
 // Example City and on the 12-site synthetic cohort twice: natively with the repo's venv, and
 // under Pyodide in Node with exactly what the browser gets (the fetched runtime directory and
 // the built engine archive, its SHA-256 checked). Numbers must agree to 1e-9, everything else
@@ -58,6 +59,12 @@ def _drive(cases_json):
             {"jurisdiction": name, "sourceOrg": "parity", "sourceDate": "2026-10-01"})))
         got["run"] = json.loads(api.run(json.dumps({"asOf": "2026-10-18"})))
         got["explain"] = {s["siteId"]: json.loads(api.explain(s["siteId"])) for s in got["run"]["sites"]}
+        got["provenance"] = {
+            f"{s['siteId']}|{year}|{scenario}|{column}": json.loads(api.provenance(json.dumps(
+                {"siteId": s["siteId"], "horizonYear": year, "scenario": scenario, "column": column})))
+            for s in got["run"]["sites"]
+            for year, scenario in ((2026, "baseline"), (2046, "stress_combined"))
+            for column in ("ports_active", "spare_capacity_kw", "net_co2e_kg", "data_confidence")}
         files = json.loads(api.output_files())["files"]
         got["output_files"] = {k: v.replace(root, "<session>") for k, v in files.items()}
         out[name] = got

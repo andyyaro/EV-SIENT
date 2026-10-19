@@ -163,3 +163,45 @@ def test_as_of_fixes_the_confidence_date(no_reference_inputs):
     assert first["asOf"] == AS_OF and later["asOf"] == "2031-10-18"
     assert conf(again) == conf(first)
     assert conf(later) != conf(first), "a source five years older should cost confidence"
+
+
+def test_provenance_resolves_one_cell_on_demand(no_reference_inputs):
+    """The cell the planner opens, resolved when asked, says what provenance.resolve says."""
+    from fcf_m2 import provenance as pv
+
+    cell = {"siteId": "EXC-01", "horizonYear": 2036, "scenario": "base", "column": "ports_active"}
+    with pytest.raises(ValueError, match="Run the model first"):
+        api.provenance(json.dumps(cell))
+    _session(EXAMPLE)
+    record = _strict(api.provenance(json.dumps(cell)))
+    index = pv.ContractIndex.load(api._session.out_dir / "contract")
+    expected = pv.resolve(index, "EXC-01", 2036, "base", "ports_active").to_dict()
+    assert record == _strict(json.dumps(expected))
+    assert record["row_key"] == {"site_id": "EXC-01", "horizon_year": 2036, "scenario_name": "base"}
+    assert record["field_provenance"]["field_group"] == "parking_and_layout"
+
+    with pytest.raises(ValueError, match="no scenario row"):
+        api.provenance(json.dumps({**cell, "siteId": "EXC-99"}))
+    with pytest.raises(ValueError, match="not a column"):
+        api.provenance(json.dumps({**cell, "column": "ports_2035"}))
+    with pytest.raises(ValueError, match="scenario is missing"):
+        api.provenance(json.dumps({**cell, "scenario": ""}))
+
+
+def test_provenance_keeps_site_ids_as_text(tmp_path, no_reference_inputs):
+    """Site IDs that are all digits arrive from `run` as text ("107"). Read back as numbers they
+    would match nothing, and every cell of those sites would be refused."""
+    with open(SYNTHETIC, newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    at = rows[0].index("site_id")
+    for i, row in enumerate(rows[1:], 1):
+        row[at] = str(100 + i)
+    path = tmp_path / "numbered.csv"
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerows(rows)
+    ids = [s["siteId"] for s in _session(path)["run"]["sites"]]
+    assert "107" in ids
+    record = _strict(api.provenance(json.dumps(
+        {"siteId": "107", "horizonYear": 2026, "scenario": "baseline", "column": "ports_active"})))
+    assert record["row_key"]["site_id"] == "107"
+    assert record["field_provenance"] is not None, "the site's own provenance, found by its text ID"

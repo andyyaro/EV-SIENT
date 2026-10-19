@@ -66,6 +66,11 @@ export function createMockEngine(): EngineClient {
       if (!load) throw new EngineError(`No site ${siteId} in these results.`);
       return (await load()) as Explanation;
     },
+    async provenance() {
+      if (!ran) throw new EngineError('Run the model first.');
+      // No recorded fixture: a stand-in record would be a lineage nobody computed.
+      throw new EngineError('Where a number came from is shown with the real engine only.');
+    },
     async outputFiles() {
       if (!ran) throw new EngineError('Run the model first.');
       return (await import('./fixtures/output_files.json')).default as unknown as OutputFiles;

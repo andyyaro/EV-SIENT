@@ -272,25 +272,40 @@ class Provenance:
 
 @dataclass
 class ContractIndex:
-    """A contract directory loaded once, for repeated resolution."""
+    """A contract directory loaded once, for repeated resolution.
+
+    The scenario table is indexed by its key ``(site_id, horizon_year, scenario_name)`` the
+    first time a cell is resolved. ``resolve()`` used to find its row with a three-column mask
+    over the whole table, once per cell, which made ``export_all`` quadratic: 251 s for 600
+    sites under Pyodide. The index finds the same row by the same equality, so every answer is
+    unchanged. It is built from the table as loaded; replace ``scenarios`` and build a new
+    index rather than editing the frame in place.
+    """
 
     directory: Path
     scenarios: pd.DataFrame
     provenance: pd.DataFrame
     manifest: dict
     _by_site: dict[str, dict[str, FieldProvenance]] = field(default_factory=dict)
+    _positions: dict[tuple, list[int]] | None = field(default=None, repr=False, compare=False)
+    _rows: dict[int, pd.Series] = field(default_factory=dict, repr=False, compare=False)
 
     @classmethod
-    def load(cls, contract_dir: str | Path) -> "ContractIndex":
+    def load(cls, contract_dir: str | Path, *, text_site_ids: bool = False) -> "ContractIndex":
+        """Load a contract directory. ``text_site_ids`` reads ``site_id`` as text, so an
+        all-digit ID such as "107" matches the text the platform passes instead of being read
+        as the number 107 and matching nothing; the platform asks for it because its site IDs
+        are always text."""
         directory = Path(contract_dir)
         manifest_path = directory / "contract_manifest.json"
         if not manifest_path.is_file():
             raise ProvenanceError(f"{directory} has no contract_manifest.json; it is not a "
                                   f"contract directory and nothing here can be attributed")
+        dtype = {"site_id": str} if text_site_ids else None
         index = cls(
             directory=directory,
-            scenarios=pd.read_csv(directory / "scenario_table.csv"),
-            provenance=pd.read_csv(directory / "source_provenance.csv"),
+            scenarios=pd.read_csv(directory / "scenario_table.csv", dtype=dtype),
+            provenance=pd.read_csv(directory / "source_provenance.csv", dtype=dtype),
             manifest=json.loads(manifest_path.read_text()),
         )
         for row in index.provenance.itertuples():
@@ -312,6 +327,41 @@ class ContractIndex:
             return None
         return self._by_site.get(site_id, {}).get(group)
 
+    def scenario_row(self, site_id: str, horizon_year: int, scenario_name: str) -> pd.Series:
+        """The one scenario row with this key, or refuse.
+
+        Matches exactly as a mask on the three columns would: Python equality on the values as
+        loaded, so 2036 finds 2036.0 and "001" does not find 1. A key with a missing part is
+        never indexed, because a mask never matches a missing value either.
+        """
+        if self._positions is None:
+            positions: dict[tuple, list[int]] = {}
+            keys = zip(self.scenarios["site_id"].tolist(),
+                       self.scenarios["horizon_year"].tolist(),
+                       self.scenarios["scenario_name"].tolist())
+            for position, key in enumerate(keys):
+                if not any(pd.isna(part) for part in key):
+                    positions.setdefault(key, []).append(position)
+            self._positions = positions
+
+        try:
+            found = self._positions.get((site_id, horizon_year, scenario_name), [])
+        except TypeError:                        # an unhashable key matches no row
+            found = []
+        if not found:
+            raise ProvenanceError(
+                f"no scenario row for site_id={site_id!r}, horizon_year={horizon_year}, "
+                f"scenario_name={scenario_name!r}")
+        if len(found) > 1:
+            raise ProvenanceError(
+                f"{len(found)} rows match ({site_id}, {horizon_year}, {scenario_name}); the "
+                f"contract's uniqueness rule is broken and no number here can be attributed")
+        position = found[0]
+        row = self._rows.get(position)
+        if row is None:
+            row = self._rows[position] = self.scenarios.iloc[position]
+        return row
+
 
 def resolve(index: ContractIndex, site_id: str, horizon_year: int, scenario_name: str,
             column: str) -> Provenance:
@@ -326,18 +376,7 @@ def resolve(index: ContractIndex, site_id: str, horizon_year: int, scenario_name
             f"{column!r} is not a column of the scenario table. Known columns: "
             f"{', '.join(sorted(index.scenarios.columns))}")
 
-    rows = index.scenarios[(index.scenarios.site_id == site_id) &
-                           (index.scenarios.horizon_year == horizon_year) &
-                           (index.scenarios.scenario_name == scenario_name)]
-    if rows.empty:
-        raise ProvenanceError(
-            f"no scenario row for site_id={site_id!r}, horizon_year={horizon_year}, "
-            f"scenario_name={scenario_name!r}")
-    if len(rows) > 1:
-        raise ProvenanceError(
-            f"{len(rows)} rows match ({site_id}, {horizon_year}, {scenario_name}); the "
-            f"contract's uniqueness rule is broken and no number here can be attributed")
-    row = rows.iloc[0]
+    row = index.scenario_row(site_id, horizon_year, scenario_name)
 
     caveat_keys = list(CAVEATS.get(column, []))
     return Provenance(
@@ -399,7 +438,8 @@ def export_all(contract_dir: str | Path, out_path: str | Path) -> dict:
             fp_key = ""
             if p.field_provenance is not None:
                 fp_key = f"{row.site_id}|{p.field_provenance.field_group}"
-                field_prov.setdefault(fp_key, asdict(p.field_provenance))
+                if fp_key not in field_prov:     # asdict once per record, not once per cell
+                    field_prov[fp_key] = asdict(p.field_provenance)
 
             entries[f"{row.site_id}|{row.horizon_year}|{row.scenario_name}|{column}"] = {
                 "v": _jsonable(p.value),
