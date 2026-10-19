@@ -239,11 +239,16 @@
       });
       h += '<td class="hig-table__cell hig-table__cell--trailing"><strong>' + one(s.score) + '</strong></td>';
       if (showRange) h += '<td class="hig-table__cell hig-table__cell--trailing">' + (x.rankLow == null ? '' : x.rankLow === x.rankHigh ? x.rankLow : x.rankLow + ' to ' + x.rankHigh) + '</td>';
-      if (showChance) h += '<td class="hig-table__cell hig-table__cell--trailing">' + (x.chanceFirst == null ? '' : Math.round(x.chanceFirst) + '%') + '</td>';
+      if (showChance) h += '<td class="hig-table__cell hig-table__cell--trailing">' + (x.chanceFirst == null ? '' : one(x.chanceFirst) + '%') + '</td>';
       h += '</tr>';
     });
     h += '</tbody></table>';
     el.innerHTML = h;
+    if (showRange || showChance) {
+      var notes = document.getElementById('breakdown-notes');
+      var draws = st.method && st.method.draws ? Number(st.method.draws).toLocaleString('en-US') + ' ' : '';
+      if (notes) notes.insertAdjacentHTML('beforeend', '<p><strong>Rank range and chance of first</strong> come from ' + draws + 'random weightings around the published weights: the rank a site holds in 9 of 10 of them, and the share in which it comes first. A share of plausible weightings, not the chance a site is the right place to build. <a href="method.html#stability">How stable the ranks are</a>.</p>');
+    }
 
     // Figures in the notes, recomputed from the data.
     var counts = {};

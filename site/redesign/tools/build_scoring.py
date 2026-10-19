@@ -1,6 +1,8 @@
 """Write www/data/scoring.json: the published weights and each site's score broken into its four parts.
 
-Usage: PYTHONPATH=src python3 site/redesign/tools/build_scoring.py [RESULTS_CSV] [OUT_JSON]
+Usage: PYTHONPATH=src python3 site/redesign/tools/build_scoring.py [--check] [RESULTS_CSV] [OUT_JSON]
+
+With --check it writes nothing and exits 1 if the file on disk differs from what it would write.
 
 The weights are imported from src/fcf_m2/scoring.py, so the page can never show weights the model
 does not use. The per-site subscores come from the canonical milestone2_v3 site results (by default
@@ -23,8 +25,10 @@ sys.path.insert(0, os.path.join(REPO, 'src'))
 
 from fcf_m2.scoring import DRIVER_WEIGHTS, INVERTED_DRIVERS, SUBSCORE_WEIGHTS  # noqa: E402
 
-RESULTS = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, 'tests', 'fixture_milestone2_v3_site_results.csv')
-OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(REPO, 'site', 'redesign', 'www', 'data', 'scoring.json')
+CHECK = '--check' in sys.argv
+ARGS = [a for a in sys.argv[1:] if a != '--check']
+RESULTS = ARGS[0] if len(ARGS) > 0 else os.path.join(REPO, 'tests', 'fixture_milestone2_v3_site_results.csv')
+OUT = ARGS[1] if len(ARGS) > 1 else os.path.join(REPO, 'site', 'redesign', 'www', 'data', 'scoring.json')
 SITES = os.path.join(REPO, 'site', 'redesign', 'www', 'data', 'sites.json')
 
 PARTS = [
@@ -124,9 +128,15 @@ def main():
         'parts': parts,
         'sites': out_sites,
     }
+    text = json.dumps(doc, indent=1, ensure_ascii=False) + '\n'
+    if CHECK:
+        current = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
+        if current != text:
+            raise SystemExit(f'{OUT} is out of date: run build_scoring.py to regenerate it')
+        print(f'{OUT} is up to date')
+        return
     with open(OUT, 'w', encoding='utf-8') as f:
-        json.dump(doc, f, indent=1, ensure_ascii=False)
-        f.write('\n')
+        f.write(text)
     print(f'wrote {OUT}: {len(parts)} parts, {len(out_sites)} sites')
 
 

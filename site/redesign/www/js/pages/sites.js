@@ -218,13 +218,19 @@
     rows += simpleRow('<strong>Readiness score</strong>', '', '<span class="hig-list-row__detail sd-part__total num">' + fmt1(s.score) + '</span>', { cls: 'sd-part-total' });
 
     var st = FC.stabilityFor(S.stab, s.id);
+    var draws = S.stab && S.stab.method && S.stab.method.draws ? Number(S.stab.method.draws).toLocaleString('en-US') + ' ' : '';
+    if (st && st.chanceFirst != null) {
+      rows += simpleRow('Chance of ranking first', 'Share of ' + draws + 'random weightings that put this site first',
+        '<span class="hig-list-row__detail num">' + (Math.round(st.chanceFirst * 10) / 10).toFixed(1) + '%</span>');
+    }
     if (st && st.rankLow != null && st.rankHigh != null) {
-      rows += simpleRow('Rank when the weights shift', 'Across the weight changes tested',
+      rows += simpleRow('Rank as the weights shift', 'Its rank in 9 of 10 of those weightings',
         '<span class="hig-list-row__detail num">' + (st.rankLow === st.rankHigh ? 'Always ' + st.rankLow : st.rankLow + ' to ' + st.rankHigh) + '</span>');
     }
-    if (st && st.chanceFirst != null) {
-      rows += simpleRow('Chance of ranking first', 'Share of random weightings that put this site first',
-        '<span class="hig-list-row__detail num">' + Math.round(st.chanceFirst) + '%</span>');
+    if (st && st.capacityRange) {
+      var cr = st.capacityRange;
+      rows += simpleRow('Rank if electrical capacity varied', 'Capacity is unconfirmed. From no credit to full credit; a range, not a probability',
+        '<span class="hig-list-row__detail num">' + (cr.bestRank === cr.worstRank ? cr.bestRank : cr.bestRank + ' to ' + cr.worstRank) + '</span>');
     }
     var foot = 'Each part is its own score out of 100 times its weight, rounded so the parts add up to the score. ';
     if (s.rank <= 2 && S.topNote) foot += FC.esc(S.topNote) + ' ';
