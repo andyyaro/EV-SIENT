@@ -138,7 +138,8 @@
 .rs-ranked .rs-col-yours.is-blank, .sd-yours__row dd.is-blank { color: var(--label-secondary); font-style: italic; }
 
 /* ---------- Map ---------- */
-.rs-map { border-radius: var(--radius-group); background: var(--grouped-background-secondary); padding: 16px; }
+/* min-width: 0, or the map canvas, sized in pixels, holds the column at its old width when the window narrows or the page is zoomed (WCAG 1.4.10). */
+.rs-map { min-width: 0; border-radius: var(--radius-group); background: var(--grouped-background-secondary); padding: 16px; }
 .rs-map__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 12px; }
 .rs-map__title { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
 .rs-map__note { font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
