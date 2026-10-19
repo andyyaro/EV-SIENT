@@ -4,15 +4,15 @@
 import { create } from 'zustand';
 import { getEngine } from '../engine/client';
 import type {
-  AcceptDetails, AcceptResult, BootProgress, CheckResult, FieldCatalog, FieldFill, MatchStatus, Proposal, RunOptions,
-  RunResult, RuntimeInfo, TableInput,
+  AcceptDetails, AcceptResult, BootProgress, CheckResult, ColumnChange, ColumnsResult, FieldCatalog, FieldFill, IndexResult,
+  IndexSpec, MatchStatus, Proposal, RunOptions, RunResult, RuntimeInfo, TableInput,
 } from '../engine/protocol';
 import type { HubLookup, HubProgress } from '../hub/hub';
 import { carriedFrom, type CarriedColumns, type CarriedFilter } from '../results/carried';
 import type { ProjectSnapshot } from '../report/projectTypes';
-import { restoreColumns, type ColumnDictionary } from '../columns/dictionary';
+import { anyConfirmed, restoreColumns, type ColumnDictionary } from '../columns/dictionary';
 
-export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'report' | 'explore';
+export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'explore' | 'yourindex' | 'report';
 
 export const STEPS: { key: StepKey; label: string; icon: string; short: string }[] = [
   { key: 'start', label: 'Start', short: 'Start', icon: 'house' },
@@ -23,6 +23,7 @@ export const STEPS: { key: StepKey; label: string; icon: string; short: string }
   { key: 'run', label: 'Run', short: 'Run', icon: 'play.fill' },
   { key: 'results', label: 'Results', short: 'Results', icon: 'chart.bar' },
   { key: 'explore', label: 'Explore', short: 'Explore', icon: 'magnifyingglass' },
+  { key: 'yourindex', label: 'Your Index', short: 'Index', icon: 'square.grid.2x2' },
   { key: 'report', label: 'Report', short: 'Report', icon: 'doc' },
 ];
 
@@ -71,6 +72,22 @@ export interface Session {
   yourColumns: YourColumnsView;
   /** The planner's confirmed column dictionary and labels (src/columns), saved in the project file. */
   columnDictionary: ColumnDictionary | null;
+  /** The column dictionary for the uploaded file, as the engine last answered (contract section 1). */
+  columns: ColumnsResult | null;
+  /** The planner's own index settings (Your Index), saved in the project file. Never official. */
+  indexSpecs: IndexSpec[];
+  /** Which of indexSpecs the Your Index screen shows. */
+  indexActive: number;
+  /** The last run of one of the planner's indexes, with the settings it ran. */
+  indexResult: IndexRun | null;
+}
+
+export interface IndexRun {
+  result: IndexResult;
+  /** JSON of the spec and options as they were sent, to tell when the settings have changed since. */
+  input: string;
+  /** The readiness run open when the index ran (its comparison is with that run), if any. */
+  runId: string | null;
 }
 
 export interface YourColumnsView {
@@ -107,6 +124,12 @@ interface Actions {
   selectSite(siteId: string | null): void;
   toggleCompare(siteId: string): void;
   setYourColumns(view: Partial<YourColumnsView>): void;
+  /** Read the column dictionary from the engine (proposed the first time, then as confirmed). */
+  loadColumns(): Promise<void>;
+  confirmColumns(changes: ColumnChange[]): Promise<void>;
+  setIndexSpecs(specs: IndexSpec[], active?: number): void;
+  /** Run one of the planner's indexes. Never official, never on the readiness scale. */
+  runIndex(spec: IndexSpec, options?: { populationColumn?: string }): Promise<void>;
   clearError(): void;
   clearNotice(): void;
   newProject(): Promise<void>;
@@ -116,8 +139,8 @@ const initial: Omit<Session, 'boot' | 'fields'> = {
   step: 'start', table: null, proposal: null, check: null, details: {}, accepted: null, run: null,
   staleReason: null, busy: null, error: null, notice: null, selectedSiteId: null, compare: [],
   confirmed: {}, guessed: {}, hub: null, hubProgress: null, publicChoice: {}, publicFills: [],
-  carried: null, yourColumns: noView,
-  columnDictionary: null,
+  carried: null, yourColumns: noView, columnDictionary: null,
+  columns: null, indexSpecs: [], indexActive: 0, indexResult: null,
 };
 
 /** The view kept across runs, less any column the new run no longer carries. */
@@ -245,6 +268,11 @@ export function stepGate(s: Session, step: StepKey): { open: boolean; reason?: s
     case 'explore':
       // Explore reads the uploaded file's own columns; it needs no run and no confirmed directions.
       return s.proposal ? { open: true } : { open: false, reason: 'Upload a file first.' };
+    case 'yourindex': {
+      if (!s.proposal) return { open: false, reason: 'Upload a file first.' };
+      const confirmed = s.columns?.entries.some((e) => e['evsient:provenance'] === 'confirmed_by_user' && e['evsient:direction'] != null);
+      return confirmed ? { open: true } : { open: false, reason: 'Confirm which way is better for some of your columns first.' };
+    }
   }
 }
 
@@ -334,7 +362,7 @@ export const useSession = create<Session & Actions>((set, get) => {
           if (status === 'check' && proposal.mapping[field]) guessed[field] = proposal.mapping[field];
         }
         markStale('You uploaded a different file.');
-        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null, ...noPublicData, columnDictionary: null });
+        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null, ...noPublicData, columnDictionary: null, columns: null, indexResult: null });
       } catch (e) { if (gen === generation) fail(e); }
     },
 
@@ -513,11 +541,14 @@ export const useSession = create<Session & Actions>((set, get) => {
         if (gen !== generation) return;
         const confirmed: Record<string, string> = { ...proposal.mapping };
         const publicChoice = Object.fromEntries(publicFills.map((f) => [f.field, 'use' as const]));
-        set({ table: snapshot.table, proposal, check, confirmed, guessed: {}, details: { ...snapshot.details }, publicFills, publicChoice });
+        set({
+          table: snapshot.table, proposal, check, confirmed, guessed: {}, details: { ...snapshot.details }, publicFills, publicChoice,
+          indexSpecs: snapshot.yourIndex?.specs ?? [], indexActive: snapshot.yourIndex?.active ?? 0,
+        });
         // The planner's column dictionary, read again against the reopened file (src/columns).
-        const columns = await restoreColumns(snapshot.columns);
+        const restored = await restoreColumns(snapshot.columns);
         if (gen !== generation) return;
-        set({ columnDictionary: columns.dictionary });
+        set({ columnDictionary: restored.dictionary, columns: restored.columns });
         if (proposal.refused || check.counts.mustFix > 0) {
           set({ busy: null, notice: 'This project file was opened, but its file has items marked Must Fix, so the model was not run.' });
           get().go('check');
@@ -538,7 +569,7 @@ export const useSession = create<Session & Actions>((set, get) => {
         const carried = snapshot.carried ?? carriedFrom(snapshot.table, proposal.mapping);
         set({
           run, carried, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [],
-          notice: `Opened ${snapshot.manifest.name}. The model was run again on this device, with data confidence judged as of ${snapshot.manifest.asOf}.${versionNote}${columns.note}`,
+          notice: `Opened ${snapshot.manifest.name}. The model was run again on this device, with data confidence judged as of ${snapshot.manifest.asOf}.${versionNote}${restored.note}`,
         });
         get().go('results');
       } catch (e) { if (gen === generation) fail(e); }
@@ -553,6 +584,37 @@ export const useSession = create<Session & Actions>((set, get) => {
     },
 
     setYourColumns(view) { set({ yourColumns: { ...get().yourColumns, ...view } }); },
+
+    // These three answer the caller with the engine's refusal (the stand-in engine refuses them all).
+    async loadColumns() {
+      const gen = generation;
+      await ensureEngineSession();
+      const columns = await getEngine().columns();
+      if (gen === generation) set({ columns });
+    },
+
+    async confirmColumns(changes) {
+      const gen = generation;
+      await ensureEngineSession();
+      const columns = await getEngine().columnsConfirm(changes);
+      if (gen !== generation) return;
+      const labels = get().columnDictionary?.labels ?? {};
+      set({ columns, columnDictionary: anyConfirmed(columns.entries) ? { tableSchema: columns.tableSchema, labels } : null });
+    },
+
+    setIndexSpecs(specs, active) {
+      const at = Math.max(0, Math.min(active ?? get().indexActive, specs.length - 1));
+      set({ indexSpecs: specs, indexActive: at });
+    },
+
+    async runIndex(spec, options) {
+      const gen = generation;
+      const input = JSON.stringify({ spec, options: options ?? {} });
+      await ensureEngineSession();
+      const result = await getEngine().indexRun(spec, options);
+      if (gen !== generation) return;
+      set({ indexResult: { result, input, runId: get().run?.runId ?? null } });
+    },
 
     clearError() { set({ error: null }); },
     clearNotice() { set({ notice: null }); },

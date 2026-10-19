@@ -419,7 +419,10 @@ export interface IndexSpec {
   robustness?: { draws: number; spread: number; seed: number };
 }
 
-export interface IndexValidation { ok: boolean; refusals: string[]; [key: string]: unknown }
+/** One reason the engine will not run an index, in words; `column` names the criterion it is about. */
+export interface IndexRefusal { code: string; message: string; column?: string }
+
+export interface IndexValidation { ok: boolean; refusals: IndexRefusal[]; spec: IndexSpec | null; [key: string]: unknown }
 
 /** The planner's own index (contract section 3). Never official, never on the readiness scale. */
 export interface IndexResult {
@@ -427,8 +430,8 @@ export interface IndexResult {
   name: string;
   badge: string;
   refused: boolean;
-  refusals: string[];
-  spec: IndexSpec;
+  refusals: IndexRefusal[];
+  spec: IndexSpec | null;
   formula: unknown;
   summary: Record<string, unknown>;
   sites: Record<string, unknown>[];

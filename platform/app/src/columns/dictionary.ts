@@ -47,7 +47,9 @@ function keepLabels(labels: Record<string, string>, entries: ColumnEntry[]): Rec
 
 /** The dictionary for the uploaded file, as the engine has it now (proposed the first time). */
 export async function loadColumns(): Promise<ColumnsResult> {
-  return getEngine().columns();
+  const result = await getEngine().columns();
+  useSession.setState({ columns: result });
+  return result;
 }
 
 /**
@@ -64,6 +66,7 @@ export async function confirmColumns(changes: ColumnChange[], labels: Record<str
     else delete merged[name];
   }
   useSession.setState({
+    columns: result,
     columnDictionary: anyConfirmed(result.entries)
       ? { tableSchema: result.tableSchema, labels: keepLabels(merged, result.entries) }
       : null,
@@ -117,14 +120,17 @@ export function parseSavedColumns(value: unknown): ColumnDictionary | null {
  * Give a saved dictionary back to the engine for the reopened file. A dictionary the engine cannot
  * read again is kept as saved, so saving the project again does not lose it, and the planner is told.
  */
-export async function restoreColumns(saved: ColumnDictionary | undefined): Promise<{ dictionary: ColumnDictionary | null; note: string }> {
-  if (!saved) return { dictionary: null, note: '' };
+export async function restoreColumns(
+  saved: ColumnDictionary | undefined,
+): Promise<{ dictionary: ColumnDictionary | null; columns: ColumnsResult | null; note: string }> {
+  if (!saved) return { dictionary: null, columns: null, note: '' };
   try {
     const result = await getEngine().columnsRestore(saved.tableSchema);
-    return { dictionary: { tableSchema: result.tableSchema, labels: keepLabels(saved.labels, result.entries) }, note: '' };
+    return { dictionary: { tableSchema: result.tableSchema, labels: keepLabels(saved.labels, result.entries) }, columns: result, note: '' };
   } catch (e) {
     return {
       dictionary: saved,
+      columns: null,
       note: ` Your column choices were kept in the project but could not be read again here: ${engineMessage(e)}`,
     };
   }

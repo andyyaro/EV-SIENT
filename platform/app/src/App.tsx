@@ -24,11 +24,13 @@ const loadReport = () => import('./report/ReportView').then((m) => ({ default: m
 const loadExplore = () => import('./explore/ExploreView').then((m) => ({ default: m.ExploreView }));
 const ResultsView = lazy(loadResults);
 const ExploreView = lazy(loadExplore);
+// Your Index loads only when the planner opens it.
+const YourIndexView = lazy(() => import('./yourindex/YourIndexView').then((m) => ({ default: m.YourIndexView })));
 const ReportView = lazy(loadReport);
 
 const SCREENS: Record<StepKey, React.ComponentType> = {
   start: StartStep, upload: UploadStep, map: MapStep, check: CheckStep, fill: FillStep, run: RunStep,
-  results: ResultsView, report: ReportView, explore: ExploreView,
+  results: ResultsView, explore: ExploreView, yourindex: YourIndexView, report: ReportView,
 };
 
 function StepNav() {

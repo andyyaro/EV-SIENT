@@ -13,6 +13,7 @@ import {
 import { CAPACITY_LADDER, ladderRung } from '../results/data';
 import { carriedNumber, carriedText, showCarried, type CarriedColumns } from '../results/carried';
 import { fieldLabel, groupLabel, type ReportModel } from './reportModel';
+import { INDEX_SECTION, IndexReportSection } from '../yourindex/ReportSection';
 
 /** A table that may scroll sideways on a narrow screen: focusable and named, so a keyboard user can scroll it. */
 const scrollRegion = (label: string) => ({ role: 'region', 'aria-label': label, tabIndex: 0 }) as const;
@@ -90,7 +91,7 @@ export function ReportDocument({ m }: { m: ReportModel }) {
 
       <nav className="rp-toc" aria-label="Report sections">
         <h2 className="rp-toc__title">Contents</h2>
-        <ol>{[...SECTIONS, ...(m.carried ? [YOURS_SECTION] : [])].map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ol>
+        <ol>{[...SECTIONS, ...(m.carried ? [YOURS_SECTION] : []), ...(m.index ? [INDEX_SECTION] : [])].map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ol>
       </nav>
 
       <Summary m={m} />
@@ -103,6 +104,7 @@ export function ReportDocument({ m }: { m: ReportModel }) {
       <Limitations m={m} verified={verified} />
       <Repro m={m} />
       {m.carried && <YourColumns m={m} carried={m.carried} />}
+      {m.index && <IndexReportSection r={m.index} n={SECTIONS.length + (m.carried ? 2 : 1)} />}
 
       <footer className="rp-foot">
         <p>Made with the EV-SIENT Planner, which ran the model on the planner's own device. Planning support, not engineering, permitting or budget advice.</p>

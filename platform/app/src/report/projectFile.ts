@@ -12,12 +12,15 @@
 //                         never scored (only when there are any; the file is then evsient-project/3)
 //   inputs/column_dictionary.json  the planner's confirmed column dictionary, a Frictionless Table
 //                         Schema with their labels as `title` (only when there is one; any version)
+//   inputs/your_index.json  the planner's own index settings (Your Index), labelled as theirs and
+//                         never official (only when there are any; the schema number is unchanged,
+//                         and planners that do not know the member check its hash and pass over it)
 //   results/...           every file the engine wrote for the last run (engine.outputFiles())
 
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
 import { version as appVersion } from '../../package.json';
 import { getEngine } from '../engine/client';
-import { PROTOCOL_VERSION, type AcceptDetails, type FieldFill, type TableInput } from '../engine/protocol';
+import { PROTOCOL_VERSION, type AcceptDetails, type FieldFill, type IndexSpec, type TableInput } from '../engine/protocol';
 import { projectName } from '../lib/projectName';
 import { fullMapping, useSession } from '../state/store';
 import type { CarriedColumns } from '../results/carried';
@@ -57,6 +60,12 @@ export async function buildProjectFile(): Promise<Blob> {
   if (s.publicFills.length) members['inputs/public_data.json'] = json({ fills: s.publicFills });
   if (s.carried) members['inputs/your_columns.json'] = json({ note: 'Columns from the planner\'s file that the model does not read. Kept with each site and never scored.', ...s.carried });
   if (s.columnDictionary) members[DICTIONARY_MEMBER] = json(await columnsForProject(s.columnDictionary));
+  if (s.indexSpecs.length) {
+    members['inputs/your_index.json'] = json({
+      note: 'The planner\'s own index settings, built in Your Index. Not the EV-SIENT readiness score and never official.',
+      official: false, specs: s.indexSpecs, active: s.indexActive,
+    });
+  }
   for (const [path, text] of Object.entries(outputs.files)) {
     // Engine paths are "results/..." and "inputs/..." (the accepted cohort); all of them live under results/.
     const clean = path.replace(/^\/+/, '');
@@ -183,6 +192,16 @@ export async function readProjectFile(file: File): Promise<ProjectSnapshot> {
     const columns = parseSavedColumns(parseMember<unknown>(files, DICTIONARY_MEMBER));
     if (!columns) throw new ProjectFileError('The column dictionary in this project file is not in the expected shape, so it cannot be opened.');
     snapshot.columns = columns;
+  }
+  if (files['inputs/your_index.json']) {
+    const saved = parseMember<{ specs?: unknown; active?: unknown }>(files, 'inputs/your_index.json');
+    const isSpec = (x: unknown): x is IndexSpec => isRecord(x) && x.pack === 'evsient-custom-index' && typeof x.name === 'string'
+      && Array.isArray(x.criteria) && Array.isArray(x.screens);
+    if (!isRecord(saved) || !Array.isArray(saved.specs) || !saved.specs.every(isSpec)) {
+      throw new ProjectFileError('Your Index settings in this project file are not in the expected shape, so it cannot be opened.');
+    }
+    const active = typeof saved.active === 'number' && Number.isInteger(saved.active) ? saved.active : 0;
+    snapshot.yourIndex = { specs: saved.specs, active: Math.max(0, Math.min(active, saved.specs.length - 1)) };
   }
   return snapshot;
 }

@@ -11,6 +11,7 @@ import {
 import { projectName } from '../lib/projectName';
 import type { CarriedColumns } from '../results/carried';
 import { slug, today } from '../results/format';
+import type { IndexOutcome } from '../yourindex/model';
 
 export interface ReportModel {
   run: RunResult;
@@ -30,11 +31,14 @@ export interface ReportModel {
   publicSources: PublicSource[];
   /** The jurisdiction or project name shown on the cover. */
   place: string;
+  /** The planner's own index, when they ran one: its own labelled section, never the readiness score. */
+  index?: IndexOutcome | null;
 }
 
 export function buildModel(args: {
   run: RunResult; explains: Explanation[]; files: OutputFiles; info: RuntimeInfo | null;
   details: AcceptDetails; fields: FieldCatalog | null; table: TableInput | null; carried: CarriedColumns | null;
+  index?: IndexOutcome | null;
 }): ReportModel {
   const cohort = readCohort(args.files);
   const place = projectName(args.details, args.table?.fileName);

@@ -10,9 +10,11 @@ import { buildModel, fileName, type ReportModel } from './reportModel';
 import { outputsZip, reportDocx, reportHtml, reportPdf, saveBlob, sitesCsv, workbook } from './exports';
 import { buildProjectFile } from './projectFile';
 import { previewThemeCss } from './reportTheme';
+import { outcome } from '../yourindex/model';
+import { indexCsv } from '../yourindex/indexCsv';
 import '../styles/report.css';
 
-type Job = 'html' | 'pdf' | 'docx' | 'csv' | 'xlsx' | 'zip' | 'project';
+type Job = 'html' | 'pdf' | 'docx' | 'csv' | 'index' | 'xlsx' | 'zip' | 'project';
 
 export function ReportView() {
   const run = useSession((s) => s.run);
@@ -21,6 +23,9 @@ export function ReportView() {
   const fields = useSession((s) => s.fields);
   const table = useSession((s) => s.table);
   const carried = useSession((s) => s.carried);
+  const indexRun = useSession((s) => s.indexResult);
+  // The planner's own index joins the report only when it ran and ranked sites; it is labelled as theirs.
+  const index = indexRun && !indexRun.result.refused ? outcome(indexRun.result) : null;
   const stale = useSession((s) => s.staleReason);
   const go = useSession((s) => s.go);
   const explains = useAllExplains(run);
@@ -32,8 +37,8 @@ export function ReportView() {
   const info = boot.status === 'ready' ? boot.info : null;
   const model: ReportModel | null = useMemo(() => {
     if (!run || explains.status !== 'ready' || files.status !== 'ready') return null;
-    return buildModel({ run, explains: explains.value, files: files.value, info, details, fields, table, carried });
-  }, [run, explains, files, info, details, fields, table, carried]);
+    return buildModel({ run, explains: explains.value, files: files.value, info, details, fields, table, carried, index });
+  }, [run, explains, files, info, details, fields, table, carried, index]);
 
   if (!run) {
     return (
@@ -58,6 +63,7 @@ export function ReportView() {
         if (job === 'pdf') setStatus('Preparing the PDF. The first one loads the PDF maker, and a report with many sites can take a minute.');
         out = job === 'html' ? reportHtml(model, article) : job === 'pdf' ? await reportPdf(model, article) : await reportDocx(model, article);
       } else if (job === 'csv') out = sitesCsv(model);
+      else if (job === 'index' && model.index) out = indexCsv(model.index, model.place);
       else if (job === 'xlsx') out = await workbook(model);
       else if (job === 'zip') out = await outputsZip(model);
       else out = { blob: await buildProjectFile(), name: fileName(model, 'project', 'evsient') };
@@ -76,7 +82,8 @@ export function ReportView() {
     { job: 'docx', icon: 'square.and.pencil', title: 'Word Document', detail: 'The same report as an editable Word file, with heading styles and table header rows.', action: 'Download .docx' },
     { job: 'print', icon: 'printer', title: 'Print', detail: 'Opens your browser\'s print dialog for a paper copy. For a PDF to share, use the Accessible PDF above.', action: 'Print' },
     { job: 'csv', icon: 'list.bullet', title: 'Ranked Sites', detail: `One row per site with every number in the ranked table and site profiles${carried ? ', then Your Columns, each headed as not in the score' : ''}.`, action: 'Download .csv' },
-    { job: 'xlsx', icon: 'chart.bar', title: 'Excel Workbook', detail: `Sites, Scenarios and Data Confidence sheets${carried ? ', and Your Columns on a sheet of their own' : ''}. Values only, no formulas.`, action: 'Download .xlsx' },
+    ...(index ? [{ job: 'index' as const, icon: 'list.bullet', title: 'Your Index (Not Official)', detail: `${index.name}: every site in your own index's order, each heading marked as your index, not the EV-SIENT readiness score.`, action: 'Download .csv' }] : []),
+    { job: 'xlsx', icon: 'chart.bar', title: 'Excel Workbook', detail: `Sites, Scenarios and Data Confidence sheets${carried ? ', and Your Columns on a sheet of their own' : ''}${index ? ', and Your Index on a sheet of its own' : ''}. Values only, no formulas.`, action: 'Download .xlsx' },
     { job: 'zip', icon: 'archivebox', title: 'All Model Outputs', detail: 'Every file the engine wrote for this run, with the accepted inputs.', action: 'Download .zip' },
     { job: 'project', icon: 'folder', title: 'Project File', detail: 'Open it later in the planner to rebuild these results on any device.', action: 'Download .evsient' },
   ];

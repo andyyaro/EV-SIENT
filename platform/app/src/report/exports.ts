@@ -10,6 +10,7 @@ import type { PdfWorkerApi } from './pdf.worker';
 import { reportBlocks } from './reportBlocks';
 import { fileName, groupLabel, type ReportModel } from './reportModel';
 import { standaloneCss } from './reportTheme';
+import { indexRows } from '../yourindex/indexCsv';
 
 export function saveBlob(blob: Blob, name: string): void {
   const url = URL.createObjectURL(blob);
@@ -181,12 +182,21 @@ export async function workbook(m: ReportModel): Promise<{ blob: Blob; name: stri
     ...m.run.sites.map((s) => yours.map((c) => cell(c.value(s)))),
   ] : null;
 
+  // The planner's own index on its own sheet, its heading saying it is not the readiness score.
+  const index = m.index ? indexRows(m.index) : null;
+  const indexSheet = index ? [
+    [head(`Your index, not the EV-SIENT readiness score: ${m.index!.name}. Built by the planner from their own columns; never used by the readiness model.`)],
+    index.head.map(head),
+    ...index.rows.map((row) => row.map(cell)),
+  ] : null;
+
   const widths = (n: number, first = 14) => Array.from({ length: n }, (_, i) => ({ width: i < 3 ? first + (i === 2 ? 14 : 0) : 14 }));
   const blob = await writeXlsxFile([
     { data: sites, sheet: 'Sites', columns: widths(SITE_COLUMNS.length), stickyRowsCount: 1 },
     { data: scenarios, sheet: 'Scenarios', columns: widths(scenarioHead.length), stickyRowsCount: 1 },
     { data: confidence, sheet: 'Data Confidence', columns: widths(groups.length + 4), stickyRowsCount: 1 },
     ...(yourSheet ? [{ data: yourSheet, sheet: 'Your Columns (Not in the Score)', columns: widths(yours.length), stickyRowsCount: 2 }] : []),
+    ...(indexSheet ? [{ data: indexSheet, sheet: 'Your Index (Not Official)', columns: widths(index!.head.length), stickyRowsCount: 2 }] : []),
   ] as Parameters<typeof writeXlsxFile>[0]).toBlob();
   return { blob, name: fileName(m, 'ev-sient-results', 'xlsx') };
 }

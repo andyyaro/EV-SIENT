@@ -2,7 +2,7 @@
 // Written by report/projectFile.ts (Results workstream), read back by the Start screen and
 // restored by the store's restoreProject action (Steps workstream).
 
-import type { AcceptDetails, FieldFill, TableInput } from '../engine/protocol';
+import type { AcceptDetails, FieldFill, IndexSpec, TableInput } from '../engine/protocol';
 import type { CarriedColumns } from '../results/carried';
 import type { ColumnDictionary } from '../columns/dictionary';
 
@@ -45,4 +45,6 @@ export interface ProjectSnapshot {
    * opens the project without it.
    */
   columns?: ColumnDictionary;
+  /** inputs/your_index.json: the planner's own index settings (Your Index). Never official; any schema may carry it. */
+  yourIndex?: { specs: IndexSpec[]; active: number };
 }
