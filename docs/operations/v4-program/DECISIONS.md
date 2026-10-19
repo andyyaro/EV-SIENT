@@ -1642,6 +1642,82 @@ found an older fault: the Excel download never finished for a workbook of 160 kB
 because the zip library compresses large parts in a `blob:` Worker that `worker-src 'self'`
 blocks. `vite.config.ts` now makes write-excel-file zip synchronously; the CSP is unchanged.
 
+## DEC-027 - One official pathway total: 47, from the canonical milestone2_v3 rules; 48 is history
+
+**Date:** 2026-10-18 · **Phase:** platform v1 · **Raised by:** the project owner · **Builds on
+DEC-008** · **Resolves audit finding F-05**
+
+### What was blocking
+
+The project carried two port plans and did not say which one counts. The canonical
+`milestone2_v3` mode scored and ranked sites with the fixed-anchor (V3) rules, but sized ports
+on the cohort-relative `legacy_v2` ranking with the legacy 2035/2050 pathway rule, so that the
+reference study's headline stayed **25 starter / 48 pathway**. The V3 rules on the V3 ranking
+give **25 / 47**: Pohick (`FFX003`) drops a tier and its pathway goes 4 to 2, McCoart
+(`PWC001`) rises a tier and its pathway goes 3 to 4. A reviewer noted that the project had two
+output versions. The 2026-10-17 audit (F-05, kept outside the repo) measured the same 47.
+
+### The decision
+
+1. **The official future-ready (pathway) total is 47**, the one the canonical `milestone2_v3`
+   rules produce. In that mode the port plan now follows the fixed-anchor ranking, and the
+   pathway is the V3 rule (`right_sizing._future_ready` over the V3 2036/2046 targets under the
+   V3 multipliers). The starter total stays 25.
+2. **48 is the earlier `legacy_v2` result, kept as history and labelled so.** `legacy_v2` mode
+   still reproduces 25 / 48 bit-exactly, and a reference run's `run_summary.json` states it
+   under `legacy_v2_result` beside the official totals.
+3. **New numbers, new contract (DEC-008).** `data/contract/v3/` (contract `3.0.0`, model
+   version `3.1.0`) is a new run, written by `scripts/build_contract_v3.py` into v2's 60-field
+   container with its own hash chain. Its manifest marks it authoritative and pins the v1 and
+   v2 manifest digests under `history`. v1 and v2 are frozen and untouched; the writer refuses
+   to write into either. RT-04 is model-version aware: 25 / 48 for 3.0.0, 25 / 47 for 3.1.0.
+4. **Consumers that recompute from the contract read v3**: the static dashboard, the MATLAB
+   canonical input, the 3D explorer data and the platform engine fixtures.
+5. **The 47 is confirmed independently.** `tests/test_pathway_total_independent.py` rebuilds
+   it per site from an Erlang-B route and restated floors, caps and pathway rule, without
+   calling the model's right-sizing, and shows that the difference from 48 comes from the
+   ranking alone: either pathway rule gives 47 on the V3 ranking and 48 on the legacy one.
+
+### Alternatives rejected
+
+- **Rewrite v1 or v2 with the new numbers.** Rejected: they are frozen, hash-pinned history
+  that published work cites. Changing them would leave the past unreadable.
+- **Keep 48 and disclose the legacy ranking** (the audit's other option). Rejected by the
+  owner: it keeps two plans alive, and one of them does not follow the ranking the results show.
+
+### What it does not do
+
+It does not change scores, ranks, tiers, energy or emissions; net CO2e is identical. It does
+not edit dated deliverables (the Milestone 2 deck, its speaker notes, the final report and the
+2026-06-28 public PDF), which stay correct for their date at 25 / 48. It does not change the
+public website; the changes it needs are listed for the owner. The Tableau workbook and patch
+package, the Excel workbook and `site/platform` still carry v1 until they are rebuilt.
+
+### Published numbers
+
+| Number (12-site reference study) | Before (v1, `legacy_v2`) | Now (v3, official) |
+|---|---|---|
+| Starter ports now | 25 | 25 |
+| Pathway (future-ready) ports | 48 | 47 |
+| Active ports, base: 2036 / 2046 / 2056 | 35 / 44 / 44 | 31 / 43 / 43 |
+| Active ports, high: 2036 / 2046 / 2056 | 44 / 48 / 48 | 43 / 47 / 47 |
+| Staged NPC: 2036 / 2046 / 2056 | $1.56M / $2.29M / $3.01M | $1.49M / $2.21M / $2.92M |
+| Broad overbuild NPC: 2036 / 2046 / 2056 | $1.87M / $2.64M / $3.41M | $1.85M / $2.60M / $3.36M |
+| Avoided overbuild cost: 2036 / 2046 / 2056 | $0.31M / $0.34M / $0.39M | $0.36M / $0.38M / $0.44M |
+| Expansion triggers | all `awaiting_observed_data` | unchanged |
+| Net CO2e | as before | unchanged |
+
+Per site: `FFX003` pathway 4 to 2 (now a small pilot or monitoring), `PWC001` pathway 3 to 4,
+`FFX001` and `PWC007` 2036 base active 4 to 2, `PWC006` plan text only.
+
+### Gates
+
+`tests/test_contract_v3.py` (v1 and v2 digests pinned, v3 validates, totals 25 / 47, only the
+plan fields differ from v2, `--check` passes), `tests/test_pathway_total_independent.py`, the
+legacy golden tests (25 / 48 bit-exact), `tests/test_published_numbers.py` (current docs
+against v3, dated documents against v1), and in `verify.sh` the `build_contract_v3.py --check`
+and `validate-contract data/contract/v3` gates. Full suite, parity and the app build pass.
+
 ## DEC-028 - The public data hub covers six states, with the borders between them dissolved
 
 **Date:** 2026-10-18 · **Phase:** platform v1 · **Owner decision** · **Builds on DEC-016, DEC-025**
@@ -1872,79 +1948,3 @@ closed as moot.
 - **Leave the deploy script's gate mode in place but unused.** A full `--apply` rebuilt the
   behaviour, the origin, the Lambda association and the bucket. Left in, the next person to run
   the documented command would have recreated the gate.
-
-## DEC-027 - One official pathway total: 47, from the canonical milestone2_v3 rules; 48 is history
-
-**Date:** 2026-10-18 · **Phase:** platform v1 · **Raised by:** the project owner · **Builds on
-DEC-008** · **Resolves audit finding F-05**
-
-### What was blocking
-
-The project carried two port plans and did not say which one counts. The canonical
-`milestone2_v3` mode scored and ranked sites with the fixed-anchor (V3) rules, but sized ports
-on the cohort-relative `legacy_v2` ranking with the legacy 2035/2050 pathway rule, so that the
-reference study's headline stayed **25 starter / 48 pathway**. The V3 rules on the V3 ranking
-give **25 / 47**: Pohick (`FFX003`) drops a tier and its pathway goes 4 to 2, McCoart
-(`PWC001`) rises a tier and its pathway goes 3 to 4. A reviewer noted that the project had two
-output versions. The 2026-10-17 audit (F-05, kept outside the repo) measured the same 47.
-
-### The decision
-
-1. **The official future-ready (pathway) total is 47**, the one the canonical `milestone2_v3`
-   rules produce. In that mode the port plan now follows the fixed-anchor ranking, and the
-   pathway is the V3 rule (`right_sizing._future_ready` over the V3 2036/2046 targets under the
-   V3 multipliers). The starter total stays 25.
-2. **48 is the earlier `legacy_v2` result, kept as history and labelled so.** `legacy_v2` mode
-   still reproduces 25 / 48 bit-exactly, and a reference run's `run_summary.json` states it
-   under `legacy_v2_result` beside the official totals.
-3. **New numbers, new contract (DEC-008).** `data/contract/v3/` (contract `3.0.0`, model
-   version `3.1.0`) is a new run, written by `scripts/build_contract_v3.py` into v2's 60-field
-   container with its own hash chain. Its manifest marks it authoritative and pins the v1 and
-   v2 manifest digests under `history`. v1 and v2 are frozen and untouched; the writer refuses
-   to write into either. RT-04 is model-version aware: 25 / 48 for 3.0.0, 25 / 47 for 3.1.0.
-4. **Consumers that recompute from the contract read v3**: the static dashboard, the MATLAB
-   canonical input, the 3D explorer data and the platform engine fixtures.
-5. **The 47 is confirmed independently.** `tests/test_pathway_total_independent.py` rebuilds
-   it per site from an Erlang-B route and restated floors, caps and pathway rule, without
-   calling the model's right-sizing, and shows that the difference from 48 comes from the
-   ranking alone: either pathway rule gives 47 on the V3 ranking and 48 on the legacy one.
-
-### Alternatives rejected
-
-- **Rewrite v1 or v2 with the new numbers.** Rejected: they are frozen, hash-pinned history
-  that published work cites. Changing them would leave the past unreadable.
-- **Keep 48 and disclose the legacy ranking** (the audit's other option). Rejected by the
-  owner: it keeps two plans alive, and one of them does not follow the ranking the results show.
-
-### What it does not do
-
-It does not change scores, ranks, tiers, energy or emissions; net CO2e is identical. It does
-not edit dated deliverables (the Milestone 2 deck, its speaker notes, the final report and the
-2026-06-28 public PDF), which stay correct for their date at 25 / 48. It does not change the
-public website; the changes it needs are listed for the owner. The Tableau workbook and patch
-package, the Excel workbook and `site/platform` still carry v1 until they are rebuilt.
-
-### Published numbers
-
-| Number (12-site reference study) | Before (v1, `legacy_v2`) | Now (v3, official) |
-|---|---|---|
-| Starter ports now | 25 | 25 |
-| Pathway (future-ready) ports | 48 | 47 |
-| Active ports, base: 2036 / 2046 / 2056 | 35 / 44 / 44 | 31 / 43 / 43 |
-| Active ports, high: 2036 / 2046 / 2056 | 44 / 48 / 48 | 43 / 47 / 47 |
-| Staged NPC: 2036 / 2046 / 2056 | $1.56M / $2.29M / $3.01M | $1.49M / $2.21M / $2.92M |
-| Broad overbuild NPC: 2036 / 2046 / 2056 | $1.87M / $2.64M / $3.41M | $1.85M / $2.60M / $3.36M |
-| Avoided overbuild cost: 2036 / 2046 / 2056 | $0.31M / $0.34M / $0.39M | $0.36M / $0.38M / $0.44M |
-| Expansion triggers | all `awaiting_observed_data` | unchanged |
-| Net CO2e | as before | unchanged |
-
-Per site: `FFX003` pathway 4 to 2 (now a small pilot or monitoring), `PWC001` pathway 3 to 4,
-`FFX001` and `PWC007` 2036 base active 4 to 2, `PWC006` plan text only.
-
-### Gates
-
-`tests/test_contract_v3.py` (v1 and v2 digests pinned, v3 validates, totals 25 / 47, only the
-plan fields differ from v2, `--check` passes), `tests/test_pathway_total_independent.py`, the
-legacy golden tests (25 / 48 bit-exact), `tests/test_published_numbers.py` (current docs
-against v3, dated documents against v1), and in `verify.sh` the `build_contract_v3.py --check`
-and `validate-contract data/contract/v3` gates. Full suite, parity and the app build pass.
