@@ -898,7 +898,9 @@ def columns_confirm(changes_json: str) -> str:
     if isinstance(changes, dict):
         changes = changes.get("changes", [])
     entries = dictionary.confirm(_session.entries, changes)
-    if any("evsient:reading" not in e for e in entries):
+    # `confirm` sets the reading of a column it changes how to read (role, missing values, levels,
+    # decimal mark, date order) to null; read those again so every entry has its report.
+    if any(e.get("evsient:reading") is None for e in entries):
         entries = dictionary.reread(frame, entries)
     _session.entries = entries
     return _columns_payload()

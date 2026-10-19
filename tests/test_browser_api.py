@@ -466,6 +466,19 @@ def test_the_column_dictionary_follows_the_upload_and_the_planner():
     assert restored["entries"] == confirmed["entries"]
 
 
+def test_a_change_to_how_a_column_reads_is_read_again():
+    api.propose(_table(FLEX_SAMPLE))
+    api.columns()
+    changes = [{"column": "custom_open_after_dark", "missingValues": ["To be confirmed", "Seasonal"]},
+               {"column": "custom_partner_name", "role": "text"}]
+    entries = {e["name"]: e for e in _strict(api.columns_confirm(json.dumps({"changes": changes})))["entries"]}
+    dark = entries["custom_open_after_dark"]["evsient:reading"]
+    assert dark is not None, "the changed column has its reading report again"
+    assert "Seasonal" not in entries["custom_open_after_dark"]["categories"]
+    assert {p["pattern"]: p["kind"] for p in dark["patterns"]}["Seasonal"] == "missing"
+    assert dark["cells"] == dark["read"] + dark["missing"] + dark["unreadable"]
+    assert entries["custom_partner_name"]["evsient:reading"] is not None
+
 def test_explore_and_the_planners_index_read_the_confirmed_dictionary():
     api.propose(_table(FLEX_SAMPLE))
     refused = _strict(api.index_validate(json.dumps(HEAT_INDEX)))
