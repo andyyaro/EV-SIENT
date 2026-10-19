@@ -73,7 +73,8 @@ from a11y_audit import run_axe  # noqa: E402
 AXE_PATH: str | None = None  # set by --axe
 
 THEMES = [("light", "no-preference"), ("dark", "no-preference"), ("light", "more"), ("dark", "more")]
-SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "explore", "yourindex", "report"]
+SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "results-map", "results-map-colour", "explore", "yourindex", "report"]
+MAP_SCREENS = {"results-map", "results-map-colour"}
 HEADINGS = {"start": "Rank Your", "upload": "Upload", "map": "Map Columns", "check": "Check", "fill": "Public Data",
             "run": "Run", "results": "Results", "explore": "Explore", "yourindex": "Your Index", "report": "Report"}
 DSF = 2
@@ -547,6 +548,16 @@ def show(page, screen):
         page.locator("#main h1", has_text=HEADINGS[step]).first.wait_for(timeout=30_000)
         page.evaluate("() => window.scrollTo(0, 0)")
         pf.settle(page)
+    if screen in MAP_SCREENS:
+        # Moving between screens closes the map, so show it again for this screen's checks.
+        gate = page.get_by_role("button", name="Show Map", exact=True)
+        if gate.count():
+            gate.first.click()
+        page.locator(".rs-marker").first.wait_for(timeout=30_000)
+        # results-map: markers by rank only; results-map-colour: coloured by the first of Your Columns.
+        page.locator(".rs-map__colour select").select_option(index=1 if screen == "results-map-colour" else 0)
+        page.wait_for_timeout(3000)
+        page.evaluate("() => window.scrollTo(0, 0)")
     page.evaluate(HELPERS_JS)
     if step == "yourindex":
         table = page.locator("button.hig-disclosure__trigger", has_text="Every Site as a Table")
@@ -1313,7 +1324,7 @@ def main() -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     skip = set(filter(None, args.skip.split(",")))
-    screens = args.screens.split(",")
+    screens = [s for s in args.screens.split(",") if not (args.no_map and s in MAP_SCREENS)]
     report: dict = {"base": args.base, "started": time.strftime("%Y-%m-%dT%H:%M:%S"), "screens": {}, "setup": {}}
 
     with sync_playwright() as p:
