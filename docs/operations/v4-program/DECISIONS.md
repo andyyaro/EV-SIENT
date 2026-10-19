@@ -1816,11 +1816,12 @@ Removed live on 2026-10-18, before this entry:
 - the Cognito app clients `future-city-platform-edge` and `future-city-assistant-web`, with
   their managed-login branding.
 
-Removed by hand after this entry, in order: the bucket `future-city-fellowship-platform` (backed
-up locally first; the backup is kept outside the repository), the origin access control
-`E1JND6HMX02LBD`, the response headers policy `fcf-platform-security`, the Lambda@Edge function
-`fcf-platform-edge-auth` once its edge replicas drain, the IAM role
-`fcf-platform-edge-auth-role`, and the edge-auth log groups.
+Removed by hand on 2026-10-18, in order: the bucket `future-city-fellowship-platform` (backed up
+locally first, its 936 object versions included in the deletion; the backup of the current files
+is kept outside the repository), the origin access control `E1JND6HMX02LBD`, the response
+headers policy `fcf-platform-security`, the Lambda@Edge function `fcf-platform-edge-auth` (all
+eight versions, once its edge replicas drained), the IAM role `fcf-platform-edge-auth-role`, and
+the edge-auth log groups in us-east-1 and eu-central-1. Nothing of the gate remains in AWS.
 
 In the repository: `infra/edge-auth/index.mjs`, `infra/edge-auth/granted.mjs.example` and
 `tests/edge_auth/` are removed, with the `verify.sh` gate that ran them.
