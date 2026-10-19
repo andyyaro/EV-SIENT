@@ -7,7 +7,7 @@
 // read. Nothing about the planner's file is sent: the requests name counties, never sites.
 
 import { distanceToRingsMi, haversineMi, packsFor, pointInRings, propose, type Place, type Proposed } from './compute';
-import type { HubCoverage, HubLatest, HubManifest, PackRow } from './types';
+import type { HubCoverage, HubLatest, HubManifest, HubState, PackRow } from './types';
 
 const HUB_URL = new URL('hub/', new URL(import.meta.env.BASE_URL, location.origin)).href;
 
@@ -24,6 +24,19 @@ export interface HubLookup {
   /** Counties whose packs were read, by name. */
   counties: string[];
   bytes: number;
+  /** The covered states the sites are in, or whose blocks a value was worked out from (DEC-028). */
+  states: HubStateUse[];
+  /** Sites with coordinates outside every covered state. */
+  outside: number;
+}
+
+/** A covered state as this lookup used it: its sites, and whether its own files are a source. */
+export interface HubStateUse {
+  state: HubState;
+  /** Sites in this state, by the census block nearest each one. */
+  sites: number;
+  /** Whether blocks of this state lie within a block field's circle of any site. */
+  used: boolean;
 }
 
 export interface HubProgress {
@@ -92,13 +105,32 @@ export async function lookUp(sites: HubSite[], fields: string[], onProgress?: (p
   const wanted = fields.filter((f) => manifest.fields[f]);
   const widest = Math.max(0, ...wanted.map((f) => manifest.fields[f].radiusMiles));
   const proposals: Record<string, Record<string, Proposed>> = Object.fromEntries(wanted.map((f) => [f, {}]));
+  const blockRadius = Math.max(0, ...wanted.filter((f) => manifest.fields[f].rowKind === 'block').map((f) => manifest.fields[f].radiusMiles));
+  const covered = manifest.coverage.states ?? [];
+  const inState = new Map<string, number>();
+  const usedStates = new Set<string>();
+  let outside = 0;
   for (const s of sites) {
     const place = places.get(s.siteId)!;
+    if (place.inside === false) outside += 1;
     // Narrowed once per site to the widest circle; propose() measures each field's own radius.
     const near = place.inside && s.lat != null && s.lon != null
-      ? packsFor(manifest, s.lat, s.lon).flatMap((k) => rows.get(k) ?? []).filter((r) => haversineMi(s.lat!, s.lon!, r.lat, r.lon) <= widest)
+      ? packsFor(manifest, s.lat, s.lon).flatMap((k) => rows.get(k) ?? []).map((r) => ({ r, d: haversineMi(s.lat!, s.lon!, r.lat, r.lon) })).filter((x) => x.d <= widest)
       : [];
-    for (const f of wanted) proposals[f][s.siteId] = propose(manifest.fields[f], coverage.name, place, near);
+    for (const f of wanted) proposals[f][s.siteId] = propose(manifest.fields[f], coverage.name, place, near.map((x) => x.r));
+    if (!place.inside) continue;
+    // A block GEOID starts with its state's FIPS: the nearest block says which state the site is in.
+    let nearest: { r: PackRow; d: number } | null = null;
+    for (const x of near) {
+      if (x.r.kind !== 'block') continue;
+      if (!nearest || x.d < nearest.d) nearest = x;
+      if (x.d <= blockRadius) usedStates.add(x.r.id.slice(0, 2));
+    }
+    const fips = nearest?.r.id.slice(0, 2) ?? covered.find((c) => s.lon! >= c.bbox[0] && s.lon! <= c.bbox[2] && s.lat! >= c.bbox[1] && s.lat! <= c.bbox[3])?.fips;
+    if (fips) inState.set(fips, (inState.get(fips) ?? 0) + 1);
   }
-  return { manifest, proposals, counties: keys.map((k) => byKey.get(k)!.name).sort(), bytes };
+  const states = covered
+    .filter((c) => inState.has(c.fips) || usedStates.has(c.fips))
+    .map((state) => ({ state, sites: inState.get(state.fips) ?? 0, used: usedStates.has(state.fips) }));
+  return { manifest, proposals, counties: keys.map((k) => byKey.get(k)!.name).sort(), bytes, states, outside };
 }

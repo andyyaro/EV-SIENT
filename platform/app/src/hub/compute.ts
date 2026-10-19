@@ -78,10 +78,10 @@ const miles = (r: number) => (r === 1 ? '1 mile' : `${r} miles`);
 export function propose(field: HubField, coverageName: string, place: Place, rows: PackRow[]): Proposed {
   const { lat, lon } = place;
   if (lat == null || lon == null) return { reason: 'No usable latitude and longitude in your file.' };
-  if (!place.inside) return { reason: `Outside ${coverageName}, the only area this hub covers so far.` };
+  if (!place.inside) return { reason: `Outside the area this hub covers so far: ${coverageName}.` };
   if (field.requiresFullCircle && (place.edgeMiles ?? 0) < field.radiusMiles) {
     const what = field.aggregate === 'sum' ? 'the total would be too low' : 'the average would leave out part of the area';
-    return { reason: `Within ${miles(field.radiusMiles)} of the ${coverageName} border, and the hub has nothing across it, so ${what}.` };
+    return { reason: `Within ${miles(field.radiusMiles)} of the edge of the area this hub covers, and the hub has nothing beyond it, so ${what}.` };
   }
   const near: PackRow[] = [];
   const seen = new Set<string>();

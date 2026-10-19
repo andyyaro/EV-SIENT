@@ -40,10 +40,25 @@ export interface HubDataset {
   landing: string;
   url: string;
   sourceDate: string;
+  /** A source published as one file per state: the per-state datasets it is made of. */
+  members?: string[];
+}
+
+/** One state the release covers (DEC-028), and its own block and jobs files. */
+export interface HubState {
+  fips: string;
+  stusab: string;
+  name: string;
+  /** The name as a sentence uses it, e.g. "the District of Columbia". */
+  prose?: string;
+  bbox: number[];
+  datasets: { blocks: string; jobs: string };
 }
 
 export interface HubPack {
   county: string;
+  /** State FIPS; a county FIPS also starts with it. */
+  state?: string;
   name: string;
   key: string;
   sha256: string;
@@ -57,7 +72,8 @@ export interface HubManifest {
   schema: string;
   hubVersion: string;
   builtUtc: string;
-  coverage: { name: string; stateFips: string; key: string; sha256: string; bytes: number; bbox: number[] };
+  /** Every published state together: `name` lists them in prose, `states` one by one. */
+  coverage: { name: string; states?: HubState[]; key: string; sha256: string; bytes: number; bbox: number[] };
   licences: { key: string; sha256: string; bytes: number };
   datasets: Record<string, HubDataset>;
   fields: Record<string, HubField>;
@@ -70,7 +86,7 @@ export interface HubCoverage {
   schema: string;
   name: string;
   bbox: number[];
-  /** Rings of [lon, lat]. */
+  /** Rings of [lon, lat]: the outline of all published states, borders between them dissolved. */
   rings: number[][][];
 }
 

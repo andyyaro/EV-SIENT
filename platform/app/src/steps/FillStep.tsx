@@ -13,6 +13,7 @@ import type { CheckRow, FieldFill } from '../engine/protocol';
 import type { HubField } from '../hub/types';
 import { fieldLabel, listWords, plural } from '../lib/fieldText';
 import { publicNeeds, stepGate, useSession } from '../state/store';
+import { FillCoverage } from './FillCoverage';
 
 const PAGE = 50;
 
@@ -186,7 +187,7 @@ export function FillStep() {
           <h2 id="fill-look-title" className="section__title">{hub ? 'Looked Up' : 'Look Up Public Data'}</h2>
           {!hub && (
             <p className="section__intro">
-              This downloads public data files from this site for the counties around your sites. Your file and your sites are not sent anywhere: the requests name counties, not sites, and every value is worked out on this device. The hub covers Virginia so far.
+              This downloads public data files from this site for the counties around your sites. Your file and your sites are not sent anywhere: the requests name counties, not sites, and every value is worked out on this device. The hub covers a few states so far, and the lookup says which; a site outside them gets a reason, never a zero.
             </p>
           )}
           {hub && (
@@ -194,6 +195,7 @@ export function FillStep() {
               Public data release {hub.manifest.hubVersion} · {plural(hub.counties.length, 'county file', 'county files')} · {megabytes(hub.bytes)}
             </p>
           )}
+          {hub && !looking && <FillCoverage hub={hub} />}
           <div role="status" aria-live="polite" className="st-inline-status">
             {looking && (
               <Progress
