@@ -21,12 +21,14 @@ import { RunStep } from './steps/RunStep';
 // the first screen does not wait for them. They are fetched in the background as soon as a run exists.
 const loadResults = () => import('./results/ResultsView').then((m) => ({ default: m.ResultsView }));
 const loadReport = () => import('./report/ReportView').then((m) => ({ default: m.ReportView }));
+const loadExplore = () => import('./explore/ExploreView').then((m) => ({ default: m.ExploreView }));
 const ResultsView = lazy(loadResults);
+const ExploreView = lazy(loadExplore);
 const ReportView = lazy(loadReport);
 
 const SCREENS: Record<StepKey, React.ComponentType> = {
   start: StartStep, upload: UploadStep, map: MapStep, check: CheckStep, fill: FillStep, run: RunStep,
-  results: ResultsView, report: ReportView,
+  results: ResultsView, report: ReportView, explore: ExploreView,
 };
 
 function StepNav() {

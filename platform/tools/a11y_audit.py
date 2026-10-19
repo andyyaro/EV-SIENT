@@ -2,7 +2,7 @@
 whole flow by keyboard.
 
   axe       Every screen (Start, Upload with the sample loaded, Map Columns, Check, Run, Results with
-            a site selected and two sites in Compare, Report) in light and dark, and in the
+            a site selected and two sites in Compare, Explore, Report) in light and dark, and in the
             increased-contrast themes (prefers-contrast: more), in Chromium and WebKit, against
             WCAG 2.2 A and AA and axe's best practices. With --map, Results again after Show Map,
             checking the OpenFreeMap and OpenStreetMap credit is on the map.
@@ -30,7 +30,7 @@ from playwright.sync_api import sync_playwright
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import planner_flow as pf  # noqa: E402
 
-AXE_SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "report"]
+AXE_SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "explore", "report"]
 APPEARANCES = [("light", "no-preference"), ("dark", "no-preference"), ("light", "more"), ("dark", "more")]
 TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]
 

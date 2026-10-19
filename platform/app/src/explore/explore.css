@@ -1,0 +1,154 @@
+/* Explore (explore/*). Content layer only: grouped backgrounds and cards like Results, every color a
+   token. Tone is carried by an icon and a light tint, never by a coloured edge or stripe. Charts are
+   plain elements with their numbers written beside them. */
+
+.xp [hidden] { display: none !important; }
+.xp { --xp-tint: color-mix(in srgb, var(--accent) 6%, var(--grouped-background-secondary)); }
+
+/* ---------- What these patterns are ---------- */
+.xp-claims {
+  display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; border-radius: var(--radius-group);
+  background: var(--grouped-background-secondary);
+}
+.xp-claims__icon { flex: none; color: var(--system-orange); margin-top: 1px; }
+.xp-claims__title { font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+.xp-claims__text { margin-top: 4px; max-width: 72ch; font: 400 17px/24px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); text-wrap: pretty; }
+.xp .st-banner { margin-top: 12px; }
+
+/* ---------- Checked and passed ---------- */
+.xp-metrics { display: grid; gap: 12px; margin: 12px 0 0; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+.xp-metric {
+  display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; margin: 0;
+  padding: 16px 18px; border-radius: var(--radius-group); background: var(--grouped-background-secondary);
+}
+.xp-metric dd { margin: 0; }
+.xp-metric__of { font-size: 17px; font-weight: 400; letter-spacing: -0.43px; color: var(--label-secondary); }
+.xp-bar-note { max-width: 80ch; margin-top: 12px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); text-wrap: pretty; }
+
+.xp-unconfirmed { margin-top: 16px; align-items: center; flex-wrap: wrap; }
+.xp-unconfirmed__icon { color: var(--accent); }
+.xp-unconfirmed__body { flex: 1 1 260px; min-width: 0; }
+
+.xp-busy { margin-top: 12px; max-width: 640px; }
+
+/* ---------- None passed ---------- */
+.xp-zero__card {
+  display: flex; gap: 16px; align-items: flex-start; padding: 22px 22px 24px; border-radius: var(--radius-group);
+  background: var(--xp-tint);
+}
+.xp-zero__icon { flex: none; color: var(--accent); margin-top: 0; }
+.xp-zero__lede { margin-top: 6px; max-width: 68ch; font: 400 17px/24px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); text-wrap: pretty; }
+.xp-zero__list { margin-top: 12px; padding-inline-start: 1.2em; max-width: 72ch; font: 400 15px/22px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.xp-zero__list li + li { margin-top: 6px; }
+.xp-zero__next { margin-top: 12px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+@media (max-width: 480px) {
+  .xp-zero__card { flex-direction: column; gap: 8px; padding: 18px 16px 20px; }
+}
+
+/* ---------- Pattern cards ---------- */
+.xp-list { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); align-items: start; }
+.xp-card { min-width: 0; padding: 18px 20px 16px; border-radius: var(--radius-group); background: var(--grouped-background-secondary); }
+.xp-card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.xp-tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 0 9px; border-radius: var(--radius-capsule); border: 1px solid var(--label-tertiary);
+  font: 600 12px/20px var(--font-sans); letter-spacing: 0; color: var(--label-primary); white-space: nowrap;
+}
+.xp-tag--few { border-color: var(--label-secondary); background: var(--fill-quaternary); }
+.xp-tag--few .hig-icon { color: var(--system-orange); }
+.xp-card__title { font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); overflow-wrap: anywhere; }
+.xp-card__sentence { margin-top: 4px; font: 600 17px/24px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); text-wrap: pretty; overflow-wrap: anywhere; }
+
+.xp-facts { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 14px 0 0; }
+.xp-fact { display: flex; flex-direction: column-reverse; gap: 0; }
+.xp-fact dt { font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.xp-fact dd { margin: 0; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+
+.xp-card__note { margin-top: 10px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+.xp-card__note-icon { vertical-align: -3px; color: var(--system-green); }
+.xp-card__footer { margin-top: 12px; padding-top: 10px; box-shadow: inset 0 0.5px var(--separator); }
+
+/* The strength chart: a 0 to 1 track, the 95% interval as a band, the effect as a dot. */
+.xp-strength { margin: 14px 0 0; }
+.xp-strength__plot { display: block; }
+.xp-strength__track {
+  position: relative; display: block; height: 14px; margin: 0 7px; border-radius: 7px;
+  background: var(--fill-tertiary); box-shadow: inset 0 0 0 1px var(--label-quaternary);
+}
+.xp-strength__tick { position: absolute; top: 2px; bottom: 2px; width: 1px; background: var(--label-tertiary); }
+.xp-strength__band { position: absolute; top: 2px; bottom: 2px; border-radius: 5px; background: color-mix(in srgb, var(--accent) 35%, transparent); }
+.xp-strength__dot {
+  position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 2px var(--grouped-background-secondary);
+}
+.xp-strength__scale { display: flex; justify-content: space-between; margin-top: 3px; font: 400 12px/16px var(--font-sans); color: var(--label-secondary); font-variant-numeric: tabular-nums; }
+.xp-strength__caption { display: block; margin-top: 4px; }
+.xp-strength__value { font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-primary); }
+.xp-strength__interval { color: var(--label-secondary); }
+
+/* A within-group check that reverses or erases the pattern, kept inside its card. */
+.xp-inside { margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-platter); background: var(--fill-quaternary); }
+.xp-inside__title { font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.xp-inside__text { margin-top: 4px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.xp-inside .footnote { margin-top: 6px; }
+
+.xp-sites { margin-top: 10px; }
+.xp-sites__toggle { margin-inline-start: -10px; }
+.xp-sites .footnote { margin-top: 4px; }
+.xp-sites__list { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.xp-sites__list li { padding: 1px 8px; border-radius: var(--radius-xs); background: var(--fill-tertiary); font: 400 13px/20px var(--font-mono, var(--font-sans)); color: var(--label-primary); overflow-wrap: anywhere; }
+
+/* ---------- Disclosures ---------- */
+.xp-section { margin-top: 24px; }
+.xp-disclosure { margin-top: 16px; border-radius: var(--radius-group); background: var(--grouped-background-secondary); overflow: hidden; --hig-list-row-bg: transparent; }
+.xp-section > .xp-disclosure { margin-top: 0; }
+.xp-disclosure__heading { margin: 0; font: inherit; }
+.xp-disclosure .hig-disclosure__trigger { width: 100%; min-height: 52px; border-radius: var(--radius-group); text-align: start; }
+.xp-disclosure .hig-disclosure__label { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.xp-disclosure__count { font-weight: 400; color: var(--label-secondary); }
+.xp-disclosure__content { padding: 0 var(--margin-compact) 18px; }
+.xp-disclosure__content > .section__intro { margin: 0 0 12px; }
+
+.xp-how { display: grid; gap: 10px; margin: 0; max-width: 80ch; }
+.xp-how dt { font: 600 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.xp-how dd { margin: 2px 0 0; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
+
+.xp-not { margin: 0; padding-inline-start: 1.2em; max-width: 80ch; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.xp-not li + li { margin-top: 6px; }
+.xp-not__col { font-weight: 600; }
+
+/* ---------- Each column on its own ---------- */
+.xp-cols { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); align-items: start; }
+.xp-col { min-width: 0; padding: 16px 18px; border-radius: var(--radius-glass); background: var(--fill-quaternary); }
+.xp-col__title { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); overflow-wrap: anywhere; }
+.xp-col__meta { margin-top: 2px; font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); overflow-wrap: anywhere; }
+.xp-col__name { font-family: var(--font-mono, var(--font-sans)); }
+.xp-col__count { margin-top: 8px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.xp-col__text { margin-top: 8px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); overflow-wrap: anywhere; }
+.xp-col .footnote { margin-top: 8px; }
+
+.xp-spread { display: block; margin-top: 12px; }
+.xp-spread__track { position: relative; display: block; height: 12px; border-radius: 6px; background: var(--fill-tertiary); box-shadow: inset 0 0 0 1px var(--label-quaternary); }
+.xp-spread__box { position: absolute; top: 0; bottom: 0; min-width: 2px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 40%, transparent); }
+.xp-spread__median { position: absolute; top: -3px; bottom: -3px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--label-primary); }
+.xp-spread__ends { display: flex; justify-content: space-between; margin-top: 3px; font: 400 12px/16px var(--font-sans); color: var(--label-secondary); }
+
+.xp-bars { display: grid; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+.xp-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; }
+.xp-bar__label { font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-primary); overflow-wrap: anywhere; }
+.xp-bar__value { font: 600 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-primary); text-align: end; }
+.xp-bar__hint { font-weight: 400; color: var(--label-secondary); }
+.xp-bar__track { grid-column: 1 / -1; display: block; height: 6px; border-radius: 3px; background: var(--fill-tertiary); overflow: hidden; }
+.xp-bar__fill { display: block; height: 100%; min-width: 2px; background: var(--accent); }
+.xp-bars__more { margin-top: 6px; }
+
+/* ---------- Foot ---------- */
+.xp-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 24px; }
+.xp-foot .footnote { flex: 1 1 280px; max-width: 72ch; }
+
+/* Windows High Contrast and other forced colors: fills vanish, so the marks become system colors. */
+@media (forced-colors: active) {
+  .xp-strength__track, .xp-spread__track, .xp-bar__track { border: 1px solid CanvasText; }
+  .xp-strength__dot, .xp-spread__median, .xp-bar__fill { background: CanvasText; forced-color-adjust: none; }
+  .xp-strength__band, .xp-spread__box { background: Highlight; forced-color-adjust: none; }
+  .xp-tag { border-color: CanvasText; }
+}

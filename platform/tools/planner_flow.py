@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "compare", "report"]
+SCREENS = ["start", "upload", "map", "check", "fill", "run", "results", "compare", "explore", "report"]
 
 # The live engine boots Pyodide and runs the model; give it room on a cold, slow machine.
 BOOT_TIMEOUT_MS = 240_000
@@ -131,8 +131,12 @@ def show(page, screen: str) -> None:
     else:
         go(page, screen)
         _wait_h1(page, {"start": "Rank Your", "upload": "Upload", "map": "Map Columns", "check": "Check", "fill": "Public Data",
-                        "run": "Run", "results": "Results", "report": "Report"}[screen])
+                        "run": "Run", "results": "Results", "explore": "Explore", "report": "Report"}[screen])
         page.evaluate("() => window.scrollTo(0, 0)")
     if screen == "report":
         page.locator(".rp-sheet .rp").first.wait_for(timeout=60_000)
+    if screen == "explore":
+        # The first visit runs the scan; the stand-in engine shows its explanation instead.
+        page.locator('[data-explore-state="done"], [data-explore-state="unavailable"], [data-explore-state="error"]').first.wait_for(
+            timeout=BOOT_TIMEOUT_MS)
     settle(page)

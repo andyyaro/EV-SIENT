@@ -12,7 +12,7 @@ import { carriedFrom, type CarriedColumns, type CarriedFilter } from '../results
 import type { ProjectSnapshot } from '../report/projectTypes';
 import { restoreColumns, type ColumnDictionary } from '../columns/dictionary';
 
-export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'report';
+export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'report' | 'explore';
 
 export const STEPS: { key: StepKey; label: string; icon: string; short: string }[] = [
   { key: 'start', label: 'Start', short: 'Start', icon: 'house' },
@@ -22,6 +22,7 @@ export const STEPS: { key: StepKey; label: string; icon: string; short: string }
   { key: 'fill', label: 'Public Data', short: 'Data', icon: 'globe' },
   { key: 'run', label: 'Run', short: 'Run', icon: 'play.fill' },
   { key: 'results', label: 'Results', short: 'Results', icon: 'chart.bar' },
+  { key: 'explore', label: 'Explore', short: 'Explore', icon: 'magnifyingglass' },
   { key: 'report', label: 'Report', short: 'Report', icon: 'doc' },
 ];
 
@@ -241,6 +242,9 @@ export function stepGate(s: Session, step: StepKey): { open: boolean; reason?: s
     case 'results':
     case 'report':
       return s.run ? { open: true } : { open: false, reason: 'Run the model first.' };
+    case 'explore':
+      // Explore reads the uploaded file's own columns; it needs no run and no confirmed directions.
+      return s.proposal ? { open: true } : { open: false, reason: 'Upload a file first.' };
   }
 }
 
