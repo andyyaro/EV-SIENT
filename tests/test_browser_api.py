@@ -221,6 +221,47 @@ def test_provenance_keeps_site_ids_as_text(tmp_path, no_reference_inputs):
     assert record["field_provenance"] is not None, "the site's own provenance, found by its text ID"
 
 
+def _with_ids(tmp_path: Path, ids: list[str]) -> Path:
+    """The synthetic cohort with its site IDs replaced, in order, by `ids`."""
+    with open(SYNTHETIC, newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    at = rows[0].index("site_id")
+    assert len(ids) == len(rows) - 1
+    for row, site_id in zip(rows[1:], ids):
+        row[at] = site_id
+    path = tmp_path / "ids.csv"
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerows(rows)
+    return path
+
+
+@pytest.mark.parametrize("ids", [
+    ["007", "0042", "12", "1.50", "0.0", "08", "905", "906", "907", "908", "909", "910"],
+    ["007", "0042", "12", "A-1", "b_2", "3.0", "905", "906", "907", "908", "909", "910"],
+], ids=["all-digits", "mixed"])
+def test_site_ids_keep_their_exact_text(tmp_path, ids, no_reference_inputs):
+    """The IDs a run returns are the planner's, character for character. sites.csv read with
+    default types turned an all-digit column into numbers: "007" came back as "7.0", and
+    explain and provenance then found no such site."""
+    session = _session(_with_ids(tmp_path, ids))
+    assert [r["siteId"] for r in session["check"]["rows"]] == ids
+    run = session["run"]
+    assert sorted(s["siteId"] for s in run["sites"]) == sorted(ids)
+    assert {h["siteId"] for h in run["horizons"]} == set(ids)
+    for site_id in ("007", "0042", "12"):
+        explained = _strict(api.explain(site_id))
+        assert explained["siteId"] == site_id
+        assert explained["rank"] == next(s["rank"] for s in run["sites"] if s["siteId"] == site_id)
+        record = _strict(api.provenance(json.dumps(
+            {"siteId": site_id, "horizonYear": 2026, "scenario": "baseline", "column": "ports_active"})))
+        assert record["row_key"]["site_id"] == site_id
+        assert record["field_provenance"] is not None
+    with pytest.raises(ValueError, match="No site 7 "):
+        api.explain("7")
+    sites_csv = _cohort_file("sites.csv").splitlines()
+    assert [r["site_id"] for r in csv.DictReader(sites_csv)] == ids
+
+
 # ---------- public data fills (DEC-025) ----------
 
 SOURCE = {

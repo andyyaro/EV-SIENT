@@ -105,6 +105,10 @@ def _slug(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", str(value).strip().lower()).strip("-") or "cohort"
 
 
+#: The cohort columns read as text, never as numbers.
+_TEXT_COLUMNS = {"site_id": str, "site_name": str, "site_type": str}
+
+
 class CohortError(ValueError):
     """A cohort directory cannot be run, said in a sentence its owner can act on."""
 
@@ -129,7 +133,9 @@ def _load_cohort(cohort_dir: Path):
         declared = json.loads((cohort_dir / "cohort.json").read_text())
     defaults: list[str] = []
 
-    sites = pd.read_csv(sites_path)
+    # Identifiers and names are text: read with default types, an all-digit ID column becomes
+    # numbers, so "007" comes back as 7.0 and matches nothing the planner holds.
+    sites = pd.read_csv(sites_path, dtype=_TEXT_COLUMNS)
     if "site_id" not in sites.columns:
         raise CohortError("sites.csv has no site_id column, and sites that cannot be told apart "
                           "cannot be scored.")
@@ -161,7 +167,7 @@ def _load_cohort(cohort_dir: Path):
 
     risk_path = cohort_dir / "electrical_risk.csv"
     if risk_path.is_file():
-        risk = pd.read_csv(risk_path)[["site_id", "electrical_risk_level"]]
+        risk = pd.read_csv(risk_path, dtype={"site_id": str})[["site_id", "electrical_risk_level"]]
         risk["site_id"] = risk["site_id"].astype(str).str.strip()
         risk["electrical_risk_level"] = risk["electrical_risk_level"].astype(str).str.strip().str.lower()
         wrong = sorted(set(risk["electrical_risk_level"]) - set(RISK_LEVELS))
@@ -185,7 +191,7 @@ def _load_cohort(cohort_dir: Path):
         "base_load_mean_kw": float("nan"), "base_load_peak_kw": float("nan")})
     meta_path = cohort_dir / "site_meta.csv"
     if meta_path.is_file():
-        meta = pd.read_csv(meta_path)
+        meta = pd.read_csv(meta_path, dtype={"site_id": str})
         lacking = [c for c in META_COLUMNS if c not in meta.columns]
         if lacking:
             raise CohortError(f"site_meta.csv lacks {lacking}; see docs/INPUT_SCHEMA.md.")
