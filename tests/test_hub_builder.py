@@ -2,7 +2,9 @@
 
 No network: every upstream file is written here in its publisher's layout (ACS table-based
 summary file, P.L. 94-171 zip, LODES WAC csv.gz, SVI csv, AFDC csv, TIGER shapefile zip) for an
-invented one-degree square "state" with two counties, and the build runs with --offline.
+invented one-degree square "state" with two counties, and the build runs with --offline. A
+second invented state, the square east of it, shares its eastern border (DEC-028): the
+multi-state tests publish both and check the border between them.
 The Parquet parts need pyarrow, which only the hub builder installs; they skip without it.
 """
 
@@ -24,8 +26,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "platform" / "hub")
 
 from hubbuild import estimates, geo, readers, sources  # noqa: E402
 
-# The invented state: lon -78..-77, lat 37..38, FIPS 51 (the builder's state), two counties.
+# The invented state: lon -78..-77, lat 37..38, FIPS 51, two counties.
 RING = [(-78.0, 37.0), (-78.0, 38.0), (-77.0, 38.0), (-77.0, 37.0), (-78.0, 37.0)]
+# Its neighbour: lon -77..-76, FIPS 24, one county. Drawn in the same direction, so the shared
+# border at lon -77 runs once each way, as TIGER/Line draws it.
+RING_EAST = [(-77.0, 37.0), (-77.0, 38.0), (-76.0, 38.0), (-76.0, 37.0), (-77.0, 37.0)]
 
 # Blocks: (GEOID15, lat, lon, housing units, occupied)
 BLOCKS = [
@@ -35,9 +40,14 @@ BLOCKS = [
     ("510010001001003", 37.80, -77.80, 0, 0),      # no homes, no jobs: dropped
     ("510030002001000", 37.20, -77.20, 100, 80),
 ]
-ACS = {"510010001001": (90, 12), "510030002001": (100, 30)}
+BLOCKS_EAST = [
+    ("240010001001000", 37.50, -76.99, 20, 10),    # about half a mile east of the shared border
+    ("240010001001001", 37.50, -76.50, 40, 30),
+]
+ACS = {"510010001001": (90, 12), "510030002001": (100, 30), "240010001001": (80, 9)}
 JOBS = {"510010001001000": 15, "510010001001002": 400, "510030002001000": 7}
-SVI = {"51001000100": 0.75, "51003000200": -999}   # -999: SVI gives no rank
+JOBS_EAST = {"240010001001000": 250}
+SVI = {"51001000100": 0.75, "51003000200": -999, "24001000100": 0.4}   # -999: SVI gives no rank
 STATIONS = [  # (id, lat, lon, l2, dcfc, state)
     (101, 37.505, -77.505, 4, 0, "VA"),
     (102, 37.20, -77.21, "", 2, "VA"),                  # blank L2 count means none
@@ -67,22 +77,37 @@ def _seg2_line(logrecno: str, total: int, occupied: int) -> str:
     return "|".join(p)
 
 
-def write_pl(path: Path, hu_override: int | None = None) -> None:
-    geo_lines = [_geo_line("050", "0000001", "51001", "First County", 0, 37.5, -77.5),
-                 _geo_line("050", "0000002", "51003", "Second County", 0, 37.2, -77.2)]
+def _pl_zip(path: Path, st: str, counties: list[tuple[str, str]], blocks: list, hu_override: int | None = None) -> None:
+    geo_lines = [_geo_line("050", f"{i + 1:07d}", fips, name, 0, 37.5, -77.5) for i, (fips, name) in enumerate(counties)]
     seg = []
-    for i, (g, lat, lon, hu, occ) in enumerate(BLOCKS):
+    for i, (g, lat, lon, hu, occ) in enumerate(blocks):
         rec = f"{100 + i:07d}"
         geo_lines.append(_geo_line("750", rec, g, f"Block {g[-4:]}", hu, lat, lon))
         seg.append(_seg2_line(rec, hu if hu_override is None or i else hu_override, occ))
     with zipfile.ZipFile(path, "w") as z:
-        z.writestr("vageo2020.pl", "\n".join(geo_lines) + "\n")
-        z.writestr("va000022020.pl", "\n".join(seg) + "\n")
+        z.writestr(f"{st}geo2020.pl", "\n".join(geo_lines) + "\n")
+        z.writestr(f"{st}000022020.pl", "\n".join(seg) + "\n")
+
+
+def write_pl(path: Path, hu_override: int | None = None) -> None:
+    _pl_zip(path, "va", [("51001", "First County"), ("51003", "Second County")], BLOCKS, hu_override)
+
+
+def write_pl_east(path: Path) -> None:
+    _pl_zip(path, "md", [("24001", "East County")], BLOCKS_EAST)
+
+
+def _lodes(path: Path, jobs: dict[str, int]) -> None:
+    text = "w_geocode,C000,CA01\n" + "".join(f"{g},{j},0\n" for g, j in jobs.items())
+    path.write_bytes(gzip.compress(text.encode()))
 
 
 def write_lodes(path: Path) -> None:
-    text = "w_geocode,C000,CA01\n" + "".join(f"{g},{j},0\n" for g, j in JOBS.items())
-    path.write_bytes(gzip.compress(text.encode()))
+    _lodes(path, JOBS)
+
+
+def write_lodes_east(path: Path) -> None:
+    _lodes(path, JOBS_EAST)
 
 
 def write_svi(path: Path) -> None:
@@ -105,20 +130,26 @@ def write_afdc(path: Path, rows=STATIONS, status: str = "E") -> None:
 
 
 def write_tiger(path: Path) -> None:
-    """A one-polygon TIGER-style state shapefile: .shp, .shx and .dbf with STATEFP."""
-    pts = np.array(RING, dtype="<f8")
-    content = struct.pack("<i", 5) + struct.pack("<4d", -78, 37, -77, 38) + struct.pack("<ii", 1, len(pts))
-    content += struct.pack("<i", 0) + pts.tobytes()
-    record = struct.pack(">ii", 1, len(content) // 2) + content
+    """A TIGER-style state shapefile with both invented states: .shp, .shx and .dbf with STATEFP."""
+    states = [("51", RING), ("24", RING_EAST)]
+    records, index, offset = b"", b"", 100
+    for n, (_, ring) in enumerate(states, start=1):
+        pts = np.array(ring, dtype="<f8")
+        lo, hi = pts.min(axis=0), pts.max(axis=0)
+        content = struct.pack("<i", 5) + struct.pack("<4d", lo[0], lo[1], hi[0], hi[1]) + struct.pack("<ii", 1, len(pts))
+        content += struct.pack("<i", 0) + pts.tobytes()
+        index += struct.pack(">ii", offset // 2, len(content) // 2)
+        records += struct.pack(">ii", n, len(content) // 2) + content
+        offset += 8 + len(content)
     header = lambda length: (struct.pack(">i", 9994) + b"\0" * 20 + struct.pack(">i", length // 2)
-                             + struct.pack("<ii", 1000, 5) + struct.pack("<4d", -78, 37, -77, 38) + b"\0" * 32)
-    shp = header(100 + len(record)) + record
-    shx = header(108) + struct.pack(">ii", 50, len(content) // 2)
+                             + struct.pack("<ii", 1000, 5) + struct.pack("<4d", -78, 37, -76, 38) + b"\0" * 32)
+    shp = header(100 + len(records)) + records
+    shx = header(100 + len(index)) + index
     fields = [("STATEFP", 2), ("NAME", 20)]
-    dbf = struct.pack("<BBBBIHH", 3, 126, 1, 1, 1, 32 + 32 * len(fields) + 1, 1 + 22) + b"\0" * 20
+    dbf = struct.pack("<BBBBIHH", 3, 126, 1, 1, len(states), 32 + 32 * len(fields) + 1, 1 + 22) + b"\0" * 20
     for name, length in fields:
         dbf += name.encode().ljust(11, b"\0") + b"C" + b"\0" * 4 + bytes([length]) + b"\0" * 15
-    dbf += b"\x0d" + b" " + b"51" + b"Invented".ljust(20) + b"\x1a"
+    dbf += b"\x0d" + b"".join(b" " + fp.encode() + f"Invented {fp}".encode().ljust(20) for fp, _ in states) + b"\x1a"
     with zipfile.ZipFile(path, "w") as z:
         z.writestr("tl_2026_us_state.shp", shp)
         z.writestr("tl_2026_us_state.shx", shx)
@@ -128,18 +159,27 @@ def write_tiger(path: Path) -> None:
 SPECS = {
     "acs-b11001": ("acsdt5y2024-b11001.dat", write_acs, "2020-2024"),
     "pl94171-va": ("va2020.pl.zip", write_pl, "2020"),
+    "pl94171-md": ("md2020.pl.zip", write_pl_east, "2020"),
     "lodes-wac-va": ("va_wac_S000_JT00_2023.csv.gz", write_lodes, "LODES 8.4, 2023 jobs"),
+    "lodes-wac-md": ("md_wac_S000_JT00_2023.csv.gz", write_lodes_east, "LODES 8.4, 2023 jobs"),
     "svi-2022": ("SVI_2022_US.csv", write_svi, "2022 (ACS 2018-2022)"),
     "tiger-state-2026": ("tl_2026_us_state.zip", write_tiger, "2026"),
     "afdc-stations": ("alt_fuel_stations.csv", write_afdc, "snapshot"),
 }
+STATE_ROWS = {"51": {"fips": "51", "stusab": "VA", "name": "Invented West", "blocks": "pl94171-va", "jobs": "lodes-wac-va"},
+              "24": {"fips": "24", "stusab": "MD", "name": "Invented East", "blocks": "pl94171-md", "jobs": "lodes-wac-md"}}
 
 
-def make_inputs(root: Path) -> tuple[Path, Path]:
-    """The cache and a registry pinning every file but the AFDC snapshot, as sources.json does."""
+def make_inputs(root: Path, states: tuple[str, ...] = ("51",)) -> tuple[Path, Path]:
+    """The cache and a registry pinning every file but the AFDC snapshot, as sources.json does,
+    publishing the given invented states (the western one alone unless asked)."""
     cache = root / "cache"
     datasets = {}
+    wanted = {d for s in states for d in (STATE_ROWS[s]["blocks"], STATE_ROWS[s]["jobs"])}
     for name, (file, writer, vintage) in SPECS.items():
+        family = name.rsplit("-", 1)[0] if name.startswith(("pl94171-", "lodes-wac-")) else name
+        if family != name and name not in wanted:
+            continue
         path = cache / name / file
         path.parent.mkdir(parents=True, exist_ok=True)
         writer(path)
@@ -150,13 +190,17 @@ def make_inputs(root: Path) -> tuple[Path, Path]:
                  "lastModified": None}))
         datasets[name] = {
             "title": f"Synthetic {name}", "publisher": "Test publisher", "vintage": vintage,
-            "published": None if not pinned else "2025-01-01", "licence": f"Public domain ({name}).",
+            "published": None if not pinned else "2025-01-01", "licence": f"Public domain ({family}).",
             "url": f"https://example.invalid/{file}" + ("?fuel_type=ELEC" if not pinned else ""),
             "file": file, "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if pinned else None,
             **({"url_needs_api_key": True} if not pinned else {}),
         }
+    groups = {g: {"title": f"Synthetic {g} (one file per state)", "landing": "https://example.invalid/",
+                  "url": "https://example.invalid/", "members": [STATE_ROWS[s][role] for s in states]}
+              for g, role in (("pl94171", "blocks"), ("lodes-wac", "jobs"))}
     registry = root / "sources.json"
-    registry.write_text(json.dumps({"schema": "evsient-hub-sources/1", "datasets": datasets}))
+    registry.write_text(json.dumps({"schema": "evsient-hub-sources/1", "states": [STATE_ROWS[s] for s in states],
+                                    "groups": groups, "datasets": datasets}))
     return cache, registry
 
 
@@ -350,3 +394,105 @@ def test_row_count_gate_stops_a_release_that_shrinks(built, monkeypatch):
     manifest = build.build(registry, cache, out, "2026-10-18.3", offline=True, allow_row_change=True,
                            log=lambda *_: None)
     assert manifest["gates"][1]["passed"]
+
+
+def test_a_later_release_keeps_the_published_items_of_unchanged_tables(built, monkeypatch):
+    build, registry, cache, out, first = built
+    from datetime import datetime as real
+
+    class Later(real):
+        @classmethod
+        def now(cls, tz=None):
+            return real(2026, 10, 19, 9, 0, 0, tzinfo=tz)
+
+    monkeypatch.setattr(build, "datetime", Later)
+    item = next((out / "hub" / "stac" / "svi").glob("svi-*.json"))
+    before = item.read_bytes()
+    second = build.build(registry, cache, out, "2026-10-19.1", offline=True, log=lambda *_: None)
+    assert second["builtUtc"].startswith("2026-10-19T09:00:00") and item.read_bytes() == before
+
+
+# ---------- several states (DEC-028) ----------
+
+def test_a_shared_border_is_dissolved_from_the_coverage():
+    rings = geo.dissolve_rings([np.array(RING), np.array(RING_EAST)])
+    assert len(rings) == 1
+    edges = {(tuple(a), tuple(b)) for a, b in zip(rings[0][:-1].tolist(), rings[0][1:].tolist())}
+    assert ((-77.0, 38.0), (-77.0, 37.0)) not in edges and ((-77.0, 37.0), (-77.0, 38.0)) not in edges
+    assert tuple(rings[0][0]) == tuple(rings[0][-1])
+    # A point just west of the old line is now measured to the outer edge, 0.5 degrees north or south.
+    d = geo.distance_to_rings_mi(np.array([-77.01]), np.array([37.5]), rings)[0]
+    assert d == pytest.approx(0.5 * geo.MI_PER_DEGREE, rel=1e-6)
+    assert geo.point_in_rings(-77.01, 37.5, rings) and geo.point_in_rings(-76.99, 37.5, rings)
+    # States that share no edge come back as they were.
+    apart = [np.array(RING), np.array(RING_EAST) + [5.0, 0.0]]
+    assert [r.tolist() for r in geo.dissolve_rings(apart)] == [r.tolist() for r in apart]
+
+
+@pytest.fixture
+def built_two(tmp_path):
+    pytest.importorskip("pyarrow")
+    from hubbuild import build
+
+    out = tmp_path / "out"
+    cache, registry = make_inputs(tmp_path / "one", ("51",))
+    build.build(registry, cache, out, "2026-10-18.1", offline=True, log=lambda *_: None)
+    cache, registry = make_inputs(tmp_path / "two", ("51", "24"))
+    manifest = build.build(registry, cache, out, "2026-10-18.2", offline=True, log=lambda *_: None)
+    return out, manifest
+
+
+def test_two_states_publish_one_coverage_and_packs_for_each(built_two):
+    import pyarrow.parquet as pq
+
+    out, manifest = built_two
+    hub = out / "hub"
+    assert [g["passed"] for g in manifest["gates"]] == [True] * 5
+    assert [p["county"] for p in manifest["packs"]] == ["24001", "51001", "51003"]
+    assert [s["stusab"] for s in manifest["coverage"]["states"]] == ["VA", "MD"]
+    coverage = json.loads((hub / manifest["coverage"]["key"]).read_text())
+    assert coverage["name"] == "Invented West and Invented East"
+    assert len(coverage["rings"]) == 1 and coverage["bbox"] == [-78.0, 37.0, -76.0, 38.0]
+    # A new state is reported as new, not read as a jump in the rows of the one already published.
+    rows_gate = manifest["gates"][1]
+    assert "MD 3 (new)" in rows_gate["detail"] and "VA 7 against 7 (0.0%)" in rows_gate["detail"]
+    # A station near the shared border is carried by both states' packs; the app counts it once.
+    east = pq.read_table(hub / manifest["packs"][0]["key"]).to_pylist()
+    west = pq.read_table(hub / manifest["packs"][2]["key"]).to_pylist()
+    assert "afdc:103" in {r["id"] for r in east} and "afdc:103" in {r["id"] for r in west}
+    assert {r["id"] for r in east if r["kind"] == "block"} == {"240010001001000", "240010001001001"}
+    assert manifest["notes"]["24"]["blocks"]["packHouseholdsTotal"] == 80
+    # Jobs name one source made of a file per state, whose parts agree on vintage and licence.
+    jobs = manifest["fields"]["nearby_jobs_1mi"]
+    assert jobs["primary"] == "lodes-wac" and jobs["vintage"] == "LODES 8.4, 2023 jobs"
+    assert manifest["datasets"]["lodes-wac"]["members"] == ["lodes-wac-va", "lodes-wac-md"]
+    assert manifest["datasets"]["pl94171"]["members"] == ["pl94171-va", "pl94171-md"]
+
+
+def test_the_west_state_packs_do_not_change_when_a_neighbour_is_added(built_two):
+    import pyarrow.parquet as pq
+
+    out, two = built_two
+    hub = out / "hub"
+    one = json.loads((hub / "releases" / "2026-10-18.1" / "manifest.json").read_text())
+    for p in one["packs"]:
+        q = next(x for x in two["packs"] if x["county"] == p["county"])
+        assert pq.read_table(hub / p["key"]).equals(pq.read_table(hub / q["key"]))
+        assert (p["rows"], p["bbox"]) == (q["rows"], q["bbox"])
+
+
+def test_the_registry_refuses_a_state_outside_its_group(tmp_path):
+    pytest.importorskip("pyarrow")
+    from hubbuild import build
+
+    cache, registry = make_inputs(tmp_path, ("51", "24"))
+    reg = json.loads(registry.read_text())
+    reg["groups"]["lodes-wac"]["members"] = ["lodes-wac-va"]
+    registry.write_text(json.dumps(reg))
+    with pytest.raises(sources.SourceError, match="not a member of the lodes-wac group"):
+        build.build(registry, cache, tmp_path / "out", "2026-10-18.1", offline=True, log=lambda *_: None)
+    reg["groups"]["lodes-wac"]["members"] = ["lodes-wac-va", "lodes-wac-md"]
+    reg["datasets"]["lodes-wac-md"]["vintage"] = "LODES 8.4, 2022 jobs"
+    registry.write_text(json.dumps(reg))
+    with pytest.raises(sources.SourceError, match="differ in vintage"):
+        build.build(registry, cache, tmp_path / "out", "2026-10-18.1", offline=True, log=lambda *_: None)

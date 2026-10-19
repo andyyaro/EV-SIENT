@@ -110,3 +110,43 @@ def nearest_index(lons: np.ndarray, lats: np.ndarray, to_lons: np.ndarray, to_la
         dy = to_lats[None, :] - la
         out[i:i + chunk] = np.argmin(dx * dx + dy * dy, axis=1)
     return out
+
+
+def dissolve_rings(rings: list[np.ndarray]) -> list[np.ndarray]:
+    """The outline of several states' polygons together, as closed rings of (lon, lat).
+
+    TIGER/Line draws a border two states share with the very same vertices, once in each
+    direction, so an edge that appears both ways lies inside the union and is removed; every
+    other edge is on its outline. The edges left are chained back into closed rings. The even-odd
+    rule and the distance to the nearest edge read the same set of edges however they are
+    grouped, so a vertex where two outlines touch needs no special care. Rings that share no edge
+    come back unchanged.
+    """
+    edges = [(a, b) for ring in rings for a, b in zip(map(tuple, ring[:-1].tolist()), map(tuple, ring[1:].tolist()))
+             if a != b]
+    present = set(edges)
+    outline = [e for e in edges if (e[1], e[0]) not in present]
+    if len(outline) == len(edges):
+        return [r.copy() for r in rings]
+    leaving: dict[tuple, list[int]] = {}
+    for i, (a, _) in enumerate(outline):
+        leaving.setdefault(a, []).append(i)
+    used = np.zeros(len(outline), dtype=bool)
+    out = []
+    for first in range(len(outline)):
+        if used[first]:
+            continue
+        start = outline[first][0]
+        points = [start]
+        i = first
+        while True:
+            used[i] = True
+            end = outline[i][1]
+            points.append(end)
+            if end == start:
+                break
+            i = next((j for j in leaving.get(end, []) if not used[j]), -1)
+            if i < 0:
+                raise ValueError(f"the state outlines do not close at {end}")
+        out.append(np.array(points))
+    return out

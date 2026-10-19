@@ -124,27 +124,50 @@ def check_gates(manifest: dict, staged: Staged, previous: dict | None,
             wrong.append(f"{pack['key']}: {got}")
     gates.append(Gate("schema", not wrong, "every pack has the pack schema" if not wrong else "; ".join(wrong)))
 
-    rows_now = sum(p["rows"]["block"] + p["rows"]["station"] for p in manifest["packs"])
+    # Row counts by state (a county FIPS starts with its state's), so a state added to the hub is
+    # reported as new rather than read as a jump in the states already published.
+    def rows_by_state(packs: list[dict]) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for p in packs:
+            out[p["county"][:2]] = out.get(p["county"][:2], 0) + p["rows"]["block"] + p["rows"]["station"]
+        return out
+
+    now = rows_by_state(manifest["packs"])
+    names = {s["fips"]: s["stusab"] for s in manifest["coverage"]["states"]}
     if previous:
-        rows_then = sum(p["rows"]["block"] + p["rows"]["station"] for p in previous.get("packs", []))
-        change = abs(rows_now - rows_then) / rows_then if rows_then else 1.0
-        ok = change <= ROW_CHANGE_LIMIT or allow_row_change
-        detail = (f"{rows_now} pack rows against {rows_then} in {previous['hubVersion']} "
-                  f"({change:.1%} change; limit {ROW_CHANGE_LIMIT:.0%}"
-                  f"{', allowed by --allow-row-change' if allow_row_change and change > ROW_CHANGE_LIMIT else ''})")
+        then = rows_by_state(previous.get("packs", []))
+        parts, moved = [], []
+        for st in sorted(set(now) | set(then), key=lambda s: names.get(s, s)):
+            a, b = now.get(st, 0), then.get(st)
+            if b is None:
+                parts.append(f"{names.get(st, st)} {a} (new)")
+                continue
+            change = abs(a - b) / b if b else 1.0
+            parts.append(f"{names.get(st, st)} {a} against {b} ({change:.1%})")
+            if change > ROW_CHANGE_LIMIT:
+                moved.append(names.get(st, st))
+        ok = not moved or allow_row_change
+        detail = (f"pack rows by state against {previous['hubVersion']}: {'; '.join(parts)} "
+                  f"(limit {ROW_CHANGE_LIMIT:.0%} for a state already published"
+                  f"{'; ' + ', '.join(moved) + ' over it' if moved else ''}"
+                  f"{', allowed by --allow-row-change' if allow_row_change and moved else ''})")
     else:
-        ok, detail = True, f"{rows_now} pack rows; no previous release to compare"
+        ok, detail = True, (f"{sum(now.values())} pack rows "
+                            f"({'; '.join(f'{names.get(s, s)} {n}' for s, n in sorted(now.items()))}); "
+                            f"no previous release to compare")
     gates.append(Gate("row-count change", ok, detail))
 
-    lo0, la0, lo1, la1 = manifest["coverage"]["bbox"]
+    # Each pack lies in a published state and inside that state's box plus the station margin.
     pad = manifest["coverage"]["stationMarginMiles"] / 69.0 * 1.5
-    outside = [p["county"] for p in manifest["packs"]
-               if not (lo0 - pad <= p["bbox"][0] and p["bbox"][2] <= lo1 + pad
-                       and la0 - pad <= p["bbox"][1] and p["bbox"][3] <= la1 + pad)]
-    counties_ok = all(p["county"].startswith(manifest["coverage"]["stateFips"]) for p in manifest["packs"])
-    gates.append(Gate("coordinates", not outside and counties_ok,
-                      "every pack's rows are WGS84 longitude and latitude inside the coverage box"
-                      if not outside and counties_ok else f"packs outside the coverage box: {outside}"))
+    boxes = {s["fips"]: s["bbox"] for s in manifest["coverage"]["states"]}
+    foreign = [p["county"] for p in manifest["packs"] if p["county"][:2] not in boxes]
+    outside = [p["county"] for p in manifest["packs"] if p["county"][:2] in boxes
+               and not (boxes[p["county"][:2]][0] - pad <= p["bbox"][0] and p["bbox"][2] <= boxes[p["county"][:2]][2] + pad
+                        and boxes[p["county"][:2]][1] - pad <= p["bbox"][1] and p["bbox"][3] <= boxes[p["county"][:2]][3] + pad)]
+    gates.append(Gate("coordinates", not outside and not foreign,
+                      "every pack is in a published state, with WGS84 longitude and latitude inside that state's box"
+                      if not outside and not foreign else
+                      f"packs outside their state's box: {outside}; packs in no published state: {foreign}"))
 
     licences = staged.files[manifest["licences"]["key"]].read_text()
     unlicensed = [k for k, d in manifest["datasets"].items() if not d["licence"] or d["licence"] not in licences]
