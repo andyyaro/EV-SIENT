@@ -1,0 +1,401 @@
+{
+ "assessedCommit": "5f87c8e",
+ "note": "Measured on the build before the fixes in this report, with the same scripts.",
+ "placeholders": {
+  "check": {
+   "light": [
+    {
+     "placeholder": "For example, City of Example",
+     "ratio": 1.71,
+     "color": "#bdbdbf",
+     "background": "#f4f4f5"
+    },
+    {
+     "placeholder": "For example, Facilities Department",
+     "ratio": 1.71,
+     "color": "#bdbdbf",
+     "background": "#f4f4f5"
+    }
+   ],
+   "dark": [
+    {
+     "placeholder": "For example, City of Example",
+     "ratio": 2.41,
+     "color": "#65656b",
+     "background": "#2c2c30"
+    },
+    {
+     "placeholder": "For example, Facilities Department",
+     "ratio": 2.41,
+     "color": "#65656b",
+     "background": "#2c2c30"
+    }
+   ],
+   "light-hc": [
+    {
+     "placeholder": "For example, City of Example",
+     "ratio": 1.71,
+     "color": "#bdbdbf",
+     "background": "#f4f4f5"
+    },
+    {
+     "placeholder": "For example, Facilities Department",
+     "ratio": 1.71,
+     "color": "#bdbdbf",
+     "background": "#f4f4f5"
+    }
+   ],
+   "dark-hc": [
+    {
+     "placeholder": "For example, City of Example",
+     "ratio": 2.41,
+     "color": "#65656b",
+     "background": "#2c2c30"
+    },
+    {
+     "placeholder": "For example, Facilities Department",
+     "ratio": 2.41,
+     "color": "#65656b",
+     "background": "#2c2c30"
+    }
+   ]
+  },
+  "map": {
+   "light": [
+    {
+     "placeholder": "Facility ID",
+     "ratio": 1.7,
+     "color": "#b9b9bc",
+     "background": "#efeff0"
+    }
+   ],
+   "dark": [
+    {
+     "placeholder": "Facility ID",
+     "ratio": 2.36,
+     "color": "#69696f",
+     "background": "#323236"
+    }
+   ],
+   "light-hc": [
+    {
+     "placeholder": "Facility ID",
+     "ratio": 1.7,
+     "color": "#b9b9bc",
+     "background": "#efeff0"
+    }
+   ],
+   "dark-hc": [
+    {
+     "placeholder": "Facility ID",
+     "ratio": 2.36,
+     "color": "#69696f",
+     "background": "#323236"
+    }
+   ]
+  }
+ },
+ "fieldEdges": {
+  "check": {
+   "light": [
+    [
+     "field group",
+     1.45
+    ],
+    [
+     "text field",
+     1.32
+    ],
+    [
+     "text field",
+     1.65
+    ],
+    [
+     "text field",
+     1.82
+    ]
+   ],
+   "dark": [
+    [
+     "field group",
+     1.76
+    ],
+    [
+     "text field",
+     1.45
+    ],
+    [
+     "text field",
+     2.29
+    ],
+    [
+     "text field",
+     2.76
+    ]
+   ],
+   "light-hc": [
+    [
+     "field group",
+     1.45
+    ],
+    [
+     "text field",
+     1.32
+    ],
+    [
+     "text field",
+     1.65
+    ],
+    [
+     "text field",
+     1.82
+    ]
+   ],
+   "dark-hc": [
+    [
+     "field group",
+     1.76
+    ],
+    [
+     "text field",
+     1.45
+    ],
+    [
+     "text field",
+     2.29
+    ],
+    [
+     "text field",
+     2.76
+    ]
+   ]
+  },
+  "map": {
+   "light": [
+    [
+     "menu",
+     1.16
+    ],
+    [
+     "text field",
+     1.16
+    ]
+   ],
+   "dark": [
+    [
+     "menu",
+     1.31
+    ],
+    [
+     "text field",
+     1.31
+    ]
+   ],
+   "light-hc": [
+    [
+     "menu",
+     1.16
+    ],
+    [
+     "text field",
+     1.16
+    ]
+   ],
+   "dark-hc": [
+    [
+     "menu",
+     1.31
+    ],
+    [
+     "text field",
+     1.31
+    ]
+   ]
+  },
+  "results": {
+   "light": [],
+   "dark": [],
+   "light-hc": [],
+   "dark-hc": []
+  },
+  "upload": {
+   "light": [
+    [
+     "menu",
+     1.16
+    ]
+   ],
+   "dark": [
+    [
+     "menu",
+     1.31
+    ]
+   ],
+   "light-hc": [
+    [
+     "menu",
+     1.16
+    ]
+   ],
+   "dark-hc": [
+    [
+     "menu",
+     1.31
+    ]
+   ]
+  },
+  "yourindex": {
+   "light": [
+    [
+     "menu",
+     1.16
+    ],
+    [
+     "text field",
+     1.16
+    ]
+   ],
+   "dark": [
+    [
+     "menu",
+     1.31
+    ],
+    [
+     "text field",
+     1.31
+    ]
+   ],
+   "light-hc": [
+    [
+     "menu",
+     1.16
+    ],
+    [
+     "text field",
+     1.16
+    ]
+   ],
+   "dark-hc": [
+    [
+     "menu",
+     1.31
+    ],
+    [
+     "text field",
+     1.31
+    ]
+   ]
+  }
+ },
+ "focusUnderStepBar390": {
+  "start": [],
+  "upload": [],
+  "map": [],
+  "check": [],
+  "fill": [],
+  "run": [],
+  "results": [
+   {
+    "el": "input \"on\"",
+    "visiblePoints": 0,
+    "inView": 9,
+    "by": [
+     "select.hig-focus \"1. Start2. Upload3. Map Columns4. Check5. Public Data6. Run7\""
+    ]
+   }
+  ],
+  "explore": [],
+  "yourindex": [],
+  "report": []
+ },
+ "uploadPreviewTextSpacing": {
+  "textSpacing1440": [
+   {
+    "el": "td \"Example City Central Library\"",
+    "how": "own box",
+    "overflow": "280x45 in 260x45",
+    "ellipsis": true
+   },
+   {
+    "el": "td \"Example City North Branch Library\"",
+    "how": "own box",
+    "overflow": "333x45 in 260x45",
+    "ellipsis": true
+   },
+   {
+    "el": "td \"Example City Recreation Center\"",
+    "how": "own box",
+    "overflow": "306x45 in 260x45",
+    "ellipsis": true
+   },
+   {
+    "el": "td \"Example City Transit Garage\"",
+    "how": "own box",
+    "overflow": "277x45 in 260x45",
+    "ellipsis": true
+   }
+  ],
+  "textSpacing390": [
+   {
+    "el": "td \"Example City Central Library\"",
+    "how": "own box",
+    "overflow": "280x45 in 260x45",
+    "ellipsis": true
+   },
+   {
+    "el": "td \"Example City North Branch Library\"",
+    "how": "own box",
+    "overflow": "333x45 in 260x45",
+    "ellipsis": true
+   },
+   {
+    "el": "td \"Example City Recreation Center\"",
+    "how": "own box",
+    "overflow": "306x45 in 260x45",
+    "ellipsis": true
+   },
+   {
+    "el": "td \"Example City Transit Garage\"",
+    "how": "own box",
+    "overflow": "277x45 in 260x45",
+    "ellipsis": true
+   }
+  ]
+ },
+ "mapCreditFocusRingByStyle": {
+  "build": "efcf54d",
+  "screen": "results-map",
+  "weakRings": {
+   "light": [],
+   "dark": [
+    [
+     "a \"OpenFreeMap\"",
+     1.29
+    ],
+    [
+     "a \"OpenStreetMap\"",
+     1.29
+    ],
+    [
+     "a \"\u00a9 OpenMapTiles\"",
+     1.29
+    ]
+   ],
+   "light-hc": [],
+   "dark-hc": [
+    [
+     "a \"OpenFreeMap\"",
+     1.38
+    ],
+    [
+     "a \"OpenStreetMap\"",
+     1.38
+    ],
+    [
+     "a \"\u00a9 OpenMapTiles\"",
+     1.38
+    ]
+   ]
+  }
+ }
+}

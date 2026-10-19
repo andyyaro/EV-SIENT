@@ -1,0 +1,366 @@
+{
+ "assessedCommit": "5f87c8e",
+ "date": "2026-10-18",
+ "Download .html: Report": {
+  "file": "example-city-ev-sient-report-2026-10-19.html",
+  "lang": "en",
+  "title": "EV Charging Site Readiness Report: Example City",
+  "h1": 1,
+  "h2": 12,
+  "h3": 10,
+  "tables": 19,
+  "captions": 19,
+  "thScopeCol": 91,
+  "thScopeRow": 213,
+  "imgs": 0,
+  "svgs": 157,
+  "scripts": 0
+ },
+ "Download .pdf: Accessible PDF": {
+  "file": "example-city-ev-sient-report-2026-10-19.pdf",
+  "pdfinfo": {
+   "Title": "EV Charging Site Readiness Report: Example City",
+   "Creator": "Typst 0.14.2",
+   "Tagged": "yes",
+   "UserProperties": "no",
+   "Pages": "16",
+   "PDF version": "1.7"
+  },
+  "lang": "en",
+  "markInfo": {
+   "Marked": "True",
+   "Suspects": "False"
+  },
+  "displayDocTitle": "None",
+  "outlines": true,
+  "pdfuaPart": null,
+  "structTypes": {
+   "TD": 871,
+   "TR": 256,
+   "Span": 125,
+   "LI": 105,
+   "Lbl": 105,
+   "LBody": 105,
+   "TH": 91,
+   "P": 49,
+   "Div": 36,
+   "H4": 30,
+   "L": 23,
+   "Caption": 20,
+   "Table": 19,
+   "THead": 19,
+   "TBody": 19,
+   "H2": 12,
+   "TOCI": 10,
+   "Reference": 10,
+   "Link": 10,
+   "H3": 10,
+   "TOC": 2,
+   "Document": 1,
+   "H1": 1,
+   "Figure": 1
+  },
+  "figures": [
+   {
+    "alt": "Sites plotted by their recorded latitude and longitude, numbered by rank, with no basemap. 6 sites plotted. The table gives each position.",
+    "actual": null
+   }
+  ],
+  "headingsInOrder": [
+   {
+    "page": 1,
+    "type": "H1",
+    "text": "Example City"
+   },
+   {
+    "page": 1,
+    "type": "H2",
+    "text": "Decision Summary"
+   },
+   {
+    "page": 1,
+    "type": "H2",
+    "text": "Contents"
+   },
+   {
+    "page": 1,
+    "type": "H2",
+    "text": "1. Summary"
+   },
+   {
+    "page": 1,
+    "type": "H2",
+    "text": "2. Ranked Sites"
+   },
+   {
+    "page": 2,
+    "type": "H2",
+    "text": "3. Site Locations"
+   },
+   {
+    "page": 2,
+    "type": "H2",
+    "text": "4. Site Profiles"
+   },
+   {
+    "page": 3,
+    "type": "H3",
+    "text": "1. Example City Central Library"
+   },
+   {
+    "page": 3,
+    "type": "H4",
+    "text": "Port Plan"
+   },
+   {
+    "page": 4,
+    "type": "H4",
+    "text": "Operations and Cost"
+   },
+   {
+    "page": 4,
+    "type": "H4",
+    "text": "Data Confidence: Low (7.0 of 100)"
+   },
+   {
+    "page": 4,
+    "type": "H4",
+    "text": "Capacity Evidence"
+   },
+   {
+    "page": 4,
+    "type": "H4",
+    "text": "Your Columns (Not in the Score)"
+   },
+   {
+    "page": 5,
+    "type": "H3",
+    "text": "2. Example City North Branch Library"
+   },
+   {
+    "page": 5,
+    "type": "H4",
+    "text": "Port Plan"
+   },
+   {
+    "page": 6,
+    "type": "H4",
+    "text": "Operations and Cost"
+   },
+   {
+    "page": 6,
+    "type": "H4",
+    "text": "Data Confidence: Low (7.0 of 100)"
+   },
+   {
+    "page": 6,
+    "type": "H4",
+    "text": "Capacity Evidence"
+   },
+   {
+    "page": 6,
+    "type": "H4",
+    "text": "Your Columns (Not in the Score)"
+   },
+   {
+    "page": 7,
+    "type": "H3",
+    "text": "3. Example City Transit Garage"
+   },
+   {
+    "page": 7,
+    "type": "H4",
+    "text": "Port Plan"
+   },
+   {
+    "page": 8,
+    "type": "H4",
+    "text": "Operations and Cost"
+   },
+   {
+    "page": 8,
+    "type": "H4",
+    "text": "Data Confidence: Low (5.5 of 100)"
+   },
+   {
+    "page": 8,
+    "type": "H4",
+    "text": "Capacity Evidence"
+   },
+   {
+    "page": 8,
+    "type": "H4",
+    "text": "Your Columns (Not in the Score)"
+   },
+   {
+    "page": 9,
+    "type": "H3",
+    "text": "4. Example City Hall Annex"
+   },
+   {
+    "page": 9,
+    "type": "H4",
+    "text": "Port Plan"
+   },
+   {
+    "page": 10,
+    "type": "H4",
+    "text": "Operations and Cost"
+   },
+   {
+    "page": 10,
+    "type": "H4",
+    "text": "Data Confidence: Low (5.5 of 100)"
+   },
+   {
+    "page": 10,
+    "type": "H4",
+    "text": "Capacity Evidence"
+   },
+   {
+    "page": 10,
+    "type": "H4",
+    "text": "Your Columns (Not in the Score)"
+   },
+   {
+    "page": 11,
+    "type": "H3",
+    "text": "5. Example City Recreation Center"
+   },
+   {
+    "page": 11,
+    "type": "H4",
+    "text": "Port Plan"
+   },
+   {
+    "page": 12,
+    "type": "H4",
+    "text": "Operations and Cost"
+   },
+   {
+    "page": 12,
+    "type": "H4",
+    "text": "Data Confidence: Low (5.5 of 100)"
+   },
+   {
+    "page": 12,
+    "type": "H4",
+    "text": "Capacity Evidence"
+   },
+   {
+    "page": 12,
+    "type": "H4",
+    "text": "Your Columns (Not in the Score)"
+   },
+   {
+    "page": 13,
+    "type": "H3",
+    "text": "6. Example City Riverside Park"
+   },
+   {
+    "page": 13,
+    "type": "H4",
+    "text": "Port Plan"
+   },
+   {
+    "page": 14,
+    "type": "H4",
+    "text": "Operations and Cost"
+   },
+   {
+    "page": 14,
+    "type": "H4",
+    "text": "Data Confidence: Low (7.0 of 100)"
+   },
+   {
+    "page": 14,
+    "type": "H4",
+    "text": "Capacity Evidence"
+   },
+   {
+    "page": 14,
+    "type": "H4",
+    "text": "Your Columns (Not in the Score)"
+   },
+   {
+    "page": 14,
+    "type": "H2",
+    "text": "5. Methods"
+   },
+   {
+    "page": 14,
+    "type": "H2",
+    "text": "6. Assumptions"
+   },
+   {
+    "page": 14,
+    "type": "H3",
+    "text": "Defaults the Engine Applied"
+   },
+   {
+    "page": 14,
+    "type": "H3",
+    "text": "Notes"
+   },
+   {
+    "page": 15,
+    "type": "H3",
+    "text": "Costs Withheld for Missing Inputs"
+   },
+   {
+    "page": 15,
+    "type": "H3",
+    "text": "Constants a Reviewer May Challenge"
+   },
+   {
+    "page": 15,
+    "type": "H2",
+    "text": "7. Data Sources"
+   },
+   {
+    "page": 15,
+    "type": "H2",
+    "text": "8. Limitations"
+   },
+   {
+    "page": 16,
+    "type": "H2",
+    "text": "9. Reproducibility"
+   },
+   {
+    "page": 16,
+    "type": "H2",
+    "text": "10. Your Columns (Not in the Score)"
+   }
+  ],
+  "thScope": {
+   "Column": 91
+  },
+  "chars": 27809,
+  "charsWithoutMcid": 2242
+ },
+ "Download .docx: Word Document": {
+  "file": "example-city-ev-sient-report-2026-10-19.docx",
+  "title": "EV Charging Site Readiness Report: Example City",
+  "languages": [
+   "en-US"
+  ],
+  "headingStyles": {
+   "Heading1": 1,
+   "Heading2": 12,
+   "Heading3": 10,
+   "Heading4": 30
+  },
+  "tables": 19,
+  "tablesWithHeaderRow": 19,
+  "tableCaptionsOrDescriptions": 0,
+  "images": 1,
+  "imagesWithAlt": 1,
+  "imagesDecorative": 0,
+  "imageAlt": [
+   "Sites plotted by their recorded latitude and longitude, numbered by rank, with no basemap. 6 sites plotted. The table gi"
+  ],
+  "emptyParagraphsUsedForSpace": 0,
+  "hyperlinks": 10
+ }
+}

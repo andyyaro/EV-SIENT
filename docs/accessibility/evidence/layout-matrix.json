@@ -1,0 +1,59 @@
+{
+ "assessedCommit": "5f87c8e",
+ "date": "2026-10-18",
+ "checks": 440,
+ "failing": [],
+ "perBrowser": [
+  {
+   "browser": "chromium",
+   "timing": {
+    "boot_s": 3.4,
+    "run_s": 0.8
+   },
+   "offsite": [],
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "timing": {
+    "boot_s": 2.9,
+    "run_s": 0.8
+   },
+   "offsite": [],
+   "errors": []
+  }
+ ],
+ "browsers": [
+  "chromium",
+  "webkit"
+ ],
+ "sizes": [
+  "1024x768",
+  "1366x1024",
+  "1440x900",
+  "1920x1080",
+  "320x640",
+  "360x780",
+  "390x844",
+  "430x932",
+  "768x1024",
+  "820x1180",
+  "844x390"
+ ],
+ "themes": [
+  "dark",
+  "light"
+ ],
+ "screens": [
+  "check",
+  "compare",
+  "explore",
+  "fill",
+  "map",
+  "report",
+  "results",
+  "run",
+  "start",
+  "upload"
+ ]
+}
