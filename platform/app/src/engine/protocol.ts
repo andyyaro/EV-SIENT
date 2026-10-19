@@ -74,6 +74,8 @@ export interface Proposal {
   conversions: Record<string, number>;
   matchScore: Record<string, number>;
   status: Record<string, MatchStatus>;
+  /** canonical field -> cells the field cannot read (scored as absent); only fields with some */
+  unreadable?: Record<string, number>;
   absent: string[];
   findings: Finding[];
   refused: boolean;

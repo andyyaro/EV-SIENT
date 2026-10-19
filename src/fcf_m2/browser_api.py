@@ -250,12 +250,19 @@ def _proposal_payload(proposal: intake.Proposal, frame: pd.DataFrame,
                       chosen: set[str] | None = None) -> dict:
     scores = _match_scores(frame, proposal.mapping)
     chosen = chosen or set()
+    # A column whose name fits but whose cells this field cannot read (a "High" where yes or no
+    # is expected) is not a match to wave through: most of it would be scored as absent.
+    unreadable = {
+        canonical: len(intake._cells_by_kind(frame, canonical, column)["unreadable"])
+        for canonical, column in proposal.mapping.items()
+        if intake._reader_for(canonical) is not None}
     status = {}
     for f in FIELDS:
         name = f["name"]
         if name not in proposal.mapping:
             status[name] = "unmatched"
-        elif name in chosen or (scores.get(name, 0) >= 1.0 and name not in proposal.conversions):
+        elif name in chosen or (scores.get(name, 0) >= 1.0 and name not in proposal.conversions
+                                and not unreadable.get(name)):
             status[name] = "matched"
         else:
             status[name] = "check"
@@ -266,6 +273,7 @@ def _proposal_payload(proposal: intake.Proposal, frame: pd.DataFrame,
         "conversions": dict(proposal.conversions),
         "matchScore": scores,
         "status": status,
+        "unreadable": {k: v for k, v in unreadable.items() if v},
         "absent": list(proposal.absent),
         "findings": [vars(f) for f in proposal.findings],
         "refused": proposal.refused,

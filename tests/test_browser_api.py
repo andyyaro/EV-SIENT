@@ -127,6 +127,20 @@ def test_remap_refuses_duplicate_columns_and_unknown_fields():
     assert all(again["status"][k] == "matched" for k in mapping)
 
 
+def test_a_name_match_whose_values_do_not_fit_asks_to_be_checked():
+    """flood_risk is a name the stormwater field knows, but "High" is not yes or no."""
+    columns = ["site_id", "site_name", "lat", "lon", "flood_risk"]
+    rows = [["A1", "One", "38.8", "-77.3", "High"], ["A2", "Two", "38.9", "-77.2", "Low"],
+            ["A3", "Three", "38.7", "-77.1", "no"]]
+    proposal = _strict(api.propose(json.dumps({"fileName": "f.csv", "columns": columns, "rows": rows})))
+    assert proposal["mapping"]["stormwater_risk"] == "flood_risk"
+    assert proposal["status"]["stormwater_risk"] == "check"
+    assert proposal["unreadable"] == {"stormwater_risk": 2}
+    assert proposal["status"]["site_id"] == "matched"
+    chosen = _strict(api.remap(json.dumps({"mapping": proposal["mapping"], "chosen": ["stormwater_risk"]})))
+    assert chosen["status"]["stormwater_risk"] == "matched", "the planner's own choice stands"
+
+
 def test_check_statuses_on_example_city():
     check = _session(EXAMPLE, run=False)["check"]
     statuses = {r["siteId"]: r["status"] for r in check["rows"]}

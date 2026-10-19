@@ -25,6 +25,7 @@ function FieldRow({ field, announce }: { field: FieldInfo; announce: (message: s
   const finding = conversion != null
     ? p.findings.find((f) => f.field === field.name && /multiplied by/.test(f.explain))
     : undefined;
+  const unreadable = p.unreadable?.[field.name] ?? 0;
   const usedBy = useMemo(() => {
     const out = new Map<string, string>();
     for (const [f, c] of Object.entries(p.mapping)) if (c) out.set(c, f);
@@ -105,6 +106,8 @@ function FieldRow({ field, announce }: { field: FieldInfo; announce: (message: s
           <p>
             {finding
               ? <><strong>Unit conversion.</strong> {plainText(s.fields, finding.explain)} Is that right for this column?</>
+              : unreadable > 0
+              ? <><strong>Values do not fit.</strong> {`${unreadable} of ${p.rowCount} cells in this column cannot be read as ${field.kind === 'flag' ? 'yes or no' : 'a number'}, so those sites would be scored as missing for ${field.label}. Confirm to use it anyway, or choose Not in This File.`}</>
               : <><strong>Close match.</strong> The column name is close to {field.label} but not the same. Is this the right column?</>}
           </p>
           <button type="button" className="hig-button hig-button--ios hig-button--medium hig-button--bordered-prominent hig-focus" onClick={confirm}>
