@@ -165,7 +165,9 @@
   box-shadow: inset 0 -0.5px var(--separator); }
 .st-table td { padding: 11px 14px; vertical-align: top; box-shadow: inset 0 -0.5px var(--separator); }
 .st-table tbody tr:last-child td { box-shadow: none; }
-.st-table--preview td { white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+/* A long value wraps within 260px rather than being cut off with an ellipsis, so every cell can be
+   read in full, also with wider letter and word spacing (WCAG 1.4.12). The table scrolls sideways. */
+.st-table--preview td { max-width: 260px; overflow-wrap: break-word; font-variant-numeric: tabular-nums; }
 .st-table--rows { min-width: 640px; }
 .st-table--rows td p + p { margin-top: 4px; }
 .st-table--rows tr:focus { outline: none; }
