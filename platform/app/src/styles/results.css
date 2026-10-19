@@ -178,6 +178,11 @@
 .rs-marker:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
 .rs-map .maplibregl-ctrl-group button { width: 36px; height: 36px; }
 .rs-map .maplibregl-ctrl-attrib { font: 400 11px/16px var(--font-sans); }
+/* MapLibre's credit sits on a half-white box over the tiles, so in dark themes the focus ring on its
+   links (and its text) could not be told from the map (WCAG 1.4.11). A solid box in the card's own
+   colour gives both the theme's contrast. */
+.rs-map .maplibregl-ctrl.maplibregl-ctrl-attrib { background: var(--grouped-background-secondary); color: var(--label-secondary); }
+.rs-map .maplibregl-ctrl-attrib a { color: var(--label-primary); }
 
 /* ---------- Site detail ---------- */
 .sd { max-width: 760px; }
