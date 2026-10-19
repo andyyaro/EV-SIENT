@@ -598,8 +598,14 @@ def _summary_rank(col: _Col, ids: list[str], options: dict) -> dict:
     unit = unit if isinstance(unit, str) else None
     fmt = (lambda x: f"{x:.0f}") if col.role == "year" else (lambda x: _num(x, unit))
     out["sentence"] = (f"Median {fmt(med)}; the middle half of sites lie between {fmt(q1)} and "
-                       f"{fmt(q3)}. {int(out_mask.sum())} sites are unusually high or low.")
+                       f"{fmt(q3)}. {_odd_sites(int(out_mask.sum()))}")
     return out
+
+
+def _odd_sites(n: int) -> str:
+    if n == 0:
+        return "No site is unusually high or low."
+    return "1 site is unusually high or low." if n == 1 else f"{n} sites are unusually high or low."
 
 
 def _as_of_year(options: dict) -> int | None:

@@ -507,3 +507,16 @@ def test_bridge_functions_match_the_native_ones():
     assert _by_name(confirmed)["flood_risk"]["evsient:direction"] == "lower_better"
     reread = json.loads(dc.bridge_reread(json.dumps(table), json.dumps({"entries": confirmed})))
     assert reread["entries"] == json.loads(json.dumps(dc.reread(frame, confirmed)))
+
+
+def test_a_column_nothing_settles_takes_the_mark_every_other_column_agrees_on():
+    frame = pd.DataFrame({"lat": ["44.981", "45.012"], "visitors": ["1,400", "950"],
+                          "dwell_hr": ["1.25", "0.5"]}, dtype=object)
+    by = _by_name(dc.propose(frame))
+    lat = by["lat"]
+    assert lat["decimalChar"] == "." and lat["evsient:reading"]["read"] == 2
+    assert any(e["match"] == "file decimal mark '.'" for e in lat["evsient:evidence"])
+    assert dc.parse(frame, list(by.values()))[("lat", "value")].tolist() == [44.981, 45.012]
+    # Columns that disagree settle nothing for the rest of the file.
+    frame["rain_mm"] = ["12,5", "3,75"]
+    assert _by_name(dc.propose(frame))["lat"]["decimalChar"] is None

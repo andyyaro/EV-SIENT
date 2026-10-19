@@ -31,7 +31,8 @@ it was read and how many cells it covers. So:
   visitor marks it missing.
 * The decimal mark is decided per column from cells that can only be read one way. A cell such as
   "1.234", which could be read two ways, is counted as ambiguous and is read only when the rest of
-  its column settles the question. Otherwise it is not read at all.
+  its column settles the question, or, when nothing in its column does, when every column that
+  settles it in the file agrees (the evidence says so). Otherwise it is not read at all.
 * A value outside a declared range, or a decimal on a whole-number scale, is reported and kept as
   written. Nothing is clamped or rounded.
 
@@ -580,6 +581,7 @@ class _Profile:
     missing: list[str]
     numeric_share: float = 0.0
     mark: str | None = None
+    mark_from_file: bool = False
     marks_seen: tuple = ()
     ambiguous_example: str | None = None
     ambiguous_cells: int = 0
@@ -605,7 +607,7 @@ def _by_count(counts: Counter) -> list[str]:
     return sorted(counts, key=lambda v: (-counts[v], v))
 
 
-def _profile(cells: list[str]) -> _Profile:
+def _profile(cells: list[str], file_mark: str | None = None) -> _Profile:
     filled = [c for c in cells if not _is_marker(c)]
     counts = Counter(filled)
     missing = _by_count(Counter(c for c in cells if _is_marker(c)))
@@ -622,6 +624,8 @@ def _profile(cells: list[str]) -> _Profile:
             p.proof_example = p.proof_example or raw
     p.marks_seen = tuple(sorted(proofs))
     p.mark = p.marks_seen[0] if len(p.marks_seen) == 1 else None
+    if not p.marks_seen and file_mark:
+        p.mark, p.mark_from_file = file_mark, True
     p.proof_cells = sum(proofs.values())
     numeric = 0
     symbols = Counter()
@@ -941,15 +945,33 @@ def _categories_for(role: str, p: _Profile, decided: list | None) -> list | None
     return None
 
 
-def _propose_column(name: str, cells: list[str], model_field: str | None) -> dict:
+def _file_mark(columns: list[list[str]]) -> str | None:
+    """The decimal mark every column that proves one agrees on, or None when they differ."""
+    marks = set()
+    for cells in columns:
+        for raw in set(c for c in cells if not _is_marker(c)):
+            n = _number(raw, None)
+            if n.form != "bad" and n.form != "ambiguous" and n.proves:
+                marks.add(n.proves)
+    return next(iter(marks)) if len(marks) == 1 else None
+
+
+def _propose_column(name: str, cells: list[str], model_field: str | None,
+                    file_mark: str | None = None) -> dict:
     head = _read_header(name)
-    p = _profile(cells)
+    p = _profile(cells, file_mark)
     d = _decide(head, p)
     role = d.role
     ev = d.evidence
 
     if role in _NUMERIC and p.filled:
-        if p.mark:
+        if p.mark_from_file and p.ambiguous_cells:
+            ev.append(_evidence("values", f"file decimal mark '{p.mark}'",
+                                f"nothing in this column settles the decimal mark, so cells such as "
+                                f"'{p.ambiguous_example}' are read with '{p.mark}', the mark every "
+                                f"other column in the file that shows one uses; choose the other "
+                                f"mark if this column differs"))
+        elif p.mark and not p.mark_from_file:
             ev.append(_evidence("values", f"decimal mark '{p.mark}'",
                                 f"{_plural(p.proof_cells, 'cell')} can only be read with '{p.mark}' "
                                 f"as the decimal mark (for example '{p.proof_example}'), so this "
@@ -1300,7 +1322,9 @@ def propose(frame: pd.DataFrame, model_mapping: dict[str, str] | None = None) ->
     """
     columns = _column_names(frame)
     by_column = _model_fields(model_mapping, columns)
-    return [_propose_column(name, _cells(frame, i), by_column.get(name))
+    cells = [_cells(frame, i) for i in range(len(columns))]
+    mark = _file_mark(cells)
+    return [_propose_column(name, cells[i], by_column.get(name), mark)
             for i, name in enumerate(columns)]
 
 
