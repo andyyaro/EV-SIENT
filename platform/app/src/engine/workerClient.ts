@@ -8,7 +8,8 @@
 
 import * as Comlink from 'comlink';
 import type {
-  AcceptDetails, AcceptResult, BootProgress, CheckResult, EngineClient, Explanation, FieldCatalog,
+  AcceptDetails, AcceptResult, ColumnChange, ColumnsResult, ExploreOptions, ExploreResult,
+  IndexResult, IndexSpec, IndexValidation, BootProgress, CheckResult, EngineClient, Explanation, FieldCatalog,
   FillRequest, OutputFiles, Proposal, ProvenanceRecord, ProvenanceRequest, RemapRequest, RunOptions,
   RunResult, RuntimeInfo, TableInput,
 } from './protocol';
@@ -29,6 +30,8 @@ export function createWorkerEngine(): EngineClient {
   let lastTable: string | null = null;
   let lastRemap: string | null = null;
   let lastFill: string | null = null;
+  /** The confirmed column dictionary as a Table Schema, replayed into a fresh worker. */
+  let lastColumns: string | null = null;
   const pending = new Set<(e: unknown) => void>();
 
   function spawn(): Live {
@@ -69,6 +72,7 @@ export function createWorkerEngine(): EngineClient {
       await guarded(() => current.api.propose(lastTable!));
       if (lastRemap) await guarded(() => current.api.remap(lastRemap!));
       if (lastFill) await guarded(() => current.api.fill(lastFill!));
+      if (lastColumns) await guarded(() => current.api.columns_restore(lastColumns!));
       current.hasSession = true;
     }
     return current;
@@ -87,14 +91,14 @@ export function createWorkerEngine(): EngineClient {
     },
     fields: () => call<FieldCatalog>(false, (api) => api.fields()),
     async reset() {
-      lastTable = lastRemap = lastFill = null;
+      lastTable = lastRemap = lastFill = lastColumns = null;
       await call(false, (api) => api.reset());
     },
     async propose(table: TableInput) {
       const json = JSON.stringify(table);
       const result = await call<Proposal>(false, (api) => api.propose(json));
       lastTable = json;
-      lastRemap = lastFill = null;
+      lastRemap = lastFill = lastColumns = null;
       if (live) live.hasSession = true;
       return result;
     },
@@ -117,6 +121,25 @@ export function createWorkerEngine(): EngineClient {
     explain: (siteId: string) => call<Explanation>(true, (api) => api.explain(siteId)),
     provenance: (cell: ProvenanceRequest) => call<ProvenanceRecord>(true, (api) => api.provenance(JSON.stringify(cell))),
     outputFiles: () => call<OutputFiles>(true, (api) => api.output_files()),
+    async columns() {
+      const result = await call<ColumnsResult>(true, (api) => api.columns());
+      lastColumns = JSON.stringify(result.tableSchema);
+      return result;
+    },
+    async columnsConfirm(changes: ColumnChange[]) {
+      const result = await call<ColumnsResult>(true, (api) => api.columns_confirm(JSON.stringify({ changes })));
+      lastColumns = JSON.stringify(result.tableSchema);
+      return result;
+    },
+    async columnsRestore(tableSchema: Record<string, unknown>) {
+      const result = await call<ColumnsResult>(true, (api) => api.columns_restore(JSON.stringify(tableSchema)));
+      lastColumns = JSON.stringify(result.tableSchema);
+      return result;
+    },
+    explore: (options?: ExploreOptions) => call<ExploreResult>(true, (api) => api.explore(JSON.stringify(options ?? {}))),
+    indexValidate: (spec: IndexSpec) => call<IndexValidation>(true, (api) => api.index_validate(JSON.stringify(spec))),
+    indexRun: (spec: IndexSpec, options?: { populationColumn?: string }) =>
+      call<IndexResult>(true, (api) => api.index_run(JSON.stringify({ spec, options: options ?? {} }))),
     cancel() {
       if (!live) return;
       live.worker.terminate();

@@ -48,6 +48,8 @@ function checkWith(request: FillRequest): CheckResult {
   };
 }
 
+const REAL_ONLY = 'Your columns are read with the real engine only.';
+
 export function createMockEngine(): EngineClient {
   let proposal: Proposal | null = null;
   let fills: FillRequest = { fills: [] };
@@ -112,6 +114,14 @@ export function createMockEngine(): EngineClient {
       // No recorded fixture: a stand-in record would be a lineage nobody computed.
       throw new EngineError('Where a number came from is shown with the real engine only.');
     },
+    // The planner's own columns are read by the real engine only: a recorded answer would
+    // describe a file nobody uploaded.
+    async columns(): Promise<never> { throw new EngineError(REAL_ONLY); },
+    async columnsConfirm(): Promise<never> { throw new EngineError(REAL_ONLY); },
+    async columnsRestore(): Promise<never> { throw new EngineError(REAL_ONLY); },
+    async explore(): Promise<never> { throw new EngineError(REAL_ONLY); },
+    async indexValidate(): Promise<never> { throw new EngineError(REAL_ONLY); },
+    async indexRun(): Promise<never> { throw new EngineError(REAL_ONLY); },
     async outputFiles() {
       if (!ran) throw new EngineError('Run the model first.');
       return (await import('./fixtures/output_files.json')).default as unknown as OutputFiles;

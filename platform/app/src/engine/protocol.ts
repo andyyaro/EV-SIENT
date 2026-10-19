@@ -309,6 +309,138 @@ export interface BootProgress {
 }
 
 /** What the app calls. The worker client and the sample-data stand-in both implement it. */
+// ---------- the planner's own columns (docs/FLEXIBLE_ANALYSIS.md) ----------
+// The shapes below are the contract's; Python (src/fcf_m2/flex/) is the source of truth.
+
+export type ColumnRole =
+  | 'identifier' | 'name' | 'category' | 'ordinal' | 'flag' | 'count' | 'measure' | 'score'
+  | 'percentage' | 'money' | 'date' | 'year' | 'latitude' | 'longitude' | 'address' | 'text' | 'unknown';
+export type Direction = 'higher_better' | 'lower_better' | 'neither';
+
+export interface ColumnEvidence { signal: string; match?: string; text: string; direction?: Direction }
+
+export interface ReadingPattern { pattern: string; readAs: string; count: number; kind?: string }
+
+export interface ColumnReading {
+  cells: number; read: number; missing: number; unreadable: number; ambiguous: number;
+  decimalSeparator: '.' | ',' | null;
+  patterns: ReadingPattern[];
+  patternsNotShown?: number;
+  sentinels: { value: string; count: number }[] | string[];
+  outOfRange?: number; notWhole?: number; distinct?: number;
+  min?: number | string | null; max?: number | string | null;
+}
+
+/** One column of the planner's file, as the dictionary reads it (contract section 1). */
+export interface ColumnEntry {
+  name: string;
+  type: string;
+  categories?: string[];
+  categoriesOrdered?: boolean;
+  missingValues?: string[];
+  'evsient:role': ColumnRole;
+  'evsient:unit': string | null;
+  'evsient:range': [number, number] | null;
+  'evsient:direction': Direction | null;
+  'evsient:modelField': string | null;
+  'evsient:evidence': ColumnEvidence[];
+  'evsient:agreement': 'agree' | 'conflict' | 'unknown';
+  'evsient:provenance': 'inferred' | 'confirmed_by_user';
+  'evsient:reading'?: ColumnReading;
+  [key: string]: unknown;
+}
+
+export interface ColumnsResult {
+  entries: ColumnEntry[];
+  /** The dictionary as a Frictionless v2 Table Schema, for the project file. */
+  tableSchema: Record<string, unknown>;
+}
+
+/** One change the planner makes to a column; any subset of the keys (contract section 1). */
+export interface ColumnChange {
+  column: string;
+  role?: ColumnRole;
+  unit?: string | null;
+  direction?: Direction | null;
+  categories?: string[];
+  missingValues?: string[];
+  range?: [number, number] | null;
+  decimalSeparator?: '.' | ',';
+  dateFormat?: string;
+  confirm?: boolean;
+}
+
+/** Explore's answer (contract section 2). Cards describe; nothing here ranks a site. */
+export interface ExploreCard {
+  id: string;
+  kind: string;
+  columns: string[];
+  sentence: string;
+  effect: { name: string; value: number; low: number | null; high: number | null } | null;
+  n: number;
+  q: number | null;
+  reliability: string;
+  stratum: string | null;
+  chart: Record<string, unknown> | null;
+  siteIds: string[];
+  footer: string;
+  [key: string]: unknown;
+}
+
+export interface ExploreResult {
+  checked: number;
+  passed: number;
+  fdr: number;
+  minGroup: number;
+  health: Record<string, unknown>;
+  cards: ExploreCard[];
+  [key: string]: unknown;
+}
+
+export interface ExploreOptions {
+  fdr?: number; minGroup?: number; seed?: number; stratum?: string | null;
+  asOf?: string; staleYears?: number; paretoColumns?: string[];
+}
+
+/** The planner's own index settings, shaped as a pack (contract section 3). */
+export interface IndexSpec {
+  pack: 'evsient-custom-index';
+  packVersion: string;
+  name: string;
+  criteria: {
+    column: string;
+    direction: Direction;
+    weight: number;
+    value: Record<string, unknown> & { kind: 'linear' | 'threshold' | 'target' | 'ordinal' };
+  }[];
+  screens: { logic: unknown; reason: string }[];
+  missing: 'no_credit';
+  minCoverage: number;
+  robustness?: { draws: number; spread: number; seed: number };
+}
+
+export interface IndexValidation { ok: boolean; refusals: string[]; [key: string]: unknown }
+
+/** The planner's own index (contract section 3). Never official, never on the readiness scale. */
+export interface IndexResult {
+  official: false;
+  name: string;
+  badge: string;
+  refused: boolean;
+  refusals: string[];
+  spec: IndexSpec;
+  formula: unknown;
+  summary: Record<string, unknown>;
+  sites: Record<string, unknown>[];
+  unranked: Record<string, unknown>[];
+  excluded: Record<string, unknown>[];
+  rankChanges: unknown[];
+  robustness: Record<string, unknown>;
+  gatesChecked: unknown;
+  comparison?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export interface EngineClient {
   readonly kind: 'worker' | 'mock';
   boot(onProgress?: (p: BootProgress) => void): Promise<RuntimeInfo>;
@@ -324,6 +456,14 @@ export interface EngineClient {
   explain(siteId: string): Promise<Explanation>;
   provenance(cell: ProvenanceRequest): Promise<ProvenanceRecord>;
   outputFiles(): Promise<OutputFiles>;
+  /** The column dictionary for the uploaded file: proposed the first time, then as confirmed. */
+  columns(): Promise<ColumnsResult>;
+  columnsConfirm(changes: ColumnChange[]): Promise<ColumnsResult>;
+  /** A dictionary saved in a project file, read again against the reopened file. */
+  columnsRestore(tableSchema: Record<string, unknown>): Promise<ColumnsResult>;
+  explore(options?: ExploreOptions): Promise<ExploreResult>;
+  indexValidate(spec: IndexSpec): Promise<IndexValidation>;
+  indexRun(spec: IndexSpec, options?: { populationColumn?: string }): Promise<IndexResult>;
   /** Stops a run in progress by ending the worker; the next call starts a fresh one. */
   cancel(): void;
 }

@@ -44,6 +44,7 @@ from typing import Any
 import pandas as pd
 
 from . import intake
+from .flex import dictionary, explore as flex_explore, index as flex_index
 from .scoring import (DRIVER_WEIGHTS, INVERTED_DRIVERS, NUMERIC_FIELDS, SUBSCORE_WEIGHTS,
                       YES_NO_FIELDS)
 
@@ -168,6 +169,9 @@ class _Session:
         self.contract: Any = None             # the last run's provenance.ContractIndex
         #: Public data the planner accepted (see `fill`); cleared by a new file or mapping.
         self.fills: list[dict] = []
+        #: The column dictionary (docs/FLEXIBLE_ANALYSIS.md); proposed on first ask, then as the
+        #: planner confirms it. Cleared by a new file.
+        self.entries: list[dict] | None = None
 
 
 _session = _Session()
@@ -377,6 +381,7 @@ def propose(table_json: str) -> str:
     _session.cohort_dir = _session.out_dir = None
     _session.results = None
     _session.fills = []
+    _session.entries = None
     return _out(_proposal_payload(proposal, frame))
 
 
@@ -847,3 +852,133 @@ def output_files() -> str:
             if path.is_file():
                 files[prefix + path.relative_to(base).as_posix()] = path.read_text()
     return _out({"files": files})
+
+
+# ---------- the planner's own columns (docs/FLEXIBLE_ANALYSIS.md) ----------
+#
+# None of these touches the readiness model. They read the uploaded file through the column
+# dictionary the planner confirms: Explore describes it, and the planner's own index ranks it,
+# always labelled as theirs.
+
+def _uploaded() -> pd.DataFrame:
+    if _session.frame is None:
+        raise ValueError("Upload a file first.")
+    return _session.frame
+
+
+def _with_model_fields(entries: list[dict]) -> list[dict]:
+    """Each entry's `evsient:modelField` as Map Columns has it now."""
+    by_column = {column: field for field, column in
+                 (_session.proposal.mapping.items() if _session.proposal else [])}
+    for entry in entries:
+        entry["evsient:modelField"] = by_column.get(entry["name"])
+    return entries
+
+
+def _columns_payload() -> str:
+    entries = _with_model_fields(_session.entries)
+    return _out({"entries": entries, "tableSchema": dictionary.to_table_schema(entries)})
+
+
+def columns() -> str:
+    """The column dictionary for the uploaded file: proposed the first time, then as confirmed."""
+    frame = _uploaded()
+    if _session.entries is None:
+        mapping = dict(_session.proposal.mapping) if _session.proposal else {}
+        _session.entries = dictionary.propose(frame, mapping)
+    return _columns_payload()
+
+
+def columns_confirm(changes_json: str) -> str:
+    """Apply the planner's changes to the dictionary, and read again any column they affect."""
+    frame = _uploaded()
+    if _session.entries is None:
+        columns()
+    changes = json.loads(changes_json)
+    if isinstance(changes, dict):
+        changes = changes.get("changes", [])
+    entries = dictionary.confirm(_session.entries, changes)
+    if any("evsient:reading" not in e for e in entries):
+        entries = dictionary.reread(frame, entries)
+    _session.entries = entries
+    return _columns_payload()
+
+
+def columns_restore(schema_json: str) -> str:
+    """A dictionary saved in a project file, read again against the reopened file."""
+    frame = _uploaded()
+    _session.entries = dictionary.reread(frame, dictionary.from_table_schema(json.loads(schema_json)))
+    return _columns_payload()
+
+
+def _typed(ordinal_as: str) -> pd.DataFrame:
+    """The file's typed values through the confirmed dictionary's own reader.
+
+    Numbers, flags and (for Explore) ordinals are floats, an ordinal being its level's position;
+    for the index an ordinal is its level's label, which its value map names. Categories are text
+    and dates ISO text. Unread cells are missing, exactly as the reading report says.
+    """
+    frame = _uploaded()
+    if _session.entries is None:
+        columns()
+    parsed = dictionary.parse(frame, _session.entries)
+    out: dict[str, list] = {}
+    for entry in _session.entries:
+        name, role = entry["name"], entry["evsient:role"]
+        values = parsed[(name, "value")].tolist()
+        if role == "category":
+            out[name] = [None if pd.isna(v) else str(v) for v in values]
+        elif role == "date":
+            out[name] = [None if pd.isna(v) else v.date().isoformat() for v in values]
+        elif role == "ordinal" and ordinal_as == "label":
+            levels = entry.get("categories") or []
+            out[name] = [None if pd.isna(v) else str(levels[int(v)]) for v in values]
+        else:
+            out[name] = [None if (isinstance(v, float) and math.isnan(v)) else v for v in values]
+    return pd.DataFrame(out, index=frame.index)
+
+
+def _role_column(role: str) -> str | None:
+    return next((e["name"] for e in _session.entries or [] if e.get("evsient:role") == role), None)
+
+
+def explore(options_json: str = "{}") -> str:
+    """Explore's findings about the planner's columns. It ranks no site."""
+    typed = _typed("position")
+    table = {"typed": True, "columns": list(typed.columns),
+             "rows": [[None if (isinstance(v, float) and math.isnan(v)) else v for v in row]
+                      for row in typed.itertuples(index=False, name=None)]}
+    return flex_explore.bridge_scan(json.dumps(table, allow_nan=False),
+                                    json.dumps(_session.entries), options_json or "{}")
+
+
+def index_validate(spec_json: str) -> str:
+    """The planner's index settings checked against the confirmed dictionary, before a run."""
+    if _session.entries is None:
+        columns()
+    return _out(flex_index.validate(json.loads(spec_json), _session.entries))
+
+
+def index_run(request_json: str) -> str:
+    """The planner's own index: never official, never on the readiness scale.
+
+    The request is `{"spec": {...}, "options": {"populationColumn": ...}}`. With a readiness run
+    open, the result also compares the two rankings site by site.
+    """
+    request = json.loads(request_json)
+    spec, options = request.get("spec"), request.get("options") or {}
+    frame = _uploaded()
+    typed = _typed("label")
+    id_column = _role_column("identifier")
+    ids = ([str(v).strip() for v in frame[id_column].tolist()] if id_column
+           else [f"row {i}" for i in range(1, len(frame) + 1)])
+    raw = frame.copy()
+    raw.index = typed.index = pd.Index(ids, dtype=object)
+    result = flex_index.run(typed, raw, spec,
+                            population_column=options.get("populationColumn"),
+                            entries=_session.entries, name_column=_role_column("name"))
+    if _session.results is not None and not result.get("refused"):
+        scores = {str(r["site_id"]): float(r["readiness_score"])
+                  for _, r in _session.results.iterrows()}
+        result["comparison"] = flex_index.comparison(result, scores)
+    return _out(result)

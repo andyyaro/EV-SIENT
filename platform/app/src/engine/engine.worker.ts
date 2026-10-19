@@ -152,6 +152,12 @@ const api = {
   async explain(siteId: string) { await ready(); return invoke('explain', siteId); },
   async provenance(cellJson: string) { await ready(); return invoke('provenance', cellJson); },
   async output_files() { await ready(); return invoke('output_files'); },
+  async columns() { await ready(); return invoke('columns'); },
+  async columns_confirm(changesJson: string) { await ready(); return invoke('columns_confirm', changesJson); },
+  async columns_restore(schemaJson: string) { await ready(); return invoke('columns_restore', schemaJson); },
+  async explore(optionsJson: string) { await ready(); return invoke('explore', optionsJson); },
+  async index_validate(specJson: string) { await ready(); return invoke('index_validate', specJson); },
+  async index_run(requestJson: string) { await ready(); return invoke('index_run', requestJson); },
 };
 
 export type EngineWorkerApi = typeof api;

@@ -28,6 +28,12 @@ function lazyMock(): EngineClient {
     run: later('run'),
     explain: later('explain'),
     provenance: later('provenance'),
+    columns: later('columns'),
+    columnsConfirm: later('columnsConfirm'),
+    columnsRestore: later('columnsRestore'),
+    explore: later('explore'),
+    indexValidate: later('indexValidate'),
+    indexRun: later('indexRun'),
     outputFiles: later('outputFiles'),
     cancel() { void loaded.then((m) => m.cancel()); },
   };

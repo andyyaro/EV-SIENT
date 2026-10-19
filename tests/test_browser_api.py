@@ -426,3 +426,59 @@ def test_without_fills_the_cohort_is_what_intake_writes(no_reference_inputs):
     plain = intake.provenance_rows(api._session.proposal, list(applied["site_id"]), **args)
     empty = intake.provenance_rows(api._session.proposal, list(applied["site_id"]), **args, public_fills={})
     assert plain.equals(empty)
+
+
+# ---------- the planner's own columns (docs/FLEXIBLE_ANALYSIS.md) ----------
+
+FLEX_SAMPLE = REPO / "tests" / "fixtures" / "flex" / "dictionary_360_sample.csv"
+
+HEAT_INDEX = {
+    "pack": "evsient-custom-index", "packVersion": "1.0.0", "name": "Heat refuge priority",
+    "criteria": [
+        {"column": "heat_risk_0_100", "direction": "higher_better", "weight": 0.4,
+         "value": {"kind": "linear", "worst": 0, "best": 100}},
+        {"column": "flood_risk", "direction": "lower_better", "weight": 0.3,
+         "value": {"kind": "ordinal", "map": {"Low": 1.0, "Moderate": 0.5, "High": 0.0}}},
+        {"column": "solar_roof_potential_kw", "direction": "higher_better", "weight": 0.3,
+         "value": {"kind": "threshold", "worst": 50, "best": 200}},
+    ],
+    "screens": [], "missing": "no_credit", "minCoverage": 0.65,
+    "robustness": {"draws": 200, "spread": 0.25, "seed": 1},
+}
+
+
+def test_the_column_dictionary_follows_the_upload_and_the_planner():
+    with pytest.raises(ValueError, match="Upload a file first"):
+        api.columns()
+    api.propose(_table(FLEX_SAMPLE))
+    entries = {e["name"]: e for e in _strict(api.columns())["entries"]}
+    assert entries["site_id"]["evsient:role"] == "identifier"
+    assert entries["site_id"]["evsient:modelField"] == "site_id"
+    assert entries["heat_risk_0_100"]["evsient:direction"] is None, "a direction waits for the planner"
+    changes = [{"column": "heat_risk_0_100", "direction": "higher_better"}]
+    confirmed = _strict(api.columns_confirm(json.dumps({"changes": changes})))
+    heat = next(e for e in confirmed["entries"] if e["name"] == "heat_risk_0_100")
+    assert heat["evsient:direction"] == "higher_better"
+    assert heat["evsient:provenance"] == "confirmed_by_user"
+    # The project file's copy restores the same dictionary against the reopened file.
+    api.propose(_table(FLEX_SAMPLE))
+    restored = _strict(api.columns_restore(json.dumps(confirmed["tableSchema"])))
+    assert restored["entries"] == confirmed["entries"]
+
+
+def test_explore_and_the_planners_index_read_the_confirmed_dictionary():
+    api.propose(_table(FLEX_SAMPLE))
+    refused = _strict(api.index_validate(json.dumps(HEAT_INDEX)))
+    assert not refused["ok"]
+    assert {r["code"] for r in refused["refusals"]} == {"unconfirmed_direction"}
+    changes = [{"column": c["column"], "direction": c["direction"]} for c in HEAT_INDEX["criteria"]]
+    api.columns_confirm(json.dumps({"changes": changes}))
+    assert _strict(api.index_validate(json.dumps(HEAT_INDEX)))["ok"]
+    result = _strict(api.index_run(json.dumps({"spec": HEAT_INDEX})))
+    assert result["official"] is False and not result["refused"]
+    assert "comparison" not in result, "no readiness run is open"
+    for site in result["sites"]:
+        assert abs(sum(d["points"] for d in site["drivers"]) - site["score"]) <= 0.05 + 1e-9
+    found = _strict(api.explore("{}"))
+    assert found["checked"] >= found["passed"] >= 0
+    assert all("not cause" in card["footer"] for card in found["cards"])
