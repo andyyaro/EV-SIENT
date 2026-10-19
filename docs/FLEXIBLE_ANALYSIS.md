@@ -292,7 +292,10 @@ number. What reaches the model is decided by these tiers, not by the model.
 | With consent | Column headers and their dictionary entries (role, unit, direction, scale); per-column blank share, a cardinality bucket and rounded 10th, 50th and 90th percentiles (never min or max); category labels with counts, any count under 10 suppressed; results the engine already computed (sites per tier, Explore cards, the visitor's index formula and its gates); one site's driver breakdown when the planner asks about that site, with the site renamed "Site A" | Opt-in once per session, after the planner sees the exact payload; any column can be withheld |
 | Never | Rows or any single cell, sample values, site names, IDs, addresses, coordinates (even rounded), free-text notes, carried column values per site, the file name | Never |
 
-Safeguards: Bedrock data retention `none`; the ledger records tokens, never content; headers
-and labels travel as quoted, length-capped data with invisible Unicode and leading `= + - @`
-removed; answers write numbers as placeholders filled from tool results, and any number that
-does not match a tool result is struck through; causal verbs are refused.
+Safeguards: the provider's data terms are stated as they are, never stronger (OpenAI's
+standard API data terms while the assistant runs on OpenAI, from 2026-10-19; Bedrock data
+retention `none`, checked by the proxy, when it runs on Bedrock; DEC-029 and its addendum);
+the ledger records tokens, never content; headers and labels travel as quoted, length-capped
+data with invisible Unicode and leading `= + - @` removed; answers write numbers as
+placeholders filled from tool results, and any number that does not match a tool result is
+struck through; causal verbs are refused.

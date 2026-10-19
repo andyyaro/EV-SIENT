@@ -49,3 +49,8 @@ export async function readRetentionMode(region, env = process.env, fetchFn = fet
   const body = await r.json();
   return String(body.mode ?? '');
 }
+
+/** The provider check core.mjs runs for Bedrock: ready only while the mode reads "none". */
+export function retentionIsNone(readMode) {
+  return async () => (await readMode()) === 'none';
+}

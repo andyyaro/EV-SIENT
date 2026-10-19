@@ -151,10 +151,11 @@ test('prices: worst case covers any actual use of the same request', () => {
     assert.ok(worst >= plain);
   }
   // Haiku at the request size limit (32 KB plus the system prompt): well under a cent.
-  assert.ok(worstCaseMicros('haiku', 32 * 1024 + 12_000, 1200) < 0.0065 * USD);
+  assert.ok(worstCaseMicros('anthropic:haiku', 32 * 1024 + 12_000, 1200) < 0.0065 * USD);
   assert.throws(() => worstCaseMicros('nope', 1, 1));
   // Every input field counts at its own price (M2: Sonnet cache reads at $0.20 a million).
-  assert.equal(actualMicros('sonnet', { cache_read_input_tokens: 1_000_000 }), 0.20 * USD);
+  assert.equal(actualMicros('bedrock:sonnet', { cache_read_input_tokens: 1_000_000 }), 0.20 * USD);
+  assert.equal(actualMicros('anthropic:sonnet', { cache_read_input_tokens: 1_000_000 }), 0.10 * USD);
 });
 
 test('S4: one visitor has a daily share; reaching it refuses them only, and writes nothing', async () => {

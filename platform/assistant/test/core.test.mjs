@@ -2,14 +2,15 @@
 // model, streaming, settling, the rate limits, and never a 403 or 404.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createAssistant, mergeUsage, WORDS } from '../src/core.mjs';
+import { readFileSync } from 'node:fs';
+import { absorbUsage, createAssistant, mergeUsage, WORDS } from '../src/core.mjs';
 import { configFromEnv } from '../src/config.mjs';
 import { createLedger, USD } from '../src/ledger.mjs';
 import { addressPrefix, countQuestion, DEFAULT_LIMITS, DEFAULT_LOCAL, loadSalt, localLimiter, NO_ADDRESS, RateLimited, TokenBucket, viewerAddress, visitorHash } from '../src/limits.mjs';
 import { memoryStore } from '../src/store.mjs';
 import { actualMicros, priceForModel, PRICES, worstCaseMicros } from '../src/pricing.mjs';
-import { SYSTEM_PROMPT } from '../src/prompt.mjs';
-import { readRetentionMode, signV4 } from '../src/retention.mjs';
+import { buildBody, DATA_HANDLING, methodNumbers, systemPrompt } from '../src/prompt.mjs';
+import { retentionIsNone } from '../src/retention.mjs';
 
 const NOW = new Date('2026-10-18T12:00:00Z');
 const SESSION = 'session-0123456789abcdef';
@@ -19,7 +20,7 @@ const OPEN_LOCAL = { askGlobal: { capacity: 1e6, perMinute: 1e6 }, askAddress: {
 
 function config(over = {}) {
   return {
-    ...configFromEnv({ ASSISTANT_ENABLED: 'true' }),
+    ...configFromEnv({ ASSISTANT_ENABLED: 'true', PROVIDER: 'anthropic' }),
     local: OPEN_LOCAL,
     statusCacheMs: 0,
     ...over,
@@ -50,9 +51,9 @@ function fakeModel({ text = 'The demand part is 45% of the score.', usage = { in
   };
 }
 
-function setup({ cfg = config(), model = fakeModel(), store = memoryStore(), caps, retention = async () => 'none', clock = { t: NOW } } = {}) {
+function setup({ cfg = config(), model = fakeModel(), store = memoryStore(), caps, ready = async () => true, clock = { t: NOW } } = {}) {
   const ledger = createLedger(store, caps ?? { monthMicros: cfg.monthMicros, dayMicros: cfg.dayMicros, deeperMonthMicros: cfg.deeperMonthMicros, visitorDayMicros: cfg.visitorDayMicros });
-  const a = createAssistant(cfg, { store, ledger, model, retention, now: () => clock.t });
+  const a = createAssistant(cfg, { store, ledger, model, ready, now: () => clock.t });
   return { a, store, ledger, model, clock };
 }
 
@@ -87,16 +88,18 @@ test('an answer streams as NDJSON: meta, text, done; and the ledger settles to t
   assert.equal(lines.filter((l) => l.t === 'text').map((l) => l.v).join(''), 'The demand part is 45% of the score.');
   assert.deepEqual(lines.at(-1), { t: 'done', stop: 'end_turn' });
   const m = store.items.get('ledger#month#2026-10');
-  assert.equal(m.committed, actualMicros('haiku', { input_tokens: 3000, output_tokens: 40 }));
+  assert.equal(m.committed, actualMicros('anthropic:haiku', { input_tokens: 3000, output_tokens: 40 }));
   assert.equal(m.spent, m.committed);
   assert.equal(m.calls, 1);
   // The request Bedrock received.
   const sent = model.calls[0];
-  assert.equal(sent.modelId, 'global.anthropic.claude-haiku-5-5');
-  assert.equal(sent.body.anthropic_version, 'bedrock-2023-05-31');
+  assert.equal(sent.modelId, 'claude-haiku-5-5');
+  assert.equal(sent.body.model, 'claude-haiku-5-5', 'the Claude API takes the model in the body');
+  assert.equal(sent.body.stream, true);
+  assert.equal(sent.body.anthropic_version, undefined, 'the version goes in a header');
   assert.equal(sent.body.max_tokens, 1200);
   assert.deepEqual(sent.body.thinking, { type: 'disabled' });
-  assert.equal(sent.body.system[0].text, SYSTEM_PROMPT);
+  assert.equal(sent.body.system[0].text, systemPrompt('anthropic'));
   assert.match(sent.body.messages.at(-1).content[0].text, /<question>\nWhat does the demand part measure\?\n<\/question>/);
 });
 
@@ -107,7 +110,7 @@ test('a model failure mid-answer keeps the whole reservation; a refusal before i
     assert.equal(r.status, 200);
     assert.equal(r.lines().at(-1).t, 'error');
     const m = store.items.get('ledger#month#2026-10');
-    assert.ok(m.committed > actualMicros('haiku', { input_tokens: 3000, output_tokens: 40 }), 'reservation kept');
+    assert.ok(m.committed > actualMicros('anthropic:haiku', { input_tokens: 3000, output_tokens: 40 }), 'reservation kept');
     assert.equal(m.spent, m.committed);
   }
   {
@@ -181,14 +184,14 @@ test('never 403 or 404: unknown paths are 400, wrong methods 405', async () => {
 });
 
 test('a deeper answer uses the deeper model under its own sub-cap', async () => {
-  const cfg = configFromEnv({ ASSISTANT_ENABLED: 'true', DEEPER_MODEL_ID: 'global.anthropic.claude-sonnet-5-5' });
+  const cfg = configFromEnv({ ASSISTANT_ENABLED: 'true', PROVIDER: 'anthropic', DEEPER_MODEL_ID: 'claude-sonnet-5-5' });
   const model = fakeModel();
   const { a, store } = setup({ cfg, model });
   const r = await call(a, { body: ask({ deeper: true }) });
   assert.equal(r.status, 200);
-  assert.equal(model.calls[0].modelId, 'global.anthropic.claude-sonnet-5-5');
+  assert.equal(model.calls[0].modelId, 'claude-sonnet-5-5');
   assert.equal(model.calls[0].body.thinking, undefined, 'Sonnet 5.5 refuses thinking switched off');
-  assert.equal(store.items.get('ledger#month#2026-10').deeperCommitted, actualMicros('sonnet', { input_tokens: 3000, output_tokens: 40 }));
+  assert.equal(store.items.get('ledger#month#2026-10').deeperCommitted, actualMicros('anthropic:sonnet', { input_tokens: 3000, output_tokens: 40 }));
 });
 
 test('rate limits: per address per hour, then everyone per minute', async () => {
@@ -268,7 +271,7 @@ test('configuration: defaults, and anything malformed refuses to start', () => {
   assert.throws(() => configFromEnv({ MONTHLY_CAP_USD: 'five' }));
   assert.throws(() => configFromEnv({ MODEL_PRICE: 'opus' }));
   assert.throws(() => configFromEnv({ MAX_TOKENS: '100000' }));
-  assert.throws(() => configFromEnv({ MODEL_ID: 'anthropic.claude-haiku-5-5' }), /inference profile/);
+  assert.throws(() => configFromEnv({ PROVIDER: 'bedrock', MODEL_ID: 'anthropic.claude-haiku-5-5' }), /model ID for bedrock/);
   assert.throws(() => configFromEnv({ MODEL_EXTRA_JSON: '{"system":"x"}' }));
   assert.throws(() => configFromEnv({ MODEL_EXTRA_JSON: '[1]' }));
   assert.equal(configFromEnv({ MONTHLY_CAP_USD: '0' }).monthMicros, 0);
@@ -278,18 +281,52 @@ test('configuration: defaults, and anything malformed refuses to start', () => {
 });
 
 test('S3: the price row comes from the model ID, and a mismatch refuses to start', () => {
-  assert.equal(priceForModel('global.anthropic.claude-haiku-5-5'), 'haiku');
-  assert.equal(priceForModel('global.anthropic.claude-sonnet-5-5'), 'sonnet');
-  assert.throws(() => priceForModel('global.anthropic.claude-opus-5-5'));
-  assert.throws(() => priceForModel('global.anthropic.claude-haiku-5-5-preview'));
-  assert.equal(configFromEnv({ MODEL_ID: 'global.anthropic.claude-sonnet-5-5' }).model.price, 'sonnet', 'derived, not the default haiku');
-  assert.equal(configFromEnv({ MODEL_PRICE: 'haiku' }).model.price, 'haiku', 'a matching MODEL_PRICE is accepted');
-  assert.throws(() => configFromEnv({ MODEL_ID: 'global.anthropic.claude-sonnet-5-5', MODEL_PRICE: 'haiku' }), /priced as sonnet/);
-  assert.throws(() => configFromEnv({ MODEL_ID: 'global.anthropic.claude-opus-5-5' }), /no price/);
-  assert.throws(() => configFromEnv({ DEEPER_MODEL_ID: 'global.anthropic.claude-sonnet-5-5', DEEPER_MODEL_PRICE: 'haiku' }));
-  assert.equal(configFromEnv({ DEEPER_MODEL_ID: 'global.anthropic.claude-sonnet-5-5' }).deeper.price, 'sonnet');
-  // Sonnet 5.5's cache read price (M2).
-  assert.equal(PRICES.sonnet.cacheRead, 0.20);
+  assert.equal(priceForModel('global.anthropic.claude-haiku-5-5', 'bedrock'), 'bedrock:haiku');
+  assert.equal(priceForModel('global.anthropic.claude-sonnet-5-5', 'bedrock'), 'bedrock:sonnet');
+  assert.equal(priceForModel('claude-haiku-5-5', 'anthropic'), 'anthropic:haiku');
+  assert.equal(priceForModel('claude-sonnet-5-5', 'anthropic'), 'anthropic:sonnet');
+  assert.throws(() => priceForModel('global.anthropic.claude-opus-5-5', 'bedrock'));
+  assert.throws(() => priceForModel('global.anthropic.claude-haiku-5-5-preview', 'bedrock'));
+  assert.throws(() => priceForModel('claude-opus-5-5', 'anthropic'));
+  // An ID from the other provider is never priced.
+  assert.throws(() => priceForModel('claude-haiku-5-5', 'bedrock'));
+  assert.throws(() => priceForModel('global.anthropic.claude-haiku-5-5', 'anthropic'));
+  for (const [provider, haiku, sonnet] of [['bedrock', 'global.anthropic.claude-haiku-5-5', 'global.anthropic.claude-sonnet-5-5'], ['anthropic', 'claude-haiku-5-5', 'claude-sonnet-5-5']]) {
+    const env = { PROVIDER: provider };
+    assert.equal(configFromEnv(env).model.id, haiku, `${provider} default model`);
+    assert.equal(configFromEnv({ ...env, MODEL_ID: sonnet }).model.price, `${provider}:sonnet`, 'derived, not the default haiku');
+    assert.equal(configFromEnv({ ...env, MODEL_PRICE: 'haiku' }).model.price, `${provider}:haiku`, 'a matching MODEL_PRICE is accepted');
+    assert.equal(configFromEnv({ ...env, MODEL_PRICE: `${provider}:haiku` }).model.price, `${provider}:haiku`);
+    assert.throws(() => configFromEnv({ ...env, MODEL_ID: sonnet, MODEL_PRICE: 'haiku' }), /priced as/);
+    assert.throws(() => configFromEnv({ ...env, DEEPER_MODEL_ID: sonnet, DEEPER_MODEL_PRICE: 'haiku' }));
+    assert.equal(configFromEnv({ ...env, DEEPER_MODEL_ID: sonnet }).deeper.price, `${provider}:sonnet`);
+  }
+  // OpenAI: one model, gpt-5.4-mini, at OpenAI's list price.
+  assert.equal(priceForModel('gpt-5.4-mini', 'openai'), 'openai:gpt-5.4-mini');
+  for (const id of ['gpt-5.4', 'gpt-5.4-mini-2026-03-17', 'gpt-5.4-minix', 'gpt-5-4-mini']) assert.throws(() => priceForModel(id, 'openai'), undefined, id);
+  assert.throws(() => priceForModel('gpt-5.4-mini', 'anthropic'));
+  assert.equal(configFromEnv({}).provider, 'openai', 'OpenAI is the default provider');
+  assert.equal(configFromEnv({}).model.id, 'gpt-5.4-mini');
+  assert.equal(configFromEnv({}).model.price, 'openai:gpt-5.4-mini');
+  assert.equal(configFromEnv({ MODEL_PRICE: 'gpt-5.4-mini' }).model.price, 'openai:gpt-5.4-mini');
+  assert.equal(configFromEnv({ MODEL_PRICE: 'openai:gpt-5.4-mini' }).model.price, 'openai:gpt-5.4-mini');
+  assert.throws(() => configFromEnv({ MODEL_PRICE: 'haiku' }), /priced as/);
+  assert.throws(() => configFromEnv({ MODEL_ID: 'gpt-5.4' }), /no price/);
+  assert.throws(() => configFromEnv({ DEEPER_MODEL_ID: 'gpt-5.4' }), /no price/);
+  assert.deepEqual(PRICES['openai:gpt-5.4-mini'], { input: 0.75, cacheWrite: 0.75, cacheRead: 0.075, output: 4.50 });
+  assert.throws(() => configFromEnv({ MODEL_ID: 'global.anthropic.claude-haiku-5-5' }), /model ID for openai/, 'a Bedrock ID under the default provider');
+  assert.throws(() => configFromEnv({ PROVIDER: 'anthropic', MODEL_ID: 'gpt-5.4-mini' }), /model ID for anthropic/);
+  assert.throws(() => configFromEnv({ PROVIDER: 'anthropic', MODEL_ID: 'global.anthropic.claude-haiku-5-5' }), /model ID for anthropic/);
+  assert.throws(() => configFromEnv({ PROVIDER: 'bedrock', MODEL_ID: 'claude-haiku-5-5' }), /model ID for bedrock/);
+  assert.throws(() => configFromEnv({ PROVIDER: 'bedrock', MODEL_PRICE: 'anthropic:haiku' }), /priced as/, 'another provider\'s row');
+  assert.throws(() => configFromEnv({ PROVIDER: 'anthropic', MODEL_ID: 'claude-opus-5-5' }), /no price/);
+  assert.throws(() => configFromEnv({ PROVIDER: 'mistral' }), /PROVIDER/);
+  // Sonnet 5.5's cache read: $0.20 on Bedrock as the review set it (M2); the Claude API list
+  // price is 0.05 times input, $0.10.
+  assert.equal(PRICES['bedrock:sonnet'].cacheRead, 0.20);
+  assert.equal(PRICES['anthropic:sonnet'].cacheRead, 0.10);
+  assert.deepEqual(PRICES['anthropic:haiku'], { input: 0.10, cacheWrite: 0.125, cacheRead: 0.01, output: 0.50 });
+  assert.deepEqual({ ...PRICES['anthropic:sonnet'], cacheRead: 0 }, { input: 2.00, cacheWrite: 2.50, cacheRead: 0, output: 10.00 });
 });
 
 test('S3: MODEL_EXTRA_JSON accepts allow-listed keys only', () => {
@@ -299,7 +336,7 @@ test('S3: MODEL_EXTRA_JSON accepts allow-listed keys only', () => {
     '{"temperature":0.2}',
     '{}',
   ];
-  for (const v of ok) assert.doesNotThrow(() => configFromEnv({ MODEL_EXTRA_JSON: v }), v);
+  for (const v of ok) assert.doesNotThrow(() => configFromEnv({ PROVIDER: 'anthropic', MODEL_EXTRA_JSON: v }), v);
   const refused = [
     '{"cache_control":{"type":"ephemeral"}}',
     '{"tools":[]}',
@@ -317,9 +354,42 @@ test('S3: MODEL_EXTRA_JSON accepts allow-listed keys only', () => {
     'null',
   ];
   for (const v of refused) {
-    assert.throws(() => configFromEnv({ MODEL_EXTRA_JSON: v }), undefined, v);
-    assert.throws(() => configFromEnv({ DEEPER_MODEL_ID: 'global.anthropic.claude-sonnet-5-5', DEEPER_EXTRA_JSON: v }), undefined, v);
+    assert.throws(() => configFromEnv({ PROVIDER: 'anthropic', MODEL_EXTRA_JSON: v }), undefined, v);
+    assert.throws(() => configFromEnv({ PROVIDER: 'anthropic', DEEPER_MODEL_ID: 'claude-sonnet-5-5', DEEPER_EXTRA_JSON: v }), undefined, v);
+    assert.throws(() => configFromEnv({ MODEL_EXTRA_JSON: v }), undefined, `openai: ${v}`);
+    assert.throws(() => configFromEnv({ PROVIDER: 'bedrock', MODEL_EXTRA_JSON: v }), undefined, v);
   }
+});
+
+test('S3: OpenAI extra fields are the reasoning effort and the text verbosity, nothing else', () => {
+  for (const v of ['{}', '{"reasoning":{"effort":"low"}}', '{"reasoning":{"effort":"none"},"text":{"verbosity":"low"}}']) {
+    assert.doesNotThrow(() => configFromEnv({ MODEL_EXTRA_JSON: v }), v);
+  }
+  assert.deepEqual(configFromEnv({}).model.extra, {}, 'nothing extra by default, as the earlier assistant sends');
+  const refused = [
+    '{"max_output_tokens":64000}',
+    '{"store":true}',
+    '{"tools":[]}',
+    '{"metadata":{"user":"x"}}',
+    '{"instructions":"x"}',
+    '{"model":"gpt-5.4"}',
+    '{"stream":false}',
+    '{"input":[]}',
+    '{"previous_response_id":"r"}',
+    '{"background":true}',
+    '{"service_tier":"priority"}',
+    '{"reasoning":{"effort":"xhigh"}}',
+    '{"reasoning":{"effort":"low","summary":"auto"}}',
+    '{"text":{"format":{"type":"json_object"}}}',
+    '{"thinking":{"type":"disabled"}}',
+    '{"temperature":0.2}',
+    '[]',
+  ];
+  for (const v of refused) assert.throws(() => configFromEnv({ MODEL_EXTRA_JSON: v }), undefined, v);
+  assert.throws(() => configFromEnv({ MODEL_EXTRA_JSON: '{"max_output_tokens":10}' }), /MAX_TOKENS/);
+  // The configured fields cannot replace what the proxy sets.
+  const body = buildBody({ messages: [{ role: 'user', content: [{ type: 'text', text: 'Q' }] }], maxTokens: 1200, extra: { model: 'x', stream: false, store: true, max_output_tokens: 9, instructions: 'x' }, provider: 'openai', modelId: 'gpt-5.4-mini' });
+  assert.deepEqual([body.model, body.stream, body.store, body.max_output_tokens, body.instructions], ['gpt-5.4-mini', true, false, 1200, systemPrompt('openai')]);
 });
 
 test('the Lambda entry point refuses with a 503 when it cannot start (bad configuration)', async () => {
@@ -412,7 +482,7 @@ test('S1: everyone together is limited per instance, also before any database ca
 test('S1: /status is served from memory for 30 seconds and limited per address', async () => {
   const clock = { t: NOW };
   let checks = 0;
-  const { a, store } = setup({ cfg: config({ local: DEFAULT_LOCAL, statusCacheMs: 30_000 }), clock, retention: async () => { checks += 1; return 'none'; } });
+  const { a, store } = setup({ cfg: config({ local: DEFAULT_LOCAL, statusCacheMs: 30_000 }), clock, ready: async () => { checks += 1; return true; } });
   const status = (ip) => call(a, { method: 'GET', path: '/api/assistant/status', headers: from(ip) });
   assert.equal((await status('198.51.100.1')).json().state, 'available');
   const reads = store.calls.read;
@@ -421,7 +491,7 @@ test('S1: /status is served from memory for 30 seconds and limited per address',
   clock.t = new Date(NOW.getTime() + 31_000);
   await status('198.51.100.1');
   assert.ok(store.calls.read > reads, 'read again after 30 seconds');
-  assert.equal(checks, 1, 'the retention mode is cached longer than the status');
+  assert.equal(checks, 1, 'the provider check is cached longer than the status');
   // One address: the bucket's capacity, then refused without reading anything.
   const one = '203.0.113.5';
   let ok = 0;
@@ -445,7 +515,7 @@ test('S1: a cap this instance has seen refuses later questions without DynamoDB'
 });
 
 test('S2: settles at the larger of the stream and the invocation metrics, field by field', async () => {
-  const expected = actualMicros('haiku', { input_tokens: 3000, output_tokens: 1200 });
+  const expected = actualMicros('anthropic:haiku', { input_tokens: 3000, output_tokens: 1200 });
   assert.equal(expected, 900);
   {
     // The stream says 40 output tokens, the metrics 1200: the ledger takes 1200.
@@ -483,7 +553,7 @@ test('S2: with no final output count, the whole reservation is kept', async () =
   assert.equal(m.committed, m.spent);
   // The reservation is the worst case for the request that was sent.
   const sent = Buffer.byteLength(JSON.stringify(model.calls[0].body));
-  assert.equal(m.committed, worstCaseMicros('haiku', sent, 1200));
+  assert.equal(m.committed, worstCaseMicros('anthropic:haiku', sent, 1200));
 });
 
 test('S4: one visitor cannot use more than their daily share', async () => {
@@ -494,7 +564,7 @@ test('S4: one visitor cannot use more than their daily share', async () => {
   assert.equal((await call(a, { body: ask() })).status, 200);
   const visitor = visitorHash(await loadSalt(store), '203.0.113.7');
   const key = `ledger#visitor#${visitor}#2026-10-18`;
-  assert.equal(store.items.get(key).committed, actualMicros('haiku', { input_tokens: 3000, output_tokens: 40 }), 'settled to the actual cost');
+  assert.equal(store.items.get(key).committed, actualMicros('anthropic:haiku', { input_tokens: 3000, output_tokens: 40 }), 'settled to the actual cost');
   store.items.set(key, { committed: 49_000, spent: 49_000 });
   let r;
   const seen = await capture(async () => { r = await call(a, { body: ask() }); });
@@ -517,7 +587,7 @@ test('S4: the limits are lower: 30 a day per address, and the body at most 32 KB
   assert.ok(DEFAULT_LIMITS.perAddressHour <= DEFAULT_LIMITS.perAddressDay);
   // At 32 KB plus the system prompt, one Haiku question reserves well under a cent, so the
   // visitor's share is at least eight full-size questions.
-  const worst = worstCaseMicros('haiku', 32 * 1024 + Buffer.byteLength(SYSTEM_PROMPT) + 2000, 1200);
+  const worst = worstCaseMicros('anthropic:haiku', 32 * 1024 + Buffer.byteLength(systemPrompt('anthropic')) + 2000, 1200);
   assert.ok(worst < 0.01 * USD, `worst case ${worst}`);
   assert.ok(configFromEnv({}).visitorDayMicros / worst >= 8);
 });
@@ -538,13 +608,14 @@ test('M1: requests without CloudFront\'s address share one conservative bucket a
   assert.equal(store.items.get(hour).n, 3);
 });
 
-test('M7: data retention must read "none", or nothing is sent to the model', async () => {
-  for (const retention of [async () => 'default', async () => 'provider_data_share', async () => { throw new Error('down'); }, undefined]) {
+test('M7: on Bedrock, data retention must read "none", or nothing is sent to the model', async () => {
+  const modes = [async () => 'default', async () => 'provider_data_share', async () => { throw new Error('down'); }];
+  for (const ready of [...modes.map(retentionIsNone), undefined]) {
     const model = fakeModel();
     const store = memoryStore();
-    const cfg = config();
+    const cfg = config({ ...configFromEnv({ ASSISTANT_ENABLED: 'true', PROVIDER: 'bedrock' }), local: OPEN_LOCAL, statusCacheMs: 0 });
     const ledger = createLedger(store, { monthMicros: cfg.monthMicros, dayMicros: cfg.dayMicros, deeperMonthMicros: cfg.deeperMonthMicros, visitorDayMicros: cfg.visitorDayMicros });
-    const a = createAssistant(cfg, { store, ledger, model, retention, now: () => NOW });
+    const a = createAssistant(cfg, { store, ledger, model, ready, now: () => NOW });
     let r;
     await capture(async () => { await a.warm(); r = await call(a, { body: ask() }); });
     assert.equal(r.status, 503);
@@ -557,11 +628,11 @@ test('M7: data retention must read "none", or nothing is sent to the model', asy
   }
 });
 
-test('M7: a failed retention check is retried after a minute; a good one is reused', async () => {
+test('M7: a failed provider check is retried after a minute; a good one is reused', async () => {
   const clock = { t: NOW };
   let mode = 'default';
   let checks = 0;
-  const { a, model } = setup({ clock, retention: async () => { checks += 1; return mode; } });
+  const { a, model } = setup({ clock, ready: retentionIsNone(async () => { checks += 1; return mode; }) });
   await capture(() => a.warm());
   assert.equal(checks, 1);
   mode = 'none';
@@ -574,4 +645,415 @@ test('M7: a failed retention check is retried after a minute; a good one is reus
   clock.t = new Date(NOW.getTime() + 61_000 + 15 * 60_000 + 1);
   await capture(async () => assert.equal((await call(a, { body: ask() })).status, 503));
   assert.equal(model.calls.length, 2);
+});
+
+// ---------------------------------------------------------------- the Claude API provider
+
+/** The Claude API's events for one answer, as SSE bytes in awkward chunks. */
+function sse(events) {
+  return events.map(([event, data]) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`).join('');
+}
+function fetchReturning(text, { status = 200, chunk = 7 } = {}) {
+  const seen = [];
+  const fn = async (url, init) => {
+    seen.push({ url, init });
+    if (init.signal?.aborted) throw Object.assign(new Error('aborted'), { name: 'AbortError' });
+    const bytes = new TextEncoder().encode(text);
+    const body = new ReadableStream({
+      start(c) {
+        for (let i = 0; i < bytes.length; i += chunk) c.enqueue(bytes.slice(i, i + chunk));
+        c.close();
+      },
+    });
+    return { ok: status < 400, status, body, json: async () => JSON.parse(text) };
+  };
+  fn.seen = seen;
+  return fn;
+}
+const ANSWER_EVENTS = [
+  ['message_start', { type: 'message_start', message: { id: 'msg_1', type: 'message', role: 'assistant', content: [], model: 'claude-haiku-5-5', usage: { input_tokens: 2000, cache_creation_input_tokens: 1000, cache_read_input_tokens: 500, output_tokens: 1 } } }],
+  ['content_block_start', { type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } }],
+  ['ping', { type: 'ping' }],
+  ['content_block_delta', { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: 'The demand part ' } }],
+  ['content_block_delta', { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: 'is 45% of the score. \u00dcn\u00efc\u00f6d\u00e9 \u2713' } }],
+  ['content_block_stop', { type: 'content_block_stop', index: 0 }],
+  // Cumulative counts; a field sent as null never lowers what message_start said.
+  ['message_delta', { type: 'message_delta', delta: { stop_reason: 'end_turn', stop_sequence: null }, usage: { input_tokens: null, cache_read_input_tokens: null, output_tokens: 1200 } }],
+  ['message_stop', { type: 'message_stop' }],
+];
+
+test('anthropic: an answer streamed over SSE is shown and settled at the list price', async () => {
+  const { anthropicModel } = await import('../src/anthropic.mjs');
+  const fetchFn = fetchReturning(sse(ANSWER_EVENTS), { chunk: 5 });
+  const model = anthropicModel({ getKey: () => 'fake-anthropic-test-0000000000000000', fetchFn });
+  const { a, store } = setup({ model });
+  const r = await call(a, { body: ask() });
+  assert.equal(r.status, 200);
+  assert.equal(r.lines().filter((l) => l.t === 'text').map((l) => l.v).join(''), 'The demand part is 45% of the score. \u00dcn\u00efc\u00f6d\u00e9 \u2713');
+  assert.deepEqual(r.lines().at(-1), { t: 'done', stop: 'end_turn' });
+  // 2000 input at $0.10, 1000 cache writes at $0.125, 500 cache reads at $0.01, 1200 output at $0.50.
+  const expected = actualMicros('anthropic:haiku', { input_tokens: 2000, cache_creation_input_tokens: 1000, cache_read_input_tokens: 500, output_tokens: 1200 });
+  assert.equal(expected, 200 + 125 + 5 + 600);
+  assert.equal(store.items.get('ledger#month#2026-10').committed, expected);
+  const sent = JSON.parse(fetchFn.seen[0].init.body);
+  assert.equal(sent.model, 'claude-haiku-5-5');
+  assert.equal(sent.stream, true);
+  assert.equal(fetchFn.seen[0].init.headers['anthropic-version'], '2023-06-01');
+});
+
+test('anthropic: without a final output count the whole reservation is kept', async () => {
+  const { anthropicModel } = await import('../src/anthropic.mjs');
+  const noCount = ANSWER_EVENTS.map(([e, d]) => (e === 'message_delta' ? [e, { type: 'message_delta', delta: { stop_reason: 'end_turn' } }] : [e, d]));
+  const cut = ANSWER_EVENTS.slice(0, 5); // the connection ends mid-answer
+  for (const events of [noCount, cut]) {
+    const fetchFn = fetchReturning(sse(events));
+    const model = anthropicModel({ getKey: () => 'fake-anthropic-test-0000000000000000', fetchFn });
+    const { a, store } = setup({ model });
+    await call(a, { body: ask() });
+    const m = store.items.get('ledger#month#2026-10');
+    // The reservation is the worst case for exactly the bytes that were sent.
+    assert.equal(m.committed, worstCaseMicros('anthropic:haiku', Buffer.byteLength(fetchFn.seen[0].init.body), 1200));
+    assert.equal(m.committed, m.spent);
+  }
+});
+
+test('anthropic: an error event mid-answer keeps the reservation; an HTTP refusal costs nothing', async () => {
+  const { anthropicModel } = await import('../src/anthropic.mjs');
+  {
+    const events = [...ANSWER_EVENTS.slice(0, 4), ['error', { type: 'error', error: { type: 'overloaded_error', message: 'Overloaded' } }]];
+    const model = anthropicModel({ getKey: () => 'fake-anthropic-test-0000000000000000', fetchFn: fetchReturning(sse(events)) });
+    const { a, store } = setup({ model });
+    let r;
+    const seen = await capture(async () => { r = await call(a, { body: ask() }); });
+    assert.equal(r.lines().at(-1).t, 'error');
+    assert.ok(seen.some((l) => l.includes('"overloaded_error"')));
+    assert.ok(store.items.get('ledger#month#2026-10').committed > 1000, 'kept: the model had started');
+  }
+  for (const status of [400, 401, 429, 500, 529]) {
+    const body = JSON.stringify({ type: 'error', error: { type: 'rate_limit_error', message: 'x' } });
+    const model = anthropicModel({ getKey: () => 'fake-anthropic-test-0000000000000000', fetchFn: fetchReturning(body, { status }) });
+    const { a, store } = setup({ model });
+    let r;
+    await capture(async () => { r = await call(a, { body: ask() }); });
+    assert.equal(r.lines().at(-1).t, 'error');
+    assert.equal(store.items.get('ledger#month#2026-10').committed, 0, `HTTP ${status} is not billed`);
+  }
+  {
+    // No response at all (network failure): not known to be unbilled, so kept.
+    const model = anthropicModel({ getKey: () => 'fake-anthropic-test-0000000000000000', fetchFn: async () => { throw new TypeError('fetch failed'); } });
+    const { a, store } = setup({ model });
+    await capture(() => call(a, { body: ask() }));
+    assert.ok(store.items.get('ledger#month#2026-10').committed > 0);
+  }
+});
+
+test('anthropic: no API key means unavailable, before the limits, the ledger or the model', async () => {
+  const { keySource } = await import('../src/anthropic.mjs');
+  for (const read of [async () => null, async () => '', async () => { throw Object.assign(new Error('x'), { name: 'ParameterNotFound' }); }]) {
+    const key = keySource(read);
+    const model = fakeModel();
+    const store = memoryStore();
+    const { a } = setup({ model, store, ready: key.refresh });
+    let r;
+    const seen = await capture(async () => { await a.warm(); r = await call(a, { body: ask() }); });
+    assert.equal(r.status, 503);
+    assert.equal(r.json().error, 'unavailable');
+    assert.equal(model.calls.length, 0);
+    assert.equal(storeCalls(store), 0);
+    assert.ok(seen.some((l) => /provider_not_ready|provider_check_error/.test(l)));
+    const s = (await call(a, { method: 'GET', path: '/api/assistant/status' })).json();
+    assert.deepEqual([s.state, s.scope], ['paused', 'unavailable']);
+  }
+});
+
+test('anthropic: the key is read at cold start and again every 15 minutes, never logged', async () => {
+  const { anthropicModel, keySource } = await import('../src/anthropic.mjs');
+  const clock = { t: NOW };
+  const KEY = 'fake-anthropic-SECRET-KEY-VALUE-0123456789';
+  let reads = 0;
+  const key = keySource(async () => { reads += 1; return KEY; });
+  const fetchFn = fetchReturning(sse(ANSWER_EVENTS));
+  const { a } = setup({ clock, model: anthropicModel({ getKey: key.get, fetchFn }), ready: key.refresh });
+  const seen = await capture(async () => {
+    await a.warm();
+    await call(a, { body: ask() });
+    clock.t = new Date(NOW.getTime() + 14 * 60_000);
+    await call(a, { body: ask() });
+    clock.t = new Date(NOW.getTime() + 15 * 60_000 + 1);
+    await call(a, { body: ask() });
+  });
+  assert.equal(reads, 2);
+  assert.equal(fetchFn.seen[0].init.headers['x-api-key'], KEY);
+  for (const line of seen) assert.doesNotMatch(line, /SECRET-KEY/);
+});
+
+test('anthropic: the call stops when the viewer goes away', async () => {
+  let signal;
+  const model = {
+    calls: [],
+    async *stream(req) {
+      signal = req.signal;
+      yield { type: 'message_start', message: { usage: { input_tokens: 3000, output_tokens: 1 } } };
+      yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: 'The ' } };
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      if (signal.aborted) throw Object.assign(new Error('aborted'), { name: 'AbortError' });
+      yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: 'rest' } };
+    },
+  };
+  const { a, store } = setup({ model });
+  let closed;
+  const out = [];
+  await capture(() => a.handle({ method: 'POST', path: '/api/assistant/ask', headers: { 'cloudfront-viewer-address': '203.0.113.7:1' }, body: JSON.stringify(ask()) }, {
+    start() {},
+    write(t) { out.push(t); if (t.includes('"The "')) closed(); },
+    end() {},
+    onClose(fn) { closed = fn; },
+  }));
+  assert.equal(signal.aborted, true);
+  assert.ok(!out.join('').includes('rest'));
+  assert.ok(store.items.get('ledger#month#2026-10').committed > actualMicros('anthropic:haiku', { input_tokens: 3000, output_tokens: 1 }), 'kept: it broke off');
+  // A write that fails (the stream is gone) also stops the call.
+  let signal2;
+  const model2 = { async *stream(req) { signal2 = req.signal; yield { type: 'message_start', message: { usage: {} } }; yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: 'x' } }; if (signal2.aborted) throw Object.assign(new Error('a'), { name: 'AbortError' }); } };
+  const b = setup({ model: model2 }).a;
+  let writes = 0;
+  await capture(() => b.handle({ method: 'POST', path: '/api/assistant/ask', headers: { 'cloudfront-viewer-address': '203.0.113.7:1' }, body: JSON.stringify(ask()) }, {
+    start() {}, end() {},
+    write() { writes += 1; if (writes > 1) throw new Error('gone'); },
+  }));
+  assert.equal(signal2.aborted, true);
+});
+
+test('anthropic: usage counts only ever go up, field by field', () => {
+  const u = absorbUsage({}, { input_tokens: 3000, cache_read_input_tokens: 20, output_tokens: 1 });
+  absorbUsage(u, { input_tokens: null, output_tokens: 1200, cache_creation_input_tokens: undefined });
+  absorbUsage(u, { output_tokens: 900, cache_read_input_tokens: -5 });
+  assert.deepEqual(u, { input_tokens: 3000, cache_read_input_tokens: 20, output_tokens: 1200 });
+});
+
+test('the system prompt says only what is true of the provider in use', () => {
+  const anthropic = systemPrompt('anthropic');
+  const bedrock = systemPrompt('bedrock');
+  assert.doesNotMatch(anthropic, /retention switched off|not stored by/i, 'no zero-retention claim for the Claude API');
+  assert.doesNotMatch(anthropic, /Bedrock/);
+  assert.match(anthropic, /standard commercial terms/);
+  assert.match(anthropic, /does not use them to train models by default/);
+  assert.match(bedrock, /data retention switched off/);
+  assert.ok(anthropic.includes(DATA_HANDLING.anthropic) && bedrock.includes(DATA_HANDLING.bedrock));
+  const openai = systemPrompt('openai');
+  assert.ok(openai.includes(DATA_HANDLING.openai));
+  assert.match(openai, /OpenAI's standard API data terms/);
+  assert.doesNotMatch(openai, /retention switched off|not stored|zero retention|Bedrock|Anthropic|Claude/i, 'no zero-retention claim, no other provider');
+  assert.throws(() => systemPrompt('mistral'));
+  assert.ok(methodNumbers().includes(30), 'the 30 days may be quoted');
+  // The panel says the same thing in the same words (platform/app/src/assistant/AssistantPanel.tsx).
+  const panel = readFileSync(new URL('../../app/src/assistant/AssistantPanel.tsx', import.meta.url), 'utf8');
+  for (const statement of Object.values(DATA_HANDLING)) {
+    const claim = statement.replace(/^Requests are processed by /, '');
+    const words = claim.replace(/'/g, "\\'");
+    assert.ok(panel.includes(claim) || panel.includes(words), `panel: ${claim}`);
+  }
+});
+
+test('status names the provider, so the panel can say where questions go', async () => {
+  const { a } = setup();
+  assert.equal((await call(a, { method: 'GET', path: '/api/assistant/status' })).json().provider, 'anthropic');
+  const o = setup({ cfg: config({ ...configFromEnv({ ASSISTANT_ENABLED: 'true' }), local: OPEN_LOCAL, statusCacheMs: 0 }) }).a;
+  assert.equal((await call(o, { method: 'GET', path: '/api/assistant/status' })).json().provider, 'openai');
+  const b = setup({ cfg: config({ ...configFromEnv({ ASSISTANT_ENABLED: 'true', PROVIDER: 'bedrock' }), local: OPEN_LOCAL, statusCacheMs: 0 }) }).a;
+  assert.equal((await call(b, { method: 'GET', path: '/api/assistant/status' })).json().provider, 'bedrock');
+});
+
+// ---------------------------------------------------------------- the OpenAI provider
+
+const OPENAI_KEY = 'fake-openai-SECRET-KEY-VALUE-0123456789';
+const openaiConfig = (over = {}) => config({ ...configFromEnv({ ASSISTANT_ENABLED: 'true' }), local: OPEN_LOCAL, statusCacheMs: 0, ...over });
+
+/** The Responses API's events for one answer, as SSE (OpenAI sends an event: line and the type in the data). */
+function oaSse(events) {
+  return events.map((d) => `event: ${d.type}\ndata: ${JSON.stringify(d)}\n\n`).join('');
+}
+const OA_USAGE = { input_tokens: 3000, input_tokens_details: { cached_tokens: 1000 }, output_tokens: 600, output_tokens_details: { reasoning_tokens: 200 }, total_tokens: 3600 };
+const OA_EVENTS = [
+  { type: 'response.created', sequence_number: 0, response: { id: 'resp_1', status: 'in_progress', usage: null } },
+  { type: 'response.in_progress', sequence_number: 1, response: { id: 'resp_1', status: 'in_progress' } },
+  { type: 'response.output_item.added', sequence_number: 2, output_index: 0, item: { type: 'message', role: 'assistant', content: [] } },
+  { type: 'response.output_text.delta', sequence_number: 3, item_id: 'msg_1', output_index: 0, content_index: 0, delta: 'The demand part ' },
+  { type: 'response.output_text.delta', sequence_number: 4, item_id: 'msg_1', output_index: 0, content_index: 0, delta: 'is 45% of the score. \u00dcn\u00efc\u00f6d\u00e9 \u2713' },
+  { type: 'response.output_text.done', sequence_number: 5, item_id: 'msg_1', output_index: 0, content_index: 0, text: 'The demand part is 45% of the score.' },
+  { type: 'response.completed', sequence_number: 6, response: { id: 'resp_1', status: 'completed', usage: OA_USAGE } },
+];
+
+test('openai: an answer streamed over SSE is shown and settled at the list price', async () => {
+  const { openaiModel } = await import('../src/openai.mjs');
+  const fetchFn = fetchReturning(oaSse(OA_EVENTS), { chunk: 5 });
+  const { a, store } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn }) });
+  const r = await call(a, { body: ask() });
+  assert.equal(r.status, 200);
+  assert.equal(r.lines().filter((l) => l.t === 'text').map((l) => l.v).join(''), 'The demand part is 45% of the score. \u00dcn\u00efc\u00f6d\u00e9 \u2713');
+  assert.deepEqual(r.lines().at(-1), { t: 'done', stop: 'end_turn' });
+  // 2000 uncached input at $0.75, 1000 cached at $0.075, 600 output (reasoning included) at $4.50.
+  const expected = actualMicros('openai:gpt-5.4-mini', { input_tokens: 2000, cache_read_input_tokens: 1000, output_tokens: 600 });
+  assert.equal(expected, 1500 + 75 + 2700);
+  const m = store.items.get('ledger#month#2026-10');
+  assert.equal(m.committed, expected);
+  assert.equal(m.spent, expected);
+  // The request: one POST to the Responses API, as the earlier assistant makes it, streaming.
+  assert.equal(fetchFn.seen.length, 1, 'no retries');
+  assert.equal(fetchFn.seen[0].url, 'https://api.openai.com/v1/responses');
+  assert.equal(fetchFn.seen[0].init.headers.authorization, `Bearer ${OPENAI_KEY}`);
+  const sent = JSON.parse(fetchFn.seen[0].init.body);
+  assert.equal(sent.model, 'gpt-5.4-mini');
+  assert.equal(sent.stream, true);
+  assert.equal(sent.store, false, 'the response is not stored for later retrieval');
+  assert.equal(sent.max_output_tokens, 1200);
+  assert.equal(sent.instructions, systemPrompt('openai'));
+  assert.equal(sent.metadata, undefined, 'no visitor or session identifiers are sent');
+  assert.equal(sent.system, undefined);
+  assert.equal(sent.input.at(-1).role, 'user');
+  assert.match(sent.input.at(-1).content, /<question>\nWhat does the demand part measure\?\n<\/question>/);
+});
+
+test('openai: earlier turns are sent as plain messages', async () => {
+  const { openaiModel } = await import('../src/openai.mjs');
+  const fetchFn = fetchReturning(oaSse(OA_EVENTS));
+  const { a } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn }) });
+  await call(a, { body: ask({ history: [{ role: 'user', text: 'Hi' }, { role: 'assistant', text: 'Hello' }] }) });
+  const sent = JSON.parse(fetchFn.seen[0].init.body);
+  assert.deepEqual(sent.input.slice(0, 2), [{ role: 'user', content: 'Hi' }, { role: 'assistant', content: 'Hello' }]);
+});
+
+test('openai: without a final usage count the whole reservation is kept', async () => {
+  const { openaiModel } = await import('../src/openai.mjs');
+  const done = OA_EVENTS.at(-1);
+  const cases = [
+    [...OA_EVENTS.slice(0, -1), { ...done, response: { ...done.response, usage: null } }], // no usage
+    [...OA_EVENTS.slice(0, -1), { ...done, response: { ...done.response, usage: { input_tokens: 3000 } } }], // no output count
+    [...OA_EVENTS.slice(0, -1), { ...done, response: { ...done.response, usage: { output_tokens: 600 } } }], // no input count
+    OA_EVENTS.slice(0, 4), // the connection ends mid-answer
+  ];
+  for (const events of cases) {
+    const fetchFn = fetchReturning(oaSse(events));
+    const { a, store } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn }) });
+    await capture(() => call(a, { body: ask() }));
+    const m = store.items.get('ledger#month#2026-10');
+    assert.equal(m.committed, worstCaseMicros('openai:gpt-5.4-mini', Buffer.byteLength(fetchFn.seen[0].init.body), 1200));
+    assert.equal(m.committed, m.spent);
+  }
+});
+
+test('openai: a response cut short at the output limit is settled from its usage', async () => {
+  const { openaiModel } = await import('../src/openai.mjs');
+  const events = [...OA_EVENTS.slice(0, -1), { type: 'response.incomplete', sequence_number: 6, response: { status: 'incomplete', incomplete_details: { reason: 'max_output_tokens' }, usage: { input_tokens: 3000, output_tokens: 1200 } } }];
+  const { a, store } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn: fetchReturning(oaSse(events)) }) });
+  const r = await call(a, { body: ask() });
+  assert.deepEqual(r.lines().at(-1), { t: 'done', stop: 'max_tokens' });
+  assert.equal(store.items.get('ledger#month#2026-10').committed, actualMicros('openai:gpt-5.4-mini', { input_tokens: 3000, output_tokens: 1200 }));
+});
+
+test('openai: error events keep the reservation; an HTTP refusal costs nothing', async () => {
+  const { openaiModel } = await import('../src/openai.mjs');
+  const failures = [
+    [...OA_EVENTS.slice(0, 4), { type: 'error', sequence_number: 4, code: 'server_error', message: 'The server had an error', param: null }],
+    [...OA_EVENTS.slice(0, 4), { type: 'response.failed', sequence_number: 4, response: { status: 'failed', error: { code: 'server_error', message: 'x' }, usage: null } }],
+    [{ type: 'error', sequence_number: 0, code: 'rate_limit_exceeded', message: 'x' }], // before anything started
+  ];
+  for (const events of failures) {
+    const { a, store } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn: fetchReturning(oaSse(events)) }) });
+    let r;
+    const seen = await capture(async () => { r = await call(a, { body: ask() }); });
+    assert.equal(r.lines().at(-1).t, 'error');
+    assert.ok(seen.some((l) => /"(server_error|rate_limit_exceeded)"/.test(l)));
+    assert.ok(store.items.get('ledger#month#2026-10').committed > 1000, 'kept: not known to be unbilled');
+  }
+  for (const [status, code] of [[400, 'invalid_request_error'], [401, 'invalid_api_key'], [429, 'insufficient_quota'], [429, 'rate_limit_exceeded'], [500, 'server_error'], [503, null]]) {
+    const body = code ? JSON.stringify({ error: { message: 'x', type: 'invalid_request_error', param: null, code } }) : '<html>unavailable</html>';
+    const { a, store } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn: fetchReturning(body, { status }) }) });
+    let r;
+    const seen = await capture(async () => { r = await call(a, { body: ask() }); });
+    assert.equal(r.lines().at(-1).t, 'error');
+    assert.equal(store.items.get('ledger#month#2026-10').committed, 0, `HTTP ${status} is not billed`);
+    assert.ok(seen.some((l) => l.includes(`"${code ?? `http_${status}`}"`)));
+  }
+  {
+    const model = openaiModel({ getKey: () => OPENAI_KEY, fetchFn: async () => { throw new TypeError('fetch failed'); } });
+    const { a, store } = setup({ cfg: openaiConfig(), model });
+    await capture(() => call(a, { body: ask() }));
+    assert.ok(store.items.get('ledger#month#2026-10').committed > 0, 'no response at all: kept');
+  }
+});
+
+test('openai: no key in the secret means unavailable, before the limits, the ledger or the model', async () => {
+  const { keySource } = await import('../src/apikey.mjs');
+  const { keyFromSecretString } = await import('../src/openai.mjs');
+  const reads = [
+    async () => null,
+    async () => keyFromSecretString(JSON.stringify({ GITHUB_TOKEN: 'github_pat_000000000000000000000' })),
+    async () => keyFromSecretString(JSON.stringify({ OPENAI_API_KEY: '' })),
+    async () => keyFromSecretString('not json fake-openai-SECRET-KEY-VALUE-0123456789'),
+    async () => { throw Object.assign(new Error('x'), { name: 'ResourceNotFoundException' }); },
+    async () => { throw Object.assign(new Error('x'), { name: 'AccessDeniedException' }); },
+  ];
+  for (const read of reads) {
+    const key = keySource(read);
+    const model = fakeModel();
+    const store = memoryStore();
+    const { a } = setup({ cfg: openaiConfig(), model, store, ready: key.refresh });
+    let r;
+    const seen = await capture(async () => { await a.warm(); r = await call(a, { body: ask() }); });
+    assert.equal(r.status, 503);
+    assert.equal(r.json().error, 'unavailable');
+    assert.equal(model.calls.length, 0);
+    assert.equal(storeCalls(store), 0);
+    assert.ok(seen.some((l) => /provider_not_ready|provider_check_error/.test(l)));
+    for (const line of seen) assert.doesNotMatch(line, /SECRET-KEY|github_pat/);
+  }
+});
+
+test('openai: the key is read from the secret at cold start and every 15 minutes, never logged', async () => {
+  const { keySource } = await import('../src/apikey.mjs');
+  const { keyFromSecretString, openaiModel } = await import('../src/openai.mjs');
+  const clock = { t: NOW };
+  let reads = 0;
+  const key = keySource(async () => { reads += 1; return keyFromSecretString(JSON.stringify({ OPENAI_API_KEY: OPENAI_KEY, GITHUB_TOKEN: 'github_pat_000000000000000000000' })); });
+  const fetchFn = fetchReturning(oaSse(OA_EVENTS));
+  const { a } = setup({ cfg: openaiConfig(), clock, model: openaiModel({ getKey: key.get, fetchFn }), ready: key.refresh });
+  const seen = await capture(async () => {
+    await a.warm();
+    await call(a, { body: ask() });
+    clock.t = new Date(NOW.getTime() + 14 * 60_000);
+    await call(a, { body: ask() });
+    clock.t = new Date(NOW.getTime() + 15 * 60_000 + 1);
+    await call(a, { body: ask() });
+  });
+  assert.equal(reads, 2);
+  assert.equal(key.get(), OPENAI_KEY, 'only the OpenAI key is kept');
+  for (const line of seen) assert.doesNotMatch(line, /SECRET-KEY|github_pat/);
+});
+
+test('openai: the call stops when the viewer goes away', async () => {
+  const { openaiModel } = await import('../src/openai.mjs');
+  let signal;
+  const fetchFn = async (url, init) => {
+    signal = init.signal;
+    const enc = new TextEncoder();
+    const body = new ReadableStream({
+      async pull(c) {
+        if (signal.aborted) { c.error(Object.assign(new Error('aborted'), { name: 'AbortError' })); return; }
+        c.enqueue(enc.encode(oaSse([OA_EVENTS[3]])));
+        await new Promise((resolve) => setTimeout(resolve, 2));
+      },
+    });
+    return { ok: true, status: 200, body };
+  };
+  const { a, store } = setup({ cfg: openaiConfig(), model: openaiModel({ getKey: () => OPENAI_KEY, fetchFn }) });
+  let closed;
+  await capture(() => a.handle({ method: 'POST', path: '/api/assistant/ask', headers: { 'cloudfront-viewer-address': '203.0.113.7:1' }, body: JSON.stringify(ask()) }, {
+    start() {},
+    write(t) { if (t.includes('"text"')) closed(); },
+    end() {},
+    onClose(fn) { closed = fn; },
+  }));
+  assert.equal(signal.aborted, true);
+  assert.ok(store.items.get('ledger#month#2026-10').committed > 1000, 'kept: it broke off');
 });

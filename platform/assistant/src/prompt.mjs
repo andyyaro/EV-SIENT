@@ -5,7 +5,7 @@
 // FaqLink.tsx, which cites its own sources), the three layers and the data tiers
 // (docs/FLEXIBLE_ANALYSIS.md), and what the tool is not (docs/WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md).
 //
-// The system prompt never changes between requests, so Bedrock's prompt cache keeps it warm.
+// The system prompt never changes between requests, so the prompt cache keeps it warm.
 // It holds no secrets: assume a visitor can read it.
 
 export const KNOWLEDGE = `
@@ -39,10 +39,29 @@ Three layers stay apart. The readiness model is EV-SIENT's published score and t
 Cite the run, not only the number: the report's Reproducibility section lists the run ID, the model mode, the engine version and the hash of every input and result file.
 
 ## Where data goes
-The planner's file never leaves the browser. The assistant receives the planner's question, where the planner is in the app and the file's size, and, only if the planner agrees for this session after seeing exactly what would be sent, summaries the engine already computed: column headers and their dictionary entries, the share of blanks, a rough count of distinct values, rounded 10th, 50th and 90th percentiles, category labels with counts (groups under 10 hidden), results per tier, Explore patterns, the planner's index settings, and one site's score breakdown with the site renamed Site A. It never receives rows, cells, sample values, site names, IDs, addresses, coordinates, free-text notes, per-site values of the planner's own columns or the file name. Requests are processed by Claude on Amazon Bedrock with data retention switched off, so they are not stored by AWS or Anthropic.
+The planner's file never leaves the browser. The assistant receives the planner's question, where the planner is in the app and the file's size, and, only if the planner agrees for this session after seeing exactly what would be sent, summaries the engine already computed: column headers and their dictionary entries, the share of blanks, a rough count of distinct values, rounded 10th, 50th and 90th percentiles, category labels with counts (groups under 10 hidden), results per tier, Explore patterns, the planner's index settings, and one site's score breakdown with the site renamed Site A. It never receives rows, cells, sample values, site names, IDs, addresses, coordinates, free-text notes, per-site values of the planner's own columns or the file name.
 `.trim();
 
-export const SYSTEM_PROMPT = `You are the assistant inside the EV-SIENT Planner, a browser tool that helps local-government planners compare candidate sites for public electric vehicle charging.
+/**
+ * Where requests are processed, as the assistant may tell the planner. Only what is true of the
+ * provider in use: OpenAI's standard API data terms apply, with no claim of zero retention
+ * (the request also asks OpenAI not to store the response for later retrieval, store: false);
+ * Bedrock runs with data retention set to none (checked by the proxy); the
+ * Claude API runs under Anthropic's standard commercial terms (privacy.claude.com, read
+ * 19 October 2026: inputs and outputs are not used for training by default, and are deleted
+ * within 30 days unless kept longer to enforce the usage policy or by law).
+ */
+export const DATA_HANDLING = {
+  openai: "Requests are processed by OpenAI's API under OpenAI's standard API data terms. Only the question, the conversation so far, the current step, the file's size and any summaries agreed to for this session are sent.",
+  bedrock: 'Requests are processed by Claude on Amazon Bedrock with data retention switched off, so they are not stored by AWS or Anthropic.',
+  anthropic: 'Requests are processed by Anthropic\'s Claude API under its standard commercial terms: Anthropic does not use them to train models by default, and deletes them within 30 days unless it must keep them longer to enforce its usage policy or by law.',
+};
+
+/** The system prompt for a provider (openai, anthropic or bedrock). */
+export function systemPrompt(provider) {
+  const handling = DATA_HANDLING[provider];
+  if (!handling) throw new Error(`no data handling statement for ${provider}`);
+  return `You are the assistant inside the EV-SIENT Planner, a browser tool that helps local-government planners compare candidate sites for public electric vehicle charging.
 
 Rules you always follow:
 1. Scope: answer only about the EV-SIENT Planner, its method, the planner's results as shared with you, and EV charging site planning in general. For anything else, say briefly that you can only help with the planner.
@@ -53,12 +72,15 @@ Rules you always follow:
 6. Never ask for rows, cell values, site names, addresses or coordinates, and never ask the planner to paste their file. If shared results are absent, say what the planner could share (with Review What Would Be Shared in this panel) or answer from the method.
 7. Be brief and plain: short paragraphs or a short list, no headings, no tables, no links, no images, no code. Use the planner's words, not engineering terms.
 
-${KNOWLEDGE}`;
+${KNOWLEDGE}
+${handling}`;
+}
 
 /** Every number written in the method, which an answer may quote without a placeholder. */
 export function methodNumbers() {
   const found = new Set();
-  for (const m of KNOWLEDGE.matchAll(/\d+(?:\.\d+)?/g)) found.add(Number(m[0]));
+  const text = [KNOWLEDGE, ...Object.values(DATA_HANDLING)].join('\n');
+  for (const m of text.matchAll(/\d+(?:\.\d+)?/g)) found.add(Number(m[0]));
   return [...found].sort((a, b) => a - b);
 }
 
@@ -81,13 +103,30 @@ export function buildMessages({ history, question, context }) {
   return messages;
 }
 
-/** The request body for InvokeModelWithResponseStream (Anthropic Messages format on Bedrock). */
-export function buildBody({ messages, maxTokens, extra }) {
-  return {
-    anthropic_version: 'bedrock-2023-05-31',
-    max_tokens: maxTokens,
-    system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-    messages,
-    ...extra,
-  };
+/**
+ * The request body exactly as it is sent. OpenAI: the Responses API format, with the system
+ * prompt as instructions, each turn as a plain message, streaming on and the response not
+ * stored for later retrieval (store: false). Claude: the Anthropic Messages format, for
+ * Bedrock's InvokeModelWithResponseStream (the version in the body, the model in the URL), or
+ * for the Claude API (the model and stream in the body, the version in a header). `extra`
+ * holds only the allow-listed fields (config.mjs) and is spread first, so it cannot replace
+ * the model, the stream, the output limit or the prompt.
+ */
+export function buildBody({ messages, maxTokens, extra, provider, modelId }) {
+  if (provider === 'openai') {
+    return {
+      ...extra,
+      model: modelId,
+      stream: true,
+      store: false,
+      instructions: systemPrompt(provider),
+      input: messages.map((m) => ({ role: m.role, content: m.content.map((c) => c.text).join('\n') })),
+      max_output_tokens: maxTokens,
+    };
+  }
+  const system = [{ type: 'text', text: systemPrompt(provider), cache_control: { type: 'ephemeral' } }];
+  const head = provider === 'bedrock'
+    ? { anthropic_version: 'bedrock-2023-05-31' }
+    : { model: modelId, stream: true };
+  return { ...head, max_tokens: maxTokens, system, messages, ...extra };
 }

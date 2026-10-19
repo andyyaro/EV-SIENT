@@ -1,6 +1,8 @@
 // The assistant proxy's request handling, with no AWS in it: the store (DynamoDB or memory),
-// the model (Bedrock or a test double) and the data retention check are passed in.
-// handler.mjs wires the real ones.
+// the model (OpenAI, Anthropic's Claude API, Bedrock, or a test double) and the provider check
+// (the API key is present, or Bedrock's data retention is none) are passed in. handler.mjs
+// wires the real ones. Every model yields the Anthropic Messages events; openai.mjs translates
+// OpenAI's into them.
 //
 // Routes (CloudFront sends /api/assistant/* here; the path is matched on its end so a prefix
 // change in CloudFront does not matter):
@@ -10,10 +12,11 @@
 // Status codes avoid 403 and 404, because the app's distribution turns those into its 404 page.
 //
 // Every refusal happens before the model is called, cheapest first: the size, this instance's
-// in-memory buckets (no database call), the shape (validate.mjs), switched off, data retention
-// not confirmed as none, a cap this instance already knows is reached (no database call), the
-// shared rate limits (limits.mjs), and the spend ledger (ledger.mjs). Any error in the limits,
-// the ledger or the retention check refuses the call (fail closed). Nothing here logs or
+// in-memory buckets (no database call), the shape (validate.mjs), switched off, the provider
+// not ready (no API key, or Bedrock data retention not confirmed as none), a cap this instance
+// already knows is reached (no database call), the shared rate limits (limits.mjs), and the
+// spend ledger (ledger.mjs). Any error in the limits, the ledger or the provider check refuses
+// the call (fail closed). Nothing here logs or
 // stores the question, the answer or the shared results.
 //
 // What the server enforces is the shape and the limits: closed objects, rounded numbers,
@@ -25,7 +28,7 @@ import { Invalid, LIMITS, validateAsk } from './validate.mjs';
 import { CapReached } from './ledger.mjs';
 import { countQuestion, localLimiter, loadSalt, NO_ADDRESS, RateLimited, viewerAddress, visitorHash } from './limits.mjs';
 import { actualMicros, worstCaseMicros } from './pricing.mjs';
-import { buildBody, buildMessages, methodNumbers, SYSTEM_PROMPT } from './prompt.mjs';
+import { buildBody, buildMessages, methodNumbers, systemPrompt } from './prompt.mjs';
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const STREAM_HEADERS = { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
@@ -48,7 +51,11 @@ export const WORDS = {
   model: 'The assistant could not answer just now. Try again in a minute.',
 };
 
-/** Bedrock errors that reject a request before any model work, so nothing is billed. */
+/**
+ * Bedrock errors that reject a request before any model work, so nothing is billed. The API
+ * adapters (openai.mjs, anthropic.mjs) mark their own such errors (an HTTP error status, no
+ * key) with `unbilled`.
+ */
 const REFUSED_UNBILLED = new Set([
   'ValidationException', 'AccessDeniedException', 'ResourceNotFoundException', 'ThrottlingException',
   'ServiceQuotaExceededException', 'ModelNotReadyException', 'ServiceUnavailableException',
@@ -59,7 +66,22 @@ function log(level, event, fields = {}) {
   console[level === 'warn' ? 'warn' : 'log'](JSON.stringify({ level, event, ...fields }));
 }
 
-/** Bedrock's usage, merged from the stream events and the invocation metrics, field by field. */
+const USAGE_FIELDS = ['input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens', 'output_tokens'];
+
+/**
+ * Fold one usage object from the stream into the running one, keeping the larger count per
+ * field. message_delta's counts are cumulative, and a field it sends as null or leaves out
+ * never lowers what message_start reported.
+ */
+export function absorbUsage(into, u) {
+  for (const f of USAGE_FIELDS) {
+    const v = u?.[f];
+    if (Number.isFinite(v) && v >= 0) into[f] = Math.max(into[f] ?? 0, v);
+  }
+  return into;
+}
+
+/** The usage, merged from the stream events and Bedrock's invocation metrics, field by field. */
 export function mergeUsage(stream, metrics) {
   const n = (v) => (Number.isFinite(v) && v > 0 ? v : 0);
   const m = metrics ?? {};
@@ -73,15 +95,16 @@ export function mergeUsage(stream, metrics) {
 
 /**
  * config: {
- *   enabled, monthMicros, dayMicros, deeperMonthMicros, visitorDayMicros,
+ *   enabled, provider ('openai' | 'anthropic' | 'bedrock'), monthMicros, dayMicros, deeperMonthMicros, visitorDayMicros,
  *   model: { id, price, maxTokens, extra },        // the standard model
  *   deeper: { id, price, maxTokens, extra } | null, // optional, under its own sub-cap
- *   limits, local, statusCacheMs, retentionCheckMs, timeoutMs
+ *   limits, local, statusCacheMs, readyCheckMs, timeoutMs
  * }
  * deps: {
  *   store, ledger, now,
  *   model: { stream({ modelId, body, signal }) -> AsyncIterable<event> },
- *   retention: () => Promise<string>   // Bedrock's account data retention mode in this Region
+ *   ready: () => Promise<boolean>   // the provider can be used: the API key was read,
+ *                                   // or Bedrock's data retention in this Region is none
  * }
  */
 export function createAssistant(config, deps) {
@@ -91,7 +114,7 @@ export function createAssistant(config, deps) {
   const caches = {
     salt: null,
     status: null, // { value, until }
-    retention: null, // { ok, until }
+    ready: null, // { ok, until }
     caps: new Map(), // 'month' | 'day' | 'deeper' -> Date
     visitorCaps: new Map(), // visitor hash -> Date
   };
@@ -109,18 +132,21 @@ export function createAssistant(config, deps) {
     }
   }
 
-  /** Whether Bedrock data retention is "none" here; checked now and then, never assumed. */
-  async function retentionOk() {
+  /**
+   * Whether the provider can be used; checked at cold start and then every readyCheckMs (15
+   * minutes), never assumed. A failed check is retried after a minute.
+   */
+  async function providerReady() {
     const t = now().getTime();
-    if (caches.retention && t < caches.retention.until) return caches.retention.ok;
+    if (caches.ready && t < caches.ready.until) return caches.ready.ok;
     let ok = false;
     try {
-      ok = (await deps.retention?.()) === 'none';
-      if (!ok) log('warn', 'retention_not_none');
+      ok = (await deps.ready?.()) === true;
+      if (!ok) log('warn', 'provider_not_ready', { provider: config.provider });
     } catch (e) {
-      log('warn', 'retention_check_error', { error: e?.name });
+      log('warn', 'provider_check_error', { provider: config.provider, error: e?.name });
     }
-    caches.retention = { ok, until: t + (ok ? config.retentionCheckMs ?? 900_000 : 60_000) };
+    caches.ready = { ok, until: t + (ok ? config.readyCheckMs ?? 900_000 : 60_000) };
     return ok;
   }
 
@@ -149,16 +175,16 @@ export function createAssistant(config, deps) {
     const t = now();
     if (caches.status && t.getTime() < caches.status.until) return caches.status.value;
     let value;
-    if (!(await retentionOk())) {
+    if (!(await providerReady())) {
       value = { v: 1, state: 'paused', scope: 'unavailable', message: WORDS.unavailable };
     } else {
       try {
-        const probe = worstCaseMicros(config.model.price, Buffer.byteLength(SYSTEM_PROMPT) + 2000, config.model.maxTokens);
+        const probe = worstCaseMicros(config.model.price, Buffer.byteLength(systemPrompt(config.provider)) + 2000, config.model.maxTokens);
         const s = await deps.ledger.status(t, probe);
         const usedShare = Math.round(s.usedShare * 10) / 10;
         if (s.monthReached) value = { v: 1, state: 'paused', scope: 'month', resumes: s.monthResumes.toISOString(), usedShare, message: WORDS.month };
         else if (s.dayReached) value = { v: 1, state: 'paused', scope: 'day', resumes: s.dayResumes.toISOString(), usedShare, message: WORDS.day };
-        else value = { v: 1, state: 'available', usedShare, deeper: !!config.deeper, limits: { questionChars: LIMITS.questionChars, historyTurns: LIMITS.historyTurns, bodyBytes: LIMITS.bodyBytes } };
+        else value = { v: 1, state: 'available', usedShare, deeper: !!config.deeper, provider: config.provider, limits: { questionChars: LIMITS.questionChars, historyTurns: LIMITS.historyTurns, bodyBytes: LIMITS.bodyBytes } };
       } catch (e) {
         log('warn', 'status_ledger_error', { error: e?.name });
         value = { v: 1, state: 'paused', scope: 'ledger', message: WORDS.ledger };
@@ -207,7 +233,7 @@ export function createAssistant(config, deps) {
     const deeper = body.deeper === true;
     const model = deeper ? config.deeper : config.model;
     if (!model) return send(400, { error: 'deeper_off', message: WORDS.deeperOff });
-    if (!(await retentionOk())) return send(503, { error: 'unavailable', message: WORDS.unavailable });
+    if (!(await providerReady())) return send(503, { error: 'unavailable', message: WORDS.unavailable });
 
     const at = now();
     let visitor;
@@ -231,7 +257,7 @@ export function createAssistant(config, deps) {
       return send(503, { error: 'ledger', message: WORDS.ledger });
     }
 
-    const requestBody = buildBody({ messages: buildMessages(body), maxTokens: model.maxTokens, extra: model.extra });
+    const requestBody = buildBody({ messages: buildMessages(body), maxTokens: model.maxTokens, extra: model.extra, provider: config.provider, modelId: model.id });
     const bytes = Buffer.byteLength(JSON.stringify(requestBody));
     const worst = worstCaseMicros(model.price, bytes, model.maxTokens);
     let reservation;
@@ -255,20 +281,26 @@ export function createAssistant(config, deps) {
     let complete = false;
     let stop = null;
     let refusedBeforeStart = false;
+    // Stop the model call when the proxy's timeout fires or the viewer goes away (the response
+    // stream closes, or a write to it fails): nobody is reading the rest.
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), config.timeoutMs ?? 45_000);
+    if (typeof res.onClose === 'function') res.onClose(() => abort.abort());
+    const say = (line) => {
+      try { res.write(JSON.stringify(line) + '\n'); } catch { abort.abort(); }
+    };
     res.start(200, STREAM_HEADERS);
-    res.write(JSON.stringify({ t: 'meta', methodNumbers: numbers, deeper }) + '\n');
+    say({ t: 'meta', methodNumbers: numbers, deeper });
     try {
       for await (const ev of deps.model.stream({ modelId: model.id, body: requestBody, signal: abort.signal })) {
         if (ev.type === 'message_start') {
           started = true;
-          Object.assign(usage, ev.message?.usage ?? {});
+          absorbUsage(usage, ev.message?.usage);
         } else if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta' && typeof ev.delta.text === 'string') {
-          res.write(JSON.stringify({ t: 'text', v: ev.delta.text }) + '\n');
+          say({ t: 'text', v: ev.delta.text });
         } else if (ev.type === 'message_delta') {
           if (ev.usage) {
-            Object.assign(usage, ev.usage);
+            absorbUsage(usage, ev.usage);
             if (Number.isFinite(ev.usage.output_tokens)) finalOutput = true;
           }
           if (ev.delta?.stop_reason) stop = ev.delta.stop_reason;
@@ -278,17 +310,17 @@ export function createAssistant(config, deps) {
           if (Number.isFinite(metrics?.outputTokenCount)) finalOutput = true;
         }
       }
-      res.write(JSON.stringify({ t: 'done', stop: stop ?? (complete ? 'end_turn' : 'incomplete') }) + '\n');
+      say({ t: 'done', stop: stop ?? (complete ? 'end_turn' : 'incomplete') });
     } catch (e) {
-      log('warn', 'model_error', { error: e?.name, started });
-      refusedBeforeStart = !started && REFUSED_UNBILLED.has(e?.name);
-      res.write(JSON.stringify({ t: 'error', error: 'model', message: WORDS.model }) + '\n');
+      log('warn', 'model_error', { error: e?.name, started, aborted: abort.signal.aborted });
+      refusedBeforeStart = !started && (REFUSED_UNBILLED.has(e?.name) || e?.unbilled === true);
+      say({ t: 'error', error: 'model', message: WORDS.model });
     } finally {
       clearTimeout(timer);
-      res.end();
+      try { res.end(); } catch { /* the viewer has gone */ }
     }
 
-    // Settle. A call Bedrock refused outright cost nothing. A complete call with a final output
+    // Settle. A call the provider refused outright cost nothing. A complete call with a final output
     // count costs the larger of what the stream and the invocation metrics report, field by
     // field. Anything else (broke off, timed out, no final count) keeps its whole reservation:
     // the ledger may overstate, never understate.
@@ -303,8 +335,8 @@ export function createAssistant(config, deps) {
     log('info', 'answered', { model: model.price, reserved: reservation.amount, actual, stop });
   }
 
-  /** Read the retention mode as the instance starts (cold start), so the first answer waits on nothing new. */
-  async function warm() { await retentionOk(); }
+  /** Check the provider as the instance starts (cold start), so the first answer waits on nothing new. */
+  async function warm() { await providerReady(); }
 
   return { handle, status, warm };
 }

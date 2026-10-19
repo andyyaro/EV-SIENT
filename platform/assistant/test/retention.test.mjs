@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { readRetentionMode, signV4 } from '../src/retention.mjs';
+import { readRetentionMode, retentionIsNone, signV4 } from '../src/retention.mjs';
 
 // AWS's "get-vanilla" case from the Signature Version 4 test suite.
 const VANILLA = {
@@ -51,4 +51,10 @@ test('readRetentionMode throws on an error response or without credentials', asy
   assert.equal(called, false);
   assert.equal(await readRetentionMode('us-east-1', ENV, async () => ({ ok: true, json: async () => ({ mode: 'default' }) })), 'default');
   assert.equal(await readRetentionMode('us-east-1', ENV, async () => ({ ok: true, json: async () => ({}) })), '');
+});
+
+test('retentionIsNone: Bedrock is ready only while the mode reads none', async () => {
+  assert.equal(await retentionIsNone(async () => 'none')(), true);
+  for (const mode of ['default', 'provider_data_share', 'inherit', '', 'NONE']) assert.equal(await retentionIsNone(async () => mode)(), false, mode);
+  await assert.rejects(retentionIsNone(async () => { throw new Error('down'); })());
 });

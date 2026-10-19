@@ -7,8 +7,11 @@ import type { Context } from './payload';
 
 export const BASE = '/api/assistant';
 
+/** Who answers: OpenAI, Anthropic's Claude API or Claude on Amazon Bedrock (the proxy says which). */
+export type Provider = 'openai' | 'anthropic' | 'bedrock';
+
 export type Status =
-  | { state: 'available'; usedShare: number; deeper: boolean }
+  | { state: 'available'; usedShare: number; deeper: boolean; provider?: Provider }
   | { state: 'paused'; scope: 'month' | 'day' | 'ledger'; resumes?: string; usedShare?: number; message: string }
   | { state: 'off'; message: string };
 
@@ -46,7 +49,10 @@ export async function fetchStatus(signal?: AbortSignal): Promise<Status> {
   const r = await fetch(`${BASE}/status`, { method: 'GET', cache: 'no-store', credentials: 'omit', signal });
   if (!r.ok) throw new Error(`status ${r.status}`);
   const body = await r.json() as Record<string, unknown>;
-  if (body.state === 'available') return { state: 'available', usedShare: Number(body.usedShare) || 0, deeper: !!body.deeper };
+  if (body.state === 'available') {
+    const provider = body.provider === 'openai' || body.provider === 'anthropic' || body.provider === 'bedrock' ? body.provider : undefined;
+    return { state: 'available', usedShare: Number(body.usedShare) || 0, deeper: !!body.deeper, provider };
+  }
   if (body.state === 'paused') {
     return {
       state: 'paused', scope: (body.scope as 'month' | 'day' | 'ledger') ?? 'ledger', message: String(body.message ?? ''),

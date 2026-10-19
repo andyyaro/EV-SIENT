@@ -1880,6 +1880,62 @@ another project's Bedrock Region), whether Bedrock accepts `thinking` switched o
 5.5 (`ModelExtraJson`; the smoke test shows it), and whether the Region budget sees Bedrock's
 Marketplace-billed Claude usage.
 
+### Addendum, 2026-10-19: the assistant runs on OpenAI until Bedrock offers Claude here
+
+**What happened.** The stack was deployed in `us-east-2` (function, table, alarms; CloudFront
+not yet connected; Bedrock data retention set to none). The smoke test failed with
+AccessDeniedException: Bedrock reports `agreementAvailability` NOT_AVAILABLE for every
+Anthropic model on this account, even after the owner submitted the use-case form, while
+Amazon and Meta models are available. The owner has filed a support case.
+
+**The owner's decision (2026-10-19).** Until that is resolved, the assistant runs on the
+existing OpenAI key and `gpt-5.4-mini`, the same API, model and key the site's earlier
+assistant uses. Decision 1 above is suspended, not reversed: Bedrock stays built and tested
+behind a switch. Retiring the earlier assistant's Lambda and API Gateway is still a separate
+change (decision 4).
+
+What changed in `platform/assistant/`:
+
+- **A provider switch**, `Provider` in `template.yaml` (`PROVIDER` in the function):
+  `openai` (the default), `bedrock`, or `anthropic` (Anthropic's Claude API directly, built
+  and tested on the same day as a fallback, not in use). Each provider's IAM statements exist
+  only while it is selected, and `deploy.sh` runs only that provider's checks.
+- **OpenAI path** (`src/openai.mjs`): one streaming POST to the Responses API with fetch and a
+  server-sent events parser, no new dependency; no retries; the 45-second timeout and the
+  viewer going away abort it. The request sets `store: false` and sends no metadata. Its
+  events are translated into the ones the proxy already settles, so the ledger works as
+  before: usage from `response.completed` (cached input at the cached rate, reasoning tokens
+  as output), and the whole reservation kept when no final usage arrives, the call fails
+  mid-answer or the stream breaks off (S2). An HTTP refusal before any work costs nothing.
+- **The key** is the `OPENAI_API_KEY` field of the Secrets Manager secret
+  `future-city-assistant-secrets` in `us-east-1`, read across Regions at cold start and every
+  15 minutes, kept in memory, never logged; without it the assistant is unavailable. The
+  role may call `secretsmanager:GetSecretValue` on that one secret only (its ARN with the
+  six-character suffix as `??????`). The secret also holds the earlier assistant's GitHub
+  token, which the role can therefore read though the code drops it; the README says how to
+  narrow that.
+- **Price.** `gpt-5.4-mini` is priced at $0.75 per million input tokens, $0.075 cached and
+  $4.50 output, OpenAI's standard list price read on 2026-10-19 (developers.openai.com/api/
+  docs/pricing); the repository had no record of it. **Verify against OpenAI's current price
+  list** before each deploy. The proxy refuses to start on a model it has no price for, a
+  model ID from another provider, or a `MODEL_PRICE` naming another row. Extra request fields
+  are allow-listed: `reasoning.effort` and `text.verbosity` only; the output limit is
+  `MAX_TOKENS`, never an extra field.
+- **Spend.** The $5 ledger is unchanged and stays the hard cap in this code. At these prices
+  an ordinary question costs about $0.004 (about $0.015 reserved), so the month allows about
+  1,100 of them. OpenAI spend is not on the AWS bill, so the model budget does not see it:
+  the owner should also set a monthly budget on the OpenAI project (open action 12, which
+  stays open; the key is shared with the earlier assistant).
+- **What questions are said to go to.** No zero-retention claim is made for OpenAI. The panel
+  and the system prompt say that OpenAI's standard API data terms apply and that only the
+  question, the conversation, the current step, the file's size and any summaries agreed to
+  for the session are sent. The Bedrock wording (retention none) is shown only when Bedrock
+  answers; the proxy's status names the provider.
+
+Bedrock's retention check (decision 3) applies only with `Provider=bedrock`. To return to
+Bedrock once the support case is resolved: `deploy/deploy.sh --region us-east-2 --param
+Provider=bedrock`.
+
 ## DEC-030 - The Cognito-gated `/platform*` path is retired; the planner needs no sign-in
 
 **Date:** 2026-10-18 · **Decided by:** the project owner · **Supersedes:** DEC-017 · **Builds

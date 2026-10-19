@@ -1,14 +1,51 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
   EV-SIENT Planner assistant proxy: a streaming Lambda function URL (AWS_IAM, reached only through
-  CloudFront with origin access control) that calls Claude on Amazon Bedrock through a global
-  cross-Region inference profile, with a DynamoDB spend ledger and rate limits, alarms and budgets.
+  CloudFront with origin access control) that calls an AI model through OpenAI's API, Anthropic's
+  Claude API or Amazon Bedrock (Provider), with a DynamoDB spend ledger and rate limits, alarms
+  and budgets.
   See platform/assistant/README.md. Tag Project=evsient-platform.
 
-# Deploy with platform/assistant/deploy/deploy.sh (profile future-city). The stack's Region is
-# the assistant's Region: Bedrock data retention must be set to none in this Region first.
+# Deploy with platform/assistant/deploy/deploy.sh (profile future-city). With Provider=openai
+# (the default), the OpenAI key is read from the earlier site assistant's Secrets Manager secret.
+# With Provider=bedrock, Bedrock data retention must be set to none in the stack's Region first.
+# With Provider=anthropic, the Claude API key must be in SSM Parameter Store first (README).
 
 Parameters:
+  Provider:
+    Type: String
+    AllowedValues: [openai, anthropic, bedrock]
+    Default: openai
+    Description: >-
+      Who answers: openai (OpenAI's Responses API, key in the Secrets Manager secret below),
+      anthropic (Anthropic's Claude API, key in SSM Parameter Store) or bedrock (Claude on Amazon
+      Bedrock, global inference profile). Each grants only its own permissions.
+  OpenAIModel:
+    Type: String
+    AllowedValues: [gpt-5.4-mini]
+    Default: gpt-5.4-mini
+    Description: The OpenAI model, for Provider=openai. Only models with a row in src/pricing.mjs.
+  OpenAIExtraJson:
+    Type: String
+    Default: '{}'
+    Description: Extra request fields for the OpenAI model (JSON object; reasoning effort and text verbosity only).
+  OpenAISecretName:
+    Type: String
+    Default: future-city-assistant-secrets
+    AllowedPattern: '^[A-Za-z0-9/_+=.@-]{1,500}$'
+    Description: >-
+      Name (never the value) of the Secrets Manager secret whose JSON field OPENAI_API_KEY holds
+      the OpenAI key, for Provider=openai. The earlier site assistant's secret.
+  OpenAISecretRegion:
+    Type: String
+    Default: us-east-1
+    AllowedPattern: '^[a-z]{2}(-[a-z]+)+-[0-9]$'
+    Description: The Region the secret is in (read across Regions).
+  AnthropicKeyParameter:
+    Type: String
+    Default: /evsient/assistant/anthropic-api-key
+    AllowedPattern: '^/[A-Za-z0-9/_.-]{1,500}$'
+    Description: Name (never the value) of the SSM SecureString holding the Claude API key, for Provider=anthropic.
   Enabled:
     Type: String
     AllowedValues: ['true', 'false']
@@ -49,12 +86,14 @@ Parameters:
     Type: String
     AllowedValues: ['true', 'false']
     Default: 'false'
-    Description: 'true offers deeper answers with Sonnet 5.5 and grants invoke on its profile.'
+    Description: 'true offers deeper answers with Sonnet 5.5 (Claude providers only; ignored with openai).'
   StandardModel:
     Type: String
     Default: anthropic.claude-haiku-5-5
     AllowedPattern: '^anthropic\.[a-z0-9-]+$'
-    Description: Bedrock model ID of the standard model. The global inference profile is global.<this>.
+    Description: >-
+      The standard model as Bedrock names it. Bedrock calls global.<this>; the Claude API calls
+      the part after "anthropic." (claude-haiku-5-5).
   DeeperModel:
     Type: String
     Default: anthropic.claude-sonnet-5-5
@@ -82,6 +121,9 @@ Parameters:
 
 Conditions:
   Deeper: !Equals [!Ref EnableDeeper, 'true']
+  IsBedrock: !Equals [!Ref Provider, bedrock]
+  IsAnthropic: !Equals [!Ref Provider, anthropic]
+  IsOpenAI: !Equals [!Ref Provider, openai]
   HasReservedConcurrency: !Not [!Equals [!Ref ReservedConcurrency, '']]
 
 Resources:
@@ -142,74 +184,117 @@ Resources:
               - Effect: Allow
                 Action: ['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem']
                 Resource: !GetAtt Table.Arn
-        - PolicyName: bedrock
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              # Reading (never setting) the account's data retention mode: the function
-              # refuses to answer unless it is "none".
-              - Sid: ReadDataRetention
-                Effect: Allow
-                Action: bedrock:GetAccountDataRetention
-                Resource: '*'
-              # Global cross-Region inference: the profile in this Region, the model in this
-              # Region through that profile, and the model with no Region ("unspecified")
-              # through that profile. Streaming invoke only; nothing else in Bedrock.
-              - Sid: StandardProfile
-                Effect: Allow
-                Action: bedrock:InvokeModelWithResponseStream
-                Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${StandardModel}'
-                Condition:
-                  StringEquals: { 'aws:RequestedRegion': !Ref 'AWS::Region' }
-              - Sid: StandardRegional
-                Effect: Allow
-                Action: bedrock:InvokeModelWithResponseStream
-                Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${StandardModel}'
-                Condition:
-                  StringEquals: { 'aws:RequestedRegion': !Ref 'AWS::Region' }
-                  StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${StandardModel}' }
-              - Sid: StandardGlobal
-                Effect: Allow
-                Action: bedrock:InvokeModelWithResponseStream
-                Resource: !Sub 'arn:aws:bedrock:::foundation-model/${StandardModel}'
-                Condition:
-                  StringEquals: { 'aws:RequestedRegion': unspecified }
-                  StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${StandardModel}' }
-              - !If
-                - Deeper
-                - Sid: DeeperProfile
+        # Provider=bedrock only: retention read and streaming invoke.
+        - !If
+          - IsBedrock
+          - PolicyName: bedrock
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                # Reading (never setting) the account's data retention mode: the function
+                # refuses to answer unless it is "none".
+                - Sid: ReadDataRetention
+                  Effect: Allow
+                  Action: bedrock:GetAccountDataRetention
+                  Resource: '*'
+                # Global cross-Region inference: the profile in this Region, the model in this
+                # Region through that profile, and the model with no Region ("unspecified")
+                # through that profile. Streaming invoke only; nothing else in Bedrock.
+                - Sid: StandardProfile
                   Effect: Allow
                   Action: bedrock:InvokeModelWithResponseStream
-                  Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${DeeperModel}'
+                  Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${StandardModel}'
                   Condition:
                     StringEquals: { 'aws:RequestedRegion': !Ref 'AWS::Region' }
-                - !Ref AWS::NoValue
-              - !If
-                - Deeper
-                - Sid: DeeperRegional
+                - Sid: StandardRegional
                   Effect: Allow
                   Action: bedrock:InvokeModelWithResponseStream
-                  Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${DeeperModel}'
+                  Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${StandardModel}'
                   Condition:
                     StringEquals: { 'aws:RequestedRegion': !Ref 'AWS::Region' }
-                    StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${DeeperModel}' }
-                - !Ref AWS::NoValue
-              - !If
-                - Deeper
-                - Sid: DeeperGlobal
+                    StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${StandardModel}' }
+                - Sid: StandardGlobal
                   Effect: Allow
                   Action: bedrock:InvokeModelWithResponseStream
-                  Resource: !Sub 'arn:aws:bedrock:::foundation-model/${DeeperModel}'
+                  Resource: !Sub 'arn:aws:bedrock:::foundation-model/${StandardModel}'
                   Condition:
                     StringEquals: { 'aws:RequestedRegion': unspecified }
-                    StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${DeeperModel}' }
-                - !Ref AWS::NoValue
+                    StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${StandardModel}' }
+                - !If
+                  - Deeper
+                  - Sid: DeeperProfile
+                    Effect: Allow
+                    Action: bedrock:InvokeModelWithResponseStream
+                    Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${DeeperModel}'
+                    Condition:
+                      StringEquals: { 'aws:RequestedRegion': !Ref 'AWS::Region' }
+                  - !Ref AWS::NoValue
+                - !If
+                  - Deeper
+                  - Sid: DeeperRegional
+                    Effect: Allow
+                    Action: bedrock:InvokeModelWithResponseStream
+                    Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${DeeperModel}'
+                    Condition:
+                      StringEquals: { 'aws:RequestedRegion': !Ref 'AWS::Region' }
+                      StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${DeeperModel}' }
+                  - !Ref AWS::NoValue
+                - !If
+                  - Deeper
+                  - Sid: DeeperGlobal
+                    Effect: Allow
+                    Action: bedrock:InvokeModelWithResponseStream
+                    Resource: !Sub 'arn:aws:bedrock:::foundation-model/${DeeperModel}'
+                    Condition:
+                      StringEquals: { 'aws:RequestedRegion': unspecified }
+                      StringLike: { 'bedrock:InferenceProfileArn': !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.${DeeperModel}' }
+                  - !Ref AWS::NoValue
+          - !Ref AWS::NoValue
+        # Provider=openai: read the one secret holding the OpenAI key, in its own Region. The
+        # ARN ends in a six-character suffix Secrets Manager adds, matched by ??????; nothing
+        # else in Secrets Manager. A secret encrypted with the AWS managed key aws/secretsmanager
+        # needs no KMS statement (its key policy allows decryption through Secrets Manager in
+        # this account); a customer managed key would need one, and until then the read fails
+        # and the assistant stays unavailable.
+        - !If
+          - IsOpenAI
+          - PolicyName: openai-key
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Sid: ReadOpenAIKey
+                  Effect: Allow
+                  Action: secretsmanager:GetSecretValue
+                  Resource: !Sub 'arn:aws:secretsmanager:${OpenAISecretRegion}:${AWS::AccountId}:secret:${OpenAISecretName}-??????'
+          - !Ref AWS::NoValue
+        # Provider=anthropic: read the Claude API key, one parameter only. SSM decrypts it with the
+        # AWS managed key aws/ssm, whose key policy already lets principals in this account decrypt
+        # through SSM; the KMS statement makes that explicit and limits it to this one parameter.
+        - !If
+          - IsAnthropic
+          - PolicyName: anthropic-key
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Sid: ReadAnthropicKey
+                  Effect: Allow
+                  Action: ssm:GetParameter
+                  Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${AnthropicKeyParameter}'
+                - Sid: DecryptAnthropicKeyThroughSsm
+                  Effect: Allow
+                  Action: kms:Decrypt
+                  Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+                  Condition:
+                    StringEquals:
+                      'kms:ViaService': !Sub 'ssm.${AWS::Region}.amazonaws.com'
+                      'kms:EncryptionContext:PARAMETER_ARN': !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${AnthropicKeyParameter}'
+          - !Ref AWS::NoValue
 
   Function:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: evsient-assistant
-      Description: EV-SIENT Planner assistant proxy (Bedrock, spend-capped)
+      Description: EV-SIENT Planner assistant proxy (spend-capped)
       Runtime: !Ref Runtime
       Architectures: [arm64]
       Handler: index.handler
@@ -226,9 +311,24 @@ Resources:
           DAILY_CAP_USD: !Ref DailyCapUsd
           DEEPER_MONTHLY_CAP_USD: !Ref DeeperMonthlyCapUsd
           ADDRESS_DAILY_CAP_USD: !Ref AddressDailyCapUsd
-          MODEL_ID: !Sub 'global.${StandardModel}'
-          MODEL_EXTRA_JSON: !Ref ModelExtraJson
-          DEEPER_MODEL_ID: !If [Deeper, !Sub 'global.${DeeperModel}', '']
+          PROVIDER: !Ref Provider
+          ANTHROPIC_KEY_PARAMETER: !Ref AnthropicKeyParameter
+          OPENAI_SECRET_ID: !Ref OpenAISecretName
+          OPENAI_SECRET_REGION: !Ref OpenAISecretRegion
+          # OpenAI: the model as named. Bedrock: the global inference profile. Claude API: the ID
+          # after "anthropic.".
+          MODEL_ID: !If
+            - IsOpenAI
+            - !Ref OpenAIModel
+            - !If [IsBedrock, !Sub 'global.${StandardModel}', !Select [1, !Split ['.', !Ref StandardModel]]]
+          MODEL_EXTRA_JSON: !If [IsOpenAI, !Ref OpenAIExtraJson, !Ref ModelExtraJson]
+          DEEPER_MODEL_ID: !If
+            - IsOpenAI
+            - ''
+            - !If
+              - Deeper
+              - !If [IsBedrock, !Sub 'global.${DeeperModel}', !Select [1, !Split ['.', !Ref DeeperModel]]]
+              - ''
       # A stand-in until deploy.sh uploads the real code: it refuses every request.
       Code:
         ZipFile: |
@@ -388,6 +488,8 @@ Resources:
   # Budgets alert; they never stop anything (the ledger does). Model spend in this Region (the
   # assistant runs nowhere else, and global inference bills to the calling Region), and
   # everything else tagged Project=evsient-platform (activate that cost allocation tag first).
+  # With Provider=openai or anthropic, model spend is billed by OpenAI or Anthropic, not AWS:
+  # the second cap there is the provider's own project budget or spend limit (README).
   ModelBudget:
     Type: AWS::Budgets::Budget
     Properties:

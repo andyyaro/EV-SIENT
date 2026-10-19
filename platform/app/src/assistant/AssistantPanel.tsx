@@ -18,7 +18,7 @@ import type { Explanation } from '../engine/protocol';
 import { useExplore } from '../explore/exploreStore';
 import { useSession } from '../state/store';
 import { clipChars, numbersIn, numbersInText, renderAnswer, visiblePart, type Piece } from './answer';
-import { ask, AssistantRefusal, fetchStatus, newSessionId, type Status, type Turn } from './client';
+import { ask, AssistantRefusal, fetchStatus, newSessionId, type Provider, type Status, type Turn } from './client';
 import { buildContext, contextFits, fitRequest, LIMITS, sanitizeLabel, type Context, type PayloadInputs, type ShareChoice } from './payload';
 
 
@@ -125,7 +125,14 @@ function StatusLine({ reach }: { reach: Reach }) {
   return <p className="as-status as-status--paused" role="status">{s.message}</p>;
 }
 
-function WhatItSees() {
+/** Where questions go, as the proxy reports it; nothing is claimed before it has said. */
+const WHERE_QUESTIONS_GO: Record<Provider, string> = {
+  openai: "Questions go to OpenAI's API under OpenAI's standard API data terms. Only the question, the conversation so far, the current step, the file's size and any summaries agreed to for this session are sent.",
+  anthropic: "Questions go to Anthropic's Claude API under its standard commercial terms: Anthropic does not use them to train models by default, and deletes them within 30 days unless it must keep them longer to enforce its usage policy or by law.",
+  bedrock: 'Questions go to Claude on Amazon Bedrock with data retention switched off, so they are not stored by AWS or Anthropic.',
+};
+
+function WhatItSees({ provider }: { provider?: Provider }) {
   return (
     <details className="as-sees">
       <summary className="hig-focus">What the Assistant Can and Cannot See</summary>
@@ -136,7 +143,7 @@ function WhatItSees() {
         <p>Summaries the planner already worked out: column headers and what each column holds, the share of blanks, a rough count of different values, rounded 10th, 50th and 90th percentiles (never the smallest or largest value), category labels with their counts (any group under 10 left out), sites per tier, Explore patterns, Your Index settings, and one site's score breakdown, renamed Site A. You see exactly what would be sent first, and can leave out any column.</p>
         <h4>Never</h4>
         <p>Rows or any single cell, sample values, site names, IDs, addresses, coordinates, notes or other free text, your own columns' values for any site, or your file's name.</p>
-        <p className="as-fine">Questions go to Claude on Amazon Bedrock with data retention switched off, so they are not stored by AWS or Anthropic. The assistant gives planning support, not engineering advice.</p>
+        <p className="as-fine">{provider ? `${WHERE_QUESTIONS_GO[provider]} ` : 'Questions go to an outside AI model provider. '}The assistant gives planning support, not engineering advice.</p>
       </div>
     </details>
   );
@@ -425,7 +432,7 @@ export function AssistantPanel({ onClose }: { onClose: () => void }) {
       </div>
       <div className="as-sheet__body">
         <StatusLine reach={reach} />
-        <WhatItSees />
+        <WhatItSees provider={reach.kind === 'status' && reach.status.state === 'available' ? reach.status.provider : undefined} />
         {reviewing
           ? <ShareReview inputs={inputs} onDone={() => setReviewing(false)} />
           : <ShareSummary stale={stale} onReview={() => setReviewing(true)} />}
