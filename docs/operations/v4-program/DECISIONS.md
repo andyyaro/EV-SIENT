@@ -1642,6 +1642,70 @@ found an older fault: the Excel download never finished for a workbook of 160 kB
 because the zip library compresses large parts in a `blob:` Worker that `worker-src 'self'`
 blocks. `vite.config.ts` now makes write-excel-file zip synchronously; the CSP is unchanged.
 
+## DEC-028 - The public data hub covers six states, with the borders between them dissolved
+
+**Date:** 2026-10-18 · **Phase:** platform v1 · **Owner decision** · **Builds on DEC-016, DEC-025**
+
+### What was blocking
+
+DEC-025 built the hub for Virginia alone, so a planner anywhere else was told "outside Virginia"
+for every site, and a Virginia site within a mile of Maryland or the District of Columbia lost
+its block-based values even though both neighbours publish the same public files.
+
+### The decision
+
+1. **The owner extended the hub to New York, Maryland, the District of Columbia, Colorado and
+   Illinois** (Discover Financial Services is headquartered in Riverwoods, Illinois), alongside
+   Virginia. `sources.json` now lists the published states; each has its own pinned 2020 P.L.
+   94-171 file and LODES 8.4 (2023) workplace file. Every new input is a U.S. Census Bureau
+   public-domain file, pinned by SHA-256 like the Virginia ones. No ODbL source was added: the
+   owner has not decided on ODbL, so `ev_share_local` stays out.
+2. **One coverage for all six states.** TIGER/Line draws a shared border with the same vertices
+   in both states, so the builder removes every edge that appears in both directions and keeps
+   the outline of the union. The block-based fields are offered at least 1 mile inside that
+   outline, not inside a single state: a site in Arlington now gets households, jobs and the
+   equity rank from Virginia and District of Columbia blocks together. A site within a mile of
+   a state the hub does not cover (New Jersey, from Manhattan's west side) still gets the
+   reason, never a partial total.
+3. **Each state is built exactly as before.** Its blocks, and the stations inside it or within
+   3.5 miles of its own boundary, go in its own county packs. A station near a shared border is
+   therefore in both states' packs, and the app counts it once by its AFDC ID. Virginia's 133
+   packs hold the same rows as in 2026-10-18.1 (checked table by table), and the national
+   tables keep their keys.
+4. **One source per field, one file per state underneath.** A filled value names one source, so
+   the per-state files are grouped (`pl94171`, `lodes-wac`) and the build refuses a group whose
+   files differ in publisher, vintage, publication date or licence. The Public Data step says
+   which state each site is in (by its nearest census block) and lists each state's own files
+   that the values near the sites were worked out from.
+5. **The row-count gate compares state by state.** A new state is reported as new; a state
+   already published still stops the build if its rows move more than 20%.
+
+### Release 2026-10-18.2
+
+386 county packs, 22.8 MB in all: Virginia 133 (3.6 MB), New York 62 (6.4 MB), Maryland 24
+(1.9 MB), District of Columbia 1 (0.2 MB), Colorado 64 (2.9 MB), Illinois 102 (7.7 MB; Cook
+County is the largest pack at 1.99 MB, under the 5 MB limit). Coverage: 6 rings, 8,482
+vertices. All five gates pass.
+
+### What it does not do
+
+- **No other states.** A site elsewhere is told which states the hub covers.
+- **No new fields.** `aadt_nearest`, `amenities_count_0_5mi` and `ev_share_local` are still not
+  in the hub, for the reasons DEC-025 gives.
+
+### Published numbers
+
+None moved. The reference study does not use the hub.
+
+### Gates
+
+`tests/test_hub_builder.py` adds an invented neighbouring state: the shared border is dissolved,
+both states publish packs under one coverage, the western state's packs are unchanged by the
+neighbour, a border station is in both packs, a new state passes the row-count gate as new, and
+the registry refuses a state outside its group or a group whose files disagree. The Public Data
+step was run end to end in the browser against the local release, with synthetic sites in all
+six states and one outside them.
+
 ## DEC-030 - The Cognito-gated `/platform*` path is retired; the planner needs no sign-in
 
 **Date:** 2026-10-18 · **Decided by:** the project owner · **Supersedes:** DEC-017 · **Builds
