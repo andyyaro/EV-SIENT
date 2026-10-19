@@ -151,6 +151,35 @@ A pack-shaped spec, built by the visitor, run by `fcf_m2.flex.index`.
 - The result always carries `"official": false` and the visitor's name for it, and is never
   drawn on the readiness colour scale.
 
+Details the engine settles (`fcf_m2.flex.index`, added with the first implementation):
+
+- **Value function fields.** `linear` and `threshold` take `worst` and `best` (best above worst
+  for higher_better, below it for lower_better); `target` takes `low`, `target` and `high`, full
+  credit at the target falling to none at `low` and `high`, and only for `neither`; `ordinal`
+  takes `map`, which must name every category in the dictionary entry, with values in [0, 1]
+  that do not run against the confirmed direction. A linear criterion saved without anchors gets
+  the observed range of the whole file, before screens, stored with `"pinnedFrom": "observed
+  range"`; the run returns the completed spec, and running that spec again gives the same
+  numbers.
+- **Screens are keep conditions.** A site is kept when its rule is true; otherwise it is listed
+  with the rule's `reason` and the columns it was missing. Operators: `var`, `==`, `!=`, `<`,
+  `<=`, `>`, `>=`, `and`, `or`, `!`, `in`, `missing`; anything else is refused. Screens read the
+  dictionary's reading (flags as 1 and 0, categories as their labels) and the raw text for
+  columns without one. `<`, `<=`, `>`, `>=` need numbers, so a missing value never passes a
+  numeric screen.
+- **Robustness.** `spread` sets the Dirichlet concentration so each weight typically moves by
+  that share of itself (0.25: about a quarter); `ordinalSpread` (default 0.2) moves the
+  categories between the ends of each map, never past their neighbours. Ranks are counted with
+  ties shared; the top k is 10 sites, or 10% of the ranked sites when there are under 100.
+  "What would change the rank" gives, for each adjacent pair, the weight shift on each criterion
+  (others rescaled to keep the sum at 1) at which the pair ties, and the value the lower site
+  would need on each criterion.
+- **Gates.** Dominance and "barely counts" use the Pearson correlation of each criterion's
+  credit with the index over the ranked sites; size bias uses the Spearman correlation of the
+  index with the population column (either sign); double counting uses the Spearman
+  correlation of two criteria's credit over the sites that have both. A spec that fails the
+  minimum-data rule is refused, and the refusal carries the `minimum_data` gate.
+
 ## 4. Where it runs
 
 Python in `src/fcf_m2/flex/`, run in the browser by the same Pyodide worker as the engine (one

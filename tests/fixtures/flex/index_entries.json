@@ -1,0 +1,23 @@
+{
+  "clean": [
+    {"name": "site_id", "evsient:role": "identifier", "evsient:direction": null, "evsient:provenance": "inferred"},
+    {"name": "site_name", "evsient:role": "name", "evsient:direction": null, "evsient:provenance": "inferred"},
+    {"name": "heat_risk_0_100", "evsient:role": "score", "evsient:range": [0, 100], "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "flood_risk", "evsient:role": "ordinal", "categories": ["Low", "Moderate", "High"], "categoriesOrdered": true, "missingValues": ["Unknown"], "evsient:direction": "lower_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "solar_kw", "evsient:role": "measure", "evsient:unit": "kW", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "access_1_5", "evsient:role": "score", "evsient:range": [1, 5], "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "population", "evsient:role": "count", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "open_late", "evsient:role": "flag", "evsient:direction": null, "evsient:provenance": "inferred"}
+  ],
+  "adversarial": [
+    {"name": "site_id", "evsient:role": "identifier", "evsient:direction": null, "evsient:provenance": "inferred"},
+    {"name": "site_name", "evsient:role": "name", "evsient:direction": null, "evsient:provenance": "inferred"},
+    {"name": "need", "evsient:role": "score", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "need_again", "evsient:role": "score", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "sparse", "evsient:role": "score", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "heavy_tail", "evsient:role": "measure", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "tiny", "evsient:role": "score", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "population", "evsient:role": "count", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"},
+    {"name": "constant", "evsient:role": "count", "evsient:direction": "higher_better", "evsient:provenance": "confirmed_by_user"}
+  ]
+}
