@@ -17,7 +17,7 @@ it, and no person with a disability has used it for this report. Read every "Sup
 | Address | https://app.futurecity.andyyaro.com |
 | Report date | 2026-10-18 |
 | Product description | A planner that runs in the browser. A user uploads a spreadsheet of candidate sites, matches its columns, checks and fills the data, and runs a readiness model on their own device (Python in WebAssembly, in a Web Worker). Results come as a ranked table, a map, side-by-side comparison and an optional index of the user's own columns, and as a report to download in HTML, tagged PDF and Word |
-| Contact information | **[Placeholder: the project has no public contact yet. Add an accessibility contact (an email address or a form) here and on `platform/app/public/accessibility.html` before this report is given to anyone.]** |
+| Contact information | andyyaro25@gmail.com |
 | Notes | The planner is a single web app with ten screens: Start, Upload, Map Columns (with Your Columns), Check, Public Data, Run, Results (table, map and Compare), Explore, Your Index and Report. All of them, and the three downloads, are covered here. Other work on `platform/app` (a Results stability section, an assistant panel and multi-state public data) was under way when this report was written and is not covered; see "Re-testing after other changes" |
 | Evaluation methods used | See the next section |
 
