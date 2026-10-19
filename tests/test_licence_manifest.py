@@ -214,6 +214,7 @@ def test_every_tracked_vendored_bundle_is_attributed():
                       if p.is_file()
                       and "venv" not in p.parts
                       and "node_modules" not in p.parts
+                      and ".claude" not in p.parts  # local agent worktrees, not this tree
                       and p.suffix in {".js", ".css", ".mjs", ".wasm"})
     if not vendored:
         pytest.skip("nothing vendored")
