@@ -137,6 +137,15 @@ function MapCanvas({ sites, selectedId, onSelect, colours, valueOf }: CanvasProp
       map.keyboard.enable();
       map.getCanvas().setAttribute('aria-label', 'Basemap. Use the arrow keys to pan and plus or minus to zoom; the site markers follow as buttons.');
       const bounds = new maplibregl.LngLatBounds();
+      // A marker reached by Tab may sit outside the visible part of the map (after a resize, or
+      // after panning); bring it into view so keyboard focus is never on something unseen.
+      const reveal = (marker: Marker) => {
+        const p = map.project(marker.getLngLat());
+        const c = map.getContainer();
+        if (p.x < 24 || p.y < 24 || p.x > c.clientWidth - 24 || p.y > c.clientHeight - 24) {
+          map.easeTo({ center: marker.getLngLat(), duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 400 });
+        }
+      };
       for (const s of sites) {
         const el = document.createElement('button');
         el.type = 'button';
@@ -145,6 +154,7 @@ function MapCanvas({ sites, selectedId, onSelect, colours, valueOf }: CanvasProp
         el.setAttribute('aria-label', `Rank ${s.rank}: ${s.name}`);
         el.addEventListener('click', (e) => { e.stopPropagation(); select.current(s.siteId); });
         const marker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([s.lon!, s.lat!]).addTo(map);
+        el.addEventListener('focus', () => reveal(marker));
         markerMap.set(s.siteId, { marker, el });
         bounds.extend([s.lon!, s.lat!]);
       }
@@ -205,15 +215,18 @@ function MapCanvas({ sites, selectedId, onSelect, colours, valueOf }: CanvasProp
     });
   }, [colours, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The error sits below the map, not over it, so it never covers a marker that has focus.
   return (
-    <div className="rs-map__frame">
-      <div className="rs-map__canvas" ref={box} />
-      {status === 'loading' && <p className="rs-map__status" role="status">Loading the map</p>}
+    <>
+      <div className="rs-map__frame">
+        <div className="rs-map__canvas" ref={box} />
+        {status === 'loading' && <p className="rs-map__status" role="status">Loading the map</p>}
+      </div>
       {status === 'error' && (
         <p className="rs-map__status rs-map__status--error" role="alert">
           The basemap could not load{error ? ` (${error})` : ''}. The table above still lists every site.
         </p>
       )}
-    </div>
+    </>
   );
 }
