@@ -4,6 +4,7 @@
 
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Banner } from './components/Banner';
+import { BrandMark } from './components/BrandMark';
 import { Icon } from './components/Icon';
 import { FaqLink } from './components/FaqLink';
 import { LicencesLink } from './components/LicencesLink';
@@ -34,7 +35,7 @@ function StepNav() {
     <nav className="nav-sidebar hig-sidebar hig-sidebar--ios hig-sidebar--floating hig-glass hig-glass--regular" aria-label="Steps">
       <div className="hig-sidebar__top">
         <button type="button" className="nav-brand app-brand hig-focus" onClick={() => s.go('start')}>
-          <span className="nav-brand__mark"><Icon name="bolt" size={22} strokeWidth={2} /></span>
+          <span className="nav-brand__mark"><BrandMark size={24} /></span>
           <span className="nav-brand__text">
             <span className="nav-brand__title">EV-SIENT</span>
             <span className="nav-brand__sub">Site Readiness Planner</span>
@@ -90,7 +91,7 @@ function CompactBar() {
   return (
     <header className="app-compact hig-glass hig-glass--regular">
       <button type="button" className="app-compact__brand hig-focus" onClick={() => s.go('start')}>
-        <span className="app-compact__mark"><Icon name="bolt" size={16} strokeWidth={2} /></span>
+        <span className="app-compact__mark"><BrandMark size={18} /></span>
         <span>EV-SIENT</span>
       </button>
       <label className="app-compact__step">
