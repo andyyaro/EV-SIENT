@@ -38,6 +38,9 @@
 .app-compact__step .hig-icon { position: absolute; right: 12px; pointer-events: none; }
 .app-compact__count { font: 400 13px/18px var(--font-sans); color: var(--glass-label-secondary); font-variant-numeric: tabular-nums; }
 @media (min-width: 1024px) { .app-compact { display: none; } }
+/* Keyboard focus never lands under the sticky step bar (WCAG 2.4.11): a control scrolled into view
+   by Tab or Shift+Tab stops below the bar. :where() keeps this from overriding a component's own. */
+@media (max-width: 1023.98px) { :where(a[href], button, input, select, textarea, summary, [tabindex]) { scroll-margin-top: 76px; } }
 @media (max-width: 400px) { .app-compact__count { display: none; } }
 .app .main { padding-bottom: 64px; }
 /* Focus the app moves itself (a new screen's heading, a chosen site's heading, the main region, a
