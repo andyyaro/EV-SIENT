@@ -5,6 +5,7 @@ import { useEffect, useId, useMemo, useState, type MouseEvent } from 'react';
 import { Banner } from '../components/Banner';
 import { Icon } from '../components/Icon';
 import { PageHead } from '../components/PageHead';
+import { ScoreCoverage } from '../components/ScoreCoverage';
 import { Progress } from '../components/Progress';
 import { StatusMark } from '../components/StatusMark';
 import { StepActions } from '../components/StepActions';
@@ -237,8 +238,10 @@ export function CheckStep() {
             <p><strong>Missing values never raise a score.</strong> A blank or unreadable value is scored as absent: it earns no credit and lowers data confidence. Nothing is estimated and no row is left out.</p>
           </div>
 
+          <ScoreCoverage />
+
           {absentShown.length > 0 && (
-            <Banner tone="info" title={`${plural(absentShown.length, 'Scored Field Is', 'Scored Fields Are')} Not in This File`}>
+            <Banner tone="info" title={`${plural(absentShown.length, 'Field the Model Reads Is', 'Fields the Model Reads Are')} Not in This File`}>
               <p>{listWords(absentShown.map((f) => fieldLabel(s.fields, f)))}. Every site is scored as if {absentShown.length === 1 ? 'it is' : 'they are'} absent, and data confidence is lower. If your file has {absentShown.length === 1 ? 'this' : 'any of these'}, match {absentShown.length === 1 ? 'it' : 'them'} in Map Columns.</p>
               {absentShown.some((f) => check.publicFill.fields.includes(f)) && <p>Public data may be able to propose some of them in the next step, Public Data.</p>}
             </Banner>

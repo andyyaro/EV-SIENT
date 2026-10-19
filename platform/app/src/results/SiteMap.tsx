@@ -1,26 +1,45 @@
 // The sites on a basemap, numbered by rank. Nothing loads until the planner chooses Show Map:
 // the basemap comes from OpenFreeMap, which then sees the area being viewed (never the file).
-// The ranked table is the full accessible equivalent; each marker is also a button.
+// The ranked table is the full accessible equivalent; each marker is also a button. The markers can
+// be coloured by one of Your Columns, worked out on the device: nothing more leaves it.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Map as MlMap, Marker } from 'maplibre-gl';
 import { Icon } from '../components/Icon';
 import type { SiteResult } from '../engine/protocol';
+import { NOT_IN_SCORE, carriedText, columnIndex, inkOn, markerColours, showCarried, type CarriedColumns, type MarkerColours } from './carried';
 import { isNumber } from './format';
 
 interface Props {
   sites: SiteResult[];
   selectedId: string | null;
   onSelect(siteId: string): void;
+  carried?: CarriedColumns | null;
+  /** The column of Your Columns the markers are coloured by; null for none. */
+  colourBy?: string | null;
+  onColourBy?(column: string | null): void;
+}
+
+interface CanvasProps extends Pick<Props, 'sites' | 'selectedId' | 'onSelect'> {
+  colours: MarkerColours | null;
+  /** Each site's value in the colouring column, for its marker's name. */
+  valueOf(siteId: string): string | null;
 }
 
 const isDark = () => (document.documentElement.getAttribute('data-theme') ?? '').startsWith('dark')
   || (!document.documentElement.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
 
-export function SiteMap({ sites, selectedId, onSelect }: Props) {
+export function SiteMap({ sites, selectedId, onSelect, carried = null, colourBy = null, onColourBy }: Props) {
   const [shown, setShown] = useState(false);
   const located = sites.filter((s) => isNumber(s.lat) && isNumber(s.lon));
   const missing = sites.filter((s) => !(isNumber(s.lat) && isNumber(s.lon)));
+  const k = colourBy ? columnIndex(carried, colourBy) : -1;
+  const colours = useMemo(
+    () => (carried && k >= 0 ? markerColours(carried, carried.columns[k].name, located.map((s) => s.siteId)) : null),
+    // Recomputed when the column or the run changes, not on every render.
+    [carried, k, sites], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const valueOf = (siteId: string) => (carried && k >= 0 ? showCarried(carried.columns[k], carriedText(carried, siteId, k)) : null);
 
   return (
     <section className="rs-map" aria-labelledby="rs-map-title">
@@ -40,7 +59,24 @@ export function SiteMap({ sites, selectedId, onSelect }: Props) {
           {!located.length && <p className="footnote">No site has coordinates, so there is nothing to map.</p>}
         </div>
       ) : (
-        <MapCanvas sites={located} selectedId={selectedId} onSelect={onSelect} />
+        <>
+          {carried && onColourBy && (
+            <label className="rs-map__colour">
+              <span className="rs-map__colour-label">Colour Markers By</span>
+              <span className="st-select">
+                <select className="hig-focus" value={k >= 0 ? carried.columns[k].name : ''} onChange={(e) => onColourBy(e.target.value || null)}>
+                  <option value="">Rank Only (No Colour)</option>
+                  <optgroup label={`Your Columns (${NOT_IN_SCORE})`}>
+                    {carried.columns.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                  </optgroup>
+                </select>
+                <Icon name="chevron.up.chevron.down" size={13} />
+              </span>
+            </label>
+          )}
+          <MapCanvas sites={located} selectedId={selectedId} onSelect={onSelect} colours={colours} valueOf={valueOf} />
+          {colours && k >= 0 && <MapLegend column={carried!.columns[k].name} colours={colours} />}
+        </>
       )}
       {missing.length > 0 && (
         <p className="footnote rs-map__missing">
@@ -51,7 +87,26 @@ export function SiteMap({ sites, selectedId, onSelect }: Props) {
   );
 }
 
-function MapCanvas({ sites, selectedId, onSelect }: Props) {
+function MapLegend({ column, colours }: { column: string; colours: MarkerColours }) {
+  return (
+    <div className="rs-map__legend">
+      <p className="rs-map__legend-title">
+        {column} <span className="rs-map__legend-note">{NOT_IN_SCORE}. {colours.kind === 'range' ? 'Darker is higher.' : 'The most common values; the rest are Other.'}</span>
+      </p>
+      <ul className="rs-map__legend-list" role="list">
+        {colours.legend.map((item) => (
+          <li key={item.label} className="rs-map__legend-item">
+            <span className="rs-map__swatch" style={{ background: item.colour }} aria-hidden="true" />
+            <span className="rs-map__legend-label">{item.label}</span>
+            <span className="rs-map__legend-count num">{item.count}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function MapCanvas({ sites, selectedId, onSelect, colours, valueOf }: CanvasProps) {
   const box = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const markers = useRef(new Map<string, { marker: Marker; el: HTMLButtonElement }>());
@@ -137,6 +192,18 @@ function MapCanvas({ sites, selectedId, onSelect }: Props) {
       }
     }
   }, [selectedId, status]);
+
+  useEffect(() => {
+    const byRank = new Map(sites.map((s) => [s.siteId, s]));
+    markers.current.forEach(({ el }, id) => {
+      const colour = colours?.byId.get(id);
+      el.style.background = colour ?? '';
+      el.style.color = colour ? inkOn(colour) : '';
+      const s = byRank.get(id);
+      const value = valueOf(id);
+      if (s) el.setAttribute('aria-label', `Rank ${s.rank}: ${s.name}${value !== null ? `. ${value}` : ''}`);
+    });
+  }, [colours, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="rs-map__frame">

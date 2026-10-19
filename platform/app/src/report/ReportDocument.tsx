@@ -1,6 +1,8 @@
 // The report: a decision summary, then nine fixed sections (summary, ranked sites, site locations,
 // site profiles, methods, assumptions, data sources, limitations, reproducibility). Static markup
 // filled only from engine outputs, so the same DOM is the preview, the printout and the .html file.
+// When the planner's file has columns the model does not read, a tenth section lists them and each
+// profile shows the site's values, every time labelled as not in the score.
 
 import type { Driver, Explanation, SiteResult } from '../engine/protocol';
 import { accessSentence, explainSummary } from '../results/explainText';
@@ -9,6 +11,7 @@ import {
   SUBSCORE_KEYS, subscoreLabel, tierKey, tierLong, tierShort,
 } from '../results/format';
 import { CAPACITY_LADDER, ladderRung } from '../results/data';
+import { carriedNumber, carriedText, showCarried, type CarriedColumns } from '../results/carried';
 import { fieldLabel, groupLabel, type ReportModel } from './reportModel';
 
 /** A table that may scroll sideways on a narrow screen: focusable and named, so a keyboard user can scroll it. */
@@ -25,6 +28,8 @@ const SECTIONS = [
   ['rp-limitations', 'Limitations'],
   ['rp-repro', 'Reproducibility'],
 ] as const;
+
+const YOURS_SECTION = ['rp-yours', 'Your Columns (Not in the Score)'] as const;
 
 function Tier({ tier, long }: { tier: string; long?: boolean }) {
   return <span className={`rp-tier rp-tier--${tierKey(tier)}`}><span className="rp-tier__mark" aria-hidden="true" />{long ? tierLong(tier) : tierShort(tier)}</span>;
@@ -85,7 +90,7 @@ export function ReportDocument({ m }: { m: ReportModel }) {
 
       <nav className="rp-toc" aria-label="Report sections">
         <h2 className="rp-toc__title">Contents</h2>
-        <ol>{SECTIONS.map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ol>
+        <ol>{[...SECTIONS, ...(m.carried ? [YOURS_SECTION] : [])].map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ol>
       </nav>
 
       <Summary m={m} />
@@ -97,6 +102,7 @@ export function ReportDocument({ m }: { m: ReportModel }) {
       <Sources m={m} />
       <Limitations m={m} verified={verified} />
       <Repro m={m} />
+      {m.carried && <YourColumns m={m} carried={m.carried} />}
 
       <footer className="rp-foot">
         <p>Made with the EV-SIENT Planner, which ran the model on the planner's own device. Planning support, not engineering, permitting or budget advice.</p>
@@ -336,6 +342,16 @@ function Profiles({ m }: { m: ReportModel }) {
                 The engine records the capacity basis as {sentence(cap.basis || 'unknown').toLowerCase()}{cap.confidence ? `, capacity confidence ${cap.confidence}` : ''}.{cap.source ? ` Source: ${cap.source}.` : ''}
               </p>
             ) : <p>The scenario table has no capacity row for this site.</p>}
+
+            {m.carried && (
+              <>
+                <h4 className="rp-h4">Your Columns (Not in the Score)</h4>
+                <p className="rp-note">From the planner's file, as written. The model does not read these, so they played no part in this site's score, rank or port plan.</p>
+                <dl className="rp-dl rp-dl--yours">
+                  {m.carried.columns.map((c, k) => <div key={c.name}><dt>{c.name}</dt><dd>{showCarried(c, carriedText(m.carried!, s.siteId, k))}</dd></div>)}
+                </dl>
+              </>
+            )}
           </section>
         );
       })}
@@ -524,6 +540,54 @@ function Repro({ m }: { m: ReportModel }) {
           </table>
         </div>
       )}
+    </section>
+  );
+}
+
+/** What each of Your Columns holds: its range, or its most common values. */
+function columnSummary(c: CarriedColumns, k: number, ids: string[]): string {
+  const col = c.columns[k];
+  const values = ids.map((id) => carriedText(c, id, k)).filter(Boolean);
+  if (!values.length) return 'Blank at every site';
+  if (col.numeric) {
+    const nums = values.map((v) => [carriedNumber(v)!, v] as const).sort((a, b) => a[0] - b[0]);
+    return `${showCarried(col, nums[0][1])} to ${showCarried(col, nums[nums.length - 1][1])}`;
+  }
+  const tally = new Map<string, number>();
+  for (const v of values) tally.set(v, (tally.get(v) ?? 0) + 1);
+  if (tally.size > 12) return `${tally.size} different values`;
+  const top = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+  return top.slice(0, 4).map(([v, n]) => `${v} (${n})`).join(', ') + (top.length > 4 ? `, and ${top.length - 4} more` : '');
+}
+
+function YourColumns({ m, carried }: { m: ReportModel; carried: CarriedColumns }) {
+  const ids = m.run.sites.map((s) => s.siteId);
+  const N = ids.length;
+  return (
+    <section className="rp-section" aria-labelledby={YOURS_SECTION[0]}>
+      <H2 n={SECTIONS.length + 1} id={YOURS_SECTION[0]}>{YOURS_SECTION[1]}</H2>
+      <p>
+        The planner's file has {plural(carried.columns.length, 'column')} the model does not read. {carried.columns.length === 1 ? 'It is' : 'They are'} kept
+        with each site by its site ID and shown as written, in each site profile above. <strong>{carried.columns.length === 1 ? 'It is' : 'They are'} not in the score:</strong> no
+        score, rank, tier or port plan in this report used {carried.columns.length === 1 ? 'it' : 'them'}.
+      </p>
+      <div className="rp-tablewrap" {...scrollRegion('Your columns table')}>
+        <table className="rp-table rp-table--compact">
+          <caption>Your columns, not in the score, in the order of the file.</caption>
+          <thead><tr><th scope="col">Column</th><th scope="col">Holds</th><th scope="col" className="rp-num">Sites With a Value</th><th scope="col">Values</th></tr></thead>
+          <tbody>
+            {carried.columns.map((c, k) => (
+              <tr key={c.name}>
+                <th scope="row">{c.name}</th>
+                <td>{c.numeric ? 'Numbers' : 'Text'}</td>
+                <td className="rp-num">{ids.filter((id) => carriedText(carried, id, k)).length} of {N}</td>
+                <td>{columnSummary(carried, k, ids)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="rp-note">Every value, site by site, is in the Ranked Sites download (.csv) and on the Your Columns sheet of the Excel workbook.</p>
     </section>
   );
 }

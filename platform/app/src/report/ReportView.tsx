@@ -20,6 +20,7 @@ export function ReportView() {
   const details = useSession((s) => s.details);
   const fields = useSession((s) => s.fields);
   const table = useSession((s) => s.table);
+  const carried = useSession((s) => s.carried);
   const stale = useSession((s) => s.staleReason);
   const go = useSession((s) => s.go);
   const explains = useAllExplains(run);
@@ -31,8 +32,8 @@ export function ReportView() {
   const info = boot.status === 'ready' ? boot.info : null;
   const model: ReportModel | null = useMemo(() => {
     if (!run || explains.status !== 'ready' || files.status !== 'ready') return null;
-    return buildModel({ run, explains: explains.value, files: files.value, info, details, fields, table });
-  }, [run, explains, files, info, details, fields, table]);
+    return buildModel({ run, explains: explains.value, files: files.value, info, details, fields, table, carried });
+  }, [run, explains, files, info, details, fields, table, carried]);
 
   if (!run) {
     return (
@@ -74,8 +75,8 @@ export function ReportView() {
     { job: 'pdf', icon: 'document.on.document', title: 'Accessible PDF', detail: 'The same report as a tagged PDF with bookmarks, for screen readers, sharing and print.', action: 'Download .pdf' },
     { job: 'docx', icon: 'square.and.pencil', title: 'Word Document', detail: 'The same report as an editable Word file, with heading styles and table header rows.', action: 'Download .docx' },
     { job: 'print', icon: 'printer', title: 'Print', detail: 'Opens your browser\'s print dialog for a paper copy. For a PDF to share, use the Accessible PDF above.', action: 'Print' },
-    { job: 'csv', icon: 'list.bullet', title: 'Ranked Sites', detail: 'One row per site with every number in the ranked table and site profiles.', action: 'Download .csv' },
-    { job: 'xlsx', icon: 'chart.bar', title: 'Excel Workbook', detail: 'Sites, Scenarios and Data Confidence sheets. Values only, no formulas.', action: 'Download .xlsx' },
+    { job: 'csv', icon: 'list.bullet', title: 'Ranked Sites', detail: `One row per site with every number in the ranked table and site profiles${carried ? ', then Your Columns, each headed as not in the score' : ''}.`, action: 'Download .csv' },
+    { job: 'xlsx', icon: 'chart.bar', title: 'Excel Workbook', detail: `Sites, Scenarios and Data Confidence sheets${carried ? ', and Your Columns on a sheet of their own' : ''}. Values only, no formulas.`, action: 'Download .xlsx' },
     { job: 'zip', icon: 'archivebox', title: 'All Model Outputs', detail: 'Every file the engine wrote for this run, with the accepted inputs.', action: 'Download .zip' },
     { job: 'project', icon: 'folder', title: 'Project File', detail: 'Open it later in the planner to rebuild these results on any device.', action: 'Download .evsient' },
   ];

@@ -2,7 +2,8 @@
 
 Shared by matrix.py (device matrix) and a11y_audit.py (axe-core, contrast, keyboard). It walks
 Start -> Upload (Example City sample) -> Map Columns -> Check -> Public Data -> Run -> Results ->
-Report once per page, then moves between the screens through the app's own history handling, so
+Report once per page (leaving the sample's Fleet column unmatched, so Results has one of Your
+Columns to show), then moves between the screens through the app's own history handling, so
 each screen can be shown again at any window size without running the model again.
 
 Not a test of the engine's numbers: platform/tools/parity.mjs and browser_check.py do that.
@@ -77,6 +78,9 @@ def run_flow(page, base: str, mock: bool) -> dict:
 
     page.get_by_role("button", name="Continue to Map Columns", exact=True).click()
     _wait_h1(page, "Map Columns")
+    # Fleet is read but not scored; left unmatched, it is carried as one of Your Columns.
+    page.locator("#col-fleet_vehicles").select_option("")
+    page.locator(".st-map-row--unmatched#field-fleet_vehicles").wait_for(timeout=60_000)
     accept = page.get_by_role("button", name="Accept All Matched", exact=True)
     if accept.count():
         accept.first.click()
@@ -101,6 +105,12 @@ def run_flow(page, base: str, mock: bool) -> dict:
     boxes.nth(0).check()
     boxes.nth(1).check()
     page.locator(".rs-compare").wait_for()
+    # Fleet added to the ranked table from Your Columns, and the control closed again.
+    toggle = page.locator(".rs-yours__toggle")
+    toggle.click()
+    page.locator(".rs-yours__option", has_text="Fleet").locator("input").check()
+    toggle.click()
+    page.locator("th.rs-col-yours").first.wait_for()
     page.locator(".sd-card .ex__sentence, .sd-card .sd-error").first.wait_for(timeout=60_000)
 
     go(page, "report")

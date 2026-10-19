@@ -8,6 +8,8 @@
 //   inputs/details.json   source details (AcceptDetails)
 //   inputs/public_data.json  public values the planner accepted, with their sources (only when
 //                         there are any; the file is then evsient-project/2, otherwise /1)
+//   inputs/your_columns.json  the file's columns the model does not read, with each site's values,
+//                         never scored (only when there are any; the file is then evsient-project/3)
 //   results/...           every file the engine wrote for the last run (engine.outputFiles())
 
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
@@ -16,7 +18,10 @@ import { getEngine } from '../engine/client';
 import { PROTOCOL_VERSION, type AcceptDetails, type FieldFill, type TableInput } from '../engine/protocol';
 import { projectName } from '../lib/projectName';
 import { fullMapping, useSession } from '../state/store';
-import { PROJECT_SCHEMA, PROJECT_SCHEMA_V1, type ProjectManifest, type ProjectSnapshot } from './projectTypes';
+import type { CarriedColumns } from '../results/carried';
+import {
+  PROJECT_SCHEMA, PROJECT_SCHEMA_V1, PROJECT_SCHEMA_V3, PROJECT_SCHEMAS, type ProjectManifest, type ProjectSnapshot,
+} from './projectTypes';
 
 export const PROJECT_EXTENSION = '.evsient';
 const MAX_PROJECT_BYTES = 100 * 1024 * 1024;
@@ -47,6 +52,7 @@ export async function buildProjectFile(): Promise<Blob> {
     'inputs/details.json': json(s.details),
   };
   if (s.publicFills.length) members['inputs/public_data.json'] = json({ fills: s.publicFills });
+  if (s.carried) members['inputs/your_columns.json'] = json({ note: 'Columns from the planner\'s file that the model does not read. Kept with each site and never scored.', ...s.carried });
   for (const [path, text] of Object.entries(outputs.files)) {
     // Engine paths are "results/..." and "inputs/..." (the accepted cohort); all of them live under results/.
     const clean = path.replace(/^\/+/, '');
@@ -59,7 +65,7 @@ export async function buildProjectFile(): Promise<Blob> {
   const b = s.boot;
   const info = b.status === 'ready' ? b.info : null;
   const manifest: ProjectManifest = {
-    schema: s.publicFills.length ? PROJECT_SCHEMA : PROJECT_SCHEMA_V1,
+    schema: s.carried ? PROJECT_SCHEMA_V3 : s.publicFills.length ? PROJECT_SCHEMA : PROJECT_SCHEMA_V1,
     name: projectName(s.details, s.table.fileName),
     savedAt: new Date().toISOString(),
     app: { version: appVersion },
@@ -113,9 +119,9 @@ export async function readProjectFile(file: File): Promise<ProjectSnapshot> {
   if (!files['project.json']) throw new ProjectFileError(broken);
 
   const manifest = parseMember<ProjectManifest>(files, 'project.json');
-  if (!isRecord(manifest) || (manifest.schema !== PROJECT_SCHEMA && manifest.schema !== PROJECT_SCHEMA_V1)) {
+  if (!isRecord(manifest) || !(PROJECT_SCHEMAS as readonly unknown[]).includes(manifest.schema)) {
     const found = isRecord(manifest) && typeof manifest.schema === 'string' ? ` (it says ${manifest.schema})` : '';
-    throw new ProjectFileError(`This project file was saved in a format this planner does not read${found}. It reads ${PROJECT_SCHEMA_V1} and ${PROJECT_SCHEMA}.`);
+    throw new ProjectFileError(`This project file was saved in a format this planner does not read${found}. It reads ${PROJECT_SCHEMAS.slice(0, -1).join(', ')} and ${PROJECT_SCHEMAS[PROJECT_SCHEMAS.length - 1]}.`);
   }
   if (!isRecord(manifest.members) || typeof manifest.asOf !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.asOf)) {
     throw new ProjectFileError(broken);
@@ -148,12 +154,26 @@ export async function readProjectFile(file: File): Promise<ProjectSnapshot> {
   if (!isRecord(details) || !Object.values(details).every((v) => v === undefined || typeof v === 'string')) {
     throw new ProjectFileError('The source details in this project file are not in the expected shape, so it cannot be opened.');
   }
-  if (!files['inputs/public_data.json']) return { manifest, table, mapping, details };
-  const publicData = parseMember<{ fills: FieldFill[] }>(files, 'inputs/public_data.json');
-  const isFill = (f: unknown) => isRecord(f) && typeof f.field === 'string' && isRecord(f.source)
-    && isRecord(f.values) && Object.values(f.values).every((v) => typeof v === 'number');
-  if (!isRecord(publicData) || !Array.isArray(publicData.fills) || !publicData.fills.every(isFill)) {
-    throw new ProjectFileError('The public data values in this project file are not in the expected shape, so it cannot be opened.');
+  const snapshot: ProjectSnapshot = { manifest, table, mapping, details };
+  if (files['inputs/public_data.json']) {
+    const publicData = parseMember<{ fills: FieldFill[] }>(files, 'inputs/public_data.json');
+    const isFill = (f: unknown) => isRecord(f) && typeof f.field === 'string' && isRecord(f.source)
+      && isRecord(f.values) && Object.values(f.values).every((v) => typeof v === 'number');
+    if (!isRecord(publicData) || !Array.isArray(publicData.fills) || !publicData.fills.every(isFill)) {
+      throw new ProjectFileError('The public data values in this project file are not in the expected shape, so it cannot be opened.');
+    }
+    snapshot.publicData = publicData;
   }
-  return { manifest, table, mapping, details, publicData };
+  if (files['inputs/your_columns.json']) {
+    const carried = parseMember<CarriedColumns>(files, 'inputs/your_columns.json');
+    const isColumn = (c: unknown) => isRecord(c) && typeof c.name === 'string' && typeof c.numeric === 'boolean';
+    const ok = isRecord(carried) && Array.isArray(carried.columns) && carried.columns.length > 0 && carried.columns.every(isColumn)
+      && isRecord(carried.values) && Object.values(carried.values).every((v) => isStringArray(v) && v.length === carried.columns.length);
+    if (!ok) throw new ProjectFileError('Your Columns in this project file are not in the expected shape, so it cannot be opened.');
+    snapshot.carried = {
+      columns: carried.columns.map((c) => ({ name: c.name, numeric: c.numeric, ...(typeof c.grouped === 'boolean' ? { grouped: c.grouped } : {}) })),
+      values: carried.values,
+    };
+  }
+  return snapshot;
 }

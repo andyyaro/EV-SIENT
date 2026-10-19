@@ -30,6 +30,7 @@
 }
 .app-messages .st-banner { margin-top: 0; }
 .st-banner--error { --banner-edge: var(--system-red); background: color-mix(in srgb, var(--system-red) 8%, var(--grouped-background-secondary)); }
+.st-banner--warning { --banner-edge: var(--system-orange); background: color-mix(in srgb, var(--system-orange) 10%, var(--grouped-background-secondary)); }
 .st-banner--stale { --banner-edge: var(--system-orange); background: color-mix(in srgb, var(--system-orange) 10%, var(--grouped-background-secondary)); }
 .st-banner--info { --banner-edge: var(--accent); background: var(--grouped-background-secondary); }
 .st-banner__icon { margin-top: 1px; color: var(--banner-edge); }

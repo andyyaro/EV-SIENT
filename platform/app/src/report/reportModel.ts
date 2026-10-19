@@ -9,6 +9,7 @@ import {
   readAssumptions, readCapacity, readCohort, readManifest, readPublicSources, type CapacityEvidence, type PublicSource,
 } from '../results/data';
 import { projectName } from '../lib/projectName';
+import type { CarriedColumns } from '../results/carried';
 import { slug, today } from '../results/format';
 
 export interface ReportModel {
@@ -19,6 +20,8 @@ export interface ReportModel {
   details: AcceptDetails;
   fields: FieldCatalog | null;
   table: TableInput | null;
+  /** The file's columns the model does not read, shown in their own section. Never scored. */
+  carried: CarriedColumns | null;
   cohort: ReturnType<typeof readCohort>;
   manifest: ReturnType<typeof readManifest>;
   assumptions: ReturnType<typeof readAssumptions>;
@@ -31,7 +34,7 @@ export interface ReportModel {
 
 export function buildModel(args: {
   run: RunResult; explains: Explanation[]; files: OutputFiles; info: RuntimeInfo | null;
-  details: AcceptDetails; fields: FieldCatalog | null; table: TableInput | null;
+  details: AcceptDetails; fields: FieldCatalog | null; table: TableInput | null; carried: CarriedColumns | null;
 }): ReportModel {
   const cohort = readCohort(args.files);
   const place = projectName(args.details, args.table?.fileName);

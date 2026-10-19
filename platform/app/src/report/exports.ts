@@ -4,6 +4,7 @@
 import * as Comlink from 'comlink';
 import { strToU8, zipSync } from 'fflate';
 import type { SiteResult } from '../engine/protocol';
+import { carriedNumber, carriedText, type CarriedColumns } from '../results/carried';
 import { SUBSCORE_KEYS, subscoreLabel } from '../results/format';
 import type { PdfWorkerApi } from './pdf.worker';
 import { reportBlocks } from './reportBlocks';
@@ -121,9 +122,28 @@ function csvCell(v: Cell): string {
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+/**
+ * Your Columns, after the model's: each heading says it is the planner's column and not in the
+ * score, and each value is the text the planner wrote.
+ */
+export const yourColumnTitle = (name: string) => `Your column (not in the score): ${name}`;
+
+function yourColumns(c: CarriedColumns | null, asNumbers: boolean): Col[] {
+  if (!c) return [];
+  return c.columns.map((col, k): Col => ({
+    title: yourColumnTitle(col.name),
+    value: (s) => {
+      const text = carriedText(c, s.siteId, k);
+      if (!text) return null;
+      return asNumbers && col.numeric ? carriedNumber(text) : text;
+    },
+  }));
+}
+
 export function sitesCsv(m: ReportModel): { blob: Blob; name: string } {
-  const lines = [SITE_COLUMNS.map((c) => csvCell(c.title)).join(',')];
-  for (const s of m.run.sites) lines.push(SITE_COLUMNS.map((c) => csvCell(c.value(s))).join(','));
+  const columns = [...SITE_COLUMNS, ...yourColumns(m.carried, false)];
+  const lines = [columns.map((c) => csvCell(c.title)).join(',')];
+  for (const s of m.run.sites) lines.push(columns.map((c) => csvCell(c.value(s))).join(','));
   // A byte-order mark so Excel reads the file as UTF-8.
   return { blob: new Blob(['﻿' + lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' }), name: fileName(m, 'ranked-sites', 'csv') };
 }
@@ -152,11 +172,21 @@ export async function workbook(m: ReportModel): Promise<{ blob: Blob; name: stri
     ...m.run.sites.map((s) => [s.siteId, s.name, s.confidence.score, s.confidence.level, ...groups.map((g) => s.confidence.breakdown[g] ?? null)].map(cell)),
   ];
 
+  // Your Columns on their own sheet, so the Sites sheet holds only the model's numbers.
+  const id: Col[] = [SITE_COLUMNS[0], SITE_COLUMNS[1], SITE_COLUMNS[2]];
+  const yours = [...id, ...yourColumns(m.carried, true)];
+  const yourSheet = m.carried ? [
+    [head(`Columns from your file that the model does not read. Not in the score: shown as you wrote them, never used to rank.`)],
+    yours.map((c) => head(c.title)),
+    ...m.run.sites.map((s) => yours.map((c) => cell(c.value(s)))),
+  ] : null;
+
   const widths = (n: number, first = 14) => Array.from({ length: n }, (_, i) => ({ width: i < 3 ? first + (i === 2 ? 14 : 0) : 14 }));
   const blob = await writeXlsxFile([
     { data: sites, sheet: 'Sites', columns: widths(SITE_COLUMNS.length), stickyRowsCount: 1 },
     { data: scenarios, sheet: 'Scenarios', columns: widths(scenarioHead.length), stickyRowsCount: 1 },
     { data: confidence, sheet: 'Data Confidence', columns: widths(groups.length + 4), stickyRowsCount: 1 },
+    ...(yourSheet ? [{ data: yourSheet, sheet: 'Your Columns (Not in the Score)', columns: widths(yours.length), stickyRowsCount: 2 }] : []),
   ] as Parameters<typeof writeXlsxFile>[0]).toBlob();
   return { blob, name: fileName(m, 'ev-sient-results', 'xlsx') };
 }

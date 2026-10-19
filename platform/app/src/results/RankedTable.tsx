@@ -1,9 +1,13 @@
 // The ranked sites as a table: the complete accessible view of everything the map and charts show.
 // Each site's name is a button that selects it (arrow keys move between sites); the last column
-// adds the site to Compare.
+// adds the site to Compare. Columns from the planner's own file (Your Columns) follow, tinted and
+// labelled Not in the Score; their headings sort the table, and Rank puts it back in rank order.
 
 import { useRef, type KeyboardEvent } from 'react';
+import { Icon } from '../components/Icon';
 import type { SiteResult } from '../engine/protocol';
+import { breakable } from './YourColumns';
+import { NOT_IN_SCORE, carriedText, columnIndex, showCarried, type CarriedColumns } from './carried';
 import { fmt, isNumber, tierKey, tierShort } from './format';
 
 interface Props {
@@ -12,9 +16,16 @@ interface Props {
   compare: string[];
   onSelect(siteId: string, from: 'table'): void;
   onToggleCompare(siteId: string): void;
+  carried?: CarriedColumns | null;
+  /** Your Columns shown as table columns, in the order the planner added them. */
+  shown?: string[];
+  /** null is rank order. */
+  sort?: { column: string; dir: 1 | -1 } | null;
+  onSort?(column: string | null): void;
 }
 
-export function RankedTable({ sites, selectedId, compare, onSelect, onToggleCompare }: Props) {
+export function RankedTable({ sites, selectedId, compare, onSelect, onToggleCompare, carried = null, shown = [], sort = null, onSort }: Props) {
+  const extra = shown.map((name) => ({ name, k: columnIndex(carried, name) })).filter((c) => c.k >= 0);
   const body = useRef<HTMLTableSectionElement>(null);
   const full = compare.length >= 3;
   const tabStop = sites.some((s) => s.siteId === selectedId) ? selectedId : sites[0]?.siteId;
@@ -33,11 +44,19 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
           and the roles keep the table's meaning for screen readers whatever the CSS display. */}
       <table className="hig-table__grid" role="table">
         <caption id="rs-ranked-cap" className="hig-visually-hidden">
-          Ranked sites, {sites.length} in all. Choose a site's name to show its details; the up and down arrow keys move between sites.
+          Ranked sites, {sites.length} {sites.length === 1 ? 'site' : 'sites'} shown{sort ? `, sorted by ${sort.column}, ${sort.dir === 1 ? 'lowest' : 'highest'} first` : ', in rank order'}. Choose a site's name to show its details; the up and down arrow keys move between sites.
+          {extra.length > 0 && ' The last columns come from your file. They are not in the score and do not change the rank.'}
         </caption>
         <thead role="rowgroup">
           <tr role="row">
-            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing rs-col-rank"><span className="hig-table__heading-label">Rank</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing rs-col-rank" aria-sort={extra.length ? (sort ? 'none' : 'ascending') : undefined}>
+              {extra.length && onSort ? (
+                <button type="button" className="rs-sort hig-focus" onClick={() => onSort(null)}>
+                  <span className="hig-table__heading-label">Rank</span>
+                  {!sort && <Icon name="chevron.up" size={12} strokeWidth={2.4} />}
+                </button>
+              ) : <span className="hig-table__heading-label">Rank</span>}
+            </th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading rs-col-site"><span className="hig-table__heading-label">Site</span></th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Score</span></th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Tier</span></th>
@@ -45,6 +64,28 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Ports Now</span></th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Pathway</span></th>
             <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--center"><span className="hig-table__heading-label">Compare</span></th>
+            {extra.map(({ name, k }) => {
+              const on = sort?.column === name;
+              const numeric = carried!.columns[k].numeric;
+              return (
+                <th
+                  scope="col" role="columnheader" key={name}
+                  className={'hig-table__heading rs-col-yours ' + (numeric ? 'hig-table__cell--trailing' : 'hig-table__cell--leading')}
+                  aria-sort={on ? (sort!.dir === 1 ? 'ascending' : 'descending') : 'none'}
+                >
+                  <button
+                    type="button" className="rs-sort hig-focus" onClick={() => onSort?.(name)}
+                    aria-label={`${name}, ${NOT_IN_SCORE.toLowerCase()}. Sort by this column${on ? (sort!.dir === 1 ? ', now ascending' : ', now descending') : ''}.`}
+                  >
+                    <span className="rs-yours-head">
+                      <span className="hig-table__heading-label rs-yours-head__name">{breakable(name)}</span>
+                      <span className="rs-yours-head__note">{NOT_IN_SCORE}</span>
+                    </span>
+                    {on && <Icon name={sort!.dir === 1 ? 'chevron.up' : 'chevron.down'} size={12} strokeWidth={2.4} />}
+                  </button>
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody ref={body} role="rowgroup">
@@ -94,6 +135,15 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
                     <span className="hig-visually-hidden">Compare {s.name}</span>
                   </label>
                 </td>
+                {extra.map(({ name, k }, j) => {
+                  const col = carried!.columns[k];
+                  const text = carriedText(carried!, s.siteId, k);
+                  return (
+                    <td role="cell" key={name} className={'hig-table__cell rs-col-yours ' + (col.numeric ? 'hig-table__cell--trailing num' : 'hig-table__cell--leading rs-yours-text') + (j === 0 ? ' rs-yours-first' : '') + (text ? '' : ' is-blank')}>
+                      <span className="rs-cell-label" aria-hidden="true">{name}: </span>{showCarried(col, text)}
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}

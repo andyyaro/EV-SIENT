@@ -1,13 +1,15 @@
 // The Results workspace: what the numbers are (the engine's claims line, always shown), the totals,
 // the ranked sites with a map and one site's details beside them, and Compare.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { useSession } from '../state/store';
 import { ComparePanel } from './ComparePanel';
 import { RankedTable } from './RankedTable';
 import { SiteDetail } from './SiteDetail';
 import { SiteMap } from './SiteMap';
+import { YourColumnsControl } from './YourColumns';
+import { columnIndex, compareCarried, passesFilter } from './carried';
 import { useOutputFiles } from './data';
 import { fmt, plural } from './format';
 import '../styles/results.css';
@@ -21,6 +23,9 @@ export function ResultsView() {
   const selectSite = useSession((s) => s.selectSite);
   const toggleCompare = useSession((s) => s.toggleCompare);
   const go = useSession((s) => s.go);
+  const carried = useSession((s) => s.carried);
+  const view = useSession((s) => s.yourColumns);
+  const setView = useSession((s) => s.setYourColumns);
   const files = useOutputFiles(run);
   const [notesOpen, setNotesOpen] = useState(false);
   const [announce, setAnnounce] = useState('');
@@ -29,6 +34,17 @@ export function ResultsView() {
   const pendingFocus = useRef(false);
 
   const site = run?.sites.find((s) => s.siteId === selectedId) ?? run?.sites[0] ?? null;
+
+  // The table's rows: every site, or those the planner's filter keeps, in rank order or sorted by
+  // one of Your Columns. Only the order on screen changes; every rank is the engine's.
+  const tableSites = useMemo(() => {
+    const all = run?.sites ?? [];
+    if (!carried) return all;
+    const kept = all.filter((s) => passesFilter(carried, view.filter, s.siteId));
+    const k = view.sort ? columnIndex(carried, view.sort.column) : -1;
+    if (k < 0) return kept;
+    return [...kept].sort((a, b) => compareCarried(carried, k, a.siteId, b.siteId, view.sort!.dir) || a.rank - b.rank);
+  }, [run, carried, view.filter, view.sort]);
 
   // On a narrow screen the details sit below the table: after choosing a site there, move to them.
   function focusTitle() {
@@ -62,6 +78,13 @@ export function ResultsView() {
     }
     selectSite(siteId);
     setAnnounce(`Showing ${s.name}, rank ${s.rank} of ${run!.sites.length}.`);
+  }
+
+  function sortBy(column: string | null) {
+    const now = view.sort;
+    const sort = column === null ? null : now?.column !== column ? { column, dir: 1 as const } : now.dir === 1 ? { column, dir: -1 as const } : null;
+    setView({ sort });
+    setAnnounce(sort ? `Sorted by ${sort.column}, ${sort.dir === 1 ? 'lowest' : 'highest'} first. Not in the score: ranks are unchanged.` : 'In rank order.');
   }
 
   function toggle(siteId: string) {
@@ -137,8 +160,17 @@ export function ResultsView() {
         <div className="section__head"><h2 className="section__title" id="rs-ranked-title">Ranked Sites</h2></div>
         <div className="rs-split" ref={splitRef}>
           <div className="rs-master">
-            <RankedTable sites={run.sites} selectedId={site?.siteId ?? null} compare={compare} onSelect={choose} onToggleCompare={toggle} />
-            <SiteMap sites={run.sites} selectedId={site?.siteId ?? null} onSelect={(id) => choose(id, 'map')} />
+            {carried && <YourColumnsControl carried={carried} total={run.sites.length} showing={tableSites.length} />}
+            {tableSites.length ? (
+              <RankedTable
+                sites={tableSites} selectedId={site?.siteId ?? null} compare={compare} onSelect={choose} onToggleCompare={toggle}
+                carried={carried} shown={view.shown} sort={view.sort} onSort={sortBy}
+              />
+            ) : <p className="rs-compare-empty">No site matches the filter. Clear it to see every site.</p>}
+            <SiteMap
+              sites={run.sites} selectedId={site?.siteId ?? null} onSelect={(id) => choose(id, 'map')}
+              carried={carried} colourBy={view.mapColour} onColourBy={(mapColour) => setView({ mapColour })}
+            />
           </div>
           <div className="rs-detail">
             {site && (
@@ -148,6 +180,7 @@ export function ResultsView() {
                 site={site}
                 fields={fields}
                 files={files}
+                carried={carried}
                 inCompare={compare.includes(site.siteId)}
                 compareFull={compare.length >= 3}
                 onToggleCompare={() => toggle(site.siteId)}
@@ -167,7 +200,7 @@ export function ResultsView() {
           <h2 className="section__title" id="rs-compare-title">Compare Sites</h2>
           <span className="section__aside num">{compare.length} of 3 chosen</span>
         </div>
-        <ComparePanel sites={compareSites} onRemove={toggle} onSelect={(id) => choose(id, 'compare')} />
+        <ComparePanel sites={compareSites} onRemove={toggle} onSelect={(id) => choose(id, 'compare')} carried={carried} />
       </section>
 
       <p className="hig-visually-hidden" aria-live="polite" aria-atomic="true">{announce}</p>

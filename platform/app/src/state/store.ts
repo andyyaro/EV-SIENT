@@ -8,6 +8,7 @@ import type {
   RunResult, RuntimeInfo, TableInput,
 } from '../engine/protocol';
 import type { HubLookup, HubProgress } from '../hub/hub';
+import { carriedFrom, type CarriedColumns, type CarriedFilter } from '../results/carried';
 import type { ProjectSnapshot } from '../report/projectTypes';
 
 export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'report';
@@ -62,7 +63,21 @@ export interface Session {
   publicChoice: Record<string, 'use' | 'skip'>;
   /** The public values the engine holds now, exactly as last sent to it. */
   publicFills: FieldFill[];
+  /** The file's columns the model does not read, kept with the last run's sites (never scored). */
+  carried: CarriedColumns | null;
+  /** How Results shows them: the table's extra columns, its order and filter, the map's colours. */
+  yourColumns: YourColumnsView;
 }
+
+export interface YourColumnsView {
+  shown: string[];
+  /** null is rank order. */
+  sort: { column: string; dir: 1 | -1 } | null;
+  filter: CarriedFilter | null;
+  mapColour: string | null;
+}
+
+const noView: YourColumnsView = { shown: [], sort: null, filter: null, mapColour: null };
 
 interface Actions {
   go(step: StepKey): void;
@@ -87,6 +102,7 @@ interface Actions {
   restoreProject(snapshot: ProjectSnapshot): Promise<void>;
   selectSite(siteId: string | null): void;
   toggleCompare(siteId: string): void;
+  setYourColumns(view: Partial<YourColumnsView>): void;
   clearError(): void;
   clearNotice(): void;
   newProject(): Promise<void>;
@@ -96,7 +112,19 @@ const initial: Omit<Session, 'boot' | 'fields'> = {
   step: 'start', table: null, proposal: null, check: null, details: {}, accepted: null, run: null,
   staleReason: null, busy: null, error: null, notice: null, selectedSiteId: null, compare: [],
   confirmed: {}, guessed: {}, hub: null, hubProgress: null, publicChoice: {}, publicFills: [],
+  carried: null, yourColumns: noView,
 };
+
+/** The view kept across runs, less any column the new run no longer carries. */
+function keepView(view: YourColumnsView, carried: CarriedColumns | null): YourColumnsView {
+  const has = new Set(carried?.columns.map((c) => c.name) ?? []);
+  return {
+    shown: view.shown.filter((c) => has.has(c)),
+    sort: view.sort && has.has(view.sort.column) ? view.sort : null,
+    filter: view.filter && has.has(view.filter.column) ? view.filter : null,
+    mapColour: view.mapColour && has.has(view.mapColour) ? view.mapColour : null,
+  };
+}
 
 /** Everything public data adds, cleared whenever the file or its column matches change. */
 const noPublicData = { hub: null, hubProgress: null, publicChoice: {}, publicFills: [] };
@@ -443,7 +471,13 @@ export const useSession = create<Session & Actions>((set, get) => {
         set({ accepted, busy: 'run' });
         const run = await engine.run({ asOf: options?.asOf ?? today() });
         if (gen !== generation) return;
-        set({ run, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [] });
+        // Taken with the mapping the run used, so a later change in Map Columns leaves these results alone.
+        const s = get();
+        const carried = carriedFrom(s.table, s.proposal?.mapping);
+        set({
+          run, carried, yourColumns: keepView(s.yourColumns, carried), staleReason: null, busy: null,
+          selectedSiteId: run.sites[0]?.siteId ?? null, compare: [],
+        });
       } catch (e) { if (gen === generation) fail(e); }
     },
 
@@ -488,8 +522,10 @@ export const useSession = create<Session & Actions>((set, get) => {
         const versionNote = nowVersion && savedVersion && nowVersion !== savedVersion
           ? ` It was saved with model version ${savedVersion} and re-run with version ${nowVersion}, so some figures may differ.`
           : '';
+        // An older project file has no saved columns; they are read again from its table.
+        const carried = snapshot.carried ?? carriedFrom(snapshot.table, proposal.mapping);
         set({
-          run, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [],
+          run, carried, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [],
           notice: `Opened ${snapshot.manifest.name}. The model was run again on this device, with data confidence judged as of ${snapshot.manifest.asOf}.${versionNote}`,
         });
         get().go('results');
@@ -503,6 +539,8 @@ export const useSession = create<Session & Actions>((set, get) => {
       if (c.includes(siteId)) set({ compare: c.filter((x) => x !== siteId) });
       else if (c.length < 3) set({ compare: [...c, siteId] });
     },
+
+    setYourColumns(view) { set({ yourColumns: { ...get().yourColumns, ...view } }); },
 
     clearError() { set({ error: null }); },
     clearNotice() { set({ notice: null }); },

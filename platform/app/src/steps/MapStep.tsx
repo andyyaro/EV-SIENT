@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Banner } from '../components/Banner';
 import { Icon } from '../components/Icon';
 import { PageHead } from '../components/PageHead';
+import { ScoreCoverage } from '../components/ScoreCoverage';
 import { StatusMark } from '../components/StatusMark';
 import { StepActions } from '../components/StepActions';
 import type { FieldInfo } from '../engine/protocol';
@@ -229,6 +230,8 @@ export function MapStep() {
           </div>
         )}
       </div>
+
+      <ScoreCoverage />
 
       <div role="status" aria-live="polite" className="st-inline-status">
         {s.busy === 'remap' ? 'Updating the matches.' : announcement}

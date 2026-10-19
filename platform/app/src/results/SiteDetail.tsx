@@ -1,10 +1,13 @@
 // One site in full: score and subscores, the Explain card, the port plan and its horizons, data
-// confidence by group, operations and the capacity evidence. Every number is the engine's.
+// confidence by group, operations and the capacity evidence. Every number is the engine's, except
+// in Your Columns, which shows the planner's own values for columns the model does not read.
 
 import { forwardRef } from 'react';
 import { Icon } from '../components/Icon';
 import type { FieldCatalog, OutputFiles, RunResult, SiteResult } from '../engine/protocol';
 import { ExplainCard } from './ExplainCard';
+import { YourColumnsCard } from './YourColumns';
+import type { CarriedColumns } from './carried';
 import {
   CAPACITY_LADDER, ladderRung, readCapacity, useExplain, type Loadable,
 } from './data';
@@ -17,6 +20,7 @@ interface Props {
   site: SiteResult;
   fields: FieldCatalog | null;
   files: Loadable<OutputFiles>;
+  carried?: CarriedColumns | null;
   inCompare: boolean;
   compareFull: boolean;
   onToggleCompare(): void;
@@ -24,7 +28,7 @@ interface Props {
 }
 
 export const SiteDetail = forwardRef<HTMLHeadingElement, Props>(function SiteDetail(
-  { run, site, fields, files, inCompare, compareFull, onToggleCompare, onBack }, titleRef,
+  { run, site, fields, files, carried, inCompare, compareFull, onToggleCompare, onBack }, titleRef,
 ) {
   const explain = useExplain(run, site.siteId);
   const total = run.sites.length;
@@ -158,6 +162,8 @@ export const SiteDetail = forwardRef<HTMLHeadingElement, Props>(function SiteDet
         <h3 className="sd-card__title" id="sd-cap">Capacity Evidence</h3>
         <CapacityLadder siteId={site.siteId} files={files} />
       </section>
+
+      {carried && <YourColumnsCard carried={carried} siteId={site.siteId} />}
     </article>
   );
 });
