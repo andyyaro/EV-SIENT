@@ -121,6 +121,11 @@ by the visitor. Stored in the `.evsient` file as a Frictionless Data Package v2 
 - **The Table Schema** is `{"$schema": "https://datapackage.org/profiles/2.0/tableschema.json",
   "fields": [...], "missingValues": [""], "evsient:dictionaryVersion": 1}`; each field's own
   `missingValues` overrides the table's.
+- **In the project file** it is `inputs/column_dictionary.json`, written once the planner has
+  confirmed any column, in a project file of any version (an older planner opens the project
+  without it). A label the planner gives a column is the field's Frictionless `title`; it is
+  display only, and `from_table_schema` ignores it. Opening the project gives the schema back to
+  the engine with `columns_restore`, which reads every column again against the reopened file.
 - **Typed values** (`parse`): numbers as floats, an ordinal as its level's position from 0, a
   flag as 1.0, 0.0 or NaN, a category as a pandas Categorical, a date as datetime64, other
   roles as text; columns `(name, "value")` and `(name, "raw")`, the raw cells untouched.

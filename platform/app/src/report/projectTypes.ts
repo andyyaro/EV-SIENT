@@ -4,6 +4,7 @@
 
 import type { AcceptDetails, FieldFill, TableInput } from '../engine/protocol';
 import type { CarriedColumns } from '../results/carried';
+import type { ColumnDictionary } from '../columns/dictionary';
 
 /** Written when the file has columns the model does not read (Your Columns), saved with the project. */
 export const PROJECT_SCHEMA_V3 = 'evsient-project/3';
@@ -38,4 +39,10 @@ export interface ProjectSnapshot {
   publicData?: { fills: FieldFill[] };
   /** inputs/your_columns.json: the file's columns the model does not read, by site ID (evsient-project/3). */
   carried?: CarriedColumns;
+  /**
+   * inputs/column_dictionary.json: the planner's confirmed column dictionary as a Frictionless Table
+   * Schema, labels as each field's `title`. Optional in any version: a planner that does not know it
+   * opens the project without it.
+   */
+  columns?: ColumnDictionary;
 }

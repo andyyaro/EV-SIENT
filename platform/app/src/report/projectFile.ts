@@ -10,6 +10,8 @@
 //                         there are any; the file is then evsient-project/2, otherwise /1)
 //   inputs/your_columns.json  the file's columns the model does not read, with each site's values,
 //                         never scored (only when there are any; the file is then evsient-project/3)
+//   inputs/column_dictionary.json  the planner's confirmed column dictionary, a Frictionless Table
+//                         Schema with their labels as `title` (only when there is one; any version)
 //   results/...           every file the engine wrote for the last run (engine.outputFiles())
 
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
@@ -19,6 +21,7 @@ import { PROTOCOL_VERSION, type AcceptDetails, type FieldFill, type TableInput }
 import { projectName } from '../lib/projectName';
 import { fullMapping, useSession } from '../state/store';
 import type { CarriedColumns } from '../results/carried';
+import { DICTIONARY_MEMBER, columnsForProject, parseSavedColumns } from '../columns/dictionary';
 import {
   PROJECT_SCHEMA, PROJECT_SCHEMA_V1, PROJECT_SCHEMA_V3, PROJECT_SCHEMAS, type ProjectManifest, type ProjectSnapshot,
 } from './projectTypes';
@@ -53,6 +56,7 @@ export async function buildProjectFile(): Promise<Blob> {
   };
   if (s.publicFills.length) members['inputs/public_data.json'] = json({ fills: s.publicFills });
   if (s.carried) members['inputs/your_columns.json'] = json({ note: 'Columns from the planner\'s file that the model does not read. Kept with each site and never scored.', ...s.carried });
+  if (s.columnDictionary) members[DICTIONARY_MEMBER] = json(await columnsForProject(s.columnDictionary));
   for (const [path, text] of Object.entries(outputs.files)) {
     // Engine paths are "results/..." and "inputs/..." (the accepted cohort); all of them live under results/.
     const clean = path.replace(/^\/+/, '');
@@ -174,6 +178,11 @@ export async function readProjectFile(file: File): Promise<ProjectSnapshot> {
       columns: carried.columns.map((c) => ({ name: c.name, numeric: c.numeric, ...(typeof c.grouped === 'boolean' ? { grouped: c.grouped } : {}) })),
       values: carried.values,
     };
+  }
+  if (files[DICTIONARY_MEMBER]) {
+    const columns = parseSavedColumns(parseMember<unknown>(files, DICTIONARY_MEMBER));
+    if (!columns) throw new ProjectFileError('The column dictionary in this project file is not in the expected shape, so it cannot be opened.');
+    snapshot.columns = columns;
   }
   return snapshot;
 }

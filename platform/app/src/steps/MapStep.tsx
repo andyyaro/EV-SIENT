@@ -9,6 +9,7 @@ import { PageHead } from '../components/PageHead';
 import { ScoreCoverage } from '../components/ScoreCoverage';
 import { StatusMark } from '../components/StatusMark';
 import { StepActions } from '../components/StepActions';
+import { YourColumnsPanel } from '../columns/YourColumnsPanel';
 import type { FieldInfo } from '../engine/protocol';
 import { fieldLabel, plainText, plural, sentence } from '../lib/fieldText';
 import { recall, remember, type RememberedMapping } from '../lib/rememberedMappings';
@@ -246,6 +247,8 @@ export function MapStep() {
       <Group id="grp-matched" title="Matched" open={showMatched || byStatus.matched.length <= 6} onToggle={byStatus.matched.length > 6 ? () => setShowMatched((v) => !v) : undefined}
         intro="These columns match the field names exactly, or you chose or confirmed them. You can still change any of them."
         fields={byStatus.matched} announce={setAnnouncement} />
+
+      <YourColumnsPanel />
 
       <StepActions
         onBack={() => s.go('upload')}

@@ -10,6 +10,7 @@ import type {
 import type { HubLookup, HubProgress } from '../hub/hub';
 import { carriedFrom, type CarriedColumns, type CarriedFilter } from '../results/carried';
 import type { ProjectSnapshot } from '../report/projectTypes';
+import { restoreColumns, type ColumnDictionary } from '../columns/dictionary';
 
 export type StepKey = 'start' | 'upload' | 'map' | 'check' | 'fill' | 'run' | 'results' | 'report';
 
@@ -67,6 +68,8 @@ export interface Session {
   carried: CarriedColumns | null;
   /** How Results shows them: the table's extra columns, its order and filter, the map's colours. */
   yourColumns: YourColumnsView;
+  /** The planner's confirmed column dictionary and labels (src/columns), saved in the project file. */
+  columnDictionary: ColumnDictionary | null;
 }
 
 export interface YourColumnsView {
@@ -113,6 +116,7 @@ const initial: Omit<Session, 'boot' | 'fields'> = {
   staleReason: null, busy: null, error: null, notice: null, selectedSiteId: null, compare: [],
   confirmed: {}, guessed: {}, hub: null, hubProgress: null, publicChoice: {}, publicFills: [],
   carried: null, yourColumns: noView,
+  columnDictionary: null,
 };
 
 /** The view kept across runs, less any column the new run no longer carries. */
@@ -326,7 +330,7 @@ export const useSession = create<Session & Actions>((set, get) => {
           if (status === 'check' && proposal.mapping[field]) guessed[field] = proposal.mapping[field];
         }
         markStale('You uploaded a different file.');
-        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null, ...noPublicData });
+        set({ table, proposal, check, guessed, confirmed: {}, accepted: null, busy: null, ...noPublicData, columnDictionary: null });
       } catch (e) { if (gen === generation) fail(e); }
     },
 
@@ -506,6 +510,10 @@ export const useSession = create<Session & Actions>((set, get) => {
         const confirmed: Record<string, string> = { ...proposal.mapping };
         const publicChoice = Object.fromEntries(publicFills.map((f) => [f.field, 'use' as const]));
         set({ table: snapshot.table, proposal, check, confirmed, guessed: {}, details: { ...snapshot.details }, publicFills, publicChoice });
+        // The planner's column dictionary, read again against the reopened file (src/columns).
+        const columns = await restoreColumns(snapshot.columns);
+        if (gen !== generation) return;
+        set({ columnDictionary: columns.dictionary });
         if (proposal.refused || check.counts.mustFix > 0) {
           set({ busy: null, notice: 'This project file was opened, but its file has items marked Must Fix, so the model was not run.' });
           get().go('check');
@@ -526,7 +534,7 @@ export const useSession = create<Session & Actions>((set, get) => {
         const carried = snapshot.carried ?? carriedFrom(snapshot.table, proposal.mapping);
         set({
           run, carried, staleReason: null, busy: null, selectedSiteId: run.sites[0]?.siteId ?? null, compare: [],
-          notice: `Opened ${snapshot.manifest.name}. The model was run again on this device, with data confidence judged as of ${snapshot.manifest.asOf}.${versionNote}`,
+          notice: `Opened ${snapshot.manifest.name}. The model was run again on this device, with data confidence judged as of ${snapshot.manifest.asOf}.${versionNote}${columns.note}`,
         });
         get().go('results');
       } catch (e) { if (gen === generation) fail(e); }

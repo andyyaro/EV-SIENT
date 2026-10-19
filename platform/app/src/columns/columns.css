@@ -1,0 +1,91 @@
+/* Your Columns on Map Columns (src/columns). Content layer: grouped backgrounds and tokens only, as
+   steps.css. Status is a shape and a word; no coloured edge or side stripe on any card or row. */
+
+.yc-open { gap: 6px; }
+.yc-panel { margin-top: 12px; }
+.yc-gap { margin-top: 12px; }
+.yc-gap-bottom { margin-bottom: 12px; }
+.yc-quiet { color: var(--label-secondary); }
+.yc-mono { font-family: var(--font-mono); font-size: 0.94em; overflow-wrap: anywhere; }
+.yc-num { text-align: end !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.yc-summary { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px 20px; margin-top: 12px; }
+.yc-summary__counts { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px;
+  font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.yc-summary__counts strong { font-weight: 600; }
+.yc-summary__all { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: 40ch; }
+.yc-filter { margin-top: 16px; }
+
+.yc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.yc-card { display: grid; gap: 12px; min-width: 0; padding: 18px 20px; border-radius: var(--radius-glass); background: var(--grouped-background-secondary); }
+.yc-card__top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 12px; }
+.yc-card__titles { min-width: 0; flex: 1 1 200px; }
+.yc-card__name { font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); overflow-wrap: anywhere; }
+.yc-card__file { margin-top: 2px; font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+
+.yc-facts { display: grid; gap: 6px; margin: 0; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+.yc-fact { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; }
+.yc-fact dt { font: 600 13px/21px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.yc-fact dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.yc-needs { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+.yc-needs .hig-icon { color: var(--system-orange); }
+
+.yc-sub { display: flex; align-items: center; gap: 6px; font: 600 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.yc-why__list, .yc-problems__list { margin: 4px 0 0; padding-inline-start: 1.2em; display: grid; gap: 4px;
+  font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.yc-why__list li, .yc-problems__list li { max-width: 72ch; overflow-wrap: anywhere; }
+.yc-problems { padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--system-orange) 10%, var(--grouped-background-secondary)); }
+.yc-problems .yc-sub { color: var(--label-primary); }
+.yc-problems__list { color: var(--label-primary); }
+.yc-problems__icon { color: var(--system-orange); }
+
+.yc-card__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.yc-card__actions .hig-button { gap: 6px; }
+
+.yc-edit { padding-top: 14px; border-top: 0.5px solid var(--separator); }
+.yc-edit__grid { display: flex; flex-wrap: wrap; gap: 14px 20px; }
+.yc-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 220px; max-width: 420px; }
+.yc-field__label { padding: 0; font: 600 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.yc-field__hint { font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); max-width: 72ch; }
+.yc-field .st-select { display: flex; width: 100%; min-width: 0; }
+.yc-input {
+  box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--fill-tertiary);
+  color: var(--label-primary); font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px; color-scheme: light dark;
+}
+.yc-input::placeholder { color: var(--placeholder-text, var(--label-tertiary)); opacity: 1; }
+
+.yc-direction, .yc-missing { margin: 16px 0 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 6px; }
+.yc-direction__options { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.yc-radio { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px 0 8px; border-radius: 12px; cursor: pointer;
+  font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }
+@media (hover: hover) { .yc-radio:hover { background: var(--fill-quaternary); } }
+.yc-radio input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.yc-radio input:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+.yc-reading { margin-top: 16px; display: grid; gap: 6px; }
+.yc-reading__wrap { max-width: 100%; overflow-x: auto; border-radius: 12px; background: var(--fill-quaternary); }
+.yc-reading__wrap:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.yc-reading__table { width: 100%; border-collapse: collapse; font: 400 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-primary); }
+.yc-reading__table th { padding: 8px 10px; text-align: start; font-weight: 600; color: var(--label-secondary); box-shadow: inset 0 -0.5px var(--separator); white-space: nowrap; }
+.yc-reading__table td { padding: 8px 10px; vertical-align: top; box-shadow: inset 0 -0.5px var(--separator); min-width: 8ch; }
+.yc-reading__table tbody tr:last-child td { box-shadow: none; }
+
+.yc-error { display: flex; gap: 6px; align-items: flex-start; margin-top: 14px; padding: 10px 12px; border-radius: 12px;
+  background: color-mix(in srgb, var(--system-red) 10%, var(--grouped-background-secondary)); font: 400 15px/21px var(--font-sans); color: var(--label-primary); }
+.yc-error .hig-icon { flex: none; margin-top: 2px; color: var(--system-red); }
+
+.yc-edit__buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 18px; }
+.yc-edit__buttons .hig-button { gap: 6px; }
+.yc-edit__why { flex: 1 1 260px; }
+
+@media (max-width: 520px) {
+  .yc-card { padding: 16px; }
+  .yc-fact { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .yc-summary__all, .yc-summary__all .hig-button { width: 100%; max-width: none; }
+  .yc-open { width: 100%; justify-content: center; }
+}
+
+/* Windows high contrast and forced colours: keep the tinted panels visible as outlines. */
+@media (forced-colors: active) {
+  .yc-card, .yc-problems, .yc-error, .yc-reading__wrap { outline: 1px solid CanvasText; }
+}
