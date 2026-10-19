@@ -1,20 +1,59 @@
 {
   "CallerReference": "evsient-app-20261018",
-  "Aliases": { "Quantity": 1, "Items": ["app.futurecity.andyyaro.com"] },
+  "Aliases": {
+    "Quantity": 1,
+    "Items": [
+      "app.futurecity.andyyaro.com"
+    ]
+  },
   "DefaultRootObject": "index.html",
   "Origins": {
-    "Quantity": 1,
+    "Quantity": 2,
     "Items": [
       {
         "Id": "s3-future-city-app",
         "DomainName": "future-city-app.s3.us-east-1.amazonaws.com",
         "OriginPath": "",
-        "CustomHeaders": { "Quantity": 0 },
-        "S3OriginConfig": { "OriginAccessIdentity": "" },
-        "OriginAccessControlId": "E44Z5LFBLB257",
+        "CustomHeaders": {
+          "Quantity": 0
+        },
+        "S3OriginConfig": {
+          "OriginAccessIdentity": "",
+          "OriginReadTimeout": 30
+        },
         "ConnectionAttempts": 3,
         "ConnectionTimeout": 10,
-        "OriginShield": { "Enabled": false }
+        "OriginShield": {
+          "Enabled": false
+        },
+        "OriginAccessControlId": "E44Z5LFBLB257"
+      },
+      {
+        "Id": "lambda-evsient-assistant",
+        "DomainName": "6czqk6qpx3kyw5l2jjnd55rhyq0wzgzp.lambda-url.us-east-2.on.aws",
+        "OriginPath": "",
+        "CustomHeaders": {
+          "Quantity": 0
+        },
+        "CustomOriginConfig": {
+          "HTTPPort": 80,
+          "HTTPSPort": 443,
+          "OriginProtocolPolicy": "https-only",
+          "OriginSslProtocols": {
+            "Quantity": 1,
+            "Items": [
+              "TLSv1.2"
+            ]
+          },
+          "OriginReadTimeout": 60,
+          "OriginKeepaliveTimeout": 5
+        },
+        "OriginAccessControlId": "EKQPU73AUTUV8",
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10,
+        "OriginShield": {
+          "Enabled": false
+        }
       }
     ]
   },
@@ -23,8 +62,17 @@
     "ViewerProtocolPolicy": "redirect-to-https",
     "AllowedMethods": {
       "Quantity": 2,
-      "Items": ["HEAD", "GET"],
-      "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+      "Items": [
+        "HEAD",
+        "GET"
+      ],
+      "CachedMethods": {
+        "Quantity": 2,
+        "Items": [
+          "HEAD",
+          "GET"
+        ]
+      }
     },
     "Compress": true,
     "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
@@ -37,26 +85,49 @@
         }
       ]
     },
-    "LambdaFunctionAssociations": { "Quantity": 0 },
-    "TrustedSigners": { "Enabled": false, "Quantity": 0 },
-    "TrustedKeyGroups": { "Enabled": false, "Quantity": 0 },
+    "LambdaFunctionAssociations": {
+      "Quantity": 0
+    },
+    "TrustedSigners": {
+      "Enabled": false,
+      "Quantity": 0
+    },
+    "TrustedKeyGroups": {
+      "Enabled": false,
+      "Quantity": 0
+    },
     "FieldLevelEncryptionId": "",
     "SmoothStreaming": false
   },
   "CacheBehaviors": {
-    "Quantity": 1,
+    "Quantity": 2,
     "Items": [
       {
-        "PathPattern": "/runtime/*",
-        "TargetOriginId": "s3-future-city-app",
-        "ViewerProtocolPolicy": "redirect-to-https",
+        "PathPattern": "/api/assistant/*",
+        "TargetOriginId": "lambda-evsient-assistant",
+        "ViewerProtocolPolicy": "https-only",
         "AllowedMethods": {
-          "Quantity": 2,
-          "Items": ["HEAD", "GET"],
-          "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+          "Quantity": 7,
+          "Items": [
+            "GET",
+            "HEAD",
+            "OPTIONS",
+            "PUT",
+            "PATCH",
+            "POST",
+            "DELETE"
+          ],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": [
+              "GET",
+              "HEAD"
+            ]
+          }
         },
-        "Compress": true,
-        "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+        "Compress": false,
+        "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+        "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
         "FunctionAssociations": {
           "Quantity": 1,
           "Items": [
@@ -66,23 +137,92 @@
             }
           ]
         },
-        "LambdaFunctionAssociations": { "Quantity": 0 },
-        "TrustedSigners": { "Enabled": false, "Quantity": 0 },
-        "TrustedKeyGroups": { "Enabled": false, "Quantity": 0 },
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "TrustedSigners": {
+          "Enabled": false,
+          "Quantity": 0
+        },
+        "TrustedKeyGroups": {
+          "Enabled": false,
+          "Quantity": 0
+        },
         "FieldLevelEncryptionId": "",
         "SmoothStreaming": false
+      },
+      {
+        "PathPattern": "/runtime/*",
+        "TargetOriginId": "s3-future-city-app",
+        "TrustedSigners": {
+          "Enabled": false,
+          "Quantity": 0
+        },
+        "TrustedKeyGroups": {
+          "Enabled": false,
+          "Quantity": 0
+        },
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": [
+            "HEAD",
+            "GET"
+          ],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": [
+              "HEAD",
+              "GET"
+            ]
+          }
+        },
+        "SmoothStreaming": false,
+        "Compress": true,
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "FunctionAssociations": {
+          "Quantity": 1,
+          "Items": [
+            {
+              "FunctionARN": "arn:aws:cloudfront::ACCOUNT_ID:function/evsient-app-headers",
+              "EventType": "viewer-response"
+            }
+          ]
+        },
+        "FieldLevelEncryptionId": "",
+        "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+        "GrpcConfig": {
+          "Enabled": false
+        }
       }
     ]
   },
   "CustomErrorResponses": {
     "Quantity": 2,
     "Items": [
-      { "ErrorCode": 403, "ResponsePagePath": "/404.html", "ResponseCode": "404", "ErrorCachingMinTTL": 60 },
-      { "ErrorCode": 404, "ResponsePagePath": "/404.html", "ResponseCode": "404", "ErrorCachingMinTTL": 60 }
+      {
+        "ErrorCode": 403,
+        "ResponsePagePath": "/404.html",
+        "ResponseCode": "404",
+        "ErrorCachingMinTTL": 60
+      },
+      {
+        "ErrorCode": 404,
+        "ResponsePagePath": "/404.html",
+        "ResponseCode": "404",
+        "ErrorCachingMinTTL": 60
+      }
     ]
   },
   "Comment": "EV-SIENT Planner",
-  "Logging": { "Enabled": false, "IncludeCookies": false, "Bucket": "", "Prefix": "" },
+  "Logging": {
+    "Enabled": false,
+    "IncludeCookies": false,
+    "Bucket": "",
+    "Prefix": ""
+  },
   "PriceClass": "PriceClass_100",
   "Enabled": true,
   "ViewerCertificate": {
@@ -91,7 +231,12 @@
     "SSLSupportMethod": "sni-only",
     "MinimumProtocolVersion": "TLSv1.2_2021"
   },
-  "Restrictions": { "GeoRestriction": { "RestrictionType": "none", "Quantity": 0 } },
+  "Restrictions": {
+    "GeoRestriction": {
+      "RestrictionType": "none",
+      "Quantity": 0
+    }
+  },
   "WebACLId": "",
   "HttpVersion": "http2and3",
   "IsIPV6Enabled": true
