@@ -12,11 +12,15 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
+    "@myriaddreamin/typst-ts-web-compiler": "0.7.0",
     "comlink": "4.4.2",
+    "docx": "9.8.1",
     "fflate": "0.8.3",
     "maplibre-gl": "6.12.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "source-code-pro": "2.42.0",
+    "source-sans": "3.52.0",
     "write-excel-file": "4.1.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "5.0.15"
@@ -28,5 +32,11 @@
     "pyodide": "314.0.7",
     "typescript": "6.0.3",
     "vite": "8.3.2"
+  },
+  "overrides": {
+    "docx": {
+      "nanoid": "6.0.1",
+      "@types/node": "26.6.4"
+    }
   }
 }

@@ -1,9 +1,12 @@
 // The Report screen's downloads. Each is built on the device from the engine's outputs and handed
 // to the browser as a file; nothing is uploaded.
 
+import * as Comlink from 'comlink';
 import { strToU8, zipSync } from 'fflate';
 import type { SiteResult } from '../engine/protocol';
 import { SUBSCORE_KEYS, subscoreLabel } from '../results/format';
+import type { PdfWorkerApi } from './pdf.worker';
+import { reportBlocks } from './reportBlocks';
 import { fileName, groupLabel, type ReportModel } from './reportModel';
 import { standaloneCss } from './reportTheme';
 
@@ -41,6 +44,43 @@ ${article.outerHTML}
 </html>
 `;
   return { blob: new Blob([html], { type: 'text/html;charset=utf-8' }), name: fileName(m, 'ev-sient-report', 'html') };
+}
+
+// ---------- PDF and Word ----------
+// Both are built from the rendered report (reportBlocks.ts). Their libraries load only when asked
+// for: the PDF maker in a worker (pdf.worker.ts, about 7 MB once), Word's in its own chunk.
+
+let pdfMaker: { worker: Worker; api: Comlink.Remote<PdfWorkerApi>; failed: Promise<never> } | null = null;
+
+function startPdfMaker() {
+  const worker = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module', name: 'evsient-pdf' });
+  // A worker that cannot load reports only an error event; turn it into a rejection.
+  const failed = new Promise<never>((_, reject) => {
+    worker.addEventListener('error', (e) => reject(new Error(e.message || 'The PDF maker could not be loaded.')));
+  });
+  failed.catch(() => undefined);
+  return { worker, api: Comlink.wrap<PdfWorkerApi>(worker), failed };
+}
+
+export async function reportPdf(m: ReportModel, article: HTMLElement): Promise<{ blob: Blob; name: string }> {
+  const json = JSON.stringify(reportBlocks(m, article));
+  pdfMaker ??= startPdfMaker();
+  const maker = pdfMaker;
+  try {
+    const bytes = await Promise.race([maker.api.pdf(json), maker.failed]);
+    return { blob: new Blob([bytes as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }), name: fileName(m, 'ev-sient-report', 'pdf') };
+  } catch (e) {
+    // Start afresh next time rather than reuse a worker in an unknown state.
+    maker.worker.terminate();
+    if (pdfMaker === maker) pdfMaker = null;
+    throw e;
+  }
+}
+
+export async function reportDocx(m: ReportModel, article: HTMLElement): Promise<{ blob: Blob; name: string }> {
+  const blocks = reportBlocks(m, article);
+  const { docxBlob } = await import('./docxReport');
+  return { blob: await docxBlob(blocks), name: fileName(m, 'ev-sient-report', 'docx') };
 }
 
 // ---------- Table rows shared by CSV and Excel ----------

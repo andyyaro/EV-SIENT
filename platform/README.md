@@ -15,7 +15,7 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | Check | See which rows are ready, which have missing values, and anything that must be fixed | `check` |
 | Run | One button | `accept`, then `run` |
 | Results | Ranked sites, a map, why each site scores what it does, compare up to three | `explain`; `provenance` resolves one number's lineage when it is opened |
-| Report | Download the report, tables and the project file | `output_files` |
+| Report | Download the report (HTML, tagged PDF, Word), the tables and the project file | `output_files` |
 
 ## Layout
 
@@ -24,6 +24,7 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | `app/` | The static single-page app: React 19, Vite 8, TypeScript, styled with the HIG Native design system (the same tokens and components as `site/redesign/`) |
 | `app/src/engine/protocol.ts` | The message protocol: every shape `browser_api.py` returns. Python is the source of truth |
 | `app/src/engine/mock.ts` | An engine stand-in that answers from recorded Example City outputs, for interface work (`?engine=mock`) |
+| `app/src/report/` | The report and its downloads. `ReportDocument.tsx` is the one source: the PDF and Word files are built from its rendered markup (`reportBlocks.ts`), the PDF by Typst in a worker (`report.typ`, `pdf.worker.ts`) |
 | `app/public/samples/` | The invented Example City file and the blank template, from `data/intake/` |
 | `app/public/manifest.webmanifest`, `app/public/icons/` | The install manifest and its icons (rendered from `icon.svg` by `tools/render_icons.py`) |
 | `app/pwa/` | The service worker (`sw.js`) and the Vite plugin that writes it into `dist/` with the build's file lists and hashes |

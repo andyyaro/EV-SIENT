@@ -374,7 +374,7 @@ function Methods({ m }: { m: ReportModel }) {
         </table>
       </div>
       <p>
-        Data confidence scores how well each group of fields is sourced, from 0 to 100, weighted by group. {CONFIDENCE_CUTOFFS}
+        Data confidence scores how well each group of fields is sourced, from 0 to 100, weighted by group. {CONFIDENCE_CUTOFFS}{' '}
         The port plan sizes starter ports for today and a future-ready pathway for the {andList((m.manifest?.conventions?.horizons ?? []).map(String)) || 'later'} horizons,
         under the scenarios {andList((m.manifest?.conventions?.cases ?? []).map(caseLabel)) || 'the engine reports'}.
       </p>

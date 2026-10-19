@@ -7,12 +7,12 @@ import { useSession } from '../state/store';
 import { useAllExplains, useOutputFiles } from '../results/data';
 import { ReportDocument } from './ReportDocument';
 import { buildModel, fileName, type ReportModel } from './reportModel';
-import { outputsZip, reportHtml, saveBlob, sitesCsv, workbook } from './exports';
+import { outputsZip, reportDocx, reportHtml, reportPdf, saveBlob, sitesCsv, workbook } from './exports';
 import { buildProjectFile } from './projectFile';
 import { previewThemeCss } from './reportTheme';
 import '../styles/report.css';
 
-type Job = 'html' | 'csv' | 'xlsx' | 'zip' | 'project';
+type Job = 'html' | 'pdf' | 'docx' | 'csv' | 'xlsx' | 'zip' | 'project';
 
 export function ReportView() {
   const run = useSession((s) => s.run);
@@ -51,10 +51,11 @@ export function ReportView() {
     setStatus('Preparing the file');
     try {
       let out: { blob: Blob; name: string };
-      if (job === 'html') {
+      if (job === 'html' || job === 'pdf' || job === 'docx') {
         const article = paper.current?.querySelector<HTMLElement>('.rp');
         if (!article) throw new Error('The report is not ready yet.');
-        out = reportHtml(model, article);
+        if (job === 'pdf') setStatus('Preparing the PDF. The first one loads the PDF maker, and a report with many sites can take a minute.');
+        out = job === 'html' ? reportHtml(model, article) : job === 'pdf' ? await reportPdf(model, article) : await reportDocx(model, article);
       } else if (job === 'csv') out = sitesCsv(model);
       else if (job === 'xlsx') out = await workbook(model);
       else if (job === 'zip') out = await outputsZip(model);
@@ -70,7 +71,9 @@ export function ReportView() {
 
   const items: { job: Job | 'print'; icon: string; title: string; detail: string; action: string }[] = [
     { job: 'html', icon: 'doc', title: 'Report', detail: 'One accessible web page with everything below. Opens in any browser, offline.', action: 'Download .html' },
-    { job: 'print', icon: 'printer', title: 'Print or Save as PDF', detail: 'Opens your browser\'s print dialog. Choose Save as PDF there for a PDF copy.', action: 'Print' },
+    { job: 'pdf', icon: 'document.on.document', title: 'Accessible PDF', detail: 'The same report as a tagged PDF with bookmarks, for screen readers, sharing and print.', action: 'Download .pdf' },
+    { job: 'docx', icon: 'square.and.pencil', title: 'Word Document', detail: 'The same report as an editable Word file, with heading styles and table header rows.', action: 'Download .docx' },
+    { job: 'print', icon: 'printer', title: 'Print', detail: 'Opens your browser\'s print dialog for a paper copy. For a PDF to share, use the Accessible PDF above.', action: 'Print' },
     { job: 'csv', icon: 'list.bullet', title: 'Ranked Sites', detail: 'One row per site with every number in the ranked table and site profiles.', action: 'Download .csv' },
     { job: 'xlsx', icon: 'chart.bar', title: 'Excel Workbook', detail: 'Sites, Scenarios and Data Confidence sheets. Values only, no formulas.', action: 'Download .xlsx' },
     { job: 'zip', icon: 'archivebox', title: 'All Model Outputs', detail: 'Every file the engine wrote for this run, with the accepted inputs.', action: 'Download .zip' },
