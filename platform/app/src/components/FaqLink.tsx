@@ -7,8 +7,8 @@
 // missing values (DEC-011 as docs/INPUT_SCHEMA.md states it), tiers (scoring.recommendation_tier,
 // config.TIER*), data confidence (confidence.py, docs/GLOSSARY.md), citing (the report's
 // Reproducibility section, data/contract/v1/README.md rule 3), limits
-// (docs/WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md), browsers (tools/browser_check.py, tools/matrix.py)
-// and offline use (pwa/sw.js).
+// (docs/WHAT_THIS_CAN_AND_CANNOT_TELL_YOU.md), browsers (tools/browser_check.py, tools/matrix.py),
+// offline use (pwa/sw.js) and accessibility (docs/accessibility/ACR.md, public/accessibility.html).
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -86,6 +86,12 @@ const ANSWERS: { q: string; a: ReactNode }[] = [
         <p>Yes, once the model has loaded on this device. The planner keeps its own files and, after the model first loads, the Python runtime and the model, so it opens and runs without a connection. The background tiles of the Results map still need one. Your browser may also offer to install the planner as an app.</p>
         <p>What is kept is the planner itself, never your file or results. When a new version is published, the planner says so and waits for you to reload.</p>
       </>
+    ),
+  },
+  {
+    q: 'Is the planner accessible?',
+    a: (
+      <p>It aims to meet WCAG 2.1 and 2.2 Level AA, and every release is checked with axe-core in four colour themes and by keyboard alone. The project team&apos;s own assessment, which is not an independent audit, says what meets each criterion and what does not yet: <a className="app-licences" href="/accessibility.html" target="_blank" rel="noopener">Accessibility Conformance Report<span className="hig-visually-hidden"> (opens in a new tab)</span></a>.</p>
     ),
   },
 ];

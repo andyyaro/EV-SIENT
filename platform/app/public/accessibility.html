@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Accessibility | EV-SIENT Planner</title>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #595959;
+    --link: #0066cc;
+    --border: rgba(0, 0, 0, 0.16);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --text: #f5f5f7;
+      --muted: #b8b8bd;
+      --link: #4da3ff;
+      --border: rgba(255, 255, 255, 0.24);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    padding: 24px 16px 48px;
+  }
+  main {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 12px; }
+  h2 { font-size: 20px; line-height: 1.3; margin: 32px 0 8px; }
+  p, ul { margin: 0 0 14px; }
+  li { margin: 0 0 8px; }
+  .lede { font-size: 19px; }
+  .muted { color: var(--muted); }
+  .notice {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 0 0 20px;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 0 0 14px; }
+  caption { text-align: left; font-weight: 600; padding: 0 0 6px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
+  .back { display: inline-block; min-height: 44px; line-height: 44px; font-weight: 600; }
+  @media (max-width: 480px) {
+    main { padding: 20px 16px; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Accessibility of the EV-SIENT Planner</h1>
+  <p class="lede">The EV-SIENT Planner aims to meet the Web Content Accessibility Guidelines (WCAG) 2.1 and 2.2 at Level AA.</p>
+  <p class="notice"><strong>This report is self-assessed by the project team, not independently audited.</strong> It was written on 18 October 2026 for the planner at app.futurecity.andyyaro.com, app version 0.1.0 with engine version 3.0.0.</p>
+
+  <h2>How it was checked</h2>
+  <ul>
+    <li>Automated checks with axe-core 4.13.0 on every screen, in Chromium and WebKit, at desktop and phone widths, in the light, dark and both increased contrast themes.</li>
+    <li>Every screen used by keyboard alone, with the focus order, focus visibility and the contrast of focus rings, borders and chart marks measured in all four themes.</li>
+    <li>Manual checks for zoom to 400 percent, text spacing, hover content, target size, error messages, status messages and the downloaded HTML, PDF and Word reports.</li>
+    <li>Screen readers were not tested. That work is planned with NVDA, JAWS, VoiceOver and TalkBack.</li>
+  </ul>
+
+  <h2>Summary</h2>
+  <table>
+    <caption>WCAG Level A and AA success criteria by result</caption>
+    <thead>
+      <tr><th scope="col">Result</th><th scope="col" class="num">WCAG 2.1</th><th scope="col" class="num">Added in WCAG 2.2</th></tr>
+    </thead>
+    <tbody>
+      <tr><th scope="row">Supports</th><td class="num">35</td><td class="num">4</td></tr>
+      <tr><th scope="row">Partially supports</th><td class="num">6</td><td class="num">1</td></tr>
+      <tr><th scope="row">Does not support</th><td class="num">0</td><td class="num">0</td></tr>
+      <tr><th scope="row">Not applicable</th><td class="num">9</td><td class="num">1</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Known issues</h2>
+  <ul>
+    <li><strong>Map colours.</strong> When the map colours sites by one of your own columns, the colour is the only cue you can see on the map. The value is in each marker's name for screen readers, and the column can be shown in the results table. (1.4.1)</li>
+    <li><strong>Map panning.</strong> Moving the map needs a drag, or two fingers on a touch screen. The arrow keys pan it, and the results table lists every site. (2.5.1, 2.5.7)</li>
+    <li><strong>Step menu on narrow screens.</strong> Choosing a step in the compact step menu goes to that step straight away. (3.2.2)</li>
+    <li><strong>Your Index chart with wider text spacing.</strong> Some labels on the rank change chart are cut off when letter and word spacing are increased. The table beside it holds the same data. (1.4.12)</li>
+    <li><strong>The PDF report.</strong> It is tagged, with headings, a title and a language, but row headers in its tables are tagged as ordinary cells, and the title is not set as the window title. The HTML and Word reports do not have these problems. (1.3.1, 2.4.2)</li>
+  </ul>
+
+  <h2>The full report</h2>
+  <p>The full Accessibility Conformance Report follows the ITI VPAT 2.5 format and gives a result and remarks for every criterion. It is kept with the project's source code at docs/accessibility/ACR.md, with the evidence behind it.</p>
+
+  <h2>Contact</h2>
+  <p>To report an accessibility problem or ask for the full report: <strong>[Placeholder: the project's public accessibility contact will be added here.]</strong></p>
+
+  <p><a class="back" href="/">Go to the EV-SIENT Planner</a></p>
+</main>
+</body>
+</html>
