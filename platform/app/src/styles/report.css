@@ -25,7 +25,7 @@
 .rp-decision { margin-top: 24px; padding: 20px 22px; border: 1px solid var(--separator-opaque); border-radius: 14px; }
 .rp-decision__title { font: 700 20px/25px var(--font-sans); letter-spacing: -0.45px; }
 .rp-decision__list { margin-top: 10px !important; font-size: 17px; line-height: 25px; letter-spacing: -0.43px; }
-.rp-claims { margin-top: 14px !important; padding: 12px 14px; border-left: 4px solid var(--system-orange); background: var(--fill-quinary, var(--fill-quaternary)); }
+.rp-claims { margin-top: 14px !important; padding: 12px 14px; border-radius: 8px; background: var(--fill-quinary, var(--fill-quaternary)); }
 
 .rp-toc { margin-top: 24px; }
 .rp-toc__title { font: 600 15px/20px var(--font-sans); color: var(--label-secondary); }

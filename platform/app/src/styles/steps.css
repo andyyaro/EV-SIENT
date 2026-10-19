@@ -24,10 +24,9 @@
 .app-messages { max-width: var(--content-max); margin: 0 auto; }
 .app-messages:not(:empty) { padding-top: 20px; display: grid; gap: 10px; }
 .st-banner {
-  display: flex; gap: 12px; align-items: flex-start; padding: 14px 14px 14px 16px; margin-top: 16px;
+  display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; margin-top: 16px;
   border-radius: var(--radius-glass); background: var(--fill-quaternary); color: var(--label-primary);
   font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px;
-  border-inline-start: 4px solid var(--banner-edge, var(--label-tertiary));
 }
 .app-messages .st-banner { margin-top: 0; }
 .st-banner--error { --banner-edge: var(--system-red); background: color-mix(in srgb, var(--system-red) 8%, var(--grouped-background-secondary)); }
@@ -171,7 +170,7 @@
 .st-table--rows tr:focus { outline: none; }
 .st-table--rows tr:focus td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .st-num-col { width: 64px; text-align: end !important; font-variant-numeric: tabular-nums; }
-.st-row--must_fix td:first-child { box-shadow: inset 4px 0 var(--system-red), inset 0 -0.5px var(--separator); }
+.st-row--must_fix td { background: color-mix(in srgb, var(--system-red) 6%, transparent); }
 .st-cell-label { display: none; }
 
 /* Every Row on a narrow screen: each row is a stacked card, so every column shows without sideways
@@ -197,7 +196,8 @@
   .st-table--rows .st-cell-name { grid-area: name; font-weight: 600; overflow-wrap: anywhere; }
   .st-table--rows .st-cell-status { grid-area: status; justify-self: end; }
   .st-table--rows .st-cell-details { grid-area: details; margin-top: 6px; }
-  .st-table--rows .st-row--must_fix { box-shadow: inset 4px 0 var(--system-red), inset 0 -0.5px var(--separator); }
+  .st-table--rows .st-row--must_fix { background: color-mix(in srgb, var(--system-red) 6%, transparent); }
+  .st-table--rows .st-row--must_fix td { background: none; }
   .st-table--rows tr:focus { background: color-mix(in srgb, var(--accent) 10%, transparent); }
   .st-table--rows tr:focus td { background: none; }
   .st-table--rows .st-row-empty { display: block; }
