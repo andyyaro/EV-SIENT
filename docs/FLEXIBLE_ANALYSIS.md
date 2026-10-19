@@ -157,3 +157,19 @@ Python in `src/fcf_m2/flex/`, run in the browser by the same Pyodide worker as t
 source of truth), reached through `browser_api`. pandas and numpy only by default; SciPy or
 scikit-learn are imported lazily by the features that need them. Native and Pyodide results
 must agree (`platform/tools/parity.mjs`).
+
+## 5. What the assistant may see
+
+Owner decision, 2026-10-18. The assistant proposes; the engine on the device computes every
+number. What reaches the model is decided by these tiers, not by the model.
+
+| Tier | Contents | When |
+|---|---|---|
+| Always | EV-SIENT's method, field definitions and FAQ; where the planner is in the app and the file's shape ("Check step, 360 rows, 31 columns") | Whenever the assistant is open |
+| With consent | Column headers and their dictionary entries (role, unit, direction, scale); per-column blank share, a cardinality bucket and rounded 10th, 50th and 90th percentiles (never min or max); category labels with counts, any count under 10 suppressed; results the engine already computed (sites per tier, Explore cards, the visitor's index formula and its gates); one site's driver breakdown when the planner asks about that site, with the site renamed "Site A" | Opt-in once per session, after the planner sees the exact payload; any column can be withheld |
+| Never | Rows or any single cell, sample values, site names, IDs, addresses, coordinates (even rounded), free-text notes, carried column values per site, the file name | Never |
+
+Safeguards: Bedrock data retention `none`; the ledger records tokens, never content; headers
+and labels travel as quoted, length-capped data with invisible Unicode and leading `= + - @`
+removed; answers write numbers as placeholders filled from tool results, and any number that
+does not match a tool result is struck through; causal verbs are refused.
