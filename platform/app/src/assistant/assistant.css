@@ -1,0 +1,109 @@
+/* The Assistant: a modal sheet over the open project. Nearly full screen on a phone, a sheet on
+   the right on wide screens. Tokens only, so light, dark and higher contrast follow the app.
+   Status and sharing notes are whole tinted panels, never a coloured edge. */
+
+.as-sheet {
+  width: min(560px, calc(100% - 16px)); max-width: none; max-height: calc(100dvh - 16px); height: min(760px, calc(100dvh - 16px));
+  margin: auto; padding: 0; border: 0; border-radius: var(--radius-sheet);
+  background: var(--background-elevated-primary); color: var(--label-primary);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); overflow: hidden;
+}
+.as-sheet[open] { display: flex; flex-direction: column; }
+.as-sheet::backdrop { background: var(--scrim-sheet); }
+@media (min-width: 1024px) {
+  .as-sheet { margin: 8px 8px 8px auto; height: calc(100dvh - 16px); }
+}
+
+.as-sheet__head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 8px 24px; border-bottom: 1px solid var(--separator); }
+.as-sheet__title { margin: 0; font: 700 22px/28px var(--font-sans); letter-spacing: -0.26px; }
+.as-sheet__body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px 24px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.as-sheet p { margin: 0; }
+.as-fine { font: 400 13px/18px var(--font-sans); color: var(--label-secondary); }
+.as-h3 { margin: 0; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; }
+.as-h4 { margin: 4px 0 0; font: 600 15px/20px var(--font-sans); }
+
+/* Status: one calm panel. Paused is tinted orange across the whole panel, with the words saying why. */
+.as-status { padding: 12px 14px; border-radius: var(--radius-group); background: var(--fill-quaternary); font: 400 15px/21px var(--font-sans); }
+.as-status--calm { color: var(--label-primary); }
+.as-status--paused { background: color-mix(in srgb, var(--system-orange) 14%, var(--background-elevated-primary)); }
+.as-status--paused p + p { margin-top: 4px; }
+.as-status__title { font-weight: 600; }
+
+/* What it can and cannot see */
+.as-sees { border-radius: var(--radius-group); background: var(--fill-quaternary); }
+.as-sees summary { min-height: 44px; display: flex; align-items: center; padding: 0 14px; cursor: pointer; font: 600 15px/20px var(--font-sans); border-radius: var(--radius-group); }
+.as-sees__body { padding: 0 14px 14px; }
+.as-sees__body h4 { margin: 10px 0 2px; font: 600 15px/20px var(--font-sans); }
+.as-sees__body p { font: 400 15px/21px var(--font-sans); color: var(--label-secondary); }
+.as-sees__body .as-fine { margin-top: 10px; }
+
+/* Sharing */
+.as-share, .as-review { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--radius-group); background: var(--fill-quaternary); font: 400 15px/21px var(--font-sans); }
+.as-share__stale { padding: 8px 10px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--system-orange) 14%, transparent); }
+.as-fieldset { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 2px; }
+.as-fieldset legend { padding: 0; margin-bottom: 4px; font: 600 15px/20px var(--font-sans); }
+.as-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font: 400 15px/20px var(--font-sans); cursor: pointer; }
+.as-check input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+.as-check input:disabled + span { color: var(--label-tertiary); }
+.as-select { display: flex; flex-direction: column; gap: 4px; padding-left: 30px; }
+.as-select select { min-height: 44px; max-width: 100%; padding: 0 12px; border: 1px solid var(--separator); border-radius: var(--radius-sm); background: var(--background-elevated-primary); color: inherit; font: 400 15px/20px var(--font-sans); }
+.as-columns { max-height: 220px; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); column-gap: 12px; }
+.as-columns .as-check span { overflow-wrap: anywhere; }
+.as-preview {
+  margin: 0; max-height: 260px; overflow: auto; padding: 10px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--separator); background: var(--background-elevated-primary);
+  font: 400 12px/17px var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.as-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Conversation */
+.as-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.as-turn { padding: 10px 14px; border-radius: var(--radius-group); }
+.as-turn--user { background: var(--fill-tertiary); margin-left: 32px; }
+.as-turn--assistant { background: var(--fill-quaternary); margin-right: 16px; }
+.as-turn__who { font: 600 13px/18px var(--font-sans); color: var(--label-secondary); margin-bottom: 2px !important; }
+.as-answer__p { font: 400 15px/21px var(--font-sans); white-space: pre-wrap; overflow-wrap: anywhere; }
+.as-answer__p + .as-answer__p { margin-top: 8px !important; }
+.as-answer__note { margin-top: 6px !important; font: 400 13px/18px var(--font-sans); color: var(--label-secondary); }
+.as-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+.as-missing { color: var(--label-secondary); font-style: italic; }
+.as-unverified { color: var(--label-secondary); text-decoration-thickness: 2px; }
+
+/* Question */
+.as-ask { flex: none; display: flex; flex-direction: column; gap: 6px; padding: 10px 24px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); border-top: 1px solid var(--separator); }
+.as-ask__label { font: 600 13px/18px var(--font-sans); color: var(--label-secondary); }
+.as-ask__input {
+  width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; padding: 10px 12px; border: 1px solid var(--separator); border-radius: var(--radius-sm);
+  background: var(--background-elevated-primary); color: inherit; font: 400 16px/22px var(--font-sans);
+}
+.as-ask__input:disabled { background: var(--fill-quaternary); color: var(--label-tertiary); }
+.as-ask__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.as-ask__row .as-check { margin-inline-end: auto; }
+
+@media (max-width: 480px) {
+  .as-sheet__head { padding-left: 16px; }
+  .as-sheet__body { padding: 8px 16px 12px; }
+  .as-ask { padding-left: 16px; padding-right: 16px; }
+  .as-turn--user { margin-left: 16px; }
+  .as-turn--assistant { margin-right: 0; }
+}
+
+@media (forced-colors: active) {
+  .as-status, .as-sees, .as-share, .as-review, .as-turn { border: 1px solid CanvasText; }
+  .as-value { text-decoration: underline; }
+}
+
+/* The compact bar's Assistant button (below 1024px). */
+.app-compact__assistant {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0;
+  border: 0; border-radius: var(--radius-capsule); background: var(--fill-tertiary); color: var(--glass-label-primary); cursor: pointer;
+}
+/* Room for it on a phone: the brand stays on one line and the step menu gives way. */
+.app-compact:has(.app-compact__assistant) .app-compact__brand { white-space: nowrap; }
+@media (max-width: 480px) {
+  .app-compact:has(.app-compact__assistant) .app-compact__step select { max-width: calc(52vw - 56px); }
+}
+@media (forced-colors: active) {
+  .app-compact__assistant { border: 1px solid ButtonText; }
+}

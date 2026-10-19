@@ -1706,6 +1706,86 @@ the registry refuses a state outside its group or a group whose files disagree. 
 step was run end to end in the browser against the local release, with synthetic sites in all
 six states and one outside them.
 
+## DEC-029 - The planner's assistant runs on Claude in Amazon Bedrock, under a hard $5 monthly cap
+
+**Date:** 2026-10-18 · **Phase:** platform v1 (build plan Phase 2, flexibility Phase D) · **Builds on DEC-024, DEC-026**
+
+### What was blocking
+
+The planner had no way to answer "what does this mean?" beside the results. The site's old
+assistant (futurecity.andyyaro.com) calls OpenAI from its own Lambda with an API key in Secrets
+Manager and no spend limit of its own (open action 12). `docs/FLEXIBLE_ANALYSIS.md` section 5
+had set the rules for an assistant in the planner (data tiers, consent, placeholders for
+numbers, no causal claims) but nothing implemented them, and nothing bounded what it could cost.
+
+### The decision
+
+The owner's choices on 2026-10-18:
+
+1. **Provider: Claude on Amazon Bedrock**, through the **global cross-Region inference
+   profile** (`global.anthropic.claude-haiku-5-5`; deeper answers with
+   `global.anthropic.claude-sonnet-5-5` are built but off). The model IDs are configuration
+   (`template.yaml` parameters), not code.
+2. **A hard cap of $5 a month on model spend that fails closed.** A DynamoDB ledger reserves
+   the most each call could cost before calling Bedrock, on condition that the month's and the
+   day's ($0.35) committed spend stay within their caps, and settles to the actual cost after.
+   Any ledger error refuses. When the cap is reached the assistant stops and the panel says
+   "The assistant has reached this month's limit"; everything else keeps working.
+3. **Bedrock data retention `none`** in the assistant's Region, and model invocation logging
+   off. `deploy.sh` checks both and stops otherwise. The proxy logs metadata only.
+4. **The old OpenAI assistant will be retired**, not deleted in this change.
+   `platform/assistant/README.md` lists the steps; retiring it closes open action 12.
+5. **The AWS bill outside model spend stays under $10 a month.** Estimated $0.00 to $0.15 at
+   expected use; a tag budget alerts at $5 and $10.
+
+How it is built (`platform/assistant/`, `platform/app/src/assistant/`):
+
+- **Same origin.** `/api/assistant/*` on the app's distribution, a Lambda function URL with
+  AuthType AWS_IAM behind origin access control, streaming NDJSON. The CSP is unchanged
+  (`connect-src 'self'`). The proxy never answers 403 or 404, which the distribution turns
+  into its 404 page.
+- **Three tiers, enforced twice.** Always: the question, the conversation, the step and the
+  file's size. With consent, once per session, after the planner sees the exact JSON: column
+  summaries (rounded 10th, 50th and 90th percentiles, categories of 10 or more), results per
+  tier, Explore patterns, Your Index settings, and one site's breakdown as "Site A". Never:
+  rows, cells, names, IDs, addresses, coordinates, free text, the file name. The browser
+  builds the payload; the server accepts only closed objects with rounded numbers and
+  sanitised labels, and a column whose header names an identifying field carries only its
+  header whatever role it was given.
+- **Answers are checked.** Numbers from the data come back as placeholders filled from what
+  was sent; any other number that matches nothing is struck through; an answer that claims a
+  cause is not shown. The system prompt says the tool is planning support, not engineering
+  advice.
+- **Limits:** 20 questions an hour and 60 a day per address (hashed by /24 or /56), 40 a day
+  per session, 30 a minute for everyone, 8 questions a conversation, 64 KB a request.
+
+### What it does not do
+
+- It does not call tools or act in the planner; it answers from the method and what was
+  shared with the question.
+- It never sees the planner's file, and nothing it says changes a score, a tier or a ranking.
+- Budgets and alarms do not stop spending; only the ledger does.
+- Nothing is deployed by this change: the coordinator applies the stack, the code and the
+  CloudFront behaviour after review (`platform/assistant/README.md`).
+
+### Published numbers
+
+None moved. The engine, the scores and parity are untouched.
+
+### Gates
+
+`node --test "platform/assistant/test/*.test.mjs"` (also in `tests/test_planner_assistant.py`
+and the Planner CI job): 150 seeded property cases over the 360-row synthetic file proving the
+Never tier cannot reach the payload and that the server accepts every payload the browser
+builds; server validation; the ledger under 200 concurrent reservations, cap reached, settle;
+the rate limits; request handling with a fake model (streaming, settling, refusals, never 403
+or 404); the answer checks. The app type-checks and builds.
+
+Open before deploy: the Region (plan: `us-east-2`, so the retention setting does not touch
+another project's Bedrock Region), whether Bedrock accepts `thinking` switched off for Haiku
+5.5 (`ModelExtraJson`; the smoke test shows it), and whether the Region budget sees Bedrock's
+Marketplace-billed Claude usage.
+
 ## DEC-030 - The Cognito-gated `/platform*` path is retired; the planner needs no sign-in
 
 **Date:** 2026-10-18 · **Decided by:** the project owner · **Supersedes:** DEC-017 · **Builds

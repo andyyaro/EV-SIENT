@@ -258,7 +258,9 @@ The plan reserves two more behaviours (the Free plan allows five):
 - `/api/*`: the assistant proxy, a Lambda function URL behind a Lambda-type OAC. Use
   Managed-CachingDisabled and Managed-AllViewerExceptHostHeader, allow all methods, and attach
   the same function (or a variant without HTML-only headers). The CSP needs no change because
-  the API is same-origin (`connect-src 'self'`).
+  the API is same-origin (`connect-src 'self'`). Built (not yet applied) as behaviour
+  `/api/assistant/*`: `platform/assistant/README.md` has the stack, the deploy steps and
+  `deploy/edge_config.py`, which writes the updated config for review.
 
 Add each behaviour by fetching the live config (`aws cloudfront get-distribution-config`),
 adding the item to `CacheBehaviors`, and `update-distribution --if-match <ETag>`. Update

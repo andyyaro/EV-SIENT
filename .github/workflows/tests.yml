@@ -112,6 +112,9 @@ jobs:
       - name: Native and browser engines agree
         run: VENV_PY=$(command -v python) node platform/tools/parity.mjs
 
+      - name: Assistant proxy and payload tests
+        run: node --test "platform/assistant/test/*.test.mjs"
+
       - name: Type-check and build the app
         working-directory: platform/app
         run: npm run build

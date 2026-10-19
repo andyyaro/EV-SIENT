@@ -1,0 +1,8 @@
+{
+  "version": "2.0",
+  "rawPath": "/api/assistant/ask",
+  "headers": { "content-type": "application/json" },
+  "requestContext": { "http": { "method": "POST" } },
+  "isBase64Encoded": false,
+  "body": "{\"v\":1,\"session\":\"smoke-test-session-0001\",\"question\":\"In one sentence, what does the readiness score compare?\",\"history\":[],\"context\":{\"app\":{\"step\":\"start\",\"hasRun\":false,\"engine\":\"real\"}}}"
+}

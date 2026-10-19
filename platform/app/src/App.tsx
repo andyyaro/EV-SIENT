@@ -8,6 +8,7 @@ import { BrandMark } from './components/BrandMark';
 import { Icon } from './components/Icon';
 import { FaqLink } from './components/FaqLink';
 import { LicencesLink } from './components/LicencesLink';
+import { AssistantButton, AssistantHost, AssistantLink } from './assistant/AssistantLauncher';
 import { useUpdate } from './pwa/register';
 import { STEPS, stepDone, stepGate, useSession, type StepKey } from './state/store';
 import { StartStep } from './steps/StartStep';
@@ -83,7 +84,7 @@ function StepNav() {
       </div>
       <p className="nav-sidebar__foot">
         Your files stay on this device. Planning support, not engineering advice.{' '}
-        <FaqLink /> · <LicencesLink />
+        <FaqLink /> · <AssistantLink /> · <LicencesLink />
       </p>
     </nav>
   );
@@ -115,6 +116,7 @@ function CompactBar() {
         <Icon name="chevron.up.chevron.down" size={13} />
       </label>
       <span className="app-compact__count num" aria-hidden="true">{`${index + 1} of ${STEPS.length}`}</span>
+      <AssistantButton />
       <ol className="app-compact__dots" aria-hidden="true">
         {STEPS.map((step, i) => (
           <li key={step.key} className={i < index ? 'is-past' : i === index ? 'is-current' : ''} />
@@ -212,6 +214,7 @@ export function App() {
           <Screen />
         </Suspense>
       </main>
+      <AssistantHost />
     </div>
   );
 }
