@@ -145,6 +145,38 @@
     }
     return dataPromise;
   }
+  /* Other published data files (data/scoring.json, data/stability.json, data/versions.json). optional() resolves to
+     null when a file is missing or unreadable, so a page always falls back to the text it ships with. */
+  var jsonCache = {};
+  function json(path) {
+    if (!jsonCache[path]) {
+      jsonCache[path] = fetch(path, { cache: 'no-cache' }).then(function (r) {
+        if (!r.ok) throw new Error(path + ' could not be loaded (HTTP ' + r.status + ').');
+        return r.json();
+      });
+    }
+    return jsonCache[path];
+  }
+  function optional(path) { return json(path).catch(function () { return null; }); }
+  /* Stability figures appear only once the analysis has been published (status "final"). */
+  function stabilityReady(st) { return !!(st && st.status === 'final'); }
+  function stabilityFor(st, id) {
+    if (!stabilityReady(st)) return null;
+    return (st.sites || []).filter(function (s) { return s.id === id; })[0] || null;
+  }
+  /* The two highest-ranked sites and the gap between them, rounded as published. */
+  function topTwo(sites) {
+    var s = (sites || []).slice().sort(function (a, b) { return a.rank - b.rank; });
+    if (s.length < 2) return null;
+    return { first: s[0], second: s[1], gap: Math.round((s[0].score - s[1].score) * 10) / 10 };
+  }
+  function topGapText(sites) {
+    var t = topTwo(sites);
+    if (!t) return '';
+    return 'The ' + t.gap.toFixed(1) + '-point gap between ' + t.first.id + ' and ' + t.second.id +
+      ' is within what modest changes to the weights can reverse.';
+  }
+
   var TIERS = {
     'tier1': { short: 'Tier 1', label: 'Tier 1: advance to site screening' },
     'high-review': { short: 'High review', label: 'High-review candidate' },
@@ -219,7 +251,19 @@
   }
 
   window.FC = { icon: icon, hydrateIcons: hydrateIcons, esc: esc, data: data, tier: tier, TIERS: TIERS, siteType: siteType,
-    fmtUSD: fmtUSD, fmtUSDk: fmtUSDk, segmented: segmented, NAV: NAV };
+    fmtUSD: fmtUSD, fmtUSDk: fmtUSDk, segmented: segmented, NAV: NAV,
+    json: json, optional: optional, stabilityReady: stabilityReady, stabilityFor: stabilityFor, topTwo: topTwo, topGapText: topGapText };
+
+  /* Any element marked data-top-gap gets the top-two note, recomputed from the published scores. */
+  function fillTopGap() {
+    var els = document.querySelectorAll('[data-top-gap]');
+    if (!els.length) return;
+    data().then(function (d) {
+      var text = topGapText(d && d.sites);
+      if (text) els.forEach(function (el) { el.textContent = text; });
+    }).catch(function () { /* the shipped text stays */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fillTopGap); else fillTopGap();
 
   function boot() {
     if (document.body.getAttribute('data-nav') !== 'none') { renderNav(); renderFooter(); }

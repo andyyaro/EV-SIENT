@@ -165,6 +165,16 @@
 .sd-ready__score { font: 400 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
 .sd-ready__hint { margin-top: 4px; font: 400 15px/20px var(--font-sans); letter-spacing: -0.23px; color: var(--label-secondary); }
 
+/* Score breakdown: points per part with a bar against that part's maximum (shape and number carry it, not color) */
+.sd-part__body { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 0; }
+.sd-part__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sd-part__pts { flex: none; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }
+.sd-part__bar { display: block; height: 6px; border-radius: 3px; background: var(--fill-tertiary); overflow: hidden; }
+.sd-part__fill { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+.sd-part-total .hig-list-row__title strong { font-weight: 600; }
+.sd-part__total { font-weight: 700; color: var(--label-primary); }
+@media (forced-colors: active) { .sd-part__bar { border: 1px solid CanvasText; } .sd-part__fill { background: CanvasText; } }
+
 /* Ports: one tile per port; solid with a bolt = install now, dashed = future-ready pathway */
 .sd-ports__body { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 0; }
 .sd-pips { display: flex; flex-wrap: wrap; gap: 8px; }

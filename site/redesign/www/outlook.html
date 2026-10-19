@@ -39,8 +39,13 @@
       <div class="hig-list hig-list--ios hig-list--insetGrouped scenario-list">
         <div class="hig-list-section">
           <ul class="hig-list-section__rows" id="scenario-rows" role="list"></ul>
-          <p class="hig-list-section__footer" id="scenario-foot">Growth multipliers are provisional planning conventions, not yet calibrated to observed charging data. The earlier legacy_v2 sweep also tested long sessions, a short daily window and peakier demand; their parameters are not published here. Like base and high growth, those showed no future-ready capacity gaps, while combined stress opened two (PWC002 and PWC008, one port each).</p>
+          <p class="hig-list-section__footer" id="scenario-foot">Growth multipliers are provisional planning conventions, not yet calibrated to observed charging data. Check them against real charging records before using them for funding decisions: <a href="method.html#funding">what to check</a>.</p>
         </div>
+      </div>
+      <div class="earlier" id="scenario-official" hidden></div>
+      <div class="earlier" id="scenario-earlier">
+        <p class="earlier__label">Earlier result (legacy_v2)</p>
+        <p class="earlier__text" id="scenario-earlier-text">The earlier legacy_v2 sweep tested six scenarios: base, high growth and combined stress, plus long sessions, a short daily window and peakier demand, whose parameters are not published here. Five showed no future-ready capacity gaps. Combined stress opened two: PWC002 and PWC008, 1 port each.</p>
       </div>
     </section>
 
@@ -51,7 +56,7 @@
 
     <section class="section" aria-labelledby="cost-title">
       <div class="section__head"><h2 class="section__title" id="cost-title">Lifecycle Cost</h2></div>
-      <p class="section__intro">Net present value of three ways to build the network, at each horizon. These are screening-class planning estimates for the base-case trajectory only: useful for comparing strategies, never a budget, quote or engineering estimate.</p>
+      <p class="section__intro">Net present value of three ways to build the network, at each horizon. These are screening-class planning estimates for the base-case trajectory only: useful for comparing strategies, never a budget, quote or engineering estimate. Before they support a funding decision, test them against installation-cost evidence and observed charging use: <a href="method.html#funding">what to check</a>.</p>
       <div class="chart-card">
         <div id="cost-chart"></div>
         <div class="saving-grid" id="savings" aria-label="Avoided overbuild cost by horizon" role="group"></div>

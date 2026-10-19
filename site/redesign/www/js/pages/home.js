@@ -122,9 +122,25 @@
     if (ffx002) { setText('ffx002-rank', ordinal(ffx002.rank)); setText('ffx002-score', ffx002.score.toFixed(1)); }
   }
 
+  /* Official versus earlier (legacy_v2) results, from data/versions.json. Official totals stay summed from sites.json. */
+  function renderVersions(v, d) {
+    if (!v || !v.official || !v.earlier) return;
+    var old = v.earlier, off = v.official;
+    if (old.first) { setText('earlier-first-id', old.first.id); setText('earlier-first-score', Number(old.first.score).toFixed(1)); }
+    var basis = document.getElementById('ports-basis');
+    if (basis && off.portPlanBasis && off.portPlanBasis !== old.model && old.pathway != null) {
+      var sites = (d && d.sites) || [];
+      basis.textContent = 'Port totals are the official plan (' + off.portPlanBasis + ', ' + sum(sites, 'starter') + ' now and ' + sum(sites, 'pathway') +
+        ' future-ready). ' + old.label + ': ' + old.starter + ' now and ' + old.pathway + ' future-ready, superseded.';
+    }
+  }
+
   window.FCHome = { gauge: gauge, candidateCard: candidateCard };
   if (typeof document === 'undefined' || !document.getElementById || !document.getElementById('top-candidates')) return;
-  FC.data().then(render).catch(function () {
+  FC.data().then(function (d) {
+    render(d);
+    return FC.optional('data/versions.json').then(function (v) { renderVersions(v, d); });
+  }).catch(function () {
     // The static figures already on the page match the published data, so they stay as they are.
     var note = document.getElementById('data-status');
     if (note) note.textContent = 'Live data could not be loaded, so the figures shown are the published values.';

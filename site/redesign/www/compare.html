@@ -49,6 +49,7 @@
         </div>
         <div id="compare-chart"><p class="footnote">Loading the site data.</p></div>
       </div>
+      <p class="footnote compare-gap"><span data-top-gap>The 1.6-point gap between FFX004 and FFX002 is within what modest changes to the weights can reverse.</span> <a href="method.html#stability">How stable the ranks are</a></p>
     </section>
 
     <section class="section" aria-labelledby="table-title">
@@ -70,6 +71,21 @@
         <p><strong>Data confidence is Low at all 12 sites.</strong> Electrical capacity is an unverified placeholder: nobody has confirmed the service at any site could support chargers.</p>
         <p><strong>Waits are modelled, not observed.</strong> Mean wait is the simulated average under the base case. Peak wait is an Erlang peak-window estimate for the busiest period of the day.</p>
         <p><strong>Ports.</strong> Starter ports are the install-now recommendation; future-ready ports are the pathway capacity a site should be prepared for. Every site carries at least 2 starter ports, including the Public Safety Training Center (PWC003), where those 2 are a placeholder in the total, not a recommendation.</p>
+      </div>
+    </section>
+
+    <section class="section" id="breakdown" aria-labelledby="breakdown-title">
+      <div class="section__head"><h2 class="section__title" id="breakdown-title">Where Each Score Comes From</h2></div>
+      <p class="section__intro">Each site's readiness score split into its four weighted parts, in points. The parts add up to the score. <a href="method.html#scoring">See every weight</a>.</p>
+      <div class="site-table-wrap">
+        <div class="hig-table hig-table--ios site-table breakdown-table" id="breakdown-table" tabindex="0" role="region" aria-labelledby="breakdown-title">
+          <p class="footnote">Loading the score breakdown.</p>
+        </div>
+      </div>
+      <div class="notes" id="breakdown-notes">
+        <p><strong>Close at the top.</strong> <span data-top-gap>The 1.6-point gap between FFX004 and FFX002 is within what modest changes to the weights can reverse.</span> <a href="method.html#stability">How stable the ranks are</a>.</p>
+        <p><strong>Feasibility is mostly a placeholder.</strong> Spare electrical capacity is unverified at all 12 sites, so <span data-k="feas-shared">7</span> sites get exactly the same feasibility points (<span data-k="feas-shared-pts">12.6</span>).</p>
+        <p><strong>Demand marked *</strong> is counted at 65 percent because public access at that site (PWC003) is limited.</p>
       </div>
     </section>
   </div>

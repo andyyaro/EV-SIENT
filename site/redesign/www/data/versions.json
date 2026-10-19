@@ -1,0 +1,29 @@
+{
+ "status": "pending",
+ "TODO": "PLACEHOLDER until the 47-port official pathway lands. Then: (1) update the pathway values in sites.json (sites and horizons) to the official plan; every official port total on the site is summed from sites.json, never read from this file. (2) Set official.portPlanBasis to \"milestone2_v3\". (3) Fill official.scenarios with the official sweep in the same shape as earlier.scenarios, and official.gapSites like earlier.gapSites ([] for none), or leave both null. (4) Fill official.baselineCheck in the same shape as earlier.baselineCheck, or leave it null. (5) Set status to \"final\". The earlier block is the historical legacy_v2 result and does not change.",
+ "official": {
+  "label": "Official result",
+  "model": "milestone2_v3",
+  "portPlanBasis": "legacy_v2",
+  "scenarios": null,
+  "gapSites": null,
+  "baselineCheck": null
+ },
+ "earlier": {
+  "label": "Earlier result (legacy_v2)",
+  "model": "legacy_v2",
+  "starter": 25,
+  "pathway": 48,
+  "first": {"id": "FFX002", "score": 58.8},
+  "scenarios": [
+   {"key": "base", "name": "Base", "gaps": 0},
+   {"key": "high", "name": "High growth", "gaps": 0},
+   {"key": "long_sessions", "name": "Long sessions", "gaps": 0},
+   {"key": "short_window", "name": "Short daily window", "gaps": 0},
+   {"key": "peakier", "name": "Peakier demand", "gaps": 0},
+   {"key": "stress_combined", "name": "Combined stress", "gaps": 2}
+  ],
+  "gapSites": [{"id": "PWC002", "ports": 1}, {"id": "PWC008", "ports": 1}],
+  "baselineCheck": {"sites": 12, "tier1": 2, "categories": 5, "exports": 15, "errors": 0, "warnings": 0, "reviewFlags": 38, "info": 12}
+ }
+}

@@ -200,6 +200,61 @@
     });
   }
 
+  /* ---------- Score breakdown: four weighted parts in points (data/scoring.json), plus rank range and chance of
+     first place once the stability check is published (data/stability.json). ---------- */
+  function breakdown(data, scoring, st) {
+    var el = document.getElementById('breakdown-table');
+    if (!el) return;
+    if (!scoring || !scoring.parts || !scoring.sites) {
+      el.innerHTML = '<p class="footnote">The score breakdown could not be loaded. Reload the page to try again.</p>';
+      return;
+    }
+    var e = FC.esc;
+    var byId = {};
+    scoring.sites.forEach(function (b) { byId[b.id] = b; });
+    var sites = data.sites.slice().sort(function (a, b) { return a.rank - b.rank; });
+    var ready = FC.stabilityReady(st);
+    var stab = function (id) { return FC.stabilityFor(st, id) || {}; };
+    var showRange = ready && sites.some(function (s) { return stab(s.id).rankLow != null; });
+    var showChance = ready && sites.some(function (s) { return stab(s.id).chanceFirst != null; });
+
+    var h = '<table class="hig-table__grid"><caption class="hig-visually-hidden">Score breakdown for all ' + sites.length +
+      ' sites, in points. Each row’s parts add up to its score.</caption><thead><tr class="hig-table__head-row">';
+    var heads = [['Rank', 'trailing'], ['Site', 'leading']].concat(scoring.parts.map(function (p) { return [p.name + ' (' + p.weight + ')', 'trailing']; }))
+      .concat([['Score', 'trailing']]).concat(showRange ? [['Rank Range', 'trailing']] : []).concat(showChance ? [['Chance of First', 'trailing']] : []);
+    heads.forEach(function (c, i) {
+      var sticky = i < 2 ? ' is-sticky is-sticky--' + i : '';
+      h += '<th scope="col" class="hig-table__heading hig-table__cell--' + c[1] + sticky + '"><span class="hig-table__heading-label">' + e(c[0]) + '</span></th>';
+    });
+    h += '</tr></thead><tbody>';
+    sites.forEach(function (s) {
+      var b = byId[s.id] || { parts: {} }, x = stab(s.id);
+      h += '<tr class="hig-table__row">' +
+        '<td class="hig-table__cell hig-table__cell--trailing is-sticky is-sticky--0"><span class="site-table__rank">' + s.rank + '</span></td>' +
+        '<th scope="row" class="hig-table__cell hig-table__cell--leading is-sticky is-sticky--1"><span class="site-table__site"><a href="sites.html#' + e(s.id) + '">' + e(s.name) + '</a><span class="site-table__id">' + e(s.id) + '</span></span></th>';
+      scoring.parts.forEach(function (p) {
+        var v = b.parts[p.key];
+        h += '<td class="hig-table__cell hig-table__cell--trailing">' + (v == null ? '' : one(v)) +
+          (p.key === 'demand' && b.demandAccessFactor ? '<span class="site-table__unit"> *</span>' : '') + '</td>';
+      });
+      h += '<td class="hig-table__cell hig-table__cell--trailing"><strong>' + one(s.score) + '</strong></td>';
+      if (showRange) h += '<td class="hig-table__cell hig-table__cell--trailing">' + (x.rankLow == null ? '' : x.rankLow === x.rankHigh ? x.rankLow : x.rankLow + ' to ' + x.rankHigh) + '</td>';
+      if (showChance) h += '<td class="hig-table__cell hig-table__cell--trailing">' + (x.chanceFirst == null ? '' : Math.round(x.chanceFirst) + '%') + '</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table>';
+    el.innerHTML = h;
+
+    // Figures in the notes, recomputed from the data.
+    var counts = {};
+    scoring.sites.forEach(function (b) { var k = one(b.parts.feasibility); counts[k] = (counts[k] || 0) + 1; });
+    var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
+    if (top && counts[top] > 1) {
+      document.querySelectorAll('[data-k="feas-shared"]').forEach(function (n) { n.textContent = counts[top]; });
+      document.querySelectorAll('[data-k="feas-shared-pts"]').forEach(function (n) { n.textContent = top; });
+    }
+  }
+
   function fail(err) {
     var msg = '<p class="footnote" role="alert">' + FC.esc(err && err.message ? err.message : 'The site data could not be loaded.') +
       ' Reload the page to try again.</p>';
@@ -207,6 +262,13 @@
     document.getElementById('site-table').innerHTML = msg;
   }
 
-  function start() { FC.data().then(boot).catch(fail); }
+  function start() {
+    FC.data().then(function (data) {
+      boot(data);
+      return Promise.all([FC.optional('data/scoring.json'), FC.optional('data/stability.json')]).then(function (all) {
+        breakdown(data, all[0], all[1]);
+      });
+    }).catch(fail);
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

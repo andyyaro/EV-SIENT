@@ -1,0 +1,34 @@
+{
+ "status": "pending",
+ "TODO": "PLACEHOLDER. Replace every null with the exact output of the weight-stability analysis, then set status to \"final\". Pages show no figure from this file until status is \"final\". Keep the field names. method.rescale is one plain sentence saying how the other weights move when one changes; method.draws is the number of random weight sets; method.spread is one plain phrase for how far the random weights move (for example \"about 5 to 7 points\"). oneAtATime rows are shown in this order; firstScore and secondScore are scores out of 100 under the changed weights. sites[].chanceFirst is a percentage from 0 to 100; rankLow and rankHigh are the best and worst rank the analysis reports for the site.",
+ "method": {
+  "step": 5,
+  "rescale": null,
+  "draws": null,
+  "spread": null
+ },
+ "oneAtATime": [
+  {"part": "demand", "change": 5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "demand", "change": -5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "feasibility", "change": 5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "feasibility", "change": -5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "safety", "change": 5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "safety", "change": -5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "equity", "change": 5, "first": null, "firstScore": null, "second": null, "secondScore": null},
+  {"part": "equity", "change": -5, "first": null, "firstScore": null, "second": null, "secondScore": null}
+ ],
+ "sites": [
+  {"id": "FFX004", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "FFX002", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC002", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC006", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC007", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "FFX001", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC004", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC001", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "FFX003", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC008", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC005", "chanceFirst": null, "rankLow": null, "rankHigh": null},
+  {"id": "PWC003", "chanceFirst": null, "rankLow": null, "rankHigh": null}
+ ]
+}

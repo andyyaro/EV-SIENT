@@ -168,8 +168,186 @@
     });
   }
 
-  FC.data().then(function (d) {
+  /* ---------- Figures in the prose (data-k), recomputed from the published data ---------- */
+  function setText(key, value) {
+    document.querySelectorAll('[data-k="' + key + '"]').forEach(function (el) { el.textContent = value; });
+  }
+  function fmtPts(v) { return String(Math.round(v * 100) / 100); }
+  function one(v) { return Number(v).toFixed(1); }
+
+  function renderFigures(sites, scoring) {
+    var starter = 0, pathway = 0;
+    sites.forEach(function (s) { starter += s.starter; pathway += s.pathway; });
+    setText('starter', starter);
+    setText('pathway', pathway);
+    var t = FC.topTwo(sites);
+    if (t) {
+      setText('first-id', t.first.id); setText('first-score', one(t.first.score));
+      setText('second-id', t.second.id); setText('second-score', one(t.second.score));
+    }
+    if (scoring && scoring.sites) {
+      // The feasibility points most sites share: the mark of the placeholder electrical capacity.
+      var counts = {};
+      scoring.sites.forEach(function (s) { var k = one(s.parts.feasibility); counts[k] = (counts[k] || 0) + 1; });
+      var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
+      if (top && counts[top] > 1) { setText('feas-shared', counts[top]); setText('feas-shared-pts', top); }
+      if (scoring.meta && scoring.meta.accessFactor) setText('access-pct', Math.round(scoring.meta.accessFactor * 100));
+    }
+  }
+
+  /* ---------- Weights table, rebuilt from data/scoring.json so it can never drift from the model ---------- */
+  function renderWeights(scoring) {
+    var table = document.getElementById('m-weights');
+    if (!table || !scoring || !scoring.parts) return;
+    var e = FC.esc;
+    table.querySelectorAll('tbody').forEach(function (tb) { tb.remove(); });
+    var html = scoring.parts.map(function (p) {
+      return '<tbody><tr class="m-weights__part"><th scope="rowgroup" colspan="2">' + e(p.name) + '</th><td class="m-weights__num">' + p.weight + '</td></tr>' +
+        p.drivers.map(function (d) {
+          return '<tr><th scope="row"><span class="m-weights__name">' + e(d.name) + '</span>' +
+            (d.note ? '<span class="m-weights__note">' + e(d.note) + '</span>' : '') + '</th>' +
+            '<td class="m-weights__num">' + d.share + '%</td><td class="m-weights__num">' + fmtPts(d.points) + '</td></tr>';
+        }).join('') + '</tbody>';
+    }).join('');
+    var tfoot = table.querySelector('tfoot');
+    if (tfoot) tfoot.insertAdjacentHTML('beforebegin', html); else table.insertAdjacentHTML('beforeend', html);
+    var cards = document.querySelectorAll('#m-parts .m-dim');
+    scoring.parts.forEach(function (p, i) {
+      var w = cards[i] && cards[i].querySelector('.m-dim__weight');
+      if (w) w.innerHTML = p.weight + '<span class="m-dim__unit"> points</span>';
+    });
+  }
+
+  /* ---------- Rank stability, from data/stability.json once it is published (status "final") ---------- */
+  function renderStability(st, sites, scoring) {
+    if (!FC.stabilityReady(st)) return;
+    var e = FC.esc;
+    var names = {};
+    ((scoring && scoring.parts) || []).forEach(function (p) { names[p.key] = p.name; });
+    var byId = {};
+    sites.forEach(function (s) { byId[s.id] = s; });
+    var t = FC.topTwo(sites);
+
+    var oat = document.getElementById('m-oat');
+    var rows = (st.oneAtATime || []).filter(function (r) { return r.first; });
+    if (oat && rows.length) {
+      var step = (st.method && st.method.step) || 5;
+      var h = '<table class="m-oat"><caption>Each weight moved ' + step + ' points</caption><thead><tr>' +
+        '<th scope="col">Change</th><th scope="col">First</th><th scope="col">Second</th></tr></thead><tbody>';
+      rows.forEach(function (r) {
+        var flip = t && r.first !== t.first.id;
+        var label = (names[r.part] || r.part) + ' ' + (r.change > 0 ? '+' : '') + r.change;
+        h += '<tr><th scope="row">' + e(label) + '</th>' +
+          '<td' + (flip ? ' class="m-oat__flip"' : '') + '>' + e(r.first) + (flip ? '<span class="hig-visually-hidden"> (a different leader)</span>' : '') + (r.firstScore != null ? '<span class="m-oat__score">' + one(r.firstScore) + '</span>' : '') + '</td>' +
+          '<td>' + e(r.second || '') + (r.secondScore != null ? '<span class="m-oat__score">' + one(r.secondScore) + '</span>' : '') + '</td></tr>';
+      });
+      h += '</tbody></table>';
+      if (st.method && st.method.rescale) h += '<p class="footnote m-stab__foot">' + e(st.method.rescale) + '</p>';
+      if (t) h += '<p class="footnote m-stab__foot">A site in bold in the First column means the change put a different site first than the published ranking (' + e(t.first.id) + ').</p>';
+      oat.innerHTML = h;
+    }
+
+    var chance = document.getElementById('m-chance');
+    var ranked = (st.sites || []).filter(function (s) { return s.chanceFirst != null; });
+    if (chance && ranked.length) {
+      var shown = ranked.filter(function (s) { return s.chanceFirst > 0; }).sort(function (a, b) { return b.chanceFirst - a.chanceFirst; });
+      var never = ranked.length - shown.length;
+      var c = '<ul class="m-chance" role="list" aria-label="Chance of first place">' + shown.map(function (s) {
+        var site = byId[s.id] || { name: s.id };
+        var pct = Math.round(s.chanceFirst);
+        var range = s.rankLow != null && s.rankHigh != null ? (s.rankLow === s.rankHigh ? 'Always rank ' + s.rankLow : 'Rank ' + s.rankLow + ' to ' + s.rankHigh) : '';
+        return '<li class="m-chance__row"><a class="m-chance__site" href="sites.html#' + e(s.id) + '">' + e(s.id) +
+          '<span>' + e(site.name) + (range ? ' · ' + e(range) : '') + '</span></a>' +
+          '<span class="m-chance__value">' + pct + '%</span>' +
+          '<span class="m-chance__bar" aria-hidden="true"><span class="m-chance__fill" style="width:' + Math.max(0, Math.min(100, s.chanceFirst)) + '%"></span></span></li>';
+      }).join('') + '</ul>';
+      var foot = [];
+      if (never) foot.push('The other ' + never + ' sites never came first.');
+      if (st.method && st.method.draws) foot.push(Number(st.method.draws).toLocaleString('en-US') + ' random weight sets' + (st.method.spread ? ', each weight moving ' + st.method.spread + ' around its published value' : '') + '.');
+      if (foot.length) c += '<p class="footnote m-stab__foot">' + e(foot.join(' ')) + '</p>';
+      chance.innerHTML = c;
+    }
+  }
+
+  /* ---------- Official versus earlier (legacy_v2) results, from data/versions.json ----------
+     Official port totals are always summed from data/sites.json. versions.json says which ranking the port plan
+     follows and carries the earlier result, kept apart and labelled. */
+  function resultBadge(gaps) {
+    return gaps > 0
+      ? '<span class="m-result m-result--gap">' + FC.icon('exclamationmark.triangle', { size: 18 }) + gaps + (gaps === 1 ? ' gap' : ' gaps') + '</span>'
+      : '<span class="m-result m-result--ok">' + FC.icon('checkmark.circle', { size: 18 }) + 'No gaps</span>';
+  }
+  function gapList(list, label) {
+    if (!list || !list.length) return '';
+    return '<ul class="m-gaps__list" role="list" aria-label="' + FC.esc(label) + '">' + list.map(function (g) {
+      return '<li><a class="m-gaps__site" href="sites.html#' + FC.esc(g.id) + '">' + FC.esc(g.id) + '</a><span class="m-gaps__amt num">Gap of ' + g.ports + (g.ports === 1 ? ' port' : ' ports') + '</span></li>';
+    }).join('') + '</ul>';
+  }
+  var CHECK_LABELS = [['sites', 'Candidate sites evaluated'], ['tier1', 'Tier 1 starter candidates'], ['categories', 'Decision categories applied'],
+    ['exports', 'Tableau-ready data exports'], ['errors', 'Blocking validation errors'], ['warnings', 'Warnings'], ['reviewFlags', 'Review flags to confirm'], ['info', 'Info items']];
+  function metrics(m) {
+    return '<dl class="m-metrics">' + CHECK_LABELS.filter(function (l) { return m[l[0]] != null; }).map(function (l) {
+      return '<div class="m-metric"><dt class="metric__label">' + l[1] + '</dt><dd class="metric__value">' + FC.esc(m[l[0]]) + '</dd></div>';
+    }).join('') + '</dl>';
+  }
+
+  function renderVersions(v, sites) {
+    if (!v || !v.official || !v.earlier) return;
+    var e = FC.esc, off = v.official, old = v.earlier;
+    var starter = 0, pathway = 0;
+    sites.forEach(function (s) { starter += s.starter; pathway += s.pathway; });
+
+    // Port plan: once the official plan no longer follows the earlier ranking, say so and show the earlier totals apart.
+    if (off.portPlanBasis && off.portPlanBasis !== old.model) {
+      var basis = document.getElementById('m-basis');
+      if (basis) basis.innerHTML = '<strong>It follows the official <code>' + e(off.portPlanBasis) + '</code> ranking.</strong> Its totals of ' +
+        starter + ' install-now and ' + pathway + ' future-ready ports are the official plan, the same ranking the results pages show.';
+      var pe = document.getElementById('m-plan-earlier');
+      if (pe && old.pathway != null) {
+        pe.innerHTML = '<p class="m-earlier__label">' + e(old.label) + '</p>' +
+          '<p class="m-earlier__value"><span class="num">' + old.starter + '</span> install-now and <span class="num">' + old.pathway + '</span> future-ready ports</p>' +
+          '<p class="m-earlier__lead">The study’s accepted <code>' + e(old.model) + '</code> ranking, as first presented. Shown for the record only.</p>' +
+          '<p class="m-earlier__state">' + FC.icon('xmark', { size: 16 }) + 'Superseded</p>';
+        pe.hidden = false;
+      }
+    }
+
+    // Scenario sweep: the official result when published, the earlier one always labelled.
+    var so = document.getElementById('m-scen-official');
+    if (so && off.scenarios && off.scenarios.length) {
+      so.innerHTML = '<p class="m-official__label">' + e(off.label) + ' (' + e(off.model) + ')</p>' +
+        '<ul class="m-earlier__rows" role="list">' + off.scenarios.map(function (s) {
+          return '<li><span>' + e(s.name) + '</span>' + resultBadge(s.gaps) + '</li>';
+        }).join('') + '</ul>' + gapList(off.gapSites, 'Capacity gaps in the official result');
+      so.hidden = false;
+    }
+    var rowsEl2 = document.getElementById('m-scen-earlier-rows');
+    if (rowsEl2 && old.scenarios) {
+      rowsEl2.innerHTML = old.scenarios.map(function (s) { return '<li><span>' + e(s.name) + '</span>' + resultBadge(s.gaps) + '</li>'; }).join('');
+    }
+    var gapsEl = document.getElementById('m-scen-earlier-gaps');
+    if (gapsEl && old.gapSites) gapsEl.outerHTML = gapList(old.gapSites, 'Combined-stress capacity gaps in the earlier result') || '';
+
+    // Baseline check: the official run's counts lead when published; the earlier counts stay labelled below.
+    var co = document.getElementById('m-check-official');
+    if (co && off.baselineCheck) {
+      co.innerHTML = '<p class="m-official__label">' + e(off.label) + ' (' + e(off.model) + ')</p>' + metrics(off.baselineCheck);
+      co.hidden = false;
+      if (off.baselineCheck.reviewFlags != null) setText('review-flags', off.baselineCheck.reviewFlags);
+    }
+    var ce = document.getElementById('m-check-earlier');
+    if (ce && old.baselineCheck) {
+      ce.innerHTML = '<p class="m-earlier__label">' + e(old.label) + '</p>' + metrics(old.baselineCheck);
+    }
+  }
+
+  Promise.all([FC.data(), FC.optional('data/scoring.json'), FC.optional('data/stability.json'), FC.optional('data/versions.json')]).then(function (all) {
+    var d = all[0], scoring = all[1], st = all[2], v = all[3];
     var sites = (d && d.sites) || [];
+    renderFigures(sites, scoring);
+    renderWeights(scoring);
+    renderStability(st, sites, scoring);
+    renderVersions(v, sites);
     if (rowsEl) renderPlan(sites);
     renderMembership(sites);
   }).catch(function () {

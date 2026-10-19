@@ -64,7 +64,7 @@
         var lastH = hAt(k, years[years.length - 1]);
         detail = full ? 'All ' + full.pathway + ' ports by ' + full.year : (lastH ? lastH.active + ' of ' + lastH.pathway + ' ports by ' + lastH.year : '');
       }
-      var text = s.text + (k === 'stress_combined' ? ' In the earlier legacy_v2 sweep it was the only scenario to leave future-ready gaps: PWC002 and PWC008, 1 port each.' : '');
+      var text = s.text;
       var sw = FCChart.swatch({ label: s.name, color: s.color, shape: s.shape, line: k !== 'baseline', dash: s.dash });
       return '<li class="hig-list-row"><div class="hig-list-row__content"><span class="hig-list-row__lead" aria-hidden="true">' + sw + '</span>' +
         '<div class="hig-list-row__body"><div class="hig-list-row__text"><span class="hig-list-row__title">' + esc(s.name) + '</span>' +
@@ -142,11 +142,39 @@
     }
   }
 
+  /* Scenario sweep results: the official one once published, the earlier legacy_v2 one always labelled (data/versions.json). */
+  function gapsText(list) {
+    return list.map(function (g) { return g.id + ' (' + g.ports + (g.ports === 1 ? ' port)' : ' ports)'); }).join(' and ');
+  }
+  function sweepText(scen, gapSites) {
+    var clear = scen.filter(function (s) { return !s.gaps; }), hit = scen.filter(function (s) { return s.gaps; });
+    var t = clear.length === scen.length ? 'No scenario left a future-ready capacity gap.'
+      : (clear.length ? clear.length + ' of ' + scen.length + ' scenarios showed no future-ready capacity gaps. ' : '') +
+        hit.map(function (s) { return s.name + ' opened ' + s.gaps + (s.gaps === 1 ? ' gap' : ' gaps'); }).join('; ') +
+        (gapSites && gapSites.length ? ': ' + gapsText(gapSites) : '') + '.';
+    return t;
+  }
+  function versions(v) {
+    if (!v || !v.official || !v.earlier) return;
+    var esc = FC.esc, off = v.official, old = v.earlier;
+    if (off.scenarios && off.scenarios.length) {
+      var o = document.getElementById('scenario-official');
+      o.innerHTML = '<p class="earlier__label">' + esc(off.label) + ' (' + esc(off.model) + ')</p><p class="earlier__text">' + esc(sweepText(off.scenarios, off.gapSites)) + '</p>';
+      o.hidden = false;
+    }
+    // The earlier (legacy_v2) paragraph is historical and ships as written in outlook.html.
+  }
+
   function fail(err) {
     document.getElementById('tiles').innerHTML = '<p class="footnote" role="alert">' + FC.esc(err && err.message ? err.message : 'The outlook data could not be loaded.') +
       ' Reload the page to try again.</p>';
   }
 
-  function start() { FC.data().then(boot).catch(fail); }
+  function start() {
+    FC.data().then(function (d) {
+      boot(d);
+      return FC.optional('data/versions.json').then(versions);
+    }).catch(fail);
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

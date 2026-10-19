@@ -137,3 +137,19 @@
 .strategy-list { margin-top: 4px; padding-inline-start: 1.2em; }
 .strategy-list li + li { margin-top: 4px; }
 @media (max-width: 699px) { .site-table .is-sticky--1 { width: 172px; min-width: 172px; } }
+
+/* Score breakdown table (Compare): read-only rows, narrower than the main table */
+.breakdown-table .hig-table__grid { min-width: 780px; }
+.breakdown-table .hig-table__row { cursor: default; }
+.breakdown-table .hig-table__row:hover > .hig-table__cell { background-color: transparent; }
+.breakdown-table .hig-table__row:hover > .hig-table__cell.is-sticky { background-color: var(--background-primary); }
+.breakdown-table.hig-table--ios .hig-table__heading { height: 44px; font-size: 15px; line-height: 20px; letter-spacing: -0.23px; }
+.breakdown-table .hig-table__heading > .hig-table__heading-label { white-space: normal; padding-top: 4px; padding-bottom: 4px; }
+.breakdown-table strong { font-weight: 600; }
+.compare-gap { margin-top: 10px; max-width: 80ch; }
+
+/* Earlier (historical) and official sweep results on Outlook: a quiet labelled block, kept apart from the list */
+.earlier { margin-top: 12px; padding: 14px 16px; border-radius: var(--radius-group); background: var(--fill-quaternary); max-width: 80ch; }
+.earlier[hidden] { display: none; }
+.earlier__label { font: 600 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
+.earlier__text { margin-top: 4px; font: 400 15px/21px var(--font-sans); letter-spacing: -0.23px; color: var(--label-primary); }

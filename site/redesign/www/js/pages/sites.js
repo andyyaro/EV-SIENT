@@ -8,7 +8,7 @@
   var WIDE = window.matchMedia('(min-width: 1024px)');
   var BASE_TITLE = 'Sites · EV-SIENT';
 
-  var S = { sites: [], byId: {}, q: '', jur: 'all', sort: 'rank', sel: null, view: null, listScroll: 0, rendered: null };
+  var S = { scoring: null, stab: null, scoreById: {}, topNote: '', sites: [], byId: {}, q: '', jur: 'all', sort: 'rank', sel: null, view: null, listScroll: 0, rendered: null };
   var E = {};
   var gaugeSeq = 0;
 
@@ -197,6 +197,41 @@
       'Future-ready ports are capacity to prepare for (conduit, panel space, layout), not chargers to install now. Right-sizing must be checked against engineering, utility and permitting review.');
   }
 
+  /* Score breakdown: each weighted part in points, adding up to the published score (data/scoring.json), then the
+     rank range and chance of first place once the stability check is published (data/stability.json). */
+  function breakdownHTML(s) {
+    var sc = S.scoring, b = S.scoreById[s.id];
+    if (!sc || !sc.parts || !b) return '';
+    var rows = sc.parts.map(function (p) {
+      var pts = b.parts[p.key];
+      if (pts == null) return '';
+      var f = Math.max(0, Math.min(1, pts / p.weight));
+      var sub = fmt1(pts) + ' of ' + p.weight + ' possible points' +
+        (p.key === 'demand' && b.demandAccessFactor ? '. Counted at ' + Math.round(b.demandAccessFactor * 100) + ' percent because public access is limited' : '');
+      return '<li class="hig-list-row hig-list-row--subtitle sd-part"><div class="hig-list-row__content"><span class="hig-list-row__body sd-part__body">' +
+        '<span class="sd-part__top"><span class="hig-list-row__text"><span class="hig-list-row__title">' + FC.esc(p.name) + '</span>' +
+        '<span class="hig-list-row__subtitle">' + FC.esc(sub) + '</span></span>' +
+        '<span class="sd-part__pts num">' + fmt1(pts) + '</span></span>' +
+        '<span class="sd-part__bar" aria-hidden="true"><span class="sd-part__fill" style="width:' + (f * 100).toFixed(1) + '%"></span></span>' +
+        '</span></div></li>';
+    }).join('');
+    rows += simpleRow('<strong>Readiness score</strong>', '', '<span class="hig-list-row__detail sd-part__total num">' + fmt1(s.score) + '</span>', { cls: 'sd-part-total' });
+
+    var st = FC.stabilityFor(S.stab, s.id);
+    if (st && st.rankLow != null && st.rankHigh != null) {
+      rows += simpleRow('Rank when the weights shift', 'Across the weight changes tested',
+        '<span class="hig-list-row__detail num">' + (st.rankLow === st.rankHigh ? 'Always ' + st.rankLow : st.rankLow + ' to ' + st.rankHigh) + '</span>');
+    }
+    if (st && st.chanceFirst != null) {
+      rows += simpleRow('Chance of ranking first', 'Share of random weightings that put this site first',
+        '<span class="hig-list-row__detail num">' + Math.round(st.chanceFirst) + '%</span>');
+    }
+    var foot = 'Each part is its own score out of 100 times its weight, rounded so the parts add up to the score. ';
+    if (s.rank <= 2 && S.topNote) foot += FC.esc(S.topNote) + ' ';
+    foot += '<a href="method.html#scoring">How the weights work</a>' + (s.rank <= 2 ? ' · <a href="method.html#stability">How stable the ranks are</a>' : '') + '.';
+    return sectionHTML('Score Breakdown', rows, foot);
+  }
+
   function waitRow(title, subtitle, m) {
     var w = waitInfo(m);
     var trailing = '<span class="sd-wait"><span class="sd-wait__value num">' + fmt1(m) + ' min</span>' +
@@ -236,6 +271,9 @@
           '<span class="sd-ready__hint">Higher is stronger. Scores compare sites against fixed anchors; they are not a feasibility finding.</span>' +
         '</span></span></div></li>');
 
+    /* Score breakdown */
+    list += breakdownHTML(s);
+
     /* Ports */
     list += portsHTML(s);
 
@@ -263,7 +301,7 @@
     list += sectionHTML('See Also',
       linkRow('explore.html', 'View on Map', 'map') +
       linkRow('compare.html', 'Compare All Sites', 'chart.bar') +
-      linkRow('method.html', 'How Scores Are Made', 'list.bullet'), '', 'sd-section--links');
+      linkRow('method.html#scoring', 'How Scores Are Made', 'list.bullet'), '', 'sd-section--links');
 
     h += '<div class="hig-list hig-list--ios hig-list--insetGrouped sd-list">' + list + '</div>';
     return h;
@@ -516,7 +554,11 @@
     E.prevName = $('sd-prev-name'); E.nextName = $('sd-next-name');
     E.back = $('sites-back'); E.barPrev = $('sites-bar-prev'); E.barNext = $('sites-bar-next');
 
-    FC.data().then(function (d) {
+    Promise.all([FC.data(), FC.optional('data/scoring.json'), FC.optional('data/stability.json')]).then(function (all) {
+      var d = all[0];
+      S.scoring = all[1]; S.stab = all[2]; S.scoreById = {};
+      ((S.scoring && S.scoring.sites) || []).forEach(function (b) { S.scoreById[b.id] = b; });
+      S.topNote = FC.topGapText(d.sites);
       S.sites = (d.sites || []).map(function (s) {
         s._hay = norm([s.name, s.id, s.jurisdiction, FC.siteType(s.type), s.type.replace(/_/g, ' '), (FC.TIERS[s.tierKey] || {}).short].join(' '));
         S.byId[s.id] = s;
