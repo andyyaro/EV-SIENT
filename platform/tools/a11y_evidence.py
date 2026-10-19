@@ -45,9 +45,11 @@ def axe_summary(path: Path) -> dict:
 
 
 def matrix_summary(path: Path) -> dict:
-    rows = json.loads(path.read_text())
+    every = json.loads(path.read_text())
+    rows = [r for r in every if "size" in r]
+    runs = [r for r in every if "size" not in r]  # one per browser: timing, requests to other sites, errors
     failing = [r for r in rows if not r.get("ok")]
-    return {"checks": len(rows), "failing": failing,
+    return {"checks": len(rows), "failing": failing, "perBrowser": runs,
             "browsers": sorted({r["browser"] for r in rows}), "sizes": sorted({r["size"] for r in rows}),
             "themes": sorted({r["theme"] for r in rows}), "screens": sorted({r["screen"] for r in rows})}
 
