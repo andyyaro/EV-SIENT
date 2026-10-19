@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Banner } from '../components/Banner';
 import { Icon } from '../components/Icon';
+import { LicencesLink } from '../components/LicencesLink';
 import { PageHead } from '../components/PageHead';
 import { Progress } from '../components/Progress';
 import { PROJECT_EXTENSION, readProjectFile } from '../report/projectFile';
@@ -215,6 +216,11 @@ export function StartStep() {
         <DataPanel />
         <EngineStatus />
       </div>
+
+      <p className="footnote st-smallprint">
+        Planning support, not engineering advice. The planner and the EV-SIENT model are open source under the Apache License 2.0.{' '}
+        <LicencesLink />
+      </p>
     </div>
   );
 }

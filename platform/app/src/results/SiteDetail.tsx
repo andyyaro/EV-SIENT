@@ -94,27 +94,28 @@ export const SiteDetail = forwardRef<HTMLHeadingElement, Props>(function SiteDet
         {site.plan && <p className="sd-plan">{site.plan}</p>}
         {horizons.length > 0 && (
           <div className="sd-scroll hig-table hig-table--ios rs-table" role="region" aria-labelledby="sd-hz-cap" tabIndex={0}>
-            <table className="hig-table__grid">
+            {/* Explicit roles: on narrow screens each horizon is a stacked row (results.css). */}
+            <table className="hig-table__grid sd-hz" role="table">
               <caption id="sd-hz-cap" className="sd-caption">Ports by Horizon and Scenario</caption>
-              <thead>
-                <tr>
-                  <th scope="col" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Year</span></th>
-                  <th scope="col" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Scenario</span></th>
-                  <th scope="col" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Active</span></th>
-                  <th scope="col" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Pathway</span></th>
-                  <th scope="col" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Cap</span></th>
-                  <th scope="col" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Strategy</span></th>
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Year</span></th>
+                  <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Scenario</span></th>
+                  <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Active</span></th>
+                  <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Pathway</span></th>
+                  <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Cap</span></th>
+                  <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Strategy</span></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {horizons.map((h) => (
-                  <tr className="hig-table__row" key={`${h.year}-${h.case}`}>
-                    <th scope="row" className="hig-table__cell hig-table__cell--leading num">{h.year}</th>
-                    <td className="hig-table__cell hig-table__cell--leading">{caseLabel(h.case)}</td>
-                    <td className="hig-table__cell hig-table__cell--trailing">{fmt.int(h.portsActive)}</td>
-                    <td className="hig-table__cell hig-table__cell--trailing">{fmt.int(h.portsPathway)}</td>
-                    <td className="hig-table__cell hig-table__cell--trailing">{fmt.int(h.capacityCap)}</td>
-                    <td className="hig-table__cell hig-table__cell--leading rs-wrap">{sentence(h.strategy)}</td>
+                  <tr role="row" className="hig-table__row" key={`${h.year}-${h.case}`}>
+                    <th scope="row" role="rowheader" className="hig-table__cell hig-table__cell--leading num sd-hz__year">{h.year}</th>
+                    <td role="cell" className="hig-table__cell hig-table__cell--leading sd-hz__case">{caseLabel(h.case)}</td>
+                    <td role="cell" className="hig-table__cell hig-table__cell--trailing num sd-hz__n sd-hz__active"><span className="rs-cell-label" aria-hidden="true">Active </span>{fmt.int(h.portsActive)}</td>
+                    <td role="cell" className="hig-table__cell hig-table__cell--trailing num sd-hz__n sd-hz__pathway"><span className="rs-cell-label" aria-hidden="true">Pathway </span>{fmt.int(h.portsPathway)}</td>
+                    <td role="cell" className="hig-table__cell hig-table__cell--trailing num sd-hz__n sd-hz__cap"><span className="rs-cell-label" aria-hidden="true">Cap </span>{fmt.int(h.capacityCap)}</td>
+                    <td role="cell" className="hig-table__cell hig-table__cell--leading rs-wrap sd-hz__strategy">{sentence(h.strategy)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -40,3 +40,17 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
   mapping the planner chooses is recorded as a choice, not a source (DEC-021, DEC-023).
 - **Every number on screen comes from the engine.** The interface explains with fixed wording
   filled from the engine's own numbers; it never computes a score itself.
+
+## Checks before a release
+
+| Command | What it proves |
+|---|---|
+| `node platform/tools/parity.mjs` | The browser engine and the native package give the same numbers (also in CI) |
+| `python3 platform/tools/matrix.py <base-url> <out-dir>` | Every screen at 11 window sizes, light and dark: no sideways scroll, nothing covered, controls large enough |
+| `python3 platform/tools/a11y_audit.py <base-url> <out-dir> --axe <axe.min.js>` | axe-core on every screen, in all four themes |
+| `python3 platform/tools/browser_check.py` | The real engine boots and runs Example City in Chromium and WebKit |
+
+Both screen scripts walk the flow through `tools/planner_flow.py` and take `--mock` for the stand-in engine.
+
+`npm run build` first runs `tools/build_licences.mjs`, which writes `public/licences.txt` (every
+bundled package, the Pyodide runtime and its Python wheels, with their licence texts).

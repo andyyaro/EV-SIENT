@@ -1,0 +1,31 @@
+/* Text contrast to WCAG 2.2 AA (4.5:1 for text, 3:1 for large text and controls).
+
+   The design system's iOS colors put two text colors below 4.5:1: Secondary Label in light
+   (rgba(60, 60, 67, 0.6) is 3.4:1 on white and 3.3:1 on the grouped background) and the blue
+   accent (#0088ff is 3.5:1 as text on white, and white on it is 3.5:1; #0091ff in dark is 3.9:1 on
+   a dark fill and white on it 3.2:1). A planning tool read by the public has to meet AA, so this
+   layer moves those colors just far enough, built only from the system's own tokens:
+
+   - Light: Secondary Label is System Gray darkened by 30% toward Label (#636366, 5.9:1 on white,
+     4.7:1 on Tertiary Fill), and the sidebar's secondary glass text uses it too (the glass value,
+     #727272, measures 4.4:1 on the rendered sidebar); and the accent is System Blue darkened by 30% (#005fb3: 6.4:1 as text
+     on white, 5.0:1 on a bordered button on the grouped background, 6.4:1 for white text on it).
+   - Dark: the accent is System Blue lightened by 30% toward white (#4db2ff) with black text on it,
+     the pairing the design system itself uses in Increased Contrast Dark (#5cb8ff, black).
+   - Increased Contrast Dark is left exactly as designed; Increased Contrast Light takes the light
+     changes, because its accent (#1e6ef4) is still under 4.5:1 on a Tertiary Fill.
+
+   The report (report/reportTheme.ts) reads the light block below for its own always-light page.
+   :root:root matches the specificity of tokens.css's increased-contrast media blocks, so these win
+   by coming later. */
+
+:root:root[data-theme^="light"] {
+  --label-secondary: color-mix(in srgb, var(--system-gray) 70%, var(--label-primary));
+  --glass-label-secondary: var(--label-secondary);
+  --accent: color-mix(in srgb, var(--system-blue) 70%, var(--black));
+}
+
+:root:root[data-theme="dark"] {
+  --accent: color-mix(in srgb, var(--system-blue) 70%, var(--white));
+  --on-accent: var(--black);
+}

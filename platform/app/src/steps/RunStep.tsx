@@ -8,6 +8,7 @@ import { Progress } from '../components/Progress';
 import { StatusMark } from '../components/StatusMark';
 import { StepActions } from '../components/StepActions';
 import { plural } from '../lib/fieldText';
+import { readableFileName } from '../lib/projectName';
 import { CONFIGURATION, stepGate, today, useSession } from '../state/store';
 
 function Row({ title, children }: { title: string; children: ReactNode }) {
@@ -85,7 +86,7 @@ export function RunStep() {
           </div>
           <div className="hig-list-section">
             <ul className="hig-list-section__rows">
-              <Row title="Jurisdiction or Organisation">{d.jurisdiction || 'Not given (the file name is used)'}</Row>
+              <Row title="Jurisdiction or Organisation">{d.jurisdiction || `Not given (${s.table ? readableFileName(s.table.fileName) : 'the file name'} is used)`}</Row>
               <Row title="Data Supplied By">{d.sourceOrg || 'Not given'}</Row>
               <Row title="Date of the Data">{d.sourceDate || 'Not given (lowers data confidence)'}</Row>
               <li className="hig-list-row hig-list-row--actionable">

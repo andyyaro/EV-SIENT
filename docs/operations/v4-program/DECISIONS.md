@@ -1479,3 +1479,53 @@ identifiers and risk levels refused) and `tests/test_input_schema.py`, which che
 `data/schema/input_schema_v1.json` against the code that implements each statement in it,
 measures which fields move the score rather than trusting the schema's word, and reruns the
 worked example in `docs/INPUT_SCHEMA.md`.
+
+## DEC-024 - The planner runs the unmodified engine in the planner's own browser
+
+**Date:** 2026-10-18 · **Phase:** platform v1 · **Builds on DEC-011, DEC-016, DEC-021, DEC-023**
+
+### What was blocking
+
+DEC-023 made another jurisdiction's sites run end to end, but only from the command line: a
+planner needed Python, a cloned repository and a terminal, and the mapping review was still
+text (F-25). A hosted service would have meant receiving planners' site files, which DEC-016's
+line between private inputs and public outputs does not allow us to hold.
+
+### The decision
+
+1. **The engine runs where the file is.** `platform/app` is a static page that loads Pyodide
+   in a Web Worker and imports `fcf_m2` from an archive built from `src/` with no edits. The
+   planner's file is read in the browser and never sent anywhere; the only other requests are
+   the app's own files and, after the planner chooses Show Map, basemap tiles.
+2. **One bridge, no second implementation.** `src/fcf_m2/browser_api.py` exposes intake,
+   mapping, check, run and explain as JSON strings. The interface fills fixed wording with the
+   engine's numbers and never computes a score. `explain` returns each driver's points so they
+   sum to the score shown, including the demand access adjustment.
+3. **Never without a cohort.** `browser_api.run` refuses to run before a file has been checked
+   and accepted, because `workflow.run` without a cohort reads the reference study's private
+   inputs, which the bundle does not contain.
+4. **A run can be replayed on its own date.** `workflow.run` takes `as_of`, passed to
+   `build_confidence`, so a restored `.evsient` project file reproduces its saved results
+   instead of aging them by the days since. Without `as_of` nothing changes.
+5. **The two engines must agree.** `platform/tools/parity.mjs` runs the worked example through
+   the browser archive and through the native package and fails on any difference above
+   1e-9; CI runs it on every change (3,476 numbers, largest difference 3.55e-15 at commit).
+6. **Licence.** The project is released under Apache-2.0 (`LICENSE`, `NOTICE`), the permissive
+   licence the build plan recommended, so planners elsewhere can host their own copy.
+
+### What it does not do
+
+- **No public data hub yet.** County packs, the assistant and a tagged PDF report are later
+  phases of the build plan.
+- **No new scoring.** The browser engine is the same package; the reference study's outputs do
+  not change.
+
+### Published numbers
+
+None moved. `as_of` defaults to today, as before.
+
+### Gates
+
+`tests/test_browser_api.py` (the bridge's field catalog matches `docs/INPUT_SCHEMA.md`, statuses,
+refusal without a cohort, explanations that sum to the score), `tests/test_licence_manifest.py`,
+and the CI `platform` job (runtime fetch with pinned hashes, engine archive, parity, app build).

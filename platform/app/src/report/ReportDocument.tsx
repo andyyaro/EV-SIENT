@@ -11,6 +11,9 @@ import {
 import { CAPACITY_LADDER, ladderRung } from '../results/data';
 import { fieldLabel, groupLabel, type ReportModel } from './reportModel';
 
+/** A table that may scroll sideways on a narrow screen: focusable and named, so a keyboard user can scroll it. */
+const scrollRegion = (label: string) => ({ role: 'region', 'aria-label': label, tabIndex: 0 }) as const;
+
 const SECTIONS = [
   ['rp-summary', 'Summary'],
   ['rp-ranked', 'Ranked Sites'],
@@ -131,7 +134,7 @@ function Ranked({ m }: { m: ReportModel }) {
   return (
     <section className="rp-section" aria-labelledby="rp-ranked">
       <H2 n={2} id="rp-ranked">Ranked Sites</H2>
-      <div className="rp-tablewrap">
+      <div className="rp-tablewrap" {...scrollRegion('Ranked sites table')}>
         <table className="rp-table">
           <caption>All sites in rank order. Subscores and data confidence run from 0 to 100.</caption>
           <thead>
@@ -208,7 +211,7 @@ function Locations({ m }: { m: ReportModel }) {
           </figcaption>
         </figure>
       ) : <p>No site has coordinates, so there is nothing to plot.</p>}
-      <div className="rp-tablewrap">
+      <div className="rp-tablewrap" {...scrollRegion('Site locations table')}>
         <table className="rp-table rp-table--compact">
           <caption>Site positions (WGS84 decimal degrees).</caption>
           <thead><tr><th scope="col" className="rp-num">Rank</th><th scope="col">Site</th><th scope="col">Type</th><th scope="col" className="rp-num">Latitude</th><th scope="col" className="rp-num">Longitude</th></tr></thead>
@@ -278,7 +281,7 @@ function Profiles({ m }: { m: ReportModel }) {
               <>
                 <p className="rp-lead">{explainSummary(e, N).sentences.join(' ')}</p>
                 {accessSentence(e) && <p className="rp-callout">{accessSentence(e)}</p>}
-                <div className="rp-tablewrap"><DriverRows e={e} /></div>
+                <div className="rp-tablewrap" {...scrollRegion(`Score breakdown table for ${s.name}`)}><DriverRows e={e} /></div>
               </>
             ) : <p>The engine's breakdown for this site was not available.</p>}
             {s.absentFields.length > 0 && <p className="rp-note">Not recorded for this site: {s.absentFields.map((f) => fieldLabel(m, f)).join(', ')}. Missing values never raise a score.</p>}
@@ -286,7 +289,7 @@ function Profiles({ m }: { m: ReportModel }) {
             <h4 className="rp-h4">Port Plan</h4>
             <p>{fmt.int(s.portsNow)} ports now, {fmt.int(s.pathwayPorts)} on the pathway, capacity cap {fmt.int(s.capacityCap)}.{s.plan ? ` ${s.plan}` : ''}</p>
             {hz.length > 0 && (
-              <div className="rp-tablewrap">
+              <div className="rp-tablewrap" {...scrollRegion(`Port plan table for ${s.name}`)}>
                 <table className="rp-table rp-table--compact">
                   <caption>Ports by horizon and scenario.{strategies.length === 1 ? ` Strategy in every row: ${sentence(strategies[0])}.` : ''}</caption>
                   <thead>
@@ -351,7 +354,7 @@ function Methods({ m }: { m: ReportModel }) {
         times 100 times its own weight times its credit, so the drivers add up to the score. A value nobody recorded earns no credit; it is never filled in.
         A site not recorded as open to the public has its demand counted at 65%.
       </p>
-      <div className="rp-tablewrap">
+      <div className="rp-tablewrap" {...scrollRegion('Subscore weights table')}>
         <table className="rp-table">
           <caption>Subscore weights and what each subscore measures.</caption>
           <thead><tr><th scope="col">Subscore</th><th scope="col" className="rp-num">Weight</th><th scope="col">What it measures (share of the whole score)</th></tr></thead>
@@ -405,7 +408,7 @@ function Assumptions({ m }: { m: ReportModel }) {
       {rows.length > 0 && (
         <>
           <h3 className="rp-h3">Constants a Reviewer May Challenge</h3>
-          <div className="rp-tablewrap">
+          <div className="rp-tablewrap" {...scrollRegion('Constants table')}>
             <table className="rp-table rp-table--compact">
               <caption>From the run's assumptions file (results/contract/assumptions.json).</caption>
               <thead><tr><th scope="col">Assumption</th><th scope="col">Value</th></tr></thead>
@@ -424,7 +427,7 @@ function Sources({ m }: { m: ReportModel }) {
   return (
     <section className="rp-section" aria-labelledby="rp-sources">
       <H2 n={7} id="rp-sources">Data Sources</H2>
-      <div className="rp-tablewrap">
+      <div className="rp-tablewrap" {...scrollRegion('Data sources table')}>
         <table className="rp-table rp-table--compact">
           <caption>Where the inputs came from, as the planner recorded them when the file was accepted.</caption>
           <thead><tr><th scope="col">Source</th><th scope="col">Organisation</th><th scope="col">Date</th><th scope="col">Detail</th></tr></thead>
@@ -505,7 +508,7 @@ function Repro({ m }: { m: ReportModel }) {
         {rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="rp-break">{v}</dd></div>)}
       </dl>
       {hashes.length > 0 && (
-        <div className="rp-tablewrap">
+        <div className="rp-tablewrap" {...scrollRegion('File hashes table')}>
           <table className="rp-table rp-table--compact rp-hashes">
             <caption>File hashes from the run's contract manifest (results/contract/contract_manifest.json).</caption>
             <thead><tr><th scope="col">File</th><th scope="col">SHA-256</th></tr></thead>

@@ -3,7 +3,9 @@
 
 .app-brand { width: 100%; border: 0; background: transparent; cursor: pointer; text-align: start; font: inherit; }
 .app-steps { counter-reset: step; }
-.app-steps .hig-sidebar__row { width: 100%; border: 0; background: transparent; font: inherit; text-align: start; cursor: pointer; color: var(--glass-label-primary); }
+/* Width and inset come from hig.css (.hig-sidebar--ios .hig-sidebar__row), as on the public site, so the
+   selected capsule sits inside the sidebar rather than touching its edge. */
+.app-steps .hig-sidebar__row { border: 0; background: transparent; font: inherit; text-align: start; cursor: pointer; color: var(--glass-label-primary); }
 .app-steps .hig-sidebar__row[aria-disabled] { cursor: default; color: var(--glass-label-tertiary); }
 .app-steps .hig-sidebar__row.is-selected { background: var(--fill-tertiary); }
 .app-steps .hig-sidebar__row.is-selected .hig-sidebar__label { font-weight: 600; }
@@ -30,7 +32,7 @@
 .app-compact__dots li.is-current { background: var(--accent); }
 .app-compact__step { position: relative; display: inline-flex; align-items: center; margin-inline-start: auto; color: var(--glass-label-primary); }
 .app-compact__step select {
-  appearance: none; -webkit-appearance: none; max-width: 52vw; text-overflow: ellipsis; min-height: 44px; padding: 0 30px 0 14px; border: 0; border-radius: var(--radius-capsule);
+  appearance: none; -webkit-appearance: none; max-width: 52vw; overflow: hidden; text-overflow: ellipsis; min-height: 44px; padding: 0 30px 0 14px; border: 0; border-radius: var(--radius-capsule);
   background: var(--fill-tertiary); color: inherit; font: 500 15px/20px var(--font-sans);
 }
 .app-compact__step .hig-icon { position: absolute; right: 12px; pointer-events: none; }
@@ -38,4 +40,14 @@
 @media (min-width: 1024px) { .app-compact { display: none; } }
 @media (max-width: 400px) { .app-compact__count { display: none; } }
 .app .main { padding-bottom: 64px; }
-.app .main:focus { outline: none; }
+/* Focus the app moves itself (a new screen's heading, a chosen site's heading, the main region, a
+   section or row jumped to) is for screen readers and the next Tab: these are not controls, so no
+   ring in any browser, whatever :focus-visible decides. Real controls keep their rings. */
+.app .main:focus,
+.app :is(h1, h2, h3, section, article, div)[tabindex="-1"]:focus { outline: none; }
+
+/* The Licences link in the sidebar footer and the Start screen's small print. */
+.app-licences { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.app-licences:hover { color: var(--label-primary); }
+.nav-sidebar__foot .app-licences:hover { color: var(--glass-label-primary); }
+.st-smallprint { margin-top: 32px; }

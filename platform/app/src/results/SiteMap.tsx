@@ -70,7 +70,7 @@ function MapCanvas({ sites, selectedId, onSelect }: Props) {
       const map = new maplibregl.Map({
         container: box.current,
         style: styleUrl(dark),
-        attributionControl: { compact: true },
+        attributionControl: { compact: false }, // always visible: OpenFreeMap and OpenStreetMap credit
         cooperativeGestures: true,
         dragRotate: false,
         pitchWithRotate: false,

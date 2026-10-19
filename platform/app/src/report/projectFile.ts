@@ -12,6 +12,7 @@ import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
 import { version as appVersion } from '../../package.json';
 import { getEngine } from '../engine/client';
 import { PROTOCOL_VERSION, type AcceptDetails, type TableInput } from '../engine/protocol';
+import { projectName } from '../lib/projectName';
 import { fullMapping, useSession } from '../state/store';
 import { PROJECT_SCHEMA, type ProjectManifest, type ProjectSnapshot } from './projectTypes';
 
@@ -54,10 +55,9 @@ export async function buildProjectFile(): Promise<Blob> {
 
   const b = s.boot;
   const info = b.status === 'ready' ? b.info : null;
-  const stem = s.table.fileName.replace(/\.[^.]+$/, '');
   const manifest: ProjectManifest = {
     schema: PROJECT_SCHEMA,
-    name: s.details.jurisdiction?.trim() || stem || 'EV-SIENT project',
+    name: projectName(s.details, s.table.fileName),
     savedAt: new Date().toISOString(),
     app: { version: appVersion },
     engine: { version: info?.engine.version ?? 'unknown', sha256: info?.engine.sha256 ?? '', protocol: info?.protocol ?? PROTOCOL_VERSION },

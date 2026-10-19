@@ -10,6 +10,7 @@ import { StatusMark } from '../components/StatusMark';
 import { StepActions } from '../components/StepActions';
 import type { AcceptDetails, CheckRow, Finding, RowStatus } from '../engine/protocol';
 import { fieldLabel, listWords, plainText, plural } from '../lib/fieldText';
+import { readableFileName } from '../lib/projectName';
 import { stepGate, useSession } from '../state/store';
 
 const PAGE = 100;
@@ -74,7 +75,7 @@ function DetailsForm() {
     sourceOrg: draft.sourceOrg?.trim() ?? '',
     sourceDate: draft.sourceDate ?? '',
   });
-  const stem = s.table?.fileName.replace(/\.[^.]+$/, '') ?? 'the file name';
+  const fallbackName = s.table ? readableFileName(s.table.fileName) : 'the file name';
   const field = (key: keyof AcceptDetails, label: string, type: 'text' | 'date', placeholder?: string) => (
     <label className="st-inset-field">
       <span className="st-inset-field__label">{label}</span>
@@ -93,7 +94,7 @@ function DetailsForm() {
     <section className="section" aria-labelledby="details-title">
       <h2 id="details-title" className="section__title">Where the Data Came From</h2>
       <p className="section__intro">
-        Optional. These are written into the results and the report so a reader knows the source. Leave the name empty and {stem} is used.
+        Optional. These are written into the results and the report so a reader knows the source. Leave the name empty and {fallbackName} is used.
       </p>
       <div className="card st-details">
         <div className="st-inset-fields">
@@ -139,33 +140,35 @@ function RowsTable() {
           </button>
         ))}
       </div>
-      <div className="st-table-wrap" role="region" aria-labelledby="rows-title" tabIndex={0}>
-        <table className="st-table st-table--rows">
+      {/* Explicit table roles: on narrow screens the rows are laid out as stacked cards (steps.css),
+          and the roles keep the table's meaning for screen readers whatever the CSS display. */}
+      <div className="st-table-wrap st-table-wrap--rows" role="region" aria-label="Every row table" tabIndex={0}>
+        <table className="st-table st-table--rows" role="table">
           <caption className="hig-visually-hidden">Rows in your file and their status. Row numbers are as in your spreadsheet, with the headings in row 1.</caption>
-          <thead>
-            <tr>
-              <th scope="col" className="st-num-col">Row</th>
-              <th scope="col">Site ID</th>
-              <th scope="col">Site Name</th>
-              <th scope="col">Status</th>
-              <th scope="col">Details</th>
+          <thead role="rowgroup">
+            <tr role="row">
+              <th scope="col" role="columnheader" className="st-num-col">Row</th>
+              <th scope="col" role="columnheader">Site ID</th>
+              <th scope="col" role="columnheader">Site Name</th>
+              <th scope="col" role="columnheader">Status</th>
+              <th scope="col" role="columnheader">Details</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody role="rowgroup">
             {shown.map((r) => (
-              <tr key={r.row} id={`row-${r.row}`} tabIndex={-1} className={`st-row st-row--${r.status}`}>
-                <td className="st-num-col num">{r.row}</td>
-                <td className="st-mono">{r.siteId || <span className="st-blank">blank</span>}</td>
-                <td>{r.siteName || <span className="st-blank">none</span>}</td>
-                <td><StatusMark kind={r.status} /></td>
-                <td className="st-wrap">
+              <tr key={r.row} id={`row-${r.row}`} tabIndex={-1} role="row" className={`st-row st-row--${r.status}`}>
+                <td role="cell" className="st-num-col st-cell-row num"><span className="st-cell-label" aria-hidden="true">Row </span>{r.row}</td>
+                <td role="cell" className="st-mono st-cell-id"><span className="st-cell-label" aria-hidden="true">Site ID </span>{r.siteId || <span className="st-blank">blank</span>}</td>
+                <td role="cell" className="st-cell-name">{r.siteName || <span className="st-blank">none</span>}</td>
+                <td role="cell" className="st-cell-status"><StatusMark kind={r.status} /></td>
+                <td role="cell" className="st-wrap st-cell-details">
                   {r.mustFix.map((m, i) => <p key={i}>{m}</p>)}
                   {r.missing.length > 0 && <p>No value for {listWords(r.missing.map((m) => fieldLabel(s.fields, m)))}.</p>}
                   {!r.mustFix.length && !r.missing.length && <span className="st-muted">Every matched field has a value.</span>}
                 </td>
               </tr>
             ))}
-            {!shown.length && <tr><td colSpan={5} className="st-muted">No rows with this status.</td></tr>}
+            {!shown.length && <tr role="row" className="st-row-empty"><td role="cell" colSpan={5} className="st-muted">No rows with this status.</td></tr>}
           </tbody>
         </table>
       </div>

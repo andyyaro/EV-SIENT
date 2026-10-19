@@ -6,6 +6,7 @@ import type {
   AcceptDetails, Explanation, FieldCatalog, OutputFiles, RunResult, RuntimeInfo, TableInput,
 } from '../engine/protocol';
 import { readAssumptions, readCapacity, readCohort, readManifest, type CapacityEvidence } from '../results/data';
+import { projectName } from '../lib/projectName';
 import { slug, today } from '../results/format';
 
 export interface ReportModel {
@@ -29,8 +30,7 @@ export function buildModel(args: {
   details: AcceptDetails; fields: FieldCatalog | null; table: TableInput | null;
 }): ReportModel {
   const cohort = readCohort(args.files);
-  const stem = args.table?.fileName.replace(/\.[^.]+$/, '') ?? '';
-  const place = args.details.jurisdiction?.trim() || cohort?.jurisdiction?.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || stem || 'EV-SIENT Project';
+  const place = projectName(args.details, args.table?.fileName);
   return {
     ...args,
     explains: new Map(args.explains.map((e) => [e.siteId, e])),

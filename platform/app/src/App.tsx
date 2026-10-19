@@ -2,19 +2,25 @@
 // ones, and the current step's screen. Steps 1 to 4 behave as a wizard; Results and Report are
 // a workspace the planner moves around in freely once a run exists.
 
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Banner } from './components/Banner';
 import { Icon } from './components/Icon';
+import { LicencesLink } from './components/LicencesLink';
 import { STEPS, stepDone, stepGate, useSession, type StepKey } from './state/store';
 import { StartStep } from './steps/StartStep';
 import { UploadStep } from './steps/UploadStep';
 import { MapStep } from './steps/MapStep';
 import { CheckStep } from './steps/CheckStep';
 import { RunStep } from './steps/RunStep';
-import { ResultsView } from './results/ResultsView';
-import { ReportView } from './report/ReportView';
 
-const SCREENS: Record<StepKey, () => React.JSX.Element> = {
+// Results and Report (with the report's styles and the downloads) load only once there is a run, so
+// the first screen does not wait for them. They are fetched in the background as soon as a run exists.
+const loadResults = () => import('./results/ResultsView').then((m) => ({ default: m.ResultsView }));
+const loadReport = () => import('./report/ReportView').then((m) => ({ default: m.ReportView }));
+const ResultsView = lazy(loadResults);
+const ReportView = lazy(loadReport);
+
+const SCREENS: Record<StepKey, React.ComponentType> = {
   start: StartStep, upload: UploadStep, map: MapStep, check: CheckStep, run: RunStep,
   results: ResultsView, report: ReportView,
 };
@@ -67,7 +73,10 @@ function StepNav() {
           })}
         </ol>
       </div>
-      <p className="nav-sidebar__foot">Your files stay on this device. Planning support, not engineering advice.</p>
+      <p className="nav-sidebar__foot">
+        Your files stay on this device. Planning support, not engineering advice.{' '}
+        <LicencesLink />
+      </p>
     </nav>
   );
 }
@@ -133,8 +142,28 @@ function Messages() {
   );
 }
 
+/** Focus the screen's heading, waiting briefly for a screen that is still loading. */
+function focusHeading(): () => void {
+  const main = document.getElementById('main');
+  const tryFocus = () => {
+    const heading = document.querySelector<HTMLElement>('#main h1');
+    if (!heading) return false;
+    if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+    return true;
+  };
+  if (tryFocus() || !main) return () => {};
+  main.focus({ preventScroll: true });
+  const observer = new MutationObserver(() => { if (tryFocus()) stop(); });
+  const timer = window.setTimeout(() => stop(), 5000);
+  const stop = () => { observer.disconnect(); window.clearTimeout(timer); };
+  observer.observe(main, { childList: true, subtree: true });
+  return stop;
+}
+
 export function App() {
   const step = useSession((s) => s.step);
+  const hasRun = useSession((s) => !!s.run);
   const Screen = SCREENS[step];
   const shownStep = useRef(step);
   useEffect(() => {
@@ -143,14 +172,11 @@ export function App() {
     if (shownStep.current === step) return; // first paint: leave focus where the browser put it
     shownStep.current = step;
     // Move focus to the new screen's heading so keyboard and screen reader users start there.
-    const heading = document.querySelector<HTMLElement>('#main h1');
-    if (heading) {
-      if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
-      heading.focus({ preventScroll: true });
-    } else {
-      document.getElementById('main')?.focus({ preventScroll: true });
-    }
+    return focusHeading();
   }, [step]);
+  useEffect(() => {
+    if (hasRun) { void loadResults(); void loadReport(); }
+  }, [hasRun]);
   return (
     <div className="shell app">
       <a className="skip-link" href="#main">Skip to Content</a>
@@ -158,7 +184,9 @@ export function App() {
       <CompactBar />
       <main id="main" className="main" tabIndex={-1}>
         <Messages />
-        <Screen />
+        <Suspense fallback={<div className="page"><p className="st-inline-status" role="status">Loading</p></div>}>
+          <Screen />
+        </Suspense>
       </main>
     </div>
   );

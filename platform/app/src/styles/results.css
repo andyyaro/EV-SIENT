@@ -234,6 +234,89 @@
   font: 600 12px/18px var(--font-sans); color: var(--label-primary); vertical-align: 1px;
 }
 
+/* ---------- Narrow screens: tables as stacked rows ----------
+   Below the width each table needs, every row becomes a small card so every column shows without
+   sideways scrolling. The headings stay in the markup for screen readers (visually hidden), each table
+   keeps explicit ARIA table roles, and the short labels shown inline (.rs-cell-label) are aria-hidden
+   because the column heading already names each cell. The wide layouts above are unchanged. */
+.rs-cell-label { display: none; }
+.rs-ranked, .sd-scroll, .rs-compare { container-type: inline-size; }
+.rs-ranked { container-name: rs-ranked; }
+.sd-scroll { container-name: sd-hz; }
+.rs-compare { container-name: rs-compare; }
+
+@container rs-ranked (max-width: 599px) {
+  .rs-ranked .hig-table__grid, .rs-ranked tbody { display: block; min-width: 0; }
+  .rs-ranked thead { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .rs-ranked .rs-row {
+    position: relative; display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; padding: 6px 4px 10px 44px;
+    box-shadow: inset 0 -0.5px var(--separator);
+  }
+  .rs-ranked .rs-row:last-child { box-shadow: none; }
+  .rs-ranked.hig-table--ios .rs-row > .hig-table__cell {
+    display: block; height: auto; padding: 0 !important; box-shadow: none; background: none; white-space: normal; text-align: start;
+  }
+  /* The rank hangs in the left margin, level with the site name, so wrapped lines stay indented. */
+  .rs-ranked.hig-table--ios .rs-row > .rs-rank { position: absolute; left: 10px; top: 10px; width: 24px; line-height: 20px; text-align: end; }
+  .rs-ranked .rs-row > .rs-col-site { flex: 1 1 0; min-width: 0; }
+  .rs-ranked .rs-row > .rs-score { flex: none; }
+  .rs-ranked .rs-row > .rs-col-compare { flex: none; }
+  /* A line break, then the secondary values, indented under the site name. */
+  .rs-ranked .rs-row::after { content: ""; order: 1; flex: 0 0 100%; height: 0; }
+  .rs-ranked .rs-row > .rs-col-tier, .rs-ranked .rs-row > .rs-col-conf, .rs-ranked .rs-row > .rs-col-ports {
+    order: 2; font-size: 13px; line-height: 18px; letter-spacing: -0.08px; color: var(--label-secondary);
+  }
+  .rs-ranked .rs-cell-label { display: inline; }
+  .rs-ranked .rs-score .rs-cell-label { font-weight: 400; color: var(--label-secondary); }
+  .rs-ranked .rs-row.is-selected { background-color: var(--fill-tertiary); box-shadow: inset 4px 0 0 var(--accent), inset 0 -0.5px var(--separator); }
+  .rs-ranked .rs-row.is-selected > .hig-table__cell, .rs-ranked .rs-row.is-selected > .hig-table__cell:first-child { background: none; box-shadow: none; }
+}
+@media (hover: hover) {
+  @container rs-ranked (max-width: 599px) {
+    .rs-ranked .rs-row:not(.is-selected):hover { background-color: var(--fill-quaternary); }
+    .rs-ranked .rs-row:not(.is-selected):hover > .hig-table__cell { background: none; }
+  }
+}
+
+@container sd-hz (max-width: 519px) {
+  .sd-scroll .sd-hz, .sd-scroll .sd-hz tbody { display: block; min-width: 0; }
+  .sd-scroll .sd-hz thead { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sd-scroll .sd-hz caption { display: block; }
+  .sd-hz .hig-table__row {
+    display: grid; grid-template-columns: auto auto auto minmax(0, 1fr); align-items: baseline; gap: 2px 14px;
+    grid-template-areas: "year case case case" "active pathway cap ." "strategy strategy strategy strategy";
+    padding: 10px 14px; box-shadow: inset 0 -0.5px var(--separator);
+  }
+  .sd-hz .hig-table__row:last-child { box-shadow: none; }
+  .sd-scroll.hig-table--ios .sd-hz .hig-table__cell {
+    display: block; height: auto; padding: 0 !important; box-shadow: none; background: none; white-space: normal; text-align: start; min-width: 0;
+  }
+  .sd-hz .sd-hz__year { grid-area: year; font-weight: 600; }
+  .sd-hz .sd-hz__case { grid-area: case; font-weight: 600; }
+  .sd-hz .sd-hz__active { grid-area: active; }
+  .sd-hz .sd-hz__pathway { grid-area: pathway; }
+  .sd-hz .sd-hz__cap { grid-area: cap; }
+  .sd-hz .sd-hz__n .rs-cell-label { display: inline; color: var(--label-secondary); }
+  .sd-hz .sd-hz__strategy { grid-area: strategy; margin-top: 2px; color: var(--label-secondary); }
+}
+
+@container rs-compare (max-width: 559px) {
+  .rs-compare .hig-table__grid, .rs-compare thead, .rs-compare tbody { display: block; min-width: 0; }
+  .rs-compare tr { display: grid; grid-template-columns: repeat(var(--rs-n, 2), minmax(0, 1fr)); column-gap: 12px; }
+  .rs-compare thead tr { padding: 4px 14px 8px; box-shadow: inset 0 -1px var(--separator); }
+  .rs-compare thead .rs-compare__corner { display: none; }
+  .rs-compare.hig-table--ios .rs-compare__site { display: block; padding: 8px 0 !important; min-width: 0; }
+  .rs-compare__link { white-space: normal; overflow-wrap: anywhere; }
+  .rs-compare .rs-compare__grouprow > th { display: block; grid-column: 1 / -1; }
+  .rs-compare tbody .hig-table__row { padding: 8px 14px 10px; row-gap: 2px; box-shadow: inset 0 -0.5px var(--separator); }
+  .rs-compare tbody .hig-table__row:last-child { box-shadow: none; }
+  .rs-compare.hig-table--ios tbody .hig-table__cell {
+    display: block; height: auto; padding: 0 !important; box-shadow: none; background: none; white-space: normal; min-width: 0;
+  }
+  .rs-compare.hig-table--ios tbody .rs-compare__label { grid-column: 1 / -1; font-size: 13px; line-height: 18px; color: var(--label-secondary) !important; }
+  .rs-compare__tag { margin-left: 6px; }
+}
+
 @media print {
   .rs-map, .sd-compare, .sd-back, .rs-check { display: none !important; }
   .rs-master { position: static; max-height: none; overflow: visible; }

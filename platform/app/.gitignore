@@ -5,3 +5,4 @@ public/runtime/
 *.tsbuildinfo
 # Downloaded Pyodide files, kept between runs of tools/fetch_runtime.mjs
 .cache/
+public/licences.txt

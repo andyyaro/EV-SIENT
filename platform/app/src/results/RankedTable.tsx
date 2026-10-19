@@ -29,23 +29,25 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
 
   return (
     <div className="hig-table hig-table--ios rs-table rs-ranked" role="region" aria-labelledby="rs-ranked-cap" tabIndex={0}>
-      <table className="hig-table__grid">
+      {/* Explicit table roles: on narrow screens each row is laid out as a stacked card (results.css),
+          and the roles keep the table's meaning for screen readers whatever the CSS display. */}
+      <table className="hig-table__grid" role="table">
         <caption id="rs-ranked-cap" className="hig-visually-hidden">
           Ranked sites, {sites.length} in all. Choose a site's name to show its details; the up and down arrow keys move between sites.
         </caption>
-        <thead>
-          <tr>
-            <th scope="col" className="hig-table__heading hig-table__cell--trailing rs-col-rank"><span className="hig-table__heading-label">Rank</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--leading rs-col-site"><span className="hig-table__heading-label">Site</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Score</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Tier</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Data Confidence</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Ports Now</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Pathway</span></th>
-            <th scope="col" className="hig-table__heading hig-table__cell--center"><span className="hig-table__heading-label">Compare</span></th>
+        <thead role="rowgroup">
+          <tr role="row">
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing rs-col-rank"><span className="hig-table__heading-label">Rank</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading rs-col-site"><span className="hig-table__heading-label">Site</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Score</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Tier</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading"><span className="hig-table__heading-label">Data Confidence</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Ports Now</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--trailing"><span className="hig-table__heading-label">Pathway</span></th>
+            <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--center"><span className="hig-table__heading-label">Compare</span></th>
           </tr>
         </thead>
-        <tbody ref={body}>
+        <tbody ref={body} role="rowgroup">
           {sites.map((s, i) => {
             const selected = s.siteId === selectedId;
             const inCompare = compare.includes(s.siteId);
@@ -54,11 +56,12 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
             return (
               <tr
                 key={s.siteId}
+                role="row"
                 className={'hig-table__row rs-row' + (selected ? ' is-selected' : '')}
                 onClick={(e) => { if (!(e.target as HTMLElement).closest('input, label, button')) onSelect(s.siteId, 'table'); }}
               >
-                <td className="hig-table__cell hig-table__cell--trailing rs-rank num">{s.rank}</td>
-                <th scope="row" className="hig-table__cell hig-table__cell--leading rs-col-site">
+                <td role="cell" className="hig-table__cell hig-table__cell--trailing rs-rank num">{s.rank}</td>
+                <th scope="row" role="rowheader" className="hig-table__cell hig-table__cell--leading rs-col-site">
                   <button
                     type="button"
                     className="rs-site hig-focus"
@@ -71,16 +74,16 @@ export function RankedTable({ sites, selectedId, compare, onSelect, onToggleComp
                     <span className="rs-site__id num">{s.siteId}{mapped ? '' : ' · not on map'}</span>
                   </button>
                 </th>
-                <td className="hig-table__cell hig-table__cell--trailing rs-score num">{fmt.score(s.score)}</td>
-                <td className="hig-table__cell hig-table__cell--leading">
+                <td role="cell" className="hig-table__cell hig-table__cell--trailing rs-score num"><span className="rs-cell-label" aria-hidden="true">Score </span>{fmt.score(s.score)}</td>
+                <td role="cell" className="hig-table__cell hig-table__cell--leading rs-col-tier">
                   <span className={`tier tier--${tk}`} title={s.tier}><span className="tier__mark" aria-hidden="true" />{tierShort(s.tier)}</span>
                 </td>
-                <td className="hig-table__cell hig-table__cell--leading">
-                  {s.confidence.level ?? 'Not recorded'}
+                <td role="cell" className="hig-table__cell hig-table__cell--leading rs-col-conf">
+                  <span className="rs-cell-label" aria-hidden="true">Confidence </span>{s.confidence.level ?? 'Not recorded'}
                 </td>
-                <td className="hig-table__cell hig-table__cell--trailing num">{fmt.int(s.portsNow)}</td>
-                <td className="hig-table__cell hig-table__cell--trailing num">{fmt.int(s.pathwayPorts)}</td>
-                <td className="hig-table__cell hig-table__cell--center">
+                <td role="cell" className="hig-table__cell hig-table__cell--trailing num rs-col-ports"><span className="rs-cell-label" aria-hidden="true">Ports Now </span>{fmt.int(s.portsNow)}</td>
+                <td role="cell" className="hig-table__cell hig-table__cell--trailing num rs-col-ports"><span className="rs-cell-label" aria-hidden="true">Pathway </span>{fmt.int(s.pathwayPorts)}</td>
+                <td role="cell" className="hig-table__cell hig-table__cell--center rs-col-compare">
                   <label className="rs-check">
                     <input
                       type="checkbox"

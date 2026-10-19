@@ -105,7 +105,7 @@ function Preview() {
         <h2 id="preview-title" className="section__title">First Rows</h2>
         <span className="section__aside num">{plural(table.rows.length, 'row')} · {plural(table.columns.length, 'column')}</span>
       </div>
-      <div className="st-table-wrap" role="region" aria-labelledby="preview-title" tabIndex={0}>
+      <div className="st-table-wrap" role="region" aria-label="First rows table" tabIndex={0}>
         <table className="st-table st-table--preview">
           <caption className="hig-visually-hidden">The first {rows.length} rows of {table.fileName}, as written in the file</caption>
           <thead>

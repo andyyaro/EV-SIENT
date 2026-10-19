@@ -58,15 +58,16 @@ export function ComparePanel({ sites, onRemove, onSelect }: { sites: SiteResult[
   }
   return (
     <div className="hig-table hig-table--ios rs-table rs-compare" role="region" aria-labelledby="rs-compare-cap" tabIndex={0}>
-      <table className="hig-table__grid">
+      {/* Explicit roles: on narrow screens each row's label sits above its values (results.css). */}
+      <table className="hig-table__grid" role="table" style={{ '--rs-n': sites.length } as React.CSSProperties}>
         <caption id="rs-compare-cap" className="hig-visually-hidden">
           {sites.length === 1 ? 'One site chosen to compare. Add another to see differences.' : `${sites.length} sites side by side.`} Tags mark each row's highest or lowest value.
         </caption>
-        <thead>
-          <tr>
-            <td className="hig-table__heading rs-compare__corner" />
+        <thead role="rowgroup">
+          <tr role="row">
+            <td role="cell" className="hig-table__heading rs-compare__corner" />
             {sites.map((s) => (
-              <th scope="col" className="hig-table__heading hig-table__cell--leading rs-compare__site" key={s.siteId}>
+              <th scope="col" role="columnheader" className="hig-table__heading hig-table__cell--leading rs-compare__site" key={s.siteId}>
                 <span className="rs-compare__name">
                   <button type="button" className="rs-compare__link hig-focus" onClick={() => onSelect(s.siteId)}>{s.name}</button>
                 </span>
@@ -79,17 +80,17 @@ export function ComparePanel({ sites, onRemove, onSelect }: { sites: SiteResult[
           </tr>
         </thead>
         {groups().map(({ group, rows }) => (
-          <tbody key={group}>
-            <tr className="rs-compare__grouprow">
-              <th scope="rowgroup" colSpan={sites.length + 1} className="rs-compare__group">{group}</th>
+          <tbody key={group} role="rowgroup">
+            <tr role="row" className="rs-compare__grouprow">
+              <th scope="rowgroup" role="rowheader" colSpan={sites.length + 1} className="rs-compare__group">{group}</th>
             </tr>
             {rows.map((row) => {
               const best = bestOf(row, sites);
               return (
-                <tr className="hig-table__row" key={row.label}>
-                  <th scope="row" className="hig-table__cell hig-table__cell--leading rs-compare__label">{row.label}</th>
+                <tr role="row" className="hig-table__row" key={row.label}>
+                  <th scope="row" role="rowheader" className="hig-table__cell hig-table__cell--leading rs-compare__label">{row.label}</th>
                   {sites.map((s) => (
-                    <td className={'hig-table__cell hig-table__cell--leading num' + (best.has(s.siteId) ? ' is-best' : '')} key={s.siteId}>
+                    <td role="cell" className={'hig-table__cell hig-table__cell--leading num' + (best.has(s.siteId) ? ' is-best' : '')} key={s.siteId}>
                       <span className="rs-compare__value">{row.show(s)}</span>
                       {best.has(s.siteId) && <span className="rs-compare__tag">{tagWord(row)}</span>}
                     </td>
