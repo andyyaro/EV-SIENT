@@ -32,7 +32,7 @@ export function fetchOutputFiles(runId: string): Promise<OutputFiles> {
 
 export type Loadable<T> = { status: 'loading' } | { status: 'ready'; value: T } | { status: 'error'; message: string };
 
-function useLoad<T>(key: string | null, load: () => Promise<T>): Loadable<T> {
+export function useLoad<T>(key: string | null, load: () => Promise<T>): Loadable<T> {
   const [state, setState] = useState<{ key: string | null; value: Loadable<T> }>({ key: null, value: { status: 'loading' } });
   useEffect(() => {
     if (!key) return;

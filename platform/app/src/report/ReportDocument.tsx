@@ -14,6 +14,7 @@ import { CAPACITY_LADDER, ladderRung } from '../results/data';
 import { carriedNumber, carriedText, showCarried, type CarriedColumns } from '../results/carried';
 import { fieldLabel, groupLabel, type ReportModel } from './reportModel';
 import { INDEX_SECTION, IndexReportSection } from '../yourindex/ReportSection';
+import { MethodsStability, ProfileStability } from './StabilityReport';
 
 /** A table that may scroll sideways on a narrow screen: focusable and named, so a keyboard user can scroll it. */
 const scrollRegion = (label: string) => ({ role: 'region', 'aria-label': label, tabIndex: 0 }) as const;
@@ -293,6 +294,7 @@ function Profiles({ m }: { m: ReportModel }) {
               </>
             ) : <p>The engine's breakdown for this site was not available.</p>}
             {s.absentFields.length > 0 && <p className="rp-note">Not recorded for this site: {s.absentFields.map((f) => fieldLabel(m, f)).join(', ')}. Missing values never raise a score.</p>}
+            <ProfileStability m={m} siteId={s.siteId} />
 
             <h4 className="rp-h4">Port Plan</h4>
             <p>{fmt.int(s.portsNow)} ports now, {fmt.int(s.pathwayPorts)} on the pathway, capacity cap {fmt.int(s.capacityCap)}.{s.plan ? ` ${s.plan}` : ''}</p>
@@ -396,6 +398,7 @@ function Methods({ m }: { m: ReportModel }) {
         The port plan sizes starter ports for today and a future-ready pathway for the {andList((m.manifest?.conventions?.horizons ?? []).map(String)) || 'later'} horizons,
         under the scenarios {andList((m.manifest?.conventions?.cases ?? []).map(caseLabel)) || 'the engine reports'}.
       </p>
+      <MethodsStability m={m} />
     </section>
   );
 }

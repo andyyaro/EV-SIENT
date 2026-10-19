@@ -5,7 +5,7 @@
 
 import type {
   AcceptResult, CheckResult, EngineClient, Explanation, FieldCatalog, FillRequest, OutputFiles, Proposal,
-  RemapRequest, RunResult, RuntimeInfo,
+  RemapRequest, RunResult, RuntimeInfo, StabilityResult,
 } from './protocol';
 import { EngineError } from './protocol';
 import infoJson from './fixtures/info.json';
@@ -108,6 +108,11 @@ export function createMockEngine(): EngineClient {
       const load = explains[`./fixtures/explain_${siteId}.json`];
       if (!load) throw new EngineError(`No site ${siteId} in these results.`);
       return (await load()) as Explanation;
+    },
+    // Recorded from the real engine on Example City with its default seed, like run.json.
+    async stability() {
+      if (!ran) throw new EngineError('Run the model first.');
+      return (await import('./fixtures/stability.json')).default as unknown as StabilityResult;
     },
     async provenance() {
       if (!ran) throw new EngineError('Run the model first.');

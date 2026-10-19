@@ -2,7 +2,12 @@
 
 [← repository root](../README.md)
 
-Everything lives under [`milestone-2/`](milestone-2/):
+Everything lives under [`milestone-2/`](milestone-2/), except
+[`rank-stability/`](rank-stability/), the score breakdown and rank-stability checks for the 12 reference
+sites as JSON, written by `scripts/build_rank_stability.py` for the public site to embed (method:
+[docs/methodology/rank_stability.md](../docs/methodology/rank_stability.md)).
+
+The Milestone 2 documents:
 
 | Document | Formats | What it is |
 |---|---|---|

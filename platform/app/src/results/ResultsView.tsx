@@ -8,6 +8,7 @@ import { ComparePanel } from './ComparePanel';
 import { RankedTable } from './RankedTable';
 import { SiteDetail } from './SiteDetail';
 import { SiteMap } from './SiteMap';
+import { StabilityOverview } from './StabilityOverview';
 import { YourColumnsControl } from './YourColumns';
 import { columnIndex, compareCarried, passesFilter } from './carried';
 import { useOutputFiles } from './data';
@@ -194,6 +195,8 @@ export function ResultsView() {
           </div>
         </div>
       </section>
+
+      <StabilityOverview run={run} />
 
       <section className="section" aria-labelledby="rs-compare-title">
         <div className="section__head">

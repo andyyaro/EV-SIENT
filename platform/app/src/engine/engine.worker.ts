@@ -150,6 +150,7 @@ const api = {
   async accept(detailsJson: string) { await ready(); return invoke('accept', detailsJson); },
   async run(optionsJson: string) { await ready(); return invoke('run', optionsJson); },
   async explain(siteId: string) { await ready(); return invoke('explain', siteId); },
+  async stability(optionsJson: string) { await ready(); return invoke('stability', optionsJson); },
   async provenance(cellJson: string) { await ready(); return invoke('provenance', cellJson); },
   async output_files() { await ready(); return invoke('output_files'); },
   async columns() { await ready(); return invoke('columns'); },

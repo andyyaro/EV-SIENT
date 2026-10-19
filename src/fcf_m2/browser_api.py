@@ -13,6 +13,7 @@ It adds no model logic. Each call is a thin wrapper over what the command line a
     accept    ->  intake.apply + provenance_rows + accept, written as a cohort directory
     run       ->  workflow.run("milestone2_v3", cohort_dir=...), never without a cohort
     explain   ->  the score broken into the weights scoring.py already uses
+    stability ->  the score breakdown and how firm the ranks are (stability.analyse)
     provenance -> provenance.resolve, for the one cell the planner opens
     fill      ->  values the planner accepted from the public data hub, for cells their file
                   left empty, recorded with their source (applied by `accept`)
@@ -43,7 +44,7 @@ from typing import Any
 
 import pandas as pd
 
-from . import intake
+from . import intake, stability as rank_stability
 from .flex import dictionary, explore as flex_explore, index as flex_index
 from .scoring import (DRIVER_WEIGHTS, INVERTED_DRIVERS, NUMERIC_FIELDS, SUBSCORE_WEIGHTS,
                       YES_NO_FIELDS)
@@ -131,10 +132,8 @@ DRIVER_LABELS = {
 }
 
 #: The supplied fields a driver is built from, so a driver can say which input it is missing.
-DRIVER_INPUTS = {
-    "existing_ports_total_n": ["existing_l2_ports_1mi", "existing_dcfc_ports_3mi"],
-    "install_cost_est_usd_n": ["trenching_ft", "trench_cost_per_ft", "service_upgrade_cost_usd"],
-}
+#: Defined once, in stability.py, which also reads it to tell which drivers are unconfirmed.
+DRIVER_INPUTS = rank_stability.DRIVER_INPUTS
 
 #: The fields intake reads as values, and so checks and notes when absent (its own rule).
 _SCORED = set(NUMERIC_FIELDS) | set(YES_NO_FIELDS)
@@ -809,6 +808,38 @@ def explain(site_id: str) -> str:
         "subscores": subscores,
         "drivers": drivers,
     })
+
+
+def stability(options_json: str = "{}") -> str:
+    """The score breakdown and the rank-stability checks for the last run (fcf_m2.stability).
+
+    The input is `{"draws", "concentration", "seed"}`, all optional; the defaults are the
+    method's (docs/methodology/rank_stability.md). It re-weights the scores the run already
+    computed and changes nothing: no score, rank or file. It is a planning-support check of how
+    much the order depends on the weights and on unconfirmed inputs, never a probability that a
+    site is the best place to build.
+    """
+    if _session.results is None or _session.out_dir is None:
+        raise ValueError("Run the model first.")
+    options = json.loads(options_json or "{}")
+    try:
+        draws = int(options.get("draws", rank_stability.DEFAULT_DRAWS))
+        concentration = float(options.get("concentration", rank_stability.DEFAULT_CONCENTRATION))
+        seed = int(options.get("seed", rank_stability.DEFAULT_SEED))
+    except (TypeError, ValueError):
+        raise ValueError("The stability settings must be numbers.") from None
+    if not 1 <= draws <= 20000:
+        raise ValueError("Ask for between 1 and 20,000 weightings.")
+    if not (math.isfinite(concentration) and 1 <= concentration <= 10000):
+        raise ValueError("The concentration must be between 1 and 10,000.")
+    path = _session.out_dir / "data_confidence_v3.csv"
+    confidence = None
+    if path.exists():
+        confidence = rank_stability.confidence_from_results(pd.read_csv(path, dtype={"site_id": str}))
+    result = rank_stability.analyse(_session.results, confidence,
+                                    labels={**SUBSCORE_LABELS, **DRIVER_LABELS},
+                                    draws=draws, concentration=concentration, seed=seed)
+    return _out(result)
 
 
 def provenance(cell_json: str) -> str:

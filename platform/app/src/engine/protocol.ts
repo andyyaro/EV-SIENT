@@ -257,6 +257,119 @@ export interface Explanation {
   drivers: Driver[];
 }
 
+// ---------- how firm the ranks are (src/fcf_m2/stability.py) ----------
+// A planning-support check of how much the order depends on the weights and on unconfirmed
+// inputs. It re-weights the run's own scores and changes nothing. Never a probability that a
+// site is the best place to build (docs/methodology/rank_stability.md).
+
+export type SubscoreKey = 'demand' | 'feasibility' | 'safety' | 'equity';
+
+export interface StabilityOptions {
+  /** Weightings drawn; 2000 by default. */
+  draws?: number;
+  /** How tightly the drawn weights sit around the defaults; 50 by default. */
+  concentration?: number;
+  seed?: number;
+}
+
+/** One part of a score: exact `points`, and `shown`, rounded so the parts add up to the published score. */
+export interface ScorePart {
+  key: string;
+  label: string;
+  /** Share of the whole score this part can carry, 0..1. */
+  weight: number;
+  points: number;
+  shown: number;
+  /** Points at full credit. */
+  max: number;
+}
+
+export interface ScoreSubscore extends ScorePart { key: SubscoreKey; value: number }
+export interface ScoreDriver extends ScorePart { subscore: SubscoreKey; inverted: boolean }
+
+/** Where a score could land if inputs not yet confirmed ran from no credit to full credit. A range, not a likelihood. */
+export interface InputRange {
+  low: number;
+  high: number;
+  bestRank: number;
+  worstRank: number;
+  /** The drivers allowed to move at this site; empty when its inputs are confirmed. */
+  drivers: string[];
+}
+
+export type InputScenarioKey = 'capacity' | 'unconfirmed';
+
+export interface StabilitySite {
+  siteId: string;
+  name: string;
+  rank: number;
+  /** The published score; `shown` parts add up to it exactly. */
+  score: number;
+  /** The unrounded score; `points` add up to it. */
+  total: number;
+  accessAdjustment: number;
+  subscores: ScoreSubscore[];
+  drivers: ScoreDriver[];
+  /** Across the drawn weightings: shares 0..1, and the 5th, 50th and 95th percentile rank. */
+  stability: { pFirst: number; pTop3: number; rankLow: number; rankMedian: number; rankHigh: number };
+  /** Best and worst rank across the eight one-weight-at-a-time cases. */
+  weightCases: { best: number; worst: number };
+  inputRange: Partial<Record<InputScenarioKey, InputRange>>;
+}
+
+export interface WeightFlip {
+  subscore: SubscoreKey;
+  label: string;
+  direction: 'up' | 'down';
+  /** Weights in points of 100. */
+  from: number;
+  to: number;
+  change: number;
+  newTop: string;
+}
+
+export interface WeightCase {
+  subscore: SubscoreKey;
+  label: string;
+  /** Points of 100, e.g. 5 or -5. */
+  change: number;
+  weights: Record<SubscoreKey, number>;
+  top: string;
+  topChanged: boolean;
+  leaders: { siteId: string; score: number }[];
+  rankChanges: { siteId: string; from: number; to: number }[];
+}
+
+export interface StabilityResult {
+  note: string;
+  weights: { key: SubscoreKey; label: string; weight: number }[];
+  sites: StabilitySite[];
+  sensitivity: {
+    step: number;
+    top: string;
+    cases: WeightCase[];
+    flips: WeightFlip[];
+    smallestFlip: WeightFlip | null;
+    /** The smallest single-weight change that changes the top site, in one plain sentence. */
+    sentence: string;
+  };
+  rankStability: {
+    draws: number;
+    concentration: number;
+    seed: number;
+    weightSpread: { key: SubscoreKey; label: string; weight: number; low: number; high: number }[];
+  };
+  inputUncertainty: {
+    done: boolean;
+    /** Field groups below this data confidence count as not yet confirmed. */
+    threshold: number;
+    /** Why the input check was not done, when it was not. */
+    reason?: string;
+    missingConfidence?: string[];
+    scenarios: { key: InputScenarioKey; label: string; couldBeFirst: string[] }[];
+  };
+}
+
 /** One cell of the run's contract scenario table, e.g. ports_active at 2036 in "base". */
 export interface ProvenanceRequest {
   siteId: string;
@@ -457,6 +570,8 @@ export interface EngineClient {
   accept(details: AcceptDetails): Promise<AcceptResult>;
   run(options?: RunOptions): Promise<RunResult>;
   explain(siteId: string): Promise<Explanation>;
+  /** The score breakdown and how firm the ranks are, for the last run. Changes nothing. */
+  stability(options?: StabilityOptions): Promise<StabilityResult>;
   provenance(cell: ProvenanceRequest): Promise<ProvenanceRecord>;
   outputFiles(): Promise<OutputFiles>;
   /** The column dictionary for the uploaded file: proposed the first time, then as confirmed. */

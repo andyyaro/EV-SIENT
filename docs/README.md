@@ -13,6 +13,7 @@
 - [Workflow steps](WORKFLOW_STEPS.md) (generated - regenerate with `make docs`)
 - [`src/` guide](../src/README.md) · [`data/` guide](../data/README.md) · [`tests/` guide](../tests/README.md)
 - [Current-facts source register](methodology/current-facts-source-register.md) - primary-source verification of every time-sensitive fact (2026-07-19)
+- [How firm are the ranks?](methodology/rank_stability.md) - score breakdown, weight sensitivity and rank stability: a planning-support check, not a probability
 
 ## For technical reviewers
 - [Repository migration plan](repository-migration-plan.md) - what was retained/replaced/archived and why

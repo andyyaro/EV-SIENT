@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Native vs Pyodide parity for the browser path. Runs the same browser_api calls (propose,
-// remap, check, accept, run with a fixed asOf, explain for every site, provenance for a set of
-// cells per site, output_files) on
+// remap, check, accept, run with a fixed asOf, explain for every site, stability with its fixed
+// seed, provenance for a set of cells per site, output_files) on
 // Example City and on the 12-site synthetic cohort twice: natively with the repo's venv, and
 // under Pyodide in Node with exactly what the browser gets (the fetched runtime directory and
 // the built engine archive, its SHA-256 checked). Numbers must agree to 1e-9, everything else
@@ -59,6 +59,7 @@ def _drive(cases_json):
             {"jurisdiction": name, "sourceOrg": "parity", "sourceDate": "2026-10-01"})))
         got["run"] = json.loads(api.run(json.dumps({"asOf": "2026-10-18"})))
         got["explain"] = {s["siteId"]: json.loads(api.explain(s["siteId"])) for s in got["run"]["sites"]}
+        got["stability"] = json.loads(api.stability("{}"))
         got["provenance"] = {
             f"{s['siteId']}|{year}|{scenario}|{column}": json.loads(api.provenance(json.dumps(
                 {"siteId": s["siteId"], "horizonYear": year, "scenario": scenario, "column": column})))
@@ -221,6 +222,7 @@ async function main() {
     }
     const sites = nRest.run.sites.length;
     console.log(`${name}: ${sites} sites, ${Object.keys(nRest.explain).length} explanations, ` +
+      `stability for ${nRest.stability.sites.length} sites (${nRest.stability.rankStability.draws} weightings), ` +
       `${identical} of ${files.length} output files byte-identical` + (within.length ? ` (compared by value: ${within.join(', ')})` : ''));
   }
   console.log(`${numbersCompared} numbers compared, largest difference ${worst.toExponential(2)}` +

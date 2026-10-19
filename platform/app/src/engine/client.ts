@@ -27,6 +27,7 @@ function lazyMock(): EngineClient {
     accept: later('accept'),
     run: later('run'),
     explain: later('explain'),
+    stability: later('stability'),
     provenance: later('provenance'),
     columns: later('columns'),
     columnsConfirm: later('columnsConfirm'),

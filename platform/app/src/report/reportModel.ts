@@ -3,7 +3,7 @@
 // document and every download.
 
 import type {
-  AcceptDetails, Explanation, FieldCatalog, OutputFiles, RunResult, RuntimeInfo, TableInput,
+  AcceptDetails, Explanation, FieldCatalog, OutputFiles, RunResult, RuntimeInfo, StabilityResult, TableInput,
 } from '../engine/protocol';
 import {
   readAssumptions, readCapacity, readCohort, readManifest, readPublicSources, type CapacityEvidence, type PublicSource,
@@ -29,6 +29,8 @@ export interface ReportModel {
   capacity: Map<string, CapacityEvidence>;
   /** Public datasets the planner accepted values from, if any. */
   publicSources: PublicSource[];
+  /** The score breakdown and rank-stability checks; null when the engine could not give them. */
+  stability: StabilityResult | null;
   /** The jurisdiction or project name shown on the cover. */
   place: string;
   /** The planner's own index, when they ran one: its own labelled section, never the readiness score. */
@@ -39,11 +41,13 @@ export function buildModel(args: {
   run: RunResult; explains: Explanation[]; files: OutputFiles; info: RuntimeInfo | null;
   details: AcceptDetails; fields: FieldCatalog | null; table: TableInput | null; carried: CarriedColumns | null;
   index?: IndexOutcome | null;
+  stability?: StabilityResult | null;
 }): ReportModel {
   const cohort = readCohort(args.files);
   const place = projectName(args.details, args.table?.fileName);
   return {
     ...args,
+    stability: args.stability ?? null,
     explains: new Map(args.explains.map((e) => [e.siteId, e])),
     cohort,
     manifest: readManifest(args.files),

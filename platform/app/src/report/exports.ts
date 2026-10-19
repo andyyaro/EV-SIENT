@@ -141,8 +141,30 @@ function yourColumns(c: CarriedColumns | null, asNumbers: boolean): Col[] {
   }));
 }
 
+/**
+ * The rank-stability check, after the model's columns: each site's points from each subscore, and
+ * its shares of the drawn weightings (browser_api.stability). Empty when the check is not available.
+ */
+function stabilityColumns(m: ReportModel): Col[] {
+  const r = m.stability;
+  if (!r) return [];
+  const by = new Map(r.sites.map((s) => [s.siteId, s]));
+  return [
+    ...r.weights.map((w): Col => ({
+      title: `${w.label} Points (weight ${Math.round(w.weight * 100)})`,
+      value: (s) => by.get(s.siteId)?.subscores.find((x) => x.key === w.key)?.shown ?? null,
+    })),
+    { title: `Chance of First Place (share of ${r.rankStability.draws} weightings)`, value: (s) => by.get(s.siteId)?.stability.pFirst ?? null },
+    { title: 'Chance of Top Three', value: (s) => by.get(s.siteId)?.stability.pTop3 ?? null },
+    { title: 'Rank Range Best (5th percentile)', value: (s) => by.get(s.siteId)?.stability.rankLow ?? null },
+    { title: 'Rank Range Worst (95th percentile)', value: (s) => by.get(s.siteId)?.stability.rankHigh ?? null },
+    { title: `Best Rank, One Weight Moved ${r.sensitivity.step} Points`, value: (s) => by.get(s.siteId)?.weightCases.best ?? null },
+    { title: `Worst Rank, One Weight Moved ${r.sensitivity.step} Points`, value: (s) => by.get(s.siteId)?.weightCases.worst ?? null },
+  ];
+}
+
 export function sitesCsv(m: ReportModel): { blob: Blob; name: string } {
-  const columns = [...SITE_COLUMNS, ...yourColumns(m.carried, false)];
+  const columns = [...SITE_COLUMNS, ...stabilityColumns(m), ...yourColumns(m.carried, false)];
   const lines = [columns.map((c) => csvCell(c.title)).join(',')];
   for (const s of m.run.sites) lines.push(columns.map((c) => csvCell(c.value(s))).join(','));
   // A byte-order mark so Excel reads the file as UTF-8.
@@ -173,6 +195,14 @@ export async function workbook(m: ReportModel): Promise<{ blob: Blob; name: stri
     ...m.run.sites.map((s) => [s.siteId, s.name, s.confidence.score, s.confidence.level, ...groups.map((g) => s.confidence.breakdown[g] ?? null)].map(cell)),
   ];
 
+  // The rank-stability check on a sheet of its own, so the Sites sheet holds only the run's numbers.
+  const stab: Col[] = [SITE_COLUMNS[0], SITE_COLUMNS[1], SITE_COLUMNS[2], ...stabilityColumns(m)];
+  const stabSheet = m.stability ? [
+    [head(`Planning-support check, not a probability that a site is the right choice. ${m.stability.sensitivity.sentence}`)],
+    stab.map((c) => head(c.title)),
+    ...m.run.sites.map((s) => stab.map((c) => cell(c.value(s)))),
+  ] : null;
+
   // Your Columns on their own sheet, so the Sites sheet holds only the model's numbers.
   const id: Col[] = [SITE_COLUMNS[0], SITE_COLUMNS[1], SITE_COLUMNS[2]];
   const yours = [...id, ...yourColumns(m.carried, true)];
@@ -195,6 +225,7 @@ export async function workbook(m: ReportModel): Promise<{ blob: Blob; name: stri
     { data: sites, sheet: 'Sites', columns: widths(SITE_COLUMNS.length), stickyRowsCount: 1 },
     { data: scenarios, sheet: 'Scenarios', columns: widths(scenarioHead.length), stickyRowsCount: 1 },
     { data: confidence, sheet: 'Data Confidence', columns: widths(groups.length + 4), stickyRowsCount: 1 },
+    ...(stabSheet ? [{ data: stabSheet, sheet: 'Rank Stability', columns: widths(stab.length), stickyRowsCount: 2 }] : []),
     ...(yourSheet ? [{ data: yourSheet, sheet: 'Your Columns (Not in the Score)', columns: widths(yours.length), stickyRowsCount: 2 }] : []),
     ...(indexSheet ? [{ data: indexSheet, sheet: 'Your Index (Not Official)', columns: widths(index!.head.length), stickyRowsCount: 2 }] : []),
   ] as Parameters<typeof writeXlsxFile>[0]).toBlob();

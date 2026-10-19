@@ -6,6 +6,7 @@ import { forwardRef } from 'react';
 import { Icon } from '../components/Icon';
 import type { FieldCatalog, OutputFiles, RunResult, SiteResult } from '../engine/protocol';
 import { ExplainCard } from './ExplainCard';
+import { SiteStability } from './SiteStability';
 import { YourColumnsCard } from './YourColumns';
 import type { CarriedColumns } from './carried';
 import {
@@ -76,6 +77,8 @@ export const SiteDetail = forwardRef<HTMLHeadingElement, Props>(function SiteDet
         </div>
         <p className="footnote">Subscores run from 0 to 100. The score weights them {SUBSCORE_KEYS.map((k) => `${subscoreLabel(k)} ${fmt.weight(run.subscoreWeights[`${k}_subscore`])}`).join(', ')}.</p>
       </section>
+
+      <SiteStability run={run} site={site} />
 
       <section className="sd-card" aria-labelledby="sd-why">
         <h3 className="sd-card__title" id="sd-why">Why This Score</h3>

@@ -1,0 +1,2167 @@
+{
+ "note": "A planning-support sensitivity check, not a probability that a site is actually the best place to build. It re-weights the scores the model already computed to show how much the order depends on the weights, which are a judgement, and on inputs not yet confirmed.",
+ "weights": [
+  {
+   "key": "demand",
+   "label": "Demand",
+   "weight": 0.45
+  },
+  {
+   "key": "feasibility",
+   "label": "Feasibility",
+   "weight": 0.3
+  },
+  {
+   "key": "safety",
+   "label": "Safety",
+   "weight": 0.15
+  },
+  {
+   "key": "equity",
+   "label": "Equity",
+   "weight": 0.1
+  }
+ ],
+ "sites": [
+  {
+   "siteId": "EXC-01",
+   "name": "Example City Central Library",
+   "rank": 1,
+   "score": 47.7,
+   "total": 47.675998788634615,
+   "accessAdjustment": 1.0,
+   "subscores": [
+    {
+     "key": "demand",
+     "label": "Demand",
+     "weight": 0.45,
+     "value": 39.476410256410254,
+     "points": 17.764384615384614,
+     "shown": 17.8,
+     "max": 45.0
+    },
+    {
+     "key": "feasibility",
+     "label": "Feasibility",
+     "weight": 0.3,
+     "value": 35.705380577499994,
+     "points": 10.711614173249998,
+     "shown": 10.7,
+     "max": 30.0
+    },
+    {
+     "key": "safety",
+     "label": "Safety",
+     "weight": 0.15,
+     "value": 100.0,
+     "points": 15.0,
+     "shown": 15.0,
+     "max": 15.0
+    },
+    {
+     "key": "equity",
+     "label": "Equity",
+     "weight": 0.1,
+     "value": 42.0,
+     "points": 4.2,
+     "shown": 4.2,
+     "max": 10.0
+    }
+   ],
+   "drivers": [
+    {
+     "key": "nearby_households_1mi_n",
+     "label": "Households within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 4.994999999999999,
+     "shown": 5.0,
+     "max": 8.1
+    },
+    {
+     "key": "nearby_jobs_1mi_n",
+     "label": "Jobs within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 3.685499999999999,
+     "shown": 3.69,
+     "max": 8.1
+    },
+    {
+     "key": "aadt_nearest_n",
+     "label": "Daily traffic nearby",
+     "subscore": "demand",
+     "weight": 0.0585,
+     "inverted": false,
+     "points": 2.34,
+     "shown": 2.34,
+     "max": 5.8500000000000005
+    },
+    {
+     "key": "amenities_count_0_5mi_n",
+     "label": "Amenities within half a mile",
+     "subscore": "demand",
+     "weight": 0.0495,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.95
+    },
+    {
+     "key": "parking_spaces_n",
+     "label": "Parking spaces",
+     "subscore": "demand",
+     "weight": 0.045,
+     "inverted": false,
+     "points": 0.35999999999999993,
+     "shown": 0.36,
+     "max": 4.5
+    },
+    {
+     "key": "hours_open_n",
+     "label": "Hours open",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 1.4999999999999996,
+     "shown": 1.5,
+     "max": 3.6
+    },
+    {
+     "key": "avg_dwell_min_n",
+     "label": "Visit length",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": false,
+     "points": 0.7874999999999999,
+     "shown": 0.79,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "ev_share_local_n",
+     "label": "Local EV share",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 1.1159999999999999,
+     "shown": 1.12,
+     "max": 3.6
+    },
+    {
+     "key": "existing_ports_total_n",
+     "label": "Existing chargers nearby",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": true,
+     "points": 2.9803846153846156,
+     "shown": 2.98,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "spare_capacity_kw_n",
+     "label": "Spare electrical capacity",
+     "subscore": "feasibility",
+     "weight": 0.105,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 10.5
+    },
+    {
+     "key": "distance_to_service_ft_n",
+     "label": "Distance to electrical service",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 5.039370078749999,
+     "shown": 5.04,
+     "max": 7.5
+    },
+    {
+     "key": "install_cost_est_usd_n",
+     "label": "Estimated install cost",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 2.9438976378,
+     "shown": 2.95,
+     "max": 7.5
+    },
+    {
+     "key": "trenching_ft_n",
+     "label": "Trenching needed",
+     "subscore": "feasibility",
+     "weight": 0.045,
+     "inverted": true,
+     "points": 2.7283464566999998,
+     "shown": 2.73,
+     "max": 4.5
+    },
+    {
+     "key": "ada_layout_possible",
+     "label": "ADA layout possible",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "fire_access_ok",
+     "label": "Fire access adequate",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "garage_enclosed",
+     "label": "Enclosed garage",
+     "subscore": "safety",
+     "weight": 0.0225,
+     "inverted": true,
+     "points": 2.25,
+     "shown": 2.25,
+     "max": 2.25
+    },
+    {
+     "key": "emergency_disconnect_visible",
+     "label": "Emergency disconnect visible",
+     "subscore": "safety",
+     "weight": 0.015,
+     "inverted": false,
+     "points": 1.5,
+     "shown": 1.5,
+     "max": 1.5
+    },
+    {
+     "key": "stormwater_risk",
+     "label": "Stormwater risk",
+     "subscore": "safety",
+     "weight": 0.0075,
+     "inverted": true,
+     "points": 0.75,
+     "shown": 0.75,
+     "max": 0.75
+    },
+    {
+     "key": "equity_gap_index_n",
+     "label": "Equity need",
+     "subscore": "equity",
+     "weight": 0.1,
+     "inverted": false,
+     "points": 4.2,
+     "shown": 4.2,
+     "max": 10.0
+    }
+   ],
+   "stability": {
+    "pFirst": 0.9815,
+    "pTop3": 1.0,
+    "rankLow": 1,
+    "rankMedian": 1,
+    "rankHigh": 1
+   },
+   "weightCases": {
+    "best": 1,
+    "worst": 1
+   },
+   "inputRange": {
+    "capacity": {
+     "low": 47.676,
+     "high": 58.176,
+     "bestRank": 1,
+     "worstRank": 5,
+     "drivers": [
+      "spare_capacity_kw_n"
+     ]
+    },
+    "unconfirmed": {
+     "low": 0.0,
+     "high": 100.0,
+     "bestRank": 1,
+     "worstRank": 6,
+     "drivers": [
+      "nearby_households_1mi_n",
+      "nearby_jobs_1mi_n",
+      "aadt_nearest_n",
+      "amenities_count_0_5mi_n",
+      "parking_spaces_n",
+      "hours_open_n",
+      "avg_dwell_min_n",
+      "ev_share_local_n",
+      "existing_ports_total_n",
+      "spare_capacity_kw_n",
+      "distance_to_service_ft_n",
+      "install_cost_est_usd_n",
+      "trenching_ft_n",
+      "ada_layout_possible",
+      "fire_access_ok",
+      "garage_enclosed",
+      "emergency_disconnect_visible",
+      "stormwater_risk",
+      "equity_gap_index_n"
+     ]
+    }
+   }
+  },
+  {
+   "siteId": "EXC-02",
+   "name": "Example City North Branch Library",
+   "rank": 2,
+   "score": 43.4,
+   "total": 43.43493372705,
+   "accessAdjustment": 1.0,
+   "subscores": [
+    {
+     "key": "demand",
+     "label": "Demand",
+     "weight": 0.45,
+     "value": 23.455,
+     "points": 10.55475,
+     "shown": 10.5,
+     "max": 45.0
+    },
+    {
+     "key": "feasibility",
+     "label": "Feasibility",
+     "weight": 0.3,
+     "value": 42.26727909016667,
+     "points": 12.68018372705,
+     "shown": 12.7,
+     "max": 30.0
+    },
+    {
+     "key": "safety",
+     "label": "Safety",
+     "weight": 0.15,
+     "value": 90.0,
+     "points": 13.5,
+     "shown": 13.5,
+     "max": 15.0
+    },
+    {
+     "key": "equity",
+     "label": "Equity",
+     "weight": 0.1,
+     "value": 67.0,
+     "points": 6.7,
+     "shown": 6.7,
+     "max": 10.0
+    }
+   ],
+   "drivers": [
+    {
+     "key": "nearby_households_1mi_n",
+     "label": "Households within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 2.6325,
+     "shown": 2.63,
+     "max": 8.1
+    },
+    {
+     "key": "nearby_jobs_1mi_n",
+     "label": "Jobs within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 1.053,
+     "shown": 1.05,
+     "max": 8.1
+    },
+    {
+     "key": "aadt_nearest_n",
+     "label": "Daily traffic nearby",
+     "subscore": "demand",
+     "weight": 0.0585,
+     "inverted": false,
+     "points": 0.8872499999999997,
+     "shown": 0.88,
+     "max": 5.8500000000000005
+    },
+    {
+     "key": "amenities_count_0_5mi_n",
+     "label": "Amenities within half a mile",
+     "subscore": "demand",
+     "weight": 0.0495,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.95
+    },
+    {
+     "key": "parking_spaces_n",
+     "label": "Parking spaces",
+     "subscore": "demand",
+     "weight": 0.045,
+     "inverted": false,
+     "points": 0.1379999999999997,
+     "shown": 0.13,
+     "max": 4.5
+    },
+    {
+     "key": "hours_open_n",
+     "label": "Hours open",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 1.2,
+     "shown": 1.2,
+     "max": 3.6
+    },
+    {
+     "key": "avg_dwell_min_n",
+     "label": "Visit length",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": false,
+     "points": 0.6300000000000001,
+     "shown": 0.63,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "ev_share_local_n",
+     "label": "Local EV share",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 0.864,
+     "shown": 0.86,
+     "max": 3.6
+    },
+    {
+     "key": "existing_ports_total_n",
+     "label": "Existing chargers nearby",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": true,
+     "points": 3.1500000000000004,
+     "shown": 3.15,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "spare_capacity_kw_n",
+     "label": "Spare electrical capacity",
+     "subscore": "feasibility",
+     "weight": 0.105,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 10.5
+    },
+    {
+     "key": "distance_to_service_ft_n",
+     "label": "Distance to electrical service",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 5.69553805775,
+     "shown": 5.69,
+     "max": 7.5
+    },
+    {
+     "key": "install_cost_est_usd_n",
+     "label": "Estimated install cost",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 3.7838582677200003,
+     "shown": 3.78,
+     "max": 7.5
+    },
+    {
+     "key": "trenching_ft_n",
+     "label": "Trenching needed",
+     "subscore": "feasibility",
+     "weight": 0.045,
+     "inverted": true,
+     "points": 3.2007874015799995,
+     "shown": 3.2,
+     "max": 4.5
+    },
+    {
+     "key": "ada_layout_possible",
+     "label": "ADA layout possible",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "fire_access_ok",
+     "label": "Fire access adequate",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "garage_enclosed",
+     "label": "Enclosed garage",
+     "subscore": "safety",
+     "weight": 0.0225,
+     "inverted": true,
+     "points": 2.25,
+     "shown": 2.25,
+     "max": 2.25
+    },
+    {
+     "key": "emergency_disconnect_visible",
+     "label": "Emergency disconnect visible",
+     "subscore": "safety",
+     "weight": 0.015,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 1.5
+    },
+    {
+     "key": "stormwater_risk",
+     "label": "Stormwater risk",
+     "subscore": "safety",
+     "weight": 0.0075,
+     "inverted": true,
+     "points": 0.75,
+     "shown": 0.75,
+     "max": 0.75
+    },
+    {
+     "key": "equity_gap_index_n",
+     "label": "Equity need",
+     "subscore": "equity",
+     "weight": 0.1,
+     "inverted": false,
+     "points": 6.7,
+     "shown": 6.7,
+     "max": 10.0
+    }
+   ],
+   "stability": {
+    "pFirst": 0.017,
+    "pTop3": 0.837,
+    "rankLow": 2,
+    "rankMedian": 3,
+    "rankHigh": 4
+   },
+   "weightCases": {
+    "best": 2,
+    "worst": 4
+   },
+   "inputRange": {
+    "capacity": {
+     "low": 43.4349,
+     "high": 53.9349,
+     "bestRank": 1,
+     "worstRank": 5,
+     "drivers": [
+      "spare_capacity_kw_n"
+     ]
+    },
+    "unconfirmed": {
+     "low": 0.0,
+     "high": 100.0,
+     "bestRank": 1,
+     "worstRank": 6,
+     "drivers": [
+      "nearby_households_1mi_n",
+      "nearby_jobs_1mi_n",
+      "aadt_nearest_n",
+      "amenities_count_0_5mi_n",
+      "parking_spaces_n",
+      "hours_open_n",
+      "avg_dwell_min_n",
+      "ev_share_local_n",
+      "existing_ports_total_n",
+      "spare_capacity_kw_n",
+      "distance_to_service_ft_n",
+      "install_cost_est_usd_n",
+      "trenching_ft_n",
+      "ada_layout_possible",
+      "fire_access_ok",
+      "garage_enclosed",
+      "emergency_disconnect_visible",
+      "stormwater_risk",
+      "equity_gap_index_n"
+     ]
+    }
+   }
+  },
+  {
+   "siteId": "EXC-05",
+   "name": "Example City Transit Garage",
+   "rank": 3,
+   "score": 42.5,
+   "total": 42.490283070874995,
+   "accessAdjustment": 0.65,
+   "subscores": [
+    {
+     "key": "demand",
+     "label": "Demand",
+     "weight": 0.45,
+     "value": 26.233,
+     "points": 11.80485,
+     "shown": 11.8,
+     "max": 45.0
+    },
+    {
+     "key": "feasibility",
+     "label": "Feasibility",
+     "weight": 0.3,
+     "value": 50.11811023624999,
+     "points": 15.035433070874996,
+     "shown": 15.0,
+     "max": 30.0
+    },
+    {
+     "key": "safety",
+     "label": "Safety",
+     "weight": 0.15,
+     "value": 85.0,
+     "points": 12.75,
+     "shown": 12.8,
+     "max": 15.0
+    },
+    {
+     "key": "equity",
+     "label": "Equity",
+     "weight": 0.1,
+     "value": 28.999999999999996,
+     "points": 2.9,
+     "shown": 2.9,
+     "max": 10.0
+    }
+   ],
+   "drivers": [
+    {
+     "key": "nearby_households_1mi_n",
+     "label": "Households within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 1.2284999999999995,
+     "shown": 1.23,
+     "max": 5.265
+    },
+    {
+     "key": "nearby_jobs_1mi_n",
+     "label": "Jobs within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 1.3030874999999997,
+     "shown": 1.31,
+     "max": 5.265
+    },
+    {
+     "key": "aadt_nearest_n",
+     "label": "Daily traffic nearby",
+     "subscore": "demand",
+     "weight": 0.0585,
+     "inverted": false,
+     "points": 1.7428125,
+     "shown": 1.74,
+     "max": 3.8025000000000007
+    },
+    {
+     "key": "amenities_count_0_5mi_n",
+     "label": "Amenities within half a mile",
+     "subscore": "demand",
+     "weight": 0.0495,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 3.2175000000000002
+    },
+    {
+     "key": "parking_spaces_n",
+     "label": "Parking spaces",
+     "subscore": "demand",
+     "weight": 0.045,
+     "inverted": false,
+     "points": 0.7799999999999998,
+     "shown": 0.78,
+     "max": 2.9250000000000003
+    },
+    {
+     "key": "hours_open_n",
+     "label": "Hours open",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 2.34,
+     "shown": 2.34,
+     "max": 2.3400000000000003
+    },
+    {
+     "key": "avg_dwell_min_n",
+     "label": "Visit length",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": false,
+     "points": 1.6380000000000001,
+     "shown": 1.64,
+     "max": 2.0475000000000003
+    },
+    {
+     "key": "ev_share_local_n",
+     "label": "Local EV share",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 0.7722,
+     "shown": 0.77,
+     "max": 2.3400000000000003
+    },
+    {
+     "key": "existing_ports_total_n",
+     "label": "Existing chargers nearby",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": true,
+     "points": 2.00025,
+     "shown": 2.0,
+     "max": 2.0475000000000003
+    },
+    {
+     "key": "spare_capacity_kw_n",
+     "label": "Spare electrical capacity",
+     "subscore": "feasibility",
+     "weight": 0.105,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 10.5
+    },
+    {
+     "key": "distance_to_service_ft_n",
+     "label": "Distance to electrical service",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 6.269685039374998,
+     "shown": 6.27,
+     "max": 7.5
+    },
+    {
+     "key": "install_cost_est_usd_n",
+     "label": "Estimated install cost",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 4.856299212599999,
+     "shown": 4.86,
+     "max": 7.5
+    },
+    {
+     "key": "trenching_ft_n",
+     "label": "Trenching needed",
+     "subscore": "feasibility",
+     "weight": 0.045,
+     "inverted": true,
+     "points": 3.909448818899999,
+     "shown": 3.91,
+     "max": 4.5
+    },
+    {
+     "key": "ada_layout_possible",
+     "label": "ADA layout possible",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "fire_access_ok",
+     "label": "Fire access adequate",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "garage_enclosed",
+     "label": "Enclosed garage",
+     "subscore": "safety",
+     "weight": 0.0225,
+     "inverted": true,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 2.25
+    },
+    {
+     "key": "emergency_disconnect_visible",
+     "label": "Emergency disconnect visible",
+     "subscore": "safety",
+     "weight": 0.015,
+     "inverted": false,
+     "points": 1.5,
+     "shown": 1.5,
+     "max": 1.5
+    },
+    {
+     "key": "stormwater_risk",
+     "label": "Stormwater risk",
+     "subscore": "safety",
+     "weight": 0.0075,
+     "inverted": true,
+     "points": 0.75,
+     "shown": 0.75,
+     "max": 0.75
+    },
+    {
+     "key": "equity_gap_index_n",
+     "label": "Equity need",
+     "subscore": "equity",
+     "weight": 0.1,
+     "inverted": false,
+     "points": 2.9,
+     "shown": 2.9,
+     "max": 10.0
+    }
+   ],
+   "stability": {
+    "pFirst": 0.0015,
+    "pTop3": 0.59,
+    "rankLow": 2,
+    "rankMedian": 3,
+    "rankHigh": 5
+   },
+   "weightCases": {
+    "best": 2,
+    "worst": 5
+   },
+   "inputRange": {
+    "capacity": {
+     "low": 42.4903,
+     "high": 52.9903,
+     "bestRank": 1,
+     "worstRank": 5,
+     "drivers": [
+      "spare_capacity_kw_n"
+     ]
+    },
+    "unconfirmed": {
+     "low": 0.0,
+     "high": 84.25,
+     "bestRank": 1,
+     "worstRank": 6,
+     "drivers": [
+      "nearby_households_1mi_n",
+      "nearby_jobs_1mi_n",
+      "aadt_nearest_n",
+      "amenities_count_0_5mi_n",
+      "parking_spaces_n",
+      "hours_open_n",
+      "avg_dwell_min_n",
+      "ev_share_local_n",
+      "existing_ports_total_n",
+      "spare_capacity_kw_n",
+      "distance_to_service_ft_n",
+      "install_cost_est_usd_n",
+      "trenching_ft_n",
+      "ada_layout_possible",
+      "fire_access_ok",
+      "garage_enclosed",
+      "emergency_disconnect_visible",
+      "stormwater_risk",
+      "equity_gap_index_n"
+     ]
+    }
+   }
+  },
+  {
+   "siteId": "EXC-03",
+   "name": "Example City Hall Annex",
+   "rank": 4,
+   "score": 42.2,
+   "total": 42.17680108019039,
+   "accessAdjustment": 1.0,
+   "subscores": [
+    {
+     "key": "demand",
+     "label": "Demand",
+     "weight": 0.45,
+     "value": 41.63858974358974,
+     "points": 18.737365384615384,
+     "shown": 18.7,
+     "max": 45.0
+    },
+    {
+     "key": "feasibility",
+     "label": "Feasibility",
+     "weight": 0.3,
+     "value": 18.964785651916667,
+     "points": 5.689435695575,
+     "shown": 5.7,
+     "max": 30.0
+    },
+    {
+     "key": "safety",
+     "label": "Safety",
+     "weight": 0.15,
+     "value": 95.0,
+     "points": 14.25,
+     "shown": 14.3,
+     "max": 15.0
+    },
+    {
+     "key": "equity",
+     "label": "Equity",
+     "weight": 0.1,
+     "value": 35.0,
+     "points": 3.5,
+     "shown": 3.5,
+     "max": 10.0
+    }
+   ],
+   "drivers": [
+    {
+     "key": "nearby_households_1mi_n",
+     "label": "Households within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 3.442499999999999,
+     "shown": 3.44,
+     "max": 8.1
+    },
+    {
+     "key": "nearby_jobs_1mi_n",
+     "label": "Jobs within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 4.353749999999999,
+     "shown": 4.36,
+     "max": 8.1
+    },
+    {
+     "key": "aadt_nearest_n",
+     "label": "Daily traffic nearby",
+     "subscore": "demand",
+     "weight": 0.0585,
+     "inverted": false,
+     "points": 3.0224999999999995,
+     "shown": 3.02,
+     "max": 5.8500000000000005
+    },
+    {
+     "key": "amenities_count_0_5mi_n",
+     "label": "Amenities within half a mile",
+     "subscore": "demand",
+     "weight": 0.0495,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.95
+    },
+    {
+     "key": "parking_spaces_n",
+     "label": "Parking spaces",
+     "subscore": "demand",
+     "weight": 0.045,
+     "inverted": false,
+     "points": 0.63,
+     "shown": 0.63,
+     "max": 4.5
+    },
+    {
+     "key": "hours_open_n",
+     "label": "Hours open",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 1.3499999999999999,
+     "shown": 1.35,
+     "max": 3.6
+    },
+    {
+     "key": "avg_dwell_min_n",
+     "label": "Visit length",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": false,
+     "points": 1.8899999999999997,
+     "shown": 1.89,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "ev_share_local_n",
+     "label": "Local EV share",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 1.0439999999999998,
+     "shown": 1.05,
+     "max": 3.6
+    },
+    {
+     "key": "existing_ports_total_n",
+     "label": "Existing chargers nearby",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": true,
+     "points": 3.0046153846153842,
+     "shown": 3.01,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "spare_capacity_kw_n",
+     "label": "Spare electrical capacity",
+     "subscore": "feasibility",
+     "weight": 0.105,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 10.5
+    },
+    {
+     "key": "distance_to_service_ft_n",
+     "label": "Distance to electrical service",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 2.988845144375,
+     "shown": 2.99,
+     "max": 7.5
+    },
+    {
+     "key": "install_cost_est_usd_n",
+     "label": "Estimated install cost",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 1.03523622048,
+     "shown": 1.04,
+     "max": 7.5
+    },
+    {
+     "key": "trenching_ft_n",
+     "label": "Trenching needed",
+     "subscore": "feasibility",
+     "weight": 0.045,
+     "inverted": true,
+     "points": 1.6653543307199998,
+     "shown": 1.67,
+     "max": 4.5
+    },
+    {
+     "key": "ada_layout_possible",
+     "label": "ADA layout possible",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "fire_access_ok",
+     "label": "Fire access adequate",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "garage_enclosed",
+     "label": "Enclosed garage",
+     "subscore": "safety",
+     "weight": 0.0225,
+     "inverted": true,
+     "points": 2.25,
+     "shown": 2.25,
+     "max": 2.25
+    },
+    {
+     "key": "emergency_disconnect_visible",
+     "label": "Emergency disconnect visible",
+     "subscore": "safety",
+     "weight": 0.015,
+     "inverted": false,
+     "points": 1.5,
+     "shown": 1.5,
+     "max": 1.5
+    },
+    {
+     "key": "stormwater_risk",
+     "label": "Stormwater risk",
+     "subscore": "safety",
+     "weight": 0.0075,
+     "inverted": true,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 0.75
+    },
+    {
+     "key": "equity_gap_index_n",
+     "label": "Equity need",
+     "subscore": "equity",
+     "weight": 0.1,
+     "inverted": false,
+     "points": 3.5,
+     "shown": 3.5,
+     "max": 10.0
+    }
+   ],
+   "stability": {
+    "pFirst": 0.0,
+    "pTop3": 0.4855,
+    "rankLow": 2,
+    "rankMedian": 4,
+    "rankHigh": 5
+   },
+   "weightCases": {
+    "best": 2,
+    "worst": 4
+   },
+   "inputRange": {
+    "capacity": {
+     "low": 42.1768,
+     "high": 52.6768,
+     "bestRank": 1,
+     "worstRank": 5,
+     "drivers": [
+      "spare_capacity_kw_n"
+     ]
+    },
+    "unconfirmed": {
+     "low": 0.0,
+     "high": 100.0,
+     "bestRank": 1,
+     "worstRank": 6,
+     "drivers": [
+      "nearby_households_1mi_n",
+      "nearby_jobs_1mi_n",
+      "aadt_nearest_n",
+      "amenities_count_0_5mi_n",
+      "parking_spaces_n",
+      "hours_open_n",
+      "avg_dwell_min_n",
+      "ev_share_local_n",
+      "existing_ports_total_n",
+      "spare_capacity_kw_n",
+      "distance_to_service_ft_n",
+      "install_cost_est_usd_n",
+      "trenching_ft_n",
+      "ada_layout_possible",
+      "fire_access_ok",
+      "garage_enclosed",
+      "emergency_disconnect_visible",
+      "stormwater_risk",
+      "equity_gap_index_n"
+     ]
+    }
+   }
+  },
+  {
+   "siteId": "EXC-04",
+   "name": "Example City Recreation Center",
+   "rank": 5,
+   "score": 41.1,
+   "total": 41.05569069253846,
+   "accessAdjustment": 1.0,
+   "subscores": [
+    {
+     "key": "demand",
+     "label": "Demand",
+     "weight": 0.45,
+     "value": 29.71897435897436,
+     "points": 13.373538461538462,
+     "shown": 13.4,
+     "max": 45.0
+    },
+    {
+     "key": "feasibility",
+     "label": "Feasibility",
+     "weight": 0.3,
+     "value": 27.940507436666667,
+     "points": 8.382152231,
+     "shown": 8.4,
+     "max": 30.0
+    },
+    {
+     "key": "safety",
+     "label": "Safety",
+     "weight": 0.15,
+     "value": 90.0,
+     "points": 13.5,
+     "shown": 13.5,
+     "max": 15.0
+    },
+    {
+     "key": "equity",
+     "label": "Equity",
+     "weight": 0.1,
+     "value": 57.99999999999999,
+     "points": 5.8,
+     "shown": 5.8,
+     "max": 10.0
+    }
+   ],
+   "drivers": [
+    {
+     "key": "nearby_households_1mi_n",
+     "label": "Households within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 4.1850000000000005,
+     "shown": 4.19,
+     "max": 8.1
+    },
+    {
+     "key": "nearby_jobs_1mi_n",
+     "label": "Jobs within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 0.972,
+     "shown": 0.98,
+     "max": 8.1
+    },
+    {
+     "key": "aadt_nearest_n",
+     "label": "Daily traffic nearby",
+     "subscore": "demand",
+     "weight": 0.0585,
+     "inverted": false,
+     "points": 1.2479999999999998,
+     "shown": 1.25,
+     "max": 5.8500000000000005
+    },
+    {
+     "key": "amenities_count_0_5mi_n",
+     "label": "Amenities within half a mile",
+     "subscore": "demand",
+     "weight": 0.0495,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.95
+    },
+    {
+     "key": "parking_spaces_n",
+     "label": "Parking spaces",
+     "subscore": "demand",
+     "weight": 0.045,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.5
+    },
+    {
+     "key": "hours_open_n",
+     "label": "Hours open",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 1.95,
+     "shown": 1.95,
+     "max": 3.6
+    },
+    {
+     "key": "avg_dwell_min_n",
+     "label": "Visit length",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": false,
+     "points": 0.9450000000000001,
+     "shown": 0.95,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "ev_share_local_n",
+     "label": "Local EV share",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 0.9719999999999996,
+     "shown": 0.98,
+     "max": 3.6
+    },
+    {
+     "key": "existing_ports_total_n",
+     "label": "Existing chargers nearby",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": true,
+     "points": 3.1015384615384622,
+     "shown": 3.11,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "spare_capacity_kw_n",
+     "label": "Spare electrical capacity",
+     "subscore": "feasibility",
+     "weight": 0.105,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 10.5
+    },
+    {
+     "key": "distance_to_service_ft_n",
+     "label": "Distance to electrical service",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 4.219160104999999,
+     "shown": 4.22,
+     "max": 7.5
+    },
+    {
+     "key": "install_cost_est_usd_n",
+     "label": "Estimated install cost",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 2.0251968504000004,
+     "shown": 2.03,
+     "max": 7.5
+    },
+    {
+     "key": "trenching_ft_n",
+     "label": "Trenching needed",
+     "subscore": "feasibility",
+     "weight": 0.045,
+     "inverted": true,
+     "points": 2.1377952756,
+     "shown": 2.14,
+     "max": 4.5
+    },
+    {
+     "key": "ada_layout_possible",
+     "label": "ADA layout possible",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "fire_access_ok",
+     "label": "Fire access adequate",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "garage_enclosed",
+     "label": "Enclosed garage",
+     "subscore": "safety",
+     "weight": 0.0225,
+     "inverted": true,
+     "points": 2.25,
+     "shown": 2.25,
+     "max": 2.25
+    },
+    {
+     "key": "emergency_disconnect_visible",
+     "label": "Emergency disconnect visible",
+     "subscore": "safety",
+     "weight": 0.015,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 1.5
+    },
+    {
+     "key": "stormwater_risk",
+     "label": "Stormwater risk",
+     "subscore": "safety",
+     "weight": 0.0075,
+     "inverted": true,
+     "points": 0.75,
+     "shown": 0.75,
+     "max": 0.75
+    },
+    {
+     "key": "equity_gap_index_n",
+     "label": "Equity need",
+     "subscore": "equity",
+     "weight": 0.1,
+     "inverted": false,
+     "points": 5.8,
+     "shown": 5.8,
+     "max": 10.0
+    }
+   ],
+   "stability": {
+    "pFirst": 0.0,
+    "pTop3": 0.0875,
+    "rankLow": 3,
+    "rankMedian": 5,
+    "rankHigh": 5
+   },
+   "weightCases": {
+    "best": 3,
+    "worst": 5
+   },
+   "inputRange": {
+    "capacity": {
+     "low": 41.0557,
+     "high": 51.5557,
+     "bestRank": 1,
+     "worstRank": 5,
+     "drivers": [
+      "spare_capacity_kw_n"
+     ]
+    },
+    "unconfirmed": {
+     "low": 0.0,
+     "high": 100.0,
+     "bestRank": 1,
+     "worstRank": 6,
+     "drivers": [
+      "nearby_households_1mi_n",
+      "nearby_jobs_1mi_n",
+      "aadt_nearest_n",
+      "amenities_count_0_5mi_n",
+      "parking_spaces_n",
+      "hours_open_n",
+      "avg_dwell_min_n",
+      "ev_share_local_n",
+      "existing_ports_total_n",
+      "spare_capacity_kw_n",
+      "distance_to_service_ft_n",
+      "install_cost_est_usd_n",
+      "trenching_ft_n",
+      "ada_layout_possible",
+      "fire_access_ok",
+      "garage_enclosed",
+      "emergency_disconnect_visible",
+      "stormwater_risk",
+      "equity_gap_index_n"
+     ]
+    }
+   }
+  },
+  {
+   "siteId": "EXC-06",
+   "name": "Example City Riverside Park",
+   "rank": 6,
+   "score": 26.6,
+   "total": 26.64151923076923,
+   "accessAdjustment": 1.0,
+   "subscores": [
+    {
+     "key": "demand",
+     "label": "Demand",
+     "weight": 0.45,
+     "value": 26.314487179487177,
+     "points": 11.84151923076923,
+     "shown": 11.8,
+     "max": 45.0
+    },
+    {
+     "key": "feasibility",
+     "label": "Feasibility",
+     "weight": 0.3,
+     "value": 0.0,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 30.0
+    },
+    {
+     "key": "safety",
+     "label": "Safety",
+     "weight": 0.15,
+     "value": 50.0,
+     "points": 7.5,
+     "shown": 7.5,
+     "max": 15.0
+    },
+    {
+     "key": "equity",
+     "label": "Equity",
+     "weight": 0.1,
+     "value": 73.0,
+     "points": 7.300000000000001,
+     "shown": 7.3,
+     "max": 10.0
+    }
+   ],
+   "drivers": [
+    {
+     "key": "nearby_households_1mi_n",
+     "label": "Households within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 2.969999999999999,
+     "shown": 2.96,
+     "max": 8.1
+    },
+    {
+     "key": "nearby_jobs_1mi_n",
+     "label": "Jobs within 1 mile",
+     "subscore": "demand",
+     "weight": 0.081,
+     "inverted": false,
+     "points": 0.6277499999999998,
+     "shown": 0.62,
+     "max": 8.1
+    },
+    {
+     "key": "aadt_nearest_n",
+     "label": "Daily traffic nearby",
+     "subscore": "demand",
+     "weight": 0.0585,
+     "inverted": false,
+     "points": 0.7409999999999995,
+     "shown": 0.74,
+     "max": 5.8500000000000005
+    },
+    {
+     "key": "amenities_count_0_5mi_n",
+     "label": "Amenities within half a mile",
+     "subscore": "demand",
+     "weight": 0.0495,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.95
+    },
+    {
+     "key": "parking_spaces_n",
+     "label": "Parking spaces",
+     "subscore": "demand",
+     "weight": 0.045,
+     "inverted": false,
+     "points": 0.22499999999999998,
+     "shown": 0.22,
+     "max": 4.5
+    },
+    {
+     "key": "hours_open_n",
+     "label": "Hours open",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 2.0999999999999996,
+     "shown": 2.09,
+     "max": 3.6
+    },
+    {
+     "key": "avg_dwell_min_n",
+     "label": "Visit length",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": false,
+     "points": 1.26,
+     "shown": 1.26,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "ev_share_local_n",
+     "label": "Local EV share",
+     "subscore": "demand",
+     "weight": 0.036,
+     "inverted": false,
+     "points": 0.7919999999999995,
+     "shown": 0.79,
+     "max": 3.6
+    },
+    {
+     "key": "existing_ports_total_n",
+     "label": "Existing chargers nearby",
+     "subscore": "demand",
+     "weight": 0.0315,
+     "inverted": true,
+     "points": 3.1257692307692313,
+     "shown": 3.12,
+     "max": 3.1500000000000004
+    },
+    {
+     "key": "spare_capacity_kw_n",
+     "label": "Spare electrical capacity",
+     "subscore": "feasibility",
+     "weight": 0.105,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 10.5
+    },
+    {
+     "key": "distance_to_service_ft_n",
+     "label": "Distance to electrical service",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 7.5
+    },
+    {
+     "key": "install_cost_est_usd_n",
+     "label": "Estimated install cost",
+     "subscore": "feasibility",
+     "weight": 0.075,
+     "inverted": true,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 7.5
+    },
+    {
+     "key": "trenching_ft_n",
+     "label": "Trenching needed",
+     "subscore": "feasibility",
+     "weight": 0.045,
+     "inverted": true,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 4.5
+    },
+    {
+     "key": "ada_layout_possible",
+     "label": "ADA layout possible",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 5.25
+    },
+    {
+     "key": "fire_access_ok",
+     "label": "Fire access adequate",
+     "subscore": "safety",
+     "weight": 0.0525,
+     "inverted": false,
+     "points": 5.25,
+     "shown": 5.25,
+     "max": 5.25
+    },
+    {
+     "key": "garage_enclosed",
+     "label": "Enclosed garage",
+     "subscore": "safety",
+     "weight": 0.0225,
+     "inverted": true,
+     "points": 2.25,
+     "shown": 2.25,
+     "max": 2.25
+    },
+    {
+     "key": "emergency_disconnect_visible",
+     "label": "Emergency disconnect visible",
+     "subscore": "safety",
+     "weight": 0.015,
+     "inverted": false,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 1.5
+    },
+    {
+     "key": "stormwater_risk",
+     "label": "Stormwater risk",
+     "subscore": "safety",
+     "weight": 0.0075,
+     "inverted": true,
+     "points": 0.0,
+     "shown": 0.0,
+     "max": 0.75
+    },
+    {
+     "key": "equity_gap_index_n",
+     "label": "Equity need",
+     "subscore": "equity",
+     "weight": 0.1,
+     "inverted": false,
+     "points": 7.300000000000002,
+     "shown": 7.3,
+     "max": 10.0
+    }
+   ],
+   "stability": {
+    "pFirst": 0.0,
+    "pTop3": 0.0,
+    "rankLow": 6,
+    "rankMedian": 6,
+    "rankHigh": 6
+   },
+   "weightCases": {
+    "best": 6,
+    "worst": 6
+   },
+   "inputRange": {
+    "capacity": {
+     "low": 26.6415,
+     "high": 37.1415,
+     "bestRank": 6,
+     "worstRank": 6,
+     "drivers": [
+      "spare_capacity_kw_n"
+     ]
+    },
+    "unconfirmed": {
+     "low": 0.0,
+     "high": 100.0,
+     "bestRank": 1,
+     "worstRank": 6,
+     "drivers": [
+      "nearby_households_1mi_n",
+      "nearby_jobs_1mi_n",
+      "aadt_nearest_n",
+      "amenities_count_0_5mi_n",
+      "parking_spaces_n",
+      "hours_open_n",
+      "avg_dwell_min_n",
+      "ev_share_local_n",
+      "existing_ports_total_n",
+      "spare_capacity_kw_n",
+      "distance_to_service_ft_n",
+      "install_cost_est_usd_n",
+      "trenching_ft_n",
+      "ada_layout_possible",
+      "fire_access_ok",
+      "garage_enclosed",
+      "emergency_disconnect_visible",
+      "stormwater_risk",
+      "equity_gap_index_n"
+     ]
+    }
+   }
+  }
+ ],
+ "sensitivity": {
+  "step": 5.0,
+  "top": "EXC-01",
+  "cases": [
+   {
+    "subscore": "demand",
+    "label": "Demand",
+    "change": 5.0,
+    "weights": {
+     "demand": 0.5,
+     "feasibility": 0.272727,
+     "safety": 0.136364,
+     "equity": 0.090909
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 46.9
+     },
+     {
+      "siteId": "EXC-03",
+      "score": 42.1
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 41.6
+     }
+    ],
+    "rankChanges": [
+     {
+      "siteId": "EXC-02",
+      "from": 2,
+      "to": 3
+     },
+     {
+      "siteId": "EXC-05",
+      "from": 3,
+      "to": 4
+     },
+     {
+      "siteId": "EXC-03",
+      "from": 4,
+      "to": 2
+     }
+    ]
+   },
+   {
+    "subscore": "demand",
+    "label": "Demand",
+    "change": -5.0,
+    "weights": {
+     "demand": 0.4,
+     "feasibility": 0.327273,
+     "safety": 0.163636,
+     "equity": 0.109091
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 48.4
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 45.3
+     },
+     {
+      "siteId": "EXC-05",
+      "score": 44.0
+     }
+    ],
+    "rankChanges": []
+   },
+   {
+    "subscore": "feasibility",
+    "label": "Feasibility",
+    "change": 5.0,
+    "weights": {
+     "demand": 0.417857,
+     "feasibility": 0.35,
+     "safety": 0.139286,
+     "equity": 0.092857
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 46.8
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 43.4
+     },
+     {
+      "siteId": "EXC-05",
+      "score": 43.0
+     }
+    ],
+    "rankChanges": []
+   },
+   {
+    "subscore": "feasibility",
+    "label": "Feasibility",
+    "change": -5.0,
+    "weights": {
+     "demand": 0.482143,
+     "feasibility": 0.25,
+     "safety": 0.160714,
+     "equity": 0.107143
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 48.5
+     },
+     {
+      "siteId": "EXC-03",
+      "score": 43.8
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 43.5
+     }
+    ],
+    "rankChanges": [
+     {
+      "siteId": "EXC-02",
+      "from": 2,
+      "to": 3
+     },
+     {
+      "siteId": "EXC-05",
+      "from": 3,
+      "to": 5
+     },
+     {
+      "siteId": "EXC-03",
+      "from": 4,
+      "to": 2
+     },
+     {
+      "siteId": "EXC-04",
+      "from": 5,
+      "to": 4
+     }
+    ]
+   },
+   {
+    "subscore": "safety",
+    "label": "Safety",
+    "change": 5.0,
+    "weights": {
+     "demand": 0.423529,
+     "feasibility": 0.282353,
+     "safety": 0.2,
+     "equity": 0.094118
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 50.8
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 46.2
+     },
+     {
+      "siteId": "EXC-03",
+      "score": 45.3
+     }
+    ],
+    "rankChanges": [
+     {
+      "siteId": "EXC-05",
+      "from": 3,
+      "to": 4
+     },
+     {
+      "siteId": "EXC-03",
+      "from": 4,
+      "to": 3
+     }
+    ]
+   },
+   {
+    "subscore": "safety",
+    "label": "Safety",
+    "change": -5.0,
+    "weights": {
+     "demand": 0.476471,
+     "feasibility": 0.317647,
+     "safety": 0.1,
+     "equity": 0.105882
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 44.6
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 40.7
+     },
+     {
+      "siteId": "EXC-05",
+      "score": 40.0
+     }
+    ],
+    "rankChanges": []
+   },
+   {
+    "subscore": "equity",
+    "label": "Equity",
+    "change": 5.0,
+    "weights": {
+     "demand": 0.425,
+     "feasibility": 0.283333,
+     "safety": 0.141667,
+     "equity": 0.15
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 47.4
+     },
+     {
+      "siteId": "EXC-02",
+      "score": 44.7
+     },
+     {
+      "siteId": "EXC-04",
+      "score": 42.0
+     }
+    ],
+    "rankChanges": [
+     {
+      "siteId": "EXC-05",
+      "from": 3,
+      "to": 5
+     },
+     {
+      "siteId": "EXC-04",
+      "from": 5,
+      "to": 3
+     }
+    ]
+   },
+   {
+    "subscore": "equity",
+    "label": "Equity",
+    "change": -5.0,
+    "weights": {
+     "demand": 0.475,
+     "feasibility": 0.316667,
+     "safety": 0.158333,
+     "equity": 0.05
+    },
+    "top": "EXC-01",
+    "topChanged": false,
+    "leaders": [
+     {
+      "siteId": "EXC-01",
+      "score": 48.0
+     },
+     {
+      "siteId": "EXC-05",
+      "score": 43.2
+     },
+     {
+      "siteId": "EXC-03",
+      "score": 42.6
+     }
+    ],
+    "rankChanges": [
+     {
+      "siteId": "EXC-02",
+      "from": 2,
+      "to": 4
+     },
+     {
+      "siteId": "EXC-05",
+      "from": 3,
+      "to": 2
+     },
+     {
+      "siteId": "EXC-03",
+      "from": 4,
+      "to": 3
+     }
+    ]
+   }
+  ],
+  "flips": [
+   {
+    "subscore": "equity",
+    "label": "Equity",
+    "direction": "up",
+    "from": 10.0,
+    "to": 23.0534,
+    "change": 13.0534,
+    "newTop": "EXC-02"
+   },
+   {
+    "subscore": "feasibility",
+    "label": "Feasibility",
+    "direction": "up",
+    "from": 30.0,
+    "to": 48.5219,
+    "change": 18.5219,
+    "newTop": "EXC-05"
+   },
+   {
+    "subscore": "demand",
+    "label": "Demand",
+    "direction": "down",
+    "from": 45.0,
+    "to": 25.1993,
+    "change": -19.8007,
+    "newTop": "EXC-02"
+   },
+   {
+    "subscore": "demand",
+    "label": "Demand",
+    "direction": "up",
+    "from": 45.0,
+    "to": 84.478,
+    "change": 39.478,
+    "newTop": "EXC-03"
+   }
+  ],
+  "smallestFlip": {
+   "subscore": "equity",
+   "label": "Equity",
+   "direction": "up",
+   "from": 10.0,
+   "to": 23.0534,
+   "change": 13.0534,
+   "newTop": "EXC-02"
+  },
+  "sentence": "Example City Central Library stays first unless the Equity weight rises from 10 to about 23.1 points (a change of 13.1, with the other weights scaled to match); then Example City North Branch Library moves to first. No smaller change to a single weight changes the top site."
+ },
+ "rankStability": {
+  "draws": 2000,
+  "concentration": 50.0,
+  "seed": 20261018,
+  "weightSpread": [
+   {
+    "key": "demand",
+    "label": "Demand",
+    "weight": 0.45,
+    "low": 0.344206,
+    "high": 0.567377
+   },
+   {
+    "key": "feasibility",
+    "label": "Feasibility",
+    "weight": 0.3,
+    "low": 0.200069,
+    "high": 0.405561
+   },
+   {
+    "key": "safety",
+    "label": "Safety",
+    "weight": 0.15,
+    "low": 0.075378,
+    "high": 0.237693
+   },
+   {
+    "key": "equity",
+    "label": "Equity",
+    "weight": 0.1,
+    "low": 0.041882,
+    "high": 0.179075
+   }
+  ]
+ },
+ "inputUncertainty": {
+  "done": true,
+  "threshold": 50.0,
+  "scenarios": [
+   {
+    "key": "capacity",
+    "label": "Electrical capacity only",
+    "couldBeFirst": [
+     "EXC-01",
+     "EXC-02",
+     "EXC-05",
+     "EXC-03",
+     "EXC-04"
+    ]
+   },
+   {
+    "key": "unconfirmed",
+    "label": "Every input not yet confirmed",
+    "couldBeFirst": [
+     "EXC-01",
+     "EXC-02",
+     "EXC-05",
+     "EXC-03",
+     "EXC-04",
+     "EXC-06"
+    ]
+   }
+  ],
+  "missingConfidence": []
+ }
+}

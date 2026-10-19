@@ -5,7 +5,7 @@ repository is, so `ROOT = Path(__file__).parents[2]` in the engine resolves insi
 worker unpacks it to /work/pkgroot. Nothing else goes in.
 
 Which data files a browser run reads is measured, not assumed: the script runs browser_api
-natively (propose, check, accept, run, explain, output_files) on Example City and on the
+natively (propose, check, accept, run, explain, stability, output_files) on Example City and on the
 12-site synthetic cohort with an audit hook recording every file opened, and refuses to build
 if that set is not exactly ALLOWED_DATA. Real study inputs must never reach the bundle
 (DEC-016), so anything under PRIVATE_PREFIXES fails the build even if it is allowlisted.
@@ -71,6 +71,7 @@ for table in tables:
     run = json.loads(api.run(json.dumps({"asOf": "2026-10-18"})))
     for site in run["sites"]:
         api.explain(site["siteId"])
+    api.stability("{}")
     api.output_files()
 print(json.dumps(sorted(opened)))
 """

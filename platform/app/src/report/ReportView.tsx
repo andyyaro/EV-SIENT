@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { useSession } from '../state/store';
 import { useAllExplains, useOutputFiles } from '../results/data';
+import { useStability } from '../results/stability';
 import { ReportDocument } from './ReportDocument';
 import { buildModel, fileName, type ReportModel } from './reportModel';
 import { outputsZip, reportDocx, reportHtml, reportPdf, saveBlob, sitesCsv, workbook } from './exports';
@@ -30,15 +31,18 @@ export function ReportView() {
   const go = useSession((s) => s.go);
   const explains = useAllExplains(run);
   const files = useOutputFiles(run);
+  const stability = useStability(run);
   const paper = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<Job | null>(null);
   const [status, setStatus] = useState('');
 
   const info = boot.status === 'ready' ? boot.info : null;
   const model: ReportModel | null = useMemo(() => {
-    if (!run || explains.status !== 'ready' || files.status !== 'ready') return null;
-    return buildModel({ run, explains: explains.value, files: files.value, info, details, fields, table, carried, index });
-  }, [run, explains, files, info, details, fields, table, carried, index]);
+    if (!run || explains.status !== 'ready' || files.status !== 'ready' || stability.status === 'loading') return null;
+    // The stability check is part of the report when the engine gives it; without it the report still builds.
+    const stab = stability.status === 'ready' ? stability.value : null;
+    return buildModel({ run, explains: explains.value, files: files.value, info, details, fields, table, carried, index, stability: stab });
+  }, [run, explains, files, info, details, fields, table, carried, index, stability]);
 
   if (!run) {
     return (

@@ -15,7 +15,7 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | Check | See which rows are ready, which have missing values, and anything that must be fixed | `check` |
 | Public Data | Optional: look up public values for fields the file lacks, then use or skip each field (DEC-025) | `fill` |
 | Run | One button | `accept`, then `run` |
-| Results | Ranked sites, a map, why each site scores what it does, compare up to three; the file's other columns as Your Columns (DEC-026) | `explain`; `provenance` resolves one number's lineage when it is opened |
+| Results | Ranked sites, a map, why each site scores what it does, its score breakdown and how stable its rank is, compare up to three; the file's other columns as Your Columns (DEC-026) | `explain`; `stability` (docs/methodology/rank_stability.md); `provenance` resolves one number's lineage when it is opened |
 | Report | Download the report (HTML, tagged PDF, Word), the tables and the project file | `output_files` |
 
 ## Layout

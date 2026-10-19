@@ -11,7 +11,7 @@ import type {
   AcceptDetails, AcceptResult, ColumnChange, ColumnsResult, ExploreOptions, ExploreResult,
   IndexResult, IndexSpec, IndexValidation, BootProgress, CheckResult, EngineClient, Explanation, FieldCatalog,
   FillRequest, OutputFiles, Proposal, ProvenanceRecord, ProvenanceRequest, RemapRequest, RunOptions,
-  RunResult, RuntimeInfo, TableInput,
+  RunResult, RuntimeInfo, StabilityOptions, StabilityResult, TableInput,
 } from './protocol';
 import { EngineError } from './protocol';
 import type { EngineWorkerApi } from './engine.worker';
@@ -119,6 +119,7 @@ export function createWorkerEngine(): EngineClient {
     accept: (details: AcceptDetails) => call<AcceptResult>(true, (api) => api.accept(JSON.stringify(details ?? {}))),
     run: (options?: RunOptions) => call<RunResult>(true, (api) => api.run(JSON.stringify(options ?? {}))),
     explain: (siteId: string) => call<Explanation>(true, (api) => api.explain(siteId)),
+    stability: (options?: StabilityOptions) => call<StabilityResult>(true, (api) => api.stability(JSON.stringify(options ?? {}))),
     provenance: (cell: ProvenanceRequest) => call<ProvenanceRecord>(true, (api) => api.provenance(JSON.stringify(cell))),
     outputFiles: () => call<OutputFiles>(true, (api) => api.output_files()),
     async columns() {
