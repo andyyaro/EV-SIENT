@@ -109,7 +109,7 @@ def main():
         'sites': sites,
     }
     text = json.dumps(doc, indent=1, ensure_ascii=False) + '\n'
-    if '—' in text:
+    if '\u2014' in text:
         raise SystemExit('the reference text carries an em dash; the public site does not allow them')
     if CHECK:
         current = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''

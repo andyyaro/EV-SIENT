@@ -324,3 +324,4 @@
   .m-check__num, .m-chance__bar { border: 1.5px solid CanvasText; }
   .m-chance__fill { background: CanvasText; }
 }
+.m-scen-official__text { margin-top: 6px; max-width: 64ch; }

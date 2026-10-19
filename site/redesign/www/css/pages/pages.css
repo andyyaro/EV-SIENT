@@ -88,6 +88,7 @@
 .about-credit { display: flex; gap: 14px; align-items: center; }
 .about-credit__thumb { flex: none; width: 56px; height: 56px; border-radius: var(--radius-thumbnail); object-fit: cover; background: var(--fill-tertiary); }
 .correction { display: grid; gap: 12px; margin-top: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.correction__note { margin-top: 14px; }
 .correction__item { border-radius: calc(var(--radius-group) - 10px); padding: 14px 16px; background: var(--fill-quaternary); }
 .correction__label { font: 600 13px/18px var(--font-sans); letter-spacing: -0.08px; color: var(--label-secondary); }
 .correction__value { margin-top: 4px; font: 600 17px/22px var(--font-sans); letter-spacing: -0.43px; color: var(--label-primary); }

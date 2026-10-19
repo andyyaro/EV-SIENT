@@ -324,7 +324,7 @@
             </div>
             <div class="card m-port-kind">
               <span class="m-key m-key--future" aria-hidden="true"></span>
-              <p class="m-port-kind__value num" data-k="pathway">48</p>
+              <p class="m-port-kind__value num" data-k="pathway">47</p>
               <h3 class="m-port-kind__name">Future-ready ports</h3>
               <p class="m-port-kind__text">The capacity a site should be prepared to accommodate if demand grows, such as conduit, panel space and spatial planning.</p>
             </div>
@@ -344,9 +344,10 @@
             </div>
           </figure>
 
-          <h3 class="m-sub">Three things to know about the published plan</h3>
+          <h3 class="m-sub">Four things to know about the published plan</h3>
           <ul class="m-notes" role="list">
-            <li id="m-basis"><strong>It follows the <code>legacy_v2</code> ranking.</strong> The port plan uses the study's accepted <code>legacy_v2</code> ranking rather than the canonical <code>milestone2_v3</code> ranking shown on the results pages, so its totals of 25 install-now and 48 future-ready ports reconcile with what was presented. On the canonical ranking, the same rules give 25 and 47.</li>
+            <li id="m-basis"><strong>It follows the official <code>milestone2_v3</code> ranking.</strong> Its totals of 25 install-now and 47 future-ready ports are the official plan, the same ranking the results pages show.</li>
+            <li id="m-why"><strong>Why the total is 47, not the earlier 48.</strong> The earlier result (legacy_v2) sized ports on the earlier ranking and had 48 future-ready ports. On the current ranking, Pohick Regional Library (FFX003) sits a tier lower, so it is prepared for 2 future-ready ports instead of 4, and PWC McCoart Government Center (PWC001) sits a tier higher, so it is prepared for 4 instead of 3. The change comes from the ranking, not from the rule that sizes future-ready ports: either version of that rule gives 47 on today's ranking and 48 on the earlier one.</li>
             <li><strong>Every site gets at least 2 install-now ports.</strong> That includes the Public Safety Training Center (PWC003), where the advice is not to advance a public buildout until the use case is confirmed. Its 2 ports are counted in the total as a placeholder, not as a recommendation.</li>
             <li><strong>Chinn Park Regional Library (PWC004) was closed for renovation</strong> when the site data were gathered in June 2026. Its rank and plan assume it reopens much as it was.</li>
           </ul>
@@ -373,7 +374,11 @@
             </div>
           </div>
 
-          <div class="card m-scen-result" id="m-scen-official" hidden></div>
+          <div class="card m-scen-result" id="m-scen-official">
+            <p class="m-official__label">Official result (milestone2_v3)</p>
+            <p class="m-scen-official__text" id="m-scen-official-text">Of the 47 future-ready ports, base growth has 31 active by 2036, 43 by 2046 and 43 by 2056. High growth and combined stress both have 43 active by 2036, all 47 by 2046 and all 47 by 2056.</p>
+            <p class="m-scen-official__text">In this result each site's active ports are capped at its future-ready ports, so it does not count capacity gaps the way the earlier sweep did. <a href="outlook.html">See the ports over time</a>.</p>
+          </div>
 
           <div class="m-earlier" id="m-scen-earlier">
             <p class="m-earlier__label">Earlier result (legacy_v2)</p>
@@ -398,7 +403,7 @@
         <section class="m-section" id="baseline" aria-labelledby="baseline-title">
           <div class="section__head"><h2 class="section__title" id="baseline-title">Baseline Check</h2></div>
           <div class="m-prose">
-            <p>Every run of the prototype is checked for errors and for fields that need confirming before the results are used. The figures below come from the baseline run across the Fairfax and Prince William County candidates.</p>
+            <p>Every run of the prototype is checked for errors and for fields that need confirming before the results are used. The official contract v3 run does not publish these counts, so the figures below are from the earlier baseline run across the Fairfax and Prince William County candidates, labelled as such.</p>
           </div>
           <div id="m-check-official" hidden></div>
           <div class="m-earlier m-earlier--metrics" id="m-check-earlier">
@@ -417,7 +422,7 @@
 
           <h3 class="m-sub">Review flags are not failures</h3>
           <div class="m-prose">
-            <p>The run has zero blocking validation errors. Each of the <span data-k="review-flags">38</span> review flags marks a field that needs more information or administrative confirmation from local staff before detailed design can proceed. The fields that recur most are:</p>
+            <p>The earlier run had zero blocking validation errors. Each of its <span data-k="review-flags">38</span> review flags marks a field that needs more information or administrative confirmation from local staff before detailed design can proceed. The fields that recur most are:</p>
           </div>
           <ul class="m-chips" role="list">
             <li>Electrical service ratings</li>

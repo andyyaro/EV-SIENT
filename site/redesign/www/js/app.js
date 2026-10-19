@@ -177,6 +177,32 @@
       ' is within what modest changes to the weights can reverse.';
   }
 
+  /* The official scenario result in words, from the horizons array in data/sites.json. Scenarios that
+     follow the same path are named together. */
+  function scenarioSummary(H) {
+    if (!H || !H.length) return '';
+    var base0 = H.filter(function (h) { return h.scenario === 'baseline'; })[0];
+    var pathway = base0 ? base0.pathway : Math.max.apply(null, H.map(function (h) { return h.pathway; }));
+    var years = H.map(function (h) { return h.year; }).filter(function (y, i, a) { return a.indexOf(y) === i && (!base0 || y !== base0.year); }).sort();
+    var NAMES = { base: 'base growth', high: 'high growth', stress_combined: 'combined stress' };
+    var groups = [];
+    ['base', 'high', 'stress_combined'].forEach(function (k) {
+      var seq = years.map(function (y) { var h = H.filter(function (x) { return x.scenario === k && x.year === y; })[0]; return h ? h.active : null; });
+      if (seq.some(function (v) { return v == null; })) return;
+      var key = seq.join(',');
+      var g = groups.filter(function (x) { return x.key === key; })[0];
+      if (g) g.names.push(NAMES[k]); else groups.push({ key: key, seq: seq, names: [NAMES[k]] });
+    });
+    if (!groups.length) return '';
+    function list(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+    var parts = groups.map(function (g, i) {
+      var name = list(g.names);
+      var steps = g.seq.map(function (v, j) { return (v >= pathway ? 'all ' + v : v) + (j === 0 ? ' active' : '') + ' by ' + years[j]; });
+      return (i === 0 ? name : name.charAt(0).toUpperCase() + name.slice(1)) + (g.names.length > 1 ? ' both have ' : ' has ') + list(steps) + '.';
+    });
+    return 'Of the ' + pathway + ' future-ready ports, ' + parts.join(' ');
+  }
+
   var TIERS = {
     'tier1': { short: 'Tier 1', label: 'Tier 1: advance to site screening' },
     'high-review': { short: 'High review', label: 'High-review candidate' },
@@ -245,14 +271,37 @@
     f.className = 'site-foot footnote';
     f.innerHTML = '<p>Planning-support prototype. Not engineering advice, a permit, or a utility interconnection decision. No site shown here is approved. ' +
       'Electrical capacity is an unverified placeholder at all twelve sites.</p>' +
-      '<p class="num">Canonical contract v1.0.0 (generated 2026-07-19) · site inputs 2026-06-24 · emissions factor EPA eGRID2023 Rev 2, SRVC, 596.3 lb CO2e/MWh (accessed 2026-07-19; refreshed annually)</p>' +
+      '<p class="num" id="foot-contract">' + contractLine(null) + '</p>' +
       '<p>Future City Fellowship Phase 2 prototype · Built by Andy Yaro, George Mason University · <a href="about.html">About this site</a> · <a href="privacy.html">Privacy</a> · <a href="devices.html">Device Preview</a></p>';
     main.appendChild(f);
+    data().then(function (d) {
+      var el = document.getElementById('foot-contract');
+      if (el && d && d.meta && d.meta.contract) el.textContent = contractLine(d.meta);
+    }).catch(function () { /* the shipped line stays */ });
+  }
+  /* The contract line, from data/sites.json meta; the fallback matches the published file. */
+  function contractLine(m) {
+    m = m || { contract: '3.0.0', generated: '2026-10-18', inputs: '2026-06-24',
+      emissions: 'EPA eGRID2023 Rev 2, SRVC, 596.3 lb CO2e/MWh (accessed 2026-07-19; refreshed annually)' };
+    return 'Canonical contract v' + m.contract + ' (generated ' + m.generated + ') · site inputs ' + m.inputs + ' · emissions factor ' + m.emissions;
+  }
+
+  /* Elements marked data-meta-k="contract|generated|inputs|mode" show that field of data/sites.json meta. */
+  function fillMeta() {
+    var els = document.querySelectorAll('[data-meta-k]');
+    if (!els.length) return;
+    data().then(function (d) {
+      var m = (d && d.meta) || {};
+      els.forEach(function (el) {
+        var k = el.getAttribute('data-meta-k');
+        if (m[k] != null) el.textContent = (k === 'contract' ? 'v' : '') + m[k];
+      });
+    }).catch(function () { /* the shipped text stays */ });
   }
 
   window.FC = { icon: icon, hydrateIcons: hydrateIcons, esc: esc, data: data, tier: tier, TIERS: TIERS, siteType: siteType,
     fmtUSD: fmtUSD, fmtUSDk: fmtUSDk, segmented: segmented, NAV: NAV,
-    json: json, optional: optional, stabilityReady: stabilityReady, stabilityFor: stabilityFor, topTwo: topTwo, topGapText: topGapText };
+    json: json, optional: optional, stabilityReady: stabilityReady, stabilityFor: stabilityFor, topTwo: topTwo, topGapText: topGapText, scenarioSummary: scenarioSummary };
 
   /* Any element marked data-top-gap gets the top-two note, recomputed from the published scores. */
   function fillTopGap() {
@@ -263,7 +312,8 @@
       if (text) els.forEach(function (el) { el.textContent = text; });
     }).catch(function () { /* the shipped text stays */ });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fillTopGap); else fillTopGap();
+  function fillShared() { fillTopGap(); fillMeta(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fillShared); else fillShared();
 
   function boot() {
     if (document.body.getAttribute('data-nav') !== 'none') { renderNav(); renderFooter(); }

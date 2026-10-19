@@ -72,6 +72,8 @@
         '<div class="hig-list-row__trailing"><span class="hig-list-row__detail">' + esc(detail) + '</span></div></div></div></li>';
     });
     document.getElementById('scenario-rows').innerHTML = rows.join('');
+    var sumEl = document.getElementById('scenario-official-text'), sum = FC.scenarioSummary(H);
+    if (sumEl && sum) sumEl.textContent = sum;
 
     /* ---------- Ports over time ---------- */
     var portsVals = GROWTH.map(function (k) {

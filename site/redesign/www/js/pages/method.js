@@ -343,7 +343,11 @@
     }).join('') + '</dl>';
   }
 
-  function renderVersions(v, sites) {
+  function renderVersions(v, sites, horizons) {
+    // The official scenario result in words, from the horizons in data/sites.json (replaced below by a published sweep).
+    var sot = document.getElementById('m-scen-official-text');
+    var summary = FC.scenarioSummary(horizons);
+    if (sot && summary) sot.textContent = summary;
     if (!v || !v.official || !v.earlier) return;
     var e = FC.esc, off = v.official, old = v.earlier;
     var starter = 0, pathway = 0;
@@ -399,7 +403,7 @@
     renderFigures(sites, scoring);
     renderWeights(scoring);
     renderStability(st, sites, scoring);
-    renderVersions(v, sites);
+    renderVersions(v, sites, d && d.horizons);
     if (rowsEl) renderPlan(sites);
     renderMembership(sites);
   }).catch(function () {
