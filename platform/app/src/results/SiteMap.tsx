@@ -138,11 +138,13 @@ function MapCanvas({ sites, selectedId, onSelect, colours, valueOf }: CanvasProp
       map.getCanvas().setAttribute('aria-label', 'Basemap. Use the arrow keys to pan and plus or minus to zoom; the site markers follow as buttons.');
       const bounds = new maplibregl.LngLatBounds();
       // A marker reached by Tab may sit outside the visible part of the map (after a resize, or
-      // after panning); bring it into view so keyboard focus is never on something unseen.
+      // after panning); bring it into view so keyboard focus is never on something unseen. On a short
+      // window the map is taller than the screen, so once it has moved, scroll the marker into view too.
       const reveal = (marker: Marker) => {
         const p = map.project(marker.getLngLat());
         const c = map.getContainer();
         if (p.x < 24 || p.y < 24 || p.x > c.clientWidth - 24 || p.y > c.clientHeight - 24) {
+          map.once('moveend', () => marker.getElement().scrollIntoView({ block: 'nearest', inline: 'nearest' }));
           map.easeTo({ center: marker.getLngLat(), duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 400 });
         }
       };
