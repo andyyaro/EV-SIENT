@@ -54,7 +54,9 @@ def axe_audit(p, args, origin: str, out: Path) -> tuple[list, int]:
     rows, violations = [], 0
     for name in args.browsers.split(","):
         browser = getattr(p, name).launch()
-        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        # axe is injected as a script tag, which a deployed CSP rightly blocks; matrix.py checks the
+        # app under its real CSP.
+        page = browser.new_page(viewport={"width": 1440, "height": 900}, bypass_csp=True)
         watch = pf.Watch(origin)
         watch.attach(page)
         timing = pf.run_flow(page, args.base, args.mock)
