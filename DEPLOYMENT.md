@@ -10,8 +10,15 @@ an estimate it says so.
 
 ## 1. What is live
 
-One CloudFront distribution, `E1XZPHWHZV0OEO`, on the alias
+This file covers the original site: one CloudFront distribution, `E1XZPHWHZV0OEO`, on the alias
 **`futurecityfellowship.andyyaro.com`**, serving one thing with one access rule.
+
+Two more sites are built from this repository and documented beside their source:
+
+| Site | Distribution | Deploy and runbook |
+|---|---|---|
+| **futurecity.andyyaro.com**, the study site, and its launch film at `/film.html` | `E3RNYDDSMJAZUR` | `site/redesign/README.md`, `site/redesign/tools/deploy.sh`; the film: `media/launch-film/README.md` |
+| **app.futurecity.andyyaro.com**, the planner, with its public data hub and assistant | `E1JXKS26TDP3Z2` | `platform/infra/README.md`, `platform/tools/deploy.sh`, `platform/hub/README.md`, `platform/assistant/README.md` |
 
 | Path | Origin | Who can reach it |
 |---|---|---|
@@ -45,12 +52,12 @@ Nothing below was shared with another project except the Cognito user pool, whic
 | CloudFront origin | `platform-gated` | **Removed 2026-10-18** |
 | Cognito app client | `future-city-platform-edge` | **Deleted 2026-10-18**, with its managed-login branding |
 | Cognito app client | `future-city-assistant-web` | **Deleted 2026-10-18**, with its managed-login branding |
-| S3 bucket (gated bundle) | `future-city-fellowship-platform` | To be removed by hand, after a local backup |
-| Origin access control | `E1JND6HMX02LBD` | To be removed by hand; the origin that used it is already gone |
-| Response headers policy | `fcf-platform-security` | To be removed by hand; nothing references it once the behaviour is gone |
-| Lambda@Edge function | `fcf-platform-edge-auth` | To be removed by hand once its edge replicas drain, which takes hours after the association is removed. This is normal, not a fault |
-| IAM role | `fcf-platform-edge-auth-role` | To be removed by hand, after the function |
-| Log groups | the edge-auth groups in us-east-1 and eu-central-1 | To be removed by hand, after the function |
+| S3 bucket (gated bundle) | `future-city-fellowship-platform` | **Removed 2026-10-18**, after a local backup |
+| Origin access control | `E1JND6HMX02LBD` | **Removed 2026-10-18** |
+| Response headers policy | `fcf-platform-security` | **Removed 2026-10-18** |
+| Lambda@Edge function | `fcf-platform-edge-auth` | **Deleted 2026-10-18**, all eight versions, once its edge replicas drained |
+| IAM role | `fcf-platform-edge-auth-role` | **Deleted 2026-10-18** |
+| Log groups | the edge-auth groups in us-east-1 and eu-central-1 | **Deleted 2026-10-18**. Nothing of the gate remains in AWS (DEC-030) |
 | Cognito user pool | `us-east-1_mKrwfQTkg` | **Stays.** Pre-existing and shared; the embedded assistant client `future-city-assistant-embedded-client` stays with it |
 
 `scripts/deploy_platform.py` can no longer recreate any of these: it publishes the public site
@@ -94,6 +101,13 @@ served on the page that used them.
 there is no compute at all now that the Lambda@Edge gate is retired; the assistant's Lambda
 (section 9) scales to zero and bills per request.
 
+The figures above cover this distribution only. The study site and the planner (section 1) are
+static sites on their own buckets and distributions; the planner's assistant adds a Lambda and a
+small DynamoDB spend ledger, and its model spend has its own hard cap of $5 a month, separate from
+the $10 AWS ceiling (DEC-029). The planner's and the assistant's costs are in
+`platform/infra/README.md` and `platform/assistant/README.md`; the study site is a static bucket
+and distribution like this one.
+
 ---
 
 ## 4. How to deploy
@@ -102,7 +116,7 @@ there is no compute at all now that the Lambda@Edge gate is retired; the assista
 aws sso login --profile future-city          # the token expires; this is the usual blocker
 python scripts/deploy_platform.py            # DRY RUN - prints its plan, changes nothing
 python scripts/deploy_platform.py --apply
-python scripts/verify_deployment.py          # 32 live assertions, both halves
+python scripts/verify_deployment.py          # 32 live assertions: retired paths, NFC pages, public pages
 python scripts/check_live_vs_main.py         # every published file byte-identical to main
 ```
 
@@ -221,7 +235,7 @@ is in `docs/operations/v4-program/LEDGER.md`.
   under `data/synthetic/`, and `build_release_artifact.py --public` builds a complete artifact
   by substituting them for the real inputs. Verified by running it.
 - ~~`vendor_cesium.sh` has no checksum~~ **CLOSED.** It verifies a pinned **SHA-512** against the
-  downloaded tarball (`vendor_cesium.sh:64`).
+  downloaded tarball (the SHA-512 comparison in `vendor_cesium.sh`).
 - ~~`requirements-lock.txt` carries zero `--hash` lines~~ **CLOSED, with a stated limit.**
   `requirements-hashed.txt` carries **839 digests across 27 pins**. The lock itself still has
   none, deliberately: it is used as a *constraints* file for an editable install, and pip
@@ -379,7 +393,7 @@ later, sent all of them.
 | Behaviour | Policy | Headers |
 |---|---|---|
 | Default (public site, NFC pages) | `fcf-production-security` (`480181a4-…`) | HSTS 1 year, `nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection` |
-| ~~`/platform*`~~ | ~~`fcf-platform-security` (`ab666a54-…`)~~ | Behaviour removed 2026-10-18 (DEC-030); the policy is to be deleted by hand |
+| ~~`/platform*`~~ | ~~`fcf-platform-security` (`ab666a54-…`)~~ | Behaviour and policy removed 2026-10-18 (DEC-030) |
 
 HSTS deliberately has no `includeSubDomains` and no `preload`: the `andyyaro.com` zone is shared
 with other projects. There is **no Content-Security-Policy** yet; one needs an inventory of every
@@ -399,13 +413,13 @@ with its ETag, then delete the policy.
 | Piece | Before | After | Rollback |
 |---|---|---|---|
 | Cognito pool `us-east-1_mKrwfQTkg` MFA | `OFF` | `ON`, authenticator app (TOTP). Each user enrolls at their next sign-in | `set-user-pool-mfa-config --mfa-configuration OFF` |
-| Log retention | Never expire | 30 days: `/aws/lambda/future-city-assistant-chat`, and the edge-auth groups in us-east-1 and eu-central-1 (those two go with the gate, DEC-030) | `delete-retention-policy` |
-| `future-city-fellowship-platform` versioning | Off | `Enabled`, like the main bucket. The bucket goes with the gate (DEC-030) | Can be suspended, never removed |
+| Log retention | Never expire | 30 days: `/aws/lambda/future-city-assistant-chat`, and the edge-auth groups in us-east-1 and eu-central-1 (both deleted with the gate on 2026-10-18, DEC-030) | `delete-retention-policy` |
+| `future-city-fellowship-platform` versioning | Off | `Enabled`, like the main bucket. The bucket was removed with the gate on 2026-10-18 (DEC-030) | Not applicable |
 
 **Lambda@Edge writes its logs in the region of the edge location that served the request**, and
 creates that region's log group on first use with no retention. Only us-east-1 and eu-central-1
-existed on 2026-10-17. When the function is deleted (DEC-030), check every region once with
-`aws logs describe-log-groups --region <r>` and delete any edge-auth group left behind.
+existed on 2026-10-17. The function and both log groups were deleted on 2026-10-18 (DEC-030), so
+no Lambda@Edge remains.
 
 ### The `/platform` allowlist is out of the repository, and so is the gate
 

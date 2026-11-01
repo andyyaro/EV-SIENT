@@ -18,7 +18,14 @@ canonical horizons). Installed editable via `make setup` from the repo root.
 | `emissions.py` | Net avoided CO2e (sourced grid factor + vintage) and avoided-EVSE metric |
 | `standards.py` | Per-site standards register (adopted vs latest editions; conditional standards excluded) |
 | `triggers.py` | Proposed equity-aware expansion-trigger policy with explainable rule traces |
-| `contract.py` | Canonical contract build + validation (rules RT-01..RT-10, JSON Schema, hash chain) |
+| `contract.py` | Contract build + validation (rules RT-01..RT-10, JSON Schema, hash chain) |
+| `contract_v2.py`, `contract_v3.py` | Contract v2 (additive observed-data fields) and v3, the authoritative output since DEC-027 |
+| `stability.py` | Score breakdown and rank stability: one-weight sweeps, 2,000 random weightings, the unconfirmed-capacity range |
+| `intake.py` | Reads a jurisdiction's own file and never silently improves it (DEC-021, DEC-023) |
+| `provenance.py` | Resolves any displayed number to its full lineage |
+| `browser_api.py` | The planner's door into the engine: JSON in, JSON out, run unmodified in the browser under Pyodide (DEC-024) |
+| `flex/` | Flexible analysis of a visitor's own columns: `dictionary.py`, `explore.py`, `index.py` (`docs/FLEXIBLE_ANALYSIS.md`) |
+| `server.py`, `launcher.py` | The desktop tier's local server and launcher |
 | `matlab_adapter.py` | Generates the MATLAB input CSV from the contract (`capacity_basis` on every row) |
 | `visuals.py` / `gis_offline.py` | Footer-enforced charts; fully offline site map from cached boundaries |
 | `workflow.py` | Orchestrator + the single step manifest that generates `docs/WORKFLOW_STEPS.md` |

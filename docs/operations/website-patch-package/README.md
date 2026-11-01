@@ -1,5 +1,9 @@
 # Website + AI Assistant Offline Update Package
 
+> **Applied since (Phase 8.3, July 2026):** the patch below is now in `site/www/`, the site's source
+> in git, and is live (`docs/operations/v4-program/LEDGER.md`, phase 8). The text below records the
+> package as it was written.
+
 **Nothing in this package has been deployed. No AWS resource, DNS entry, or live page was
 touched in this run.** The website (`futurecityfellowship.andyyaro.com`: landing, dashboard,
 results, methodology, and authenticated AI Assistant pages on S3/CloudFront + Cognito +

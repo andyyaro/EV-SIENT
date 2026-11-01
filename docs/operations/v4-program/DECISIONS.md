@@ -1786,6 +1786,10 @@ six states and one outside them.
 
 **Date:** 2026-10-18 · **Phase:** platform v1 (build plan Phase 2, flexibility Phase D) · **Builds on DEC-024, DEC-026**
 
+> **Provider suspended 2026-10-19:** Bedrock blocks Anthropic models for this account, so the
+> assistant runs on OpenAI (`gpt-5.4-mini`) behind a provider switch. Bedrock stays built and
+> selectable. See the addendum at the end of this entry.
+
 ### What was blocking
 
 The planner had no way to answer "what does this mean?" beside the results. The site's old

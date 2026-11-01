@@ -66,12 +66,13 @@ confidence floor.
 Every number resolves to the run that produced it and the source behind it. Two model modes
 exist, and every surface this repository builds names which one it used. Standards scope,
 adopted code editions, and the [Authority Having Jurisdiction](GLOSSARY.md#ahj--authority-having-jurisdiction) (AHJ) boundary are stated explicitly. Anything generated from
-the contract names its mode. **Four older artifacts do not**: a superseded Tableau workbook
-still public with `legacy_v2` ranks and that mode's own Medium/Low confidence labels; this
-project's results page, whose rotating gallery publishes `legacy_v2` scores and now says so; a
-public planning-report PDF generated 2026-06-28 that prints all twelve legacy scores under the
-heading "Current Site Ranking"; and the dated Milestone 2 deck, left unedited because it
-records what was actually presented.
+the contract names its mode. **Three older artifacts do not**: a superseded Tableau workbook
+still public with `legacy_v2` ranks and that mode's own Medium/Low confidence labels; a
+planning-report PDF generated 2026-06-28 that prints all twelve legacy scores under the heading
+"Current Site Ranking", which now carries a superseded notice on its cover and is linked from no
+page; and the dated Milestone 2 deck, left unedited because it records what was actually
+presented. The results page's rotating gallery used to be a fourth; since 2026-07-28 it is
+generated from `milestone2_v3`.
 
 → [Methodology](methodology/) · [Standards matrix](standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)
 → [Migration from V2](migration-from-v2.md) - why two modes exist and what moved
@@ -112,11 +113,11 @@ conventions rather than forecasts.
 Two model modes exist. `legacy_v2` reproduces an earlier accepted baseline exactly, and
 `milestone2_v3` is the current canonical model. They disagree about the top site - FFX002 under
 the old mode, FFX004 under the current one - so anything generated from the contract
-**names the mode** wherever a rank appears. They are not interchangeable. **Four** older
-artifacts predate that rule and still show `legacy_v2` ranks: the superseded Tableau workbook (queued for removal),
-this project's own results gallery (now labelled on the page), a 2026-06-28 planning-report PDF
-that prints the full twelve-site legacy ranking (now labelled where it is linked), and the
-dated Milestone 2 deck (left as the record of what was presented).
+**names the mode** wherever a rank appears. They are not interchangeable. **Three** older
+artifacts predate that rule and still show `legacy_v2` ranks: the superseded Tableau workbook
+(queued for removal), a 2026-06-28 planning-report PDF that prints the full twelve-site legacy
+ranking (superseded notice on its cover, linked from no page), and the dated Milestone 2 deck
+(left as the record of what was presented). The results gallery now uses `milestone2_v3`.
 
 **Why 47 and not 48?**
 The official pathway total is the one the canonical `milestone2_v3` rules produce: 25 starter

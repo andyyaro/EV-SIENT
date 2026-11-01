@@ -12,7 +12,8 @@
 | `anchors/anchor_set_v1.json` | tracked reference | yes | versioned fixed scoring anchors (V3); changing this changes scores |
 | `provenance/` | tracked reference | yes | typed field-level provenance driving data confidence |
 | `cache/boundaries/` | tracked reference (external cache) | yes | US Census TIGER 2024 county boundaries, filtered+simplified for offline maps (see ATTRIBUTION.md) |
-| `contract/v1/` | tracked reference - **the canonical cross-model contract, FROZEN** | yes | site × horizon × case table + schema + manifest with hash chain; every downstream artifact quotes these values. Frozen at Phase 4: its values never change, and its manifest digest is pinned so a change is detected. |
+| `contract/v3/` | tracked reference - **the authoritative contract since DEC-027** | yes | a new `milestone2_v3` run in v2's 60-field container with its own hash chain, pinning the v1 and v2 digests as history: 25 starter ports and the official 47-port pathway. Built by `scripts/build_contract_v3.py` (`make contract-v3`). The study site, the static dashboard, the MATLAB input and the 3D explorer read it |
+| `contract/v1/` | tracked reference - **the first cross-model contract, FROZEN history** | yes | site × horizon × case table + schema + manifest with hash chain; every downstream artifact quotes these values. Frozen at Phase 4: its values never change, and its manifest digest is pinned so a change is detected. |
 | `contract/v2/` | tracked reference - **additive over v1** | yes | every v1 field carried across byte-identically, plus the observed-data fields (`observed_*`, capacity confirmation, trigger outcome). Gated to rebuild byte-identically from v1, so v2 cannot silently restate a v1 value. |
 | `synthetic/` | tracked reference (fabricated) | yes | the invented site set shipped with the public installer (DEC-020). Every value is fabricated and labelled; a run against it declares `synthetic_inputs: true`. |
 | `observed/observed_sessions_template.csv` | example/template | yes | import format for future observed-session calibration |
@@ -24,9 +25,11 @@
 
 ## The contract in one paragraph
 
-`contract/v1/scenario_table.csv` (120 rows = 12 sites × {2026 baseline; 2036/2046/2056 ×
-base/high/stress}) is the single source of truth consumed by MATLAB, Excel, the
-dashboard, and the presentation. `capacity_basis` is `placeholder` on every row -
+`contract/v3/scenario_table.csv` (120 rows = 12 sites × {2026 baseline; 2036/2046/2056 ×
+base/high/stress}) is the authoritative output (DEC-027), consumed by the study site, MATLAB,
+the static dashboard and the 3D explorer. The frozen `contract/v1/` holds the earlier `legacy_v2`
+plan (25 / 48) that the dated Milestone 2 deliverables quote; the Excel workbook, the desktop
+bundle and the published Tableau workbook still read it until they are rebuilt. `capacity_basis` is `placeholder` on every row -
 machine-readable proof that no electrical capacity has been verified. Validate any
 time with `make validate` (rules, JSON Schema, and the RT-10 manifest hash chain).
 

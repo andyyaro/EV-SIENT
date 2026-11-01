@@ -1,7 +1,9 @@
 # infra/assistant - the public AI assistant's Lambda
 
 `lambda_function.py` is the source of the Lambda `future-city-assistant-chat`, which answers
-`POST /chat` on API Gateway `future-city-assistant-api` for `site/www/assistant.html`.
+`POST /chat` on API Gateway `future-city-assistant-api` for both sites' Assistant pages:
+`site/www/assistant.html` and the study site's `site/redesign/www/assistant.html`. The planner's
+Assistant at app.futurecity.andyyaro.com is a separate service (`platform/assistant/`).
 
 Until 2026-10-17 this code existed only inside AWS. It is tracked here so that every change to
 it is reviewable and every deployed state can be rolled back.

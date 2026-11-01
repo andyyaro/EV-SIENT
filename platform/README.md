@@ -16,7 +16,12 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | Public Data | Optional: look up public values for fields the file lacks, then use or skip each field (DEC-025) | `fill` |
 | Run | One button | `accept`, then `run` |
 | Results | Ranked sites, a map, why each site scores what it does, its score breakdown and how stable its rank is, compare up to three; the file's other columns as Your Columns (DEC-026) | `explain`; `stability` (docs/methodology/rank_stability.md); `provenance` resolves one number's lineage when it is opened |
+| Explore | Descriptive patterns in the file's own columns, with how many were checked and passed; never part of the score (`docs/FLEXIBLE_ANALYSIS.md`) | `columns`, `columns_confirm`, `columns_restore`, `explore` |
+| Your Index | The planner's own ranking, a weighted sum of columns they confirm, always labelled as theirs and never official | `index_validate`, `index_run` |
 | Report | Download the report (HTML, tagged PDF, Word), the tables and the project file | `output_files` |
+
+The Assistant, opened from any step, is optional: it sees the question and the step, and only the
+summaries the planner agrees to share after seeing them (`docs/FLEXIBLE_ANALYSIS.md` section 5).
 
 ## Layout
 
@@ -27,11 +32,14 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | `app/src/engine/mock.ts` | An engine stand-in that answers from recorded Example City outputs, for interface work (`?engine=mock`) |
 | `app/src/report/` | The report and its downloads. `ReportDocument.tsx` is the one source: the PDF and Word files are built from its rendered markup (`reportBlocks.ts`), the PDF by Typst in a worker (`report.typ`, `pdf.worker.ts`) |
 | `app/src/hub/` | Reads the public data hub: fetches and checks county packs, works out each proposed value |
+| `app/src/explore/`, `app/src/yourindex/`, `app/src/columns/` | Explore, Your Index and the column dictionary's cards |
+| `app/src/assistant/` | The Assistant panel: consent, the payload preview, the answer |
 | `app/public/samples/` | The invented Example City file and the blank template, from `data/intake/` |
 | `app/public/manifest.webmanifest`, `app/public/icons/` | The install manifest and its icons (rendered from `icon.svg` by `tools/render_icons.py`) |
 | `app/pwa/` | The service worker (`sw.js`) and the Vite plugin that writes it into `dist/` with the build's file lists and hashes |
 | `app/public/runtime/` | Built, not committed: the pinned Pyodide subset and the engine archive (see `tools/`) |
-| `hub/` | The public data hub builder: pinned public sources to per-county Parquet packs (`hub/README.md`) |
+| `hub/` | The public data hub builder: pinned public sources to per-county Parquet packs for six states (`hub/README.md`, DEC-028) |
+| `assistant/` | The Assistant's proxy: a Lambda behind `/api/assistant/*`, OpenAI `gpt-5.4-mini` by default behind a provider switch, a hard $5 monthly spend cap (`assistant/README.md`, DEC-029 and its addendum) |
 | `tools/` | Runtime fetch, engine packaging, parity checks, deploy |
 | `infra/` | Hosting configuration for app.futurecity.andyyaro.com |
 
@@ -39,8 +47,9 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 
 - **Nothing the planner uploads leaves the device.** No analytics, no telemetry, no server
   calls with user rows. The only network requests are the app's own files (including, when
-  the planner asks, the public data packs for the counties around their sites) and, on the
-  Results map, basemap tiles.
+  the planner asks, the public data packs for the counties around their sites), on the
+  Results map, basemap tiles, and, only when the planner asks the Assistant, their question and
+  any summaries they agree to share. Rows, cells, names and coordinates never leave.
 - **The engine never runs without a cohort.** A run without one would read the reference
   study's private inputs (DEC-016), which the browser bundle does not contain.
 - **Nothing is improved silently.** Intake's findings are shown before anything runs, and a
@@ -73,6 +82,8 @@ Web Worker. The plan this follows is the 2026-10-18 build plan (kept outside the
 | `python3 platform/tools/matrix.py <base-url> <out-dir>` | Every screen at 11 window sizes, light and dark: no sideways scroll, nothing covered, controls large enough, no console errors, no requests to other sites (in CI at three sizes) |
 | `python3 platform/tools/a11y_audit.py <base-url> <out-dir> --axe <axe.min.js>` | axe-core on every screen, in all four themes, and the whole flow from Start to a downloaded report by keyboard alone (also in CI) |
 | `python3 platform/tools/browser_check.py` | The real engine boots and runs Example City in Chromium and WebKit |
+| `python3 platform/tools/wcag_checks.py` | The targeted WCAG checks behind the [Accessibility Conformance Report](../docs/accessibility/ACR.md) that axe-core and `matrix.py` do not make |
+| `node --test "platform/assistant/test/*.test.mjs"` | The Assistant proxy: payload rules, the spend ledger, both providers |
 | `python3 platform/tools/offline_check.py platform/app/dist` | Installable (manifest, icons, no Chromium installability errors), the service worker holds the shell and, after one run, the runtime stored decoded; then, with the server stopped, the whole flow runs again with the real engine, in Chromium and WebKit (also in CI) |
 
 Both screen scripts walk the flow through `tools/planner_flow.py` and take `--mock` for the stand-in engine.

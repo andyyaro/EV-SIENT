@@ -1,8 +1,10 @@
 # Hosting for app.futurecity.andyyaro.com
 
 The EV-SIENT Planner is a static single-page app. Its Python model runs in the visitor's browser
-(Pyodide WebAssembly in a Web Worker), so the hosting only serves files: a private S3 bucket
-behind one CloudFront distribution. There is no server-side code. Account IDs are written as
+(Pyodide WebAssembly in a Web Worker), so the hosting mostly serves files: a private S3 bucket
+behind one CloudFront distribution. The one piece of server-side code is the optional Assistant,
+a Lambda origin behind `/api/assistant/*` (`platform/assistant/README.md`); it never receives the
+planner's rows. Account IDs are written as
 `ACCOUNT_ID` throughout; the JSON files here use that placeholder and are filled in at apply time.
 
 Created 2026-10-18. All resources carry the tag `Project=evsient-platform` where AWS allows tags.
@@ -248,9 +250,12 @@ Findings on 2026-10-18 (nothing was subscribed and billing was not changed):
 - Free plan allowance: 1M requests and 100 GB a month, no overage charges; requests blocked by
   WAF do not count. At about 14 MB per first visit, 100 GB is roughly 7,000 first visits a month.
 
-## Adding `/hub/*` and `/api/*` later
+## `/hub/` and `/api/assistant/*`
 
-The plan reserves two more behaviours (the Free plan allows five):
+Both are live. The public data hub is served from this bucket under `/hub/` by the default
+behaviour (`platform/hub/README.md`, "Publishing"), so it needed no behaviour of its own. The
+Assistant's behaviour `/api/assistant/*` and its origin are applied and recorded in
+`distribution-config.json`. The notes below are how they were planned:
 
 - `/hub/*`: county data packs. Either another prefix in this bucket (no new origin; add a
   behaviour with Managed-CachingOptimized and the same function) or a second bucket with its own
@@ -273,7 +278,7 @@ adding the item to `CacheBehaviors`, and `update-distribution --if-match <ETag>`
 | Content | Flat HTML pages, no build step | Vite build plus Pyodide runtime (about 21 MB) |
 | Security headers | Custom response headers policy `fcf-redesign-noindex` | CloudFront Function `evsient-app-headers` (flat-rate compatible) |
 | CSP | Strict; `connect-src` adds Cognito and the assistant API | Adds `'wasm-unsafe-eval'` and the OpenFreeMap tile host (workers come only from `'self'`: the engine worker and MapLibre's bundled worker); same-origin only otherwise |
-| Behaviours | Default only | Default plus `/runtime/*` |
+| Behaviours | Default only | Default, `/runtime/*` and `/api/assistant/*` |
 | Caching | HTML `no-cache`, everything else 5 minutes | HTML `no-cache`; hashed and runtime files 1 year immutable; others 5 minutes |
 | Compression | Edge only | Edge, plus Brotli pre-compression for large runtime files |
 | Invalidation | `/*` each deploy | `/`, `/index.html`, `/404.html` only |

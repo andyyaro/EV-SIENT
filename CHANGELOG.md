@@ -1,5 +1,56 @@
 # Changelog
 
+## Unreleased - Two live sites, the planner and the launch film (October 2026)
+
+The study is now two public sites built from this repository, and a planner that runs the model
+on anyone's own sites. None of it changes the epistemics: capacity is still a placeholder at all
+twelve sites and every site still scores Low data confidence.
+
+### Added
+- **The planner, app.futurecity.andyyaro.com** (`platform/`, DEC-024). The unmodified `fcf_m2`
+  engine runs in the visitor's browser under Pyodide; the visitor's file never leaves the device.
+  Steps: Upload, Map Columns, Check, Public Data, Run, Results, then Explore, Your Index and
+  Report. Results show the ranked sites, a map, why each site scores what it does, its score
+  breakdown and how stable its rank is. The report downloads as an accessible web page, a tagged
+  PDF and a Word document, with CSV, Excel, all model outputs and an `.evsient` project file. The
+  planner installs and works offline. Licensed Apache-2.0 with the rest of the code.
+- **The study site, futurecity.andyyaro.com** (`site/redesign/`): a HIG Native redesign of the
+  public pages, built from contract v3. It publishes the four score weights (45 / 30 / 15 / 10),
+  each site's score split into those parts, and rank stability from one-weight sweeps and 2,000
+  random weightings (`src/fcf_m2/stability.py`, `docs/methodology/rank_stability.md`).
+- **The public data hub** (`platform/hub/`, DEC-025, DEC-028): pinned public sources as
+  per-county packs for Virginia, New York, Maryland, the District of Columbia, Colorado and
+  Illinois. A planner can use or skip each proposed field; a public value is recorded as such.
+- **Flexible analysis** (`docs/FLEXIBLE_ANALYSIS.md`, `src/fcf_m2/flex/`): a column dictionary for
+  every column of a visitor's file; Your Columns, carried and shown but never scored (DEC-026);
+  Explore, descriptive findings that count their own tests (Benjamini-Hochberg at q = 0.10, groups
+  under 10 sites hidden); and Your Index, a ranking the visitor builds from confirmed columns,
+  always labelled as theirs.
+- **The planner's assistant** (`platform/assistant/`, DEC-029): opt-in, shown the payload before
+  anything is shared, never rows or names, under a hard $5 monthly cap. It runs on OpenAI's
+  `gpt-5.4-mini` behind a provider switch since 2026-10-19, because Amazon Bedrock blocks
+  Anthropic models for this account (DEC-029 addendum).
+- **Accessibility Conformance Report** for the planner (`docs/accessibility/ACR.md`), self-assessed
+  against WCAG 2.1 and 2.2 A and AA, with the axe-core and WCAG checks behind it in CI.
+- **The launch film** (`media/launch-film/`), published 2026-10-23 at
+  https://futurecity.andyyaro.com/film.html: 59 seconds, narrated by Kokoro-82M (voice af_heart),
+  every screen recorded from the live sites. The folder holds its source; generated media and
+  third-party audio are left out (see its README). `site/redesign/tools/deploy.sh` now leaves
+  `film.html` and `film/` alone, so a site deploy cannot delete the film.
+- README: the film at the top, screenshots of both sites and the analysis charts.
+
+### Changed
+- **The Cognito-gated `/platform*` path is retired** (DEC-030): the planner needs no sign-in, and
+  the gate's Lambda@Edge, bucket and unused app clients are gone.
+- The README's lead chart was a capture of the earlier contract v1 run; it now uses the contract
+  v3 charts in `dashboard/static/`.
+
+### Known gaps
+- The Excel workbook, the desktop bundle in `site/platform/` and the published Tableau workbook
+  still read contract v1, so they show the earlier 48-port pathway until they are rebuilt (DEC-027).
+- Asked about one site's drivers, the planner's assistant has returned "(value not available)" in
+  place of the numbers it was shared (seen 2026-10-23).
+
 ## Unreleased - One official output: contract v3 and a 47-port pathway (DEC-027)
 
 The reference study now has one authoritative output. The official totals are **25 starter
