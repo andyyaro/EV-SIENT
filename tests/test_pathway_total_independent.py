@@ -129,18 +129,21 @@ def test_the_erlang_b_route_agrees_with_the_textbook_value():
     assert wait == pytest.approx(20.0)
 
 
+@pytest.mark.real_inputs
 def test_the_official_pathway_is_47_on_the_canonical_rules():
     mine = _pathways("fixture_milestone2_v3_site_results.csv", V3_MULT)
     assert sum(mine.values()) == 47
     assert mine == _contract_pathways("v3"), "per-site pathway differs from contract v3"
 
 
+@pytest.mark.real_inputs
 def test_the_earlier_legacy_v2_pathway_is_48():
     mine = _pathways("fixture_legacy_v2_site_results.csv", LEGACY_MULT)
     assert sum(mine.values()) == 48
     assert mine == _contract_pathways("v1"), "per-site pathway differs from the frozen v1"
 
 
+@pytest.mark.real_inputs
 def test_the_difference_is_the_ranking_not_the_multipliers():
     """Both multiplier sets give 47 on the fixed-anchor ranking and 48 on the legacy one: the
     one-port difference is which sites the plan treats as Tier 2 and Tier 3."""

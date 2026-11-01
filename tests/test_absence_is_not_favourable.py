@@ -82,6 +82,7 @@ def test_the_same_value_no_longer_answers_differently_by_type():
             scoring.yesno_to_num(value)
 
 
+@pytest.mark.real_inputs
 def test_real_inputs_are_unaffected_so_no_published_number_moves():
     sites = pd.read_csv(REPO / "data/inputs/real_sites_v2.csv")
     for field in scoring.YES_NO_FIELDS:
@@ -180,6 +181,7 @@ def test_a_number_written_as_text_is_refused_not_zeroed():
     assert "visitors_day" in scored.loc[scored["site_id"] == sites.loc[3, "site_id"], "absent_fields"].iloc[0]
 
 
+@pytest.mark.real_inputs
 def test_all_twelve_real_sites_are_complete_so_no_published_number_moves():
     """Why the fix could ship without a re-baseline: none of these paths is live on the real
     inputs, and the run's own `absent_fields` column says so."""

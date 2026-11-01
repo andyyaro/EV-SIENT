@@ -5,7 +5,7 @@
 set -u
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 PY="${VENV_PY:-$REPO/venv/bin/python}"
-PASS=0; FAIL=0
+PASS=0; FAIL=0; SKIP=0
 declare -a RESULTS
 
 gate () {
@@ -26,12 +26,36 @@ gate () {
   fi
 }
 
+# The study's private inputs (DEC-016): facility-level occupancy, parking and electrical data for
+# twelve named public buildings, the two result tables that carry them column for column, and the
+# 3D explorer's site data, whose score breakdown shows each input's raw value.
+# The public repository does not hold them. There, a gate that needs them reports SKIP instead
+# of failing, and everything else runs on the synthetic set (DEC-020). Where they are present,
+# as in the private archive, every gate runs.
+REAL_INPUTS=(data/inputs/real_sites_v2.csv
+             data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv
+             data/inputs/legacy_matlab_site_meta.csv
+             tests/fixture_legacy_v2_site_results.csv
+             tests/fixture_milestone2_v3_site_results.csv
+             explorer/web/data/sites.json
+             explorer/web/data/sites.geojson
+             explorer/web/data/sites.inline.js)
+have_real_inputs () {
+  local f
+  for f in "${REAL_INPUTS[@]}"; do [ -f "$REPO/$f" ] || return 1; done
+}
+gate_real () {
+  if have_real_inputs; then gate "$@"; return; fi
+  RESULTS+=("SKIP  $1 (needs the study's private inputs, DEC-016)"); SKIP=$((SKIP+1))
+}
+
 echo "=== Future City Fellowship - repository verification ($(date)) ==="
+have_real_inputs || echo "note: the study's private inputs are not in this checkout; gates that need them are skipped"
 
 gate "python: test suite with coverage gate (incl. legacy golden + cohort invariance + contract + offline GIS)" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/ -q --cov=fcf_m2 --cov-fail-under=80"
 
-gate "python: legacy_v2 mode reproduces the earlier legacy_v2 result (25 starter / 48 pathway)" \
+gate_real "python: legacy_v2 mode reproduces the earlier legacy_v2 result (25 starter / 48 pathway)" \
   bash -c "cd '$REPO' && '$PY' -m fcf_m2.workflow run --mode legacy_v2 --out data/outputs/verify_legacy >/dev/null && grep -q '\"starter_total\": 25' data/outputs/verify_legacy/run_summary.json && grep -q '\"pathway_total\": 48' data/outputs/verify_legacy/run_summary.json"
 
 gate "contract: tracked data/contract/v1 passes all rules + JSON Schema + RT-10 hash chain" \
@@ -48,7 +72,7 @@ gate "contract: tracked data/contract/v2 passes v1 rules + v2 rules + JSON Schem
 
 # v3 is the authoritative output (DEC-027): a new run of the model, not a copy of v2. The
 # check reruns the model and refuses if anything but the run stamp differs from the tracked v3.
-gate "contract: v3 matches a fresh canonical run (25 starter / 47 pathway) and its hash chain verifies" \
+gate_real "contract: v3 matches a fresh canonical run (25 starter / 47 pathway) and its hash chain verifies" \
   bash -c "cd '$REPO' && '$PY' scripts/build_contract_v3.py --check"
 
 gate "contract: tracked data/contract/v3 passes v1 + v2 rules + JSON Schema + RT-10 hash chain" \
@@ -163,7 +187,7 @@ gate "clone-safety: every declared dependency is tracked, not just present on th
 gate "3d: explorer suite passes (attribution reproduces the model score in BOTH modes)" \
   bash -c "cd '$REPO' && '$PY' -m pytest tests/test_explorer_pipeline.py tests/test_explorer_drift.py -q"
 
-gate "3d: sites.geojson is strict-valid RFC 7946 with the 12 expected sites in Northern Virginia" \
+gate_real "3d: sites.geojson is strict-valid RFC 7946 with the 12 expected sites in Northern Virginia" \
   "$PY" - <<EOF
 import json
 from pathlib import Path
@@ -264,13 +288,13 @@ gate "intake: a messy third-party file degrades confidence rather than being cle
 # It also builds the public artifact and INSPECTS IT, because an artifact whose inputs were
 # correctly substituted still shipped 36 real facility identifiers through files nobody had
 # thought of.
-gate "synthetic: the public input set is usable, honest, and not a disguised copy" \
+gate_real "synthetic: the public input set is usable, honest, and not a disguised copy" \
   bash -c "cd '$REPO' && '$PY' scripts/build_synthetic_inputs.py >/dev/null && '$PY' -m pytest tests/test_synthetic_inputs.py -q && '$PY' scripts/build_release_artifact.py /tmp/fcf_public_gate --public >/dev/null && rm -rf /tmp/fcf_public_gate"
 
 # The public website must carry its own caveats and must not embed a workbook that no longer
 # exists. The patch package sat unapplied for three weeks; the Tableau embeds pointed at a
 # workbook that had been deleted, so every one resolved to resource-not-found.
-gate "website: public pages carry their caveats and embed only the canonical workbook" \
+gate_real "website: public pages carry their caveats and embed only the canonical workbook" \
   bash -c "cd '$REPO' && '$PY' scripts/patch_site_www.py >/dev/null && '$PY' scripts/retarget_tableau_embeds.py >/dev/null && '$PY' scripts/check_site_www.py"
 
 # Drives the entry form in a real headless Chrome - the only check that sees what a person
@@ -308,6 +332,9 @@ gate "links: markdown links resolve (lychee if installed, else internal-link che
 echo
 echo "=== RESULTS ==="
 printf '%s\n' "${RESULTS[@]}"
-echo "PASS: $PASS   FAIL: $FAIL"
-[ "$FAIL" -eq 0 ] && echo "ALL REPOSITORY VERIFICATION GATES PASSED"
+echo "PASS: $PASS   FAIL: $FAIL   SKIP: $SKIP"
+if [ "$FAIL" -eq 0 ]; then
+  if [ "$SKIP" -eq 0 ]; then echo "ALL REPOSITORY VERIFICATION GATES PASSED"
+  else echo "ALL GATES THAT CAN RUN HERE PASSED ($SKIP need the study's private inputs)"; fi
+fi
 exit $FAIL

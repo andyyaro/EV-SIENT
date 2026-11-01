@@ -129,6 +129,7 @@ def test_rt04_holds_each_contract_to_its_own_models_totals(v2_rows, v3_rows):
     assert any("RT-04: pathway total 47 != 48" in p for p in wrong)
 
 
+@pytest.mark.real_inputs
 def test_tracked_v3_matches_a_fresh_run_of_the_model():
     result = subprocess.run(
         [sys.executable, str(REPO / "scripts/build_contract_v3.py"), "--check"],

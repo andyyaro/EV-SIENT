@@ -7,6 +7,40 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from fcf_m2.workflow import have_real_inputs  # noqa: E402
+
+#: Files built from the private inputs that carry them: the study's results, which hold the inputs
+#: column for column, and the 3D explorer's site data, whose score breakdown shows each input's
+#: raw value. They are private too (DEC-016).
+REAL_FIXTURES = ("tests/fixture_legacy_v2_site_results.csv", "tests/fixture_milestone2_v3_site_results.csv",
+                 "explorer/web/data/sites.json", "explorer/web/data/sites.geojson",
+                 "explorer/web/data/sites.inline.js")
+
+#: Whether this checkout holds the reference study's private inputs. The public repository does
+#: not, and runs everything that does not need them on the synthetic set (DEC-020).
+HAVE_REAL_INPUTS = have_real_inputs() and all((ROOT / f).is_file() for f in REAL_FIXTURES)
+NEEDS_REAL_INPUTS = ("needs the study's private inputs (data/inputs/, DEC-016), which this "
+                     "checkout does not hold; it runs on the synthetic set instead (DEC-020)")
+
+#: Fixtures that read the private inputs; a test that asks for one needs them.
+REAL_INPUT_FIXTURES = {"sites", "risk", "golden_site_results", "scored_legacy"}
+
+requires_real_inputs = pytest.mark.skipif(not HAVE_REAL_INPUTS, reason=NEEDS_REAL_INPUTS)
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "real_inputs: needs the study's private inputs; skipped where they are absent")
+
+
+def pytest_collection_modifyitems(config, items):
+    if HAVE_REAL_INPUTS:
+        return
+    skip = pytest.mark.skip(reason=NEEDS_REAL_INPUTS)
+    for item in items:
+        if item.get_closest_marker("real_inputs") or REAL_INPUT_FIXTURES & set(item.fixturenames):
+            item.add_marker(skip)
+
 
 @pytest.fixture(scope="session")
 def sites():

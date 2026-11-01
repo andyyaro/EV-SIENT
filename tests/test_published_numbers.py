@@ -218,6 +218,7 @@ def portfolio() -> pd.DataFrame:
 class TestPublishedCosts:
     """The README's cost columns are a fresh canonical run's (contract v3's) portfolio."""
 
+    @pytest.mark.real_inputs
     @pytest.mark.parametrize("horizon,staged,broad,avoided", [
         (2036, "$1.49M", "$1.85M", "$0.36M"),
         (2046, "$2.21M", "$2.60M", "$0.38M"),

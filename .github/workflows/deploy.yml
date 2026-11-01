@@ -72,7 +72,14 @@ jobs:
           python scripts/build_platform_surfaces.py
 
       - name: Public website carries its caveats and embeds only the canonical workbook
+        # The patcher rebuilds the site's specimen cards from the study's own results, which
+        # carry its private inputs (DEC-016). The public repository does not hold them, so
+        # there this step says so and stops; the private archive runs it in full.
         run: |
+          if [ ! -f data/inputs/real_sites_v2.csv ] || [ ! -f tests/fixture_milestone2_v3_site_results.csv ]; then
+            echo "SKIPPED: needs the study's private inputs (DEC-016), which this checkout does not hold"
+            exit 0
+          fi
           python scripts/patch_site_www.py
           python scripts/retarget_tableau_embeds.py
           python scripts/check_site_www.py

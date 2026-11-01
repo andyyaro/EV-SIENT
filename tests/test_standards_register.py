@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
@@ -31,6 +32,7 @@ def _reference_register() -> pd.DataFrame:
         sites, battery_storage=sites["site_id"].map(flags["battery_storage_flag"]))
 
 
+@pytest.mark.real_inputs
 def test_the_frozen_register_regenerates_apart_from_its_dashes():
     frozen = (V1 / "standards_register.csv").read_text(encoding="utf-8")
     assert frozen.count("\u2014") == 72, "the known difference changed; re-measure it"

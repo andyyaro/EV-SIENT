@@ -50,12 +50,14 @@ def real():
 
 # ---------------------------------------------------------------- usable
 
+@pytest.mark.real_inputs
 def test_columns_match_the_real_schema_exactly(synthetic, real):
     """Not a superset or a subset - identical, in order. The model reads by name, but a
     missing column fails at run time rather than here, which is the wrong place to find out."""
     assert list(synthetic[0]) == list(real[0])
 
 
+@pytest.mark.real_inputs
 def test_same_number_of_sites(synthetic, real):
     assert len(synthetic) == len(real) == 12
 
@@ -124,6 +126,7 @@ def test_the_matlab_meta_does_not_claim_a_real_provenance():
 
 # ---------------------------------------------------------------- not derived
 
+@pytest.mark.real_inputs
 def test_no_real_site_id_appears_anywhere_in_the_synthetic_set():
     real_ids = {r["site_id"] for r in rows(REAL / "real_sites_v2.csv")}
     for path in SYNTH.glob("*"):
@@ -134,6 +137,7 @@ def test_no_real_site_id_appears_anywhere_in_the_synthetic_set():
             assert site_id not in text, f"{path.name} contains the real id {site_id}"
 
 
+@pytest.mark.real_inputs
 def test_no_real_facility_name_address_or_postcode_leaks():
     real = rows(REAL / "real_sites_v2.csv")
     haystack = " ".join(p.read_text(errors="ignore") for p in SYNTH.glob("*") if p.is_file())
@@ -147,6 +151,7 @@ def test_no_real_facility_name_address_or_postcode_leaks():
         assert row["city"].strip().lower() not in haystack.lower().split(","), row["city"]
 
 
+@pytest.mark.real_inputs
 def test_synthetic_coordinates_are_nowhere_near_the_real_ones(synthetic, real):
     """Coordinates are the most re-identifying field in the file. A degree is roughly 111 km;
     the sets must not be plausibly confusable."""
@@ -158,6 +163,7 @@ def test_synthetic_coordinates_are_nowhere_near_the_real_ones(synthetic, real):
                 f"{row['site_id']} sits within a degree of a real site")
 
 
+@pytest.mark.real_inputs
 def test_the_synthetic_ordering_is_not_the_real_ordering(synthetic, real):
     """The subtle leak. If a fixture is produced by perturbing real values row by row, the
     RANK ORDER of a column survives the perturbation even when no value matches - and rank
@@ -181,6 +187,7 @@ def test_the_synthetic_ordering_is_not_the_real_ordering(synthetic, real):
         f"perturbation and re-identifies sites")
 
 
+@pytest.mark.real_inputs
 def test_no_facility_scale_value_matches_a_real_one_row_for_row(synthetic, real):
     """Row-for-row equality on a facility-scale column is the signature of a copy that only
     some columns were randomised in."""
@@ -216,6 +223,7 @@ def test_regenerating_is_deterministic(tmp_path):
     assert before == after
 
 
+@pytest.mark.real_inputs
 def test_no_categorical_support_shares_its_SHAPE_with_the_real_one():
     """A set that shares no member can still share its structure.
 

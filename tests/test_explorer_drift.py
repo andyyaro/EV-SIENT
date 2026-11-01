@@ -63,6 +63,7 @@ class TestModeSeparation:
         assert set(bs.MODE_SOURCES) == set(bs.MODES) == set(bs.MODE_HORIZONS)
         assert bs.DEFAULT_MODE == bs.MODE_V3, "the canonical mode must be the default"
 
+    @pytest.mark.real_inputs
     @pytest.mark.parametrize("mode", bs.MODES)
     def test_each_mode_resolves_and_builds(self, mode):
         sources = bs.resolve_sources(str(ROOT), mode)
@@ -70,6 +71,7 @@ class TestModeSeparation:
         assert len(result.features) == 12
         assert result.manifest["mode"] == mode
 
+    @pytest.mark.real_inputs
     def test_legacy_mode_emits_only_its_own_horizons(self):
         sources = bs.resolve_sources(str(ROOT), bs.MODE_LEGACY)
         result = bs.build(bs.load(sources), sources, bs.MODE_LEGACY)
@@ -77,6 +79,7 @@ class TestModeSeparation:
         leaked = [k for k in props if any(h in k for h in CANONICAL_HORIZONS)]
         assert leaked == [], f"legacy_v2 leaked canonical horizon fields: {leaked}"
 
+    @pytest.mark.real_inputs
     def test_canonical_mode_never_emits_a_retired_horizon(self):
         """The defect this phase exists to fix: a ports_2050 field under a V3 repository."""
         sources = bs.resolve_sources(str(ROOT), bs.MODE_V3)
@@ -89,6 +92,7 @@ class TestModeSeparation:
             leaked_rs = [k for k in rs if any(h in k for h in RETIRED_HORIZONS)]
             assert leaked_rs == [], f"{props['site_id']} right_sizing retired: {leaked_rs}"
 
+    @pytest.mark.real_inputs
     def test_the_two_modes_disagree_about_the_top_site(self):
         """Not a defect -- the reason mode must be visible. Pin it so it stays visible."""
         tops = {}
@@ -105,6 +109,7 @@ def committed() -> dict:
     return json.loads((WEB_DATA / "sites.geojson").read_text())
 
 
+@pytest.mark.real_inputs
 class TestCommittedArtifacts:
     """The built payload is committed, so it must match a fresh build of the default mode."""
 

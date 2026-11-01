@@ -44,6 +44,11 @@ twelve sites and every site still scores Low data confidence.
   the gate's Lambda@Edge, bucket and unused app clients are gone.
 - The README's lead chart was a capture of the earlier contract v1 run; it now uses the contract
   v3 charts in `dashboard/static/`.
+- **The repository runs without the study's private inputs** (DEC-016, DEC-020). Where
+  `data/inputs/`, the two result fixtures and the explorer's site data are absent, the model runs
+  on the synthetic set and says so, tests that need the real study are skipped
+  (`@pytest.mark.real_inputs`), and `scripts/verify.sh` reports those gates as SKIP rather than
+  FAIL. Where the files are present, every test and gate runs as before (41 of 41).
 
 ### Known gaps
 - The Excel workbook, the desktop bundle in `site/platform/` and the published Tableau workbook

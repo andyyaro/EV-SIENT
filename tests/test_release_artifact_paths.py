@@ -100,6 +100,7 @@ def public_archive(tmp_path_factory):
     return Path(zpath)
 
 
+@pytest.mark.real_inputs
 def test_the_public_archive_stores_only_posix_names(public_archive):
     with zipfile.ZipFile(public_archive) as z:
         names = z.namelist()
@@ -107,6 +108,7 @@ def test_the_public_archive_stores_only_posix_names(public_archive):
     assert not bad, f"{len(bad)} archive entries carry backslashes: {bad[:5]}"
 
 
+@pytest.mark.real_inputs
 def test_the_public_archive_carries_every_input_the_model_reads(public_archive):
     with zipfile.ZipFile(public_archive) as z:
         names = set(z.namelist())
@@ -121,6 +123,7 @@ def test_the_public_archive_carries_every_input_the_model_reads(public_archive):
 TEXT_SUFFIXES = {".py", ".csv", ".json", ".md", ".txt", ".html", ".js", ".css", ".toml", ".sh"}
 
 
+@pytest.mark.real_inputs
 def test_every_text_file_in_the_public_archive_is_valid_utf8(public_archive):
     """The third Windows defect from the same green run.
 
@@ -209,6 +212,7 @@ def test_no_packaging_script_relies_on_the_platform_encoding(script):
         + "\n  ".join(offenders))
 
 
+@pytest.mark.real_inputs
 def test_the_manifest_keys_match_the_archive_names(public_archive):
     """A manifest that names files the archive does not contain cannot verify anything. The
     Windows artifact had 58 such keys and nothing objected."""
@@ -247,6 +251,7 @@ def test_the_windows_reproduction_lines_name_real_paths():
         assert path in text, f"the Windows lines no longer contain {path!r}"
 
 
+@pytest.mark.real_inputs
 def test_the_public_archive_ships_that_text(public_archive):
     with zipfile.ZipFile(public_archive) as z:
         assert z.read("REPRODUCTION.txt").decode("utf-8") == bra.REPRO_PUBLIC

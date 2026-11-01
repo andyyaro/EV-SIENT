@@ -65,28 +65,66 @@ def generate_docs() -> str:
     return "\n".join(lines)
 
 
+#: The reference study's inputs. Three of them hold facility-level occupancy, parking and
+#: electrical data for twelve named public buildings, so they stay private (DEC-016) and the
+#: public repository does not carry them. Where they are absent the model runs on the synthetic
+#: set instead (DEC-020), whose provenance marks the run SYNTHETIC: the contract says so, and the
+#: real study's golden totals are not asserted against it.
+REAL_INPUTS = {
+    "sites": "data/inputs/real_sites_v2.csv",
+    "risk": "data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv",
+    "prov": "data/provenance/field_provenance_v1.csv",
+    "meta": "data/inputs/legacy_matlab_site_meta.csv",
+}
+SYNTHETIC_INPUTS = {
+    "sites": "data/synthetic/synthetic_sites_v2.csv",
+    "risk": "data/synthetic/synthetic_v2_electrical_risk_summary.csv",
+    "prov": "data/synthetic/synthetic_field_provenance_v1.csv",
+    "meta": "data/synthetic/synthetic_matlab_site_meta.csv",
+}
+#: The private ones. `field_provenance_v1.csv` is not among them: it records where each field
+#: came from, not a value, and the published contract carries the same rows.
+PRIVATE_INPUTS = ("sites", "risk", "meta")
+
+
+def have_real_inputs() -> bool:
+    """True when this checkout holds the reference study's private inputs."""
+    return all((ROOT / REAL_INPUTS[k]).is_file() for k in PRIVATE_INPUTS)
+
+
+def input_paths() -> dict[str, Path]:
+    """The four site-keyed inputs a reference run reads: the real ones, else the synthetic set."""
+    chosen = REAL_INPUTS if have_real_inputs() else SYNTHETIC_INPUTS
+    return {k: ROOT / v for k, v in chosen.items()}
+
+
 def _load_inputs():
-    sites = pd.read_csv(ROOT / "data/inputs/real_sites_v2.csv")
-    risk = pd.read_csv(ROOT / "data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv")
-    prov = pd.read_csv(ROOT / "data/provenance/field_provenance_v1.csv")
-    meta = pd.read_csv(ROOT / "data/inputs/legacy_matlab_site_meta.csv")
+    paths = input_paths()
+    sites = pd.read_csv(paths["sites"])
+    risk = pd.read_csv(paths["risk"])
+    prov = pd.read_csv(paths["prov"])
+    meta = pd.read_csv(paths["meta"])
     anchors = load_anchor_set(ROOT / "data/anchors/anchor_set_v1.json")
     return sites, risk, prov, meta, anchors
 
 
 def _reference_info(sites: pd.DataFrame) -> dict:
-    """What a run on the reference study says about its own inputs. Unchanged since v1."""
+    """What a run on the reference study says about its own inputs. Unchanged since v1.
+
+    On the synthetic set the manifest names the synthetic files it read, so a contract built
+    from them cannot be mistaken for one built from the study's own inputs."""
+    paths = input_paths()
+    real = have_real_inputs()
     return {
         "jurisdiction": jurisdiction_for,
         "source_date": "2026-06-24",
-        "source_id": "real_sites_v2+frozen_v2_outputs+anchors_v1",
+        "source_id": "real_sites_v2+frozen_v2_outputs+anchors_v1" if real else "synthetic_inputs_v1+anchors_v1",
         "inputs_hashed": {
-            "real_sites_v2.csv": contract.sha256_file(ROOT / "data/inputs/real_sites_v2.csv"),
-            "legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv":
-                contract.sha256_file(ROOT / "data/inputs/legacy_v2_electrical_risk_summary_frozen_2026-07-19.csv"),
-            "field_provenance_v1.csv": contract.sha256_file(ROOT / "data/provenance/field_provenance_v1.csv"),
+            paths["sites"].name: contract.sha256_file(paths["sites"]),
+            paths["risk"].name: contract.sha256_file(paths["risk"]),
+            paths["prov"].name: contract.sha256_file(paths["prov"]),
             "anchor_set_v1.json": contract.sha256_file(ROOT / "data/anchors/anchor_set_v1.json"),
-            "legacy_matlab_site_meta.csv": contract.sha256_file(ROOT / "data/inputs/legacy_matlab_site_meta.csv"),
+            paths["meta"].name: contract.sha256_file(paths["meta"]),
         },
         "cohort": None,
         "site_count": len(sites),
@@ -286,6 +324,9 @@ def run(mode: str, out_dir: Path, contract_dir: Path | None = None,
     penalty); without it, today. The platform passes it so that one project file scores the
     same on any day it is re-opened."""
     if cohort_dir is None:
+        if not have_real_inputs():
+            print("note: the study's private inputs (data/inputs/) are not in this checkout, so "
+                  "this run uses the synthetic set in data/synthetic/ (DEC-020)")
         sites, risk, prov, meta, anchors = _load_inputs()
         info = _reference_info(sites)
     else:

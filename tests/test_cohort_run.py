@@ -44,6 +44,7 @@ def _validate(contract_dir: Path) -> None:
     workflow.main(["validate-contract", str(contract_dir)])   # exits non-zero on any problem
 
 
+@pytest.mark.real_inputs
 def test_the_reference_digests_are_the_files_in_data_inputs():
     """Editing a real input must be a deliberate re-baseline, never a silent opt-out of RT-04."""
     for name, digest in contract.REFERENCE_INPUTS.items():
@@ -115,6 +116,7 @@ def test_a_site_missing_a_cost_input_gets_no_cost_figures(tmp_path):
     assert gap not in set(costs["site_id"])
 
 
+@pytest.mark.real_inputs
 def test_the_reference_study_run_as_a_cohort_is_still_held_to_25_and_47(tmp_path):
     """RT-04 keys on the inputs, not on how they arrived. Since DEC-027 the totals are the
     canonical 25 / 47, planned on the fixed-anchor ranking like any other cohort."""
@@ -159,6 +161,7 @@ def test_an_unknown_risk_level_is_refused(tmp_path):
         workflow.run("milestone2_v3", tmp_path / "out", cohort_dir=cohort)
 
 
+@pytest.mark.real_inputs
 def test_the_reference_run_is_unchanged_by_any_of_this(tmp_path):
     """No --cohort: the same inputs, digests and schema; the golden totals are DEC-027's."""
     result = workflow.run("milestone2_v3", tmp_path / "out")

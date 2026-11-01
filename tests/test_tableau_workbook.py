@@ -91,6 +91,7 @@ def _canonical_run_present():
     mod.ensure_v3_run()
 
 
+@pytest.mark.real_inputs
 def test_readiness_is_canonical_v3_not_legacy():
     """The single most consequential check in this file.
 
@@ -152,6 +153,7 @@ def test_map_coordinates_are_in_northern_virginia():
 
 # ------------------------------------------------------------------ drift
 
+@pytest.mark.real_inputs
 def test_sheet_data_and_spec_rebuild_identically():
     result = subprocess.run(
         [sys.executable, str(REPO / "scripts/build_tableau_workbook.py"), "--check"],
@@ -274,6 +276,7 @@ def test_two_series_charts_are_grouped_not_stacked():
             f"{name} has series only on colour, so its bars stack into a false total")
 
 
+@pytest.mark.real_inputs
 def test_no_chart_plots_a_constant_measure():
     """One shipped: peak waits plotted p50 and p90, both 0.0 at all twelve sites, and it
     published as axis labels with no bars. The build now refuses; this pins it."""

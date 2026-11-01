@@ -64,6 +64,7 @@ def result(frames, sources):
 # ------------------------------------------------------------- source layer
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_required_sources_resolve(sources):
     assert "results" in sources and "right_sizing" in sources
@@ -95,6 +96,7 @@ def test_subscore_weights_sum_to_one():
     assert sum(bs.SUBSCORE_WEIGHTS.values()) == pytest.approx(1.0)
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_attribution_reproduces_model_score(frames):
     """The whole point: our decomposition must rebuild the model's own score."""
@@ -107,6 +109,7 @@ def test_attribution_reproduces_model_score(frames):
         )
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_build_emits_no_drift_warnings(result):
     drift = [w for w in result.warnings if "attribution" in w]
@@ -130,17 +133,20 @@ def test_invert_flags_match_scoring_module():
 # ------------------------------------------------------------- output shape
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_every_site_becomes_a_feature(result, frames):
     assert len(result.features) == len(frames["results"])
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_ranks_are_dense_and_unique(result):
     ranks = sorted(f["properties"]["model_rank"] for f in result.features)
     assert ranks == list(range(1, len(ranks) + 1))
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_coordinates_are_in_northern_virginia(result):
     for f in result.features:
@@ -149,6 +155,7 @@ def test_coordinates_are_in_northern_virginia(result):
         assert 38.4 < lat < 39.2, f["id"]
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_output_is_strict_json(result, tmp_path):
     """No NaN/Infinity - those are valid Python but invalid JSON, and they
@@ -160,6 +167,7 @@ def test_output_is_strict_json(result, tmp_path):
     json.loads(text)  # strict by default
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_all_expected_keys_present(result):
     required = {
@@ -172,6 +180,7 @@ def test_all_expected_keys_present(result):
         assert not missing, f"{f['id']} missing {missing}"
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_asset_ports_are_sane(result):
     for f in result.features:
@@ -180,6 +189,7 @@ def test_asset_ports_are_sane(result):
         assert asset["pathway_ports"] >= asset["ports"]
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_strengths_and_constraints_are_ordered(result):
     for f in result.features:
@@ -190,6 +200,7 @@ def test_strengths_and_constraints_are_ordered(result):
         assert forgone == sorted(forgone, reverse=True), p["site_id"]
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_writes_inline_bundle(result, tmp_path):
     paths = bs.write(result, str(tmp_path))
@@ -369,6 +380,7 @@ def test_normals_are_unit_length():
         assert math.sqrt(x * x + y * y + z * z) == pytest.approx(1.0, abs=1e-5)
 
 
+@pytest.mark.real_inputs
 @needs_repo
 def test_end_to_end(tmp_path, result):
     """ETL -> models, the way `make all` runs it."""

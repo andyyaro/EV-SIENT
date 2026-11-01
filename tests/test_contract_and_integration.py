@@ -18,6 +18,7 @@ class TestContractValidation:
         site = pd.read_csv(out / "contract/site_table.csv")
         return st, site
 
+    @pytest.mark.real_inputs
     def test_generated_contract_is_valid(self, valid):
         st, site = valid
         assert contract.validate_scenario_table(st, site) == []
@@ -81,6 +82,7 @@ class TestContractValidation:
 
 
 class TestReconciliation:
+    @pytest.mark.real_inputs
     def test_rt04_reference_totals(self, v3_outputs):
         """The official totals are the canonical 25 / 47 (DEC-027); the run still reports the
         earlier legacy_v2 result, 25 / 48, as history."""
@@ -146,6 +148,7 @@ class TestWorkflowAndDocs:
         assert (workflow.ROOT / "docs/WORKFLOW_STEPS.md").read_text() == docs, (
             "docs/WORKFLOW_STEPS.md is stale: run `python -m fcf_m2.workflow docs`")
 
+    @pytest.mark.real_inputs
     def test_legacy_mode_runs(self, tmp_path):
         result = workflow.run("legacy_v2", tmp_path / "leg")
         assert result["starter_total"] == 25 and result["pathway_total"] == 48

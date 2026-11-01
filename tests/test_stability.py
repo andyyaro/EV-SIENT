@@ -38,6 +38,7 @@ def _case(sens: dict, subscore: str, change: float) -> dict:
 
 # ---------- breakdown ----------
 
+@pytest.mark.real_inputs
 def test_shown_contributions_add_up_exactly_to_the_published_score(results):
     for site in st.breakdown(results):
         target = round(site["score"] * 10)
@@ -48,6 +49,7 @@ def test_shown_contributions_add_up_exactly_to_the_published_score(results):
         assert sum(d["points"] for d in site["drivers"]) == pytest.approx(site["total"], abs=1e-9)
 
 
+@pytest.mark.real_inputs
 def test_the_drivers_reproduce_each_subscore_before_any_rescaling(results):
     """The rescale in breakdown() only absorbs float noise; the recomputed drivers ARE the subscores."""
     df = st._ordered(results)
@@ -57,6 +59,7 @@ def test_the_drivers_reproduce_each_subscore_before_any_rescaling(results):
         np.testing.assert_allclose(recomputed, weight * df[subscore].to_numpy(), atol=1e-6)
 
 
+@pytest.mark.real_inputs
 def test_a_driver_earning_nothing_is_never_shown_as_earning_something(results):
     for site in st.breakdown(results):
         for d in site["drivers"]:
@@ -65,6 +68,7 @@ def test_a_driver_earning_nothing_is_never_shown_as_earning_something(results):
             assert abs(d["shown"] - d["points"]) < 0.01 + 1e-9
 
 
+@pytest.mark.real_inputs
 def test_the_top_two_break_down_as_published(results):
     by = {s["siteId"]: s for s in st.breakdown(results)}
     assert by["FFX004"]["score"] == 53.4 and by["FFX002"]["score"] == 51.8
@@ -74,6 +78,7 @@ def test_the_top_two_break_down_as_published(results):
     assert all(d["points"] == 0 for s in by.values() for d in s["drivers"] if d["key"] == "spare_capacity_kw_n")
 
 
+@pytest.mark.real_inputs
 def test_the_access_adjustment_scales_demand_drivers(results):
     pwc003 = next(s for s in st.breakdown(results) if s["siteId"] == "PWC003")
     assert pwc003["accessAdjustment"] == 0.65
@@ -81,6 +86,7 @@ def test_the_access_adjustment_scales_demand_drivers(results):
     assert demand_max == pytest.approx(45 * 0.65)
 
 
+@pytest.mark.real_inputs
 def test_seven_sites_share_one_feasibility_subscore(results):
     """The placeholder capacity leaves feasibility identical wherever the other inputs match."""
     assert int((results["feasibility_subscore"].round(4) == 41.9167).sum()) == 7
@@ -88,6 +94,7 @@ def test_seven_sites_share_one_feasibility_subscore(results):
 
 # ---------- one weight at a time ----------
 
+@pytest.mark.real_inputs
 def test_five_more_points_of_equity_puts_ffx002_first(results):
     case = _case(st.weight_sensitivity(results), "equity", 5.0)
     assert case["top"] == "FFX002" and case["topChanged"]
@@ -97,12 +104,14 @@ def test_five_more_points_of_equity_puts_ffx002_first(results):
     assert case["weights"]["demand"] / case["weights"]["feasibility"] == pytest.approx(1.5, rel=1e-4)
 
 
+@pytest.mark.real_inputs
 def test_five_fewer_points_of_demand_leaves_ffx004_first_by_a_tenth(results):
     case = _case(st.weight_sensitivity(results), "demand", -5.0)
     assert case["top"] == "FFX004" and not case["topChanged"]
     assert [(x["siteId"], x["score"]) for x in case["leaders"][:2]] == [("FFX004", 53.1), ("FFX002", 53.0)]
 
 
+@pytest.mark.real_inputs
 def test_every_case_keeps_the_weights_summing_to_one(results):
     sens = st.weight_sensitivity(results)
     assert len(sens["cases"]) == 8
@@ -110,6 +119,7 @@ def test_every_case_keeps_the_weights_summing_to_one(results):
         assert sum(c["weights"].values()) == pytest.approx(1.0)
 
 
+@pytest.mark.real_inputs
 def test_the_smallest_flip_is_three_points_of_equity(results):
     sens = st.weight_sensitivity(results)
     flip = sens["smallestFlip"]
@@ -124,6 +134,7 @@ def test_the_smallest_flip_is_three_points_of_equity(results):
     assert "City of Fairfax Regional Library moves to first" in sens["sentence"]
 
 
+@pytest.mark.real_inputs
 def test_a_tie_at_the_end_of_the_range_is_not_a_flip(results):
     """At 100 points of safety every site with safety 90 ties; first place does not change hands."""
     flips = st.weight_sensitivity(results)["flips"]
@@ -143,6 +154,7 @@ def test_a_site_far_ahead_never_flips():
 
 # ---------- many weightings ----------
 
+@pytest.mark.real_inputs
 def test_dirichlet_draws_give_the_known_shares_of_first_place(results):
     stab = st.rank_stability(results)
     by = {s["siteId"]: s for s in stab["sites"]}
@@ -155,6 +167,7 @@ def test_dirichlet_draws_give_the_known_shares_of_first_place(results):
         assert 1 <= s["rankLow"] <= s["rankMedian"] <= s["rankHigh"] <= len(results)
 
 
+@pytest.mark.real_inputs
 def test_rank_percentiles_are_numpys_inverted_cdf(results):
     """The module reads percentiles from one sort; numpy's own quantile must agree."""
     stab = st.rank_stability(results)
@@ -168,6 +181,7 @@ def test_rank_percentiles_are_numpys_inverted_cdf(results):
         assert s["pFirst"] == pytest.approx(float(np.mean(ranks[:, k] == 1)))
 
 
+@pytest.mark.real_inputs
 def test_the_same_seed_gives_the_same_answer_and_another_seed_a_close_one(results):
     a = st.rank_stability(results)
     assert a == st.rank_stability(results)
@@ -176,6 +190,7 @@ def test_the_same_seed_gives_the_same_answer_and_another_seed_a_close_one(result
         assert abs(x["pFirst"] - y["pFirst"]) < 0.05
 
 
+@pytest.mark.real_inputs
 def test_drawn_weights_centre_on_the_defaults(results):
     spread = st.rank_stability(results)["weightSpread"]
     for s in spread:
@@ -199,12 +214,14 @@ def test_six_hundred_sites_run_well_under_a_second():
 
 # ---------- inputs not yet confirmed ----------
 
+@pytest.mark.real_inputs
 def test_the_confidence_breakdown_is_read_from_the_results(results):
     conf = st.confidence_from_results(results)
     assert conf["FFX004"]["electrical_service"] == 0.0
     assert conf["FFX004"]["address_and_public_access"] == 90.0
 
 
+@pytest.mark.real_inputs
 def test_capacity_alone_could_move_nine_sites_into_first(results):
     unc = st.input_uncertainty(results)
     assert unc["done"]
@@ -217,6 +234,7 @@ def test_capacity_alone_could_move_nine_sites_into_first(results):
     assert "PWC003" not in cap["couldBeFirst"]
 
 
+@pytest.mark.real_inputs
 def test_every_unconfirmed_input_could_reorder_all_twelve(results):
     unc = st.input_uncertainty(results)
     allin = next(s for s in unc["scenarios"] if s["key"] == "unconfirmed")
@@ -226,6 +244,7 @@ def test_every_unconfirmed_input_could_reorder_all_twelve(results):
         assert site["bestRank"] <= site["worstRank"]
 
 
+@pytest.mark.real_inputs
 def test_without_confidence_the_input_check_says_why_it_was_not_done(results):
     bare = results.drop(columns=["data_confidence_reason"])
     unc = st.input_uncertainty(bare)
