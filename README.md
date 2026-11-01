@@ -10,7 +10,7 @@ the picture) · [Download the MP4, 45 MB](https://futurecity.andyyaro.com/film/e
 code-responsive public EV charging in **Fairfax City**, **Fairfax County** and **Prince William
 County**, Virginia, and a planner that runs the same model on anyone's own sites.
 
-![tests](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/tests.yml/badge.svg)
+![tests](https://github.com/andyyaro/EV-SIENT/actions/workflows/tests.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
 ![matlab](https://img.shields.io/badge/MATLAB-R2025b%20suite%2049%2F49%20(synthetic%20fixture)-B08948)
 ![licence](https://img.shields.io/badge/licence-Apache--2.0-1B4332)
@@ -229,7 +229,8 @@ so: DEC-027 made the canonical 47-port pathway the official total and 48 the ear
 make setup          # venv + editable install with pinned test extras
 make test           # full suite incl. legacy golden tests (reports coverage; the 80% floor
                     #   is enforced by ./scripts/verify.sh and CI, not by this target)
-make run-legacy     # reproduce the earlier legacy_v2 result (25/48; official is 25/47)
+make run-legacy     # reproduce the earlier legacy_v2 result (25/48; official is 25/47).
+                    #   Needs the private inputs; without them it runs on the synthetic set
 make run-v3         # full V3 run: scores, scenarios, economics, emissions, contract
 make validate       # validate contract v3 (authoritative) and the frozen v1/v2
 ./scripts/verify.sh # every repository verification gate
@@ -282,7 +283,7 @@ never against real site data; see
 
 ## Verification
 
-`./scripts/verify.sh` runs **every gate it declares** - 40 as of 2026-08-02, and the live
+`./scripts/verify.sh` runs **every gate it declares** - 41 as of 2026-10-31, and the live
 number is whatever it prints: the pytest suite with a coverage floor, legacy
 baseline reproduction, contract rule/schema/hash-chain validation, cross-model reconciliation
 against the MATLAB input, generated-docs drift, footer QA on every dashboard visual, secret and
@@ -292,6 +293,10 @@ parity in a real browser, supply-chain digests, packaging constraints,
 intake degradation, and a clone-safety check that catches files present here but missing from a
 fresh clone. It exits with the number of failures, so a red run is visible in the exit code, not
 just in the log.
+
+In this public copy, the five gates that need the study's private inputs report SKIP rather
+than FAIL, and so do the tests that need them; everything else runs on the synthetic set (see
+[About this repository](#about-this-repository)).
 
 CI runs **the same gates**, on every pull request and every push to `main`
 ([tests.yml](.github/workflows/tests.yml)) - literally the same, because CI invokes
@@ -342,6 +347,24 @@ Since then the project has become a running system rather than a document set:
 None of this changes the epistemics. Capacity is still a placeholder at all twelve sites, and
 the next real step is unchanged: client follow-up, utility and facility data requests (which
 upgrade `capacity_basis` from placeholder), AHJ conversations, and pilot preparation.
+
+## About this repository
+
+This is the public copy of the project's working repository, published on 31 October 2026.
+Every commit keeps its original date and message, from the first on 21 June 2026, so the history
+shows the study as it was built. Three things were taken out of every commit first
+([DEC-031](docs/operations/v4-program/DECISIONS.md)):
+
+- **The twelve facilities' raw inputs** (occupancy, parking and electrical data), the files built
+  from them that carry them, and the stakeholder contact list. They stay private (DEC-016) until
+  the facilities' owners agree to their release. The model runs on an invented synthetic set
+  instead (DEC-020), and the tests and checks that need the real study say so and are skipped.
+  The study's results are not affected: they are published at
+  [futurecity.andyyaro.com](https://futurecity.andyyaro.com).
+- **Email addresses and account identifiers**, replaced with placeholders.
+- **The names of the two people interviewed**, now given by role.
+
+A commit that touched only removed files is kept, empty, so the timeline is complete.
 
 ## Team
 

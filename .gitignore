@@ -83,3 +83,13 @@ infra/assistant/.deploy.zip
 # removed on 2026-10-18 (DEC-030), but a copy of this file can still sit on a maintainer's disk,
 # and it must never be committed.
 infra/edge-auth/granted.mjs
+
+# The study's private inputs and the files built from them that carry them (DEC-016, DEC-031).
+# This public copy never holds them. To run the real study, copy them in from the private
+# archive; these lines keep them from being committed here by accident.
+data/inputs/
+tests/fixture_legacy_v2_site_results.csv
+tests/fixture_milestone2_v3_site_results.csv
+explorer/web/data/sites.json
+explorer/web/data/sites.geojson
+explorer/web/data/sites.inline.js
