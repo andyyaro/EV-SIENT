@@ -2008,3 +2008,57 @@ closed as moot.
 - **Leave the deploy script's gate mode in place but unused.** A full `--apply` rebuilt the
   behaviour, the origin, the Lambda association and the bucket. Left in, the next person to run
   the documented command would have recreated the gate.
+
+---
+
+## DEC-031 - The public repository is a cleaned copy, EV-SIENT; this one stays private as the archive
+
+**Date:** 2026-10-31 · **Settles the method for open actions 14 and 15** · **Owner's decisions:
+"cleaned new repo", named "EV-SIENT"; the real site inputs: "Leave them out"**
+
+### Decision
+
+The history is published as a new repository, `andyyaro/EV-SIENT`, cleaned before it is
+pushed. This repository keeps its name and stays private, as the archive and the home of the
+study's private inputs. Rewriting this one in place was rejected: old commits would stay
+reachable through its pull-request refs, and its tags and release would break.
+
+### What the copy keeps
+
+Every commit on `main`, `v2-expansion-planning` and `archive/pre-milestone2-v3-20260719`, with
+its original author, date and message, from 21 June 2026 on. A commit that touched only removed
+files stays, empty, so the timeline is complete. The study's published results (ranks, scores,
+the four weighted parts, rank stability, port plans) stay too: futurecity.andyyaro.com already
+publishes them.
+
+### What it leaves out, in every commit
+
+- **The study's private inputs (DEC-016):** `data/inputs/`; the old `data/source_extracts/`,
+  including the stakeholder contact list; two earlier copies at the root (`real_sites_v1.csv`,
+  `data_quality_report.csv`); and `PROJECT_STATUS.md`, which quoted input values. Also the files
+  built from them that carry them: the two result fixtures, which hold the inputs column for
+  column; the 3D explorer's site data, whose score breakdown shows each input's raw value; and
+  two old Tableau packages whose extracts could not be inspected.
+- **Identifiers**, replaced with placeholders: the retired gate's login email addresses and
+  Cognito user IDs (DEC-030), county and city staff email addresses, and the AWS account ID.
+  Twelve commits made under a laptop's local hostname are attributed to the GitHub noreply
+  address.
+- **Two people's names.** The county client contact and the fire-service interviewee are named
+  by role, `[client contact]` and `[fire-service interviewee]`: in text, in file names, inside
+  the Word, PowerPoint and Excel deliverables, and in the PDFs, where the name is redacted in
+  place.
+
+### Running without the private inputs
+
+`fcf_m2.workflow.have_real_inputs()` decides. Where the inputs are absent, a reference run reads
+the synthetic set (DEC-020) and says so; its provenance marks the contract SYNTHETIC, so the real
+study's golden totals are not asserted against it. Tests that need the real study carry
+`@pytest.mark.real_inputs` and are skipped, and `scripts/verify.sh` reports the five gates that
+need them as SKIP rather than FAIL. Where the inputs are present, as here, every test and all 41
+gates run.
+
+### How it was checked
+
+Every blob and commit message in the cleaned history was scanned before it was pushed: for the
+inputs' values, as CSV, JSON, Markdown tables and prose, including inside Office files and PDFs;
+for every replaced identifier and both names; and for author identities. None remained.
