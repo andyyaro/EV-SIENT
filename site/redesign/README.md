@@ -12,6 +12,7 @@ https://futurecity.andyyaro.com/devices.html.
 | Path | What it is |
 |---|---|
 | `www/` | The static site: flat HTML pages, no build step, no frameworks, no web fonts |
+| `film.html`, `film/` (live only) | The launch film's watch page and files, published by `media/launch-film/deploy/publish.sh`, not from `www/`. `tools/deploy.sh` excludes both from its `--delete` syncs, so a site deploy leaves the film alone |
 | `www/css/tokens.css` | Generated from the design system's `tokens.json` (four themes: light, dark and both increased-contrast variants) |
 | `www/css/base.css`, `www/css/hig.css`, `www/js/icons.js` | Copied from the design system (foundations, component styles, icon glyphs) |
 | `www/css/site.css`, `www/js/app.js`, `www/js/theme.js` | The shell: navigation, footer, data loading, shared controls, system theme mapping |
