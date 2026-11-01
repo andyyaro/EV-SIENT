@@ -1,0 +1,13 @@
+{
+  "name": "ev-sient-launch-film",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cues": "python3 -I tools/build_cues.py",
+    "events": "python3 -I sound/events.py",
+    "sound": "python3 sound/design.py",
+    "dev": "npx --yes hyperframes@0.8.173 preview",
+    "check": "npx --yes hyperframes@0.8.173 check",
+    "render": "npx --yes hyperframes@0.8.173 render"
+  }
+}

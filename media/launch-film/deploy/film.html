@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EV-SIENT launch film</title>
+<meta name="description" content="One minute on EV-SIENT: the study that ranked twelve public sites in Northern Virginia for starter EV charging, and the planner that ranks yours, in your browser.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<style>
+  :root { --bg: #0b0b0e; --card: #16161a; --ink: #f5f5f7; --ink2: #aeaeb2; --hair: rgba(255, 255, 255, 0.12); --blue: #0091ff; --blue-press: #0a84ff; }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  a { color: var(--blue); }
+  a:focus-visible, video:focus-visible, summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 56px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+  header img { display: block; height: 30px; width: auto; }
+  header a.back { font-size: 15px; text-decoration: none; }
+  h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 10px; font-weight: 700; }
+  .lede { color: var(--ink2); font-size: clamp(17px, 2vw, 20px); margin: 0 0 24px; max-width: 760px; }
+  .player { border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--hair); }
+  video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 8px; }
+  .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 22px; font-weight: 600; font-size: 17px; text-decoration: none; }
+  .btn.primary { background: var(--blue); color: #fff; }
+  .btn.primary:hover { background: var(--blue-press); }
+  .btn.secondary { background: rgba(118, 118, 128, 0.24); color: var(--ink); }
+  .meta { color: var(--ink2); font-size: 15px; margin: 8px 0 0; }
+  details { margin-top: 32px; background: var(--card); border-radius: 14px; padding: 4px 20px; border: 1px solid var(--hair); }
+  summary { cursor: pointer; font-weight: 600; padding: 14px 0; min-height: 44px; }
+  details p { margin: 0 0 12px; }
+  .credits { margin-top: 32px; color: var(--ink2); font-size: 14px; line-height: 1.6; border-top: 1px solid var(--hair); padding-top: 20px; }
+  .credits p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="./" aria-label="EV-SIENT study home"><img src="film/logo.svg" alt="EV-SIENT" width="130" height="30"></a>
+    <a class="back" href="./">The study</a>
+  </header>
+  <main>
+    <h1>EV-SIENT, in one minute</h1>
+    <p class="lede">The study that ranked twelve public sites in Northern Virginia for starter EV charging, and the planner that ranks yours, right in your browser.</p>
+    <div class="player">
+      <video controls playsinline preload="metadata" poster="film/poster.jpg" width="1920" height="1080" aria-label="EV-SIENT launch film, 59 seconds, with narration">
+        <source src="film/ev-sient-launch.mp4" type="video/mp4">
+        Your browser cannot play this video. <a href="film/ev-sient-launch.mp4">Download the MP4</a>.
+      </video>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://app.futurecity.andyyaro.com">Try the planner</a>
+      <a class="btn secondary" href="./">Read the study</a>
+    </div>
+    <p class="meta">59 seconds, 1920 × 1080, captions in the picture. <a href="film/ev-sient-launch.mp4" download>Download the MP4 (45 MB)</a> · <a href="film/ev-sient-launch.vtt" download>Captions file (WebVTT)</a></p>
+
+    <details>
+      <summary>Transcript</summary>
+      <p>Every city wants more EV chargers. Few can show where the first ones should go, and why.</p>
+      <p>This is EV-SIENT. We screened twelve public sites in Northern Virginia on four published parts: demand, feasibility, safety and equity. Then we reweighted the model 2,000 times, to show how sure each rank really is.</p>
+      <p>Now it's your turn. Bring a spreadsheet of your own sites. The planner matches your columns and runs the model right in your browser. Your file never leaves your device.</p>
+      <p>See every site ranked, exactly why it scored that way, and download a council-ready report in one click. Fill gaps with public data, ask the built-in assistant, and keep planning even offline.</p>
+      <p>EV-SIENT. Plan smarter charging with your own data. Try it free today.</p>
+    </details>
+
+    <div class="credits">
+      <p>Every screen in the film is the live study site or planner, recorded frame by frame. The planner shots use Example City, an invented sample file. EV-SIENT is planning support, not engineering advice.</p>
+      <p>Narration: Kokoro-82M, voice af_heart. Music: "Retro Funk Energetic" by Music_Unlimited (Pixabay). Sound effects: Mixkit.</p>
+      <p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, © <a href="https://openmaptiles.org/">OpenMapTiles</a>. Tiles by <a href="https://openfreemap.org/">OpenFreeMap</a>, drawn with MapLibre GL JS. The laptop is drawn with three.js.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

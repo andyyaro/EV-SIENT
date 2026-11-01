@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Device shot</title>
+<style>
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  /* the film's own ground (index.html #bg), so this shot sits on it with no seam */
+  #ground { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 42%, #18181d 0%, #0c0c0f 58%, #050506 100%); }
+  #acc { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  #gl { position: absolute; left: 0; top: 0; width: 3840px; height: 2160px; visibility: hidden; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+<script src="../assets/cues.js"></script>
+</head>
+<body>
+<div id="ground"></div>
+<canvas id="gl"></canvas>
+<canvas id="acc" width="1920" height="1080"></canvas>
+<script type="module">
+/* "Now it's your turn": a laptop rises into the light and the camera settles square on its screen, where the
+   film's planner window sits exactly. The screen itself is left dark here: the film lays its live window over
+   the four corners this page reports for every frame, so the picture on the screen is the real recording.
+   Rendered at 2x and reduced, with sub-frames averaged across a half-frame shutter for motion blur. */
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from './vendor/jsm/RoundedBoxGeometry.js';
+import { RoomEnvironment } from './vendor/jsm/RoomEnvironment.js';
+
+const FPS = 30, W = 1920, H = 1080, SS = 2;
+const C = window.CUES;
+const L0 = C.words['05-yours'][4][1] - 0.35;   // "Bring": the laptop rises as the big type leaves upward
+const L1 = C.vo['06-device'] - 0.9;            // square on the screen; the window then lifts off
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const EI = (p) => (p <= 0 ? 0 : 2 ** (10 * (p - 1)));
+const EO = (p) => (p >= 1 ? 1 : 1 - 2 ** (-10 * p));
+const EIO = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? EI(2 * p) / 2 : (1 + EO(2 * p - 1)) / 2);
+
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W * SS, H * SS, false);
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.55;
+
+// ------------------------------------------------------------------ the laptop (metres)
+const BW = 0.3125, BD = 0.221, BT = 0.0105;              // base
+const DW = 0.296, DH = DW * 858 / 1440;                  // display: the film window's proportions
+const LT = 0.0055, LH = DH + 0.0095 + 0.0175;            // lid: display + top and bottom bezels
+const OPEN = THREE.MathUtils.degToRad(110);              // lid angle from closed
+
+const alu = new THREE.MeshPhysicalMaterial({ color: 0x8c9098, metalness: 1, roughness: 0.34, clearcoat: 0.15, clearcoatRoughness: 0.4 });
+const aluEdge = new THREE.MeshPhysicalMaterial({ color: 0xa9adb5, metalness: 1, roughness: 0.22 });
+const black = new THREE.MeshPhysicalMaterial({ color: 0x050506, metalness: 0, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.2, envMapIntensity: 0.18 });
+const keyMat = new THREE.MeshStandardMaterial({ color: 0x0e0f11, metalness: 0.05, roughness: 0.7, envMapIntensity: 0.12 });
+const well = new THREE.MeshStandardMaterial({ color: 0x1a1b1f, metalness: 0.5, roughness: 0.6, envMapIntensity: 0.3 });
+const pad = new THREE.MeshPhysicalMaterial({ color: 0x7d8189, metalness: 0.85, roughness: 0.2, clearcoat: 0.6 });
+
+const laptop = new THREE.Group();
+scene.add(laptop);
+
+const base = new THREE.Mesh(new RoundedBoxGeometry(BW, BT, BD, 6, 0.0075), alu);
+base.position.set(0, BT / 2, 0);
+laptop.add(base);
+// keyboard well and keys
+const KW = 0.272, KD = 0.106, kz = -BD / 2 + 0.018 + KD / 2;
+const wellM = new THREE.Mesh(new RoundedBoxGeometry(KW, 0.0012, KD, 3, 0.0005), well);
+wellM.position.set(0, BT + 0.0002, kz);
+laptop.add(wellM);
+const rows = [[14, 0.0135], [14, 0.0175], [14, 0.0175], [13, 0.0175], [12, 0.0175], [10, 0.0175]];
+const keys = new THREE.InstancedMesh(new RoundedBoxGeometry(1, 1, 1, 2, 0.12), keyMat, 80);
+let n = 0, z = kz - KD / 2 + 0.006;
+const m4 = new THREE.Matrix4();
+rows.forEach(([count, depth], r) => {
+  const gap = 0.0022, kw = (KW - 0.012 - gap * (count - 1)) / count;
+  for (let i = 0; i < count; i++) {
+    const wide = r === 5 && (i === 4) ? 4.2 : 1;      // the space bar
+    if (r === 5 && i > 4 && i < 8) continue;
+    const x = -KW / 2 + 0.006 + i * (kw + gap) + (kw * wide) / 2;
+    m4.compose(new THREE.Vector3(x, BT + 0.0012, z + depth / 2 - 0.001), new THREE.Quaternion(), new THREE.Vector3(kw * wide, 0.0016, depth - 0.0026));
+    keys.setMatrixAt(n++, m4);
+  }
+  z += depth + 0.0008;
+});
+keys.count = n;
+laptop.add(keys);
+const padM = new THREE.Mesh(new RoundedBoxGeometry(0.128, 0.0006, 0.082, 4, 0.0003), pad);
+padM.position.set(0, BT + 0.0001, BD / 2 - 0.012 - 0.041);
+laptop.add(padM);
+
+// the lid, hinged at the back edge of the base
+const hinge = new THREE.Group();
+hinge.position.set(0, BT, -BD / 2 + 0.004);
+hinge.rotation.x = -(OPEN - Math.PI / 2);              // 110° open: leans back 20° from upright
+laptop.add(hinge);
+const lid = new THREE.Mesh(new RoundedBoxGeometry(BW, LH, LT, 6, 0.0026), alu);
+lid.position.set(0, LH / 2 + 0.001, -LT / 2);
+hinge.add(lid);
+const bezel = new THREE.Mesh(new RoundedBoxGeometry(BW - 0.003, LH - 0.003, 0.0008, 4, 0.0003), black);
+bezel.position.set(0, LH / 2 + 0.001, 0.0002);
+hinge.add(bezel);
+const dispY = 0.001 + 0.0175 + DH / 2;                // display centre on the lid
+const display = new THREE.Mesh(new THREE.PlaneGeometry(DW, DH), new THREE.MeshBasicMaterial({ color: 0x050506 }));
+display.position.set(0, dispY, 0.0007);
+hinge.add(display);
+const hingeBar = new THREE.Mesh(new THREE.CylinderGeometry(0.0055, 0.0055, BW - 0.06, 24), aluEdge);
+hingeBar.rotation.z = Math.PI / 2;
+hingeBar.position.set(0, BT - 0.001, -BD / 2 + 0.006);
+laptop.add(hingeBar);
+
+// light: a soft key from above left, a cool rim from behind, and the brand-blue pool it floats over
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-0.6, 0.9, 0.7); scene.add(key);
+const rim = new THREE.DirectionalLight(0x8fc6ff, 3.2); rim.position.set(0.7, 0.5, -0.9); scene.add(rim);
+const rim2 = new THREE.DirectionalLight(0x5aa8ff, 1.6); rim2.position.set(-0.8, 0.2, -0.6); scene.add(rim2);
+const glowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d'), r = g.createRadialGradient(256, 256, 0, 256, 256, 256);
+  r.addColorStop(0, 'rgba(0,145,255,0.55)'); r.addColorStop(0.45, 'rgba(0,145,255,0.16)'); r.addColorStop(1, 'rgba(0,145,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 512, 512);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const pool = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.7), new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+pool.rotation.x = -Math.PI / 2; pool.position.y = -0.03;
+laptop.add(pool);
+
+// ------------------------------------------------------------------ the camera
+const FOV = 28;
+const camera = new THREE.PerspectiveCamera(FOV, W / H, 0.01, 20);
+scene.updateMatrixWorld(true);
+// final pose: square on the display, which then fills the film window's rectangle exactly
+// (#win: 1440 x 858 at 240, 66 -> centre 45 px above the frame's centre)
+function finalPose() {
+  laptop.position.set(0, 0, 0); laptop.rotation.set(0, 0, 0); scene.updateMatrixWorld(true);
+  const centre = display.getWorldPosition(new THREE.Vector3());
+  const q = display.getWorldQuaternion(new THREE.Quaternion());
+  const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(q), up = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+  const viewH = DH * H / 858;
+  const dist = (viewH / 2) / Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+  const target = centre.clone().addScaledVector(up, -45 * viewH / H);
+  return { pos: target.clone().addScaledVector(normal, dist), target, up };
+}
+const FIN = finalPose();
+const PIVOT = new THREE.Vector3(0, 0.075, -0.02);
+const START = { az: THREE.MathUtils.degToRad(-34), el: THREE.MathUtils.degToRad(21), dist: 1.02 };
+const fin = (() => {
+  const v = FIN.pos.clone().sub(PIVOT);
+  return { az: Math.atan2(v.x, v.z), el: Math.asin(v.y / v.length()), dist: v.length() };
+})();
+
+function pose(t) {
+  const u = clamp((t - L0) / (L1 - L0));
+  // the laptop rises into frame and turns to face us (EO: it arrives moving, matched to the type leaving up)
+  const r = EO(clamp(u / 0.55));
+  laptop.position.set(0, lerp(-0.2, 0, r), 0);
+  laptop.rotation.set(0, lerp(0.42, 0, EO(clamp(u / 0.8))), 0);
+  // the camera swings round and in, settling square on the screen
+  const e = EIO(u);
+  const az = lerp(START.az, fin.az, e), el = lerp(START.el, fin.el, e), dist = Math.exp(lerp(Math.log(START.dist), Math.log(fin.dist), e));
+  const pos = PIVOT.clone().add(new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(dist));
+  const target = new THREE.Vector3(0, 0.07, 0).lerp(FIN.target, e);
+  camera.position.copy(pos);
+  camera.up.copy(new THREE.Vector3(0, 1, 0).lerp(FIN.up, e).normalize());
+  camera.lookAt(target);
+  camera.updateMatrixWorld(true);
+  scene.updateMatrixWorld(true);
+}
+
+function corners() {
+  return [[-1, 1], [1, 1], [1, -1], [-1, -1]].map(([sx, sy]) => {
+    const p = new THREE.Vector3((sx * DW) / 2, (sy * DH) / 2, 0).applyMatrix4(display.matrixWorld).project(camera);
+    return [Math.round(((p.x + 1) / 2) * W * 100) / 100, Math.round(((1 - p.y) / 2) * H * 100) / 100];
+  });
+}
+
+const acc = document.getElementById('acc').getContext('2d');
+window.renderFrame = (f, opts = {}) => {
+  const shutter = opts.shutter ?? 0.5;
+  const t = L0 + f / FPS;
+  // sub-frames by how far the screen's corners travel in one shutter
+  pose(t); const a = corners(); pose(t + shutter / FPS); const b = corners();
+  const travel = Math.max(...a.map((p, i) => Math.hypot(p[0] - b[i][0], p[1] - b[i][1])));
+  const n = Math.max(1, Math.min(12, Math.ceil(travel / 3)));
+  acc.clearRect(0, 0, W, H);
+  acc.globalCompositeOperation = 'copy';
+  for (let k = 0; k < n; k++) {
+    pose(t + (shutter * ((k + 0.5) / n - 0.5)) / FPS);
+    renderer.render(scene, camera);
+    acc.globalAlpha = 1 / (k + 1);
+    acc.drawImage(renderer.domElement, 0, 0, W, H);
+    acc.globalCompositeOperation = 'source-over';
+  }
+  acc.globalAlpha = 1;
+  pose(t);
+  return { f, t: Math.round(t * 1000) / 1000, sub: n, corners: corners() };
+};
+window.timing = { L0, L1, fps: FPS };
+window.deviceReady = true;
+</script>
+</body>
+</html>

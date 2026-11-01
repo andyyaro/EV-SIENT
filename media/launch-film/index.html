@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="assets/cues.js"></script>
+    <script src="assets/edit.js"></script>
+    <style>
+      /* Inter / Inter Display (SIL OFL) stand in for the planner's SF Pro. Private family names so the
+         renderer can't alias them to a system face. */
+      @font-face { font-family: "EVText"; src: url("assets/fonts/Inter-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "EVText"; src: url("assets/fonts/Inter-Medium.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "EVText"; src: url("assets/fonts/Inter-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "EVText"; src: url("assets/fonts/Inter-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "EVDisplay"; src: url("assets/fonts/InterDisplay-Medium.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "EVDisplay"; src: url("assets/fonts/InterDisplay-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "EVDisplay"; src: url("assets/fonts/InterDisplay-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }
+
+      :root {
+        /* the EV-SIENT kit: Signal Blue #0088FF on light, #0091FF on dark; secondary #AEAEB2 on dark */
+        --night: #0b0b0e; --ink: #1d1d1f; --ink2: #6e6e73; --hair: #e3e3e8;
+        --blue: #0088ff; --blue-d: #0091ff; --sec: #aeaeb2;
+        --orange: #ff8d28; --teal: #00c3d0; --purple: #cb30e0; --green: #34c759;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+      body { font-family: "EVText", sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+      .scene, .layer { position: absolute; inset: 0; }
+      /* layers that arrive later start hidden here, not with a set at 0 (which frame 0 would not render) */
+      #brand, #prod, #turn, #cta, #lapwrap { visibility: hidden; }
+      .num { font-variant-numeric: tabular-nums; }
+      .display { font-family: "EVDisplay", sans-serif; font-weight: 600; letter-spacing: -0.026em; }
+      .ico { display: inline-block; flex: none; }
+      .ico svg { display: block; width: 100%; height: 100%; }
+      .card { position: absolute; background: #fff; color: var(--ink); border-radius: 30px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25); }
+      #bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 42%, #18181d 0%, #0c0c0f 58%, #050506 100%); }
+      video { display: block; }
+
+      /* ---------- 1 · Hook: the night flight over the 12 sites ---------- */
+      #hookv-wrap, #hookv { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #lights { position: absolute; left: 0; top: 0; overflow: visible; }
+      #hook-veil { position: absolute; inset: 0; background:
+        radial-gradient(ellipse 52% 30% at 50% 24%, rgba(6, 8, 12, 0.82) 0%, rgba(6, 8, 12, 0.5) 55%, rgba(6, 8, 12, 0) 100%),
+        linear-gradient(180deg, rgba(6, 8, 12, 0.6) 0%, rgba(6, 8, 12, 0) 40%, rgba(6, 8, 12, 0) 82%, rgba(6, 8, 12, 0.55) 100%); }
+      #hook-copy { position: absolute; left: 0; top: 0; width: 1920px; }
+      .hl { position: absolute; left: 0; width: 1920px; text-align: center; font-size: 72px; line-height: 92px; white-space: nowrap;
+        text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6); }
+      .hl span { display: inline-block; margin: 0 0.12em; }
+      /* the headline sits high; the twelve sites light up below it */
+      #hl1 { top: 100px; color: #fff; }
+      #hl2 { top: 196px; color: #a1a1a8; }
+      #hl3 { top: 292px; color: var(--blue-d); }
+      #osm { position: absolute; right: 26px; bottom: 20px; font-size: 15px; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.01em; }
+
+      /* ---------- 2 · Brand ---------- */
+      #lock { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #b-mark { position: absolute; left: 0; top: 0; width: 146px; height: 190px; transform-origin: 59px 59px; }
+      #b-word { position: absolute; left: 739px; top: 409px; width: 631px; height: 99px; }
+      #b-desc { position: absolute; left: 741px; top: 538px; font-size: 38px; font-weight: 500; color: var(--sec); letter-spacing: -0.01em; white-space: nowrap; }
+
+      /* ---------- the laptop, and the planner's window ---------- */
+      #lapwrap, #lapv { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #glow { position: absolute; left: 260px; top: 160px; width: 1400px; height: 760px; border-radius: 50%;
+        background: radial-gradient(ellipse at center, rgba(0, 145, 255, 0.20) 0%, rgba(0, 145, 255, 0.06) 45%, rgba(0, 145, 255, 0) 70%); }
+      /* #winH carries the screen's perspective while the window sits on the laptop (a matrix3d per frame) */
+      #winH { position: absolute; left: 240px; top: 66px; width: 1440px; height: 858px; transform-origin: 0 0; transform: var(--m, none); }
+      #win { position: absolute; left: 0; top: 0; width: 1440px; height: 858px; border-radius: 18px; overflow: hidden; background: #f2f2f7;
+        transform-origin: 720px 429px; box-shadow: 0 60px 140px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.10); }
+      #bar { position: absolute; left: 0; top: 0; width: 1440px; height: 48px; background: #e9e9ee; border-bottom: 1px solid #d2d2d7; }
+      .tl { position: absolute; top: 18px; width: 13px; height: 13px; border-radius: 50%; }
+      #url { position: absolute; left: 430px; top: 9px; width: 580px; height: 30px; border-radius: 9px; background: #fff;
+        display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17px; color: #3a3a3c; letter-spacing: -0.005em; }
+      #url .ico { width: 15px; height: 15px; color: #8e8e93; }
+      #url-pre { color: #1d1d1f; font-weight: 600; }
+      #offline { position: absolute; left: 1024px; top: 9px; height: 30px; padding: 0 12px 0 10px; border-radius: 15px; background: #1d1d1f; color: #fff;
+        display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 600; opacity: 0; }
+      #offline .ico { width: 17px; height: 17px; }
+      #sample { position: absolute; right: 14px; top: 9px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(118, 118, 128, 0.16);
+        display: flex; align-items: center; font-size: 15px; font-weight: 500; color: #3a3a3c; opacity: 0; }
+      #view { position: absolute; left: 0; top: 48px; width: 1440px; height: 810px; overflow: hidden; background: #f2f2f7; }
+      .shot { position: absolute; left: 0; top: 0; width: 1440px; height: 810px; overflow: hidden; opacity: 0; }
+      .cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+      .cam video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      .ring { position: absolute; border: 3px solid var(--blue); border-radius: 16px; background: rgba(0, 136, 255, 0.07);
+        box-shadow: 0 0 0 6px rgba(0, 136, 255, 0.14); opacity: 0; }
+      .ripple { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 3px solid rgba(0, 136, 255, 0.9);
+        background: rgba(0, 136, 255, 0.12); opacity: 0; }
+      .pc { position: absolute; left: 0; top: 0; width: 24px; height: 30px; transform-origin: 3px 2px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3)); }
+      #sheen { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+        background: linear-gradient(112deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.16) 46%, rgba(255, 255, 255, 0.05) 52%, rgba(255, 255, 255, 0) 64%);
+        background-size: 260% 100%; background-repeat: no-repeat; background-position: 100% 0; }
+      #dim { position: absolute; inset: 0; background: rgba(10, 10, 14, 0.55); opacity: 0; }
+
+      /* overlays that float over the window */
+      #parts { left: 460px; top: 236px; width: 1000px; height: 470px; opacity: 0; }
+      #parts .h { position: absolute; left: 56px; top: 48px; font-size: 46px; }
+      #parts .s { position: absolute; left: 58px; top: 112px; font-size: 24px; color: var(--ink2); }
+      #pbar { position: absolute; left: 56px; top: 178px; width: 888px; height: 34px; border-radius: 10px; background: #e5e5ea; overflow: hidden; }
+      #pbar i { position: absolute; top: 0; height: 34px; transform-origin: 0 50%; transform: scaleX(0); }
+      .pcol { position: absolute; top: 262px; width: 210px; opacity: 0; }
+      .pcol .n { display: flex; align-items: center; gap: 12px; font-size: 27px; font-weight: 600; letter-spacing: -0.01em; }
+      .pcol .n i { width: 16px; height: 16px; border-radius: 50%; }
+      .pcol .w { font-family: "EVDisplay", sans-serif; font-size: 84px; font-weight: 700; letter-spacing: -0.03em; margin-top: 10px; line-height: 1; }
+      .pcol .w small { font-size: 40px; font-weight: 600; margin-left: 4px; color: var(--ink2); }
+
+      #count { left: 96px; top: 548px; width: 470px; height: 240px; padding: 34px 40px; opacity: 0; }
+      #count .v { font-family: "EVDisplay", sans-serif; font-size: 112px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+      #count .k { font-size: 27px; color: var(--ink2); margin-top: 18px; line-height: 1.3; }
+
+      .note { display: flex; align-items: center; gap: 22px; padding: 0 30px; opacity: 0; }
+      .note .tile { width: 72px; height: 72px; border-radius: 20px; background: var(--blue); color: #fff; display: grid; place-items: center; flex: none; }
+      .note .tile .ico { width: 40px; height: 40px; }
+      .note .t { font-size: 29px; font-weight: 600; letter-spacing: -0.012em; }
+      .note .d { font-size: 22px; color: var(--ink2); margin-top: 5px; }
+      #badge { left: 1100px; top: 712px; width: 560px; height: 136px; }
+      #toast { left: 1150px; top: 128px; width: 520px; height: 128px; }
+      .more { left: 1150px; width: 680px; height: 172px; }
+      #m1 { top: 222px; } #m2 { top: 418px; } #m3 { top: 614px; }
+
+      .fchip { position: absolute; left: 0; top: 0; height: 46px; padding: 0 18px 0 12px; border-radius: 13px; background: #fff; color: var(--ink);
+        display: flex; align-items: center; gap: 9px; font-size: 18px; font-weight: 600; opacity: 0; white-space: nowrap;
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.08); transform-origin: 20px 23px; }
+      .fchip .ico { width: 24px; height: 24px; color: #1f8f4e; }
+
+      /* ---------- 5 · Your turn ---------- */
+      #turn-t { position: absolute; left: 0; top: 470px; width: 1920px; text-align: center; font-size: 104px; line-height: 120px; white-space: nowrap; }
+      #turn-t span { display: inline-block; margin: 0 0.12em; }
+      #turn-t .b { color: var(--blue-d); }
+
+      /* ---------- 9 · Call to action ---------- */
+      #cta-stage { position: absolute; inset: 0; transform-origin: 960px 520px; }
+      #c-logo { position: absolute; left: 640px; top: 212px; width: 640px; height: 148px; }
+      #c-line { position: absolute; left: 0; top: 432px; width: 1920px; text-align: center; font-size: 66px; line-height: 84px; white-space: nowrap; }
+      #c-line span { display: inline-block; margin: 0 0.11em; opacity: 0; }
+      #c-line .b { color: var(--blue-d); }
+      #c-pill { position: absolute; left: 50%; top: 580px; height: 96px; margin-left: -440px; width: 880px; border-radius: 48px; background: #1b1b1f;
+        box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.14); display: flex; align-items: center; padding: 0 12px 0 40px; gap: 16px; opacity: 0; }
+      #c-pill .ico { width: 30px; height: 30px; color: #8e8e93; }
+      #c-pill .u { font-size: 36px; font-weight: 500; letter-spacing: -0.01em; color: #fff; flex: 1; }
+      #c-pill .go { height: 72px; padding: 0 34px; border-radius: 36px; background: var(--blue); color: #fff; font-size: 31px; font-weight: 600;
+        display: flex; align-items: center; letter-spacing: -0.01em; position: relative; }
+      #c-shine { position: absolute; left: 640px; top: 212px; width: 640px; height: 148px;
+        -webkit-mask: url("assets/brand/evsient-logo-reversed.svg") center / 100% 100% no-repeat; mask: url("assets/brand/evsient-logo-reversed.svg") center / 100% 100% no-repeat;
+        background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(170,215,255,0.95) 50%, rgba(255,255,255,0) 60%);
+        background-size: 300% 100%; background-repeat: no-repeat; background-position: 100% 0%; }
+      #c-glow { position: absolute; inset: 0; border-radius: 36px; box-shadow: 0 0 0 4px rgba(0, 145, 255, 0.9), 0 0 30px 6px rgba(0, 145, 255, 0.55); opacity: 0; }
+      #c-study { position: absolute; left: 0; top: 716px; width: 1920px; text-align: center; font-size: 30px; color: var(--sec); opacity: 0; }
+      #c-study b { color: #fff; font-weight: 500; }
+      #c-fine { position: absolute; left: 0; top: 996px; width: 1920px; text-align: center; font-size: 21px; color: #6e6e73; opacity: 0; }
+
+      /* burned-in captions: white on a dark box, bottom centre */
+      #cc { position: absolute; left: 0; right: 0; top: 952px; text-align: center; font-size: 36px; font-weight: 500; line-height: 1.32; letter-spacing: -0.005em; }
+      #cc span { display: inline; background: rgba(12, 12, 14, 0.78); color: #fff; padding: 0.1em 0.42em; border-radius: 12px;
+        -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+      #fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="59" data-width="1920" data-height="1080">
+
+      <div id="film" class="clip scene" data-whole data-layout-allow-overflow data-layout-allow-occlusion data-start="0" data-duration="59" data-track-index="1">
+        <div id="bg"></div>
+
+        <!-- 1 · Hook: a night flight over the twelve real sites; three light up; the camera dives onto rank 1 -->
+        <div id="hook" class="layer">
+          <div id="hookv-wrap"><video id="hookv" class="clip" data-start="0" data-duration="7.8" src="assets/map/hook.mp4" muted playsinline></video></div>
+          <div id="hook-veil"></div>
+          <svg id="lights" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+          <div id="hook-copy" class="display">
+            <div class="hl" id="hl1"></div>
+            <div class="hl" id="hl2"></div>
+            <div class="hl" id="hl3"></div>
+          </div>
+          <div id="osm">Map data © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap</div>
+        </div>
+
+        <!-- 2 · Brand: the site becomes the Bolt Pin; the wordmark follows -->
+        <div id="brand" class="layer">
+          <div id="lock">
+            <img id="b-mark" src="assets/brand/evsient-mark-dark-ui.svg" alt="">
+            <img id="b-word" src="assets/brand/evsient-wordmark-reversed.svg" alt="EV-SIENT">
+            <div id="b-desc">Site Evaluation &amp; Navigation Tool</div>
+          </div>
+        </div>
+
+        <!-- 3–8 · Product: the live sites, recorded frame by frame, in one browser window -->
+        <div id="prod" class="layer">
+          <div id="glow"></div>
+          <div id="lapwrap"><video id="lapv" class="clip" data-start="24.8333" data-duration="2.8" src="assets/device/laptop.mp4" muted playsinline></video></div>
+          <div id="winH">
+            <div id="win">
+              <div id="bar">
+                <i class="tl" style="left: 20px; background: #ff5f57"></i><i class="tl" style="left: 41px; background: #febc2e"></i><i class="tl" style="left: 62px; background: #28c840"></i>
+                <div id="url"><span class="ico" data-i="lock"></span><span><span id="url-pre"></span>futurecity.andyyaro.com</span></div>
+                <div id="offline"><span class="ico" data-i="wifiSlash"></span>Offline</div>
+                <div id="sample">Example City sample · invented data</div>
+              </div>
+              <div id="view">
+                <div class="shot" id="sh-overview"><div class="cam"><video id="v-overview" class="clip" data-start="9.3333" data-duration="8.7" src="assets/shots/overview.mp4" muted playsinline></video>
+                  <div class="ring" id="r-sites" style="left: 556px; top: 378px; width: 178px; height: 174px; border-radius: 26px"></div></div></div>
+                <div class="shot" id="sh-compare"><div class="cam"><video id="v-compare" class="clip" data-start="17.5667" data-duration="6.1667" src="assets/shots/compare.mp4" muted playsinline></video>
+                  <div class="ring" id="r-chance" style="left: 1500px; top: 188px; width: 142px; height: 176px; border-radius: 14px"></div></div></div>
+                <div class="shot" id="sh-upload"><div class="cam"><video id="v-upload" class="clip" data-start="24.7667" data-duration="3.1333" src="assets/shots/upload.mp4" muted playsinline></video>
+                  <div class="fchip" id="chip"><span class="ico" data-i="sheet"></span>example-city.csv</div></div></div>
+                <div class="shot" id="sh-mapcols"><div class="cam"><video id="v-mapcols" class="clip" data-start="27.4" data-duration="2.0333" src="assets/shots/mapcols.mp4" muted playsinline></video>
+                  <div class="ring" id="r-matched" style="left: 572px; top: 219px; width: 434px; height: 38px; border-radius: 19px"></div></div></div>
+                <div class="shot" id="sh-run"><div class="cam"><video id="v-run" class="clip" data-start="28.9667" data-duration="2.7333" src="assets/shots/run.mp4" muted playsinline></video>
+                  <div class="ring" id="r-run" style="left: 706px; top: 940px; width: 790px; height: 62px; border-radius: 14px"></div></div></div>
+                <div class="shot" id="sh-results"><div class="cam"><video id="v-results" class="clip" data-start="31.6333" data-duration="6.6" src="assets/shots/results.mp4" muted playsinline></video>
+                  <div class="ring" id="r-first" style="left: 462px; top: 137px; width: 735px; height: 82px; border-radius: 12px"></div>
+                  <div class="ring" id="r-why" style="left: 1255px; top: 70px; width: 476px; height: 106px; border-radius: 14px"></div></div></div>
+                <div class="shot" id="sh-report"><div class="cam"><video id="v-report" class="clip" data-start="37.7667" data-duration="4.6333" src="assets/shots/report.mp4" muted playsinline></video>
+                  <div class="ring" id="r-pdf" style="left: 460px; top: 320px; width: 1282px; height: 68px; border-radius: 14px"></div></div></div>
+                <div class="shot" id="sh-fill"><div class="cam"><video id="v-fill" class="clip" data-start="41.9" data-duration="2.2333" src="assets/shots/fill.mp4" muted playsinline></video></div></div>
+                <div class="shot" id="sh-assistant"><div class="cam"><video id="v-assistant" class="clip" data-start="43.6333" data-duration="2.6333" src="assets/shots/assistant.mp4" muted playsinline></video></div></div>
+                <div class="shot" id="sh-offline"><div class="cam"><video id="v-offline" class="clip" data-start="45.7667" data-duration="3.1667" src="assets/shots/offline.mp4" muted playsinline></video></div></div>
+              </div>
+              <div id="dim"></div>
+              <div id="sheen"></div>
+            </div>
+          </div>
+
+          <div id="parts" class="card">
+            <div class="h display">Four published parts</div>
+            <div class="s">The study's weights. Together they make a 0 to 100 readiness score.</div>
+            <div id="pbar"></div>
+          </div>
+          <div id="count" class="card"><div class="v num">0</div><div class="k">random reweightings,<br>to test every rank</div></div>
+          <div id="badge" class="card note"><div class="tile"><span class="ico" data-i="shield" style="width: 40px; height: 40px"></span></div>
+            <div><div class="t">Your file stays on this device</div><div class="d">The model runs in this browser tab.</div></div></div>
+          <div id="toast" class="card note"><div class="tile"><span class="ico" data-i="docDown" style="width: 40px; height: 40px"></span></div>
+            <div><div class="t">Accessible PDF saved</div><div class="d">Made on this device. Nothing uploaded.</div></div></div>
+          <div id="m1" class="card note more"><div class="tile"><span class="ico" data-i="globe" style="width: 40px; height: 40px"></span></div>
+            <div><div class="t">Public data fills the gaps</div><div class="d">Your own values always win.</div></div></div>
+          <div id="m2" class="card note more"><div class="tile"><span class="ico" data-i="bubble" style="width: 40px; height: 40px"></span></div>
+            <div><div class="t">A built-in assistant</div><div class="d">You review what it can see first.</div></div></div>
+          <div id="m3" class="card note more"><div class="tile"><span class="ico" data-i="wifiSlash" style="width: 40px; height: 40px"></span></div>
+            <div><div class="t">Works offline</div><div class="d">Keep planning without a connection.</div></div></div>
+        </div>
+
+        <!-- 5 · Your turn -->
+        <div id="turn" class="layer">
+          <div id="turn-t" class="display"><span>Now</span><span>it's</span><span class="b">your</span><span class="b">turn.</span></div>
+        </div>
+
+        <!-- 9 · Call to action -->
+        <div id="cta" class="layer">
+          <div id="cta-stage">
+            <img id="c-logo" src="assets/brand/evsient-logo-reversed.svg" alt="EV-SIENT">
+            <div id="c-shine"></div>
+            <div id="c-line" class="display"><span>Plan</span><span>smarter</span><span>charging</span><span>with</span><span class="b">your</span><span class="b">own</span><span class="b">data.</span></div>
+            <div id="c-pill"><span class="ico" data-i="lock"></span><span class="u">app.futurecity.andyyaro.com</span><span class="go"><i id="c-glow"></i>Try it free</span></div>
+            <div id="c-study">The study behind it: <b>futurecity.andyyaro.com</b></div>
+            <div id="c-fine">Planning support, not engineering advice. Example City is invented sample data.</div>
+          </div>
+        </div>
+
+        <div id="cc"></div>
+        <div id="fade"></div>
+      </div>
+
+      <audio id="mix" class="clip" src="assets/audio/mix.wav" data-start="0" data-duration="59" data-track-index="9"></audio>
+    </div>
+
+    <script>
+      /* =====================================================================
+         EV-SIENT launch film, v2: about 1 minute, 1920×1080, 30 fps.
+
+         Everything on screen is real: the opening flies over the twelve candidate sites from OpenStreetMap
+         data (map/flight.html), the laptop is rendered in 3D (device/laptop.html), and every screen is the
+         live site or planner recorded frame by frame (capture/takes.py), conformed to the narration
+         (tools/conform.py -> window.EDIT). The pointer is the recorded one.
+
+         Same two rules as v1:
+           1. ONE EASE FAMILY. Arrivals EO, departures EI, a move that starts and ends at rest EIO.
+           2. MATCHED VECTORS AT EVERY CUT.
+         Per-frame values are stamped with tl.set, so every frame is exact and seek-safe.
+         ===================================================================== */
+      const C = window.CUES, E = window.EDIT, FPS = C.fps, DUR = C.duration;
+      const K = E.cuts, SH = E.shots;
+      const F = (f) => (f - 1) / FPS;
+      const S = (f) => F(f) - 0.008;
+      const fr = (t) => Math.round(t * FPS) + 1;
+      const W = (k, i) => C.words[k][i][1];
+      const V = C.vo;
+      const tl = gsap.timeline({ paused: true });
+      const $ = (s) => document.querySelector(s);
+      const NS = "http://www.w3.org/2000/svg";
+      const EO = (p) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p));
+      const EI = (p) => (p <= 0 ? 0 : Math.pow(2, 10 * (p - 1)));
+      const EIO = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? EI(2 * p) / 2 : (1 + EO(2 * p - 1)) / 2);
+      const clamp = (p, a = 0, b = 1) => Math.max(a, Math.min(b, p));
+      const lerp = (a, b, p) => a + (b - a) * p;
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        if (parent) parent.appendChild(e);
+        return e;
+      };
+      /* Stamp a per-frame function over [t0, t1] (seconds): fn(t, f) -> [target, vars]. */
+      const stamp = (t0, t1, fn) => { for (let f = fr(t0); f <= fr(t1); f++) { const r = fn(F(f), f); if (r) tl.set(r[0], r[1], S(f)); } };
+      // A layer is on screen over [t0, t1). (A layer that starts at 0 is simply visible by default.)
+      const show = (sel, t0, t1) => {
+        if (t0 > 0) tl.set(sel, { visibility: "visible" }, t0);
+        if (t1 != null) tl.set(sel, { visibility: "hidden" }, t1);
+      };
+      const snap = (t, tol = 0.16) => {
+        let best = t, d = tol;
+        for (const x of C.beats) if (Math.abs(x - t) <= d) { d = Math.abs(x - t); best = x; }
+        return best;
+      };
+
+      /* ---------- icons: HIG-style glyphs (24×24, 1.8 stroke) ---------- */
+      const ICO = {
+        lock: '<rect x="5.5" y="10.5" width="13" height="10" rx="2.2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/>',
+        shield: '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.3 2.3 4.3-4.6"/>',
+        docDown: '<path d="M6 4.5A1.5 1.5 0 0 1 7.5 3H14l4 4v12.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5z"/><path d="M14 3v4h4"/><path d="M12 10.5v6M9.4 14L12 16.6 14.6 14"/>',
+        globe: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/><path d="M3 12h18M4.5 7.5h15M4.5 16.5h15"/>',
+        bubble: '<path d="M6.5 4.5h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11.5l-4.5 3.5v-3.5h-.5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z"/><path d="M8.5 9h7M8.5 12h4.5"/>',
+        wifiSlash: '<path d="M2.8 9.2a13.5 13.5 0 0 1 18.4 0M5.8 12.4a9.2 9.2 0 0 1 12.4 0M8.8 15.6a4.8 4.8 0 0 1 6.4 0"/><circle cx="12" cy="19" r="1.1" fill="currentColor" stroke="none"/><path d="M4 3.5l16 17"/>',
+        sheet: '<rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M4 9h16M4 14.5h16M10 9v11.5"/>',
+      };
+      const svgIco = (k) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + "</svg>";
+      document.querySelectorAll("[data-i]").forEach((n) => (n.innerHTML = svgIco(n.dataset.i)));
+
+      const SFX = { cuts: [], rings: [], clicks: [], keys: [], scrolls: [], lights: [], top: [] };
+      const panX = (x, k = 1.2) => +((x / 1920 - 0.5) * k).toFixed(2);   // screen x -> stereo position
+
+      /* =====================================================================
+         1 · HOOK. "Every city wants more EV chargers. Few can show where the first ones should go, and why."
+         A low glide over Fairfax City at night; on "chargers" the camera cranes up until all twelve sites are in
+         view; on "first" the top three light; on "why" rank 1 rings; the camera dives onto it.
+         The lights ride on the map: their positions come from the render, frame by frame.
+         ===================================================================== */
+      const HK = E.hook, HT = HK.timing, NH = HK.xy.length;
+      const TOP3 = ["FFX004", "FFX002", "PWC002"], HERO = HK.ids.indexOf(HT.hero);
+      const END = HT.END, Z0 = HK.zoom[Math.round(HT.D0 * FPS)], ZE = HK.zoom[Math.min(NH - 1, Math.round(END * FPS))];
+      const lights = $("#lights");
+      const xyAt = (t) => HK.xy[clamp(Math.round(t * FPS), 0, NH - 1)];
+      // the sites switch on once the whole region is in the frame (nearest rank 1 first), just before "first"
+      const inFrame = (P) => P.every(([x, y]) => x > 30 && x < 1890 && y > 30 && y < 1050);
+      let ON = HT.TP0;
+      while (ON < HT.TP1 && !inFrame(xyAt(ON))) ON += 1 / FPS;
+      const dots = HK.ids.map((id, i) => {
+        const g = el("g", { opacity: 0 }, lights);
+        const halo = el("circle", { r: 15, fill: "rgba(170, 200, 255, 0.16)" }, g);
+        const c = el("circle", { r: 0, fill: "#e4ecf8" }, g);
+        return { id, i, g, halo, c, top: TOP3.indexOf(id) };
+      });
+      const zoomAt = (t) => HK.zoom[clamp(Math.round(t * FPS), 0, NH - 1)];
+      // the hero grows from a light to the Bolt Pin's circle (59 px) as the camera arrives
+      const heroR = (t) => 8.5 * Math.pow(59 / 8.5, clamp((zoomAt(t) - Z0) / (ZE - Z0)));
+      stamp(ON - 0.05, END - 1 / FPS, (t, f) => {
+        const P = xyAt(t);
+        dots.forEach((d) => tl.set(d.g, { attr: { transform: `translate(${P[d.i][0]} ${P[d.i][1]})` } }, S(f)));
+        if (t >= HT.D0) {
+          const r = heroR(t);
+          tl.set(dots[HERO].c, { attr: { r: r.toFixed(2) } }, S(f));
+          tl.set(dots[HERO].halo, { attr: { r: (r * 1.9).toFixed(2) } }, S(f));
+        }
+        return null;
+      });
+      // the lights come up as the region opens out, nearest the hero first
+      const P1 = xyAt(HT.TP1);
+      const order = dots.slice().sort((a, b) => Math.hypot(P1[a.i][0] - P1[HERO][0], P1[a.i][1] - P1[HERO][1]) - Math.hypot(P1[b.i][0] - P1[HERO][0], P1[b.i][1] - P1[HERO][1]));
+      order.forEach((d, k) => {
+        const t = ON + 0.045 * k;
+        tl.to(d.g, { opacity: 1, duration: 0.3, ease: EO }, t);
+        tl.fromTo(d.c, { attr: { r: 0 } }, { attr: { r: 5.5 }, duration: 0.45, ease: EO, immediateRender: false }, t);
+        SFX.lights.push([+t.toFixed(3), panX(xyAt(t)[d.i][0])]);
+      });
+      // "first": the top three light up, each with one ring
+      const FIRST = W("01-hook", 11), WHY = W("01-hook", 16);
+      dots.filter((d) => d.top >= 0).forEach((d) => {
+        const t = FIRST + 0.1 * d.top;
+        SFX.top.push([+t.toFixed(3), panX(xyAt(t)[d.i][0])]);
+        const ringC = el("circle", { r: 9, fill: "none", stroke: "#0091ff", "stroke-width": 3, opacity: 0 }, d.g);
+        tl.to(d.c, { attr: { r: 8.5 }, fill: "#0091ff", duration: 0.35, ease: EO }, t);
+        tl.to(d.halo, { attr: { r: 24 }, fill: "rgba(0, 145, 255, 0.3)", duration: 0.35, ease: EO }, t);
+        tl.fromTo(ringC, { attr: { r: 9 }, opacity: 0.85 }, { attr: { r: 52 }, opacity: 0, duration: 0.9, ease: EO, immediateRender: false }, t);
+      });
+      // "why": rank 1 rings once more; the others let go as the camera dives
+      const whyRing = el("circle", { r: 9, fill: "none", stroke: "#0091ff", "stroke-width": 3, opacity: 0 }, dots[HERO].g);
+      tl.fromTo(whyRing, { attr: { r: 9 }, opacity: 0.9 }, { attr: { r: 70 }, opacity: 0, duration: 1.0, ease: EO, immediateRender: false }, WHY);
+      dots.filter((d) => d.i !== HERO).forEach((d) => tl.to(d.g, { opacity: 0, duration: 0.5, ease: EI }, HT.D0 + 0.55));
+      tl.to(dots[HERO].halo, { opacity: 0, duration: 0.4, ease: EI }, END - 0.45);
+      // copy, word by word on the narration
+      const HOOK = C.words["01-hook"];
+      [["#hl1", 0, 5], ["#hl2", 6, 14], ["#hl3", 15, 16]].forEach(([sel, a, b]) => {
+        for (let i = a; i <= b; i++) {
+          const s = document.createElement("span");
+          s.textContent = HOOK[i][0].replace(/^go$/, "go,");
+          $(sel).appendChild(s);
+          tl.fromTo(s, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.5, ease: EO }, HOOK[i][1] - 0.04);
+        }
+      });
+      const DIVE0 = WHY + 0.55;     // the copy clears once "why" has landed, so the dive shows rank 1
+      tl.to(["#hook-copy", "#hook-veil"], { opacity: 0, y: -40, filter: "blur(6px)", duration: 0.4, ease: EI }, DIVE0);
+      tl.to("#osm", { opacity: 0, duration: 0.3, ease: EI }, END - 0.3);
+      // the map goes dark under the Bolt Pin (a clip keeps its own visibility, so its wrapper fades)
+      tl.to("#hookv-wrap", { opacity: 0, filter: "blur(6px)", duration: 0.5, ease: EI }, END - 0.25);
+      show("#hook", 0, END);
+
+      /* =====================================================================
+         2 · BRAND. The site becomes the Bolt Pin (its circle sits where the light was), the pin's tail draws
+         down, then the mark slides left and the wordmark wipes in on "EV-SIENT".
+         ===================================================================== */
+      const B0 = END, MARK0 = { x: 960 - 59, y: 540 - 59 }, MARK1 = { x: 550, y: 400 };
+      show("#brand", B0, V["03-study"] - 0.25);
+      tl.set("#b-mark", { x: MARK0.x, y: MARK0.y }, 0);
+      tl.fromTo("#b-mark", { clipPath: "inset(0px 0px 72px 0px)" }, { clipPath: "inset(0px 0px 0px 0px)", duration: 0.5, ease: EO, immediateRender: false }, B0);
+      tl.fromTo("#b-mark", { scale: 1 }, { scale: 1.04, duration: 0.6, ease: EO, immediateRender: false }, B0);
+      const SLIDE0 = W("02-brand", 2) - 0.32;
+      tl.to("#b-mark", { x: MARK1.x, y: MARK1.y, scale: 1, duration: 0.75, ease: EIO }, SLIDE0);
+      tl.fromTo("#b-word", { clipPath: "inset(0px 100% 0px 0px)", x: -30 }, { clipPath: "inset(0px 0% 0px 0px)", x: 0, duration: 0.7, ease: EO }, SLIDE0 + 0.3);
+      tl.fromTo("#b-desc", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: EO }, SLIDE0 + 0.8);
+      const BX = V["03-study"] - 0.55;
+      tl.to("#lock", { y: -110, opacity: 0, duration: 0.32, ease: EI }, BX);
+
+      /* ---------- the window's camera ----------
+         A pose {x, y, s} centres page point (x, y) (in the 1920×1080 recording) in the 1440×810 view at s× the
+         fit scale, clamped so the recording always fills the view. */
+      const VW = 1440, VH = 810, FIT = VW / 1920;
+      const xf = (p) => {
+        const Kc = FIT * p.s;
+        return { x: clamp(VW / 2 - Kc * p.x, VW - Kc * 1920, 0), y: clamp(VH / 2 - Kc * p.y, VH - Kc * 1080, 0), scale: Kc };
+      };
+      const camOf = (id) => "#sh-" + id + " .cam";
+      const camSet = (id, p, t = 0) => tl.set(camOf(id), xf(p), t);
+      // log-scale zoom, focus point eased with it
+      const camMove = (id, A, B, t0, t1, ease = EIO) => stamp(t0, t1, (t) => {
+        const e = ease(clamp((t - t0) / (t1 - t0)));
+        return [camOf(id), xf({ x: lerp(A.x, B.x, e), y: lerp(A.y, B.y, e), s: Math.exp(lerp(Math.log(A.s), Math.log(B.s), e)) })];
+      });
+      // a cut inside the window: the outgoing shot keeps travelling left, the incoming one arrives from the right
+      const cut = (a, b, t) => {
+        SFX.cuts.push(t);
+        if (a) tl.to("#sh-" + a, { x: -150, opacity: 0, duration: 0.24, ease: EI }, t - 0.24);
+        tl.fromTo("#sh-" + b, { x: 190, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: EO, immediateRender: false }, t - 0.06);
+      };
+      const swap = (a, b, t) => { tl.set("#sh-" + a, { opacity: 0 }, t); tl.set("#sh-" + b, { opacity: 1, x: 0 }, t); };
+      const ring = (sel, t, t1) => {
+        SFX.rings.push(t);
+        tl.fromTo(sel, { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.45, ease: EO, immediateRender: false }, t);
+        if (t1 != null) tl.to(sel, { opacity: 0, duration: 0.25, ease: EI }, t1);
+      };
+
+      /* ---------- the recorded pointer, per film frame, inside each shot's camera ----------
+         Every press (the button going down in the recording) leaves a ripple and a click in the sound. */
+      const CURSOR = '<path d="M6 4 L6 46 L16.5 36.2 L23.4 52.4 L30.6 49.3 L23.8 33.4 L38.2 33.4 Z" fill="#1d1d1f" stroke="#fff" stroke-width="3.2" stroke-linejoin="round" />';
+      Object.entries(SH).forEach(([name, sh]) => {
+        const cam = $(camOf(name));
+        $("#v-" + name).dataset.layoutAllowOverflow = "";
+        const pc = el("svg", { class: "pc", viewBox: "0 0 46 58" }, cam);
+        pc.innerHTML = CURSOR;
+        const f0 = Math.round(sh.start * FPS);
+        sh.cursor.forEach(([x, y, d], k) => {
+          tl.set(pc, { x: x - 3.1, y: y - 2.1, scale: d ? 0.86 : 1 }, (f0 + k) / FPS - 0.008 + (k ? 0 : 0.0001));
+          if (d && (!k || !sh.cursor[k - 1][2])) {
+            const t = (f0 + k) / FPS;
+            const rp = document.createElement("div");
+            rp.className = "ripple";
+            rp.style.left = x + "px"; rp.style.top = y + "px";
+            cam.appendChild(rp);
+            tl.fromTo(rp, { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.5, duration: 0.55, ease: EO, immediateRender: false }, t);
+            // the window sits left of centre for the last three shots
+            SFX.clicks.push([+t.toFixed(3), +(({ fill: -0.3, assistant: -0.3, offline: -0.3 }[name] || 0) + (x / 1920 - 0.5) * 0.5).toFixed(2), name]);
+          }
+        });
+      });
+
+      /* =====================================================================
+         3 · THE STUDY. The window rises with futurecity.andyyaro.com; the camera pushes onto the result tiles
+         on "twelve"; "four published parts" brings the weights card, each part filling on its word, while the
+         page scrolls on to the top candidates underneath.
+         ===================================================================== */
+      const WIN0 = K.WIN0;
+      show("#prod", WIN0, V["08-cta"] - 0.2);
+      tl.fromTo("#win", { y: 170, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.85, ease: EO }, WIN0);
+      tl.fromTo("#glow", { opacity: 0 }, { opacity: 1, duration: 1.0, ease: EO }, WIN0);
+      tl.set("#sh-overview", { opacity: 1 }, 0);
+      const P = {
+        overview0: { x: 960, y: 540, s: 1 }, overview1: { x: 1100, y: 465, s: 1.62 },
+        compare0: { x: 960, y: 560, s: 1.08 }, compare1: { x: 1290, y: 275, s: 2.3 },
+        upload: { x: 960, y: 540, s: 1 },
+        mapcols0: { x: 960, y: 540, s: 1 }, mapcols1: { x: 790, y: 300, s: 1.9 },
+        run0: { x: 960, y: 540, s: 1 }, run1: { x: 1000, y: 830, s: 1.45 },
+        results0: { x: 960, y: 540, s: 1 }, results1: { x: 830, y: 250, s: 1.55 }, why: { x: 1495, y: 300, s: 1.75 },
+        report0: { x: 960, y: 540, s: 1 }, report1: { x: 1090, y: 420, s: 1.45 },
+        fill: { x: 880, y: 540, s: 1.35 }, ask0: { x: 1630, y: 830, s: 1.65 }, ask1: { x: 1630, y: 330, s: 1.65 },
+        offline: { x: 1630, y: 300, s: 1.6 },
+      };
+      ["overview", "compare", "upload", "mapcols", "run", "report", "fill", "assistant", "offline"].forEach((id) =>
+        camSet(id, P[id] || P[id + "0"] || P[{ assistant: "ask0" }[id]]));
+      P.run2 = { x: 980, y: 900, s: 1.75 };
+      camSet("results", P.run2);          // results take over from the run at the same pose, then pull back
+      const TWELVE = W("03-study", 2);
+      camMove("overview", P.overview0, P.overview1, TWELVE - 0.18, TWELVE + 0.9);
+      ring("#r-sites", TWELVE + 0.45, W("03-study", 9) - 0.2);
+      const FOUR = W("03-study", 9);
+      camMove("overview", P.overview1, { x: 960, y: 540, s: 1.08 }, FOUR - 0.1, FOUR + 0.7);
+      tl.to("#dim", { opacity: 1, duration: 0.5, ease: EO }, FOUR - 0.05);
+      tl.fromTo("#parts", { opacity: 0, y: 40, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: EO }, FOUR - 0.05);
+      const PARTS = [["Demand", 45, "#0088ff", 12], ["Feasibility", 30, "#ff8d28", 13], ["Safety", 15, "#00c3d0", 14], ["Equity", 10, "#cb30e0", 16]];
+      let acc = 0;
+      PARTS.forEach(([name, w, col, wi], k) => {
+        const seg = document.createElement("i");
+        seg.style.left = (888 * acc) / 100 + (k ? 2 : 0) + "px";
+        seg.style.width = (888 * w) / 100 - (k ? 2 : 0) + "px";
+        seg.style.background = col;
+        $("#pbar").appendChild(seg);
+        acc += w;
+        const colEl = document.createElement("div");
+        colEl.className = "pcol";
+        colEl.style.left = 56 + k * 232 + "px";
+        colEl.innerHTML = '<div class="n"><i style="background:' + col + '"></i>' + name + '</div><div class="w num">' + w + "<small>%</small></div>";
+        $("#parts").appendChild(colEl);
+        const t = W("03-study", wi) - 0.06;
+        tl.to(seg, { scaleX: 1, duration: 0.55, ease: EO }, t);
+        tl.fromTo(colEl, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: EO }, t);
+      });
+
+      /* =====================================================================
+         4 · HOW SURE. Compare: the chart while "two thousand" counts up, then down to where each score comes
+         from; on "how sure" the camera pushes to Chance of First: 70.8%, 19.0%, 10.2%.
+         ===================================================================== */
+      const CMP = K.CMP;
+      tl.to("#parts", { opacity: 0, x: -120, duration: 0.3, ease: EI }, CMP - 0.3);
+      tl.to("#dim", { opacity: 0, duration: 0.3, ease: EI }, CMP - 0.3);
+      cut("overview", "compare", CMP);
+      const TWO = W("04-stable", 6);
+      tl.fromTo("#count", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.55, ease: EO }, TWO - 0.25);
+      stamp(TWO, TWO + 0.9, (t) => ["#count .v", { innerText: Math.round(2000 * EO(clamp((t - TWO) / 0.9))).toLocaleString("en-US") }]);
+      tl.set("#count .v", { innerText: "2,000" }, TWO + 0.9 + 1 / FPS);
+      SFX.scrolls.push([SH.compare.marks.toParts, SH.compare.marks.toParts + 1.6]);
+      const SURE = W("04-stable", 12);
+      camMove("compare", P.compare0, P.compare1, SURE - 0.3, SURE + 0.8);
+      ring("#r-chance", SURE + 0.55);
+      // the window falls away (EI, down and back); "Now it's your turn" arrives from the same depth
+      const OUT1 = K.OUT1;
+      tl.to("#count", { opacity: 0, x: -80, duration: 0.3, ease: EI }, OUT1 - 0.1);
+      tl.to("#win", { y: 80, scale: 0.92, opacity: 0, filter: "blur(6px)", duration: 0.36, ease: EI }, OUT1);
+      tl.to("#glow", { opacity: 0, duration: 0.36, ease: EI }, OUT1);
+      tl.set("#sh-compare", { opacity: 0 }, OUT1 + 0.4);
+
+      /* =====================================================================
+         5 · YOUR TURN. Big type on the narration; on "Bring" a laptop rises into the light, the planner on its
+         screen, and the camera settles square on it. The screen's picture is the film's own window, held to
+         the screen's four corners frame by frame, so when the laptop falls away the window simply stays.
+         ===================================================================== */
+      const YOURS = C.words["05-yours"];
+      const BRING = W("05-yours", 4);
+      show("#turn", OUT1 + 0.2, BRING + 0.3);
+      [...document.querySelectorAll("#turn-t span")].forEach((s, i) =>
+        tl.fromTo(s, { opacity: 0, scale: 1.12, filter: "blur(8px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: EO }, YOURS[i][1] - 0.05));
+      tl.to("#turn-t", { y: -120, opacity: 0, duration: 0.3, ease: EI }, E.laptop.timing.L0 - 0.24);   // clear before the laptop rises
+
+      const LP = E.laptop, LAP0 = Math.round(LP.timing.L0 * FPS) / FPS, L1 = LP.timing.L1, NL = LP.corners.length;
+      // matrix3d taking the window's 1440×858 box onto a quad (TL, TR, BR, BL), in #winH's own coordinates
+      const quad = (q) => {
+        const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+        const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+        let a, b, c, d, e, f, g, h;
+        if (Math.abs(dx3) < 1e-9 && Math.abs(dy3) < 1e-9) { a = x1 - x0; b = x2 - x1; c = x0; d = y1 - y0; e = y2 - y1; f = y0; g = 0; h = 0; }
+        else {
+          const den = dx1 * dy2 - dx2 * dy1;
+          g = (dx3 * dy2 - dx2 * dy3) / den; h = (dx1 * dy3 - dx3 * dy1) / den;
+          a = x1 - x0 + g * x1; b = x3 - x0 + h * x3; c = x0; d = y1 - y0 + g * y1; e = y3 - y0 + h * y3; f = y0;
+        }
+        const w = 1440, hh = 858;
+        return `matrix3d(${a / w},${d / w},0,${g / w},${b / hh},${e / hh},0,${h / hh},0,0,1,0,${c},${f},0,1)`;
+      };
+      show("#lapwrap", LAP0, L1 + 0.9);
+      tl.set("#win", { y: 0, scale: 1, opacity: 1, filter: "blur(0px)", borderRadius: 4, boxShadow: "0 0px 0px rgba(0,0,0,0), 0 0 0 0px rgba(255,255,255,0)" }, LAP0);
+      tl.set("#sh-upload", { opacity: 1, x: 0 }, LAP0);
+      tl.set("#url-pre", { innerText: "app." }, LAP0);
+      tl.set("#sample", { opacity: 1 }, LAP0);
+      for (let k = 0; k < NL; k++) {
+        const q = LP.corners[k].map(([x, y]) => [x - 240, y - 66]);
+        const t = LAP0 + k / FPS;
+        tl.set("#winH", { "--m": t < L1 + 0.02 ? quad(q) : "none" }, t - 0.008 + (k ? 0 : 0.0001));
+      }
+      tl.set("#winH", { "--m": "none" }, LAP0 + NL / FPS);
+      tl.fromTo("#sheen", { opacity: 1, backgroundPosition: "100% 0" }, { backgroundPosition: "-10% 0", duration: L1 - LAP0, ease: EIO, immediateRender: false }, LAP0);
+      tl.to("#sheen", { opacity: 0, duration: 0.35, ease: EI }, L1 - 0.35);
+      // the window lifts off; the laptop falls back into the dark
+      tl.to("#lapwrap", { scale: 0.86, y: 90, opacity: 0, filter: "blur(12px)", duration: 0.75, ease: EIO }, L1 + 0.08);
+      tl.to("#win", { borderRadius: 18, boxShadow: "0 60px 140px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.10)", duration: 0.6, ease: EO }, L1 + 0.05);
+      tl.to("#glow", { opacity: 1, duration: 0.8, ease: EO }, L1 + 0.1);
+      // the file, carried in by the pointer
+      const UP = SH.upload, uf0 = Math.round(UP.start * FPS), DRAG0 = UP.marks.dragStart, DROP = UP.marks.drop;
+      UP.cursor.forEach(([x, y], k) => {
+        const t = (uf0 + k) / FPS;
+        if (t >= DRAG0 - 0.05 && t <= DROP + 0.3) tl.set("#chip", { x: x + 16, y: y + 20 }, t - 0.008);
+      });
+      tl.to("#chip", { opacity: 1, duration: 0.15, ease: EO }, DRAG0);
+      tl.to("#chip", { scale: 0.5, opacity: 0, duration: 0.25, ease: EI }, DROP);
+
+      /* =====================================================================
+         6 · YOUR DEVICE. "matches your columns": Accept All Matched, 31 matched. "runs the model": Run the Model,
+         and the run's own progress. "Your file never leaves your device": the planner's own promise.
+         ===================================================================== */
+      cut("upload", "mapcols", K.MC);
+      camMove("mapcols", P.mapcols0, P.mapcols1, W("06-device", 2) - 0.3, W("06-device", 2) + 0.5);
+      ring("#r-matched", SH.mapcols.marks.accept + 0.12);
+      cut("mapcols", "run", K.RUN);
+      camMove("run", P.run0, P.run1, K.RUN + 0.2, K.PRESS - 0.1);
+      camMove("run", P.run1, P.run2, K.PRESS, K.RES);          // a slow push while the model runs
+      ring("#r-run", K.PRESS + 0.3, K.RES - 0.1);
+      swap("run", "results", K.RES);
+      camMove("results", P.run2, P.results0, K.RES + 0.05, K.RES + 0.8);
+      const NEVER = W("06-device", 13);
+      tl.fromTo("#badge", { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.55, ease: EO }, NEVER - 0.08);
+
+      /* =====================================================================
+         7 · RESULTS. "every site ranked": down to the ranked table, rank 1 ringed. "exactly why": rank 1 chosen
+         and Why This Score. "download a council-ready report": the Report, and Download .pdf on "one click".
+         ===================================================================== */
+      const RS = V["07-results"];
+      tl.to("#badge", { opacity: 0, x: 60, duration: 0.25, ease: EI }, RS - 0.25);
+      const RK = SH.results.marks;
+      SFX.scrolls.push([RK.toTable, RK.toTable + 0.95], [RK.toWhy, RK.toWhy + 0.7]);
+      camMove("results", P.results0, P.results1, RK.toTable + 0.3, W("07-results", 3) + 0.35);
+      ring("#r-first", W("07-results", 3) + 0.25, RK.pick + 0.2);
+      camMove("results", P.results1, P.why, RK.toWhy, W("07-results", 9) + 0.2);
+      ring("#r-why", W("07-results", 9) - 0.05);
+      cut("results", "report", K.REP);
+      camMove("report", P.report0, P.report1, SH.report.marks.toReport + 0.25, W("07-results", 13) + 0.1);
+      ring("#r-pdf", W("07-results", 13) + 0.05);
+      tl.fromTo("#toast", { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.5, ease: EO }, K.CLICK + 0.3);
+
+      /* =====================================================================
+         8 · AND MORE. The window steps left; three notes arrive on their words: public data, the assistant,
+         offline. The window shows each one, as it happened.
+         ===================================================================== */
+      const MORE = K.MORE;
+      tl.to("#toast", { opacity: 0, x: 60, duration: 0.25, ease: EI }, MORE - 0.4);
+      tl.to("#win", { x: -354, y: 25, scale: 0.7, duration: 0.7, ease: EIO }, MORE - 0.35);
+      tl.to("#glow", { x: -354, y: 25, scale: 0.75, duration: 0.7, ease: EIO }, MORE - 0.35);
+      cut("report", "fill", MORE);
+      const NOTE = [["#m1", 0], ["#m2", 5], ["#m3", 11]];
+      NOTE.forEach(([sel, wi], k) => {
+        const t = W("07b-more", wi) - 0.06;
+        tl.fromTo(sel, { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.55, ease: EO }, t);
+        if (k) tl.to(NOTE[k - 1][0], { opacity: 0.42, duration: 0.4, ease: EO }, t);
+      });
+      cut("fill", "assistant", K.ASK);
+      SFX.keys = SH.assistant.marks.keys || [];
+      camMove("assistant", P.ask0, P.ask1, SH.assistant.marks.send - 0.05, SH.assistant.marks.send + 0.5);
+      cut("assistant", "offline", K.OFF);
+      const OFFT = SH.offline.marks.offline;
+      tl.fromTo("#offline", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.4, ease: EO }, OFFT);
+
+      /* =====================================================================
+         9 · CALL TO ACTION. Everything falls back; the logo, the line on its words, the address and the button.
+         ===================================================================== */
+      const END0 = K.END0;
+      tl.to(["#win", "#glow"], { scale: 0.6, opacity: 0, filter: "blur(8px)", duration: 0.36, ease: EI }, END0);
+      tl.to([".more"], { opacity: 0, x: 80, duration: 0.3, ease: EI }, END0);
+      show("#cta", END0 + 0.3);
+      tl.fromTo("#cta-stage", { scale: 1.12, filter: "blur(8px)", opacity: 0 }, { scale: 1, filter: "blur(0px)", opacity: 1, duration: 1.0, ease: EO }, END0 + 0.3);
+      const CTA = C.words["08-cta"];
+      [...document.querySelectorAll("#c-line span")].forEach((s, i) =>
+        tl.fromTo(s, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: EO }, CTA[3 + i][1] - 0.04));
+      const TRY = W("08-cta", 10);
+      tl.fromTo("#c-pill", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: EO }, TRY - 0.08);
+      tl.fromTo("#c-study", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: EO }, TRY + 0.75);
+      tl.fromTo("#c-fine", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: EO }, TRY + 1.3);
+      const HIT = C.endHit || TRY + 3;
+      tl.fromTo("#c-shine", { backgroundPosition: "100% 0%" }, { backgroundPosition: "0% 0%", duration: 0.9, ease: EIO }, HIT - 0.3);
+      tl.fromTo("#c-glow", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.5, duration: 0.9, ease: EO, immediateRender: false }, HIT);
+      tl.to("#fade", { opacity: 1, duration: 1.0, ease: EI }, DUR - 1.1);
+
+      /* ---------- captions: the narration, white on a dark box ---------- */
+      tl.set("#cc", { innerHTML: "" }, 0);
+      C.caps.forEach(([a, b, text]) => {
+        tl.set("#cc", { innerHTML: "<span>" + text + "</span>" }, a);
+        tl.set("#cc", { innerHTML: "" }, b);
+      });
+
+      // event list for the sound design (sound/design.py), so every sound lands on its frame
+      window.__sfx = {
+        hook: { tp0: HT.TP0, tp1: HT.TP1, d0: HT.D0, end: END, first: FIRST, why: WHY, lights: SFX.lights, top: SFX.top,
+          hero: panX(xyAt(WHY)[HERO][0]) },
+        brand: B0, slide: SLIDE0, word: SLIDE0 + 0.3, brandOut: BX, win0: WIN0,
+        laptop: [LAP0, L1], cuts: SFX.cuts, rings: SFX.rings, clicks: SFX.clicks, keys: SFX.keys, scrolls: SFX.scrolls,
+        drag: [DRAG0, DROP], badge: NEVER - 0.08, toast: K.CLICK + 0.3, parts0: FOUR - 0.05,
+        countIn: TWO - 0.25, count: [TWO, TWO + 0.9], turn: YOURS.slice(0, 4).map((w) => w[1] - 0.05), hit: HIT,
+        out1: OUT1, end0: END0, parts: PARTS.map((p) => W("03-study", p[3]) - 0.06), notes: NOTE.map(([, wi]) => W("07b-more", wi) - 0.06),
+        offline: OFFT, cta: [TRY - 0.08], ctaIn: END0 + 0.3, run: [K.PRESS, K.RES], dur: DUR, beats: C.beats,
+      };
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

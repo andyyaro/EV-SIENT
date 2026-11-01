@@ -1,0 +1,124 @@
+{
+  "fps": 30,
+  "duration": 59.0,
+  "vo": {
+    "01-hook": 1.1,
+    "02-brand": 7.61,
+    "03-study": 9.7,
+    "04-stable": 17.92,
+    "05-yours": 23.88,
+    "06-device": 27.754,
+    "07-results": 34.436,
+    "07b-more": 42.103,
+    "08-cta": 49.054
+  },
+  "captions": [
+    [
+      "03-study",
+      0,
+      7,
+      "We screened twelve public sites in Northern Virginia"
+    ],
+    [
+      "03-study",
+      8,
+      16,
+      "on four published parts: demand, feasibility, safety and equity."
+    ],
+    [
+      "04-stable",
+      0,
+      8,
+      "Then we reweighted the model 2,000 times,"
+    ],
+    [
+      "04-stable",
+      9,
+      16,
+      "to show how sure each rank really is."
+    ],
+    [
+      "05-yours",
+      4,
+      10,
+      "Bring a spreadsheet of your own sites."
+    ],
+    [
+      "06-device",
+      0,
+      4,
+      "The planner matches your columns"
+    ],
+    [
+      "06-device",
+      5,
+      12,
+      "and runs the model right in your browser."
+    ],
+    [
+      "06-device",
+      13,
+      18,
+      "Your file never leaves your device."
+    ],
+    [
+      "07-results",
+      0,
+      3,
+      "See every site ranked,"
+    ],
+    [
+      "07-results",
+      4,
+      9,
+      "exactly why it scored that way,"
+    ],
+    [
+      "07-results",
+      10,
+      18,
+      "and download a council-ready report in one click."
+    ],
+    [
+      "07b-more",
+      0,
+      4,
+      "Fill gaps with public data,"
+    ],
+    [
+      "07b-more",
+      5,
+      9,
+      "ask the built-in assistant,"
+    ],
+    [
+      "07b-more",
+      10,
+      14,
+      "and keep planning even offline."
+    ]
+  ],
+  "music": {
+    "file": "assets/audio/music/retro-funk-energetic.mp3",
+    "credit": "Retro Funk Energetic, Music_Unlimited, Pixabay (Pixabay Content License)",
+    "edit": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        17.666,
+        50.805
+      ],
+      [
+        48.734,
+        94.3
+      ]
+    ],
+    "endHit": 102.067,
+    "xfade": 0.03,
+    "target_lufs": -18.0,
+    "duck_db": -8.0
+  },
+  "sfx_gain_db": 4.0
+}

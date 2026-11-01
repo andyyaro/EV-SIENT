@@ -1,0 +1,65 @@
+{
+ "01-hook": {
+  "file": "01-hook.wav",
+  "duration": 4.94,
+  "text": "Every city wants more EV chargers. Few can show where the first ones should go, and why.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "02-brand": {
+  "file": "02-brand.wav",
+  "duration": 1.18,
+  "text": "This is EV-SIENT.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "03-study": {
+  "file": "03-study.wav",
+  "duration": 7.48,
+  "text": "We screened twelve public sites in Northern Virginia on four published parts: demand, feasibility, safety and equity.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "04-stable": {
+  "file": "04-stable.wav",
+  "duration": 4.74,
+  "text": "Then we reweighted the model two thousand times, to show how sure each rank really is.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "05-yours": {
+  "file": "05-yours.wav",
+  "duration": 2.95,
+  "text": "Now it's your turn. Bring a spreadsheet of your own sites.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "06-device": {
+  "file": "06-device.wav",
+  "duration": 6.04,
+  "text": "The planner matches your columns and runs the model right in your browser. Your file never leaves your device.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "07-results": {
+  "file": "07-results.wav",
+  "duration": 6.22,
+  "text": "See every site ranked, exactly why it scored that way, and download a council-ready report in one click.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "07b-more": {
+  "file": "07b-more.wav",
+  "duration": 5.15,
+  "text": "Fill gaps with public data, ask the built-in assistant, and keep planning even offline.",
+  "voice": "af_heart",
+  "speed": 1.0
+ },
+ "08-cta": {
+  "file": "08-cta.wav",
+  "duration": 4.19,
+  "text": "EV-SIENT. Plan smarter charging with your own data. Try it free today.",
+  "voice": "af_heart",
+  "speed": 1.0
+ }
+}

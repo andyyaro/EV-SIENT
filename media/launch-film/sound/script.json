@@ -1,0 +1,40 @@
+[
+ {
+  "key": "01-hook",
+  "text": "Every city wants more EV chargers. Few can show where the first ones should go, and why."
+ },
+ {
+  "key": "02-brand",
+  "text": "This is EV-SIENT.",
+  "speak": "This is E V shent."
+ },
+ {
+  "key": "03-study",
+  "text": "We screened twelve public sites in Northern Virginia on four published parts: demand, feasibility, safety and equity."
+ },
+ {
+  "key": "04-stable",
+  "text": "Then we reweighted the model two thousand times, to show how sure each rank really is."
+ },
+ {
+  "key": "05-yours",
+  "text": "Now it's your turn. Bring a spreadsheet of your own sites."
+ },
+ {
+  "key": "06-device",
+  "text": "The planner matches your columns and runs the model right in your browser. Your file never leaves your device."
+ },
+ {
+  "key": "07-results",
+  "text": "See every site ranked, exactly why it scored that way, and download a council-ready report in one click."
+ },
+ {
+  "key": "07b-more",
+  "text": "Fill gaps with public data, ask the built-in assistant, and keep planning even offline."
+ },
+ {
+  "key": "08-cta",
+  "text": "EV-SIENT. Plan smarter charging with your own data. Try it free today.",
+  "speak": "E V shent. Plan smarter charging with your own data. Try it free today."
+ }
+]

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hook flight</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<style>
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #06080c; }
+  #acc { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  #map { position: absolute; left: 0; top: 0; width: 3840px; height: 2160px; }
+  #acc { z-index: 2; }
+  .maplibregl-control-container { display: none; }
+</style>
+<script src="../assets/cues.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<canvas id="acc" width="1920" height="1080"></canvas>
+<script type="module">
+/* The film's opening: a night flight over the 12 real candidate sites in Northern Virginia, from OpenStreetMap
+   data (OpenFreeMap tiles), diving onto rank 1, Fairfax County Government Center.
+
+   The camera is a pure function of film time, so any frame can be rendered alone. renderFrame(f) waits for
+   every tile, then averages sub-frames across a half-frame shutter into #acc (motion blur), as many as the
+   camera's speed at that frame needs. Lights, rings and copy are drawn by the film over this, at the
+   positions this page reports. */
+import * as maplibregl from './vendor/maplibre-gl.mjs';
+maplibregl.setWorkerUrl(new URL('./vendor/maplibre-gl-worker.mjs', location.href).href);
+
+const FPS = 30, W = 1920, H = 1080;
+const C = window.CUES;
+const word = (i) => C.words['01-hook'][i][1];
+const T_FIRST = word(11), T_WHY = word(16);
+const D0 = T_WHY - 0.6;                 // the camera settles as "first" lights the three, then dives
+const END = C.vo['02-brand'] - 0.3;     // the cut to the Bolt Pin, on the music's drop
+const SITES = await (await fetch('sites.json')).json();
+const HERO = SITES.find((s) => s.rank === 1);
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const EI = (p) => (p <= 0 ? 0 : 2 ** (10 * (p - 1)));
+const EO = (p) => (p >= 1 ? 1 : 1 - 2 ** (-10 * p));
+const EIO = (p) => (p < 0.5 ? EI(2 * p) / 2 : (1 + EO(2 * p - 1)) / 2);
+const sine = (p) => 0.5 - 0.5 * Math.cos(Math.PI * clamp(p));
+
+const style = {
+  version: 8,
+  glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+  sources: { omt: { type: 'vector', url: 'https://tiles.openfreemap.org/planet' } },
+  sky: {
+    'sky-color': '#0a1222', 'horizon-color': '#16284a', 'fog-color': '#06080c',
+    'sky-horizon-blend': 0.7, 'horizon-fog-blend': 0.75, 'fog-ground-blend': 0.55, 'atmosphere-blend': 0,
+  },
+  light: { anchor: 'viewport', color: '#dce8ff', intensity: 0.5, position: [1.15, 205, 32] },
+  layers: [
+    { id: 'bg', type: 'background', paint: { 'background-color': '#06080c' } },
+    { id: 'landuse', type: 'fill', source: 'omt', 'source-layer': 'landuse', filter: ['in', ['get', 'class'], ['literal', ['residential', 'commercial', 'retail', 'industrial']]], paint: { 'fill-color': '#0a0d14', 'fill-opacity': 0.9 } },
+    { id: 'green', type: 'fill', source: 'omt', 'source-layer': 'landcover', filter: ['in', ['get', 'class'], ['literal', ['wood', 'grass', 'farmland']]], paint: { 'fill-color': '#070b0b', 'fill-opacity': 0.7 } },
+    { id: 'water', type: 'fill', source: 'omt', 'source-layer': 'water', paint: { 'fill-color': '#0a1424' } },
+    { id: 'river', type: 'line', source: 'omt', 'source-layer': 'waterway', paint: { 'line-color': '#0d1a2e', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.6, 16, 4] } },
+    { id: 'minor', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['in', ['get', 'class'], ['literal', ['minor', 'service']]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#8fa6d0', 'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.14, 13, 0.26, 17, 0.34], 'line-width': ['interpolate', ['exponential', 1.6], ['zoom'], 9, 0.25, 13, 0.9, 18, 9] } },
+    { id: 'major-glow', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['in', ['get', 'class'], ['literal', ['primary', 'secondary', 'tertiary', 'trunk']]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#2f6dff', 'line-opacity': 0.22, 'line-blur': ['interpolate', ['linear'], ['zoom'], 9, 2, 16, 10], 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 9, 2.5, 13, 6, 18, 40] } },
+    { id: 'major', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['in', ['get', 'class'], ['literal', ['primary', 'secondary', 'tertiary', 'trunk']]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#c2d4f4', 'line-opacity': 0.62, 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 9, 0.5, 13, 1.6, 18, 14] } },
+    { id: 'motorway-glow', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['==', ['get', 'class'], 'motorway'],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#3d82ff', 'line-opacity': 0.34, 'line-blur': ['interpolate', ['linear'], ['zoom'], 9, 3, 16, 14], 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 9, 4, 13, 10, 18, 60] } },
+    { id: 'motorway', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['==', ['get', 'class'], 'motorway'],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#dbe7ff', 'line-opacity': 0.82, 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 9, 0.9, 13, 2.6, 18, 22] } },
+    { id: 'buildings', type: 'fill-extrusion', source: 'omt', 'source-layer': 'building', minzoom: 13,
+      paint: {
+        'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 6], 0, '#1f2940', 25, '#2b3858', 70, '#3b4d78'],
+        'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 15, ['coalesce', ['get', 'render_height'], 6]],
+        'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+        'fill-extrusion-opacity': 0.94,
+        'fill-extrusion-vertical-gradient': true,
+      } },
+  ],
+};
+
+const map = new maplibregl.Map({
+  container: 'map', style, interactive: false, attributionControl: false, fadeDuration: 0, maxPitch: 75,
+  canvasContextAttributes: { antialias: true, preserveDrawingBuffer: true },
+  center: [-77.44, 38.73], zoom: 10.4, pitch: 55, bearing: -25,
+});
+await new Promise((res) => map.once('load', res));
+
+// ------------------------------------------------------------------ the camera, as a function of film time
+// The map is drawn at twice the size and one zoom level closer, then reduced: finer streets and clean edges.
+// Zooms below are what the viewer sees; jump() adds the offset.
+const SS = 2, ZO = 1;
+const jump = (c) => map.jumpTo({ ...c, zoom: c.zoom + ZO });
+const project = (ll) => { const p = map.project(ll); return { x: p.x / SS, y: p.y / SS }; };
+const unproject = (x, y) => map.unproject([x * SS, y * SS]);
+
+const TP0 = C.words['01-hook'][5][1] + 0.35;  // on "chargers" the camera starts to crane up and back
+const TP1 = T_FIRST - 0.06;             // the whole region is in view as "first" lights the three
+const M_PER_DEG = 111320;
+// 1. a low glide over Fairfax City at night, already moving on the first frame, easing as it ends
+const G0 = { lng: -77.3080, lat: 38.8452, zoom: 14.75, pitch: 66, bearing: -64 };
+const GLIDE_M = 640;
+function glide(t) {
+  const p = clamp(t / TP0), e = 1 - (1 - p) ** 2;
+  const br = (G0.bearing * Math.PI) / 180;
+  const d = GLIDE_M * e;
+  return {
+    center: [G0.lng + (d * Math.sin(br)) / (M_PER_DEG * Math.cos((G0.lat * Math.PI) / 180)), G0.lat + (d * Math.cos(br)) / M_PER_DEG],
+    zoom: G0.zoom + 0.12 * e, pitch: G0.pitch, bearing: G0.bearing + 6 * e,
+  };
+}
+// 2. the region, all twelve sites in view
+const WIDE = { center: [-77.446, 38.722], zoom: 10.15, pitch: 50, bearing: -20 };
+const WIDE2 = { center: [-77.440, 38.726], zoom: 10.22, pitch: 52, bearing: -17 };
+// the region sits low in the frame, under the headline: each centre moves to the point now DROP px above it
+const DROP = 70;
+for (const c of [WIDE, WIDE2]) { jump(c); const q = unproject(W / 2, H / 2 - DROP); c.center = [q.lng, q.lat]; }
+function pull(t) {
+  const g = glide(TP0), u = EIO(clamp((t - TP0) / (TP1 - TP0)));
+  const zoom = lerp(g.zoom, WIDE.zoom, u);
+  // the centre moves with the visible span, so the picture recedes evenly instead of sliding
+  const s0 = 2 ** -g.zoom, s1 = 2 ** -WIDE.zoom, w = (2 ** -zoom - s0) / (s1 - s0);
+  return { center: [lerp(g.center[0], WIDE.center[0], w), lerp(g.center[1], WIDE.center[1], w)], zoom,
+    pitch: lerp(g.pitch, WIDE.pitch, u), bearing: lerp(g.bearing, WIDE.bearing, u) };
+}
+function hold(t) {
+  const u = sine((t - TP1) / (D0 - TP1));
+  return { center: [lerp(WIDE.center[0], WIDE2.center[0], u), lerp(WIDE.center[1], WIDE2.center[1], u)],
+    zoom: lerp(WIDE.zoom, WIDE2.zoom, u), pitch: lerp(WIDE.pitch, WIDE2.pitch, u), bearing: lerp(WIDE.bearing, WIDE2.bearing, u) };
+}
+const Z_END = 17.6, PITCH_END = 64, BEARING_END = 14;
+jump(WIDE2);
+const S0 = project([HERO.lon, HERO.lat]);
+
+function place(cam, target, at) {
+  // Find the centre that puts `target` at screen point `at` for this zoom, pitch and bearing.
+  let c = [target.lon, target.lat];
+  for (let i = 0; i < 8; i++) {
+    jump({ ...cam, center: c });
+    const p = project([target.lon, target.lat]);
+    const dx = p.x - at.x, dy = p.y - at.y;
+    if (Math.hypot(dx, dy) < 0.05) break;
+    const q = unproject(W / 2 + dx, H / 2 + dy);
+    c = [q.lng, q.lat];
+  }
+  return { ...cam, center: c };
+}
+
+function camera(t) {
+  if (t <= TP0) return glide(t);
+  if (t <= TP1) return pull(t);
+  if (t <= D0) return hold(t);
+  // 3. the dive onto rank 1
+  const u = clamp((t - D0) / (END - D0));
+  const zoom = lerp(WIDE2.zoom, Z_END, u ** 2.6);        // log scale, accelerating into the cut
+  const pitch = lerp(WIDE2.pitch, PITCH_END, sine(u));
+  const bearing = lerp(WIDE2.bearing, BEARING_END, sine(u));
+  const m = EIO(clamp(u / 0.8));
+  return place({ zoom, pitch, bearing }, HERO, { x: lerp(S0.x, W / 2, m), y: lerp(S0.y, H / 2, m) });
+}
+
+function idle() {
+  return new Promise((res) => {
+    let done = false;
+    const fin = () => { if (!done) { done = true; res(); } };
+    map.once('idle', fin);
+    map.triggerRepaint();
+    setTimeout(fin, 30000);
+  });
+}
+
+// how far the picture moves in one shutter at time t (px), to choose the number of sub-frames
+function travel(t, shutter) {
+  const pts = [[160, 160], [W - 160, 160], [W / 2, H / 2], [160, H - 160], [W - 160, H - 160]];
+  jump(camera(t));
+  const ll = pts.map((p) => unproject(p[0], p[1]));
+  jump(camera(t + shutter / FPS));
+  return Math.max(...ll.map((q, i) => { const p = project(q); return Math.hypot(p.x - pts[i][0], p.y - pts[i][1]); }));
+}
+
+const acc = document.getElementById('acc').getContext('2d');
+
+window.renderFrame = async (f, opts = {}) => {
+  const shutter = opts.shutter ?? 0.5, maxSub = opts.maxSub ?? 12;
+  const t = f / FPS;
+  const n = Math.max(1, Math.min(maxSub, Math.ceil(travel(t, shutter) / 3)));
+  acc.globalCompositeOperation = 'copy';
+  for (let k = 0; k < n; k++) {
+    const tk = t + (shutter * ((k + 0.5) / n - 0.5)) / FPS;
+    jump(camera(tk));
+    await idle();
+    acc.globalAlpha = 1 / (k + 1);
+    acc.drawImage(map.getCanvas(), 0, 0, W, H);
+    acc.globalCompositeOperation = 'source-over';
+  }
+  acc.globalAlpha = 1;
+  // where the sites are on this frame (at its centre time), for the film's lights
+  jump(camera(t));
+  const sites = SITES.map((s) => {
+    const p = project([s.lon, s.lat]);
+    return [s.id, Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10];
+  });
+  return { f, t, sub: n, zoom: map.getZoom() - ZO, pitch: map.getPitch(), bearing: map.getBearing(), sites };
+};
+window.timing = { TP0, TP1, D0, END, T_FIRST, T_WHY, hero: HERO.id };
+window.mapReady = true;
+</script>
+</body>
+</html>
