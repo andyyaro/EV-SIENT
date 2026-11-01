@@ -52,7 +52,12 @@ def _edge_config():
 
 def test_edge_config_adds_and_removes_the_assistant_behaviour() -> None:
     edge = _edge_config()
-    live = json.loads((REPO / "platform/infra/distribution-config.json").read_text())
+    # The recorded config has carried the assistant since 2026-10-19 (42b05a1), so start from it
+    # with the assistant taken out: the distribution as it was before, and after a removal.
+    recorded = json.loads((REPO / "platform/infra/distribution-config.json").read_text())
+    live = edge.transform(recorded, None, None, remove=True)
+    assert edge.ORIGIN_ID in {o["Id"] for o in recorded["Origins"]["Items"]}
+    assert edge.ORIGIN_ID not in {o["Id"] for o in live["Origins"]["Items"]}
     domain = "abc123def456.lambda-url.us-east-2.on.aws"
     new = edge.transform({"ETag": "E1", "DistributionConfig": live}, domain, "E2ABCDEFGHIJK", remove=False)
     origins = {o["Id"]: o for o in new["Origins"]["Items"]}
@@ -74,6 +79,9 @@ def test_edge_config_adds_and_removes_the_assistant_behaviour() -> None:
     assert edge.transform(new, None, None, remove=True) == live
     with pytest.raises(SystemExit):
         edge.transform(live, "evil.example.com", "E2ABCDEFGHIJK", remove=False)
+    # Adding the assistant back with the recorded origin's own values gives the recorded config.
+    rec = next(o for o in recorded["Origins"]["Items"] if o["Id"] == edge.ORIGIN_ID)
+    assert edge.transform(live, rec["DomainName"], rec["OriginAccessControlId"], remove=False) == recorded
 
 
 def test_csp_already_allows_the_same_origin_api() -> None:

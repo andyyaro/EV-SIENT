@@ -31,6 +31,18 @@ READABLE = [p for p in TRACKED if assistant._is_allowed_repo_path(p)]
 
 #: Placeholder addresses that are part of a public page's markup, not anyone's identity.
 PLACEHOLDER_EMAILS = {"name@agency.gov"}
+# Not addresses: files named at a pixel density, like a map sprite's "ofm@2x.png".
+DENSITY_FILE_NAME = re.compile(r"@\d+x\.(?:png|jpe?g|webp|svg|json)$")
+ACR = "docs/accessibility/ACR.md"
+
+
+def _published_accessibility_contact() -> set[str]:
+    """The one address the owner chose to publish (2026-10-19), as the accessibility contact on the
+    planner's public accessibility page and in its conformance report. Read from the report's own
+    contact row, so it is written in one place, and allowed in that file only."""
+    text = (REPO / ACR).read_text(encoding="utf-8")
+    m = re.search(r"^\| Contact information \| (\S+@\S+) \|$", text, re.M)
+    return {m.group(1)} if m else set()
 
 
 @pytest.mark.parametrize("path", [
@@ -86,7 +98,10 @@ def test_no_readable_file_carries_an_email_address():
             text = (REPO / path).read_text(encoding="utf-8")
         except (UnicodeDecodeError, FileNotFoundError):
             continue
-        emails = set(assistant.EMAIL_PATTERN.findall(text)) - PLACEHOLDER_EMAILS
+        emails = {e for e in assistant.EMAIL_PATTERN.findall(text) if not DENSITY_FILE_NAME.search(e)}
+        emails -= PLACEHOLDER_EMAILS
+        if path == ACR:
+            emails -= _published_accessibility_contact()
         if emails:
             found[path] = sorted(emails)
     assert found == {}, f"readable files carry email addresses: {sorted(found)}"
