@@ -140,3 +140,19 @@ def show(page, screen: str) -> None:
         page.locator('[data-explore-state="done"], [data-explore-state="unavailable"], [data-explore-state="error"]').first.wait_for(
             timeout=BOOT_TIMEOUT_MS)
     settle(page)
+
+
+# The tallest image Chromium and WebKit will write. The Report screen's preview on a phone is
+# taller than that (CI, 2026-10-31: WebKit at 390x844), and a screenshot is evidence, not a check:
+# every check reads the page itself.
+MAX_SHOT_PX = 32767
+
+
+def screenshot(page, path: str, full_page: bool = True, **kw) -> None:
+    """A screenshot that never fails for length: a full page past MAX_SHOT_PX is cut at that length."""
+    if full_page:
+        h, w, dpr = page.evaluate(
+            "() => [document.documentElement.scrollHeight, document.documentElement.clientWidth, devicePixelRatio]")
+        if h * dpr > MAX_SHOT_PX:
+            kw["clip"] = {"x": 0, "y": 0, "width": w, "height": (MAX_SHOT_PX - 1) // dpr}
+    page.screenshot(path=path, full_page=full_page, **kw)

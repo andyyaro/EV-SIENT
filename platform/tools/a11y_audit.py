@@ -79,7 +79,7 @@ def axe_audit(p, args, origin: str, out: Path) -> tuple[list, int]:
                     if args.shots and contrast == "more":
                         shot = out / "contrast" / name / f"{size}-{theme}-{screen}.jpg"
                         shot.parent.mkdir(parents=True, exist_ok=True)
-                        page.screenshot(path=str(shot), full_page=True, type="jpeg", quality=70)
+                        pf.screenshot(page, str(shot), full_page=True, type="jpeg", quality=70)
         if args.map and name == args.browsers.split(",")[0]:
             page.set_viewport_size({"width": 1440, "height": 900})
             page.emulate_media(color_scheme="light", contrast="no-preference")

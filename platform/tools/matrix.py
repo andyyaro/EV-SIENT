@@ -139,7 +139,7 @@ def main() -> int:
                         if not args.no_shots:
                             shot = out / name / theme / f"{w}x{h}-{screen}.jpg"
                             shot.parent.mkdir(parents=True, exist_ok=True)
-                            page.screenshot(path=str(shot), full_page=screen != "compare", type="jpeg", quality=70)
+                            pf.screenshot(page, str(shot), full_page=screen != "compare", type="jpeg", quality=70)
                         errors = watch.errors[before:]
                         bad = bool(found["hscroll"] or found["covered"] or found["small"] or found["primarySmall"] or errors)
                         failures += bad
