@@ -1,23 +1,97 @@
+[![EV-SIENT launch film: a night flight over the twelve candidate sites in Northern Virginia, under the headline "Every city wants more EV chargers. Few can show where the first ones should go, and why." Select to watch the 59-second film.](docs/assets/readme/launch-film.jpg)](https://futurecity.andyyaro.com/film.html)
+
+**[Watch the 59-second launch film](https://futurecity.andyyaro.com/film.html)** (narrated, captions in
+the picture) · [Download the MP4, 45 MB](https://futurecity.andyyaro.com/film/ev-sient-launch.mp4) ·
+[How it was made](media/launch-film/)
+
 # Future City Fellowship - Safe, Code-Responsive EV Charging Planning
 
-Decision-support platform for planning safe, code-responsive public EV charging in
-**Fairfax City**, **Fairfax County** and **Prince William County**, Virginia.
+**EV-SIENT** (Site Evaluation & Navigation Tool) is a decision-support platform for planning safe,
+code-responsive public EV charging in **Fairfax City**, **Fairfax County** and **Prince William
+County**, Virginia, and a planner that runs the same model on anyone's own sites.
 
 ![tests](https://github.com/andyyaro/Future-City-Fellowship-/actions/workflows/tests.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
 ![matlab](https://img.shields.io/badge/MATLAB-R2025b%20suite%2049%2F49%20(synthetic%20fixture)-B08948)
+![licence](https://img.shields.io/badge/licence-Apache--2.0-1B4332)
 
-![Lifecycle cost in net present value across three horizons for three build cases - defer, overbuild now, and staged. Staged costs less than overbuild at every horizon.](docs/assets/readme/project-overview.png)
+| | Live at | What it is |
+|---|---|---|
+| **The study** | [futurecity.andyyaro.com](https://futurecity.andyyaro.com) | The twelve-site screening: ranks, the four weighted parts behind each score, how stable each rank is, port plans to 2056 |
+| **The planner** | [app.futurecity.andyyaro.com](https://app.futurecity.andyyaro.com) | Bring a spreadsheet of your own sites; the unmodified model runs in your browser and your file never leaves your device |
 
-Portfolio lifecycle cost, net present value, base escalation - from the canonical
-`milestone2_v3` run. **STG** (staged, the recommendation) costs less than **OVB** (energise the
-whole future-ready pathway in 2026) at every horizon: **$1.49M vs $1.85M** by 2036, **$2.92M vs
-$3.36M** by 2056 (contract v3). **DEF** is a floor comparator and not a plan - it lays the
-pathway and energises **no ports at all**, which is why it sits flat at $0.62M and why the
-lowest bars on this chart are the ones that charge nobody. The chart itself is a capture of the
-earlier contract v1 run, the `legacy_v2`-era 48-port plan ($1.56M vs $1.87M by 2036, $3.01M vs
-$3.41M by 2056); the comparison it shows holds under both. Screening-class estimates for
-comparing cases against each other. Never a budget, quote or bid.
+## See it
+
+### The study: [futurecity.andyyaro.com](https://futurecity.andyyaro.com)
+
+![The study site's overview: 12 sites screened, 2 in Tier 1, 25 starter ports now and 47 future-ready, data confidence Low at all 12 sites, under a note that says what the site is and is not.](docs/assets/readme/study-site-overview.jpg)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/readme/study-site-compare.jpg" alt="Compare: the readiness score of all twelve sites as bars coloured by tier. Fairfax County Government Center leads at 53.4, City of Fairfax Regional Library is second at 51.8."></td>
+<td width="50%"><img src="docs/assets/readme/study-site-score-parts.jpg" alt="Where each score comes from: each site's score split into demand (45), feasibility (30), safety (15) and equity (10), with its rank range and chance of first place across 2,000 random weightings: 70.8, 19.0 and 10.2 percent for the top three."></td>
+</tr>
+<tr>
+<td>Every site's readiness score, coloured by decision tier.</td>
+<td>Each score split into its four weighted parts, and how sure each rank is after 2,000 reweightings.</td>
+</tr>
+</table>
+
+### The planner: [app.futurecity.andyyaro.com](https://app.futurecity.andyyaro.com)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/readme/planner-start.jpg" alt="The planner's Start screen: start a new project, open a project file, or try the Example City sample, with a note that the file stays on the device."></td>
+<td width="50%"><img src="docs/assets/readme/planner-results.jpg" alt="Results for the Example City sample: six ranked sites, a map with numbered markers, and the top site's readiness of 47.7 with its score breakdown and rank stability."></td>
+</tr>
+<tr>
+<td>Start a project, reopen one, or try the invented Example City sample.</td>
+<td>Ranked sites, a map, each site's score breakdown and how stable its rank is.</td>
+</tr>
+<tr>
+<td><img src="docs/assets/readme/planner-why-this-score.jpg" alt="Why This Score: every driver of the top site's score as a bar, with the points it adds and the most it could add, grouped by demand, feasibility and safety."></td>
+<td><img src="docs/assets/readme/planner-report.jpg" alt="Report: downloads for an accessible web page, a tagged PDF, a Word document, CSV and Excel tables, all model outputs and the project file, with a preview of the Example City report."></td>
+</tr>
+<tr>
+<td>Why each site scores what it does, driver by driver.</td>
+<td>A council-ready report (web page, tagged PDF, Word), the tables and a project file, all made on the device.</td>
+</tr>
+</table>
+
+The six steps are Upload, Map Columns, Check, Public Data, Run and Results, then Explore, Your
+Index and Report. Public Data can fill gaps from a public data hub that covers six states
+(DEC-028). Columns the model does not use are carried and shown, never scored (DEC-026); Explore
+describes them and Your Index lets a planner rank by them, labelled as their own
+([flexible analysis](docs/FLEXIBLE_ANALYSIS.md)). An optional assistant sees the question and the step the
+planner is on, plus only the summaries the planner agrees to share, never rows; it runs under a
+hard $5 monthly cap. The planner installs and works offline.
+Screens above use Example City, an invented sample. [More on the planner](platform/README.md).
+
+### The analysis
+
+<table>
+<tr>
+<td width="50%"><img src="dashboard/static/04_lifecycle_cost.png" alt="Lifecycle cost: staged pilots cost less than a broad buildout at every horizon, avoiding $0.36M by 2036, $0.38M by 2046 and $0.44M by 2056."></td>
+<td width="50%"><img src="dashboard/static/02_starter_vs_pathway.png" alt="Start small, stay expandable: 25 starter ports inside a 47-port pathway, site by site."></td>
+</tr>
+<tr>
+<td>Staged pilots cost less than building out now, at every horizon.</td>
+<td>25 starter ports inside a 47-port future-ready pathway.</td>
+</tr>
+<tr>
+<td><img src="dashboard/static/03_ports_three_horizons.png" alt="Active ports at 2026, 2036, 2046 and 2056 on the base and high adoption paths, reaching the 47-port pathway ceiling on the high path by 2046."></td>
+<td><img src="dashboard/static/05_net_co2e.png" alt="Net avoided CO2e grows to about 173 to 260 tonnes a year by 2056 on the base and high paths."></td>
+</tr>
+<tr>
+<td>Active ports as adoption grows, up to the pathway ceiling.</td>
+<td>Net avoided CO2e, base and high adoption paths.</td>
+</tr>
+</table>
+
+Portfolio net present cost, base escalation, 3% real discount, from the authoritative contract v3
+(DEC-027): staged **$1.49M vs $1.85M** for a broad buildout by 2036, **$2.21M vs $2.60M** by 2046,
+**$2.92M vs $3.36M** by 2056. Screening-class estimates for comparing cases against each other,
+never a budget, quote or bid. All nine charts are in [`dashboard/static/`](dashboard/static/).
 
 ## Start here
 
@@ -115,15 +189,22 @@ flowchart LR
     C --> E[Excel workbook<br/>excel/]
     C --> F[Static dashboard + Tableau<br/>dashboard/]
     C --> G[Reports + presentation<br/>reports/ · presentation/]
-    C --> H[Platform - two tiers<br/>site/platform/]
+    C --> S[Study site<br/>futurecity.andyyaro.com<br/>site/redesign/]
+    C --> H[Desktop bundle<br/>site/platform/]
     C --> I[3D explorer<br/>explorer/]
-    H --> J[NFC field layer<br/>tag → form → CSV]
-    J -.corrections.-> A
+    C --> W[Original site + NFC field layer<br/>site/www/ · tag → form → CSV]
+    W -.corrections.-> A
+    B --> P[Planner<br/>app.futurecity.andyyaro.com<br/>the same model in the browser<br/>on a planner's own sites]
+    U[A planner's own file<br/>never leaves the device] --> P
 ```
 
-Python is the single producer; MATLAB, Excel, Tableau, the platform, the 3D explorer and every
+Python is the single producer; MATLAB, Excel, Tableau, both sites, the 3D explorer and every
 visual consume the same validated contract, so no two artifacts can disagree about a port
 count, a year, or whether capacity is a placeholder (`capacity_basis` travels with every row).
+The planner is the one surface that runs the model rather than reading its output: it ships the
+unmodified `fcf_m2` package to the browser (Pyodide, DEC-024) and never carries the study's real
+inputs (DEC-016). Three surfaces still read the frozen contract v1 until they are rebuilt (DEC-027):
+the Excel workbook, the desktop bundle in `site/platform/` and the published Tableau workbook.
 
 The dotted arrow is the point of the whole design: a tapped NFC tag opens a form that feeds
 observations back into the inputs, so the study can be corrected by someone standing at the site
@@ -169,7 +250,7 @@ never against real site data; see
 | Path | Contents |
 |---|---|
 | [`src/fcf_m2/`](src/README.md) | The Python model (scoring, right-sizing, waits, economics, emissions, confidence, triggers, contract) |
-| [`data/`](data/README.md) | Site inputs, scoring anchors, provenance, cached GIS boundaries, the canonical contract |
+| [`data/`](data/README.md) | Site inputs, scoring anchors, provenance, cached GIS boundaries, the contracts (v3 authoritative, v1 and v2 frozen) |
 | [`tests/`](tests/README.md) | The test suite incl. golden legacy fixtures and contract validation |
 | [`matlab/`](matlab/README.md) | Site-grid load-behavior model (session-based profiles, capacity guard, managed charging) |
 | [`excel/`](excel/README.md) | Updated grid-planning workbook with live reconciliation checks |
@@ -178,9 +259,12 @@ never against real site data; see
 | [`presentation/`](presentation/README.md) | Final deck, speaker notes, timing runbook, Q&A backup |
 | [`docs/`](docs/README.md) | Architecture, methodology, standards, operations, human-action packages |
 | [`scripts/`](scripts/README.md) | Verification harness and artifact builders |
-| `site/` | The deployed surfaces: the public website (`site/www/`) and the platform bundle (`site/platform/`) |
+| [`platform/`](platform/README.md) | The planner at app.futurecity.andyyaro.com: the app (`app/`), its assistant proxy (`assistant/`), the public data hub (`hub/`), hosting (`infra/`) and release checks (`tools/`) |
+| [`site/redesign/`](site/redesign/README.md) | The study site at futurecity.andyyaro.com (HIG Native design, no build step) |
+| `site/` | The other deployed surfaces: the original website and NFC pages (`site/www/`, futurecityfellowship.andyyaro.com) and the desktop bundle (`site/platform/`) |
+| [`media/launch-film/`](media/launch-film/README.md) | The 59-second launch film's source: composition, recordings scripts, map flight, 3D laptop, sound design |
 | `explorer/` | The 3D site explorer - Cesium viewer, 12 building models, its own ETL |
-| `infra/` | The public assistant's Lambda source (`infra/assistant/`), deployed by `scripts/deploy_assistant.py` |
+| `infra/` | The Assistant Lambda behind both sites' Assistant pages (`infra/assistant/`), deployed by `scripts/deploy_assistant.py` |
 
 ## Key documents
 
@@ -189,6 +273,11 @@ never against real site data; see
 - **[Gap-closure status](reports/milestone-2/Milestone_2_Gap_Closure_Status.md)** - all 52 fellowship criteria dispositioned
 - **[Standards application matrix](docs/standards/FINAL_STANDARDS_APPLICATION_MATRIX.md)** - UL 2594 + UL 3600 highlighted; adopted-vs-latest editions
 - **[Proposed standard concept](docs/standards/PROPOSED_MUNICIPAL_EV_STANDARD_CONCEPT.md)** - fellowship design exercise, not a UL/ULSE proposal
+- **[The planner](platform/README.md)** - how app.futurecity.andyyaro.com runs the model on a visitor's own file, and the rules its code keeps
+- **[Flexible analysis](docs/FLEXIBLE_ANALYSIS.md)** - the column dictionary, Explore and Your Index: what the planner does with columns the model does not score
+- **[Accessibility Conformance Report](docs/accessibility/ACR.md)** - the planner against WCAG 2.1 and 2.2, Levels A and AA; self-assessed, with its evidence
+- **[Rank stability](docs/methodology/rank_stability.md)** - how sure each rank is, from one-weight sweeps and 2,000 random weightings
+- **[Decisions log](docs/operations/v4-program/DECISIONS.md)** - every decision since the V4 program began, DEC-000 to DEC-030
 - **[Reproduction guide](docs/operations/reproduction-guide.md)** · **[Migration from V2](docs/migration-from-v2.md)** · **[Contract v1 → v2](docs/migration-from-v3.md)** · **[Open human actions](docs/operations/open-human-actions.md)**
 
 ## Verification
@@ -225,22 +314,30 @@ disconnect-placement, access, and code-edition determinations rest with the loca
 2. Demand is synthetic and uncalibrated; growth multipliers are provisional conventions.
 3. Costs are screening-class benchmarks; emissions rest on labeled assumptions.
 4. MATLAB code **now runs on real MathWorks MATLAB** (R2025b Update 5, 49 tests passed / 0 failed, [`matlab/EXECUTION_STATUS.md`](matlab/EXECUTION_STATUS.md)) - but only against a **synthetic** fixture, because the public CI harness must never carry project data. The managed-charging numerics therefore remain unexercised against real capacity, since limitation 1 means no real capacity exists. The Simulink model is now **built** ([run 30296650057](matlab/outputs/run-30296650057/)) but has never been **simulated**, and no number here derives from it.
-5. The Tableau workbook **has** been rebuilt, verified and [published](https://public.tableau.com/app/profile/yiguedan.philippe.andy.yaro/viz/EV_Charging_Site_Readiness_M2_Canonical/Milestone2Overview) from the canonical contract. **Four presentation features remain unbuildable** and are named in [CAPABILITY_GAP.md](dashboard/tableau/CAPABILITY_GAP.md): bar-in-bar, two reference lines, dashboard filter scoping, and the 8-point story. Separately, an **older workbook is still live on the same profile carrying superseded numbers** - see [open human actions](docs/operations/open-human-actions.md).
+5. The Tableau workbook **has** been rebuilt, verified and [published](https://public.tableau.com/app/profile/yiguedan.philippe.andy.yaro/viz/EV_Charging_Site_Readiness_M2_Canonical/Milestone2Overview) from the canonical contract. **Four presentation features remain unbuildable** and are named in [CAPABILITY_GAP.md](dashboard/tableau/CAPABILITY_GAP.md): bar-in-bar, two reference lines, dashboard filter scoping, and the 8-point story. It was built from contract v1 before DEC-027, so it still shows the earlier 48-port pathway; so do the Excel workbook and the desktop bundle in `site/platform/` until they are rebuilt from contract v3. Separately, an **older workbook is still live on the same profile carrying superseded numbers** - see [open human actions](docs/operations/open-human-actions.md).
 6. Client, team-adoption, AHJ, utility, and funding steps remain open - see [open human actions](docs/operations/open-human-actions.md).
 
 ## Project status
 
 Milestone 2 package complete (July 2026); presentation 2026-07-21.
 
-Since then the project has become a running system rather than a document set: the model is
-served through a **platform** with two capability tiers (the planner at
-`app.futurecity.andyyaro.com` carries synthetic samples only and needs no sign-in; the old
-Cognito-gated `/platform/` path was retired on 2026-10-18, DEC-030); a **3D explorer**
-and a **static dashboard** read the same contract; an **NFC field layer** is built and walked
-end to end on real hardware, so that someone standing in a car park could send a correction back
-into the model - **no tag has been placed at any site, and no permission to place one has been
-sought**; and an **intake layer** lets another jurisdiction bring its own data file without that
-file quietly scoring better than it should.
+Since then the project has become a running system rather than a document set:
+
+- **The study site** at futurecity.andyyaro.com (October 2026) publishes the twelve-site results
+  from contract v3, the four weighted parts behind every score and how stable each rank is.
+- **The planner** at app.futurecity.andyyaro.com (October 2026) runs the model in a visitor's
+  browser on their own sites. It carries the invented Example City sample only, needs no sign-in
+  (the old Cognito-gated `/platform/` path was retired on 2026-10-18, DEC-030), fills gaps from a
+  six-state public data hub, describes and ranks the columns the model does not score, writes an
+  accessible report and works offline. Its optional assistant runs on OpenAI's `gpt-5.4-mini`
+  behind a provider switch (DEC-029 and its addendum), under a hard $5 monthly cap.
+- **The launch film** (2026-10-23) shows both, recorded from the live sites; its source is in
+  [`media/launch-film/`](media/launch-film/).
+- A **3D explorer** and a **static dashboard** read the same contract; an **NFC field layer** is
+  built and walked end to end on real hardware, so that someone standing in a car park could send
+  a correction back into the model - **no tag has been placed at any site, and no permission to
+  place one has been sought**; and an **intake layer** lets another jurisdiction bring its own
+  data file without that file quietly scoring better than it should.
 
 None of this changes the epistemics. Capacity is still a placeholder at all twelve sites, and
 the next real step is unchanged: client follow-up, utility and facility data requests (which
