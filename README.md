@@ -1,19 +1,43 @@
-[![EV-SIENT launch film: a night flight over the twelve candidate sites in Northern Virginia, under the headline "Every city wants more EV chargers. Few can show where the first ones should go, and why." Select to watch the 59-second film.](docs/assets/readme/launch-film.jpg)](https://futurecity.andyyaro.com/film.html)
+<p align="center">
+  <a href="https://futurecity.andyyaro.com">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/evsient-logo-endorsed-reversed.svg">
+      <img src="docs/assets/brand/evsient-logo-endorsed.svg" alt="EV-SIENT, Future City Fellowship" width="440">
+    </picture>
+  </a>
+</p>
 
-**[Watch the 59-second launch film](https://futurecity.andyyaro.com/film.html)** (narrated, captions in
-the picture) · [Download the MP4, 45 MB](https://futurecity.andyyaro.com/film/ev-sient-launch.mp4) ·
-[How it was made](media/launch-film/)
+<p align="center">
+  <a href="https://github.com/andyyaro/EV-SIENT/actions/workflows/tests.yml"><img src="https://github.com/andyyaro/EV-SIENT/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-0088FF" alt="licence: Apache 2.0"></a>
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776AB" alt="python 3.11+">
+  <a href="https://app.futurecity.andyyaro.com"><img src="https://img.shields.io/badge/planner-runs%20in%20your%20browser-E8590C" alt="planner: runs in your browser"></a>
+  <a href="data/contract/v3/"><img src="https://img.shields.io/badge/contract-v3.0.0-2E7D32" alt="contract v3.0.0"></a>
+  <a href="matlab/EXECUTION_STATUS.md"><img src="https://img.shields.io/badge/MATLAB-49%2F49%20(synthetic%20fixture)-B08948" alt="MATLAB R2025b: 49 of 49 tests, synthetic fixture"></a>
+  <a href="docs/accessibility/ACR.md"><img src="https://img.shields.io/badge/accessibility-ACR%2C%20self--assessed-6E56CF" alt="accessibility: conformance report, self-assessed"></a>
+</p>
 
-# Future City Fellowship - Safe, Code-Responsive EV Charging Planning
+<p align="center"><b>Every city wants more EV chargers. Few can show where the first ones should go, and why.</b></p>
+
+<p align="center">
+  <a href="https://futurecity.andyyaro.com">Study</a> |
+  <a href="https://app.futurecity.andyyaro.com">Planner</a> |
+  <a href="https://futurecity.andyyaro.com/film.html">Film</a> |
+  <a href="#quick-start">Quickstart</a> |
+  <a href="https://futurecity.andyyaro.com/method.html">Method</a> |
+  <a href="docs/START_HERE.md">Docs</a> |
+  <a href="docs/operations/v4-program/DECISIONS.md">Decisions</a>
+</p>
+
+<p align="center">
+  <a href="https://futurecity.andyyaro.com/film.html"><img src="docs/assets/readme/planner-in-action.webp" alt="The EV-SIENT planner, from the launch film: a spreadsheet of sites is dropped in, its columns are matched, the model runs in the browser, the sites come back ranked with why each scored as it did, and a report downloads. Select to watch the 59-second film." width="920"></a>
+</p>
+
+<p align="center"><b>Watch the 59-second launch film:</b> <a href="https://futurecity.andyyaro.com/film.html">with sound and captions</a> · <a href="https://futurecity.andyyaro.com/film/ev-sient-launch.mp4">MP4, 45 MB</a> · <a href="media/launch-film/">how it was made</a></p>
 
 **EV-SIENT** (Site Evaluation & Navigation Tool) is a decision-support platform for planning safe,
 code-responsive public EV charging in **Fairfax City**, **Fairfax County** and **Prince William
 County**, Virginia, and a planner that runs the same model on anyone's own sites.
-
-![tests](https://github.com/andyyaro/EV-SIENT/actions/workflows/tests.yml/badge.svg)
-![python](https://img.shields.io/badge/python-3.11%2B-1B4332)
-![matlab](https://img.shields.io/badge/MATLAB-R2025b%20suite%2049%2F49%20(synthetic%20fixture)-B08948)
-![licence](https://img.shields.io/badge/licence-Apache--2.0-1B4332)
 
 | | Live at | What it is |
 |---|---|---|
